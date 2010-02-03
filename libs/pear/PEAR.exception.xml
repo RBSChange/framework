@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<localization>
+
+	<entity id="pear-error">
+		<locale lang="en">PEAR error (code: {code}, mode: {mode}): {message}\n {user_info}\n {PEAR_ERROR}</locale>
+		<locale lang="fr">erreur PEAR (code: {code}, mode: {mode}): {message}\n {user_info}\n {PEAR_ERROR}</locale>
+	</entity>
+
+</localization>

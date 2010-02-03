@@ -1,0 +1,1 @@
+DROP TABLE "<{$model->getTableName()}>" cascade constraints

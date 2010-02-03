@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+	<defines>
+		<!-- 
+		<define name="AG_LOGGING_LEVEL">DEBUG</define>
+		<define name="AG_DEVELOPMENT_MODE">true</define>
+		-->
+    	 
+		<!--  
+		<define name="AG_DISABLE_BLOCK_CACHE">true</define>
+		<define name="AG_DISABLE_SIMPLECACHE">true</define>
+		-->
+		
+		${solrDef}
+		${fakeMailDef}
+		
+		<!-- 
+		<define name="MOD_NOTIFICATION_SENDER">noreply@${serverHost}</define>
+		<define name="MOD_NOTIFICATION_SENDER_HOST">${serverHost}</define>
+		-->
+		
+		<!-- WARNING: this id must be unique -->
+		<define name="PROJECT_ID">${project}_${author}</define>
+	</defines>
+
+	<config>
+		<general>
+			<entry name="server-fqdn">${serverFqdn}</entry>
+		</general>
+		
+		<databases>
+			<webapp>
+				<entry name="class">PDODatabase</entry>
+				<entry name="user">admin-webedit</entry>
+				<entry name="password">admin-webedit</entry>
+				<entry name="database">${database}</entry>
+				<entry name="host">${database_host}</entry>
+				<entry name="protocol">mysql</entry>
+				<entry name="port">3306</entry>
+				<!-- <entry name="emulate_prepares">false</entry> -->
+			</webapp>
+		</databases>
+	</config>
+</project>

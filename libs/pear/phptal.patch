@@ -1,0 +1,483 @@
+Index: PHPTAL.php
+===================================================================
+--- PHPTAL.php	(revision 59756)
++++ PHPTAL.php	(working copy)
+@@ -43,7 +43,19 @@
+         }
+     }
+     else {
+-        define('PHPTAL_PHP_CODE_DESTINATION', '/tmp/');
++        /**
++         * -------
++         * C4 hack
++         * -------
++         *
++         * Generated templates must go into the webapp's cache folder.
++         *
++         * @author INTcourS
++         * @date 2007-02-21
++         * @since 2.0
++         */
++        // define('PHPTAL_PHP_CODE_DESTINATION', '/tmp/');
++        define('PHPTAL_PHP_CODE_DESTINATION', AG_CACHE_DIR);
+     }
+ }
+ //}}}
+Index: PHPTAL/Context.php
+===================================================================
+--- PHPTAL/Context.php	(revision 59756)
++++ PHPTAL/Context.php	(working copy)
+@@ -221,7 +221,19 @@
+  * throw an exception when a part of the path cannot be resolved, null is
+  * returned instead.
+  */
+-function phptal_path($base, $path, $nothrow=false)
++/**
++ * -------
++ * C4 hack
++ * -------
++ *
++ * Keep cool and prevent this function to throw an exception BY DEFAULT.
++ *
++ * @author INTcourS
++ * @date 2007-02-21
++ * @since 2.0
++ */
++// function phptal_path($base, $path, $nothrow=false)
++function phptal_path($base, $path, $nothrow=true)
+ {//{{{
+     $parts   = split('/', $path);
+     $current = true;
+@@ -357,10 +369,36 @@
+ function phptal_escape($var, $ent, $encoding)
+ {
+     if (is_object($var)){
+-        return htmlspecialchars($var->__toString(), $ent, $encoding);
++        /**
++         * -------
++         * C4 hack
++         * -------
++         *
++         * There is nothing to escape here : we need to handle
++         * that kind of shit on C4's top level.
++         *
++         * @author INTcourS
++         * @date 2007-02-21
++         * @since 2.0
++         */
++        // return htmlspecialchars($var->__toString(), $ent, $encoding);
++        return $var->__toString();
+     }
+     if (is_string($var)){
+-        return htmlspecialchars($var, $ent, $encoding);
++        /**
++         * -------
++         * C4 hack
++         * -------
++         *
++         * There is nothing to escape here : we need to handle
++         * that kind of shit on C4's top level.
++         *
++         * @author INTcourS
++         * @date 2007-02-21
++         * @since 2.0
++         */
++        // return htmlspecialchars($var, $ent, $encoding);
++        return $var;
+     }
+     if (is_bool($var)){
+         return (int)$var;
+Index: PHPTAL/Dom/Defs.php
+===================================================================
+--- PHPTAL/Dom/Defs.php	(revision 59756)
++++ PHPTAL/Dom/Defs.php	(working copy)
+@@ -65,6 +65,7 @@
+ require_once 'PHPTAL/Namespace/METAL.php';
+ require_once 'PHPTAL/Namespace/I18N.php';
+ require_once 'PHPTAL/Namespace/PHPTAL.php';
++require_once 'PHPTAL/Namespace/CHANGE.php';
+ 
+ /**
+  * PHPTAL constants.
+@@ -218,6 +219,19 @@
+      * This array contains XHTML boolean attributes, their value is self 
+      * contained (ie: they are present or not).
+      */
++    /**
++     * -------
++     * C4 hack
++     * -------
++     *
++     * Yeah... But this is a XUL world, so we need to keep
++     * "disabled" and "readonly" attributes out of it.
++     *
++     * @author INTcourS
++     * @date 2007-02-21
++     * @since 2.0
++     */
++    // private static $XHTML_BOOLEAN_ATTRIBUTES = array('compact', 'nowrap', 'ismap', 'declare', 'noshade', 'checked', 'disabled', 'readonly', 'multiple', 'selected', 'noresize', 'defer');
+     private static $XHTML_BOOLEAN_ATTRIBUTES = array(
+         'compact',
+         'nowrap',
+@@ -225,8 +239,6 @@
+         'declare',
+         'noshade',
+         'checked',
+-        'disabled',
+-        'readonly',
+         'multiple',
+         'selected',
+         'noresize',
+Index: PHPTAL/Php/Attribute.php
+===================================================================
+--- PHPTAL/Php/Attribute.php	(revision 59756)
++++ PHPTAL/Php/Attribute.php	(working copy)
+@@ -20,7 +20,7 @@
+ //  Authors: Laurent Bedubourg <lbedubourg@motion-twin.com>
+ //  
+ 
+-require_once 'PHPTAL/Dom/Node.php';
++//require_once 'PHPTAL/Dom/Node.php';
+ 
+ /**
+  * Base class for all PHPTAL attributes.
+@@ -80,11 +80,15 @@
+             $this->tag->generator->doEchoRaw($code);
+     }
+ 
++
++    protected $_echoType = PHPTAL_Php_Attribute::ECHO_TEXT;
++
++
+     protected function parseSetExpression($exp)
+     {
+         $exp = trim($exp);
+         // (dest) (value)
+-        if (preg_match('/^([a-z0-9:\-_]+)\s+(.*?)$/i', $exp, $m)){
++        if (preg_match('/^([a-z0-9:\-_\[\]]+)\s+(.*?)$/i', $exp, $m)){
+             array_shift($m);
+             return $m;
+         }
+@@ -92,7 +96,25 @@
+         return array($exp, null);
+     }
+ 
+-    protected $_echoType = PHPTAL_Php_Attribute::ECHO_TEXT;
++    public function evaluate($exp, $stripQuotes = false)
++    {
++    	$exp = trim(strval($exp));
++    	$end = strlen($exp) - 1;
++    	if (is_numeric($exp))
++    	{
++    		return $exp;
++    	}
++    	else if (($exp{0} == "'" && $exp{$end} == "'") || ($exp{0} == '"' && $exp{$end} == '"'))
++    	{
++    		if ($stripQuotes) $exp = substr($exp, 1, -1);
++    		return $exp;
++    	}
++    	else
++    	{
++    		return $this->tag->generator->evaluateExpression($exp);
++    	}
++    }
++
+ }
+ 
+ ?>
+Index: PHPTAL/Php/Attribute/I18N/Attributes.php
+===================================================================
+--- PHPTAL/Php/Attribute/I18N/Attributes.php	(revision 59756)
++++ PHPTAL/Php/Attribute/I18N/Attributes.php	(working copy)
+@@ -50,13 +50,51 @@
+ {
+     public function start()
+     {
++        /**
++         * -------
++         * C4 hack
++         * -------
++         *
++         * Depending on the template's context, localization keys could come
++         * into an XML encoded form (for example, "&amp;modules.section.localkey;"
++         * instead of "&modules.section.localkey;").
++         *
++         * @author INTcourS
++         * @date 2007-02-21
++         * @since 2.0
++         */
++        $this->expression = str_replace('&amp;', '&', $this->expression);
+         // split attributes to translate
+         $expressions = $this->tag->generator->splitExpression($this->expression);
+         // foreach attribute
+         foreach ($expressions as $exp){
+             list($attribute, $key) = $this->parseSetExpression($exp);
+-            //   if the translation key is specified 
++            /**
++             * -------
++             * C4 hack
++             * -------
++             *
++             * Please don't break on C4's odd cases.
++             *
++             * @author INTcourS
++             * @date 2007-02-21
++             * @since 2.0
++             */
++            if (empty($attribute) && empty($key)) continue;
++            //   if the translation key is specified
+             if ($key != null){
++                /**
++                 * -------
++                 * C4 hack
++                 * -------
++                 *
++                 * Restore the stripped ';' at the end of the locale key.
++                 *
++                 * @author INTcourS
++                 * @date 2007-02-21
++                 * @since 2.0
++                 */
++                $key .= ';';
+                 // we use it and replace the tag attribute with the result of
+                 // the translation
+                 $key = str_replace('\'', '\\\'', $key);
+Index: PHPTAL/Php/Attribute/I18N/Translate.php
+===================================================================
+--- PHPTAL/Php/Attribute/I18N/Translate.php	(revision 59756)
++++ PHPTAL/Php/Attribute/I18N/Translate.php	(working copy)
+@@ -19,7 +19,21 @@
+ {
+     public function start()
+     {
+-        // if no expression is given, the content of the node is used as 
++        /**
++         * -------
++         * C4 hack
++         * -------
++         *
++         * Depending on the template's context, localization keys could come
++         * into an XML encoded form (for example, "&amp;modules.section.localkey;"
++         * instead of "&modules.section.localkey;").
++         *
++         * @author INTbonjF
++         * @date 2007-04-13
++         * @since 2.0
++         */
++    	$this->expression = str_replace('&amp;', '&', $this->expression);
++        // if no expression is given, the content of the node is used as
+         // a translation key
+         if (strlen(trim($this->expression)) == 0){
+             $code = $this->_getTranslationKey($this->tag);
+@@ -27,6 +41,19 @@
+             $code = '\'' . $code . '\'';
+         }
+         else {
++            /**
++             * -------
++             * C4 hack
++             * -------
++             *
++             * Force I18N evaluation if the current expression
++             * is a proper C4 localization key.
++             *
++             * @author INTcourS
++             * @date 2007-02-21
++             * @since 2.0
++             */
++            if (f_Locale::isLocaleKey($this->expression) === true) $this->expression = 'string:' . $this->expression;
+             $code = $this->tag->generator->evaluateExpression($this->expression);
+         }
+         $this->_prepareNames($this->tag);
+Index: PHPTAL/Php/Attribute/TAL/Repeat.php
+===================================================================
+--- PHPTAL/Php/Attribute/TAL/Repeat.php	(revision 59756)
++++ PHPTAL/Php/Attribute/TAL/Repeat.php	(working copy)
+@@ -20,7 +20,7 @@
+ //  Authors: Laurent Bedubourg <lbedubourg@motion-twin.com>
+ //  
+ 
+-require_once 'PHPTAL/Php/Attribute.php';
++//require_once 'PHPTAL/Php/Attribute.php';
+ 
+ // TAL Specifications 1.4
+ //
+@@ -81,7 +81,7 @@
+         $this->tag->generator->doEnd();
+     }
+ 
+-    private function initRepeat()
++    protected function initRepeat()
+     {
+         list($varName, $expression) = $this->parseSetExpression($this->expression);
+         $code = $this->tag->generator->evaluateExpression($expression);
+@@ -105,13 +105,13 @@
+ 	    $this->tag->generator->doSetVar($this->controller, 'new PHPTAL_RepeatController($tmp)');
+     	$this->tag->generator->doEnd();
+     }
+-       
+-    private function doForeach()
++
++    protected function doForeach()
+     {
+         $this->tag->generator->doForeach($this->item, $this->controller.'->source');
+     }
+-    
+-    private function updateIterationVars()
++
++    protected function updateIterationVars()
+     {
+         $this->tag->generator->doSetVar($this->controller.'->key', '$__key__');
+         $this->tag->generator->doSetVar($this->controller.'->index', $this->controller.'->index +1');
+@@ -124,9 +124,9 @@
+         $this->tag->generator->doSetVar($this->controller.'->end', 'true');
+         $this->tag->generator->doEnd();
+     }
+-    
+-    private $item;
+-    private $controller;
++
++    protected $item;
++    protected $controller;
+ }
+ 
+ ?>
+Index: PHPTAL/Php/CodeWriter.php
+===================================================================
+--- PHPTAL/Php/CodeWriter.php	(revision 59756)
++++ PHPTAL/Php/CodeWriter.php	(working copy)
+@@ -47,7 +47,26 @@
+ 
+     public function setXmlDeclaration(PHPTAL_Php_XmlDeclaration $dt)
+     {
+-        $this->_xmldeclaration = str_replace('\'', '\\\'', $dt->node->getValue());
++        /**
++         * -------
++         * C4 hack
++         * -------
++         *
++         * PHPTal assumes there should be only one "XML declaration"
++         * into the final document (a <?xml(...)?> thing).
++         *
++         * But it's really not the case with common XUL stuff,
++         * so we need to concatenate all the "XML declarations"
++         * found by the parser in order to "push" them once.
++         *
++         * @author INTcourS
++         * @date 2007-02-21
++         * @since 2.0
++         */
++        // $this->_xmldeclaration = str_replace('\'', '\\\'', $dt->node->getValue());
++        $this->_xmldeclaration = trim(
++            $this->_xmldeclaration . "\n" . str_replace('\'', '\\\'', $dt->node->getValue())
++        );
+     }
+ 
+     public function setFunctionPrefix($prefix)
+@@ -279,7 +298,19 @@
+             list(,$before,$expression,$after) = $m;
+             
+             $before = $this->escape($before);
+-            $before = str_replace('&amp;', '&', $before);
++            /**
++             * -------
++             * C4 hack
++             * -------
++             *
++             * Hmmm... Have you ever heard something about
++             * proper link validation ?
++             *
++             * @author INTcourS
++             * @date 2007-02-21
++             * @since 2.0
++             */
++            // $before = str_replace('&amp;', '&', $before);
+             array_push($this->_htmlBuffer, $before);
+ 
+             $expression = $this->_state->interpolateTalesVarsInHtml($expression);
+@@ -291,8 +322,20 @@
+ 		$str = str_replace('$${', '${', $str);
+         
+         if (strlen($str) > 0){
+-            $str = $this->escape($str); 
+-            $str = str_replace('&amp;', '&', $str);
++            $str = $this->escape($str);
++            /**
++             * -------
++             * C4 hack
++             * -------
++             *
++             * Hmmm... Have you ever heard something about
++             * proper link validation ?
++             *
++             * @author INTcourS
++             * @date 2007-02-21
++             * @since 2.0
++             */
++            // $str = str_replace('&amp;', '&', $str);
+             array_push($this->_htmlBuffer, $str);
+         }
+     }
+@@ -343,7 +386,20 @@
+     
+     private function escape($html)
+     {
+-        return htmlspecialchars($html, ENT_QUOTES, $this->_state->getEncoding());
++        /**
++         * -------
++         * C4 hack
++         * -------
++         *
++         * There is nothing to escape here : we need to handle
++         * that kind of shit on C4's top level.
++         *
++         * @author INTcourS
++         * @date 2007-02-21
++         * @since 2.0
++         */
++        // return htmlspecialchars($html, ENT_QUOTES, $this->_state->getEncoding());
++        return $html;
+     }
+     
+     private function indentSpaces() 
+Index: PHPTAL/Php/Node.php
+===================================================================
+--- PHPTAL/Php/Node.php	(revision 59756)
++++ PHPTAL/Php/Node.php	(working copy)
+@@ -344,7 +344,7 @@
+     private function prepareAttributes()
+     {
+         //TODO: use registered namespaces instead of the raw list
+-        if (preg_match('/^(tal|metal|phptal|i18n):block$/', $this->name, $m)) {
++        if (preg_match('/^(tal|metal|phptal|i18n|change):block$/', $this->name, $m)) {
+             $this->headFootDisabled = true;
+             list(,$ns) = $m;
+             $attributes = array();
+Index: PHPTAL/Php/TalesInternal.php
+===================================================================
+--- PHPTAL/Php/TalesInternal.php	(revision 59756)
++++ PHPTAL/Php/TalesInternal.php	(working copy)
+@@ -215,7 +215,7 @@
+ 	                break;
+ 
+ 	            case ';':
+-	                if ($i<$len && $expression[$i+1] == ';'){
++	                if ($i<$len && isset($expression[$i+1]) && $expression[$i+1] == ';'){
+ 	                    $i++;
+ 	                }
+ 	                break;
+Index: PHPTAL/RepeatController.php
+===================================================================
+--- PHPTAL/RepeatController.php	(revision 59756)
++++ PHPTAL/RepeatController.php	(working copy)
+@@ -83,7 +83,9 @@
+             return count($iterable);
+         if (is_string($iterable))
+             return strlen($iterable);
+-        if (is_object($iterable) && method_exists($iterable, 'size')) 
++        if ($iterable instanceof ArrayObject || $iterable instanceof ArrayIterator)
++        	return $iterable->count();
++        if (is_object($iterable) && method_exists($iterable, 'size'))
+             return $iterable->size();
+         if (is_object($iterable) && method_exists($iterable, 'length')) 
+             return $iterable->length();

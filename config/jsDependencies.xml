@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scripts>
+  <script name="js.jquery"/>
+  <script name="js.jquery-dimensions" />
+  <script name="js.jquery-easing" />
+</scripts>

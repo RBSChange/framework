@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="utf-8"?>
+<localization>
+  <entity id="Week">
+    <locale lang="fr">Semaine</locale>
+    <locale lang="en">Week</locale>
+    <locale lang="de">Woche</locale>
+  </entity>
+<!-- month names -->
+  <entity id="january">
+    <locale lang="fr">janvier</locale>
+    <locale lang="en">january</locale>
+    <locale lang="de">Januar</locale>
+  </entity>
+  <entity id="february">
+    <locale lang="fr">février</locale>
+    <locale lang="en">february</locale>
+    <locale lang="de">Februar</locale>
+  </entity>
+  <entity id="march">
+    <locale lang="fr">mars</locale>
+    <locale lang="en">march</locale>
+    <locale lang="de">März</locale>
+  </entity>
+  <entity id="april">
+    <locale lang="fr">avril</locale>
+    <locale lang="en">april</locale>
+    <locale lang="de">April</locale>
+  </entity>
+  <entity id="may">
+    <locale lang="fr">mai</locale>
+    <locale lang="en">may</locale>
+    <locale lang="de">Mai</locale>
+  </entity>
+  <entity id="june">
+    <locale lang="fr">juin</locale>
+    <locale lang="en">june</locale>
+    <locale lang="de">Juni</locale>
+  </entity>
+  <entity id="july">
+    <locale lang="fr">juillet</locale>
+    <locale lang="en">july</locale>
+    <locale lang="de">Juli</locale>
+  </entity>
+  <entity id="august">
+    <locale lang="fr">août</locale>
+    <locale lang="en">august</locale>
+    <locale lang="de">August</locale>
+  </entity>
+  <entity id="september">
+    <locale lang="fr">septembre</locale>
+    <locale lang="en">september</locale>
+    <locale lang="de">September</locale>
+  </entity>
+  <entity id="october">
+    <locale lang="fr">octobre</locale>
+    <locale lang="en">october</locale>
+    <locale lang="de">Oktober</locale>
+  </entity>
+  <entity id="november">
+    <locale lang="fr">novembre</locale>
+    <locale lang="en">november</locale>
+    <locale lang="de">November</locale>
+  </entity>
+  <entity id="december">
+    <locale lang="fr">décembre</locale>
+    <locale lang="en">december</locale>
+    <locale lang="de">Dezember</locale>
+  </entity>
+<!-- abbreviated month names -->
+  <entity id="abbr.january">
+    <locale lang="fr">janv</locale>
+    <locale lang="en">jan</locale>
+    <locale lang="de">Jan</locale>
+  </entity>
+  <entity id="abbr.february">
+    <locale lang="fr">févr</locale>
+    <locale lang="en">feb</locale>
+    <locale lang="de">Feb</locale>
+  </entity>
+  <entity id="abbr.march">
+    <locale lang="fr">mars</locale>
+    <locale lang="en">mar</locale>
+    <locale lang="de">Mär</locale>
+  </entity>
+  <entity id="abbr.april">
+    <locale lang="fr">avr</locale>
+    <locale lang="en">apr</locale>
+    <locale lang="de">Apr</locale>
+  </entity>
+  <entity id="abbr.may">
+    <locale lang="fr">mai</locale>
+    <locale lang="en">may</locale>
+    <locale lang="ar">may</locale>
+    <locale lang="de">Mai</locale>
+  </entity>
+  <entity id="abbr.june">
+    <locale lang="fr">juin</locale>
+    <locale lang="en">jun</locale>
+    <locale lang="de">Jun</locale>
+  </entity>
+  <entity id="abbr.july">
+    <locale lang="fr">juil</locale>
+    <locale lang="en">jul</locale>
+    <locale lang="de">Jul</locale>
+  </entity>
+  <entity id="abbr.august">
+    <locale lang="fr">août</locale>
+    <locale lang="en">aug</locale>
+    <locale lang="de">Aug</locale>
+  </entity>
+  <entity id="abbr.september">
+    <locale lang="fr">sep</locale>
+    <locale lang="en">sep</locale>
+    <locale lang="de">Sep</locale>
+  </entity>
+  <entity id="abbr.october">
+    <locale lang="fr">oct</locale>
+    <locale lang="en">oct</locale>
+    <locale lang="de">Okt</locale>
+  </entity>
+  <entity id="abbr.november">
+    <locale lang="fr">nov</locale>
+    <locale lang="en">nov</locale>
+    <locale lang="de">Nov</locale>
+  </entity>
+  <entity id="abbr.december">
+    <locale lang="fr">déc</locale>
+    <locale lang="en">dec</locale>
+    <locale lang="de">Dez</locale>
+  </entity>
+<!-- day names -->
+  <entity id="monday">
+    <locale lang="fr">lundi</locale>
+    <locale lang="en">monday</locale>
+    <locale lang="de">Montag</locale>
+  </entity>
+  <entity id="tuesday">
+    <locale lang="fr">mardi</locale>
+    <locale lang="en">tuesday</locale>
+    <locale lang="de">Dienstag</locale>
+  </entity>
+  <entity id="wednesday">
+    <locale lang="fr">mercredi</locale>
+    <locale lang="en">wednesday</locale>
+    <locale lang="de">Mittwoch</locale>
+  </entity>
+  <entity id="thursday">
+    <locale lang="fr">jeudi</locale>
+    <locale lang="en">thursday</locale>
+    <locale lang="de">Donnerstag</locale>
+  </entity>
+  <entity id="friday">
+    <locale lang="fr">vendredi</locale>
+    <locale lang="en">friday</locale>
+    <locale lang="de">Freitag</locale>
+  </entity>
+  <entity id="saturday">
+    <locale lang="fr">samedi</locale>
+    <locale lang="en">saturday</locale>
+    <locale lang="de">Samstag</locale>
+  </entity>
+  <entity id="sunday">
+    <locale lang="fr">dimanche</locale>
+    <locale lang="en">sunday</locale>
+    <locale lang="de">Sonntag</locale>
+  </entity>
+<!-- abbreviated day names -->
+  <entity id="abbr.monday">
+    <locale lang="fr">lun</locale>
+    <locale lang="en">mon</locale>
+    <locale lang="de">Mo</locale>
+  </entity>
+  <entity id="abbr.tuesday">
+    <locale lang="fr">mar</locale>
+    <locale lang="en">tue</locale>
+    <locale lang="de">Di</locale>
+  </entity>
+  <entity id="abbr.wednesday">
+    <locale lang="fr">mer</locale>
+    <locale lang="en">wed</locale>
+    <locale lang="de">Mi</locale>
+  </entity>
+  <entity id="abbr.thursday">
+    <locale lang="fr">jeu</locale>
+    <locale lang="en">thu</locale>
+    <locale lang="de">Do</locale>
+  </entity>
+  <entity id="abbr.friday">
+    <locale lang="fr">ven</locale>
+    <locale lang="en">fri</locale>
+    <locale lang="de">Fr</locale>
+  </entity>
+  <entity id="abbr.saturday">
+    <locale lang="fr">sam</locale>
+    <locale lang="en">sat</locale>
+    <locale lang="de">Sa</locale>
+  </entity>
+  <entity id="abbr.sunday">
+    <locale lang="fr">dim</locale>
+    <locale lang="en">sun</locale>
+    <locale lang="de">So</locale>
+  </entity>
+<!-- formats -->
+  <entity id="localized-data-format">
+    <locale lang="fr">d/m/Y</locale>
+    <locale lang="en">Y-m-d</locale>
+    <locale lang="de">d.m.Y</locale>
+  </entity>
+  <entity id="localized-data-time-format">
+    <locale lang="fr">d/m/Y H:i</locale>
+    <locale lang="en">Y-m-d H:i</locale>
+    <locale lang="de">d.m.Y H:i</locale>
+  </entity>
+  <entity id="localized-user-format">
+    <locale lang="fr">l j F Y</locale>
+    <locale lang="en">l, jS F Y</locale>
+    <locale lang="de">l, j. F Y</locale>
+  </entity>
+  <entity id="localized-user-time-format">
+    <locale lang="fr">l j F Y H:i</locale>
+    <locale lang="en">l, jS F Y H:i</locale>
+    <locale lang="de">l, j. F Y H:i</locale>
+  </entity>
+<!-- smart dates -->
+  <entity id="smart-today">
+    <locale lang="fr">\a\u\j\o\u\r\d'\h\u\i</locale>
+    <locale lang="en">\t\o\d\a\y</locale>
+    <locale lang="de">\h\e\u\t\e</locale>
+  </entity>
+  <entity id="smart-today-short">
+    <locale lang="fr">\a\u\j\o\u\r\d'\h\u\i</locale>
+    <locale lang="en">\t\o\d\a\y</locale>
+    <locale lang="de">\h\e\u\t\e</locale>
+  </entity>
+  <entity id="smart-today-time">
+    <locale lang="fr">\a\u\j\o\u\r\d'\h\u\i à H:i</locale>
+    <locale lang="en">\t\o\d\a\y \a\t g:i a</locale>
+    <locale lang="de">\h\e\u\t\e H:i</locale>
+  </entity>
+  <entity id="smart-today-time-short">
+    <locale lang="fr">\a\u\j\o\u\r\d'\h\u\i, H:i</locale>
+    <locale lang="en">\t\o\d\a\y, g:i a</locale>
+    <locale lang="de">\h\e\u\t\e H:i</locale>
+  </entity>
+  <entity id="smart-today-time-midnight">
+    <locale lang="fr">\a\u\j\o\u\r\d'\h\u\i à \m\i\n\u\i\t (0\h)</locale>
+    <locale lang="en">\t\o\d\a\y \a\t \m\i\d\n\i\g\h\t</locale>
+    <locale lang="de">\h\e\u\t\e \u\m \M\i\t\t\e\r\n\a\c\h\t</locale>
+  </entity>
+  <entity id="smart-today-time-short-midnight">
+    <locale lang="fr">\a\u\j\o\u\r\d'\h\u\i, \m\i\n\u\i\t (0\h)</locale>
+    <locale lang="en">\t\o\d\a\y, \m\i\d\n\i\g\h\t</locale>
+    <locale lang="de">\h\e\u\t\e \M\i\t\t\e\r\n\a\c\h\t</locale>
+  </entity>
+  <entity id="smart-yesterday">
+    <locale lang="fr">\h\i\e\r</locale>
+    <locale lang="en">\y\e\s\t\e\r\d\a\y</locale>
+    <locale lang="de">\g\e\s\t\e\r\n</locale>
+  </entity>
+  <entity id="smart-yesterday-short">
+    <locale lang="fr">\h\i\e\r</locale>
+    <locale lang="en">\y\e\s\t\e\r\d\a\y</locale>
+    <locale lang="de">\g\e\s\t\e\r\n</locale>
+  </entity>
+  <entity id="smart-yesterday-time">
+    <locale lang="fr">\h\i\e\r \à H:i</locale>
+    <locale lang="en">\y\e\s\t\e\r\d\a\y \a\t g:i a</locale>
+    <locale lang="de">\g\e\s\t\e\r\n \u\m H:i</locale>
+  </entity>
+  <entity id="smart-yesterday-time-short">
+    <locale lang="fr">\h\i\e\r, H:i</locale>
+    <locale lang="en">\y\e\s\t\e\r\d\a\y, g:i a</locale>
+    <locale lang="de">\g\e\s\t\e\r\n H:i</locale>
+  </entity>
+  <entity id="smart-yesterday-time-midnight">
+    <locale lang="fr">\h\i\e\r \à \m\i\n\u\i\t (0\h)</locale>
+    <locale lang="en">\y\e\s\t\e\r\d\a\y \a\t \m\i\d\n\i\g\h\t</locale>
+    <locale lang="de">\g\e\s\t\e\r\n \u\m \M\i\t\t\e\r\n\a\c\h\t</locale>
+  </entity>
+  <entity id="smart-yesterday-time-short-midnight">
+    <locale lang="fr">\h\i\e\r, \m\i\n\u\i\t (0\h)</locale>
+    <locale lang="en">\y\e\s\t\e\r\d\a\y, \m\i\d\n\i\g\h\t</locale>
+    <locale lang="de">\g\e\s\t\e\r\n \M\i\t\t\e\r\n\a\c\h\t</locale>
+  </entity>
+<!-- same month and year -->
+  <entity id="smart-same-monthAndYear">
+    <locale lang="fr">l j</locale>
+    <locale lang="en">l, jS</locale>
+    <locale lang="de">l, j.</locale>
+  </entity>
+  <entity id="smart-same-monthAndYear-short">
+    <locale lang="fr">D j</locale>
+    <locale lang="en">D, jS</locale>
+    <locale lang="de">D, j.</locale>
+  </entity>
+  <entity id="smart-same-monthAndYear-time">
+    <locale lang="fr">l j \à H:i</locale>
+    <locale lang="en">l, jS \a\t g:i a</locale>
+    <locale lang="de">l, j. \u\m H:i</locale>
+  </entity>
+  <entity id="smart-same-monthAndYear-time-short">
+    <locale lang="fr">D j, H:i</locale>
+    <locale lang="en">D, jS, g:i a</locale>
+    <locale lang="de">D, j. H:i</locale>
+  </entity>
+  <entity id="smart-same-monthAndYear-time-midnight">
+    <locale lang="fr">l j \à \m\i\n\u\i\t (0\h)</locale>
+    <locale lang="en">l, jS \a\t \m\i\d\n\i\g\h\t</locale>
+    <locale lang="de">l, j. \u\m \M\i\t\t\e\r\n\a\c\h\t</locale>
+  </entity>
+  <entity id="smart-same-monthAndYear-time-short-midnight">
+    <locale lang="fr">D j, \m\i\n\u\i\t (0\h)</locale>
+    <locale lang="en">D, jS, \m\i\d\n\i\g\h\t</locale>
+    <locale lang="de">D, j. \M\i\t\t\e\r\n\a\c\h\t</locale>
+  </entity>
+<!-- same year -->
+  <entity id="smart-same-year">
+    <locale lang="fr">l j F</locale>
+    <locale lang="en">l, jS F</locale>
+    <locale lang="de">l, j. F</locale>
+  </entity>
+  <entity id="smart-same-year-short">
+    <locale lang="fr">D j M</locale>
+    <locale lang="en">D, jS M</locale>
+    <locale lang="de">D, j. M</locale>
+  </entity>
+  <entity id="smart-same-year-time">
+    <locale lang="fr">l j F à H:i</locale>
+    <locale lang="en">l, jS F \a\t g:i a</locale>
+    <locale lang="de">D, j. F \u\m H:i</locale>
+  </entity>
+  <entity id="smart-same-year-time-short">
+    <locale lang="fr">D j M, H:i</locale>
+    <locale lang="en">D, jS M, g:i a</locale>
+    <locale lang="de">D, j. M H:i</locale>
+  </entity>
+  <entity id="smart-same-year-time-midnight">
+    <locale lang="fr">l j F à \m\i\n\u\i\t (0\h)</locale>
+    <locale lang="en">l, jS F \a\t \m\i\d\n\i\g\h\t</locale>
+    <locale lang="de">D, j. F \u\m \M\i\t\t\e\r\n\a\c\h\t</locale>
+  </entity>
+  <entity id="smart-same-year-time-short-midnight">
+    <locale lang="fr">D j M, \m\i\n\u\i\t (0\h)</locale>
+    <locale lang="en">D, jS M, \m\i\d\n\i\g\h\t</locale>
+    <locale lang="de">D, j. M \M\i\t\t\e\r\n\a\c\h\t</locale>
+  </entity>
+<!-- full name including month and year -->
+  <entity id="smart-full">
+    <locale lang="fr">l j F Y</locale>
+    <locale lang="en">l, jS F Y</locale>
+    <locale lang="de">l, j. F Y</locale>
+  </entity>
+  <entity id="smart-full-short">
+    <locale lang="fr">D j M Y</locale>
+    <locale lang="en">D, jS M Y</locale>
+    <locale lang="de">D, j. M Y</locale>
+  </entity>
+  <entity id="smart-full-time">
+    <locale lang="fr">l j F Y \à H:i</locale>
+    <locale lang="en">l, jS F Y \a\t g:i a</locale>
+    <locale lang="en">l, j. F Y \u\m H:i</locale>
+  </entity>
+  <entity id="smart-full-time-short">
+    <locale lang="fr">D j M Y, H:i</locale>
+    <locale lang="en">D, jS M Y, g:i a</locale>
+    <locale lang="en">D, j. M Y H:i</locale>
+  </entity>
+  <entity id="smart-full-time-midnight">
+    <locale lang="fr">l j F Y \à \m\i\n\u\i\t (0\h)</locale>
+    <locale lang="en">l, jS F Y \a\t \m\i\d\n\i\g\h\t</locale>
+    <locale lang="de">l, j. F Y \u\m \M\i\t\t\e\r\n\a\c\h\t</locale>
+  </entity>
+  <entity id="smart-full-time-short-midnight">
+    <locale lang="fr">D j M Y, \m\i\n\u\i\t (0\h)</locale>
+    <locale lang="en">D, jS M Y, \m\i\d\n\i\g\h\t</locale>
+    <locale lang="de">D, j. M Y \M\i\t\t\e\r\n\a\c\h\t</locale>
+  </entity>
+<!-- default formats -->
+  <entity id="default-date-format">
+    <locale lang="fr">d/m/Y</locale>
+    <locale lang="en">Y-m-d</locale>
+    <locale lang="de">d.m.Y</locale>
+  </entity>
+  <entity id="default-date-format-for-jquery-datepicker">
+    <locale lang="fr">dd/mm/yyyy</locale>
+    <locale lang="en">yyyy-mm-dd</locale>
+    <locale lang="de">dd.mm.yyyy</locale>
+  </entity>
+  <entity id="default-datetime-format">
+    <locale lang="fr">d/m/Y H:i</locale>
+    <locale lang="en">Y-m-d g:i a</locale>
+    <locale lang="de">d.m.Y H:i</locale>
+  </entity>
+</localization>

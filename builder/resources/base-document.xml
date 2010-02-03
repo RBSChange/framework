@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	Attributs autorisés :
+	
+	model-version="1.0"
+	icon="iconname"
+	linked-to-root-module="true | [false]"
+	use-correction="true | [false]"
+	table-name="tablename"	
+	table-name-oci="tablename"
+	extend="[modules_generic/Document]"
+	has-url="[true] | false"
+	indexable="true | [false]"	
+	backoffice-indexable="[true] | false"
+	publish-on-day-change="[true] | false"
+-->
+<document xmlns="http://www.rbs.fr/schema/change-document/1.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.rbs.fr/schema/change-document/1.0 http://www.rbschange.fr/static/schema/change-document/1.0.xsd"
+	model-version="1.0">
+	<properties>
+		<!--
+			* Balise <add />
+			
+			* Attributs autorisés :
+			
+			name="propertyName"
+			type="String | Boolean | Integer | Double | DateTime | LongString | XHTMLFragment | modules_xxxxx/yyyyy"
+			primary-key="true | [false]"
+			cascade-delete="true | [false]"
+			min-occurs="[0]..n"
+			max-occurs="[1]..n | -1"
+			from-list="xxxxxxxx"
+			
+			db-mapping="fieldName"
+			db-size="fieldStringSize";
+			tree-node="true | [false]"
+			localized="true | [false]"
+			inverse="true | [false]"
+			preserve-old-value="true | [false]"
+			
+			default-value="xxxx"
+		-->
+	</properties>
+
+	<!--
+		<statuses default="ACTIVE" />
+	-->
+
+	<!--
+		Exemple d'activation d'un workflow pour le modèle
+		- Un seul workflow par modèle
+		- L'activation d'un workflow implique 'use-correction="true"'
+		
+		<workflow start-task="VALIDATION">
+		<parameter name="USENOTIFICATION">false</parameter>
+		</workflow>
+	-->
+
+	<!--
+		Exemples de relation arborescente
+		<children>
+		<child name="subDocuments" type="modules_generic/Document" />
+		</children>
+	-->
+	
+	<serializedproperties>
+		<!--
+			* Balise <add />
+			
+			* Attributs autorisés :
+
+			name="propertyName"
+			type="String | Boolean | Integer | Double | DateTime | LongString | XHTMLFragment | modules_xxxxx/yyyyy"
+			min-occurs="[0]..n"
+			max-occurs="[1]..n | -1"
+			from-list="xxxxxxxx"
+			localized="true | [false]"		
+			default-value="xxxx"
+		-->		
+	</serializedproperties>
+</document>

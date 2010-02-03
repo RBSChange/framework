@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<localization>
+
+	<entity id="true">
+		<locale lang="fr">Oui</locale>
+		<locale lang="en">Yes</locale>
+		<locale lang="de">Ja</locale>
+	</entity>
+	<entity id="false">
+		<locale lang="fr">Non</locale>
+		<locale lang="en">No</locale>
+		<locale lang="de">Nein</locale>
+	</entity>
+
+</localization>

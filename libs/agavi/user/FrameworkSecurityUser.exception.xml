@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<localization>
+	<entity id="invalid-login-occurence">
+		<locale lang="en">invalid login occurence. Existing user id matching login '{login}' are: {userIdArray}</locale>
+	</entity>
+	
+</localization>

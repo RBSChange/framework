@@ -1,0 +1,1061 @@
+<?php
+/**
+ * Auto-generated doc comment
+ * @package framework.persistentdocument.criteria
+ */
+class QueryConstants
+{
+	const ID = 'document_id';
+	const MODEL = 'document_model';
+
+	const FETCH_MODE_LAZY = 1;
+	const FETCH_MODE_DIRECT = 2;
+}
+
+interface f_persistentdocument_criteria_Criteria
+{
+	/**
+	 * @param f_persistentdocument_criteria_Criterion $criterion
+	 * @return f_persistentdocument_criteria_Criteria
+	 */
+	function add($criterion);
+
+	/**
+	 * @param string $relationName
+	 * @param string $documentModelName
+	 * @return f_persistentdocument_criteria_Criteria
+	 */
+	function createCriteria($relationName, $documentModelName = null);
+	
+	
+	/**
+	 * @param string $propertyName
+	 * @param string $documentModelName
+	 * @return f_persistentdocument_criteria_Criteria
+	 */
+	function createPropertyCriteria($propertyName, $documentModelName);	
+	
+	/**
+	 * @param f_persistentdocument_criteria_Projection [$args]
+	 * @return f_persistentdocument_criteria_Criteria
+	 */
+	function setProjection();
+}
+
+
+
+interface f_persistentdocument_criteria_Query // extends f_persistentdocument_criteria_Criteria
+{
+	/**
+	 * @param const $fetchMode QueryConstants::FETCH_MODE_LAZY or QueryConstants::FETCH_MODE_DIRECT
+	 * @return f_persistentdocument_criteria_Query
+	 */
+	function setFetchMode($fetchMode);
+
+	/**
+	 * @param $fetchMode
+	 * @return const QueryConstants::FETCH_MODE_LAZY or QueryConstants::FETCH_MODE_DIRECT
+	 */
+	function getFetchMode();
+
+	/**
+	 * @param f_persistentdocument_criteria_Projection [$args]
+	 * @return f_persistentdocument_criteria_Query
+	 */
+	function setProjection();
+		
+	/**
+	 * @param String $documentModelName
+	 * @return f_persistentdocument_criteria_Query
+	 */
+	function setDocumentModelName($documentModelName);
+
+	/**
+	 * @param f_persistentdocument_PersistentDocumentModel $documentModel
+	 * @return f_persistentdocument_criteria_Query
+	 */
+	function setDocumentModel($documentModel);
+
+	/**
+	 * Apply an order to the root query.
+	 * @param Order $order
+	 * @return f_persistentdocument_criteria_Query
+	 */
+	function addOrder($order);
+
+	/**
+	 * @param Integer $firstResult
+	 * @return f_persistentdocument_criteria_Query
+	 */
+	function setFirstResult($firstResult);
+
+	/**
+	 * @param Integer $maxResult
+	 * @return f_persistentdocument_criteria_Query
+	 */
+	function setMaxResults($maxResult);
+
+	// grrr for next two methods : extends ... zend auto-completion ... php.
+
+	/**
+	 * @see f_persistentdocument_criteria_Criteria
+	 * @return f_persistentdocument_criteria_Query
+	 */
+	function add($criterion);
+
+	/**
+	 * @param string $relationName
+	 * @param string $documentModelName
+	 * @return f_persistentdocument_criteria_Criteria
+	 */
+	function createCriteria($relationName, $documentModelName = null);
+	
+	
+	/**
+	 * @param string $propertyName
+	 * @param string $documentModelName
+	 * @return f_persistentdocument_criteria_Criteria
+	 */
+	function createPropertyCriteria($propertyName, $documentModelName);
+
+	/**
+	 * Shortcut for <code>$persitentProviderInstance->find($this)</code>
+	 * @see f_persistentdocument_PersistentProvider#find
+	 * @return array<f_persistentdocument_PersistentDocument>
+	 */
+	function find();
+
+	/**
+	 * Shortcut for <code>$persitentProviderInstance->findUnique($this)</code>
+	 * @see f_persistentdocument_PersistentProvider#find
+	 * @return f_persistentdocument_PersistentDocument or null
+	 */
+	function findUnique();
+	
+	/**
+	 * If the query has some projection, retrieve one of them into a dedicated array
+	 * Shortcut for <code>$persitentProviderInstance->findColumn($this, $columnName)</code>
+	 * @see f_persistentdocument_PersistentProvider#findColumn
+	 * @param String $columnName  the name of the projection
+	 * @return mixed[]
+	 */
+	function findColumn($columnName);
+
+	/**
+	 * Delete all the document matching the query
+	 * @return Integer number of deleted documents
+	 */
+	function delete();
+
+	/**
+	 * @param f_persistentdocument_criteria_HavingCriterion [$args]
+	 * @return f_persistentdocument_criteria_Query
+	 */
+	function having();
+}
+
+interface f_persistentdocument_criteria_ExecutableQuery extends f_persistentdocument_criteria_Query
+{
+
+	/**
+	 * @param String $name
+	 */
+	function addDocumentProjection($name);
+
+	/**
+	 * @return array<String>
+	 */
+	function getDocumentProjections();
+
+	/**
+	 * @return array<f_persistentdocument_criteria_Criterion>
+	 */
+	public function getCriterions();
+	 
+	/**
+	 * @return array<f_persistentdocument_criteria_f_persistentdocument_criteria_ExecutableQuery>
+	 */
+	public function getCriterias();
+
+	/**
+	 * @return boolean
+	 */
+	public function hasCriterias();
+
+	/**
+	 * @return boolean
+	 */
+	public function hasCriterions();
+
+	/**
+	 * @return array<f_persistentdocument_criteria_TreeCriterion>
+	 */
+	public function getTreeCriterions();
+
+	/**
+	 * @return array
+	 */
+	public function getOrders();
+
+	/**
+	 * @return boolean
+	 */
+	public function hasOrders();
+
+	/**
+	 * @return Integer
+	 */
+	public function getFirstResult();
+	
+	/**
+	 * @param String $columnName
+	 * @return f_persistentdocument_criteria_Query
+	 */
+	public function setFetchColumn($columnName);
+
+	/**
+	 * @return Integer
+	 */
+	public function getMaxResults();
+
+	/**
+	 * @return f_persistentdocument_PersistentDocumentModel
+	 */
+	public function getDocumentModel();
+
+	/**
+	 * @return boolean
+	 */
+	public function hasProjection();
+	
+	
+
+	/**
+	 * @return f_persistentdocument_criteria_Projection[]
+	 */
+	public function getProjection();
+}
+
+class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_criteria_Query, f_persistentdocument_criteria_ExecutableQuery
+{
+	private static $F_DOCUMENT_FIELDS = array(QueryConstants::ID, QueryConstants::MODEL);
+
+	/**
+	 * @var array<f_persistentdocument_criteria_Projection>
+	 */
+	private $projections = array();
+
+	/**
+	 * @var String
+	 */
+	private $documentProjections = array();
+
+	/**
+	 * @var f_persistentdocument_criteria_Query
+	 */
+	private $parentQuery;
+	
+	/**
+	 * @var boolean
+	 */
+	private $inverseQuery = false;	
+	
+	/**
+	 * @var array
+	 */
+	private $criterions = array();
+	/**
+	 * @var array
+	 */
+	private $treeCriterions = array();
+
+	/**
+	 * @var unknown_type
+	 */
+	private $havingCriterions = array();
+
+	/**
+	 * @var array
+	 */
+	private $criterias = array();
+	/**
+	 * @var array
+	 */
+	private $orders = array();
+	/**
+	 * @var Integer
+	 */
+	private $firstResult = 0;
+	/**
+	 * @var Integer
+	 */
+	private $maxResults = -1;
+
+	/**
+	 * @var f_persistentdocument_PersistentDocumentModel
+	 */
+	private $model;
+
+	/**
+	 * The Query fetch mode, QueryConstants::FETCH_MODE_LAZY by default
+	 * @var const
+	 */
+	private $fetchMode = QueryConstants::FETCH_MODE_LAZY;
+	
+	/**
+	 * @var String
+	 */
+	private $fetchColumnName;
+
+	/**
+	 * @param const $fetchMode QueryConstants::FETCH_MODE_LAZY or QueryConstants::FETCH_MODE_DIRECT
+	 * @return f_persistentdocument_criteria_QueryImpl
+	 */
+	public function setFetchMode($fetchMode)
+	{
+		if ($fetchMode === QueryConstants::FETCH_MODE_DIRECT && $this->model === null)
+		{
+			throw new Exception("Can not set fetchMode to DIRECT if the document model is not explicit");
+		}
+		$this->fetchMode = $fetchMode;
+		return $this;
+	}
+	
+	/**
+	 * @param String $columnName
+	 * @return f_persistentdocument_criteria_Query
+	 */
+	public function setFetchColumn($columnName)
+	{
+		$this->fetchColumnName = $columnName;
+		return $this;
+	}
+
+	/**
+	 * @param $fetchMode
+	 * @return const QueryConstants::FETCH_MODE_LAZY or QueryConstants::FETCH_MODE_DIRECT
+	 */
+	public function getFetchMode()
+	{
+		return $this->fetchMode;
+	}
+
+	/**
+	 * @param String $documentModel
+	 * @see persistentdocument/criteria/f_persistentdocument_criteria_Query#setDocumentModelName($documentModelName)
+	 */
+	public function setDocumentModelName($documentModelName, $includeChildren = true)
+	{
+		$this->setDocumentModel(f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($documentModelName), $includeChildren);
+		return $this;
+	}
+
+	/**
+	 * @param f_persistentdocument_PersistentDocumentModel $documentModel
+	 * @see persistentdocument/criteria/f_persistentdocument_criteria_Query#setDocumentModel($documentModel)
+	 */
+	public function setDocumentModel($documentModel, $includeChildren = true)
+	{
+		$this->model = $documentModel;
+		if ($documentModel->hasParent())
+		{
+			if ($includeChildren)
+			{
+				if ($documentModel->isInjectedModel())
+				{
+					$model = $documentModel->getSourceInjectionModel();
+					$isInjected = true;
+				}
+				else
+				{
+					$model = $documentModel;
+					$isInjected = false;
+				}
+
+				if ($model->hasChildren())
+				{
+					$modelNames = $model->getChildrenNames();
+					if (!$isInjected) { $modelNames[] = $documentModel->getName();}
+					$this->add(Restrictions::in("model", $modelNames));
+				}
+				else
+				{
+					$this->add(Restrictions::eq("model", $documentModel->getName()));
+				}
+			}
+			else
+			{
+				$this->add(Restrictions::eq("model", $documentModel->getName()));
+			}
+		}
+		elseif (!$includeChildren && $documentModel->hasChildren())
+		{
+			$this->add(Restrictions::eq("model", $documentModel->getName()));
+		}
+		return $this;
+	}
+
+	/**
+	 * @param f_persistentdocument_criteria_Projection $projection,...
+	 * @return f_persistentdocument_criteria_Query
+	 */
+	public function setProjection()
+	{
+		return $this->setProjectionArray(func_get_args());
+	}
+	
+	/**
+	 * @param f_persistentdocument_criteria_Projection[] $projections
+	 * @return f_persistentdocument_criteria_Query
+	 */
+	public function setProjectionArray($projections)
+	{
+		$this->documentProjections = array(); 
+		$this->projections = array();
+		foreach ($projections as $projection)
+		{
+			$this->addProjection($projection);
+		}
+		return $this;
+	}
+
+	/**
+	 * @param f_persistentdocument_criteria_Projection $projection
+	 * @return f_persistentdocument_criteria_Query
+	 */
+	public function addProjection($projection)
+	{
+		if ($projection instanceof f_persistentdocument_criteria_Projection)
+		{
+			$this->projections[] = $projection;
+		}
+		else
+		{
+			throw new Exception(get_class($projection) . ' is not a projection.');
+		}
+		return $this;
+	}
+
+	/**
+	 * "private" use of QueryBuilder
+	 *
+	 * @param unknown_type $name
+	 */
+	public function addDocumentProjection($name)
+	{
+		$this->documentProjections[] = $name;
+	}
+
+	/**
+	 * "private" use of QueryBuilder
+	 *
+	 * @param unknown_type $name
+	 */
+	public function getDocumentProjections()
+	{
+		return $this->documentProjections;
+	}
+
+	public function addOrder($order)
+	{
+		if ($this->hasParent())
+		{
+			$this->getParentQuery()->addOrder($order);
+		}
+		else
+		{
+			$this->orders[] = $order;
+		}
+		return $this;
+	}
+
+	public function setFirstResult($firstResult)
+	{
+		if ($this->hasParent())
+		{
+			$this->getParentQuery()->setFirstResult($firstResult);
+		}
+		else
+		{
+			$this->firstResult = $firstResult;
+		}
+		return $this;
+	}
+
+	public function setMaxResults($maxResults)
+	{
+		if ($this->hasParent())
+		{
+			$this->getParentQuery()->setMaxResults($maxResults);
+		}
+		else
+		{
+			$this->maxResults = $maxResults;
+		}
+		return $this;
+	}
+
+	public function add($criterion)
+	{
+		if (is_null($criterion))
+		{
+			throw new Exception('Null criterion has not allowed');
+		}
+
+		if ($criterion instanceof Example)
+		{
+			$this->addExample($criterion);
+		}
+		else if ($criterion instanceof f_persistentdocument_criteria_TreeCriterion)
+		{
+			$this->treeCriterions[] = $criterion;
+		}
+		else if ($criterion instanceof f_persistentdocument_criteria_HasTagExpression)
+		{
+			$this->criterions[] = $criterion;
+		}
+		else if ($criterion instanceof f_persistentdocument_criteria_Junction)
+		{
+			$this->criterions[] = $criterion;
+		}
+		else // "DATA" criterion
+		{
+			if (is_null($this->model) && !in_array($criterion->getPropertyName(), self::$F_DOCUMENT_FIELDS))
+			{
+				throw new Exception('Can not query on '.$criterion->getPropertyName().' with a NULL model');
+			}
+				
+			$this->criterions[] = $criterion;
+				
+		}
+		return $this;
+	}
+
+	/**
+	 * @param f_persistentdocument_criteria_HavingCriterion [$args]
+	 * @return f_persistentdocument_criteria_Query
+	 */
+	function having()
+	{
+		foreach (func_get_args() as $havingCriterion)
+		{
+			if ($havingCriterion instanceof f_persistentdocument_criteria_HavingCriterion)
+			{
+				$this->havingCriterions[] = $havingCriterion;
+			}
+			else
+			{
+				throw new Exception(get_class($havingCriterion) . ' is not a HavingCriterion.');
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * @return Boolean
+	 */
+	function hasHavingCriterion()
+	{
+		return !empty($this->havingCriterions);
+	}
+
+	/**
+	 * @return f_persistentdocument_criteria_HavingCriterion[]
+	 */
+	function getHavingCriterion()
+	{
+		return $this->havingCriterions;
+	}
+
+	/**
+	 * @param string $relationName
+	 * @param string $documentModelName
+	 * @return f_persistentdocument_criteria_Criteria
+	 */
+	public function createCriteria($relationName, $documentModelName = null)
+	{
+		$c = new f_persistentdocument_criteria_QueryImpl();
+		if (is_null($this->model))
+		{
+			throw new Exception('Can not create criteria without model assigned (see setDocumentModelName())');
+		}
+		$property = $this->model->getProperty($relationName);
+		if (is_null($property))
+		{
+			$property = $this->model->getInverseProperty($relationName);
+			$c->setInverseQuery(true);
+			if (is_null($property))
+			{
+				throw new Exception('Can not create criteria on unknown property '.$relationName);
+			}
+		}
+		
+		if (!$property->isDocument())
+		{
+			throw new Exception('Can not create criteria on scalare property '.$relationName);
+		}
+		
+		if ($documentModelName === null)
+		{
+			$documentModelName = $property->getType();
+		}
+		else
+		{
+			if (!f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($documentModelName)
+				->isModelCompatible($property->getType()))
+			{
+				throw new Exception($documentModelName . ' Is not compatible with '. $property->getType() . ' for property ' . $relationName);	
+			}
+		}
+		$c->setDocumentModelName($documentModelName);
+		$c->setParentQuery($this);
+		$this->addCriteria($relationName, $c);
+		return $c;
+	}
+	
+	/**
+	 * @param string $propertyName
+	 * @param string $documentModelName
+	 * @return f_persistentdocument_criteria_Criteria
+	 */
+	public function createPropertyCriteria($propertyName, $documentModelName)
+	{
+		$c = new f_persistentdocument_criteria_QueryImpl();
+		if ($this->model === null)
+		{
+			throw new Exception('Can not create criteria without model assigned (see setDocumentModelName())');
+		}
+		$property = $this->model->getProperty($propertyName);
+		if (is_null($property))
+		{
+			$subModel = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($documentModelName);
+			$property = $subModel->getProperty($propertyName);
+			$c->setInverseQuery(true);
+			if ($property === null)
+			{
+				throw new Exception('Can not create criteria on unknown property '.$propertyName);
+			}
+		}
+		if ($property->getType() !== f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER)
+		{
+			throw new Exception('Can not create criteria on none INTEGER property '.$propertyName);
+		}
+		$c->setDocumentModelName($documentModelName);
+		$c->setParentQuery($this);
+		$this->addCriteria($propertyName, $c);
+		return $c;		
+	}
+
+	public function createSubCriteria($relationName)
+	{
+		$c = new f_persistentdocument_criteria_QueryImpl();
+		$property = $this->model->getProperty($relationName);
+		if (is_null($property))
+		{
+			$property = $this->model->getInverseProperty($relationName);
+			$c->setInverseQuery(true);
+			if (is_null($property))
+			{
+				throw new Exception('Can not create criteria on unknown property '.$relationName);
+			}
+		}
+		if (!$property->isDocument())
+		{
+			throw new Exception('Can not create criteria on scalare property '.$relationName);
+		}
+		$c->setDocumentModelName($property->getType());
+		$c->setParentQuery($this);
+		return array($relationName, $c);
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getCriterions()
+	{
+		return $this->criterions;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getTreeCriterions()
+	{
+		return $this->treeCriterions;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getCriterias()
+	{
+		return $this->criterias;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getOrders()
+	{
+		return $this->orders;
+	}
+
+	/**
+	 * @return Integer
+	 */
+	public function getFirstResult()
+	{
+		return $this->firstResult;
+	}
+
+	/**
+	 * @return Integer
+	 */
+	public function getMaxResults()
+	{
+		return $this->maxResults;
+	}
+
+	/**
+	 * @return f_persistentdocument_PersistentDocumentModel
+	 */
+	public function getDocumentModel()
+	{
+		return $this->model;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function hasCriterias()
+	{
+		return !empty($this->criterias);
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function hasCriterions()
+	{
+		return !empty($this->criterions);
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function hasTreeCriterions()
+	{
+		return !empty($this->treeCriterions);
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function hasOrders()
+	{
+		return !empty($this->orders);
+	}
+
+	/**
+	 * @return f_persistentdocument_criteria_Projection[]
+	 */
+	public function getProjection()
+	{
+		return $this->projections;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function hasProjection()
+	{
+		return !empty($this->projections);
+	}
+	
+	/**
+	 * @return boolean true if the query or any of the criterias has a projection
+	 */
+	public function hasProjectionDeep()
+	{
+		if ($this->hasProjection())
+		{
+			return true;
+		}
+		foreach ($this->criterias as $criteria)
+		{
+			if ($criteria->hasProjectionDeep())
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Shortcut for <code>$persitentProviderInstance->find($this)</code> or
+	 * <code>$persitentProviderInstance->findColumn($this, $fetchColumnName)</code> (if setFetchColumnName() was called)
+	 * @see f_persistentdocument_PersistentProvider#find
+	 * @return f_persistentdocument_PersistentDocument[]
+	 */
+	function find()
+	{
+		if ($this->fetchColumnName !== null)
+		{
+			return f_persistentdocument_PersistentProvider::getInstance()->findColumn($this, $this->fetchColumnName);
+		}
+		return f_persistentdocument_PersistentProvider::getInstance()->find($this);
+	}
+	
+	/**
+	 * If the query has some projection, retrieve one of them into a dedicated array
+	 * Shortcut for <code>$persitentProviderInstance->findColumn($this, $columnName)</code>
+	 * @see f_persistentdocument_PersistentProvider#findColumn
+	 * @param String $columnName  the name of the projection
+	 * @return mixed[]
+	 */
+	function findColumn($columnName)
+	{
+		return f_persistentdocument_PersistentProvider::getInstance()->findColumn($this, $columnName);
+	}
+
+	/**
+	 * Shortcut for <code>$persitentProviderInstance->findUnique($this)</code>
+	 * @see f_persistentdocument_PersistentProvider#find
+	 * @return f_persistentdocument_PersistentDocument or null
+	 */
+	function findUnique()
+	{
+		return f_persistentdocument_PersistentProvider::getInstance()->findUnique($this);
+	}
+
+	/**
+	 * Delete all the documents matching the query.<br/>
+	 * <strong>Note</strong> : only for queries returning documents (of course...)
+	 * @return Integer number of deleted documents
+	 */
+	function delete()
+	{
+		// TODO: enhance this sometimes doing direct delete in the DB.
+		// Think how to manage correctly the code that is linked to the document deletion
+		$documents = $this->find();
+		foreach ($documents as $document)
+		{
+			$document->delete();
+		}
+		return count($documents);
+	}
+
+	// private methods
+
+	/**
+	 * @param Example $example
+	 */
+	private function addExample($example)
+	{
+		$properties = $example->getDocumentInstanceProperties();
+		foreach ($properties['scalars'] as $propertyName => $value)
+		{
+			if (is_null($value))
+			{
+				$this->criterions[] = Restrictions::isNull($propertyName);
+			}
+			else if ($example->getLikeEnabled())
+			{
+				$this->criterions[] = Restrictions::like($propertyName, $value, $example->getMatchMode(), $example->getIgnoreCase());
+			}
+			else
+			{
+				$this->criterions[] = Restrictions::eq($propertyName, $value, $example->getIgnoreCase());
+			}
+		}
+		foreach ($properties['documents'] as $propertyName => $value)
+		{
+			if (count($value) == 0)
+			{
+				$this->criterions[] = Restrictions::isNull($propertyName);
+			}
+			else
+			{
+				// TODO: Bof ...
+				//echo "SubCriteria : $propertyName\n";
+				$c = $this->createCriteria($propertyName);
+
+				if (count($value) > 1)
+				{
+					throw new Exception('Multiple sub-document examples not implemented');
+				}
+				$e = Example::create($value[0]);
+
+				if ($example->getLikeEnabled())
+				{
+					$e->enableLike($example->getMatchMode());
+				}
+				if ($example->getIgnoreCase())
+				{
+					$e->ignoreCase();
+				}
+				$c->add($e);
+			}
+		}
+	}
+
+	/**
+	 * @param String $relationName
+	 * @param f_persistentdocument_criteria_Criteria $criteria
+	 */
+	private function addCriteria($relationName, $criteria)
+	{
+		$this->criterias[$relationName] = $criteria;
+	}
+
+	/**
+	 * @param f_persistentdocument_criteria_Query $parentQuery
+	 */
+	public function setParentQuery($parentQuery)
+	{
+		$this->parentQuery = $parentQuery;
+	}
+	
+	/**
+	 * @return f_persistentdocument_criteria_Query
+	 */
+	private function getParentQuery()
+	{
+		return $this->parentQuery;
+	}
+
+	/**
+	 * @return Boolean
+	 */
+	public function hasParent()
+	{
+		return !is_null($this->parentQuery);
+	}
+	
+	/**
+	 * @return boolean
+	 */
+	public function getInverseQuery()
+	{
+		return $this->inverseQuery;
+	}
+	
+	/**
+	 * @param boolean $inverseQuery
+	 */
+	public function setInverseQuery($inverseQuery)
+	{
+		$this->inverseQuery = $inverseQuery;
+	}
+
+
+	public function __toString()
+	{
+		$str = "Criterias:\n";
+		foreach ($this->criterias as $criteria)
+		{
+			$str .= get_class($criteria)." ";
+		}
+		$str .= "Criterions:\n";
+		foreach ($this->criterions as $criterion)
+		{
+			$str .= get_class($criterion)." ";
+		}
+		return $str;
+	}
+}
+
+class f_persistentdocument_criteria_QueryIntersection
+{
+	
+	/**
+	 * @var f_persistentdocument_criteria_Query[]
+	 */
+	private $queries = array();
+	/**
+	 * @var f_persistentdocument_PersistentDocumentModel
+	 */
+	private $documentModel;
+	
+	
+	private $maxResult = -1;
+	
+	/**
+	 * @param f_persistentdocument_criteria_Query $query
+	 * @return f_persistentdocument_criteria_QueryGroup
+	 */
+	function add($query)
+	{
+		$queryModel = $query->getDocumentModel();
+		if ($this->documentModel === null)
+		{
+			$this->documentModel = $queryModel;
+		}
+
+		//Ordered queries at first
+		if ($query->hasOrders() && count($this->queries) > 0)
+		{
+			$this->queries = array_merge(array($query), $this->queries);
+		}
+		else
+		{
+			$this->queries[] = $query;
+		}
+		
+		if ($query->getMaxResults() > 0)
+		{
+			if ($this->maxResult == -1 || $this->maxResult > $query->getMaxResults())
+			{
+				$this->maxResult = $query->getMaxResults();
+			}
+			$query->setMaxResults(-1);
+		}
+		return $this;
+	}
+	
+	/**
+	 * @return integer || -1
+	 */
+	public function getMaxResults()
+	{
+		return $this->maxResult;
+	}
+	
+	function getDocumentModel()
+	{
+		return $this->documentModel;
+	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocumentModel $documentModel
+	 */
+	public function setDocumentModel($documentModel)
+	{
+		$this->documentModel = $documentModel;
+	}
+	
+	/**
+	 * @return f_persistentdocument_criteria_Query[]
+	 */
+	function getQueries()
+	{
+		return $this->queries;
+	}
+	
+	/**
+	 * @return f_persistentdocument_PersistentDocument[]
+	 */
+	function find()
+	{
+		return f_persistentdocument_PersistentProvider::getInstance()->findIntersection($this);
+	}
+	
+	/**
+	 * @return Integer[]
+	 */
+	function findIds()
+	{
+		return f_persistentdocument_PersistentProvider::getInstance()->findIntersectionIds($this);
+	}
+}

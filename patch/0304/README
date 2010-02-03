@@ -1,0 +1,2 @@
+Version: 3.0.0
+Suppresion des colonnes target et required de la table f_availabletags

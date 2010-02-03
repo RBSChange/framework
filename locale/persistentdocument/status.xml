@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<localization>
+	<entity id="publicated">
+		<locale lang="fr">publié</locale>
+		<locale lang="en">published</locale>
+	</entity>
+	<entity id="active">
+		<locale lang="fr">actif</locale>
+		<locale lang="en">active</locale>
+	</entity>
+	<entity id="deactivated">
+		<locale lang="fr">désactivé</locale>
+		<locale lang="en">deactivated</locale>
+	</entity>
+	<entity id="draft">
+		<locale lang="fr">brouillon</locale>
+		<locale lang="en">draft</locale>
+	</entity>
+	<entity id="correction">
+		<locale lang="fr">correction en cours</locale>
+		<locale lang="en">correction</locale>
+	</entity>
+	<entity id="deprecated">
+		<locale lang="fr">version déprèciée</locale>
+		<locale lang="en">deprecated</locale>
+	</entity>
+	<entity id="filed">
+		<locale lang="fr">archivé</locale>
+		<locale lang="en">filed</locale>
+	</entity>
+	<entity id="workflow">
+		<locale lang="fr">workflow</locale>
+		<locale lang="en">workflow</locale>
+	</entity>
+	
+	<entity id="active.enddate">
+		<locale lang="fr">Le document n'est plus publiable</locale>
+	</entity>
+	
+	<entity id="active.startedate">
+		<locale lang="fr">Le document n'est pas encore publiable</locale>
+	</entity>	
+</localization>

@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+	<!--
+		Define section :
+		<define name="$name">$value</define> <=> <?php define($name, $value); ?>
+		-->
+	<defines>
+		<define name="WEBAPP_HOME">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'webapp'</define>
+		<define name="FRAMEWORK_VERSION">3.0.0</define>
+		<define name="CHANGE_RELEASE">3.0</define>
+
+		<define name="CAPTCHA_SESSION_KEY">CHANGE_CAPTCHA</define>
+
+		<define name="AG_TEMPLATE_DIR">WEBAPP_HOME . DIRECTORY_SEPARATOR . 'templates'</define>
+		<define name="AG_CONFIG_DIR">FRAMEWORK_HOME . DIRECTORY_SEPARATOR . 'config'</define>
+		<define name="AG_LIB_DIR">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'libs'</define>
+		<define name="AG_MODULE_DIR">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'modules'</define>
+
+		<define name="CHANGE_CONFIG_DIR">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'config'</define>
+		<define name="CHANGE_CACHE_DIR">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . PROFILE</define>
+		<define name="CHANGE_CACHE_PDF">DIRECTORY_SEPARATOR . 'pdf' . DIRECTORY_SEPARATOR . 'tmp'</define>
+
+		<define name="AG_APP_DIR">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'agavi' . DIRECTORY_SEPARATOR</define>
+
+		<define name="AG_WEBAPP_CONTEXT"></define>
+		<define name="AG_DEVELOPMENT_MODE">false</define>
+
+		<define name="CHANGE4_CACHE_SERVICE_CLASS">f_persistentdocument_DatabaseCacheService</define>
+
+		<define name="MODE_DEBUG">0</define>
+		
+		<define name="PHPTAL_PHP_CODE_DESTINATION">AG_CACHE_DIR . DIRECTORY_SEPARATOR . 'template/'</define>
+
+		<define name="AG_DEFAULT_MODULE">website</define>
+		<define name="AG_DEFAULT_ACTION">Index</define>
+
+		<define name="AG_ERROR_404_MODULE">website</define>
+		<define name="AG_ERROR_404_ACTION">Error404</define>
+
+		<define name="AG_LOGIN_MODULE">users</define>
+		<define name="AG_LOGIN_ACTION">Login</define>
+
+		<define name="AG_MODULE_DISABLED_MODULE">website</define>
+		<define name="AG_MODULE_DISABLED_ACTION">Unavailable</define>
+
+		<define name="AG_SECURE_MODULE">users</define>
+		<define name="AG_SECURE_ACTION">Login</define>
+
+		<define name="AG_UNAVAILABLE_MODULE">website</define>
+		<define name="AG_UNAVAILABLE_ACTION">Unavailable</define>
+		<define name="AG_AVAILABLE">true</define>
+
+		<define name="AG_ACTION_ACCESSOR">action</define>
+		<define name="AG_MODULE_ACCESSOR">module</define>
+
+		<define name="AG_CONTENT_TYPE">html</define>
+		<define name="AG_PATH_INFO_ARRAY">SERVER</define>
+		<define name="AG_PATH_INFO_KEY">PATH_INFO</define>
+
+		<define name="AG_URL_FORMAT">GET</define>
+
+		<define name="AG_USE_DATABASE">false</define>
+
+		<define name="AG_USE_LOGGING">true</define>
+		<define name="AG_LOGGING_LEVEL">WARN</define>
+		<define name="AG_USE_DEBUG">true</define>
+
+		<define name="AG_OVERWRITE_WEBAPP_DOCUMENT_MODEL">false</define>
+
+		<define name="AG_USE_SECURITY">true</define>
+		<define name="AG_USER_NAMESPACE">rbs/webedit4</define>
+		<define name="AG_WEBAPP_NAME">WebappName</define>
+
+		<define name="AG_SUPPORTED_LANGUAGES">fr</define>
+
+		<define name="AG_UI_SUPPORTED_LANGUAGES">fr</define>
+
+		<define name="CHANGE_USE_CORRECTION">true</define>
+		<define name="CHANGE_USE_WORKFLOW">false</define>	
+		<define name="DEFAULT_UI_PROTOCOL">http</define>
+		
+		<define name="DEFAULT_TIMEZONE">Europe/Paris</define>
+		
+		<define name="RICHTEXT_PRESERVE_H1_TAGS">false</define>
+		
+		<define name="USE_NEW_TEMPLATES_ONLY">true</define>
+		<!-- Optional constants -->
+
+		<define name="AG_DISABLE_BLOCK_CACHE">false</define>
+		<!-- (AG_DISABLE_SIMPLECACHE == true) => (AG_DISABLE_BLOCK_CACHE == true) -->
+		<define name="AG_DISABLE_SIMPLECACHE">false</define>
+		
+	</defines>
+	<!--
+		  Config section :
+		  <config>
+			<name1>
+			  <name2>
+				<entry name="name3">value3</entry>
+				<entry name="name4">value4</entry>
+			  </name2>
+			  <entry name="name5">value5</entry>
+			  ...
+		  <=>
+		  <?php
+		  Framework::$config =
+			array(
+			  'name1' =>
+				array(
+				  'name2' =>
+					array('name3' => 'value3'),
+					array('name4' => 'value4')
+				  'name5' => 'value5'))
+				  ...
+		  -->
+	<config>
+		<!-- GENERAL -->
+		<general>
+			<entry name="os">linux</entry>
+			<entry name="server-fqdn">fully-qualified-domain-name</entry>
+			<entry name="server-ip">serveur.ip.address</entry>
+		</general>
+		<charts>
+			<!--  This can be google directly or eastwood for instance -->
+			<entry name="googleChartProvider">http://chart.apis.google.com/chart</entry>
+		</charts>
+
+		<injection>
+			<!--
+				  <entry name="module_aService">extensionmodule_aSubService</entry>
+				  -->
+		</injection>
+		
+		<modules>		
+	     	<uixul>
+				<disableRichtextTtoolbarButtons>
+					<entry name="ruby">true</entry>
+				</disableRichtextTtoolbarButtons>
+			</uixul>
+	     </modules>
+
+		<!-- AUTOLOAD -->
+		<!--
+				Keys of remplacement : '%AG_LIB_DIR%', '%AG_MODULE_DIR%', '%FRAMEWORK_HOME%', '%WEBAPP_HOME%', '%WEBEDIT_HOME%', %PROFILE%
+			-->
+		<autoload>
+			<Framework>
+				<entry name="name">Framework Dir</entry>
+				<entry name="path">%FRAMEWORK_HOME%</entry>
+				<entry name="recursive">true</entry>
+				<!-- Use ; to create an array -->
+				<entry name="exclude">deprecated;doc;module;webapp</entry>
+			</Framework>
+			<Libs>
+				<entry name="name">Libs</entry>
+				<entry name="path">%AG_LIB_DIR%/*</entry>
+				<entry name="recursive">true</entry>
+			</Libs>
+			<Build>
+				<entry name="name">Build</entry>
+				<entry name="path">%WEBEDIT_HOME%/build/%PROFILE%/*</entry>
+				<entry name="recursive">true</entry>
+			</Build>
+			<ModuleActions>
+				<entry name="name">Module Actions</entry>
+				<entry name="path">%AG_MODULE_DIR%/%MODULE_NAME%/actions</entry>
+			</ModuleActions>
+			<ModuleLib>
+				<entry name="name">Module Lib</entry>
+				<entry name="path">%AG_MODULE_DIR%/%MODULE_NAME%/lib/</entry>
+				<entry name="recursive">true</entry>
+			</ModuleLib>
+			<ModuleViews>
+				<entry name="name">Module Views</entry>
+				<entry name="path">%AG_MODULE_DIR%/%MODULE_NAME%/views/</entry>
+			</ModuleViews>
+			<ModulePersistentDocument>
+				<entry name="name">Module Persistent Document</entry>
+				<entry name="path">%AG_MODULE_DIR%/%MODULE_NAME%/persistentdocument/</entry>
+			</ModulePersistentDocument>
+			<ModulePersistentDocumentImportClasses>
+				<entry name="name">Module Persistent Document import classes</entry>
+				<entry name="path">%AG_MODULE_DIR%/%MODULE_NAME%/persistentdocument/import/</entry>
+			</ModulePersistentDocumentImportClasses>
+			<ModulePersistentDocumentFilterClasses>
+				<entry name="name">Module Persistent Document filter classes</entry>
+				<entry name="path">%AG_MODULE_DIR%/%MODULE_NAME%/persistentdocument/filters/</entry>
+			</ModulePersistentDocumentFilterClasses>
+			<ModuleTests>
+				<entry name="name">Module Tests</entry>
+				<entry name="path">%AG_MODULE_DIR%/%MODULE_NAME%/tests/</entry>
+				<entry name="recursive">true</entry>
+			</ModuleTests>
+			<ModulePatch>
+				<entry name="name">Module Patch</entry>
+				<entry name="path">%AG_MODULE_DIR%/%MODULE_NAME%/patch/</entry>
+				<entry name="recursive">true</entry>
+			</ModulePatch>
+			<WebappModuleActions>
+				<entry name="name">WebApp Module Actions</entry>
+				<entry name="path">%WEBAPP_HOME%/modules/*/actions</entry>
+			</WebappModuleActions>
+			<WebAppModuleLib>
+				<entry name="name">WebApp Module Lib</entry>
+				<entry name="path">%WEBAPP_HOME%/modules/*/lib/</entry>
+				<entry name="recursive">true</entry>
+			</WebAppModuleLib>
+			<WebAppModuleViews>
+				<entry name="name">WebApp Module Views</entry>
+				<entry name="path">%WEBAPP_HOME%/modules/*/views/</entry>
+			</WebAppModuleViews>
+			<WebAppModuleTests>
+				<entry name="name">WebApp Module Tests</entry>
+				<entry name="path">%WEBAPP_HOME%/modules/*/tests/</entry>
+			</WebAppModuleTests>
+			<WebappPatch>
+				<entry name="name">Webapp Patch</entry>
+				<entry name="path">%WEBAPP_HOME%/patch/</entry>
+				<entry name="recursive">true</entry>
+			</WebappPatch>
+		</autoload>
+
+		<!-- MAIL -->
+		<mail>
+			<entry name="type">Smtp</entry>
+			<entry name="host">localhost</entry>
+			<entry name="port">25</entry>
+			<entry name="auth">false</entry>
+			<entry name="username"></entry>
+			<entry name="password"></entry>
+
+			<!-- Other configuration possibility
+				<entry name="type">Sendmail</entry>
+				<entry name="sendmail_path"></entry>
+				<entry name="sendmail_args"></entry>
+
+				<entry name="type">Mail</entry>
+				-->
+		</mail>
+
+		<!-- DATABASES -->
+		<databases>
+			<connections>
+				<entry name="default">webapp</entry>
+				<entry name="read-only">read-only</entry>
+			</connections>
+			<!--
+				Use this to declare a mysql connection named 'webapp' :
+				<webapp>
+					<entry name="class">PDODatabase</entry>
+					<entry name="user">userName</entry>
+					<entry name="password">password</entry>
+					<entry name="database">databaseName</entry>
+					<entry name="host">fullyQualifiedHostnameOrIP</entry>
+					<entry name="protocol">mysql</entry>
+					<entry name="port">3306</entry>
+					<entry name="log_level">0</entry>
+				</webapp>
+				-->
+			<webapp>
+				<entry name="class">PDODatabase</entry>
+				<entry name="user">DatabaseUserAdmin</entry>
+				<entry name="password">UserPassword</entry>
+				<entry name="database">DatabaseName</entry>
+				<entry name="host">localhost</entry>
+				<entry name="protocol">mysql</entry>
+				<!--entry name="port"></entry-->
+				<entry name="log_level">0</entry>
+			</webapp>
+			<read-only>
+				<entry name="class">PDODatabase</entry>
+				<entry name="user">DatabaseUserAdmin</entry>
+				<entry name="password">UserPassword</entry>
+				<entry name="database">DatabaseName</entry>
+				<entry name="host">localhost</entry>
+				<entry name="protocol">mysql</entry>
+				<!--entry name="port"></entry-->
+				<entry name="log_level">0</entry>
+			</read-only>
+		</databases>
+
+		<!-- PERSISTENT PROVIDER -->
+		<persistent_provider>
+			<entry name="mysql">f_persistentdocument_PersistentProviderMySql</entry>
+			<entry name="oci">f_persistentdocument_PersistentProviderOci</entry>
+		</persistent_provider>
+
+		<!-- PDF SERVICE -->
+		<pdf>
+			<entry name="user">pdfUser</entry>
+			<entry name="password">pdfPassword</entry>
+			<entry name="customer">pdfCustomer</entry>
+		</pdf>
+		
+		<!-- Servers cluster -->
+		<nodes>
+			<!--  <entry name="node1">http://localhost</entry> -->
+		</nodes>
+	</config>
+	
+	<!-- Web browsers compatibility -->
+	<browsers>
+		<!-- 
+			<frontoffice>
+
+				<browser name="firefox">
+					<version>3.0.3</version>
+					<version>3.0.8</version>
+				</browser>
+
+			</frontoffice>
+			-->	
+		<backoffice>
+			<browser name="firefox">
+				<version>3.5.4</version>
+				<version>3.5.5</version>
+				<version>3.5.6</version>
+				<version>3.5.7</version>
+				<version>3.6</version>
+			</browser>
+		</backoffice>
+	</browsers>
+</project>

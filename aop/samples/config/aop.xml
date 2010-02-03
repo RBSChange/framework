@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aop>
+	<!--
+		For the future : not supported yet :
+		<pointcut
+			id="allServicesPreInsert" expression="protected
+			*Service::preInsert())" /> <pointcut id="allServicesPublicMethods"
+			expression="public *Service::*())" />
+		<pointcut
+			id="allServicesMethods" expression="* *Service::*())" />
+		<before	pointcut="f_persistentdocument_DocumentService::createQuery()"
+			class="" method="" />
+		<after-returning pointcut-ref="allServicesPreInsert" />
+		<after-throwing	pointcut-ref="allServicesPreInsert" throwing="" />
+		<after pointcut-ref="allServicesPreInsert" />
+	-->
+
+	<!-- Supported now -->
+	<around pointcut="f_persistentdocument_criteria_QueryImpl::find"
+		class="f_aop_samples_BenchAdvice" method="execute"
+		parameters="message: str_replace(&quot;\n&quot;, '', $this->__toString()); benchType: 'gringo'" />
+	<after pointcut="f_persistentdocument_PersistentProvider::createQuery"
+		class="f_aop_samples_AfterAdvice" method="log" />
+	<before pointcut="f_persistentdocument_PersistentProvider::createQuery"
+		class="f_aop_samples_BeforeAdvice" method="log" />
+	<after-throwing pointcut="f_persistentdocument_criteria_QueryImpl::find"
+		class="f_aop_samples_AfterThrowingAdvice" method="recover" />
+	<after-returning pointcut="f_persistentdocument_PersistentProvider::getInstance"
+		class="f_aop_samples_AfterReturningAdvice" method="log" />
+	
+	<!--
+	 Add the management of Restrictions::true() and Restrictions::false().
+	 See testTrueFalseRestriction.php
+	 -->
+	<replace pointcut="Restrictions" class="f_aop_samples_MyRestrictions" />
+	<before pointcut="f_persistentdocument_PersistentProviderMySql::processCriterion"
+	  class="f_aop_samples_BeforeProcessCriterions" method="processCriterion" />
+</aop>

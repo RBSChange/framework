@@ -1,0 +1,54 @@
+URL source: http://phpbtree.com/captcha/index.php
+
+# files:
+
+   1. gotcha.php 					- Contains the class definitions
+   2. captcha_image.php				- Image generation script
+   3. index.php						- Usage example
+   4. util.php						- Contains constants definitions utility functions
+   5. arialbd.ttf					- font file
+   6. SFTransRoboticsExtended.ttf	- font file
+
+If you just upload these files in to a sub directory on your site e.g.www.yourdomain.com/gotcha
+point your browser to www.yourdomain/gotcha/exemple.php you will see a working exemple.
+
+-------------------------------------------------------------------------------------------------------------------
+
+			SUGGETED SETTING
+
+# Move captcha_image.php to your image directory. Rename it if you want.
+# Move gotcha.php, util.php and the two(2) font files in a directory outside you web directory.
+# Considering the following directory structure.
+    	 /home
+         	/gotcha
+          		.gotcha.php
+          		.util.php
+          	/fonts
+          		.arialbd.ttf
+          		.SFTransRoboticsExtended.ttf - font file
+          	/www -Your web directory
+               	/images - your image directory.
+                 	.captcha_image.php
+
+# Edit captcha_image.php.
+	On line 32 and 33 change the include directive to reflect the location of gotcha.php and util.php. e.g for the above exemple it will look like this:
+			include_once('../../gotcha/gotcha.php')
+			include_once('../../gotcha/util.php')
+	or like this:
+			include_once('/home/gotcha/gotcha.php')
+			include_once('/home/gotcha/util.php')
+	the first one is more flexible.
+
+	On line 64 change:
+	$t->addFont('SFTransRoboticsExtended.ttf') to $t->addFont('../../fonts/SFTransRoboticsExtended.ttf')
+	On line 65 change:
+	$t->addFont('arialbd.ttf') to $t->addFont('../../fonts/arialbd.ttf')
+
+	- To add more fonts, just repeat this process with different font files.
+
+# That's about it. See exemple.php for usage exemple.
+
+#SECURITY BEST PRACTICE.
+It is recommended that you change the value of the following:
+ *CAPTCHA_SESSION_KEY -A constant declared in util.php on line 2. The current value is "G0TCHA_CAPTCHA".
+

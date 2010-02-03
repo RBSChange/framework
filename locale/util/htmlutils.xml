@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<localization>
+	<entity id="popupTitleAddition">
+		<locale lang="fr">(s'ouvre dans une nouvelle fenêtre)</locale>
+		<locale lang="en">(opens in new window)</locale>
+	</entity>
+</localization>

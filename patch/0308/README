@@ -1,0 +1,4 @@
+Version: 3.0.0
+
+Mise à jour de la réécriture d'url nouvelle table "f_url_rules"
+Table "m_website_urlrewriting_rules" obsolete.

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<localization>
+
+	<entity id="short">
+		<locale lang="fr">d/m/Y H:i</locale>
+		<locale lang="en">Y-m-d H:i</locale>
+		<locale lang="de">d.m.Y H:i</locale>
+	</entity>
+
+</localization>

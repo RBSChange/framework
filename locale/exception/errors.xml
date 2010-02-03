@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<localization>
+	<entity id="bad-argument">
+		<locale lang="fr">l'argument '{argument}' doit être de type '{type}'.</locale>
+		<locale lang="en">argument '{argument}' must be of type '{type}'.</locale>
+	</entity>
+
+	<entity id="file-not-found">
+		<locale lang="fr">fichier '{file}' introuvable.</locale>
+		<locale lang="en">file '{file}' not found.</locale>
+	</entity>
+	
+	<entity id="pear-exception">
+		<locale lang="fr">erreur pear {message} ({code}, {mode})\n {user_info}</locale>
+		<locale lang="en">pear error {message} ({code}, {mode})\n {user_info}</locale>
+	</entity>
+
+	<entity id="recursivity-exception">
+		<locale lang="fr">récursivité. {message}</locale>
+		<locale lang="en">recursivity. {message}</locale>
+	</entity>
+
+	<entity id="translation-key-not-found">
+		<locale lang="fr">clé de traduction '{key}' introuvable.</locale>
+		<locale lang="en">translation key '{key}' not found.</locale>
+	</entity>
+	
+	<entity id="template-not-found-exception">
+		<locale lang="fr">template '{filePath}' introuvable pour le module '{moduleName}'.</locale>
+		<locale lang="en">template '{filePath}' not found for module '{moduleName}'.</locale>
+	</entity>
+
+	<entity id="object-not-found">
+		<locale lang="fr">document ID {id} introuvable.</locale>
+		<locale lang="en">document ID {id} not found.</locale>
+	</entity>
+	
+	<entity id="attached-child">
+		<locale lang="fr">attached child.</locale>
+		<locale lang="en">attached child.</locale>
+	</entity>	
+
+	<entity id="Invalid-empty-module-name">
+		<locale lang="fr">Invalid empty module name.</locale>
+		<locale lang="en">Invalid empty module name</locale>
+	</entity>	
+		
+	<entity id="Preferences-document-not-found">
+		<locale lang="fr">Preferences document not found.</locale>
+		<locale lang="en">Preferences document not found.</locale>
+	</entity>	
+			
+	<entity id="unavailable-module">
+		<locale lang="fr">le module '{moduleName}' est indisponible.</locale>
+		<locale lang="en">module '{moduleName}' unavailable.</locale>
+	</entity>
+
+	<entity id="No-valid-user-found-for-this-workitem">
+		<locale lang="fr">Impossible de trouver un valideur.</locale>
+		<locale lang="en">No valid user found.</locale>
+	</entity>
+	
+	<entity id="No-active-workflow-for-task">
+		<locale lang="fr">Il n'existe pas de workflow valide pour la tâche '{task}'</locale>
+		<locale lang="en">No active workflow</locale>	
+	</entity>
+</localization>
