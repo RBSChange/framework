@@ -71,9 +71,9 @@ class commands_AddModule extends commands_AbstractChangedevCommand
 		LocaleService::getInstance()->regenerateLocalesForModule('modules_' . $moduleName);
 
 		$this->changecmd("clear-webapp-cache");
+		$this->changecmd("compile-config");
 		$this->changecmd("compile-documents");
 		$this->changecmd("compile-editors-config");
-		$this->changecmd("compile-config");
 		$this->changecmd("compile-roles");
 		 
 		$this->quitOk('Module ' . $moduleName . ' ready');
