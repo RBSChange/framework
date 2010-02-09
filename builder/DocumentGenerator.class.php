@@ -213,7 +213,7 @@ class builder_DocumentGenerator
 			$model = $this->modelObject;
 			while ($model->hasParentModel())
 			{
-				$parentModel = $this->modelObject->getParentModel();
+				$parentModel = $model->getParentModel();
 				if (!$cl->existsNoLoad($parentModel->getDocumentClassName()) ||
 				 !$cl->existsNoLoad($parentModel->getDocumentClassName()."base"))
 				{
