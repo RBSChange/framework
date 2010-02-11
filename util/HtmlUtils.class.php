@@ -472,6 +472,10 @@ abstract class f_util_HtmlUtils
                     {
                     	$attributes['longdesc'] = LinkHelper::getActionUrl("media", "DisplayMediaDescription", array(K::COMPONENT_ID_ACCESSOR => $document->getId(), "label" => $document->getLabel(), "lang" => $lang));
                     }
+               		if (isset($attributes["format"]))
+                    {
+                    	unset($attributes["format"]);
+                    }
                     $image = self::buildImage($attributes, $format);
                 }
             }
