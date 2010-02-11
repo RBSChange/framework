@@ -30,6 +30,11 @@ abstract class f_util_HtmlUtils
 		}
 		return $string;
 	}
+	
+	/**
+	 * @var array
+	 */
+	private static $htmlFilters;
     
     /**
      * Validate <img> and <a> html balise
@@ -40,6 +45,15 @@ abstract class f_util_HtmlUtils
     {   
         $out = preg_replace_callback(self::REGEXIMAGETAG, array(__CLASS__ , 'parseImageTag'), $input);
         $out = preg_replace_callback(self::REGEXLINKTAG, array(__CLASS__ , 'parseLinkTag'), $out);
+        
+    	if (self::$htmlFilters === null)
+		{
+			self::$htmlFilters = Framework::getConfigurationValue('framework/htmlfilters', array());
+		}
+		foreach (self::$htmlFilters as $filterName => $params)
+		{
+	        $out = preg_replace_callback($params['regexp'],  explode("::", $params["method"]), $out);
+		}
         return $out;
     }  
     
