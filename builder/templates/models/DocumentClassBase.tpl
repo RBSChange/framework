@@ -203,7 +203,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	 */
 	public function getDocumentService()
 	{
-		return <{$model->getServiceClassName()}>::getInstance();
+		return <{$model->getFinalServiceClassName()}>::getInstance();
 	}
 
 	/**
