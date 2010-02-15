@@ -1092,7 +1092,7 @@ class TagService extends BaseService
 	 */
 	public function getListPageForDocument($document)
 	{
-		if (ModuleService::getInstance()->isInstalled('modules_website'))
+		if (!ModuleService::getInstance()->isInstalled('website'))
 		{
 			throw new Exception("Module website is required.");
 		}
