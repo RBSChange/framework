@@ -28,6 +28,11 @@ class PHPTAL_Php_Attribute_CHANGE_javascript extends PHPTAL_Php_Attribute
 					$this->doEcho('$jsService->execute("html")');
             		$this->tag->generator->pushCode("\$jsService->unregisterScript('".$src."');\n");
 					break;
+					
+            	case 'head':
+            		$src = $this->evaluate($value, true);
+					$this->tag->generator->pushCode("JsService::getInstance()->registerScript('".$src."');\n");
+					break;
 
             	default:
             		$array = $this->evaluate($value, true);
