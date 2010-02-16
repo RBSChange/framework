@@ -1,6 +1,6 @@
 <?php
 /**
- * A basic odtphp2PDFClient, 
+ * A basic odtphp2PDFClient,
  * odtphp2pdf: OpenOffice documents to PDF. https://sourceforge.net/projects/odtphp2pdf/
  */
 class Odtphp2PDFClient
@@ -26,37 +26,82 @@ class Odtphp2PDFClient
 	 */
 	function getPdf($template, $model)
 	{
-		$ch = curl_init();
-		$postData = array('newTemplate' => '@'.realpath($template));
-		foreach ($model as $key => $value)
+		$postData = $this->buildPostData($template, $model);
+		$info = null;
+		$result = $this->postRequest($postData, $info);
+		if ($info["content_type"] != "application/pdf")
 		{
-			$this->toPostData($value, "model[".$key."]", $postData);
+			throw new Exception("Unable to get PDF from server: ".$result);
 		}
+		return $result;
+	}
+
+	/**
+	 * @param String $template
+	 * @param array $model
+	 * @return String the modified ODT content
+	 * @throws Exception
+	 */
+	function getOdt($template, $model)
+	{
+		$postData = $this->buildPostData($template, $model);
+		$postData["_ODT_ONLY_"] = "true";
+		$info = null;
+		$result = $this->postRequest($postData, $info);
+		if ($info["content_type"] != "application/vnd.oasis.opendocument.text")
+		{
+			//throw new Exception("Unable to get ODT from server: ".$result);
+		}
+		return $result;
+	}
+
+	// private content
+
+	private function postRequest($postData, &$info)
+	{
+		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $this->serviceUrl);
 		curl_setopt($ch, CURLOPT_POST, 1);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
 		curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-		
-		if (($result = curl_exec($ch)) === false)
+		if (($result = curl_exec($ch)) !== false)
 		{
-			if(curl_errno($ch))
+			$info = curl_getinfo($ch);
+		}
+		else
+		{
+			if (curl_errno($ch))
 			{
 				throw new Exception("Unable to get PDF : ".curl_error($ch));
 			}
-			
 		}
-		$info = curl_getinfo($ch);
 		curl_close($ch);
-		if ($info["content_type"] != "application/pdf" || $info["http_code"] != "200")
+		if ($info["http_code"] != "200")
 		{
-			throw new Exception("Unable to get PDF from server: ".$result);
+			throw new Exception("Unable to get content from server: ".var_export($result, true));
 		}
 		return $result;
 	}
+
+	private function buildPostData($template, $model)
+	{
+		$postData = array('newTemplate' => '@'.realpath($template));
+		foreach ($model as $key => $value)
+		{
+			$this->toPostData($value, "model[".$key."]", $postData);
+		}
+		
+		return $postData;
+	}
 	
-	// private content
+	private $pictureIndex = 0;
+	
+	private function isImage($key)
+	{
+		return substr($key, -5) == "PICT]";
+	}
 
 	/**
 	 * @param array|String $arrayOrString
@@ -67,10 +112,24 @@ class Odtphp2PDFClient
 	{
 		if (is_array($arrayOrString))
 		{
-			foreach ($arrayOrString as $key => $value)
+			if (count($arrayOrString) == 0)
 			{
-				$this->toPostData($value, $currentKey."[".$key."]", $postData);
+				$postData[$currentKey."[".$key."]"] = '__ODTPHP2PDT_EMPTY_ARRAY__';
 			}
+			else
+			{
+				foreach ($arrayOrString as $key => $value)
+				{
+					$this->toPostData($value, $currentKey."[".$key."]", $postData);
+				}
+			}
+		}
+		elseif ($this->isImage($currentKey))
+		{
+			$pictureName = "__ODTPHP2PDFPICTURE".$this->pictureIndex."__";
+			$this->pictureIndex++;
+			$postData[$pictureName] = "@".realpath($arrayOrString);
+			$postData[$currentKey] = $pictureName;
 		}
 		else
 		{
