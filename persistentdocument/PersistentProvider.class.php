@@ -3445,16 +3445,25 @@ abstract class f_persistentdocument_PersistentProvider
 			$acl->getDocumentService()->delete($acl);
 			return;
 		}
-		foreach ($roleService->getPermissionsByRole($role) as $permission)
+		try 
 		{
-			if (!$this->checkCompiledPermission(array($accessorId), $permission, $nodeId))
+			$permissions = $roleService->getPermissionsByRole($role);
+			foreach ($permissions as $permission)
 			{
-				$stmt = $this->prepareStatement($this->getCompileACLQuery());
-				$stmt->bindValue(':accessorId', $accessorId);
-				$stmt->bindValue(':permission', $permission);
-				$stmt->bindValue(':nodeId', $nodeId);
-				$this->executeStatement($stmt);
+				if (!$this->checkCompiledPermission(array($accessorId), $permission, $nodeId))
+				{
+					$stmt = $this->prepareStatement($this->getCompileACLQuery());
+					$stmt->bindValue(':accessorId', $accessorId);
+					$stmt->bindValue(':permission', $permission);
+					$stmt->bindValue(':nodeId', $nodeId);
+					$this->executeStatement($stmt);
+				}
 			}
+		}
+		catch (IllegalArgumentException $e)
+		{
+			Framework::error($e->getMessage());
+			$acl->getDocumentService()->delete($acl);
 		}
 	}
 
