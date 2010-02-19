@@ -55,7 +55,7 @@ class commands_AddService extends commands_AbstractChangedevCommand
 		$this->message("== Add service ==");
 
 		$moduleName = $params[0];
-		$serviceName = $param[1];
+		$serviceName = $params[1];
 		
 		$this->loadFramework();
 
