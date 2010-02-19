@@ -5,6 +5,11 @@
 class HTTPClientService extends BaseService
 {
 	/**
+	 * @var Integer
+	 */
+	private $httpReturnCode = -1;
+	
+	/**
 	 * @var HTTPClientService
 	 */
 	private static $instance;
@@ -158,7 +163,7 @@ class HTTPClient
 	 * @param mixed $value
 	 * @see curl_setopt() for available options.
 	 */
-	private function setOption($option, $value)
+	public function setOption($option, $value)
 	{
 		curl_setopt($this->curlResource, $option, $value);
 	}
@@ -168,7 +173,7 @@ class HTTPClient
 	 * @see curl_setopt() for available options.
 	 * @see curl_setopt_array()
 	 */
-	private function setOptions($options)
+	public function setOptions($options)
 	{
 		curl_setopt_array($this->curlResource, $options);
 	}
@@ -191,7 +196,22 @@ class HTTPClient
 			CURLOPT_FOLLOWLOCATION => $this->followRedirects,
 			CURLOPT_URL => $url
 		));
-
-		return curl_exec($this->curlResource);
+		
+		$data = curl_exec($this->curlResource);
+		$errno = curl_errno($this->curlResource);
+		if ($errno)
+		{	
+			Framework::error(__METHOD__ . ': curl_errno : ' . $errno);
+		}
+		$this->httpReturnCode = curl_getinfo($this->curlResource, CURLINFO_HTTP_CODE);
+		return $data;
+	}
+	
+	/**
+	 * @return Integer
+	 */
+	public function getHTTPReturnCode()
+	{
+		return $this->httpReturnCode;
 	}
 }
