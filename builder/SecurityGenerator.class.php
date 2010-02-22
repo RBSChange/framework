@@ -157,15 +157,14 @@ class builder_SecurityGenerator
 	
 	private function initClassFrontList()
 	{
-		$list = array(str_replace('/', '_', 'modules_users/frontenduser'), str_replace('/', '_', 'modules_users/frontendgroup'));
-		$feUser = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName('modules_users/frontendgroup');
-		
+		$list = array('modules_users_frontenduser', 'modules_users_frontendgroup');
+		$feUser = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName('modules_users/frontenduser');
 		if ($feUser->hasChildren())
 		{
 			foreach ($feUser->getChildrenNames() as $childrenName) 
 			{
 				$list[] = str_replace('/', '_', $childrenName);
-			}			
+			}
 		}
 
 		$feGroup = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName('modules_users/frontendgroup');
@@ -174,8 +173,8 @@ class builder_SecurityGenerator
 			foreach ($feGroup->getChildrenNames() as $childrenName) 
 			{
 				$list[] = str_replace('/', '_', $childrenName);
-			}	
-		}	
+			}
+		}
 		
 		$this->classFrontList = implode(',', $list);
 	}
