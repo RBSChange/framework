@@ -119,6 +119,8 @@
 			<entry name="os">linux</entry>
 			<entry name="server-fqdn">fully-qualified-domain-name</entry>
 			<entry name="server-ip">serveur.ip.address</entry>
+			<!-- What $_SERVER entry to use to detect https queries -->
+			<entry name="https-request-marker">HTTPS</entry>
 		</general>
 		<charts>
 			<!--  This can be google directly or eastwood for instance -->

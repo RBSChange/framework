@@ -88,7 +88,9 @@ class RequestContext
 		$this->m_lang = $this->getDefaultLang();
 		$this->m_ui_supportedLanguages = $ui_supportedLanguages;
 		$this->m_ui_lang = $this->getUserAgentLanguage();
-		$this->m_inHTTPS = (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] === 'on'));	
+		// This "marker" can be overriden especially when behind proxies
+		$httpsMarker = Framework::getConfigurationValue('general/https-request-marker', 'HTTPS');
+		$this->m_inHTTPS = (isset($_SERVER[$httpsMarker]) && ($_SERVER[$httpsMarker] === 'on'));	
 		$this->m_pathURI = (isset($_SERVER['REQUEST_URI'])) ? $_SERVER['REQUEST_URI'] : null;
 
 		if (Framework::isDebugEnabled())
