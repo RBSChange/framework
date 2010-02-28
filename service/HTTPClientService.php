@@ -3,12 +3,7 @@
  * @package framework.service
  */
 class HTTPClientService extends BaseService
-{
-	/**
-	 * @var Integer
-	 */
-	private $httpReturnCode = -1;
-	
+{	
 	/**
 	 * @var HTTPClientService
 	 */
@@ -37,6 +32,15 @@ class HTTPClientService extends BaseService
 
 class HTTPClient
 {
+	/**
+	 * @var Integer
+	 */
+	private $httpReturnCode = -1;
+	
+	/**
+	 * @var Integer
+	 */
+	private $httpHeaders = array();
 	/**
 	 * @var resource
 	 */
@@ -194,7 +198,8 @@ class HTTPClient
 			CURLOPT_REFERER => $this->referer,
 			CURLOPT_TIMEOUT => $this->timeOut,
 			CURLOPT_FOLLOWLOCATION => $this->followRedirects,
-			CURLOPT_URL => $url
+			CURLOPT_URL => $url,
+			CURLOPT_HEADERFUNCTION => array($this, 'readHeaders')
 		));
 		
 		$data = curl_exec($this->curlResource);
@@ -207,11 +212,29 @@ class HTTPClient
 		return $data;
 	}
 	
+	private function readHeaders($ch, $header)
+	{
+		$trimmedHeader = trim($header);
+		if (f_util_StringUtils::isNotEmpty($trimmedHeader))
+		{
+			$this->httpHeaders[] = $trimmedHeader;
+		}
+		return strlen($header);
+	}
+	
 	/**
 	 * @return Integer
 	 */
 	public function getHTTPReturnCode()
 	{
 		return $this->httpReturnCode;
+	}
+	
+	/**
+	 * @return Array
+	 */
+	public function getHTTPHeaders()
+	{
+		return $this->httpHeaders;
 	}
 }
