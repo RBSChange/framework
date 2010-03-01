@@ -121,6 +121,8 @@
 			<entry name="server-ip">serveur.ip.address</entry>
 			<!-- What $_SERVER entry to use to detect https queries -->
 			<entry name="https-request-marker">HTTPS</entry>
+			<!-- What is the value of https-request-marker for https queries -->
+			<entry name="https-request-marker-value">on</entry>
 		</general>
 		<charts>
 			<!--  This can be google directly or eastwood for instance -->
