@@ -2436,7 +2436,10 @@ class MysqlStatment
 
 	public function closeCursor()
 	{
-		$this->stmt->closeCursor();
+		if ($this->stmt !== false)
+		{
+			$this->stmt->closeCursor();
+		}
 	}
 
 	public function errorCode()
