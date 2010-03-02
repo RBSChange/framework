@@ -6,15 +6,15 @@ class import_ScriptReader extends BaseService
 	 * @var import_ScriptReader
 	 */
 	private static $instance;
-	
+
 	private $elements = array();
-	
+
 	private $regiteredElementsClass = array();
-	
+
 	protected function __construct()
 	{
 	}
-	
+
 	private function initialize()
 	{
 		$this->regiteredElementsClass = array();
@@ -23,7 +23,7 @@ class import_ScriptReader extends BaseService
 		$this->registerElementClass('tag', 'import_ScriptTagElement');
 		$this->registerElementClass('documentRef', 'import_ScriptDocumentRefElement');
 	}
-	
+
 	/**
 	 * @return import_ScriptReader
 	 */
@@ -35,12 +35,12 @@ class import_ScriptReader extends BaseService
 		}
 		return self::$instance;
 	}
-	
+
 	public function registerElementClass($name, $className)
 	{
 		$this->regiteredElementsClass[$name] = $className;
 	}
-	
+
 	/**
 	 * @param String $moduleName ex : website
 	 * @param String $scriptName ex : defaultsite.xml
@@ -54,7 +54,7 @@ class import_ScriptReader extends BaseService
 		}
 		$this->execute($path);
 	}
-	
+
 	/**
 	 * @param String $fileName
 	 */
@@ -63,28 +63,59 @@ class import_ScriptReader extends BaseService
 		$this->initialize();
 		$this->executeInternal($fileName);
 	}
-	
+
 	/**
 	 * @param String $fileName
 	 */
 	public function executeInternal($fileName)
 	{
+		error_reporting(E_ERROR | E_WARNING | E_PARSE);
+
+		set_error_handler(array($this, "errorReport"));
 		$reader = new XMLReader();
 		if (! $reader->open($fileName))
 		{
 			throw new Exception('Could not open ' . $fileName . ' for reading');
 		}
-		
+
 		$this->parse($reader);
 		$reader->close();
-	}	
-	
+		restore_error_handler();
+		if ($this->errors !== null)
+		{
+			$message = join("\n", $this->errors);
+			$this->errors = null;
+			throw new Exception("Error while processing $fileName:\n$message");
+		}
+	}
+
+	private $error;
+
+	function errorReport($errno, $errstr, $errfile, $errline)
+	{
+		switch ($errno)
+		{
+			case E_USER_ERROR:
+			case E_USER_WARNING:
+			case E_STRICT:
+				break;
+			default:
+				if ($this->errors === null)
+				{
+					$this->errors = array();
+				}
+				$this->errors[] = $errstr;
+				break;
+		}
+		return f_errorHandler($errno, $errstr, $errfile, $errline);
+	}
+
 	/**
 	 * @param XMLReader $reader
 	 * @param import_ScriptBaseElement $currentElement;
 	 */
 	private function parse($reader, $currentElement = null)
-	{		
+	{
 		while ($reader->read())
 		{
 			//If this is a text node then test for attributes.
@@ -94,7 +125,7 @@ class import_ScriptReader extends BaseService
 				$element = $this->createElement($name, $currentElement);
 				$isEmpty = $reader->isEmptyElement;
 				$id = null;
-				
+
 				if ($reader->hasAttributes)
 				{
 					while ($reader->moveToNextAttribute())
@@ -110,9 +141,9 @@ class import_ScriptReader extends BaseService
 						}
 					}
 				}
-				
+
 				$this->processElement($element, $id);
-				
+
 				if (! $isEmpty)
 				{
 					$currentElement = $element;
@@ -121,7 +152,7 @@ class import_ScriptReader extends BaseService
 				{
 					$this->endProcessElement($element);
 				}
-			
+					
 			}
 			elseif ($currentElement !== null)
 			{
@@ -140,7 +171,7 @@ class import_ScriptReader extends BaseService
 			}
 		}
 	}
-	
+
 	/**
 	 * @param string $name
 	 * @param import_ScriptBaseElement $parentElement
@@ -158,14 +189,14 @@ class import_ScriptReader extends BaseService
 		}
 		return new import_ScriptBaseElement($this, $parentElement, $name);
 	}
-	
+
 	/**
 	 * @param import_ScriptBaseElement $element
 	 */
 	public function getChildren($element)
 	{
 		$result = array();
-		
+
 		foreach ($this->elements as $child)
 		{
 			if ($element === $child->getParent())
@@ -175,7 +206,7 @@ class import_ScriptReader extends BaseService
 		}
 		return $result;
 	}
-	
+
 	/**
 	 * @param Integer $id
 	 * @return Boolean
@@ -184,7 +215,7 @@ class import_ScriptReader extends BaseService
 	{
 		return isset($this->elements[$id]);
 	}
-	
+
 	/**
 	 * @param string $id
 	 * @return import_ScriptBaseElement
@@ -203,7 +234,7 @@ class import_ScriptReader extends BaseService
 		}
 		throw new Exception('Identifiant ' . $id . ' introuvable');
 	}
-	
+
 	/**
 	 * @param string $id
 	 * @return import_ScriptDocumentElement
@@ -212,8 +243,8 @@ class import_ScriptReader extends BaseService
 	public function getDocumentElementById($id)
 	{
 		return $this->getElementById($id, "import_ScriptDocumentElement");
-	}	
-	
+	}
+
 	/**
 	 * @param string $message
 	 */
@@ -221,7 +252,7 @@ class import_ScriptReader extends BaseService
 	{
 		echo $message . "\n";
 	}
-	
+
 	private function processElement($element, $id)
 	{
 		if ($id)
@@ -232,10 +263,10 @@ class import_ScriptReader extends BaseService
 		{
 			$this->elements[] = $element;
 		}
-		
+
 		$element->process();
 	}
-	
+
 	private function endProcessElement($element)
 	{
 		$element->endProcess();
