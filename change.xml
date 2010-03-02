@@ -80,7 +80,7 @@
 		<dependency>
 			<name>extension/dom</name>
 			<versions>
-				<version>20031129</version>
+				<version>unknown</version>
 			</versions>
 			<description>
 			DOM/XML API Version => 20031129
@@ -107,6 +107,48 @@
 		</dependency>
 		
 		<dependency>
+			<name>extension/imagick</name>
+			<versions>
+				<version>2.2.2</version>
+			</versions>
+		</dependency>
+		
+		<dependency>
+			<name>extension/xsl</name>
+			<versions>
+				<version>unknown</version>	
+			</versions>
+			<description>
+				XSL => enabled
+				libxslt Version => 1.1.15
+				libxslt compiled against libxml Version => 2.6.24
+				EXSLT => enabled
+				libexslt Version => 1.1.15
+			</description>
+		</dependency>
+		
+		<dependency>
+			<name>extension/curl</name>
+			<versions>
+				<version>7.15.1</version>
+			</versions>
+			<description>
+			CURL support => enabled
+			CURL Information => libcurl/7.15.1 OpenSSL/0.9.8a zlib/1.2.3 libidn/0.5.18	
+			</description>
+		</dependency>
+		
+		<dependency>
+			<name>extension/date</name>
+			<versions>
+				<version>unknown</version>
+			</versions>
+			<description>
+			date/time support => enabled
+			</description>
+		</dependency>
+		
+		<dependency>
 			<name>extension/mbstring</name>
 			<versions>
 			   <version>3.7.1</version>
@@ -118,6 +160,41 @@
 			<versions>
 				<!-- do not know what version to put here -->	
 				<version>5.0.22</version>
+			</versions>
+		</dependency>
+		
+		<dependency>
+			<name>extension/reflection</name>
+			<versions>
+			   <version>unknown</version>
+			</versions>
+		</dependency>
+		
+		<dependency>
+			<name>extension/SPL</name>
+			<versions>
+			   <version>unknown</version>
+			</versions>
+		</dependency>
+		
+		<dependency>
+			<name>extension/soap</name>
+			<versions>
+			   <version>unknown</version>
+			</versions>
+		</dependency>
+		
+		<dependency>
+			<name>extension/json</name>
+			<versions>
+			   <version>unknown</version>
+			</versions>
+		</dependency>
+		
+		<dependency>
+			<name>extension/iconv</name>
+			<versions>
+			   <version>unknown</version>
 			</versions>
 		</dependency>
 		
@@ -134,7 +211,7 @@
 				<version>1.2.8</version>
 			</versions>
 			<description>
-			Use by MailService 
+			Used by MailService 
 			</description>
 		</dependency>
 		
@@ -144,7 +221,7 @@
 				<version>1.0.3</version>
 			</versions>
 			<description>
-			Use by MailService 
+			Used by MailService 
 			</description>
 		</dependency>
 		
