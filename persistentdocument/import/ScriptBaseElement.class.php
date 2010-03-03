@@ -141,7 +141,7 @@ class import_ScriptBaseElement
 			$objects = array();
 			foreach (explode(',', $this->attributes[$key]) as $value)
 			{ 
-				$objects[] = $this->script->getElementById($this->attributes[$key], "import_ScriptObjectElement")->getObject();
+				$objects[] = $this->script->getElementById($value, "import_ScriptObjectElement")->getObject();
 			}
 			if ($remove)
 			{

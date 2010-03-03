@@ -89,7 +89,7 @@ class import_ScriptReader extends BaseService
 		}
 	}
 
-	private $error;
+	private $errors;
 
 	function errorReport($errno, $errstr, $errfile, $errline)
 	{
