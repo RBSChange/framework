@@ -1,7 +1,7 @@
 <?php
 /**
  * <{$module}>_<{$nameUCFirst}>Service
- * @package <{$module}>
+ * @package modules.<{$module}>
  */
 class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassName()}>
 {

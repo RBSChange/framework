@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @example change:i18nattr="title[count] newCount; title &modules.forums.frontoffice.Has-n-new-posts;"
  * @package phptal.php.attribute.change
  */
 class PHPTAL_Php_Attribute_CHANGE_i18nattr extends PHPTAL_Php_Attribute

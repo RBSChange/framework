@@ -23,14 +23,10 @@ class <{$moduleName}>_patch_<{$patchNumber}> extends patch_BasePatch
 	 */
 	public function execute()
 	{
-		parent::execute();
-		
 		// Implement your patch here.
 	}
 
 	/**
-	 * Returns the name of the module the patch belongs to.
-	 *
 	 * @return String
 	 */
 	protected final function getModuleName()
@@ -39,7 +35,6 @@ class <{$moduleName}>_patch_<{$patchNumber}> extends patch_BasePatch
 	}
 
 	/**
-	 * Returns the number of the current patch.
 	 * @return String
 	 */
 	protected final function getNumber()

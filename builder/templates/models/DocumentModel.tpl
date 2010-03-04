@@ -1,7 +1,7 @@
 /**
  * <{if $model->inject()}>This model is not the original <{$model->getFinalDocumentClassName()}> model. It is in realty <{$model->getDocumentClassName()}>'s model that injects it.<{/if}> 
  * <{$model->getFinalDocumentClassName()}>model
- * @package <{$model->getFinalModuleName()}>.persistentdocument
+ * @package modules.<{$model->getFinalModuleName()}>.persistentdocument
  */
 class <{$model->getFinalDocumentClassName()}>model extends f_persistentdocument_PersistentDocumentModel
 {

@@ -1,7 +1,7 @@
 <?php
 /**
  * Class where to put your custom methods for document <{$model->getDocumentClassName()}>
- * @package <{$model->getModuleName()}>.persistentdocument
+ * @package modules.<{$model->getModuleName()}>.persistentdocument
  */
 class <{$model->getDocumentClassName()}> extends <{$model->getDocumentClassName()}>base <{if $model->isIndexable()}>implements indexer_IndexableDocument<{/if}>
 

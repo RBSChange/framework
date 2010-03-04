@@ -1,6 +1,6 @@
 /**
  * <{$model->getDocumentClassName()}>I18n
- * @package <{$model->getModuleName()}>.persistentdocument
+ * @package modules.<{$model->getModuleName()}>.persistentdocument
  * Class for internationalization of the document
  * @internal For framework internal usage only
  */
