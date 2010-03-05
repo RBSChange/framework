@@ -217,8 +217,19 @@ class BeanUtils
 	 * @param String|Object $beanClassNameOrObject
 	 * @param String $propertyName
 	 * @return BeanPropertyInfo
+	 * @deprecated use getBeanPropertyInfo
 	 */
 	static function getBeanProperyInfo($beanClassNameOrObject, $propertyName)
+	{
+		return self::getBeanPropertyInfo($beanClassNameOrObject, $propertyName);
+	}
+	
+	/**
+	 * @param String|Object $beanClassNameOrObject
+	 * @param String $propertyName
+	 * @return BeanPropertyInfo
+	 */
+	static function getBeanPropertyInfo($beanClassNameOrObject, $propertyName)
 	{
 		if (is_object($beanClassNameOrObject))
 		{
