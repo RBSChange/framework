@@ -39,7 +39,9 @@ class commands_ApplyProjectPolicy extends commands_AbstractChangeCommand
 		{
 			$this->message("Apply '$dir' dir policy");
 			f_util_FileUtils::chown($dir, $user, $apacheGroup, true);
-			f_util_FileUtils::chmod($dir, "2775", true);
+			// Strange behaviour when SGID on files: unable to write "directly", so use
+			// different mode for files
+			f_util_FileUtils::chmod($dir, "2775", true, "775");
 		}
 		
 		$this->quitOk("Project policy files applied");
