@@ -1,23 +1,28 @@
 <?php
-/**
- * @package framework.builder.webapp.bin.tasks
- */
-define('WEBEDIT_HOME', realpath(dirname(__FILE__) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR  . '..' . DIRECTORY_SEPARATOR));
-chdir(WEBEDIT_HOME);
-if (!file_exists(WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'webapp' . DIRECTORY_SEPARATOR . 'www' . DIRECTORY_SEPARATOR . 'site_is_disabled'))
-{
-	require_once WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'framework' . DIRECTORY_SEPARATOR . 'Framework.php';
+// In apache user's crontab, please add:
+// # run hourChange task every hour
+// 1 */1  * * * php ${WEBEDIT_HOME}/webapp/bin/tasks/hourChange.php
+require_once("BaseTask.php");
 
-	RequestContext::getInstance()->setLang(RequestContext::getInstance()->getDefaultLang());
-	$date = date_Calendar::now()->toString();
-	if (Framework::isDebugEnabled())
+class f_tasks_HourChangeTask extends f_tasks_BaseTask
+{
+	function __construct()
 	{
-	   Framework::debug('Hour change: '. $date); 
+		parent::__construct("hourChange");
 	}
 	
-	f_event_EventManager::dispatchEvent('hourChange', null, array('date' => $date));
+	protected function execute($previousRunTime)
+	{
+		$this->loadFramework();
+		$date = date_Calendar::now()->toString();
+		if (Framework::isDebugEnabled())
+		{
+			Framework::debug('Hour change: '. $date);
+		}
+
+		f_event_EventManager::dispatchEvent('hourChange', null, array('date' => $date, 'previousRunTime' => $previousRunTime));
+	}
 }
-else 
-{
-	echo('WARNING: Hour change skipped: '.time()." (site disabled)\n"); 
-}
+
+$hourChange = new f_tasks_HourChangeTask();
+$hourChange->start();
