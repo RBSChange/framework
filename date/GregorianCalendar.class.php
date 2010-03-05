@@ -19,12 +19,21 @@ class date_GregorianCalendar extends date_Calendar
 	 * is optionnal, so "Y-m-d" is a valid argument.
 	 *
 	 * @param string $dateString The date string.
+	 * @param Integer $timestamp
 	 */
-	protected function __construct($dateString = null)
+	protected function __construct($dateString = null, $timestamp = null)
 	{
 		if ( empty($dateString) )
 		{
-			$dateString = date('Y-m-d H:i:s');
+			$format = 'Y-m-d H:i:s';
+			if ($timestamp === null)
+			{
+				$dateString = date($format);
+			}
+			else
+			{
+				$dateString = date($format, $timestamp);
+			}
 		}
 		$matches = array();
 		if ( ! preg_match(self::ALLOWED_FORMAT_REGEXP, $dateString, $matches) )
@@ -74,6 +83,15 @@ class date_GregorianCalendar extends date_Calendar
 	public static function getInstance($dateString = null)
 	{
 		return new date_GregorianCalendar($dateString);
+	}
+	
+	/**
+	 * @param Integer $timestamp
+	 * @return date_GregorianCalendar
+	 */
+	public static function getInstanceFromTimestamp($timestamp)
+	{
+		return new date_GregorianCalendar(null, $timestamp);
 	}
 
 	/**

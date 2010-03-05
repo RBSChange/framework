@@ -69,7 +69,27 @@ abstract class date_Calendar
 		}
 		return f_util_ClassUtils::callMethodArgs($calendarClassName, 'getInstance', array($dateString));
 	}
-
+	
+	/**
+	 * Builds a new date_Calendar instance initialized from the given date as a
+	 * timestamp.
+	 *
+	 * @param Integer $dateString
+	 * @param string $impl Desired implementation (only Gregorian is implemented for now).
+	 *
+	 * @return date_Calendar
+	 *
+	 * @throws ClassNotFoundException
+	 */
+	public static function getInstanceFromTimestamp($timestamp, $impl = 'Gregorian')
+	{
+		$calendarClassName = 'date_'.$impl.'Calendar';
+		if ( ! f_util_ClassUtils::classExists($calendarClassName) )
+		{
+			throw new ClassNotFoundException('Unknown Calendar implementation: '.$impl);
+		}
+		return f_util_ClassUtils::callMethodArgs($calendarClassName, 'getInstanceFromTimestamp', array($dateString));
+	}
 
 	/**
 	 * Returns a date_Calendar instance initialized from a given $dateString
