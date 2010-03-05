@@ -15,10 +15,16 @@ class f_listener_PublishListener
 		$date = $params['date'];
 		if (Framework::isDebugEnabled())
 		{
-			Framework::debug(__METHOD__ . "($date)");
+			Framework::debug(__METHOD__ . "($date,".var_export($params['previousRunTime'], true).")");
 		}
-		
-		$start = date_Calendar::getInstance($date)->add(date_Calendar::HOUR, -1)->toString();
+		if (isset($params['previousRunTime']))
+		{
+			$start = date_Calendar::getInstanceFromTimestamp($params['previousRunTime'])->toString();
+		}
+		else
+		{
+			$start = date_Calendar::getInstance($date)->add(date_Calendar::HOUR, -1)->toString();
+		}
 		$end = date_Calendar::getInstance($date)->add(date_Calendar::HOUR, 1)->toString();	
 		$documentsArray = array_chunk($this->getDocumentIdsToProcess($start, $end), 500);
 		foreach ($documentsArray as $chunk)
