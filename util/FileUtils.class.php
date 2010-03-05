@@ -533,6 +533,18 @@ abstract class f_util_FileUtils
 			return self::write($path, $content);
 		}
 	}
+	
+	/**
+	 * @param String $path
+	 * @throws IOException on error
+	 */
+	static function touch($path)
+	{
+		if (!touch($path))
+		{
+			throw new IOException('Could not touch '.$path);
+		}
+	}
 
 	/**
 	 * write data to file designed by $path
@@ -883,15 +895,26 @@ abstract class f_util_FileUtils
 	 * @param String $file
 	 * @param String|Integer $mode Cf. http://php.net/manual/en/function.chmod.php
 	 * @param Boolean $recursive
+	 * @param String|Integer $filesMode if recursive, you can specify a different mode than $mode for files
 	 * @example chmod(..., "2775") or chmod (..., 02775)
 	 */
-	public static function chmod($file, $mode, $recursive = true)
+	public static function chmod($file, $mode, $recursive = true, $filesMode = null)
 	{
 		$uid = posix_getuid();
 		if (is_string($mode))
 		{
 			$mode = intval("0".$mode, 8);
 		}
+		
+		if ($filesMode === null)
+		{
+			$filesMode = $mode;	
+		}
+		elseif (is_string($filesMode))
+		{
+			$filesMode = intval("0".$filesMode, 8);
+		}
+		
 		if (chmod($file, $mode) === false)
 		{
 			throw new Exception("Could not chmod $mode $file");
@@ -912,7 +935,14 @@ abstract class f_util_FileUtils
 				}
 				else
 				{
-					if (chmod($fileInfo->getPathname(), $mode) === false)
+					if ($fileInfo->isDir())
+					{
+						 if (chmod($fileInfo->getPathname(), $mode) === false)
+						 {
+						 	throw new Exception("Could not chmod ".$fileInfo->getPathname());
+						 }
+					}
+					elseif (chmod($fileInfo->getPathname(), $filesMode) === false)
 					{
 						throw new Exception("Could not chmod ".$fileInfo->getPathname());
 					}
