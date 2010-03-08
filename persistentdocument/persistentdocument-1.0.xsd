@@ -256,6 +256,7 @@
 			<xs:attribute name="table-name" type="xs:string" />
 			<xs:attribute name="table-name-oci" type="xs:string" />	
 			<xs:attribute name="extend" type="xs:string" />
+			<xs:attribute name="inject" type="xs:boolean" default="false" />
 			<xs:attribute name="has-url" type="xs:boolean" default="true" />
 			<xs:attribute name="indexable" type="xs:boolean" default="false" />
 			<xs:attribute name="backoffice-indexable" type="xs:boolean" default="true" />
