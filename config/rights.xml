@@ -23,6 +23,7 @@ sur les documents les actions de bases sont automatiquements importées
 		<document name="basedocument">
 			<action name="List" />
 
+			<action name="GetPublicationInfos" />
 			<action name="Activate"/>
 			<action name="Cancel" />
 			<action name="CreateCorrection" />
@@ -41,6 +42,7 @@ sur les documents les actions de bases sont automatiquements importées
 			<action name="Load" back-office-name="edit"/>
 		    <action name="LoadForTranslation" back-office-name="translateFrom"/>
 
+			
 			<action name="Save" />
 			<action name="Insert" />
 			<action name="Update" />
@@ -63,6 +65,9 @@ sur les documents les actions de bases sont automatiquements importées
 		<action name="Order" back-office-name="openOrderChildren"/>
 		<action name="GetDialogTopicTree" back-office-name="addTopic"/>
 		<action name="LoadTags" back-office-name="openTags"/>
+		
 		<action name="SaveRedirectInfo" />
+		<action name="LoadRedirectInfo" />
+		<action name="GetDocumentHistory" />
 	</actions>
 </rights>
