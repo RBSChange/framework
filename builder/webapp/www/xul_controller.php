@@ -44,3 +44,5 @@ if (Framework::isDebugEnabled())
 	Framework::debug('|BENCH|'.($end-$start).'|=== END ADMIN request |'.$requestId);
 	Framework::debug('|BENCH|'.(MysqlStatment::$time['exec'] + MysqlStatment::$time['read']).'|=== SQL Time |'. str_replace("\n", '', var_export(MysqlStatment::$time, true)));  
 }
+
+f_persistentdocument_PersistentProvider::getInstance()->closeConnection();
