@@ -20,6 +20,8 @@ class framework_patch_0302 extends patch_BasePatch
 	 */
 	public function execute()
 	{
+		$this->executeSQLQuery("DELETE FROM `m_website_urlrewriting_rules` WHERE `document_id` not in (SELECT `document_id` from f_document)");
+		
 		$stmt = $this->executeSQLSelect("select * from m_website_urlrewriting_rules");
 		$documents = array();
 		foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row)

@@ -2832,10 +2832,14 @@ class f_persistentdocument_DocumentService extends BaseService
 	
 			if (($allowedSections === null && $model->hasURL()) || isset($allowedSections['urlrewriting']))
 			{
-				$currenturl = LinkHelper::getDocumentUrl($document);
-				if (strpos($currenturl, 'action=ViewDetail') === false)
+				try 
 				{
+					$currenturl = LinkHelper::getDocumentUrl($document);
 					$data['urlrewriting'] = array('currenturl' => $currenturl);
+				}
+				catch (Exception $e)
+				{
+					$data['urlrewriting'] = array('currenturl' => array('label' => $e->getMessage(), 'href' => ''));
 				}
 			}
 			
