@@ -956,6 +956,15 @@ class generator_PersistentModel
 			$this->editModule = $parentModel->editModule;
 		}
 
+		if ($this->useCorrection)
+		{
+			$property = generator_PersistentProperty::generateCorrectionIdProperty($this);
+			$this->addProperty($property);
+
+			$property = generator_PersistentProperty::generateCorrectionOfIdProperty($this);
+			$this->addProperty($property);
+		}
+		
 		foreach ($this->properties as $property)
 		{
 			$parentProperty = $parentModel->getPropertyByName($property->getName());
@@ -1128,10 +1137,7 @@ class generator_PersistentModel
 		{
 			return $this->getParentModel()->hasCorrection();
 		}
-		else
-		{
-			return $this->useCorrection;
-		}
+		return $this->useCorrection;
 	}
 
 	/**
@@ -2135,6 +2141,10 @@ class generator_PersistentModel
 		{
 			$this->workflow = new generator_Workflow($this);
 			$this->workflow->initialize($nodeList->item(0));
+			if (f_util_StringUtils::isNotEmpty($this->workflow->getStartTask()))
+			{
+				$this->useCorrection = true;
+			}
 		}
 	}
 
