@@ -37,8 +37,15 @@ abstract class f_tasks_BaseTask
 			{
 				throw new Exception("Could not discover WEBEDIT_HOME: PWD = ".var_export($_SERVER["PWD"]).", SCRIPT_FILENAME = ".var_export($_SERVER["SCRIPT_FILENAME"]));
 			}
-			$thisPath = $_SERVER["PWD"].DIRECTORY_SEPARATOR.$_SERVER["SCRIPT_FILENAME"];
-			define('WEBEDIT_HOME', realpath(dirname($thisPath) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR  . '..' . DIRECTORY_SEPARATOR));
+			if ($_SERVER["SCRIPT_FILENAME"][0] == '/')
+			{
+				$thisPath = $_SERVER["SCRIPT_FILENAME"];
+			}
+			else
+			{
+				$thisPath = $_SERVER["PWD"].DIRECTORY_SEPARATOR.$_SERVER["SCRIPT_FILENAME"];
+			}
+			define('WEBEDIT_HOME', realpath(dirname($thisPath) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR  . '..'));
 		}
 
 		if (!$this->runIfSiteDisabled && $this->isSiteDisabled())
@@ -55,11 +62,12 @@ abstract class f_tasks_BaseTask
 
 		if (file_exists($startFlag) && (!file_exists($endFlag) || $this->getMTime($startFlag) > $this->getMTime($endFlag)))
 		{
-			echo "WARNING: last hour change process is in error or still running\n";
+			echo "WARNING: last ".$this->name." process is in error or still running\n";
 			if (file_exists($runningFlag))
 			{
 				echo "Check ".file_get_contents($runningFlag)." pid\n";
 			}
+			return;
 		}
 		$this->touch($startFlag);
 		if (!file_put_contents($runningFlag, getmypid()))
