@@ -265,6 +265,16 @@
 			</versions>
 		</dependency>
 		
+		<dependency optionnal="true">
+			<name>extension/APC</name>
+			<description>
+			   For best performance, use APC
+			</description>
+			<versions>
+				<version>3.0.19</version>
+			</versions>
+		</dependency>
+		
 		<dependency>
 			<name>lib/smarty</name>
 			<versions>
