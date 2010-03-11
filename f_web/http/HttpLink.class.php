@@ -30,7 +30,7 @@ abstract class f_web_HttpLink implements f_web_Link
 		    if ($argSeparator === null) {$argSeparator = self::STANDARD_SEPARATOR;}
 			$url['query'] = http_build_query($queryParameters, '', $argSeparator);
 		}
-		return http_build_url($url);	    
+		return  self::http_build_url($url);	    
 	}
 	
 	
@@ -40,5 +40,40 @@ abstract class f_web_HttpLink implements f_web_Link
 	public function __toString()
 	{
 		return $this->getUrl();
+	}
+
+	public static function http_build_url($parts)
+	{
+		if (extension_loaded('http'))
+		{
+			return http_build_url($parts);	
+		}
+		
+		//'scheme' :// 'user' : 'pass' @ 'host' 'path' ? 'query' # 'fragment';
+		$url = array($parts['scheme'], '://');
+		if (isset($parts['user']))
+		{
+			$url[] = $parts['user'];
+			if (isset($parts['pass'])) 
+			{
+				$url[] = ':' .$parts['pass'];
+			}
+			$url[] = '@';
+		}
+		$url[] = $parts['host'];
+		
+		if (isset($parts['path']))
+		{
+			$url[] = $parts['path'];
+		}
+		if (isset($parts['query']))
+		{
+			$url[] = '?' . $parts['query'];
+		}
+		if (isset($parts['fragment']))
+		{
+			$url[] = '#' . $parts['fragment'];
+		}
+		return implode('', $url);	
 	}
 }
