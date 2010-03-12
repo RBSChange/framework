@@ -6,36 +6,36 @@ class f_SimpleCache
 	private $keyParameters;
 	private $cacheSpecs;
 	private $registrationPath;
-	
+
 	private $cachePath;
 	private static $oldCachePath;
-	
+
 	private static $registrationFolder;
-	
+
 	public function __construct($id, $keyParameters, $cacheSpecs)
 	{
 		$this->id = $id;
 		$this->keyParameters = md5(serialize($keyParameters));
 		$this->cacheSpecs = $cacheSpecs;
 	}
-	
+
 	static function isEnabled()
 	{
 		return constant("AG_DISABLE_SIMPLECACHE") !== true;
 	}
-	
+
 	public function exists($subCache)
 	{
 		$result = file_exists($this->getCachePath($subCache)) && $this->isValid();
 		$this->markAsBeingRegenerated();
 		return $result;
 	}
-	
+
 	private function isValid()
 	{
 		return !file_exists($this->getCachePath(self::INVALID_CACHE_ENTRY));
 	}
-	
+
 	private function markAsBeingRegenerated()
 	{
 		if (!$this->isValid())
@@ -43,7 +43,7 @@ class f_SimpleCache
 			f_util_FileUtils::unlink($this->getCachePath(self::INVALID_CACHE_ENTRY));
 		}
 	}
-	
+
 	public function setInvalid()
 	{
 		if ($this->isValid())
@@ -51,12 +51,12 @@ class f_SimpleCache
 			@touch($this->getCachePath(self::INVALID_CACHE_ENTRY));
 		}
 	}
-	
+
 	public function readFromCache($subCache)
 	{
 		return file_get_contents($this->getCachePath($subCache));
 	}
-	
+
 	public function writeToCache($subCache, $content)
 	{
 		$this->register();
@@ -78,7 +78,7 @@ class f_SimpleCache
 			}
 		}
 	}
-	
+
 	public function getCachePath($subCache)
 	{
 		if ($this->cachePath === null)
@@ -92,12 +92,12 @@ class f_SimpleCache
 		}
 		return $this->cachePath . DIRECTORY_SEPARATOR . $subCache;
 	}
-	
+
 	private function isRegistered()
 	{
 		return file_exists($this->getRegistrationPath());
 	}
-	
+
 	private function getRegistrationPath()
 	{
 		if (!is_null($this->registrationPath))
@@ -112,7 +112,17 @@ class f_SimpleCache
 		$this->registrationPath = self::$registrationFolder . DIRECTORY_SEPARATOR . $this->id;
 		return $this->registrationPath;
 	}
-	
+
+	private static function getRegistrationFolder()
+	{
+		if (is_null(self::$registrationFolder))
+		{
+			self::$registrationFolder = f_util_FileUtils::buildCachePath('simplecache', 'registration');
+			f_util_FileUtils::mkdir(self::$registrationFolder);
+		}
+		return self::$registrationFolder;
+	}
+
 	private function optimizeCacheSpecs($cacheSpecs)
 	{
 		if (f_util_ArrayUtils::isNotEmpty($cacheSpecs))
@@ -147,17 +157,17 @@ class f_SimpleCache
 						Framework::exception($e);
 					}
 				}
-				else
+				elseif (!is_numeric($spec))
 				{
 					$finalCacheSpecs[] = $spec;
 				}
 			}
-			
+
 			return $finalCacheSpecs;
 		}
 		return array();
 	}
-	
+
 	private function register()
 	{
 		$registrationPath = $this->getRegistrationPath();
@@ -171,20 +181,56 @@ class f_SimpleCache
 				$pp->registerSimpleCache($this->id, $this->optimizeCacheSpecs($this->cacheSpecs));
 				$tm->commit();
 				@touch($registrationPath);
-			
 			}
 			catch (Exception $e)
 			{
 				$tm->rollBack($e);
 			}
 		}
+		$baseById = self::$registrationFolder.'/byDocId/';
+
+		foreach ($this->cacheSpecs as $spec)
+		{
+			if (is_numeric($spec))
+			{
+				$byIdRegister = $baseById . implode('/', str_split($spec, 3)).'/'.$this->id.'|'.$this->keyParameters;
+				if (!file_exists($byIdRegister))
+				{
+					f_util_FileUtils::mkdir(dirname($byIdRegister));
+					f_util_FileUtils::symlink($this->getCachePath(), $byIdRegister);
+				}
+			}
+		}
 	}
-	
+
+	public static function clearCacheById($id)
+	{
+		self::registerShutdown();
+		self::$docIdToClear[] = $id;
+	}
+
+	static function commitClearByDocIds($docIds)
+	{
+		foreach ($docIds as $id)
+		{
+			$baseById = self::getRegistrationFolder().'/byDocId/'.implode('/', str_split($id, 3));
+			foreach (scandir($baseById) as $dir)
+			{
+				if ($dir == '.' || $dir == '..')
+				{
+					continue;
+				}
+				@touch($baseById.'/'.$dir.'/'.self::INVALID_CACHE_ENTRY);
+			}
+		}
+	}
+
 	private static $clearAll = false;
 	private static $idToClear = array();
+	private static $docIdToClear = array();
 	private static $dispatch = false;
 	private static $shutdownRegistered = false;
-	
+
 	private static function registerShutdown()
 	{
 		if (!self::$shutdownRegistered)
@@ -193,7 +239,7 @@ class f_SimpleCache
 			self::$shutdownRegistered = true;
 		}
 	}
-	
+
 	/**
 	 * @param String $id
 	 */
@@ -210,7 +256,7 @@ class f_SimpleCache
 		}
 		self::$dispatch = $dispatch || self::$dispatch;
 	}
-	
+
 
 	public final function clearSubCache($subCache, $dispatch = true)
 	{
@@ -228,10 +274,10 @@ class f_SimpleCache
 		{
 			self::$idToClear[$this->id][$this->keyParameters] = $subCache;
 		}
-		
+
 		self::$dispatch = $dispatch || self::$dispatch;
 	}
-	
+
 	/**
 	 * This is the same as BlockCache::commitClear()
 	 * but designed for the context of <code>register_shutdown_function()</code>,
@@ -242,7 +288,7 @@ class f_SimpleCache
 		umask(0002);
 		self::commitClear();
 	}
-	
+
 	public static function commitClearDispatched($ids = null)
 	{
 		self::registerShutdown();
@@ -260,7 +306,7 @@ class f_SimpleCache
 		}
 		self::$dispatch = false;
 	}
-	
+
 	/**
 	 */
 	public static function commitClear()
@@ -292,26 +338,43 @@ class f_SimpleCache
 				f_event_EventManager::dispatchEvent('simpleCacheCleared', null);
 			}
 		}
-		elseif (!empty(self::$idToClear))
+		else
 		{
-			foreach (self::$idToClear as $id => $subKey)
+			$dispatchParams = array();
+			if (!empty(self::$idToClear))
 			{
-				if (file_exists($cachePath . DIRECTORY_SEPARATOR . $id))
+				foreach (self::$idToClear as $id => $subKey)
 				{
-					$dirsToClear[] = $cachePath . DIRECTORY_SEPARATOR . $id;
+					if (file_exists($cachePath . DIRECTORY_SEPARATOR . $id))
+					{
+						$dirsToClear[] = $cachePath . DIRECTORY_SEPARATOR . $id;
+					}
+				}
+				self::buildInvalidCacheList($dirsToClear);
+				if (self::$dispatch)
+				{
+					$dispatchParams["ids"] = self::$idToClear;
 				}
 			}
-			self::buildInvalidCacheList($dirsToClear);
+			if (!empty(self::$docIdToClear))
+			{
+				self::commitClearByDocIds(self::$docIdToClear);
+				if (self::$dispatch)
+				{
+					$dispatchParams["docIds"] = self::$docIdToClear;
+				}
+			}
 			if (self::$dispatch)
 			{
-				f_event_EventManager::dispatchEvent('simpleCacheCleared', null, array("ids" => self::$idToClear));
+				f_event_EventManager::dispatchEvent('simpleCacheCleared', null, $dispatchParams);
 			}
 		}
-		
+
 		self::$clearAll = false;
 		self::$idToClear = null;
+		self::$docIdToClear = null;
 	}
-	
+
 	private static function buildInvalidCacheList($dirsToClear)
 	{
 		$cachePath = f_util_FileUtils::buildCachePath('simplecache');
@@ -329,7 +392,7 @@ class f_SimpleCache
 			closedir($dirHandler);
 		}
 	}
-	
+
 	public static function cleanExpiredCache()
 	{
 		$directoryIterator = new DirectoryIterator(f_util_FileUtils::buildChangeCachePath('simplecache'));
@@ -346,14 +409,14 @@ class f_SimpleCache
 						$fileInfo = new SplFileInfo($invalidCacheFilePath);
 						if (abs(date_Calendar::getInstance()->getTimestamp() - $fileInfo->getMTime()) > 86400)
 						{
-							f_util_FileUtils::rmdir($cacheKeyDir->getPathname());	 
+							f_util_FileUtils::rmdir($cacheKeyDir->getPathname());
 						}
 					}
 				}
 			}
 		}
 	}
-	
+
 	/**
 	 * @param f_persistentdocument_PersistentDocumentModel $model
 	 */
@@ -361,7 +424,7 @@ class f_SimpleCache
 	{
 		if (Framework::isDebugEnabled())
 		{
-				Framework::debug("[". __CLASS__ . "]: clear cache by model:".$model->getName());
+			Framework::debug("[". __CLASS__ . "]: clear cache by model:".$model->getName());
 		}
 		self::clearCacheByPattern($model->getName());
 		if ($model->isInjectedModel())
@@ -369,7 +432,7 @@ class f_SimpleCache
 			self::clearCacheByPattern($model->getOriginalModelName());
 		}
 	}
-	
+
 	/**
 	 * @param f_persistentdocument_PersistentDocumentModel $model
 	 */
@@ -377,11 +440,11 @@ class f_SimpleCache
 	{
 		if (Framework::isDebugEnabled())
 		{
-				Framework::debug("[". __CLASS__ . "]: clear cache by tag:$tag");
+			Framework::debug("[". __CLASS__ . "]: clear cache by tag:$tag");
 		}
 		self::clearCacheByPattern('tags/'.$tag );
 	}
-	
+
 	/**
 	 * @param String $pattern
 	 */
@@ -397,7 +460,7 @@ class f_SimpleCache
 			self::clear($cacheId);
 		}
 	}
-	
+
 	/**
 	 * @return f_persistentdocument_PersistentProvider
 	 */

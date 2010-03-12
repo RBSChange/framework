@@ -34,6 +34,7 @@ class listener_SimpleCacheListener
 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentUpdated");}
 		$document = $params['document'];
 		f_SimpleCache::clearCacheByModel($document->getPersistentModel());
+		f_SimpleCache::clearCacheById($document->getId());
 	}
 	
 	/**
@@ -73,6 +74,7 @@ class listener_SimpleCacheListener
 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentDeleted");}
 		$document = $params['document'];
 		f_SimpleCache::clearCacheByModel($document->getPersistentModel());
+		f_SimpleCache::clearCacheById($document->getId());
 	}
 
 	/**
@@ -84,6 +86,7 @@ class listener_SimpleCacheListener
 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentPublished");}
 		$document = $params['document'];
 		f_SimpleCache::clearCacheByModel($document->getPersistentModel());
+		f_SimpleCache::clearCacheById($document->getId());
 	}
 
 	/**
@@ -95,6 +98,7 @@ class listener_SimpleCacheListener
 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentDeactivated");}
 		$document = $params['document'];
 		f_SimpleCache::clearCacheByModel($document->getPersistentModel());
+		f_SimpleCache::clearCacheById($document->getId());
 	}
 
 	/**
@@ -103,9 +107,10 @@ class listener_SimpleCacheListener
 	 */
 	public function onPersistentDocumentUnPublished ($sender, $params)
 	{
-		Framework::debug("[". __CLASS__ . "]: onPersistentDocumentUnPublished");
+		if (Framework::isDebugEnabled()) Framework::debug("[". __CLASS__ . "]: onPersistentDocumentUnPublished");
 		$document = $params['document'];
 		f_SimpleCache::clearCacheByModel($document->getPersistentModel());
+		f_SimpleCache::clearCacheById($document->getId());
 	}
 
 	/**
@@ -117,6 +122,7 @@ class listener_SimpleCacheListener
 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentFiled");}
 		$document = $params['document'];
 		f_SimpleCache::clearCacheByModel($document->getPersistentModel());
+		f_SimpleCache::clearCacheById($document->getId());
 	}
 
 	/**
@@ -128,6 +134,7 @@ class listener_SimpleCacheListener
 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentInTrash");}
 		$document = $params['document'];
 		f_SimpleCache::clearCacheByModel($document->getPersistentModel());
+		f_SimpleCache::clearCacheById($document->getId());
 	}
 
 	/**
@@ -139,6 +146,7 @@ class listener_SimpleCacheListener
 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onChildrenOrdered");}
 		$document = $params['parent'];
 		f_SimpleCache::clearCacheByModel($document->getPersistentModel());
+		f_SimpleCache::clearCacheById($document->getId());
 	}
 	
 	public function onPersistentTreeNodeOrdered($sender, $params)
@@ -147,14 +155,22 @@ class listener_SimpleCacheListener
 		$parentNode = $params['parentNode'];
 		$document = DocumentHelper::getDocumentInstance($parentNode->getId());
 		f_SimpleCache::clearCacheByModel($document->getPersistentModel());
+		f_SimpleCache::clearCacheById($document->getId());
 	}
 	
     public function onSimpleCacheClearedNode($sender, $params)
     {
         if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onSimpleCacheClearedNode");}
-		if (is_array($params) && isset($params['ids']))  
+		if (is_array($params))  
 		{
-		    f_SimpleCache::commitClearDispatched($params['ids']);
+			if (isset($params['ids']))
+			{
+		    	f_SimpleCache::commitClearDispatched($params['ids']);
+			}
+			if (isset($params['docIds']))
+			{
+		    	f_SimpleCache::commitClearByDocIds($params['docIds']);
+			}
 		}
 		else
 		{
