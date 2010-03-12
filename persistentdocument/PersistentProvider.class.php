@@ -2352,7 +2352,7 @@ abstract class f_persistentdocument_PersistentProvider
 			$stmt->bindValue(':from_path', $originalPath, PersistentProviderConst::PARAM_STR);
 			$stmt->bindValue(':to_path', $destPath, PersistentProviderConst::PARAM_STR);
 			$stmt->bindValue(':node_level', $movedNode->getLevel(), PersistentProviderConst::PARAM_INT);
-			$stmt->bindValue(':node_path', $originalPath, PersistentProviderConst::PARAM_INT);
+			$stmt->bindValue(':node_path', $originalPath.'%', PersistentProviderConst::PARAM_INT);
 			$this->executeStatement($stmt);
 		}
 
