@@ -23,7 +23,7 @@ class indexer_PDFExtractor
 	 */
 	public function getText()
 	{
-		$processHandle = popen('pdftotext -enc UTF-8 -q ' . escapeshellarg($this->pdfPath). ' -', 'r');
+		$processHandle = popen('pdftotext -enc UTF-8 -nopgbrk -q ' . escapeshellarg($this->pdfPath). ' -', 'r');
 		if ($processHandle === false)
 		{
 			throw new Exception(__METHOD__ . ": could not get a valid process handle");
