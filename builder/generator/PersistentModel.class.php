@@ -235,6 +235,7 @@ class generator_PersistentModel
 		// Set common properties.
 		foreach ($models as $model)
 		{
+			
 			if (is_null($model->extend) || $model->extend == self::BASE_MODEL)
 			{
 				$model->applyGenericDocumentModel($virtualModel);
@@ -244,6 +245,16 @@ class generator_PersistentModel
 				if (!isset($models[$model->extend]))
 				{
 					throw new Exception("Could not find extended model ".$model->extend);
+				}
+				
+				if ($model->isInternationalized() && !$models[$model->extend]->isInternationalized())
+				{
+					throw new Exception("Can not render model ".$model->name." localized while ".$models[$model->extend]->name." is not");
+				}
+				
+				if ($model->useCorrection && !$models[$model->extend]->useCorrection)
+				{
+					throw new Exception("Can not activate correction on ".$model->name." while not activated on ".$models[$model->extend]->name);
 				}
 				
 				if ($model->inject)
@@ -276,6 +287,7 @@ class generator_PersistentModel
 		{
 			foreach ($model->getProperties() as $property)
 			{
+			
 				$property->applyDefaultConstraints();
 
 				if ($property->isInverse() && $property->isDocument())
@@ -825,6 +837,7 @@ class generator_PersistentModel
 			{
 				$newProperty->mergeGeneric($property);
 			}
+		
 		}
 
 		foreach ($baseDocument->formProperties as $key => $property)
@@ -900,6 +913,11 @@ class generator_PersistentModel
 				break;
 			}
 		}
+		
+		if ($this->localized)
+		{
+			$this->getPropertyByName("publicationstatus")->setLocalized();
+		}
 
 		/**
 		 * Serialized Properties
@@ -932,6 +950,11 @@ class generator_PersistentModel
 		if (!is_null($this->getPropertyByName('correctionid')))
 		{
 			$this->getPropertyByName('correctionid')->setLocalized();
+		}
+		$publicationStatus = $this->getPropertyByName('publicationstatus');
+		if ($publicationStatus !== null)
+		{
+			$publicationStatus->setLocalized();	
 		}
 	}
 
