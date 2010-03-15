@@ -352,10 +352,6 @@ f_persistentdocument_PersistentProvider::getInstance()->renameProperty('$moduleN
 		$defaultValues = array("min-occurs" => "0", "db-mapping" => strtolower($propertyName),
 			 "max-occurs" => "1", "tree-node" => "false", "cascade-delete" => "false",
 			 "inverse" => "false", "localized" => "false");
-		if (isset($dbSizeByType[$propertyType]))
-		{
-			$defaultValues["db-size"] = $dbSizeByType[$propertyType];
-		}
 		if ($propertyType == "Boolean")
 		{
 			$defaultValues["default-value"] = "false";
@@ -395,7 +391,13 @@ f_persistentdocument_PersistentProvider::getInstance()->renameProperty('$moduleN
 					else
 					{
 						$error = false;
-						$computedPropInfo = array_merge($defaultValues, $propInfo);
+						
+						$computedPropInfo = array();
+						foreach ($propInfo as $key => $value)
+						{
+							$computedPropInfo[$key] = ($value !== null) ? $value : $defaultValues[$key];
+						}
+						
 						if ($attrValue == "NULL")
 						{
 							$attrValue = null;
