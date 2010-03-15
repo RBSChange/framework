@@ -48,18 +48,6 @@ class f_listener_BackofficeIndexListener
 		}
 	}
 	
-	public function onPersistentDocumentCorrectionCreated($sender, $params)
-	{
-		$document = $params['document'];
-		if ($document->getPersistentModel()->isBackofficeIndexable())
-		{
-			if ($document->getPersistentModel()->useCorrection())
-			{
-				$this->delete($document);
-			}
-		}
-	}
-	
 	public function onPersistentDocumentDeleted($sender, $params)
 	{
 		$document = $params['document'];
