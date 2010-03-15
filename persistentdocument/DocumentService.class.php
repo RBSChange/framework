@@ -2271,9 +2271,9 @@ class f_persistentdocument_DocumentService extends BaseService
 			$this->tm->rollBack($e);
 			throw $e;
 		}
-
-		$this->dispatchPublicationStatusChanged($document, $document->getPublicationstatus(),
-				'persistentDocumentCorrectionCreated');
+		
+		$eventParams = array("document" => $document, "correction" => $correction);
+		f_event_EventManager::dispatchEvent('persistentDocumentCorrectionCreated', $this, $eventParams);
 			
 		return $correction;
 	}
