@@ -89,7 +89,23 @@ class commands_ApplyPatch extends commands_AbstractChangeCommand
 		{
 			// Get a instance of class
 			$className = $moduleName . '_patch_' . $patchNumber;
-			if (!f_util_ClassUtils::classExists($className))
+			if ($moduleName == "framework")
+			{
+				$patchPathBase = "framework"; 	
+			}
+			else
+			{
+				$patchPathBase = "modules/".$moduleName;
+			}
+			
+			$patchPath = realpath($patchPathBase."/patch/".$patchNumber."/install.php");
+			if ($patchPath === false)
+			{
+				throw new Exception("Could not find patch $patchNumber in component $moduleName");
+			}
+			
+			require_once($patchPath);
+			if (!class_exists($className, false))
 			{
 				throw new ClassNotFoundException($className);
 			}
