@@ -1217,4 +1217,41 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 		}
 		return null;
 	}
+	
+	public function addImportInRight($forModuleName, $fromModuleName, $configFileName)
+	{
+		$destPath = f_util_FileUtils::buildWebappPath('modules', $forModuleName, 'config', 'rights.xml');
+		$result = array('action' => 'ignore', 'path' => $destPath);
+		
+		$path = FileResolver::getInstance()->setPackageName('modules_' . $fromModuleName)
+			->setDirectory('config')->getPath($configFileName .'.xml');
+			
+		if ($path === null)
+		{
+			throw new Exception(__METHOD__ . ' file ' . $fromModuleName . '/config/' . $configFileName . '.xml not found');
+		}
+		
+		if (!file_exists($destPath))
+		{
+			$document = f_util_DOMUtils::fromString('<rights />');
+			$result['action'] = 'create';
+		}
+		else
+		{
+			$document = f_util_DOMUtils::fromPath($destPath);
+		}
+		
+		$xquery = 'import[@modulename="'.$fromModuleName.'" and @configfilename="'.$configFileName.'"]';
+		$importNode = $document->findUnique($xquery, $document->documentElement);
+		if ($importNode === null)
+		{
+			f_util_FileUtils::mkdir(f_util_FileUtils::buildWebappPath('modules', $forModuleName, 'config'));
+			$importNode = $document->documentElement->appendChild($document->createElement('import'));	
+			$importNode->setAttribute('modulename', $fromModuleName);
+			$importNode->setAttribute('configfilename', $configFileName);
+			f_util_DOMUtils::save($document, $destPath);
+			if ($result['action'] == 'ignore') {$result['action'] = 'update';}
+		}
+		return $result;
+	}
 }

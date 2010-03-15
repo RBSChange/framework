@@ -17,8 +17,6 @@ class builder_SecurityGenerator
 	private $classFrontList;
 
 	/**
-	 * Enter description here...
-	 *
 	 * @var ModuleRoles
 	 */
 	private $baseModuleAction;
@@ -30,74 +28,6 @@ class builder_SecurityGenerator
 	 */
 	function __construct()
 	{
-	}
-
-	public function setQuiet($bool)
-	{
-		$this->quiet = $bool;
-	}
-
-	public function getRolesFields($moduleName)
-	{
-		$rightPath = FileResolver::getInstance()
-			->setPackageName('modules_'. $moduleName)
-			->setDirectory(self::CONFIG_DIR_NAME)
-			->getPath(self::ROLE_DEF_FILE_NAME);
-		if (!file_exists($rightPath)) {return array();}
-
-		$this->loadBaseAction();
-		
-		$domDoc = new DOMDocument();
-		$domDoc->preserveWhiteSpace = false;
-		if (!$domDoc->loadXML(f_util_FileUtils::read($rightPath) ) )
-		{
-			throw new Exception("DOMDocument::loadXML failed on ".$rightPath);
-		}
-		
-		$module = new ModuleRoles($rightPath, $moduleName);
-		$module->loadXml($domDoc->documentElement);
-
-		// Recupere les actions non lié a un document
-		$actions  = $this->baseModuleAction->getDocumentAction(null);
-		$module->importActions($actions, null);
-
-		// Recupere les action Lier au document;
-		foreach ($module->documents as $name => $ignore)
-		{
-			if (!$ignore)
-			{
-				$actions  = $this->baseModuleAction->getDocumentAction('basedocument');
-				$module->importActions($actions, $name);
-			}
-		}
-
-		//Genere les permissions implicite
-		$module->generateImplicitePermission();
-
-		//transform les permissions virtuel
-		$module->extendVirtualRolePermission();
-		$module->extendRole();
-		$module->cleanPermissions();
-		$rolesFields = array();
-		if (count($module->getPermissions()) > 0)
-		{
-			$this->initClassBackList();
-			$this->initClassFrontList();
-		
-			$roles = $module->getRoles();			
-			foreach ($roles as $role) 
-			{
-				if ($role->isFrontEnd())
-				{
-					$rolesFields[$role->getName()] = array('type' => 'front', 'class' => $this->classFrontList);
-				}
-				else
-				{
-					$rolesFields[$role->getName()] = array('type' => 'back', 'class' => $this->classBackList);
-				}
-			}
-		}
-		return $rolesFields;
 	}
 	
 	public function buildSecurity()
@@ -111,113 +41,169 @@ class builder_SecurityGenerator
 		foreach ($moduleService->getModules() as $moduleName)
 		{
 			$shortModuleName = $moduleService->getShortModuleName($moduleName);
-			$rightPath = Resolver::getInstance('file')->setPackageName($moduleName)->setDirectory(self::CONFIG_DIR_NAME)->getPath(self::ROLE_DEF_FILE_NAME);
-
-			if (!file_exists($rightPath))
+			$baseRightsPath = f_util_FileUtils::buildWebeditPath('modules', $shortModuleName, self::CONFIG_DIR_NAME, self::ROLE_DEF_FILE_NAME);
+			if (!file_exists($baseRightsPath)) {$baseRightsPath = null;}
+			$overrideRightsPath = f_util_FileUtils::buildWebappPath('modules', $shortModuleName, self::CONFIG_DIR_NAME, self::ROLE_DEF_FILE_NAME);
+			if (!file_exists($overrideRightsPath)) {$overrideRightsPath = null;}
+			
+			f_util_FileUtils::rmdir(f_util_FileUtils::buildChangeBuildPath('modules', $shortModuleName, 'roles'));
+			
+			if ($baseRightsPath === null && $overrideRightsPath === null)
 			{
-				f_util_FileUtils::rmdir(f_util_FileUtils::buildChangeBuildPath('modules', $shortModuleName, 'roles'));
 				$this->logs[] = "Module $shortModuleName skipped";
 				continue;
 			}
-			try
-			{
-				$this->generateRoleSystemFiles($shortModuleName, $rightPath);
-			}
-			catch(Exception $e)
-			{
-				throw $e;
-			}
+			$this->generateRoleSystemFiles($shortModuleName, $baseRightsPath, $overrideRightsPath);
 			$this->logs[] = "Module $shortModuleName OK";
 		}
 
 		return $this->logs;
 	}
-
-	private function initClassBackList()
-	{	
-		$list = array(str_replace('/', '_', 'modules_users/backenduser'), str_replace('/', '_', 'modules_users/backendgroup'));
-		$boUser = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName('modules_users/backenduser');
-		if ($boUser->hasChildren())
+	
+	/**
+	 * @return ModuleRoles
+	 */
+	private function getBaseModuleAction()
+	{
+		if ($this->baseModuleAction === null)
 		{
-			foreach ($boUser->getChildrenNames() as $childrenName) 
+			$this->loadBaseAction();
+		}
+		return $this->baseModuleAction;
+	}
+	
+	
+	public function setQuiet($bool)
+	{
+		$this->quiet = $bool;
+	}
+
+	public function getRolesFields($moduleName)
+	{
+		$baseRightsPath = f_util_FileUtils::buildWebeditPath('modules', $moduleName, self::CONFIG_DIR_NAME, self::ROLE_DEF_FILE_NAME);
+		if (!file_exists($baseRightsPath)) {$baseRightsPath = null;}
+		$overrideRightsPath = f_util_FileUtils::buildWebappPath('modules', $moduleName, self::CONFIG_DIR_NAME, self::ROLE_DEF_FILE_NAME);
+		if (!file_exists($overrideRightsPath)) {$overrideRightsPath = null;}
+		
+		if ($baseRightsPath === null  && $overrideRightsPath === null)
+		{
+			return array();	
+		}
+		
+		$module = $this->loadModuleRoles($moduleName, $baseRightsPath, $overrideRightsPath);
+		$rolesFields = array();
+		if (count($module->getPermissions()) > 0)
+		{	
+			$this->initClassBackList();
+			$this->initClassFrontList();
+		
+			$roles = $module->getRoles();			
+			foreach ($roles as $role) 
 			{
-				$list[] = str_replace('/', '_', $childrenName);
+				if ($role->isFrontEnd())
+				{
+					$rolesFields[$role->getName()] = 
+						array('type' => 'front', 'class' => $this->classFrontList);
+				}
+				else
+				{
+					$rolesFields[$role->getName()] = 
+						array('type' => 'back', 'class' => $this->classBackList);
+				}
 			}
 		}
-		$boGroup = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName('modules_users/backendgroup');
-		if ($boGroup->hasChildren())
+		return $rolesFields;
+	}
+	
+	private function initClassBackList()
+	{	
+		if ($this->classBackList === null)
 		{
-			foreach ($boGroup->getChildrenNames() as $childrenName) 
+			$list = array(str_replace('/', '_', 'modules_users/backenduser'), str_replace('/', '_', 'modules_users/backendgroup'));
+			$boUser = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName('modules_users/backenduser');
+			if ($boUser->hasChildren())
 			{
-				$list[] = str_replace('/', '_', $childrenName);
+				foreach ($boUser->getChildrenNames() as $childrenName) 
+				{
+					$list[] = str_replace('/', '_', $childrenName);
+				}
 			}
-		}		
-		$this->classBackList = implode(',', $list);
+			$boGroup = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName('modules_users/backendgroup');
+			if ($boGroup->hasChildren())
+			{
+				foreach ($boGroup->getChildrenNames() as $childrenName) 
+				{
+					$list[] = str_replace('/', '_', $childrenName);
+				}
+			}
+			$this->classBackList = implode(',', $list);	
+		}
 	}
 	
 	private function initClassFrontList()
 	{
-		$list = array('modules_users_frontenduser', 'modules_users_frontendgroup');
-		$feUser = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName('modules_users/frontenduser');
-		if ($feUser->hasChildren())
+		if ($this->classFrontList === null)
 		{
-			foreach ($feUser->getChildrenNames() as $childrenName) 
+			$list = array('modules_users_frontenduser', 'modules_users_frontendgroup');
+			$feUser = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName('modules_users/frontenduser');
+			if ($feUser->hasChildren())
 			{
-				$list[] = str_replace('/', '_', $childrenName);
+				foreach ($feUser->getChildrenNames() as $childrenName) 
+				{
+					$list[] = str_replace('/', '_', $childrenName);
+				}
 			}
-		}
-
-		$feGroup = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName('modules_users/frontendgroup');
-		if ($feGroup->hasChildren())
-		{
-			foreach ($feGroup->getChildrenNames() as $childrenName) 
+	
+			$feGroup = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName('modules_users/frontendgroup');
+			if ($feGroup->hasChildren())
 			{
-				$list[] = str_replace('/', '_', $childrenName);
+				foreach ($feGroup->getChildrenNames() as $childrenName) 
+				{
+					$list[] = str_replace('/', '_', $childrenName);
+				}
 			}
+			$this->classFrontList = implode(',', $list);
 		}
-		
-		$this->classFrontList = implode(',', $list);
 	}
 	
 	/**
-	 * Generate cached {$moduleName}RoleService.class.php, {$moduleName}RoleService.class.php in cache/config
-	 *
-	 * @param String $moduleName SHORT target moduleName
-	 * @param String $rightPath FULL qualified path to rights.xml for the module.
+	 * @param string $moduleName
+	 * @param string $baseRightsPath
+	 * @param string $overrideRightsPath
+	 * @return ModuleRoles
 	 */
-
-	private function generateRoleSystemFiles($moduleName, $rightPath)
+	private function loadModuleRoles($moduleName, $baseRightsPath, $overrideRightsPath)
 	{
-		$domDoc = new DOMDocument();
-		$domDoc->preserveWhiteSpace = false;
-		if (!$domDoc->loadXML(f_util_FileUtils::read($rightPath) ) )
-		{
-			throw new Exception("DOMDocument::loadXML failed on ".$rightPath);
-		}
-		$module = new ModuleRoles($rightPath, $moduleName);
+		$module = new ModuleRoles($baseRightsPath, $moduleName);
 		$module->classBackList = $this->classBackList;
 		$module->classFrontList = $this->classFrontList;
 		
-		$module->loadXml($domDoc->documentElement);
+		if ($overrideRightsPath !== null)
+		{
+			$domDoc = f_util_DOMUtils::fromPath($overrideRightsPath);
+			$module->loadXml($domDoc->documentElement);
+		}
+		
+		if ($baseRightsPath !== null)
+		{
+			$domDoc = f_util_DOMUtils::fromPath($baseRightsPath);
+			$module->loadXml($domDoc->documentElement);
+		}
 
-		// Recupere les actions non lié a un document
-		$actions  = $this->baseModuleAction->getDocumentAction(null);
+		$actions  = $this->getBaseModuleAction()->getDocumentAction(null);
 		$module->importActions($actions, null);
-
-		// Recupere les action Lier au document;
+		
+		$documentActions = $this->getBaseModuleAction()->getDocumentAction('basedocument');
 		foreach ($module->documents as $name => $ignore)
 		{
 			if (!$ignore)
 			{
-				$actions  = $this->baseModuleAction->getDocumentAction('basedocument');
-				$module->importActions($actions, $name);
+				$module->importActions($documentActions, $name);
 			}
 		}
 
 		//Genere les permissions implicite
 		$module->generateImplicitePermission();
-
-
 
 		//transform les permissions virtuel
 		$module->extendVirtualRolePermission();
@@ -226,24 +212,25 @@ class builder_SecurityGenerator
 
 		$module->cleanPermissions();
 
+		return $module;
+		
+	}
+	
+	/**
+	 * Generate cached {$moduleName}RoleService.class.php, {$moduleName}RoleService.class.php in cache/config
+	 *
+	 * @param String $moduleName SHORT target moduleName
+	 * @param String $baseRightsPath FULL qualified path to rights.xml for the original module.
+	 * @param String $overrideRightsPath FULL qualified path to rights.xml for overrided the module.
+	 */
+
+	private function generateRoleSystemFiles($moduleName, $baseRightsPath, $overrideRightsPath)
+	{
+		$module = $this->loadModuleRoles($moduleName, $baseRightsPath, $overrideRightsPath);
+		
 		if (count($module->getPermissions()) > 0)
 		{
-
-			$backOfficeActions = $this->baseBackOfficeAction;
-			$backActionsPath = Resolver::getInstance('file')->setPackageName('modules_' . $moduleName)->setDirectory(self::CONFIG_DIR_NAME)->getPath('actions.xml');
-
-			if (file_exists($backActionsPath))
-			{
-				$domDoc = new DOMDocument();
-				$domDoc->preserveWhiteSpace = false;
-				$domDoc->loadXML(f_util_FileUtils::read($backActionsPath));
-				foreach ($domDoc->getElementsByTagName('action') as $actionNode)
-				{
-					$name = $actionNode->getAttribute('name');
-					$backOfficeActions[$name] = $name;
-				}
-			}
-
+			$backOfficeActions = array_merge($this->baseBackOfficeAction, $this->getBackOfficeActionsName($moduleName));
 			foreach ($module->actions as $action)
 			{
 				if (array_key_exists($action->getBackOfficeName(), $backOfficeActions))
@@ -253,7 +240,6 @@ class builder_SecurityGenerator
 			}
 
 			$module->backOfficeActions = $backOfficeActions;
-
 			$className = ucfirst($moduleName) . 'RoleService';
 			$filePath = f_util_FileUtils::buildChangeBuildPath('modules', $moduleName, 'roles', $className . '.class.php');
 			f_util_FileUtils::writeAndCreateContainer($filePath, $this->generateFile('RightsService' , 'permissions' , $module), f_util_FileUtils::OVERRIDE );
@@ -281,48 +267,35 @@ class builder_SecurityGenerator
 	private function loadBaseAction()
 	{
 		$path = f_util_FileUtils::buildFrameworkPath('config', 'rights.xml');
-		$domDoc = new DOMDocument();
-		$domDoc->preserveWhiteSpace = false;
-		if (!$domDoc->loadXML(f_util_FileUtils::read($path) ) )
-		{
-			throw new Exception("DOMDocument::loadXML failed on ".$path);
-		}
+		$domDoc = f_util_DOMUtils::fromPath($path);
 		$baseModule = new ModuleRoles($path, 'base');
 		$baseModule->loadXml($domDoc->documentElement);
-
 		$this->baseModuleAction = $baseModule;
-
+		$this->baseBackOfficeAction = $this->getBackOfficeActionsName('uixul');
+	}
+	
+	private function getBackOfficeActionsName($moduleName)
+	{
 		$backOfficeActions = array();
-		try
+		$path = FileResolver::getInstance()
+			->setPackageName('modules_'.$moduleName)
+			->setDirectory(self::CONFIG_DIR_NAME)
+			->getPath('actions.xml');		
+		if ($path !== null)
 		{
-			$moduleService = ModuleService::getInstance();
-
-			$moduleConfigPath = $moduleService->getModulePath('uixul', self::CONFIG_DIR_NAME);
-			$path = $moduleConfigPath . DIRECTORY_SEPARATOR . 'actions.xml';
-			if (file_exists($path))
+			$domDoc = f_util_DOMUtils::fromPath($path);
+			foreach ($domDoc->getElementsByTagName('action') as $actionNode)
 			{
-				$domDoc = new DOMDocument();
-				$domDoc->preserveWhiteSpace = false;
-				$domDoc->loadXML(f_util_FileUtils::read($path));
-				foreach ($domDoc->getElementsByTagName('action') as $actionNode)
-				{
-					$name = $actionNode->getAttribute('name');
-					$backOfficeActions[$name] = $name;
-				}
+				$name = $actionNode->getAttribute('name');
+				$backOfficeActions[$name] = $name;
 			}
 		}
-		catch (Exception $e)
-		{
-			//Module 'uixul' Unavailable
-		}
-
-		$this->baseBackOfficeAction = $backOfficeActions;
+		return $backOfficeActions;
 	}
 }
 
 class ModuleRoles
 {
-
 	public $filePath;
 	public $name;
 	public $backOfficeActions;
@@ -372,16 +345,35 @@ class ModuleRoles
 	{
 		foreach ($documentElement->childNodes as $node)
 		{
-			switch ($node->nodeName)
+			if ($node->nodeType === XML_ELEMENT_NODE)
 			{
-				case 'actions':
-					$this->loadXmlActions($node);
-					break;
-				case 'roles':
-					$this->loadXmlRoles($node);
-					break;
-				default:
-					break;
+				switch ($node->nodeName)
+				{
+					case 'actions':
+						$this->loadXmlActions($node);
+						break;
+					case 'roles':
+						$this->loadXmlRoles($node);
+						break;
+					case 'import':
+						$module = $node->getAttribute('modulename');
+						$fileName = $node->hasAttribute('configfilename') ? $node->getAttribute('configfilename') . '.xml' : 'rights.xml';
+						$path = FileResolver::getInstance()
+							->setPackageName('modules_' . $module)
+							->setDirectory('config')->getPath($fileName);
+						if ($path !== null)
+						{
+							$doc = f_util_DOMUtils::fromPath($path);
+							$this->loadXml($doc->documentElement);
+						}
+						else
+						{
+							Framework::warn(__METHOD__ . " Unable to find $fileName in $module config dir");
+						}
+						break;	
+					default:
+						break;
+				}
 			}
 		}
 	}
