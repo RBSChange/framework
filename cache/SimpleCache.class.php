@@ -8,6 +8,7 @@ class f_SimpleCache
 	private $registrationPath;
 
 	private $cachePath;
+	private $timeLimit;
 	private static $oldCachePath;
 
 	private static $registrationFolder;
@@ -17,6 +18,21 @@ class f_SimpleCache
 		$this->id = $id;
 		$this->keyParameters = md5(serialize($keyParameters));
 		$this->cacheSpecs = $cacheSpecs;
+		foreach ($cacheSpecs as $cacheSpec)
+		{
+			if (f_util_StringUtils::beginsWith($cacheSpec, "time:"))
+			{
+				$this->setTimeLimit(intval(substr($cacheSpec, 5)));	
+			}
+		}
+	}
+	
+	/**
+	 * @param Integer $timeLimit max time to live, in seconds
+	 */
+	private function setTimeLimit($timeLimit)
+	{
+		$this->timeLimit = $timeLimit;
 	}
 
 	static function isEnabled()
@@ -26,7 +42,9 @@ class f_SimpleCache
 
 	public function exists($subCache)
 	{
-		$result = file_exists($this->getCachePath($subCache)) && $this->isValid();
+		$cachePath = $this->getCachePath($subCache);
+		$result = file_exists($cachePath) && $this->isValid()
+			&& ($this->timeLimit === null || (time() - filemtime($cachePath)) < $this->timeLimit); 
 		$this->markAsBeingRegenerated();
 		return $result;
 	}
@@ -197,7 +215,7 @@ class f_SimpleCache
 				if (!file_exists($byIdRegister))
 				{
 					f_util_FileUtils::mkdir(dirname($byIdRegister));
-					f_util_FileUtils::symlink($this->getCachePath(), $byIdRegister);
+					f_util_FileUtils::symlink($this->getCachePath(null), $byIdRegister);
 				}
 			}
 		}
@@ -214,6 +232,10 @@ class f_SimpleCache
 		foreach ($docIds as $id)
 		{
 			$baseById = self::getRegistrationFolder().'/byDocId/'.implode('/', str_split($id, 3));
+			if (!is_dir($baseById))
+			{
+				continue;
+			}
 			foreach (scandir($baseById) as $dir)
 			{
 				if ($dir == '.' || $dir == '..')
