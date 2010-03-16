@@ -1388,10 +1388,9 @@ class f_persistentdocument_DocumentService extends BaseService
 
 	/**
 	 * TODO: move to TreeService
-	 * Generate the path string of ancestor document
-	 * the rootfolder and the current document is not inclued
-	 * the label separator is ' > ' by default
+	 * Generate the path string of ancestor document (excluding the rootfolder).
 	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param String $separator ' > ' by default
 	 * @return string
 	 */
 	public function getPathOf($document, $separator = ' > ')
