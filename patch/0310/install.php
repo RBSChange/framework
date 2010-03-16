@@ -24,17 +24,19 @@ class framework_patch_0310 extends patch_BasePatch
 	public function execute()
 	{
 		echo "\n";
+		$computedDeps = unserialize(file_get_contents(".change/autoload/.computedChangeComponents.ser"));
 		foreach (glob("modules/*/persistentdocument/*.xml") as $docXML)
 		{
 			preg_match('#.*modules/([^/]*)/persistentdocument/(.*)\.xml$#', $docXML, $matches);
 			$moduleName = $matches[1];
 			$docName = $matches[2];
 			
-			if (is_link("modules/$moduleName"))
+			if (isset($computedDeps["module"][$moduleName]))
 			{
-				// Skip standard modules: already migrated
+				// Ignore standard modules: already examined
 				continue;
 			}
+			
 			$doc = f_util_DOMUtils::fromPath($docXML);
 			$doc->registerNamespace("c", "http://www.rbs.fr/schema/change-document/1.0");
 			if ($doc->exists("c:properties/c:add[@localized = 'true' and @name != 'publicationstatus']"))
@@ -64,9 +66,10 @@ class framework_patch_0310 extends patch_BasePatch
 					}
 				}
 
+				$model = f_persistentdocument_PersistentDocumentModel::getInstance($moduleName, $docName);
 				if (!$publicationStatusLocalized)
 				{
-					$model = f_persistentdocument_PersistentDocumentModel::getInstance($moduleName, $docName);
+					
 					if ($model->useCorrection())
 					{
 						echo "Model $moduleName/$docName is localized, use correction and did not declared publicationstatus property localized: you can encounter problems. Please check.\n";
@@ -74,6 +77,22 @@ class framework_patch_0310 extends patch_BasePatch
 					elseif ($model->publishOnDayChange())
 					{
 						echo "Model $moduleName/$docName is localized, use 'publish on day change' and did not declared publicationstatus property localized: you can encounter problems. Please check.\n";
+					}
+				}
+				
+				$tableName = $model->getTableName();
+				$i18nTableName = $model->getTableName()."_i18n";
+				try
+				{
+					$this->executeSQLQuery("alter table $i18nTableName add `document_publicationstatus_i18n` ENUM('DRAFT', 'CORRECTION', 'ACTIVE', 'PUBLICATED', 'DEACTIVATED', 'FILED', 'DEPRECATED', 'TRASH', 'WORKFLOW') NULL DEFAULT NULL");
+					$this->executeSQLQuery("update $i18nTableName set document_publicationstatus_i18n = (select document_publicationstatus from $tableName where  $i18nTableName.document_id = $tableName.document_id)");
+					echo "publicationstatus localized field added to $tableName\n";
+				}
+				catch (BaseException $e)
+				{
+					if ($e->getAttribute("errorcode") != "1060")
+					{
+						throw $e;
 					}
 				}
 			}

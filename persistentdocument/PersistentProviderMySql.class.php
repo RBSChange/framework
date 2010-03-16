@@ -23,6 +23,15 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 	{
 		return $this->getDriver()->errorCode();
 	}
+	
+	/**
+	 * @return array("sqlstate" => ..., "errorcode" => ..., "errormessage" => ...)
+	 */
+	protected function getErrorParameters()
+	{
+		$errorInfo = $this->getDriver()->errorInfo();
+		return array("sqlstate" => $errorInfo[0], "errorcode" => $errorInfo[1], "errormessage" => $errorInfo[2]);
+	}
 
 	protected function errorInfo()
 	{
@@ -342,7 +351,9 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 		if ($result === false)
 		{
-			throw new Exception("Unable to execute SQL: ".$this->errorCode().": ".$this->errorInfo()."\n".$script);
+			$e = new BaseException("Unable to execute SQL: ".$this->errorCode().": ".$this->errorInfo()."\n".$script, "framework.persistentprovider.mysql.sql-error", $this->getErrorParameters());
+			$e->setAttribute("sql", $script);
+			throw $e;
 		}		
 		return $result;
 	}
