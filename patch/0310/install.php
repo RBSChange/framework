@@ -31,12 +31,6 @@ class framework_patch_0310 extends patch_BasePatch
 			$moduleName = $matches[1];
 			$docName = $matches[2];
 			
-			if (isset($computedDeps["module"][$moduleName]))
-			{
-				// Ignore standard modules: already examined
-				continue;
-			}
-			
 			$doc = f_util_DOMUtils::fromPath($docXML);
 			$doc->registerNamespace("c", "http://www.rbs.fr/schema/change-document/1.0");
 			if ($doc->exists("c:properties/c:add[@localized = 'true' and @name != 'publicationstatus']"))
@@ -69,17 +63,23 @@ class framework_patch_0310 extends patch_BasePatch
 				$model = f_persistentdocument_PersistentDocumentModel::getInstance($moduleName, $docName);
 				if (!$publicationStatusLocalized)
 				{
-					
-					if ($model->useCorrection())
+					if (isset($computedDeps["module"][$moduleName]))
 					{
-						echo "Model $moduleName/$docName is localized, use correction and did not declared publicationstatus property localized: you can encounter problems. Please check.\n";
+						// Ignore standard modules: already examined
 					}
-					elseif ($model->publishOnDayChange())
+					else
 					{
-						echo "Model $moduleName/$docName is localized, use 'publish on day change' and did not declared publicationstatus property localized: you can encounter problems. Please check.\n";
+						if ($model->useCorrection())
+						{
+							echo "Model $moduleName/$docName is localized, use correction and did not declared publicationstatus property localized: you can encounter problems. Please check.\n";
+						}
+						elseif ($model->publishOnDayChange())
+						{
+							echo "Model $moduleName/$docName is localized, use 'publish on day change' and did not declared publicationstatus property localized: you can encounter problems. Please check.\n";
+						}
 					}
 				}
-				
+
 				$tableName = $model->getTableName();
 				$i18nTableName = $model->getTableName()."_i18n";
 				try
