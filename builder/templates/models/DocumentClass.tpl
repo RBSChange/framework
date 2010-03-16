@@ -31,6 +31,16 @@ class <{$model->getDocumentClassName()}> extends <{$model->getDocumentClassName(
 	}
 	
 <{/if}>
+<{if $model->getFinalDocumentName() == 'preferences'}>
+	/**
+	 * @retrun String
+	 */
+	public function getLabel()
+	{
+		return f_Locale::translateUI(parent::getLabel());
+	}
+	
+<{/if}>
 	/**
 	 * @param string $moduleName
 	 * @param string $treeType
