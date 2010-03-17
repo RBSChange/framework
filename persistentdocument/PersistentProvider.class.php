@@ -144,7 +144,6 @@ abstract class f_persistentdocument_PersistentProvider
 	 */
 	public static function getDatabaseProfileName(&$mustValidateServerStatus = false)
 	{
-		Framework::debug(__METHOD__." NOT OK");
 		if (self::$databaseProfile === null)
 		{
 			self::$databaseProfile = 'default';
