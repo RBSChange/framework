@@ -556,38 +556,40 @@ class f_persistentdocument_DocumentService extends BaseService
 				$node = $ts->getInstanceByDocument($document);
 				if ($node !== null) {$ts->deleteNode($node);}
 				
-
 				// Effacement des relations CHILD[@id2 = $document->id]
 				if (Framework::isDebugEnabled())
 				{
 					Framework::debug('Effacement relations child  du document '.$document->getId());
 				}
 				$relations = $this->pp->getChildRelationBySlaveDocumentId($document->getId());
+				$rc = RequestContext::getInstance();
 				foreach ($relations as $relation)
 				{
 					$doc = $this->pp->getDocumentInstance($relation->getDocumentId1());
-					if ($doc->isDeleted())
+					if ($doc->isDeleted()) {continue;}
+					try 
 					{
-						continue;
+						$rc->beginI18nWork($doc->getLang());
+												
+						if ($doc->getPersistentModel()->isArrayProperty($relation->getName()))
+						{
+							$index = $doc->{'getIndexof'.ucfirst($relation->getName())}($document);
+							if ($index >= 0)
+							{
+								$doc->{'remove'.ucfirst($relation->getName()).'ByIndex'}($index);
+							}
+						}
+						else
+						{
+							$doc->{'set'.ucfirst($relation->getName())}(null);
+						}
+						$doc->save();					
+						$rc->endI18nWork();
 					}
-
-					if ("DEPRECATED" == $doc->getPublicationstatus())
+					catch (Exception $e)
 					{
-						$doc->delete();
-						continue;
+						$rc->endI18nWork($e);
 					}
-
-					if ($doc->getPersistentModel()->isArrayProperty($relation->getName()))
-					{
-						$index = $doc->{'getIndexof'.ucfirst($relation->getName())}($document);
-						$doc->{'remove'.ucfirst($relation->getName())}($index);
-					}
-					else
-					{
-						$doc->{'set'.ucfirst($relation->getName())}(null);
-					}
-
-					$doc->save();
 				}
 			}
 			else
