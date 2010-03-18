@@ -817,6 +817,16 @@ class c_Module
 	}
 	
 	/**
+	 * Module based on new perspective (3.0.0)
+	 * @return Boolean
+	 */
+	function hasPerspectiveConfigFile()
+	{
+		$path = f_util_FileUtils::buildAbsolutePath($this->getPath(), 'config', 'perspective.xml');
+		return file_exists($path);
+	}
+	
+	/**
 	 * @return Boolean
 	 */
 	function isFolderBased()

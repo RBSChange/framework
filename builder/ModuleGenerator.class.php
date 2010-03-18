@@ -182,6 +182,7 @@ class builder_ModuleGenerator
 		else
 		{
 			f_util_FileUtils::mkdir($pathBase . 'forms/editor/topic');
+			f_util_FileUtils::mkdir($pathBase . 'forms/editor/systemtopic');
 		}
 	}
 	

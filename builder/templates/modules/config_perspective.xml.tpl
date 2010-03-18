@@ -1,51 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <perspective>
 	<models>
+<{if $useFolder}>
 		<model name="modules_generic/rootfolder">
-			<children>
-<{if $useTopic}>
-				<child model="modules_website/topic" from="topics" />
-<{elseif $useFolder}>
+			<children>	
 				<child model="modules_generic/folder" />
 				<child model="modules_generic/systemfolder" />
-<{/if}>
 			</children>
-<{if $useFolder}>
 			<drops>
 				<drop model="modules_generic/folder" action="move" />
 				<drop model="modules_generic/systemfolder" action="move" />
 			</drops>
-<{/if}>
-<{if $useTopic}>
-			<columns>
-				<column name="pathOf" label="PathOf" flex="3" />
-			</columns>
-<{/if}>
 			<contextactions>
 				<contextaction name="edit" />
-<{if $useTopic}>
-				<contextaction name="addTopic" />
-				<contextaction name="openTopicOrder" />
-<{elseif $useFolder}>
 				<contextaction name="createFolder" />
 				<contextaction name="openTreeNodeOrder" />
-<{/if}>
 			</contextactions>	
 		</model>
-<{if $useTopic}>
-		<model name="modules_website/topic">
-			<children>
-				<child model="modules_website/topic" />
-			</children>
-			<drops>
-			</drops>
-			<contextactions>		
-				<contextaction name="openFolder" />
-				<contextaction name="edit" />
-				<contextaction name="openTreeNodeOrder" />
-			</contextactions>
-		</model>
-<{elseif $useFolder}>
 		<model name="modules_generic/folder">
 			<children>
 				<child model="modules_generic/folder" />
@@ -66,7 +37,54 @@
 				<contextaction name="openFolder" />
 			</contextactions>
 		</model>
-<{/if}>
+<{elseif $useTopic}>	
+		<model name="modules_generic/rootfolder">
+			<children>
+				<child model="modules_website/websitetopicsfolder" />
+			</children>
+			<drops>
+				<drop model="modules_website/websitetopicsfolder" action="move" />
+			</drops>
+			<contextactions>
+				<contextaction name="edit" />
+				<contextaction name="addTopic" />
+				<contextaction name="openTreeNodeOrder" />		
+			</contextactions>
+		</model>
+		<model name="modules_website/websitetopicsfolder">
+			<children>
+				<child model="modules_website/topic" from="topics" />
+				<child model="modules_website/systemtopic" from="topics" />
+			</children>
+			<columns>
+				<column name="pathOf" label="PathOf" flex="3" />
+			</columns>
+			<contextactions>
+				<contextaction name="openFolder" />
+				<contextaction name="openTopicOrder"/>
+			</contextactions>
+		</model>
+		<model name="modules_website/topic">
+			<children>
+				<child model="modules_website/topic" />
+				<child model="modules_website/systemtopic" />
+			</children>
+			<contextactions>
+				<contextaction name="openFolder" />
+				<contextaction name="edit" />
+			</contextactions>
+		</model>
+		<model name="modules_website/systemtopic">
+			<children>
+				<child model="modules_website/topic" />
+				<child model="modules_website/systemtopic" />
+			</children>
+			<contextactions>
+				<contextaction name="openFolder" />
+				<contextaction name="edit" />
+			</contextactions>
+		</model>			
+<{/if}>	
 	</models>
 	<toolbar>
 		<toolbarbutton name="edit" />
