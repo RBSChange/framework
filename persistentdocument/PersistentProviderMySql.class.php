@@ -97,16 +97,16 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 			$modelNames = array("'".$documentModel->getName()."'");
 			if ($documentModel->hasChildren())
 			{
-				foreach ($documentModel->getChildrenNames() as $chilName)
+				foreach ($documentModel->getChildrenNames() as $childName)
 				{
 					$modelNames = "'".$childName."'";	
 				}
 			}
-			$sqls[] = "DELETE FROM `f_relation` where relation_name = '".$oldProperty->getName()."' and document_model_id1 in (".join(",", $modelNames).")";
+			$sqls[] = "DELETE FROM `f_relation` WHERE relation_name = '".$oldProperty->getName()."' AND document_model_id1 IN (".join(",", $modelNames).")";
 		}
 		foreach ($sqls as $sql)
 		{
-			$stmt = $this->executeSQLScript($sql);
+			$this->executeSQLScript($sql);
 		}
 		return $sqls;
 	}
@@ -125,7 +125,6 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		$sqls = array();
 		$oldDbMapping = $oldProperty->getDbName();
 		$oldPropertyName = $oldProperty->getName();
-		$newDbMapping = $newProperty->getDbName();
 		$sqls[] = "ALTER TABLE `".$documentModel->getTableName()."` CHANGE COLUMN `".$oldDbMapping."` ".$newProperty->generateSql("mysql");
 		if ($oldProperty->isLocalized())
 		{
@@ -136,7 +135,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 			$modelNames = array("'".$documentModel->getName()."'");
 			if ($documentModel->hasChildren())
 			{
-				foreach ($documentModel->getChildrenNames() as $chilName)
+				foreach ($documentModel->getChildrenNames() as $childName)
 				{
 					$modelNames = "'".$childName."'";	
 				}
@@ -159,18 +158,18 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 					}
 				}
 			}
-			$sql = "UPDATE `f_relation` set relation_name = '".$newProperty->getName()."' ";
+			$sql = "UPDATE `f_relation` SET relation_name = '".$newProperty->getName()."'";
 			if ($mustUpdateRelationId)
 			{
 				$newRelationId = $this->getRelationId($newProperty->getName());
-				$relationIdUpdate = ", relation_id = $newRelationId";
+				$sql .= ", relation_id = $newRelationId";
 			}
-			$sql .= " where document_model_id1 in (".join(",", $modelNames).") and relation_name = '$oldPropertyName'";
+			$sql .= " WHERE document_model_id1 IN (".join(",", $modelNames).") AND relation_name = '$oldPropertyName'";
 			$sqls[] = $sql;
 		}
 		foreach ($sqls as $sql)
 		{
-			$stmt = $this->executeSQLScript($sql);
+			$this->executeSQLScript($sql);
 		}
 		return $sqls;
 	}
@@ -191,7 +190,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 		foreach ($sqls as $sql)
 		{
-			$stmt = $this->executeSQLScript($sql);
+			$this->executeSQLScript($sql);
 		}
 		return $sqls;
 	}
