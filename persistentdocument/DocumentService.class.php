@@ -2846,11 +2846,17 @@ class f_persistentdocument_DocumentService extends BaseService
 			
 			if ($allowedSections === null || isset($allowedSections['tags']))
 			{
-				$tags = TagService::getInstance()->getTags($document);
+				$tags = TagService::getInstance()->getTags($document);	
 				if (f_util_ArrayUtils::isNotEmpty($tags))
 				{
-					$data['tags'] = array('tags' => join(", ", $tags));
+					$tagsLabel = join(", ", $tags);
 				}
+				else
+				{
+					$tagsLabel = f_Locale::translateUI('&framework.persistentdocument.general.No-tag;');
+				}
+				$data['tags'] = array('tagsaction' => array('label' => $tagsLabel, 'disablelock' => 'false'),
+									  'tags' => $tagsLabel);
 			}
 
 			$rc->endI18nWork();
