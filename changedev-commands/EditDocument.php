@@ -393,9 +393,9 @@ f_persistentdocument_PersistentProvider::getInstance()->renameProperty('$moduleN
 						$error = false;
 						
 						$computedPropInfo = array();
-						foreach ($propInfo as $key => $value)
+						foreach ($defaultValues as $key => $value)
 						{
-							$computedPropInfo[$key] = ($value !== null) ? $value : $defaultValues[$key];
+							$computedPropInfo[$key] = isset($propInfo[$key]) ? $propInfo[$key]: $value;
 						}
 						
 						if ($attrValue == "NULL")
