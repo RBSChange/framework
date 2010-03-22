@@ -110,7 +110,7 @@ class f_util_TagReplacer {
 			for ($i=0; $i<$nb; $i++)
 			{
 				$toreplace[] = $matches[0][$i];
-				$replacements[] = str_replace("\n", '\n', f_Locale::translate('&' . $matches[1][$i] . ';'));
+				$replacements[] = str_replace("\n", '\n', f_Locale::translateUI('&' . $matches[1][$i] . ';'));
 			}
 			$content = str_replace($toreplace, $replacements, $content);
 		}

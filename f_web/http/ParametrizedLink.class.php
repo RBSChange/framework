@@ -144,6 +144,11 @@ class f_web_ChromeParametrizedLink extends f_web_ParametrizedLink
     
 	public function getUrl()
 	{
+		$params = $this->getQueryParametres();
+		if (!isset($params['uilang']))
+		{
+			$this->setQueryParameter('uilang', RequestContext::getInstance()->getUILang());
+		}
 	    return str_replace('/?', '/', parent::getUrl());
 	}   
 }

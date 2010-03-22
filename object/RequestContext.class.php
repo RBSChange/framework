@@ -87,7 +87,7 @@ class RequestContext
 		$this->m_enabled = (count($this->m_supportedLanguages) > 1);
 		$this->m_lang = $this->getDefaultLang();
 		$this->m_ui_supportedLanguages = $ui_supportedLanguages;
-		$this->m_ui_lang = $this->getUserAgentLanguage();
+		$this->m_ui_lang = isset($_SESSION['uilang']) ? $_SESSION['uilang'] : $this->getUserAgentLanguage();
 		// This "marker" can be overriden especially when behind proxies
 		$httpsMarker = Framework::getConfigurationValue('general/https-request-marker', 'HTTPS');
 		$httpsMarkerValue = Framework::getConfigurationValue('general/https-request-marker-value', 'on');
@@ -323,6 +323,17 @@ class RequestContext
 			throw new IllegalArgumentException($lang);
 		}
 	}
+	
+	
+	public function setUILangFromParameter($lang)
+	{
+		
+		if ($lang && is_string($lang) && in_array($lang, $this->getUISupportedLanguages()))
+		{
+			$this->m_ui_lang = $lang;
+		}
+	}	
+	
 
 	/**
 	 * @return array

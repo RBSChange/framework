@@ -323,8 +323,8 @@ class JsService extends BaseService
 
 	public function generateXulLibrary()
 	{
-		$requestContext = RequestContext::getInstance();
-		$requestContext->setMimeContentType(K::XUL);
+		$rc = RequestContext::getInstance();
+		$rc->setMimeContentType(K::XUL);
 		$scriptRegistryOrdered = $this->getComputedRegisteredScripts();
 		foreach ($scriptRegistryOrdered as $scriptPath => $skin)
 		{
@@ -352,14 +352,14 @@ class JsService extends BaseService
 	 */
 	private function generate($mimeContentType = null, $compact = false, $inline = false, $exclude = null)
 	{
-		$requestContext = RequestContext::getInstance();
+		$rc = RequestContext::getInstance();
 		if (is_null($mimeContentType))
 		{
-			$mimeContentType = $requestContext->getMimeContentType();
+			$mimeContentType = $rc->getMimeContentType();
 		}
 		else
 		{
-			$requestContext->setMimeContentType($mimeContentType);
+			$rc->setMimeContentType($mimeContentType);
 		}
 
 		$scriptRegistryOrdered = $this->getComputedRegisteredScripts();
@@ -400,7 +400,9 @@ class JsService extends BaseService
 						$init = false;
 						$fileId['init'] = true;
 					}
-					$fileId[K::LANG_ACCESSOR] = RequestContext::getInstance()->getLang();
+					$fileId['lang'] = $rc->getLang();
+					$fileId['uilang'] = $rc->getUILang();
+
 					$fileLocationId = implode('-', $fileId);
 					$fileLocation = WEBAPP_HOME . self::CACHE_LOCATION . $fileLocationId;
 						
@@ -628,6 +630,7 @@ class JsService extends BaseService
 		}
 		$attributes['LANGS'] = $langs;
 		$attributes['W_LANG'] = $rc->getLang();
+		$attributes['W_UILANG'] = $rc->getUILang();
 
 		$js = K::CRLF . 'var Context = ' . JsonService::getInstance()->encode($attributes) . ';' . K::CRLF;
 
