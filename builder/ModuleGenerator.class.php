@@ -379,7 +379,7 @@ class builder_ModuleGenerator
 	/**
 	 * Generate an action
 	 *
-	 * @param Srting $name
+	 * @param String $name
 	 * @return String
 	 */
 	public function generateFrontAction($name)
@@ -396,7 +396,7 @@ class builder_ModuleGenerator
 	/**
 	 * Generate a JSON action
 	 *
-	 * @param Srting $name
+	 * @param String $name
 	 * @return String
 	 */
 	public function generateJSONAction($name)
