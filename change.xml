@@ -16,12 +16,6 @@
 				<version>1.4.7</version>
 			</versions>
 		</dependency>
-		<dependency>
-			<name>extension/http</name>
-			<versions>
-				<version>1.6.0</version>
-			</versions>
-		</dependency>
 		
 		<!-- For pdf text extraction -->
 		<dependency>
@@ -32,12 +26,6 @@
 		</dependency>
 		
 		<!-- media & uixul modules. TODO: add FileUtils::getMime() that uses FileInfo and refactor -->
-		<dependency>
-        		<name>extension/fileinfo</name>
-			<versions>
-				<version>1.0.4</version>
-			</versions>
-		</dependency>
 		
 		<dependency>
 			<name>extension/mysql</name>
@@ -106,12 +94,6 @@
 			</description>
 		</dependency>
 		
-		<dependency>
-			<name>extension/imagick</name>
-			<versions>
-				<version>2.2.2</version>
-			</versions>
-		</dependency>
 		
 		<dependency>
 			<name>extension/xsl</name>
