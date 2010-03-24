@@ -141,6 +141,7 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 		{
 			$this->changecmd("import-init-data", array($modInfo["name"]));
 		}
+                $this->changecmd("init-webapp");
 		
 		$doc = f_util_DOMUtils::getDocument(WEBEDIT_HOME."/change.xml");
 		$xpath = new DOMXPath($doc);
