@@ -316,11 +316,10 @@
 			-->	
 		<backoffice>
 			<browser name="firefox">
-				<version>3.5.4</version>
-				<version>3.5.5</version>
-				<version>3.5.6</version>
 				<version>3.5.7</version>
+				<version>3.5.8</version>
 				<version>3.6</version>
+				<version>3.6.2</version>
 			</browser>
 		</backoffice>
 	</browsers>
