@@ -118,13 +118,19 @@ class LocaleService extends BaseService
 	private function processDatabase($packageKey, $entities)
 	{
 		$provider = f_persistentdocument_PersistentProvider::getInstance();
-
+		if (!Framework::inDevelopmentMode())
+		{
+			$langList = RequestContext::getInstance()->getSupportedLanguages();
+		}
 		// Add all entities in databases
 		foreach ($entities as $entity => $langs)
 		{
 			foreach ($langs as $lang => $infos)
 			{
-				$provider->addTranslate($packageKey . '.' . $entity, $lang, $infos['value'], $packageKey, '0', $infos['overridable'], $infos['useredited']);
+				if ($langList === null || in_array($lang, $langList))
+				{
+					$provider->addTranslate($packageKey . '.' . $entity, $lang, $infos['value'], $packageKey, '0', $infos['overridable'], $infos['useredited']);
+				}
 			}
 		}
 	}
