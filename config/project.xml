@@ -90,6 +90,7 @@
 		<!-- (AG_DISABLE_SIMPLECACHE == true) => (AG_DISABLE_BLOCK_CACHE == true) -->
 		<define name="AG_DISABLE_SIMPLECACHE">false</define>
 		
+		<define name="SECURE_SESSION_BY_IP">false</define>
 	</defines>
 	<!--
 		  Config section :
