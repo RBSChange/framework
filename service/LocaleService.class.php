@@ -118,6 +118,7 @@ class LocaleService extends BaseService
 	private function processDatabase($packageKey, $entities)
 	{
 		$provider = f_persistentdocument_PersistentProvider::getInstance();
+		$langList = null;
 		if (!Framework::inDevelopmentMode())
 		{
 			$langList = RequestContext::getInstance()->getSupportedLanguages();
