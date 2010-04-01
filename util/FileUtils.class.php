@@ -423,13 +423,8 @@ abstract class f_util_FileUtils
 	 */
 	static public function getTmpFile($prefix = null)
 	{
-		if (!file_exists(TMP_PATH)) {
-			mkdir(TMP_PATH);//, 0700, true);
-		}
-
-		$filePath = tempnam(TMP_PATH, $prefix);
-		touch($filePath);
-
+		$prefix = (f_util_StringUtils::isEmpty($prefix)) ? 'change_' : $prefix;
+		$filePath = tempnam(null, $prefix);
 		return $filePath;
 	}
 

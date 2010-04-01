@@ -88,7 +88,10 @@ class config_ProjectParser
 				
 				if (!isset($globalConstantsForProfile["TMP_PATH"]))
 				{
-					$globalConstantsForProfile["TMP_PATH"] = 'define(\'TMP_PATH\', \'/tmp/\'.PROJECT_ID);';
+					$tmpfile = tempnam(null, 'loc_');
+					$TMP_PATH = var_export(dirname($tmpfile), true);
+					$globalConstantsForProfile["TMP_PATH"] = 'define(\'TMP_PATH\', '.$TMP_PATH.');';
+					unlink($tmpfile);
 				}
 
 				// Remove module constants already set in global ones.
