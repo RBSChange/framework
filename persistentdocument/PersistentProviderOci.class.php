@@ -535,31 +535,51 @@ class f_persistentdocument_PersistentProviderOci extends f_persistentdocument_Pe
 		return 'SELECT "relation_id2" AS document_id FROM "f_relation" WHERE "relation_id1" = :relation_id1 AND "relation_id" = :relation_id ORDER BY "relation_order"';
 	}
 
+	protected function getloadAllRelations()
+	{
+		return 'SELECT "relation_name", "relation_order", "relation_id2" FROM "f_relation" WHERE "relation_id1" = :relation_id1 ORDER BY "relation_id", "relation_order"';
+	}
+	
 	protected function getSaveRelationsQuery()
 	{
 		return 'DELETE FROM "f_relation" WHERE "relation_id1" = :relation_id1';
 	}
 
-	protected function getloadAllRelations()
+	protected function getSaveRelationDeleteAllQuery()
 	{
-		return 'SELECT "relation_name", "relation_order", "relation_id2" FROM "f_relation" WHERE "relation_id1" = :relation_id1 ORDER BY "relation_id", "relation_order"';
+			return 'DELETE FROM "f_relation" WHERE "relation_id1" = :relation_id1 AND "relation_id" = :relation_id';
 	}
 
-	protected function getSaveRelationQuery1()
+	protected function getSaveRelationsPreviousQuery()
 	{
-		return 'DELETE FROM "f_relation" WHERE "relation_id1" = :relation_id1 AND "relation_id" = :relation_id';
-	}
-
-	protected function getSaveRelationQuery2()
+		return 'SELECT "relation_id2" AS doc_id, "relation_order" AS doc_order FROM "f_relation" WHERE "relation_id1" = :relation_id1 AND "relation_id" = :relation_id';
+	}	
+	
+	protected function getSaveRelationInsertQuery()
 	{
 		return 'INSERT INTO "f_relation" ("relation_id1", "relation_id2", "relation_order", "relation_name", "document_model_id1", "document_model_id2", "relation_id") VALUES (:relation_id1, :relation_id2, :relation_order, :relation_name, :document_model_id1, :document_model_id2, :relation_id)';
 	}
 
+	protected function getSaveRelationUpdateQuery()
+	{
+		return 'UPDATE "f_relation" SET "relation_order" = :new_order WHERE "relation_id1" = :relation_id1 AND "relation_id" = :relation_id AND "relation_order" = :relation_order';
+	}	
+	
+	
+	protected function getSaveRelationDeleteQuery()
+	{
+		return 'DELETE FROM "f_relation" WHERE "relation_id1" = :relation_id1 AND "relation_id" = :relation_id AND "relation_order" = :relation_order';
+	}
+
+	protected function getSaveRelationReorderQuery()
+	{
+		return 'UPDATE "f_relation" SET "relation_order" = -"relation_order" - 1 WHERE "relation_id1" = :relation_id1 AND "relation_id" = :relation_id AND "relation_order" < 0';
+	}	
+	
 	protected function getDeleteI18nDocument($tableName)
 	{
 		return 'DELETE FROM "'. $tableName . '" WHERE "document_id" = :id AND "lang_i18n" = :lang';
 	}
-
 
 	protected function getRootNodeQuery()
 	{

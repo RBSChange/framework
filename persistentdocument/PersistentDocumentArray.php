@@ -426,6 +426,14 @@ class f_persistentdocument_PersistentDocumentArray extends ArrayObject
 	}
 	
 	/**
+	 * @return array<integer | PersistentDocument>
+	 */
+	public function getInternalArray()
+	{
+		return parent::getArrayCopy();
+	}
+	
+	/**
 	 * @internal used by PersistentDocument only for serialized property
 	 * @param array<id> $documentIds
 	 */

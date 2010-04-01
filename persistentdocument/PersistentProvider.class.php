@@ -1755,7 +1755,7 @@ abstract class f_persistentdocument_PersistentProvider
 	 * @return String
 	 */
 	protected abstract function getloadAllRelations();
-
+	
 	/**
 	 * @param f_persistentdocument_PersistentDocumentArray $documentArray
 	 */
@@ -1769,73 +1769,147 @@ abstract class f_persistentdocument_PersistentProvider
 				$relName = $documentArray->getRelationName();
 				Framework::debug("PersistentProvider::saveRelation on document $masterDocId, $relName -> Ignored");
 			}
+			return;
 		}
-		else
-		{
-			$parentDocument = $documentArray->getParentDocument();
-			$masterDocId = $parentDocument->getId();
-			$masterDocType = $parentDocument->getDocumentModelName();
-			$relName = $documentArray->getRelationName();
-			$relId = $documentArray->getRelationId();
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug("PersistentProvider::saveRelation on document $masterDocId, $relName");
-			}
 
-			if (!$documentArray->getParentDocument()->isNew() && $documentArray->isModified())
+		$parentDocument = $documentArray->getParentDocument();
+		$masterDocId = $parentDocument->getId();
+		$masterDocType = $parentDocument->getDocumentModelName();
+		$relName = $documentArray->getRelationName();
+		$relId = $documentArray->getRelationId();
+		
+		if (Framework::isDebugEnabled())
+		{
+			Framework::debug("PersistentProvider::saveRelation on document $masterDocId, $masterDocType, $relName, $relId");
+		}
+		
+		//Recuperation des nouvelles relations
+		$docs = $documentArray->getInternalArray();
+		if (count($docs) === 0)
+		{
+			if (!$documentArray->getParentDocument()->isNew())
 			{
-				// no need to delete relation if document is new
-				$stmt = $this->prepareStatement($this->getSaveRelationQuery1());
+				$stmt = $this->prepareStatement($this->getSaveRelationDeleteAllQuery());
 				$stmt->bindValue(':relation_id1', $masterDocId, PersistentProviderConst::PARAM_INT);
 				$stmt->bindValue(':relation_id', $relId, PersistentProviderConst::PARAM_INT);
 				$this->executeStatement($stmt);
-
-				if (Framework::isDebugEnabled())
-				{
-					Framework::debug("PersistentProvider::saveRelation deleted rows :" . $stmt->rowCount());
-				}
 			}
-
-			$subDocId = 0;
-			$subDocType = '';
-			$order = 0;
-			foreach ($documentArray as $subDoc)
+			$documentArray->setIsPersisted();			
+			return;
+		}
+		
+		//Recuperations des anciens document_id / order
+		$oldIds = array();	
+		$stmt = $this->prepareStatement($this->getSaveRelationsPreviousQuery());
+		$stmt->bindValue(':relation_id1', $masterDocId, PersistentProviderConst::PARAM_INT);
+		$stmt->bindValue(':relation_id', $relId, PersistentProviderConst::PARAM_INT);
+		$this->executeStatement($stmt);
+		foreach ($stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC) as $row) 
+		{
+			$oldIds[$row['doc_id']] = $row['doc_order'];
+		}
+		$oldCount = count($oldIds);
+		$updateOrder = false;
+		$order = 0;
+		foreach ($docs as $docInfo)
+		{
+			$subDocId = is_numeric($docInfo) ? $docInfo : $docInfo->getId();
+			if (isset($oldIds[$subDocId]))
 			{
-				$subDocId = $subDoc->getId();
-				$subDocType = $subDoc->getDocumentModelName();
-
-				$stmt = $this->prepareStatement($this->getSaveRelationQuery2());
+				if ($oldIds[$subDocId] != $order)
+				{
+					$relOrder = -$order - 1;
+					$updateOrder = true;
+					$stmt = $this->prepareStatement($this->getSaveRelationUpdateQuery());
+					$stmt->bindValue(':new_order', $relOrder, PersistentProviderConst::PARAM_INT);
+					$stmt->bindValue(':relation_id1', $masterDocId, PersistentProviderConst::PARAM_INT);
+					$stmt->bindValue(':relation_id', $relId, PersistentProviderConst::PARAM_INT);
+					$stmt->bindValue(':relation_order', $oldIds[$subDocId], PersistentProviderConst::PARAM_INT);
+					$this->executeStatement($stmt);
+				}
+				unset($oldIds[$subDocId]);
+			}
+			else
+			{
+				if ($order >= $oldCount)
+				{
+					$relOrder = $order;
+				}
+				else
+				{
+					$relOrder = -$order - 1;
+					$updateOrder = true;
+				}
+				$subDocType = $docInfo->getDocumentModelName();
+				$stmt = $this->prepareStatement($this->getSaveRelationInsertQuery());
 				$stmt->bindValue(':relation_id1', $masterDocId, PersistentProviderConst::PARAM_INT);
 				$stmt->bindValue(':relation_id2', $subDocId, PersistentProviderConst::PARAM_INT);
-				$stmt->bindValue(':relation_order', $order, PersistentProviderConst::PARAM_INT);
+				$stmt->bindValue(':relation_order', $relOrder, PersistentProviderConst::PARAM_INT);
 
 				$stmt->bindValue(':relation_name', $relName, PersistentProviderConst::PARAM_STR);
 				$stmt->bindValue(':document_model_id1', $masterDocType, PersistentProviderConst::PARAM_STR);
 				$stmt->bindValue(':document_model_id2', $subDocType, PersistentProviderConst::PARAM_STR);
 				$stmt->bindValue(':relation_id', $relId, PersistentProviderConst::PARAM_INT);
-
-				if (Framework::isDebugEnabled())
-				{
-					Framework::debug("PersistentProvider::saveRelation add document : $masterDocId, $subDocId, $order, $relName");
-				}
 				$this->executeStatement($stmt);
-
-				$order++;
 			}
-			$documentArray->setIsPersisted();
+			$order++;
 		}
+		
+		if (count($oldIds) > 0)
+		{
+			//Delete old relation;
+			foreach ($oldIds as $subDocId => $order) 
+			{
+				$stmt = $this->prepareStatement($this->getSaveRelationDeleteQuery());
+				$stmt->bindValue(':relation_id1', $masterDocId, PersistentProviderConst::PARAM_INT);
+				$stmt->bindValue(':relation_id', $relId, PersistentProviderConst::PARAM_INT);	
+				$stmt->bindValue(':relation_order', $order, PersistentProviderConst::PARAM_INT);
+				$this->executeStatement($stmt);
+			}
+		}
+		
+		if ($updateOrder)
+		{
+			$stmt = $this->prepareStatement($this->getSaveRelationReorderQuery());
+			$stmt->bindValue(':relation_id1', $masterDocId, PersistentProviderConst::PARAM_INT);
+			$stmt->bindValue(':relation_id', $relId, PersistentProviderConst::PARAM_INT);	
+			$this->executeStatement($stmt);	
+		}
+		
+		$documentArray->setIsPersisted();
 	}
 
 	/**
 	 * @return String
 	 */
-	protected abstract function getSaveRelationQuery1();
+	protected abstract function getSaveRelationDeleteAllQuery();
 
 	/**
 	 * @return String
 	 */
-	protected abstract function getSaveRelationQuery2();
+	protected abstract function getSaveRelationsPreviousQuery();
+	
+	
+	/**
+	 * @return String
+	 */
+	protected abstract function getSaveRelationInsertQuery();
+	
+	/**
+	 * @return String
+	 */	
+	protected abstract function getSaveRelationUpdateQuery();
+	
+	/**
+	 * @return String
+	 */
+	protected abstract function getSaveRelationDeleteQuery();
 
+	/**
+	 * @return String
+	 */	
+	protected abstract function getSaveRelationReorderQuery();
+	
 	/**
 	 * @return String
 	 */
