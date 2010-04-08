@@ -27,6 +27,11 @@
 	     		<secureMediaStrategyClass>
 	     			<entry name="default">media_DisplaySecuremediaDefaultStrategy</entry>
 	     		</secureMediaStrategyClass>
+	     		<!-- External icons library 
+	     		<icons>
+	     			<entry name="library">/usr/share/pear/rbs/webedit4/libs/icons-1.0</entry>
+	     		</icons>
+	     		-->
 	     	</media>
 	     </modules> 
 	</config>

@@ -25,7 +25,7 @@ abstract class patch_BasePatch
 				$this->basePath = FRAMEWORK_HOME;
 				break;
 			case 'webapp':
-				$this->basePath = WEBAPP_HOME;
+				$this->basePath = PROJECT_OVERRIDE;
 				break;
 			default:
 				$this->basePath = f_util_FileUtils::buildRelativePath(AG_MODULE_DIR, $this->getModuleName());
@@ -348,7 +348,7 @@ abstract class patch_BasePatch
 
 			// Webapp.
 			case 'webapp' :
-				$packagePath = WEBAPP_HOME;
+				$packagePath = PROJECT_OVERRIDE;
 				break;
 
 			// Module.

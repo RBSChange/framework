@@ -5,7 +5,7 @@ class JsService extends BaseService
 	 * JS Cache Location (must be browsable).
 	 *
 	 */
-	const CACHE_LOCATION = '/www/cache/js/';
+	const CACHE_LOCATION = '/cache/www/js/';
 
 	/**
 	 * XHTML template for NO script integration.
@@ -89,33 +89,28 @@ class JsService extends BaseService
 	 */
 	public function clearJsCache($all = true)
 	{
+		$baseJSCacheDir = f_util_FileUtils::buildWebCachePath('js');
+		f_util_FileUtils::mkdir($baseJSCacheDir);
+		
 		if ($all)
 		{
 			// Clear ALL JS :
-			f_util_FileUtils::clearDir(WEBAPP_HOME . DIRECTORY_SEPARATOR . 'www' . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR);
+			f_util_FileUtils::clearDir($baseJSCacheDir);
 		}
 		else
 		{
 			// Only the Frontoffice ones :
-			$dir = WEBAPP_HOME . DIRECTORY_SEPARATOR . 'www' . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR;
-			if (substr($dir, -1) != DIRECTORY_SEPARATOR)
+			$dir = $baseJSCacheDir;		
+			if ($dh = opendir($dir))
 			{
-				$dir .= DIRECTORY_SEPARATOR;
-			}
-				
-			if (is_dir($dir))
-			{
-				if ($dh = opendir($dir))
+				while (($file = readdir($dh)) !== false)
 				{
-					while (($file = readdir($dh)) !== false)
+					if (($file != '.') && ($file != '..') && is_file($dir . $file) && !is_dir($dir . $file) && is_writable($dir . $file) && (strpos($file, '.uixul.') === false) && (strpos($file, '.backoffice-') === false))
 					{
-						if (($file != '.') && ($file != '..') && is_file($dir . $file) && !is_dir($dir . $file) && is_writable($dir . $file) && (strpos($file, '.uixul.') === false) && (strpos($file, '.backoffice-') === false))
-						{
-							@unlink($dir . $file);
-						}
+						@unlink($dir . $file);
 					}
-					closedir($dh);
 				}
+				closedir($dh);
 			}
 		}
 
@@ -373,11 +368,11 @@ class JsService extends BaseService
 
 		$mergedScriptHash = md5(serialize($scriptRegistryOrdered));
 		$mergedScriptFileName = $mergedScriptHash . '-' . RequestContext::getInstance()->getLang() . '.js';
-		$mergedScriptPath = f_util_FileUtils::buildWebappPath(self::CACHE_LOCATION, $mergedScriptFileName);
+		$mergedScriptPath = f_util_FileUtils::buildWebCachePath('js', $mergedScriptFileName);
 
 		if (file_exists($mergedScriptPath) && $inline == false && $mimeContentType == K::HTML)
 		{
-			$src = LinkHelper::getRessourceLink('/cache/js/' . $mergedScriptFileName)->getUrl();
+			$src = LinkHelper::getRessourceLink(self::CACHE_LOCATION . $mergedScriptFileName)->getUrl();
 			$script[] = '<script src="' . $src . '" type="text/javascript"></script>' . K::CRLF;
 		}
 		else
@@ -404,7 +399,7 @@ class JsService extends BaseService
 					$fileId['uilang'] = $rc->getUILang();
 
 					$fileLocationId = implode('-', $fileId);
-					$fileLocation = WEBAPP_HOME . self::CACHE_LOCATION . $fileLocationId;
+					$fileLocation = f_util_FileUtils::buildWebCachePath('js',  $fileLocationId);
 						
 					if (!is_null($skin) && $skin)
 					{
@@ -513,7 +508,7 @@ class JsService extends BaseService
 			if ($mergedFile !== null)
 			{
 				fclose($mergedFile);
-				$src = LinkHelper::getRessourceLink('/cache/js/' . $mergedScriptFileName)->getUrl();
+				$src = LinkHelper::getRessourceLink(self::CACHE_LOCATION . $mergedScriptFileName)->getUrl();
 				$script[] = '<script src="' . $src . '" type="text/javascript"></script>' . K::CRLF;
 			}
 		}
@@ -539,7 +534,7 @@ class JsService extends BaseService
 		$lang = RequestContext::getInstance()->getLang();
 
 		// Case #1 - a cached JS file matches the requirement :
-		$fileLocation = WEBAPP_HOME . self::CACHE_LOCATION . $script . '.js';
+		$fileLocation = f_util_FileUtils::buildWebCachePath('js', $script . '.js');
 		if (is_readable($fileLocation))
 		{
 			return $fileLocation;

@@ -24,10 +24,10 @@ class ChangeProject
 
 	function clearWebappCache()
 	{
-		f_util_FileUtils::cleanDir(f_util_FileUtils::buildWebappPath("www", "cache", "binding"));
-		f_util_FileUtils::cleanDir(f_util_FileUtils::buildWebappPath("www", "cache", "js"));
-		f_util_FileUtils::cleanDir(f_util_FileUtils::buildWebappPath("www", "cache", "css"));
-		f_util_FileUtils::cleanDir(f_util_FileUtils::buildWebappPath("www", "cache", "htmlpreview"));
+		f_util_FileUtils::cleanDir(f_util_FileUtils::buildWebCachePath('binding'));
+		f_util_FileUtils::cleanDir(f_util_FileUtils::buildWebCachePath('js'));
+		f_util_FileUtils::cleanDir(f_util_FileUtils::buildWebCachePath('css'));
+		f_util_FileUtils::cleanDir(f_util_FileUtils::buildWebCachePath('htmlpreview'));
 
 		$this->clearTemplateCache();
 	}

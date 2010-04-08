@@ -58,7 +58,7 @@ class builder_TestFactoryGenerator
 		$this->module = $module;
 		$this->date = date('r');
 		$this->pathBaseModule = AG_MODULE_DIR . DIRECTORY_SEPARATOR . $module;
-		$this->pathBaseModuleAlt = AG_WEBAPP_DIR . DIRECTORY_SEPARATOR . "modules" . DIRECTORY_SEPARATOR . $module;
+		$this->pathBaseModuleAlt = PROJECT_OVERRIDE . DIRECTORY_SEPARATOR . "modules" . DIRECTORY_SEPARATOR . $module;
 		$allModels = generator_PersistentModel::loadModels();
 		//$allModels = f_persistentdocument_PersistentDocumentModel::getDocumentModels();
 		$models = array();

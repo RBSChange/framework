@@ -29,7 +29,7 @@ class framework_patch_0300 extends patch_BasePatch
 		foreach ($moduleService->getModules() as $packageName)
 		{
 			$moduleName = $moduleService->getShortModuleName($packageName);
-			$pathWebAppForm = f_util_FileUtils::buildWebappPath('modules', $moduleName, 'forms');
+			$pathWebAppForm = f_util_FileUtils::buildOverridePath('modules', $moduleName, 'forms');
 			
 			$filePath = f_util_FileUtils::buildPath($pathWebAppForm, "permission_layout.all.all.xul");
 			if (file_exists($filePath))
@@ -49,7 +49,7 @@ class framework_patch_0300 extends patch_BasePatch
 				$this->rmdir($pathWebAppForm);
 			}
 			
-			$pathWebAppModule = f_util_FileUtils::buildWebappPath('modules', $moduleName);
+			$pathWebAppModule = f_util_FileUtils::buildOverridePath('modules', $moduleName);
 			if ($this->isEmptyDir($pathWebAppModule))
 			{
 				$this->log('Suppression du dossier de module : ' . $pathWebAppModule);

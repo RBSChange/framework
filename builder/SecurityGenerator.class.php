@@ -43,7 +43,7 @@ class builder_SecurityGenerator
 			$shortModuleName = $moduleService->getShortModuleName($moduleName);
 			$baseRightsPath = f_util_FileUtils::buildWebeditPath('modules', $shortModuleName, self::CONFIG_DIR_NAME, self::ROLE_DEF_FILE_NAME);
 			if (!file_exists($baseRightsPath)) {$baseRightsPath = null;}
-			$overrideRightsPath = f_util_FileUtils::buildWebappPath('modules', $shortModuleName, self::CONFIG_DIR_NAME, self::ROLE_DEF_FILE_NAME);
+			$overrideRightsPath = f_util_FileUtils::buildOverridePath('modules', $shortModuleName, self::CONFIG_DIR_NAME, self::ROLE_DEF_FILE_NAME);
 			if (!file_exists($overrideRightsPath)) {$overrideRightsPath = null;}
 			
 			f_util_FileUtils::rmdir(f_util_FileUtils::buildChangeBuildPath('modules', $shortModuleName, 'roles'));
@@ -82,7 +82,7 @@ class builder_SecurityGenerator
 	{
 		$baseRightsPath = f_util_FileUtils::buildWebeditPath('modules', $moduleName, self::CONFIG_DIR_NAME, self::ROLE_DEF_FILE_NAME);
 		if (!file_exists($baseRightsPath)) {$baseRightsPath = null;}
-		$overrideRightsPath = f_util_FileUtils::buildWebappPath('modules', $moduleName, self::CONFIG_DIR_NAME, self::ROLE_DEF_FILE_NAME);
+		$overrideRightsPath = f_util_FileUtils::buildOverridePath('modules', $moduleName, self::CONFIG_DIR_NAME, self::ROLE_DEF_FILE_NAME);
 		if (!file_exists($overrideRightsPath)) {$overrideRightsPath = null;}
 		
 		if ($baseRightsPath === null  && $overrideRightsPath === null)

@@ -226,10 +226,10 @@ class Browscap
 	 */
 	public function updateCache()
 	{
-		$webapp_ini_path	=  WEBEDIT_HOME . DIRECTORY_SEPARATOR . "webapp" . DIRECTORY_SEPARATOR . "framework". DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . $this->iniFilename;
-		if (file_exists($webapp_ini_path))
+		$custom_ini_path =  WEBEDIT_HOME . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . $this->iniFilename;
+		if (file_exists($custom_ini_path))
 		{
-			$ini_path = $webapp_ini_path;
+			$ini_path = $custom_ini_path;
 		}
 		else
 		{

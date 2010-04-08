@@ -738,14 +738,13 @@ abstract class f_chart_Chart extends f_chart_Visualization
 		$title = f_util_StringUtils::isEmpty($this->getTitle()) ? "chart" : $this->getTitle();
 		$key .= $title.".png";
 
-		$path = f_util_FileUtils::buildWebappPath("www", "cache", "charts", $key);
+		$path = f_util_FileUtils::buildWebCachePath("charts", $key);
 		$cacheTime = $this->getOption("cacheTime", 0);
 		if (!file_exists($path) || (filemtime($path)+$cacheTime) < time())
 		{
 			f_util_FileUtils::writeAndCreateContainer($path, file_get_contents($this->getDirectUrl()), f_util_FileUtils::OVERRIDE);
 		}
-
-		return LinkHelper::getRessourceLink("/cache/charts/".$key)->getUrl();
+		return LinkHelper::getRessourceLink("/cache/www/charts/".$key)->getUrl();
 	}
 
 	function getDirectUrl()

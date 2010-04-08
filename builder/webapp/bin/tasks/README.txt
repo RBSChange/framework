@@ -1,1 +1,0 @@
-Please open each task declared in this folder and follow the instructions

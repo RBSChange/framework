@@ -42,7 +42,7 @@ class commands_ClearCache extends commands_AbstractChangeCommand
 
 		$cacheProfileDirectory = WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . $profile;
 		$autoloadCache = $cacheProfileDirectory.DIRECTORY_SEPARATOR."autoload";
-		$cssCache = WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'webapp' . DIRECTORY_SEPARATOR . 'www' . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'css' . DIRECTORY_SEPARATOR;
+		$wwwCache = WEBEDIT_HOME . DIRECTORY_SEPARATOR .  'cache' . DIRECTORY_SEPARATOR . 'www';
 
 		// Test if the cache directory of selected profile exist
 		if ( is_dir( $cacheProfileDirectory ) )
@@ -52,9 +52,9 @@ class commands_ClearCache extends commands_AbstractChangeCommand
 				$this->deleteRecursively($autoloadCache, true);
 			}
 			$this->deleteRecursively($cacheProfileDirectory);
-			if (is_dir($cssCache))
+			if (is_dir($wwwCache))
 			{
-				$this->deleteRecursively($cssCache);
+				$this->deleteRecursively($wwwCache);
 			}
 
 			return $this->quitOk("Cache cleared");

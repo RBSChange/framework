@@ -5,19 +5,26 @@
 		<define name="$name">$value</define> <=> <?php define($name, $value); ?>
 		-->
 	<defines>
-		<define name="WEBAPP_HOME">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'webapp'</define>
+
+		<!-- Deprecated -->
+		<define name="WEBAPP_HOME">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'override'</define>
+		
+			
+		<define name="PROJECT_OVERRIDE">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'override'</define>
+		<define name="DOCUMENT_ROOT">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'webapp' . DIRECTORY_SEPARATOR . 'www'</define>
+		
 		<define name="FRAMEWORK_VERSION">3.0.0</define>
 		<define name="CHANGE_RELEASE">3.0</define>
 
 		<define name="CAPTCHA_SESSION_KEY">CHANGE_CAPTCHA</define>
 
-		<define name="AG_TEMPLATE_DIR">WEBAPP_HOME . DIRECTORY_SEPARATOR . 'templates'</define>
 		<define name="AG_CONFIG_DIR">FRAMEWORK_HOME . DIRECTORY_SEPARATOR . 'config'</define>
 		<define name="AG_LIB_DIR">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'libs'</define>
 		<define name="AG_MODULE_DIR">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'modules'</define>
 
 		<define name="CHANGE_CONFIG_DIR">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'config'</define>
 		<define name="CHANGE_CACHE_DIR">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . PROFILE</define>
+		<define name="WEB_CACHE_DIR">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'www'</define>
 		<define name="CHANGE_CACHE_PDF">DIRECTORY_SEPARATOR . 'pdf' . DIRECTORY_SEPARATOR . 'tmp'</define>
 
 		<define name="AG_APP_DIR">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'agavi' . DIRECTORY_SEPARATOR</define>
@@ -203,24 +210,24 @@
 			</ModulePatch>
 			<WebappModuleActions>
 				<entry name="name">WebApp Module Actions</entry>
-				<entry name="path">%WEBAPP_HOME%/modules/*/actions</entry>
+				<entry name="path">%PROJECT_OVERRIDE%/modules/*/actions</entry>
 			</WebappModuleActions>
 			<WebAppModuleLib>
 				<entry name="name">WebApp Module Lib</entry>
-				<entry name="path">%WEBAPP_HOME%/modules/*/lib/</entry>
+				<entry name="path">%PROJECT_OVERRIDE%/modules/*/lib/</entry>
 				<entry name="recursive">true</entry>
 			</WebAppModuleLib>
 			<WebAppModuleViews>
 				<entry name="name">WebApp Module Views</entry>
-				<entry name="path">%WEBAPP_HOME%/modules/*/views/</entry>
+				<entry name="path">%PROJECT_OVERRIDE%/modules/*/views/</entry>
 			</WebAppModuleViews>
 			<WebAppModuleTests>
 				<entry name="name">WebApp Module Tests</entry>
-				<entry name="path">%WEBAPP_HOME%/modules/*/tests/</entry>
+				<entry name="path">%PROJECT_OVERRIDE%/modules/*/tests/</entry>
 			</WebAppModuleTests>
 			<WebappPatch>
 				<entry name="name">Webapp Patch</entry>
-				<entry name="path">%WEBAPP_HOME%/patch/</entry>
+				<entry name="path">%PROJECT_OVERRIDE%/patch/</entry>
 				<entry name="recursive">true</entry>
 			</WebappPatch>
 		</autoload>

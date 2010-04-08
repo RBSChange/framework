@@ -21,7 +21,7 @@ class commands_InitFilePolicy extends commands_AbstractChangeCommand
 	 */
 	function getDescription()
 	{
-		return "Apply project & webapp policy: ownership & permissions";
+		return "Apply policy: ownership & permissions";
 	}
 
 	/**

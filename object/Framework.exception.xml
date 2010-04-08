@@ -8,24 +8,16 @@
 		<locale lang="fr">Le module "{module}" n'existe pas..</locale>
 		<locale lang="en">The module "{module}" does not exist.</locale>
 	</entity>
-
 	<entity id="invalid-resource-name">
 		<locale lang="en">the ressource syntax is invalid for {resource_name}</locale>
 	</entity>
-	<entity id="invalid-AG_LOGGING_LEVEL">
-		<locale lang="en">invalid AG_LOGGING_LEVEL please modify it in webapp/config/settings.ini</locale>
-	</entity>
-
 	<entity id="bad-version-number-syntax">
 		<locale lang="en">bad-version-number-syntax package {package} version {version} </locale>
 	</entity>
 	<entity id="invalid-component-type">
 		<locale lang="en">invalid component type ({componentType}) </locale>
 	</entity>
-
 	<entity id="invalid-import-file-name">
 		<locale lang="en">invalid-import-file-name ({fileName}): naming convention is : myfilename.[mylangisocode].xml </locale>
 	</entity>
-
-
 </localization>

@@ -54,7 +54,7 @@ class Framework
 	 */
 	public static function isSiteEnabled()
 	{
-		$siteDisabledFlag = f_util_FileUtils::buildWebappPath("www", "site_is_disabled");
+		$siteDisabledFlag = f_util_FileUtils::buildWebeditPath("site_is_disabled");
 		return !file_exists($siteDisabledFlag);
 	}
 
@@ -581,7 +581,7 @@ define('AG_DEBUG', MODE_DEBUG);
 // | directory is the root of your web application, which includes the core    |
 // | configuration files and related web application data.                     |
 // +---------------------------------------------------------------------------+
-define('AG_WEBAPP_DIR', WEBAPP_HOME);
+define('AG_WEBAPP_DIR', PROJECT_OVERRIDE);
 
 // +---------------------------------------------------------------------------+
 // | error handler

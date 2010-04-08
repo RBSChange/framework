@@ -29,22 +29,25 @@ class CacheService extends BaseService
 	
 	public function clearCssCache()
 	{
-		$cssDir = f_util_FileUtils::buildWebappPath("www", "cache", "css");
-		foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($cssDir, RecursiveDirectoryIterator::KEY_AS_PATHNAME), RecursiveIteratorIterator::CHILD_FIRST) as $file => $info)
-		{
-			if ($info->isFile() && substr($file, -3) == "css")
+		$cssDir = f_util_FileUtils::buildWebCachePath("css");
+		if (is_dir($cssDir))
+		{	
+			foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($cssDir, RecursiveDirectoryIterator::KEY_AS_PATHNAME), RecursiveIteratorIterator::CHILD_FIRST) as $file => $info)
 			{
-				touch($file.".deleted");
+				if ($info->isFile() && substr($file, -3) == "css")
+				{
+					touch($file.".deleted");
+				}
 			}
 		}
 	}
 	
 	public function clearAllWebappCache()
 	{
-		$toClear = array('binding', 'js', 'htmlpreview', 'mediaformat', 'xml');
+		$toClear = array('binding', 'js', 'htmlpreview', 'mediaformat');
 		foreach ($toClear as $directory)
 		{
-			$this->clearWebappCache($directory);
+			$this->clearWebCache($directory);
 		}
 		$this->clearCssCache();
 		$this->incrementWebappCacheVersion();
@@ -63,7 +66,7 @@ class CacheService extends BaseService
 		$toClear = array('binding', 'js', 'htmlpreview');
 		foreach ($toClear as $directory)
 		{
-			$this->clearWebappCache($directory);
+			$this->clearWebCache($directory);
 		}
 		$this->clearTemplateCache();
 		$this->clearSimpleCache();
@@ -72,24 +75,22 @@ class CacheService extends BaseService
 	/**
 	 * @param String $directory
 	 */
-	private function clearWebappCache($directory)
+	private function clearWebCache($directory)
 	{
-		$baseDirectory = f_util_FileUtils::buildWebappPath('www', 'cache');
-		if (!is_dir($baseDirectory))
+		$directoryPath = f_util_FileUtils::buildWebCachePath($directory);
+		if (!is_dir($directoryPath))
 		{
-			f_util_FileUtils::mkdir($baseDirectory);
+			f_util_FileUtils::mkdir($directoryPath);
 		}
-
-		$directory = f_util_FileUtils::buildWebappPath('www', 'cache', $directory);
-		if (is_dir($directory))
+		else
 		{
-			$this->deleteRecursively($directory);
+			$this->deleteRecursively($directoryPath);
 		}
 	}
 
 	private function incrementWebappCacheVersion()
 	{
-		$cacheVersionPath = f_util_FileUtils::buildWebappPath('www', 'cache', 'cacheversion.txt');
+		$cacheVersionPath = f_util_FileUtils::buildWebCachePath('cacheversion.txt');
 		if (is_readable($cacheVersionPath))
 		{
 			$version = intval(file_get_contents($cacheVersionPath))+1;

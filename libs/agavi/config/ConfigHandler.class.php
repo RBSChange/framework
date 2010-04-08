@@ -30,8 +30,8 @@
 abstract class ConfigHandler extends ParameterHolder
 {
 	
-	private static $keys = array('%AG_APP_DIR%', '%AG_LIB_DIR%', '%AG_MODULE_DIR%', '%AG_WEBAPP_DIR%', '%FRAMEWORK_HOME%', '%WEBEDIT_HOME%', '%WEBAPP_HOME%', '%AUTOLOAD_CLASS%', '%CHANGE_LOG_DIR%', '%AG_WEBAPP_NAME%');
-	private static $reps = array(AG_APP_DIR, AG_LIB_DIR, AG_MODULE_DIR, AG_WEBAPP_DIR, FRAMEWORK_HOME, WEBEDIT_HOME, WEBAPP_HOME, '%AUTOLOAD_CLASS%', CHANGE_LOG_DIR, AG_WEBAPP_NAME);
+	private static $keys = array('%AG_APP_DIR%', '%AG_LIB_DIR%', '%AG_MODULE_DIR%', '%AG_WEBAPP_DIR%', '%FRAMEWORK_HOME%', '%WEBEDIT_HOME%', '%PROJECT_OVERRIDE%', '%AUTOLOAD_CLASS%', '%CHANGE_LOG_DIR%', '%AG_WEBAPP_NAME%');
+	private static $reps = array(AG_APP_DIR, AG_LIB_DIR, AG_MODULE_DIR, AG_WEBAPP_DIR, FRAMEWORK_HOME, WEBEDIT_HOME, PROJECT_OVERRIDE, '%AUTOLOAD_CLASS%', CHANGE_LOG_DIR, AG_WEBAPP_NAME);
 	
 	// +-----------------------------------------------------------------------+
 	// | METHODS                                                               |

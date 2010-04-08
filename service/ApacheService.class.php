@@ -40,13 +40,11 @@ class ApacheService extends BaseService
 	
 	/**
 	 * @return Void
+	 * @deprecated 
 	 */
 	public function createApacheDirectory()
 	{
-		$dir = $this->getApacheDirectory();
-		f_util_FileUtils::mkdir($dir);
-		chgrp($dir, WWW_GROUP);
-		chmod($dir, 02775);
+		//TODO moved in ApplyWebappPolicy
 	}
 	
 	/**
@@ -110,7 +108,8 @@ class ApacheService extends BaseService
 	 */
 	private function applyReplacements($content)
 	{
-		return str_replace('%{DOCUMENT_ROOT}', f_util_FileUtils::buildWebappPath('www'), $content);
+		return str_replace(array('%{DOCUMENT_ROOT}', '%{WEBEDIT_HOME}'), 
+							array(DOCUMENT_ROOT, WEBEDIT_HOME), $content);
 	}
 	
 	/**
@@ -118,14 +117,14 @@ class ApacheService extends BaseService
 	 */
 	private function createHtaccessSymlink()
 	{
-		$linkPath = f_util_FileUtils::buildWebappPath('www', '.htaccess');
+		$linkPath = f_util_FileUtils::buildDocumentRootPath('.htaccess');
 		$linkTarget = $this->getHtaccessPath();
 		if (file_exists($linkPath))
 		{
 			// If there is already a file that is not a symlink: Exception.
 			if (!is_link($linkPath))
 			{
-				Framework::warn("The file webapp/www/.htaccess already exists and is not a symlink. Replace it with a symlink to $linkTarget");
+				Framework::warn("The file .htaccess already exists and is not a symlink. Replace it with a symlink to $linkTarget");
 				f_util_FileUtils::unlink($linkPath);
 				f_util_FileUtils::symlink($linkTarget, $linkPath);
 			}
@@ -157,8 +156,6 @@ class ApacheService extends BaseService
 		else
 		{
 			f_util_FileUtils::write($filePath, $content);
-			chgrp($filePath, WWW_GROUP);
-			chmod($filePath, 02775);
 		}
 	}
 	
@@ -189,7 +186,7 @@ class ApacheService extends BaseService
 	 */
 	private function getApacheDirectory()
 	{
-		return f_util_FileUtils::buildWebappPath('apache');
+		return f_util_FileUtils::buildChangeBuildPath('apache');
 	}
 	
 	/**

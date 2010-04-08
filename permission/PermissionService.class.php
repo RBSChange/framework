@@ -1220,7 +1220,7 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 	
 	public function addImportInRight($forModuleName, $fromModuleName, $configFileName)
 	{
-		$destPath = f_util_FileUtils::buildWebappPath('modules', $forModuleName, 'config', 'rights.xml');
+		$destPath = f_util_FileUtils::buildOverridePath('modules', $forModuleName, 'config', 'rights.xml');
 		$result = array('action' => 'ignore', 'path' => $destPath);
 		
 		$path = FileResolver::getInstance()->setPackageName('modules_' . $fromModuleName)
@@ -1245,7 +1245,7 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 		$importNode = $document->findUnique($xquery, $document->documentElement);
 		if ($importNode === null)
 		{
-			f_util_FileUtils::mkdir(f_util_FileUtils::buildWebappPath('modules', $forModuleName, 'config'));
+			f_util_FileUtils::mkdir(f_util_FileUtils::buildOverridePath('modules', $forModuleName, 'config'));
 			$importNode = $document->documentElement->appendChild($document->createElement('import'));	
 			$importNode->setAttribute('modulename', $fromModuleName);
 			$importNode->setAttribute('configfilename', $configFileName);

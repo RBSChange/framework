@@ -23,16 +23,20 @@ class framework_patch_0309 extends patch_BasePatch
 	 */
 	public function execute()
 	{
-		$source = f_util_FileUtils::buildFrameworkPath('builder', 'webapp', 'bin', 'tasks', 'dayChange.php');
-		$destination = f_util_FileUtils::buildWebappPath('bin', 'tasks', 'dayChange.php');
+		$source = f_util_FileUtils::buildFrameworkPath('builder', 'home', 'bin', 'tasks', 'BaseTask.php');
+		$destination = f_util_FileUtils::buildWebeditPath('bin', 'tasks', 'BaseTask.php');
 		f_util_FileUtils::cp($source, $destination, f_util_FileUtils::OVERRIDE);
 		
-		$source = f_util_FileUtils::buildFrameworkPath('builder', 'webapp', 'bin', 'tasks', 'hourChange.php');
-		$destination = f_util_FileUtils::buildWebappPath('bin', 'tasks', 'hourChange.php');
+		$source = f_util_FileUtils::buildFrameworkPath('builder', 'home', 'bin', 'tasks', 'dayChange.php');
+		$destination = f_util_FileUtils::buildWebeditPath('bin', 'tasks', 'dayChange.php');
 		f_util_FileUtils::cp($source, $destination, f_util_FileUtils::OVERRIDE);
 		
-		$source = f_util_FileUtils::buildFrameworkPath('builder', 'webapp', 'bin', 'tasks', 'batchMailer.php');
-		$destination = f_util_FileUtils::buildWebappPath('bin', 'tasks', 'batchMailer.php');
+		$source = f_util_FileUtils::buildFrameworkPath('builder', 'home', 'bin', 'tasks', 'hourChange.php');
+		$destination = f_util_FileUtils::buildWebeditPath('bin', 'tasks', 'hourChange.php');
+		f_util_FileUtils::cp($source, $destination, f_util_FileUtils::OVERRIDE);
+		
+		$source = f_util_FileUtils::buildFrameworkPath('builder', 'home', 'bin', 'tasks', 'batchMailer.php');
+		$destination = f_util_FileUtils::buildWebeditPath('bin', 'tasks', 'batchMailer.php');
 		f_util_FileUtils::cp($source, $destination, f_util_FileUtils::OVERRIDE);
 	}
 

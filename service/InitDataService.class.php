@@ -127,7 +127,7 @@ class InitDataService extends BaseService
 			$result = true;
 		}
 
-		$file = f_util_FileUtils::buildAbsolutePath(AG_WEBAPP_DIR, 'modules', $moduleName, 'setup', 'initData.php');
+		$file = f_util_FileUtils::buildAbsolutePath(PROJECT_OVERRIDE, 'modules', $moduleName, 'setup', 'initData.php');
 		if ( is_readable($file) )
 		{
 			$this->doImport($file, $this->getSetupClassName($moduleName, true));

@@ -345,7 +345,7 @@ class config_ProjectParser
 		$moduleList = scandir($moduleDir);
 		foreach ($moduleList as $moduleName)
 		{
-			if ($moduleName == '.' || $moduleName == '..' || $moduleName == '.svn')
+			if ($moduleName[0] === '.')
 			{
 				continue;
 			}
@@ -393,7 +393,7 @@ class config_ProjectParser
 				$ini = $this->parseModuleXmlConfig($moduleXmlFile, $ini);
 				$moduleXmlFiles[$moduleName] = simplexml_load_file($moduleXmlFile);
 			}
-			$moduleXmlWebAppFile = implode(DIRECTORY_SEPARATOR, array(WEBEDIT_HOME, 'webapp', 'modules', $moduleName, 'config', 'module.xml'));
+			$moduleXmlWebAppFile = implode(DIRECTORY_SEPARATOR, array(WEBEDIT_HOME, 'override', 'modules', $moduleName, 'config', 'module.xml'));
 			if (is_readable($moduleXmlWebAppFile))
 			{
 				$ini = $this->parseModuleXmlConfig($moduleXmlWebAppFile, $ini);

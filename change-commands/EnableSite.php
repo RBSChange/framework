@@ -29,9 +29,9 @@ class commands_EnableSite extends commands_AbstractChangeCommand
 	 */
 	function _execute($params, $options)
 	{
-		$this->message("== Enable site ==");
-		
-		$flagFile = "webapp/www/site_is_disabled"; 
+		$this->message("== Enable site ==");	
+		$flagFile = "site_is_disabled"; 
+
 		if (!file_exists($flagFile))
 		{
 			return $this->quitWarn("Site is already enabled");

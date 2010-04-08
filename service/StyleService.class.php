@@ -29,7 +29,7 @@ class StyleService extends BaseService
      * CSS Cache Location (must be browsable).
      *
      */
-	const CACHE_LOCATION = '/www/cache/css/';
+	const CACHE_LOCATION = '/cache/www/css/';
 
 
 	/**
@@ -176,7 +176,7 @@ class StyleService extends BaseService
 		$globalFileSystemName = $this->getStylePath($styleNames, $contentType, $skin);
 		if ($globalFileSystemName !== null)
 		{
-			return LinkHelper::getRessourceLink('/cache/css/' . basename($globalFileSystemName))->getUrl();
+			return LinkHelper::getRessourceLink(self::CACHE_LOCATION . basename($globalFileSystemName))->getUrl();
 		}
 		return null;
 	}
@@ -257,7 +257,7 @@ class StyleService extends BaseService
 						}
 						fclose($handle);
 					}
-	                $src = LinkHelper::getRessourceLink('/cache/css/'.basename($globalFileSystemName))->getUrl();
+	                $src = LinkHelper::getRessourceLink(self::CACHE_LOCATION . basename($globalFileSystemName))->getUrl();
 	                $style[] = '<link rel="stylesheet" href="'.$src.'" type="text/css" media="'.$mediaType.'" />';				
 				}
 			}
@@ -353,7 +353,7 @@ class StyleService extends BaseService
 			    $fileSystemName .= $skin->getIdentifier() . '.';
 			}
 		}
-		return WEBAPP_HOME . self::CACHE_LOCATION . $fileSystemName . 'css';		
+		return f_util_FileUtils::buildWebCachePath('css', $fileSystemName . 'css');		
 	}
 
 	/**
@@ -441,7 +441,7 @@ class StyleService extends BaseService
 			$this->getCurrentWebsiteId(),
 			'css');
 			
-		return WEBAPP_HOME . self::CACHE_LOCATION . implode('.', $fileParts);
+		return f_util_FileUtils::buildWebCachePath('css', implode('.', $fileParts));
 	}
 
 	/**

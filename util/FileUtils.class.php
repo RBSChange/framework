@@ -9,16 +9,15 @@ abstract class f_util_FileUtils
 	static public function isDirectoryWritable($filepath,$recurse=false)
 	{
 
-		// intcours - AG_USE_DEBUG UNDEFINED AT THIS POINT : if (AG_USE_DEBUG) file_put_contents(WEBAPP_HOME."/log/initialization.log" ,"test if ".$filepath." is writable\n",FILE_APPEND);
 		if (is_dir($filepath)==false) throw new Exception("not a directory: $filepath");
-
 		$result = @file_put_contents($filepath.'/write.test','this is a write test');
 		@unlink($filepath.'/write.test');
 
 
 		if ($result>0)
 		{
-			if ($dh = opendir($filepath)) {
+			if ($dh = opendir($filepath)) 
+			{
 				while (($file = readdir($dh)) !== false) {
 					if ($file!='..' && $file!='.' && $file!='.svn' && is_dir($filepath.'/'.$file)) self::isDirectoryWritable($filepath.'/'.$file,$recurse);
 				}
@@ -144,7 +143,7 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * create dynamically a directory (and sub-directories) on filesystem write-accessible by webapp
+	 * create dynamically a directory (and sub-directories) on filesystem
 	 * @param $directoryPath the directory to create
 	 * @throws IOException
 	 */
@@ -222,7 +221,7 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @example FileUtils::buildWebeditPath('webapp', 'cache') returns WEBEDIT_HOME.DIRECTORY_SEPARATOR.'webapp'.DIRECTORY_SEPARATOR.'cache'
+	 * @example FileUtils::buildWebeditPath('bin', 'tasks') returns WEBEDIT_HOME.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'tasks'
 	 * @return String
 	 */
 	public static function buildWebeditPath()
@@ -233,16 +232,39 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @example FileUtils::buildWebappPath('cache') returns WEBAPP_HOME.DIRECTORY_SEPARATOR.'cache'
+	 * @deprecated
 	 * @return String
 	 */
 	public static function buildWebappPath()
 	{
 		$args = func_get_args();
-		array_unshift($args, WEBAPP_HOME);
+		Framework::warn(__METHOD__);
+		array_unshift($args, PROJECT_OVERRIDE);
+		return self::buildAbsolutePathFromArray($args);
+	}
+	
+	/**
+	 * @example FileUtils::buildOverridePath('toto') returns PROJECT_OVERRIDE.DIRECTORY_SEPARATOR.'toto'
+	 * @return String
+	 */
+	public static function buildOverridePath()
+	{
+		$args = func_get_args();
+		array_unshift($args, PROJECT_OVERRIDE);
 		return self::buildAbsolutePathFromArray($args);
 	}
 
+	/**
+ 	 * @example FileUtils::buildDocumentRootPath('toto') returns DOCUMENT_ROOT.DIRECTORY_SEPARATOR.'toto'
+	 * @return String
+	 */
+	public static function buildDocumentRootPath()
+	{
+		$args = func_get_args();
+		array_unshift($args, DOCUMENT_ROOT);
+		return self::buildAbsolutePathFromArray($args);
+	}
+	
 	/**
 	 * @example FileUtils::buildCachePath('toto') returns AG_CACHE_DIR.DIRECTORY_SEPARATOR.'toto'
 	 * @return String
@@ -262,6 +284,17 @@ abstract class f_util_FileUtils
 	{
 		$args = func_get_args();
 		array_unshift($args, CHANGE_CACHE_DIR);
+		return self::buildAbsolutePathFromArray($args);
+	}
+	
+	/**
+	 * @example FileUtils::buildWebCachePath('toto') returns WEB_CACHE_DIR.DIRECTORY_SEPARATOR.'toto'
+	 * @return String
+	 */
+	public static function buildWebCachePath()
+	{
+		$args = func_get_args();
+		array_unshift($args, WEB_CACHE_DIR);
 		return self::buildAbsolutePathFromArray($args);
 	}
 
@@ -300,7 +333,7 @@ abstract class f_util_FileUtils
 
 	/**
 	 * TODO: this method does NOT returns what it promise to do ...
-	 * remove a directory (and sub-directories) on filesystem write-accessible by webapp
+	 * remove a directory (and sub-directories) on filesystem
 	 * @param $directoryPath the directory to remove
 	 * @return boolean FALSE if directory cannot be removed
 	 */

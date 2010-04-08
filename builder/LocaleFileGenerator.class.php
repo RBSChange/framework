@@ -58,11 +58,11 @@ class builder_LocaleFileGenerator
 		// Document locale file
 		if ($this->isModelInjected)
 		{
-			$baseDir = WEBEDIT_HOME.DIRECTORY_SEPARATOR."webapp".DIRECTORY_SEPARATOR."modules";
+			$baseDir = f_util_FileUtils::buildOverridePath('modules');
 		}
 		else
 		{
-			$baseDir = WEBEDIT_HOME.DIRECTORY_SEPARATOR."modules";
+			$baseDir = f_util_FileUtils::buildWebeditPath('modules');
 		}
 		$srcLocaleFile = $destLocaleFile = $baseDir . DIRECTORY_SEPARATOR . $this->model->getModuleName() . DIRECTORY_SEPARATOR . 'locale' . DIRECTORY_SEPARATOR . 'document' . DIRECTORY_SEPARATOR . $this->model->getDocumentName() . '.xml';
 		$builderLocaleFile = FRAMEWORK_HOME . DIRECTORY_SEPARATOR . 'builder' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'locales' . DIRECTORY_SEPARATOR . 'documentLocalizationTemplate.all.all.xml';

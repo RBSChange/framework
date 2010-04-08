@@ -14,8 +14,8 @@ class ClassResolver implements ResourceResolver
 	private $classes = null;
 	private $cacheDir = null;
 
-	private $keys = array('%AG_LIB_DIR%', '%AG_MODULE_DIR%', '%FRAMEWORK_HOME%', '%WEBAPP_HOME%', '%WEBEDIT_HOME%', '%PROFILE%');
-	private $reps = array(AG_LIB_DIR, AG_MODULE_DIR, FRAMEWORK_HOME, WEBAPP_HOME, WEBEDIT_HOME, PROFILE);
+	private $keys = array('%AG_LIB_DIR%', '%AG_MODULE_DIR%', '%FRAMEWORK_HOME%', '%PROJECT_OVERRIDE%', '%WEBEDIT_HOME%', '%PROFILE%');
+	private $reps = array(AG_LIB_DIR, AG_MODULE_DIR, FRAMEWORK_HOME, PROJECT_OVERRIDE, WEBEDIT_HOME, PROFILE);
 
 	private function __construct()
 	{

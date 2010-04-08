@@ -35,45 +35,104 @@ class commands_InitWebapp extends commands_AbstractChangeCommand
 
 		// Copy files
 		$this->loadFramework();
+		
+		$rootSymLink = (WEBEDIT_HOME != DOCUMENT_ROOT);
+		if ($rootSymLink)
+		{
+			f_util_FileUtils::mkdir(DOCUMENT_ROOT);
+		}
+				
+		$exclude = array(".svn", "www");
+		$home = f_util_FileUtils::buildWebeditPath();
 
-		$exclude = array(".svn");
-		$webapp = f_util_FileUtils::buildWebappPath();
+		$this->message("Import framework home files");
+		$frameworkWebapp = f_util_FileUtils::buildWebeditPath("framework", "builder", "home");
+		f_util_FileUtils::cp($frameworkWebapp, $home, f_util_FileUtils::OVERRIDE | f_util_FileUtils::APPEND, $exclude);
+		
+		//Add .htaccess for hide system folder
+		$this->message("Add missing .htaccess");
+		$htAccess = f_util_FileUtils::buildWebeditPath("framework", "builder", "home", "bin", ".htaccess");
+		$to = f_util_FileUtils::buildCachePath('.htaccess');
+		if (!file_exists($to)) 
+		{
+			f_util_FileUtils::cp($htAccess, $to);
+		}
 
-		$this->message("Import framework webapp files");
-		$frameworkWebapp = f_util_FileUtils::buildWebeditPath("framework", "builder", "webapp");
-		f_util_FileUtils::cp($frameworkWebapp, $webapp, f_util_FileUtils::OVERRIDE | f_util_FileUtils::APPEND, $exclude);
-		$this->message("Create webapp/www/media folder");
-		f_util_FileUtils::symlink(f_util_FileUtils::buildWebappPath("media"), f_util_FileUtils::buildWebappPath("www/media"), f_util_FileUtils::OVERRIDE);
-		$this->message("Create webapp/www/publicmedia folder");
-		f_util_FileUtils::symlink(f_util_FileUtils::buildWebeditPath("media"), f_util_FileUtils::buildWebappPath("www/publicmedia"), f_util_FileUtils::OVERRIDE);
-
+		foreach (array('config', 'securemedia', 'build', 'log', 'libs', 'modules', 'override', 'mailbox') as $hiddeDir) 
+		{
+			$to = f_util_FileUtils::buildWebeditPath($hiddeDir, '.htaccess');
+			if (is_dir(dirname($to)))
+			{
+				if (!file_exists($to)) 
+				{
+					f_util_FileUtils::cp($htAccess, $to);
+				}
+			}
+		}
+		
+		$this->message("Create /publicmedia folder");
+		f_util_FileUtils::symlink(f_util_FileUtils::buildWebeditPath("media"), f_util_FileUtils::buildDocumentRootPath("publicmedia"), f_util_FileUtils::OVERRIDE);
+		
 		// Icons symlink
 		if (file_exists(WEBEDIT_HOME."/libs/icons"))
 		{
 			$this->message("Create icons symlink");
-			$iconsLink = f_util_FileUtils::buildWebappPath("media", "icons");
-			f_util_FileUtils::symlink(WEBEDIT_HOME."/libs/icons", $iconsLink, f_util_FileUtils::OVERRIDE);
+			$iconsLink = f_util_FileUtils::buildWebeditPath("media", "changeicons");
+			f_util_FileUtils::symlink(WEBEDIT_HOME."/libs/icons", $iconsLink, f_util_FileUtils::OVERRIDE);			
 		}
 		elseif (($computedDeps = $this->getComputedDeps()) && isset($computedDeps["lib"]["icons"]))
 		{
 			$this->warnMessage(WEBEDIT_HOME."/libs/icons does not exists. Did you ran init-project ?");
 		}
-
-		foreach (ModuleService::getInstance()->getModulesObj() as $module)
+		
+		foreach (glob(WEBEDIT_HOME . '/modules/*/webapp') as $moduleWebapp)
 		{
-			$moduleWebapp = $module->getPath()."/webapp";
-			if (is_dir($moduleWebapp))
+			$this->message("Import ".$moduleWebapp." files");
+			f_util_FileUtils::cp($moduleWebapp, $home, f_util_FileUtils::OVERRIDE | f_util_FileUtils::APPEND, $exclude);
+			$deprecatedWWW = f_util_FileUtils::buildPath($moduleWebapp, 'www');
+			if (is_dir($deprecatedWWW))
 			{
-				$this->message("Import ".$module->getName()." webapp files");
-				f_util_FileUtils::cp($moduleWebapp, $webapp, f_util_FileUtils::OVERRIDE | f_util_FileUtils::APPEND, $exclude);
+				f_util_FileUtils::cp($deprecatedWWW, $home, f_util_FileUtils::OVERRIDE | f_util_FileUtils::APPEND, $exclude);
+			}
+		}
+		
+		foreach (glob(PROJECT_OVERRIDE . '/modules/*/webapp') as $moduleWebapp)
+		{
+			$this->message("Import ".$moduleWebapp." files");
+			f_util_FileUtils::cp($moduleWebapp, $home, f_util_FileUtils::OVERRIDE | f_util_FileUtils::APPEND, $exclude);
+			$deprecatedWWW = f_util_FileUtils::buildPath($moduleWebapp, 'www');
+			if (is_dir($deprecatedWWW))
+			{
+				f_util_FileUtils::cp($deprecatedWWW, $home, f_util_FileUtils::OVERRIDE | f_util_FileUtils::APPEND, $exclude);
 			}
 		}
 
-
-
+		if ($rootSymLink)
+		{
+			$this->addRootLink(WEBEDIT_HOME);
+		}
+		
 		// Apply file policy
 		$this->getParent()->executeCommand("applyWebappPolicy");
-
+		
 		$this->quitOk("Webapp initialized");
+	}
+	
+	private function addRootLink($targetDir)
+	{
+		$targetDir .= DIRECTORY_SEPARATOR;
+		$exclude = array('apache', 'bin', 'log', 'build', 'config', 'framework', 'libs', 'modules', 'securemedia', 
+			'webapp', 'mailbox', 'override', 'profile', 'change.xml', 'change.properties',
+			'migration', 'mockup', 'target');
+		$dh = opendir($targetDir);
+		while (($file = readdir($dh)) !== false)
+		{
+			if (strpos($file, '.') === 0) {continue;}
+			if (in_array($file, $exclude)) {continue;}
+			$target = $targetDir.$file;
+			$link = f_util_FileUtils::buildDocumentRootPath($file);
+			f_util_FileUtils::symlink($target, $link, f_util_FileUtils::OVERRIDE);
+		}
+		closedir($dh);
 	}
 }

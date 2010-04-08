@@ -261,13 +261,13 @@ class LocaleService extends BaseService
 				unset($parentInfo[1]);
 			}
 			$parentFile = $baseDir."/locale/".join("/", $parentInfo).".xml";
-			if (file_exists(WEBEDIT_HOME."/webapp/".$parentFile))
+			if (file_exists(f_util_FileUtils::buildOverridePath($parentFile)))
 			{
-				$this->processFile($package, WEBEDIT_HOME."/webapp/".$parentFile, $entities);
+				$this->processFile($package, f_util_FileUtils::buildOverridePath($parentFile), $entities);
 			}
-			if (file_exists(WEBEDIT_HOME."/".$parentFile))
+			if (file_exists(f_util_FileUtils::buildWebeditPath($parentFile)))
 			{
-				$this->processFile($package, WEBEDIT_HOME."/".$parentFile, $entities);
+				$this->processFile($package, f_util_FileUtils::buildWebeditPath($parentFile), $entities);
 			}
 			else
 			{

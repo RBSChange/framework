@@ -27,7 +27,7 @@ class framework_patch_0305 extends patch_BasePatch
 			$stylePath = f_util_FileUtils::buildWebeditPath('modules', $mod->getName(), 'style');
 			$this->migratePath($mod, $stylePath);
 
-			$stylePath = f_util_FileUtils::buildWebappPath('modules', $mod->getName(), 'style');
+			$stylePath = f_util_FileUtils::buildOverridePath('modules', $mod->getName(), 'style');
 			$this->migratePath($mod, $stylePath);
 		}
 	}

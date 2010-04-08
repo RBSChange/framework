@@ -62,24 +62,7 @@ class commands_InitProject extends commands_AbstractChangeCommand
 		{
 			$this->warnMessage($fileName.' already exists.');
 		}
-		// test config
-		$fileName = 'config/project.test.xml';
-		if (!file_exists(f_util_FileUtils::buildWebeditPath($fileName)))
-		{
-			$this->message("Create $fileName");
-			$profilProject = f_util_FileUtils::read("$builderResourcePath/config/project_profil.xml");
-			$profilSubstitutions = array("project" => $this->getProjectName(),
-				"author" => $this->getAuthor(), "serverHost" => $this->getServerHost(),
-				"database" => str_replace(".", "_", "C4_".$this->getAuthor()."_".$this->getProjectName()."_test"),
-				"database_host" => $this->getDatabaseHost(),
-				"serverFqdn" => $this->getServerFqdn(), "fakeMailDef" => $this->getFakeMailDef(),
-				"solrDef" => $this->getSolrDef());
-			f_util_FileUtils::write($fileName, $this->substitueVars($profilProject, $profilSubstitutions), f_util_FileUtils::OVERRIDE);
-		}
-		else
-		{
-			$this->warnMessage($fileName.' already exists.');
-		}
+
 		// current user config
 		$fileName = 'config/project.'.$this->getProfile().'.xml';
 		if (!file_exists(f_util_FileUtils::buildWebeditPath($fileName)))
@@ -143,8 +126,6 @@ class commands_InitProject extends commands_AbstractChangeCommand
 		f_util_FileUtils::mkdir("log/".$this->getProfile());
 
 		// various directories. FIXME: still used ?
-		f_util_FileUtils::mkdir("target/doc");
-		f_util_FileUtils::mkdir("target/report");
 		f_util_FileUtils::mkdir("mailbox");
 		f_util_FileUtils::mkdir("modules");
 

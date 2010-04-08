@@ -64,7 +64,7 @@ class builder_BackofficeStyleUpdater
 			return;
 		}
 
-		$content .= $selector . "{\n\tlist-style-image: url(/icons/$iconName.png);\n}";
+		$content .= $selector . "{\n\tlist-style-image: url(/changeicons/$iconName.png);\n}";
 		echo "Updating $file\n";
 		f_util_FileUtils::write($file, $content, f_util_FileUtils::OVERRIDE);
 	}

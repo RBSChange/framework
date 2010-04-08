@@ -31,7 +31,7 @@ class commands_DisableSite extends commands_AbstractChangeCommand
 	{
 		$this->message("== Disable site ==");
 		
-		$flagFile = "webapp/www/site_is_disabled"; 
+		$flagFile = "site_is_disabled"; 
 		if (file_exists($flagFile))
 		{
 			return $this->quitWarn("Site is already disabled");
