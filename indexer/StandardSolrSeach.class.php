@@ -45,7 +45,8 @@ class indexer_StandardSolrSearch
 					$sortingString[] = $name." asc";
 				}
 			}
-			$queryString .= ";" . join(',', $sortingString). ";";
+			
+			$queryString .= "&" . join(',', $sortingString). "&";
 		}
 
 		// Pagination

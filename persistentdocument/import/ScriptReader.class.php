@@ -85,7 +85,7 @@ class import_ScriptReader extends BaseService
 		{
 			$message = join("\n", $this->errors);
 			$this->errors = null;
-			throw new Exception("Error while processing $fileName:\n$message");
+			echo "Error while processing $fileName:\n$message";
 		}
 	}
 

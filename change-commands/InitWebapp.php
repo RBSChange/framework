@@ -42,13 +42,13 @@ class commands_InitWebapp extends commands_AbstractChangeCommand
 			f_util_FileUtils::mkdir(DOCUMENT_ROOT);
 		}
 				
-		$exclude = array(".svn", "www");
+		$exclude = array(".svn");
 		$home = f_util_FileUtils::buildWebeditPath();
 
 		$this->message("Import framework home files");
 		$frameworkWebapp = f_util_FileUtils::buildWebeditPath("framework", "builder", "home");
 		f_util_FileUtils::cp($frameworkWebapp, $home, f_util_FileUtils::OVERRIDE | f_util_FileUtils::APPEND, $exclude);
-		
+		$exclude[] = "www";
 		//Add .htaccess for hide system folder
 		$this->message("Add missing .htaccess");
 		$htAccess = f_util_FileUtils::buildWebeditPath("framework", "builder", "home", "bin", ".htaccess");
