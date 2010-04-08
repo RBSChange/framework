@@ -376,74 +376,74 @@
 		suggestions.  If invoked with a ...&cmd=rebuild, it will rebuild the
 		spellchecker index.
 	-->
-	<requestHandler name="spellchecker_fr" class="solr.ChangeSpellCheckerRequestHandler">
+	<requestHandler name="spellchecker_fr" class="solr.SpellCheckerRequestHandler">
 		<!-- default values for query parameters -->
 		<lst name="defaults">
 			<int name="suggestionCount">1</int>
 			<float name="accuracy">0.5</float>
 		</lst>
 		<str name="spellcheckerIndexBaseDir">changespell_fr</str>
-		<str name="sourceField">fr_words</str>
+		<str name="termSourceField">fr_words</str>
 	</requestHandler>
 
-	<requestHandler name="spellchecker_en" class="solr.ChangeSpellCheckerRequestHandler">
+	<requestHandler name="spellchecker_en" class="solr.SpellCheckerRequestHandler">
 		<!-- default values for query parameters -->
 		<lst name="defaults">
 			<int name="suggestionCount">1</int>
 			<float name="accuracy">0.5</float>
 		</lst>
 		<str name="spellcheckerIndexBaseDir">changespell_en</str>
-		<str name="sourceField">en_words</str>
+		<str name="termSourceField">en_words</str>
 	</requestHandler>
 
-	<requestHandler name="spellchecker_de" class="solr.ChangeSpellCheckerRequestHandler">
+	<requestHandler name="spellchecker_de" class="solr.SpellCheckerRequestHandler">
 		<!-- default values for query parameters -->
 		<lst name="defaults">
 			<int name="suggestionCount">1</int>
 			<float name="accuracy">0.5</float>
 		</lst>
 		<str name="spellcheckerIndexBaseDir">changespell_de</str>
-		<str name="sourceField">de_words</str>
+		<str name="termSourceField">de_words</str>
 	</requestHandler>
 
-	<requestHandler name="spellchecker_es" class="solr.ChangeSpellCheckerRequestHandler">
+	<requestHandler name="spellchecker_es" class="solr.SpellCheckerRequestHandler">
 		<!-- default values for query parameters -->
 		<lst name="defaults">
 			<int name="suggestionCount">1</int>
 			<float name="accuracy">0.5</float>
 		</lst>
 		<str name="spellcheckerIndexBaseDir">changespell_es</str>
-		<str name="sourceField">es_words</str>
+		<str name="termSourceField">es_words</str>
 	</requestHandler>
 
-	<requestHandler name="spellchecker_nl" class="solr.ChangeSpellCheckerRequestHandler">
+	<requestHandler name="spellchecker_nl" class="solr.SpellCheckerRequestHandler">
 		<!-- default values for query parameters -->
 		<lst name="defaults">
 			<int name="suggestionCount">1</int>
 			<float name="accuracy">0.5</float>
 		</lst>
 		<str name="spellcheckerIndexBaseDir">changespell_nl</str>
-		<str name="sourceField">nl_words</str>
+		<str name="termSourceField">nl_words</str>
 	</requestHandler>
 
-	<requestHandler name="spellchecker_it" class="solr.ChangeSpellCheckerRequestHandler">
+	<requestHandler name="spellchecker_it" class="solr.SpellCheckerRequestHandler">
 		<!-- default values for query parameters -->
 		<lst name="defaults">
 			<int name="suggestionCount">1</int>
 			<float name="accuracy">0.5</float>
 		</lst>
 		<str name="spellcheckerIndexBaseDir">changespell_it</str>
-		<str name="sourceField">it_words</str>
+		<str name="termSourceField">it_words</str>
 	</requestHandler>
 
-	<requestHandler name="spellchecker_pt" class="solr.ChangeSpellCheckerRequestHandler">
+	<requestHandler name="spellchecker_pt" class="solr.SpellCheckerRequestHandler">
 		<!-- default values for query parameters -->
 		<lst name="defaults">
 			<int name="suggestionCount">1</int>
 			<float name="accuracy">0.5</float>
 		</lst>
 		<str name="spellcheckerIndexBaseDir">changespell_pt</str>
-		<str name="sourceField">pt_words</str>
+		<str name="termSourceField">pt_words</str>
 	</requestHandler>
 
 	<!-- Update request handler.  
@@ -466,7 +466,6 @@
 	<requestHandler name="/admin/plugins" class="org.apache.solr.handler.admin.PluginInfoHandler" />
 	<requestHandler name="/admin/threads" class="org.apache.solr.handler.admin.ThreadDumpHandler" />
 	<requestHandler name="/admin/properties" class="org.apache.solr.handler.admin.PropertiesRequestHandler" />
-	<requestHandler name="/admin/synonyms" class="org.apache.solr.handler.admin.SynonymsRequestHandler" />
 
 	<!-- Echo the request contents back to the client -->
 	<requestHandler name="/debug/dump" class="solr.DumpRequestHandler">

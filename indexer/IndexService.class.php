@@ -392,50 +392,23 @@ class indexer_IndexService extends BaseService
 	
 	/**
 	 * Get the array of declared synonyms in solr's schema.xml file.
-	 *
+	 * @deprecated 
 	 * @return Array
 	 */
 	public function getSynonymsLists()
 	{
-		try
-		{
-			$this->beginFrontIndexerMode();
-			if ($this->manager == null)
-			{
-				$searchResults = array();
-			}
-			$searchResults = $this->manager->getSynonymsLists();
-			$this->endIndexerMode();
-		}
-		catch (Exception $e)
-		{
-			$this->endIndexerMode($e);
-		}
-		return $searchResults;
+		return array();
 	}
 	
 	/**
 	 * Update the synonyms list $synonymsList with the content $content
-	 *
+	 * @deprecated
 	 * @param String $synonymsList
 	 * @param String $content
 	 */
 	public function updateSynonymsList($synonymsList, $content)
 	{
-		if ($this->manager == null)
-		{
-			return;
-		}
-		try
-		{
-			$this->beginFrontIndexerMode();
-			$this->manager->updateSynonymsList($synonymsList, $content);
-			$this->endIndexerMode();
-		}
-		catch (Exception $e)
-		{
-			$this->endIndexerMode($e);
-		}
+		return;
 	}
 	
 	/**

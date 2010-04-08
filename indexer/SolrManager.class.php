@@ -353,35 +353,22 @@ class indexer_SolrManager
 	}
 	
 	/**
+	 * @deprecated 
 	 * @return Array
 	 */
 	public function getSynonymsLists()
 	{
-		$this->setTask(self::SYNONYMS_TASK);
-		return $this->getArrayPropertyFromData("synonymfiles", $this->sendXMLData(""));
+		return array();
 	}
 	
 	/**
+	 * @deprecated 
 	 * @param String $name
 	 * @param String $content
 	 */
 	public function updateSynonymsList($name, $content)
 	{
-		$this->setTask(self::SYNONYMS_TASK);
-		if (f_util_StringUtils::isEmpty($content))
-		{
-			$content = "# no content";
-		}
-		
-		if (!f_util_StringUtils::isEmpty($this->getClientId()))
-		{
-			$client = '&client=' . $this->getClientId();
-		}
-		else
-		{
-			$client = '';
-		}
-		$this->postData('/?' . $client . '&synonymsList=' . urlencode($name) . '&synonymsData=' . urlencode("# This file was generated on " . date_Calendar::now()->toString() . "\n" . $content));
+		return;
 	}
 	
 	/**
