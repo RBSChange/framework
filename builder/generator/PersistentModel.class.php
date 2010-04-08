@@ -687,6 +687,27 @@ class generator_PersistentModel
 	}
 
 	/**
+	 * @param String[] $models
+	 * @return String[]
+	 */
+	public function getAncestorModels($models = null)
+	{
+		if ($models === null)
+		{
+			$models = array();
+		}
+		else 
+		{
+			$models[] = $this->getName();
+		}
+		if ($this->extend !== null)
+		{
+			$models = self::getModelByName($this->extend)->getAncestorModels($models);
+		}
+		return $models;
+	}
+
+	/**
 	 * @return String[]
 	 */
 	function getChildren()

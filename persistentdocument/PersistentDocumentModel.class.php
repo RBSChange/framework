@@ -315,10 +315,27 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 	
 	/**
+	 * @return string[]
+	 */
+	abstract public function getAncestorModelNames();
+	
+	/**
 	 * @param String $modelName
 	 * @return Boolean
 	 */
-	abstract public function isModelCompatible($modelName);
+	public final function isModelCompatible($modelName)
+	{
+		switch ($modelName)
+		{
+			case '*':
+			case 'modules_generic/Document':
+			case $this->getName():
+				return true;
+			
+			default: 
+				return in_array($modelName, $this->getAncestorModelNames());
+		}
+	}
 
 	/**********************************************************/
 	/* Document Status Informations                            */

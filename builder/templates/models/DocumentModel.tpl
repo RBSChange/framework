@@ -175,13 +175,11 @@ class <{$model->getFinalDocumentClassName()}>model extends f_persistentdocument_
 	}
 
 	/**
-	 * @param String $modelName
-	 * @return Boolean
+	 * @return string[]
 	 */
-	public final function isModelCompatible($modelName)
+	public final function getAncestorModelNames()
 	{
-		// TODO: enhance generating a switch case or an "OR" condition ?
-		return array_search($modelName, array(<{foreach from=$model->getCompatibleModel() item=modelName}>'<{$modelName}>',<{/foreach}>)) !== false;
+		return array(<{foreach from=$model->getAncestorModels() item=modelName}>'<{$modelName}>',<{/foreach}>);
 	}
 
 	/**
