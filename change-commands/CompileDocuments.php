@@ -62,6 +62,11 @@ class commands_CompileDocuments extends commands_AbstractChangeCommand
 		{
 			try
 			{
+				// Get a document Generator.
+				$documentGenerator = new builder_DocumentGenerator($model->getModuleName(), $model->getDocumentName(), false);
+				
+				$documentGenerator->generateFinalPersistentDocumentFile();
+				
 				$documentGenerator->addStyleInBackofficeFile();
 			}
 			catch (Exception $e)

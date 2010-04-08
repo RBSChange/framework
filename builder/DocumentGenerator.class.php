@@ -194,7 +194,7 @@ class builder_DocumentGenerator
 	/**
 	 * Generate persistent document files
 	 */
-	private function generateFinalPersistentDocumentFile()
+	public function generateFinalPersistentDocumentFile()
 	{
 		$filePath = $this->pathBaseModule . 'persistentdocument' . DIRECTORY_SEPARATOR . $this->name . '.class.php';
 		// Generate documentName.class.php and save it in /modules/moduleName/persistentdocument/documentName.class.php
@@ -378,8 +378,6 @@ class builder_DocumentGenerator
 		{
 			$classResolver->appendToAutoloadFile($this->module .'_persistentdocument_' . $this->name . 'I18n', $filePath);
 		}
-		
-		$this->generateFinalPersistentDocumentFile();
 	}
 
 	public function updateRights()
