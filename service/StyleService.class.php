@@ -136,21 +136,20 @@ class StyleService extends BaseService
 		$globalFileSystemName = $this->getFileSystemNameForGlobalStyleSheet(self::MEDIA_SCREEN, $fileSystemNames);
 		if (!$this->isFileValid($globalFileSystemName))
 		{
+			$this->validFile($globalFileSystemName);
+			f_util_FileUtils::mkdir(dirname($globalFileSystemName));
 			$handle = fopen($globalFileSystemName, 'w');
-			if ($handle)
+			foreach ($styleNames as $styleName)
 			{
-				foreach ($styleNames as $styleName)
+				fwrite($handle, "/* $styleName START */\n");
+				$css = $this->getCSS($styleName, $engine, $skin);
+				if ($css !== null)
 				{
-					fwrite($handle, "/* $styleName START */\n");
-					$css = $this->getCSS($styleName, $engine, $skin);
-					if ($css !== null)
-					{
-						fwrite($handle, $css);
-					}
-					fwrite($handle, "\n/* $styleName END */\n");
+					fwrite($handle, $css);
 				}
-				fclose($handle);
+				fwrite($handle, "\n/* $styleName END */\n");
 			}
+			fclose($handle);
 		}
 		return $globalFileSystemName;
 	}
@@ -163,6 +162,14 @@ class StyleService extends BaseService
 	{
 		return is_readable($fileName) && !file_exists($fileName.'.deleted');
 	}
+	
+	private function validFile($fileName)
+	{
+		if (file_exists($fileName.'.deleted'))
+		{
+			unlink($fileName.'.deleted');
+		}
+	}	
 	
 	/**
 	 * Get URL of the given style :
@@ -239,27 +246,26 @@ class StyleService extends BaseService
 			foreach ($styleByMedia as $mediaType => $styleNames)
 			{
 				$globalFileSystemName = $this->getFileSystemNameForGlobalStyleSheet($mediaType, $styleNames);
-				if ($globalFileSystemName !== null)
+				if (!$this->isFileValid($globalFileSystemName))
 				{
+					$this->validFile($globalFileSystemName);
+					f_util_FileUtils::mkdir(dirname($globalFileSystemName));
 					$engine = $this->getFullEngineName($mimeContentType);
 					$handle = fopen($globalFileSystemName, 'w');
-					if ($handle)
+					foreach ($styleNames as $styleName) 
 					{
-						foreach ($styleNames as $styleName) 
+						fwrite($handle, "/* $styleName START */\n");
+						$css = $this->getCSS($styleName, $engine, $skin);
+						if ($css !== null)
 						{
-							fwrite($handle, "/* $styleName START */\n");
-							$css = $this->getCSS($styleName, $engine, $skin);
-							if ($css !== null)
-							{
-								fwrite($handle, $css);
-							}
-							fwrite($handle, "\n/* $styleName END */\n");
+							fwrite($handle, $css);
 						}
-						fclose($handle);
+						fwrite($handle, "\n/* $styleName END */\n");
 					}
-	                $src = LinkHelper::getRessourceLink(self::CACHE_LOCATION . basename($globalFileSystemName))->getUrl();
-	                $style[] = '<link rel="stylesheet" href="'.$src.'" type="text/css" media="'.$mediaType.'" />';				
+					fclose($handle);
 				}
+                $src = LinkHelper::getRessourceLink(self::CACHE_LOCATION . basename($globalFileSystemName))->getUrl();
+                $style[] = '<link rel="stylesheet" href="'.$src.'" type="text/css" media="'.$mediaType.'" />';
 			}
 		}
 		if (count($style) > 0)
@@ -375,16 +381,17 @@ class StyleService extends BaseService
 		{
 			return $fileLocation;
 		}
+		$this->validFile($fileLocation);
+	
 		$css = $this->getCSS($style, $engine, $skin);
 		if ($css !== null)
 		{
-			$fp = fopen($fileLocation, 'w');
-			if ($fp)
-			{			
-				fwrite($fp, $css);
-				fclose($fp);
-				return $fileLocation;
-			}			
+			f_util_FileUtils::writeAndCreateContainer($fileLocation, $css, f_util_FileUtils::OVERRIDE);	
+			return $fileLocation;
+		}
+		else if (file_exists($fileLocation))
+		{
+			unlink($fileLocation);
 		}
 		return null;
 	}
