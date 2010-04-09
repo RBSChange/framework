@@ -220,7 +220,7 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 			{
 				if (!$this->userHasRole($user, $roleName, $nodeId))
 				{
-					$acl = $this->getNewDocumentInstance('modules_generic/userAcl');
+					$acl = generic_UserAclService::getInstance()->getNewDocumentInstance();
 					$acl->setUser($user);
 					$acl->setRole($roleName);
 					$acl->setDocumentId($nodeId);
@@ -317,7 +317,7 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 			{
 				if (!$this->groupHasRole($group, $roleName, $nodeId))
 				{
-					$acl = $this->getNewDocumentInstance('modules_generic/groupAcl');
+					$acl = generic_GroupAclService::getInstance()->getNewDocumentInstance();
 					$acl->setGroup($group);
 					$acl->setRole($roleName);
 					$acl->setDocumentId($nodeId);
@@ -669,7 +669,7 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 			$this->tm->beginTransaction();
 			foreach ($userResult as $acl)
 			{
-				$derivedAcl = $this->getNewDocumentInstance('modules_generic/userAcl');
+				$derivedAcl = generic_UserAclService::getInstance()->getNewDocumentInstance();
 				$derivedAcl->setUser($acl->getUser());
 				$derivedAcl->setRole($acl->getRole());
 				$derivedAcl->setDocumentId($nodeId);
@@ -678,7 +678,7 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 
 			foreach ($groupResult as $acl)
 			{
-				$derivedAcl = $this->getNewDocumentInstance('modules_generic/groupAcl');
+				$derivedAcl = generic_GroupAclService::getInstance()->getNewDocumentInstance();
 				$derivedAcl->setGroup($acl->getGroup());
 				$derivedAcl->setRole($acl->getRole());
 				$derivedAcl->setDocumentId($nodeId);
