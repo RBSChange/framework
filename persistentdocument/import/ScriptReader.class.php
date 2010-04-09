@@ -61,7 +61,7 @@ class import_ScriptReader extends BaseService
 	public function execute($fileName)
 	{
 		$this->initialize();
-		$this->executeInternal($fileName);
+		$this->executeInternal($fileName);		
 	}
 
 	/**
@@ -76,8 +76,7 @@ class import_ScriptReader extends BaseService
 		if (! $reader->open($fileName))
 		{
 			throw new Exception('Could not open ' . $fileName . ' for reading');
-		}
-
+		}		
 		$this->parse($reader);
 		$reader->close();
 		restore_error_handler();
@@ -85,7 +84,7 @@ class import_ScriptReader extends BaseService
 		{
 			$message = join("\n", $this->errors);
 			$this->errors = null;
-			echo "Error while processing $fileName:\n$message";
+			Framework::error("Error while processing $fileName:\n$message");
 		}
 	}
 

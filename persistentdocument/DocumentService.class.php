@@ -713,13 +713,11 @@ class f_persistentdocument_DocumentService extends BaseService
 
 	/**
 	 * Creates a new instance of a document from its document model name and returns it.
-	 * @deprecated use PersistentDocument->getNewDocumentInstanceByModelName
-	 * @param string $documentModelName Example: modules_news/news
 	 * @return f_persistentdocument_PersistentDocument
 	 */
-	protected function getNewDocumentInstance($documentModelName)
+	public function getNewDocumentInstance()
 	{
-		return $this->getNewDocumentInstanceByModelName($documentModelName);
+		throw new Exception("Can not get new document instance for DocumentService : use getNewDocumentInstanceByModelName instead");
 	}
 
 	/**
@@ -2737,6 +2735,7 @@ class f_persistentdocument_DocumentService extends BaseService
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
 	 * @param string $forModuleName
+	 * @param array $allowedSections
 	 * @return array
 	 */
 	public function getResume($document, $forModuleName, $allowedSections = null)
