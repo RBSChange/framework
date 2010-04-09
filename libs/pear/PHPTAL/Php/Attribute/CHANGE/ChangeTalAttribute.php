@@ -123,8 +123,12 @@ class ChangeTalAttribute extends PHPTAL_Php_Attribute
 		// Parse change:xxxx attribute
 		foreach ($expressions as $exp)
 		{
+			if (f_util_StringUtils::isEmpty($exp))
+			{
+				continue;	
+			}
 			list($parameterName, $value) = $this->parseSetExpression($exp);
-
+			
 			if ($value === null)
 			{
 				$defaultParameterName = $this->getDefaultParameterName();
