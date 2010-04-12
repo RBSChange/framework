@@ -243,11 +243,9 @@
 
 			<!-- Other configuration possibility
 				<entry name="type">Sendmail</entry>
-				<entry name="sendmail_path"></entry>
-				<entry name="sendmail_args"></entry>
-
-				<entry name="type">Mail</entry>
-				-->
+				<entry name="sendmail_path">/usr/sbin/sendmail</entry>
+				<entry name="sendmail_args">-t -i</entry>
+			-->
 		</mail>
 
 		<!-- DATABASES -->
