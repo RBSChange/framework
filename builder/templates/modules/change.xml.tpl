@@ -9,11 +9,11 @@
 	<license>os</license>
 	<repository>public</repository>
 	<dependencies>
-		<dependency>
+		<!--<dependency>
 			<name>change-lib/framework</name>
 			<versions>
 				<version><{$frameworkVersion}></version>
 			</versions>
-		</dependency>
+		</dependency>-->
 	</dependencies>
 </change>
