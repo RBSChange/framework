@@ -31,7 +31,11 @@ class MassMailer
 			{
 				throw new Exception('$mailMessage must be an instance of mail message');
 			}
-			$mailMessage->setBounceBackAddress('testemailing.change@rbs.fr');
+			if ($mailMessage->getBounceBackAddress() == null)
+			{
+				$bounceBackAddress = Framework::getConfigurationValue('framework/defaultBounceBackAddress', 'testemailing.change@rbs.fr');
+				$mailMessage->setBounceBackAddress($bounceBackAddress);
+			}
 			$compressedContent = gzcompress(serialize($mailMessage));
 			if ($mailMessage->hasSource())
 			{
