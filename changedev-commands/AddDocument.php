@@ -90,6 +90,7 @@ Please create the document using 'create-document $moduleName $documentName'.");
 		$documentGenerator->setAuthor($this->getAuthor());
 		
 		$documentGenerator->generatePersistentDocumentFile();
+		$documentGenerator->generateFinalPersistentDocumentFile();
 		$documentGenerator->generateLocaleFile();
 
 		// Generate document service
