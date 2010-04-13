@@ -1,6 +1,31 @@
 <?php
 class bean_DateTimeConverter implements BeanValueConverter
 {
+	/**
+	 * @var String
+	 */
+	private $dateFormat;
+	
+
+	/**
+	 * @return String
+	 */
+	public function getDateFormat()
+	{
+		if ($this->dateFormat === null)
+		{
+			return date_DateFormat::getDateFormatForLang(RequestContext::getInstance()->getLang());
+		}
+		return $this->dateFormat;
+	}
+	
+	/**
+	 * @param String $dateFormat
+	 */
+	public function setDateFormat($dateFormat)
+	{
+		$this->dateFormat = $dateFormat;
+	}
 	
 	/**
 	 * @see BeanValueConverter::convertFromBeanToRequestValue()
@@ -31,7 +56,7 @@ class bean_DateTimeConverter implements BeanValueConverter
 	{
 		if (!f_util_StringUtils::isEmpty($value))
 		{
-			$convertedValue = date_Calendar::getInstanceFromFormat($value, date_DateFormat::getDateFormatForLang(RequestContext::getInstance()->getLang()));
+			$convertedValue = date_Calendar::getInstanceFromFormat($value, $this->getDateFormat());
 			$convertedValue = date_Converter::convertDateToGMT($convertedValue);
 			$convertedValue = $convertedValue->toString();
 			return $convertedValue;
@@ -49,7 +74,7 @@ class bean_DateTimeConverter implements BeanValueConverter
 	{
 		if (!f_util_StringUtils::isEmpty($value))
 		{
-			$format = date_DateFormat::getDateFormatForLang(RequestContext::getInstance()->getLang());
+			$format = $this->getDateFormat();
 			return $this->isValidFormat($value, $format);
 		}
 		return true;

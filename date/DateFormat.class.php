@@ -4,6 +4,7 @@
  */
 class date_DateFormat
 {
+	const SQL_DATE_FORMAT = "Y-m-d H:i:s";
 	/**
 	 * Formats the date according to the given $format, using the same acronyms
 	 * as the PHP built-in date() ones.

@@ -175,6 +175,10 @@ class f_persistentdocument_DocumentFilterValueParameter extends f_persistentdocu
 			{
 				$converter = new bean_DocumentsConverter();
 			}
+			else if ($converter instanceof bean_DateTimeConverter)
+			{
+				$converter->setDateFormat(date_DateFormat::SQL_DATE_FORMAT);
+			}
 			if ($converter->isValidRequestValue($value))
 			{
 				$value = $converter->convertFromRequestToBeanValue($value);

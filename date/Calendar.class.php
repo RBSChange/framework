@@ -108,24 +108,8 @@ abstract class date_Calendar
 	 */
 	public static function getInstanceFromFormat($dateString, $format, $impl = 'Gregorian')
 	{
-		// Find separator
-		$separator = null;
-		for ($i=0 ; $i<strlen($format) && is_null($separator) ; $i++)
-		{
-			switch ($format{$i})
-			{
-				case '.' :
-				case '/' :
-				case '-' :
-				case ' ' :
-					$separator = $format{$i};
-					break;
-			}
-		}
-
-		// Explode format and date with the separator
-		$dateTokens   = explode($separator, $dateString);
-		$formatTokens = explode($separator, $format);
+		$formatTokens = preg_split('/[\.\/\- :]/', $format);
+		$dateTokens = preg_split('/[\.\/\- :]/', $dateString);
 		// Date tokens length shouldn't be less than format tokens length
 		if (count($formatTokens) > count($dateTokens))
 		{
