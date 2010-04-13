@@ -148,6 +148,42 @@ class Restrictions
 	}
 
 	/**
+	 * @param String $propertyName
+	 * @param String $value
+	 */
+	static function beginsWith($propertyName, $value)
+	{
+		return new f_persistentdocument_criteria_LikeExpression($propertyName, $value, MatchMode::START(), false);
+	}
+	
+	/**
+	 * @param String $propertyName
+	 * @param String $value
+	 */
+	static function ibeginsWith($propertyName, $value)
+	{
+		return new f_persistentdocument_criteria_LikeExpression($propertyName, $value, MatchMode::START(), true);
+	}
+	
+	/**
+	 * @param String $propertyName
+	 * @param String $value
+	 */
+	static function endsWith($propertyName, $value)
+	{
+		return new f_persistentdocument_criteria_LikeExpression($propertyName, $value, MatchMode::END(), false);
+	}
+	
+	/**
+	 * @param String $propertyName
+	 * @param String $value
+	 */
+	static function iendsWith($propertyName, $value)
+	{
+		return new f_persistentdocument_criteria_LikeExpression($propertyName, $value, MatchMode::END(), true);
+	}
+	
+	/**
      * Apply an "in" constraint to the named property
      */
 	static function in($propertyName, $values)

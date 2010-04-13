@@ -194,6 +194,14 @@ abstract class f_persistentdocument_DocumentFilterImpl implements f_persistentdo
 				return f_util_StringUtils::contains(f_util_StringUtils::strtolower($testVal), f_util_StringUtils::strtolower($val));
 			case 'notLike':
 				return !f_util_StringUtils::contains($testVal, $val);
+			case 'beginsWith':
+				return f_util_StringUtils::beginsWith($testVal, $val, f_util_StringUtils::CASE_SENSITIVE);
+			case 'ibeginsWith':
+				return f_util_StringUtils::beginsWith($testVal, $val, f_util_StringUtils::CASE_INSENSITIVE);
+			case 'endsWith':
+				return f_util_StringUtils::endsWith($testVal, $val, f_util_StringUtils::CASE_SENSITIVE);
+			case 'iendsWith':
+				return f_util_StringUtils::endsWith($testVal, $val, f_util_StringUtils::CASE_INSENSITIVE);
 			case 'in':
 				foreach ($testVal as $id)
 				{

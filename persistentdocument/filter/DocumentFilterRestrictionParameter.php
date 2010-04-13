@@ -230,7 +230,7 @@ class f_persistentdocument_DocumentFilterRestrictionParameter extends f_persiste
 			switch ($propertyInfo->getType())
 			{
 				case 'String' : 
-					return array('eq', 'ieq', 'like', 'ilike', 'notLike');
+					return array('eq', 'ieq', 'like', 'ilike', 'notLike', 'beginsWith', 'ibeginsWith', 'endsWith', 'iendsWith');
 					break;
 				
 				case 'XHTMLFragment' : 
