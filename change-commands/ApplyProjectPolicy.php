@@ -38,10 +38,17 @@ class commands_ApplyProjectPolicy extends commands_AbstractChangeCommand
 		foreach ($readWriteDirs as $dir)
 		{
 			$this->message("Apply '$dir' dir policy");
-			f_util_FileUtils::chown($dir, $user, $apacheGroup, true);
-			// Strange behaviour when SGID on files: unable to write "directly", so use
-			// different mode for files
-			f_util_FileUtils::chmod($dir, "2775", true, "775");
+			try 
+			{
+				f_util_FileUtils::chown($dir, $user, $apacheGroup, true);
+				// Strange behaviour when SGID on files: unable to write "directly", so use
+				// different mode for files
+				f_util_FileUtils::chmod($dir, "2775", true, "775");
+			}
+			catch (Exception $e)
+			{
+				$this->warnMessage("Warn on Apply '$dir' dir policy: " . $e->getMessage());
+			}
 		}
 		
 		$this->quitOk("Project policy files applied");

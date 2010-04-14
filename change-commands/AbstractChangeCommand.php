@@ -3,7 +3,12 @@ abstract class commands_AbstractChangeCommand extends c_ChangescriptCommand
 {
 	protected function getAuthor()
 	{
-		return getenv("USER");
+		$user = getenv("USER");
+		if (empty($user))
+		{
+			return null;
+		}
+		return $user;
 	}
 
 	protected function getUser()

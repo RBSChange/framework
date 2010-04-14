@@ -1003,13 +1003,14 @@ abstract class f_util_FileUtils
 
 		if ($owner !== null && chown($file, $owner) === false)
 		{
+			f_util_ProcessUtils::printBackTrace();
 			throw new Exception("Could not chown $owner ".$file);
 		}
 		if ($group !== null)
 		{
 			if (chgrp($file, $group) === false)
 			{
-				throw new Exception("Could not chgrp ".$file);
+				throw new Exception("Could not chgrp $group ".$file);
 			}
 		}
 

@@ -41,12 +41,19 @@ class commands_ApplyWebappPolicy extends commands_AbstractChangeCommand
 		foreach ($dirs as $dir)
 		{
 			$this->message("Apply '$dir' dir policy");
-			// Be sure the folder is here
-			f_util_FileUtils::mkdir($dir);
-			f_util_FileUtils::chown($dir, $user, $apacheGroup, true);
-			// Strange behaviour when SGID on files: unable to write "directly", so use
-			// different mode for files
-			f_util_FileUtils::chmod($dir, "2775", true, "775");
+			try 
+			{
+				// Be sure the folder is here
+				f_util_FileUtils::mkdir($dir);
+				f_util_FileUtils::chown($dir, $user, $apacheGroup, true);
+				// Strange behaviour when SGID on files: unable to write "directly", so use
+				// different mode for files
+				f_util_FileUtils::chmod($dir, "2775", true, "775");
+			}
+			catch (Exception $e)
+			{
+				$this->warnMessage("WARN on Apply '$dir' dir policy: " . $e->getMessage());
+			}
 		}
 		
 		$this->quitOk("Webapp files policy applied");
