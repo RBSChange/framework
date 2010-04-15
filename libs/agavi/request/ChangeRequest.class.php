@@ -1,19 +1,10 @@
 <?php
 class ChangeRequest extends WebRequest
 {
-	
-	// +-----------------------------------------------------------------------+
-	// | METHODS                                                               |
-	// +-----------------------------------------------------------------------+
-	
-
 	/**
 	 * Set a cookie.
-	 *
 	 * @param string Cookie key
 	 * @param string Cookie value
-	 *
-	 * @author intCOURs
 	 */
 	public function setCookie($key, $value)
 	{
@@ -22,12 +13,8 @@ class ChangeRequest extends WebRequest
 	
 	/**
 	 * Test a cookie availability.
-	 *
 	 * @param string Cookie key
 	 * @return boolean
-	 *
-	 * @author intCOURs
-	 * @since  2.0.3
 	 */
 	public function hasCookie($key)
 	{
@@ -40,13 +27,9 @@ class ChangeRequest extends WebRequest
 	
 	/**
 	 * Get a cookie value.
-	 *
 	 * @param string Cookie key
 	 * @param string Cookie default value
 	 * @return string
-	 *
-	 * @author intCOURs
-	 * @since  2.0.3
 	 */
 	public function getCookie($key, $defaultValue = '')
 	{
@@ -59,11 +42,7 @@ class ChangeRequest extends WebRequest
 	
 	/**
 	 * Remove a cookie.
-	 *
 	 * @param string Cookie key
-	 *
-	 * @author intCOURs
-	 * @since  2.0.3
 	 */
 	public function removeCookie($key)
 	{
@@ -72,32 +51,19 @@ class ChangeRequest extends WebRequest
 	
 	/**
 	 * Retrieve an array of file information.
-	 *
 	 * @param string A file name
-	 *
 	 * @return array An associative array of file information, if the file
 	 *               exists, otherwise null.
-	 *
-	 * @author Sean Kerr (skerr@mojavi.org)
-	 * @since  0.9.0
 	 */
 	public function getFile($name)
 	{
-		
 		if (isset($_FILES[$name]))
 		{
-			
 			return $_FILES[$name];
-		
 		}
-		
 		return null;
-	
 	}
 	
-	// -------------------------------------------------------------------------
-	
-
 	/**
 	 * Retrieve a file error.
 	 *
@@ -121,20 +87,12 @@ class ChangeRequest extends WebRequest
 	 */
 	public function getFileError($name)
 	{
-		
 		if (isset($_FILES[$name]))
 		{
-			
 			return $_FILES[$name]['error'];
-		
 		}
-		
-		return $retval;
-	
+		return UPLOAD_ERR_NO_FILE;	
 	}
-	
-	// -------------------------------------------------------------------------
-	
 
 	/**
 	 * Retrieve a file name.
@@ -147,19 +105,13 @@ class ChangeRequest extends WebRequest
 	 * @since  0.9.0
 	 */
 	public function getFileName($name)
-	{
-		
+	{		
 		if (isset($_FILES[$name]))
-		{
-			
+		{	
 			return $_FILES[$name]['name'];
-		
 		}
 		return null;
 	}
-	
-	// -------------------------------------------------------------------------
-	
 
 	/**
 	 * Retrieve an array of file names.
@@ -171,13 +123,8 @@ class ChangeRequest extends WebRequest
 	 */
 	public function getFileNames()
 	{
-		
 		return array_keys($_FILES);
-	
 	}
-	
-	// -------------------------------------------------------------------------
-	
 
 	/**
 	 * Retrieve an array of files.
@@ -189,13 +136,8 @@ class ChangeRequest extends WebRequest
 	 */
 	public function getFiles()
 	{
-		
 		return $_FILES;
-	
 	}
-	
-	// -------------------------------------------------------------------------
-	
 
 	/**
 	 * Retrieve a file path.
@@ -208,21 +150,13 @@ class ChangeRequest extends WebRequest
 	 * @since  0.9.0
 	 */
 	public function getFilePath($name)
-	{
-		
+	{	
 		if (isset($_FILES[$name]))
 		{
-			
 			return $_FILES[$name]['tmp_name'];
-		
 		}
-		
 		return null;
-	
 	}
-	
-	// -------------------------------------------------------------------------
-	
 
 	/**
 	 * Retrieve a file size.
@@ -235,21 +169,14 @@ class ChangeRequest extends WebRequest
 	 * @since  0.9.0
 	 */
 	public function getFileSize($name)
-	{
-		
+	{		
 		if (isset($_FILES[$name]))
-		{
-			
+		{		
 			return $_FILES[$name]['size'];
-		
 		}
-		
 		return null;
 	
 	}
-	
-	// -------------------------------------------------------------------------
-	
 
 	/**
 	 * Retrieve a file type.
@@ -266,20 +193,12 @@ class ChangeRequest extends WebRequest
 	 */
 	public function getFileType($name)
 	{
-		
 		if (isset($_FILES[$name]))
 		{
-			
 			return $_FILES[$name]['type'];
-		
 		}
-		
 		return null;
-	
 	}
-	
-	// -------------------------------------------------------------------------
-	
 
 	/**
 	 * Indicates whether or not a file exists.
@@ -292,14 +211,9 @@ class ChangeRequest extends WebRequest
 	 * @since  0.9.0
 	 */
 	public function hasFile($name)
-	{
-		
+	{		
 		return isset($_FILES[$name]);
-	
 	}
-	
-	// -------------------------------------------------------------------------
-	
 
 	/**
 	 * Indicates whether or not a file error exists.
@@ -313,20 +227,12 @@ class ChangeRequest extends WebRequest
 	 */
 	public function hasFileError($name)
 	{
-		
 		if (isset($_FILES[$name]))
 		{
-			
 			return ($_FILES[$name]['error'] != UPLOAD_ERR_OK);
-		
 		}
-		
 		return false;
-	
 	}
-	
-	// -------------------------------------------------------------------------
-	
 
 	/**
 	 * Indicates whether or not any file errors occured.
@@ -338,25 +244,15 @@ class ChangeRequest extends WebRequest
 	 */
 	public function hasFileErrors()
 	{
-		
 		foreach ($_FILES as &$file)
 		{
-			
 			if ($file['error'] != UPLOAD_ERR_OK)
 			{
-				
 				return true;
-			
 			}
-		
 		}
-		
 		return false;
-	
 	}
-	
-	// -------------------------------------------------------------------------
-	
 
 	/**
 	 * Indicates whether or not any files exist.
@@ -368,13 +264,8 @@ class ChangeRequest extends WebRequest
 	 */
 	public function hasFiles()
 	{
-		
 		return (count($_FILES) > 0);
-	
 	}
-	
-	// -------------------------------------------------------------------------
-	
 
 	/**
 	 * Initialize this Request.
@@ -393,42 +284,26 @@ class ChangeRequest extends WebRequest
 	 */
 	public function initialize($context, $parameters = null)
 	{
-		
 		if (isset($_SERVER['REQUEST_METHOD']))
 		{
-			
 			switch ($_SERVER['REQUEST_METHOD'])
 			{
-				
 				case 'GET' :
 					$this->setMethod(self::GET);
 					break;
-				
 				case 'POST' :
 					$this->setMethod(self::POST);
 					break;
-				
 				default :
 					$this->setMethod(self::GET);
-			
 			}
-		
 		}
 		else
 		{
-			
-			// set the default method
 			$this->setMethod(self::GET);
-		
 		}
-		
-		// load parameters from GET/PATH_INFO/POST
-		$this->loadParameters();
-	
+		$this->loadParameters();	
 	}
-	
-	// -------------------------------------------------------------------------
-	
 
 	/**
 	 * Loads GET, PATH_INFO and POST data into the parameter list.
@@ -440,55 +315,31 @@ class ChangeRequest extends WebRequest
 	 */
 	private function loadParameters()
 	{
-		
-		// merge GET parameters
 		$this->setParametersByRef($_GET);
-		
-		// parse PATH_INFO
 		switch (AG_PATH_INFO_ARRAY)
 		{
-			
 			case 'SERVER' :
-				
 				$pathArray = & $_SERVER;
 				break;
-			
 			case 'ENV' :
 			default :
-				
 				$pathArray = & $_ENV;
-		
 		}
 		
 		if (isset($pathArray[AG_PATH_INFO_KEY]))
 		{
-			
 			$array = explode('/', trim($pathArray[AG_PATH_INFO_KEY], '/'));
-			$count = count($array);
-			
+			$count = count($array);			
 			for($i = 0; $i < $count; $i ++)
 			{
-				
-				// see if there's a value associated with this parameter,
-				// if not we're done with path data
 				if ($count > ($i + 1))
 				{
-					
 					$this->setParameterByRef($array[$i], $array[++ $i]);
-				
 				}
-			
 			}
-		
 		}
-		
-		// merge POST parameters
 		$this->setParametersByRef($_POST);
-	
 	}
-	
-	// -------------------------------------------------------------------------
-	
 
 	/**
 	 * Move an uploaded file.
@@ -511,74 +362,43 @@ class ChangeRequest extends WebRequest
 	 * @since  0.9.0
 	 */
 	public function moveFile($name, $file, $fileMode = 0666, $create = true, $dirMode = 0777)
-	{
-		
-		if (isset($_FILES[$name]) && $_FILES[$name]['error'] == UPLOAD_ERR_OK && $_FILES[$name]['size'] > 0)
+	{		
+		if (isset($_FILES[$name]) && $_FILES[$name]['error'] == UPLOAD_ERR_OK)
 		{
-			
-			// get our directory path from the destination filename
 			$directory = dirname($file);
-			
-			if (! is_readable($directory))
+			if (!file_exists($directory))
 			{
-				
-				$fmode = 0777;
-				
-				if ($create && ! @mkdir($directory, $dirMode, true))
+				if ($create && !@mkdir($directory, $dirMode, true))
 				{
-					
-					// failed to create the directory
 					$error = 'Failed to create file upload directory "%s"';
 					$error = sprintf($error, $directory);
-					
-					throw new FileException($error);
-				
+					throw new FileException($error);					
 				}
-				
-				// chmod the directory since it doesn't seem to work on
-				// recursive paths
-				@chmod($directory, $dirMode);
-			
 			}
-			else if (! is_dir($directory))
+			if (!is_dir($directory))
 			{
-				
 				// the directory path exists but it's not a directory
 				$error = 'File upload path "%s" exists, but is not a directory';
-				$error = sprintf($error, $directory);
-				
+				$error = sprintf($error, $directory);				
 				throw new FileException($error);
-			
 			}
-			else if (! is_writable($directory))
+			
+			if (!is_writable($directory))
 			{
-				
 				// the directory isn't writable
 				$error = 'File upload path "%s" is not writable';
-				$error = sprintf($error, $directory);
-				
+				$error = sprintf($error, $directory);				
 				throw new FileException($error);
-			
 			}
 			
 			if (@move_uploaded_file($_FILES[$name]['tmp_name'], $file))
 			{
-				
-				// chmod our file
 				@chmod($file, $fileMode);
-				
 				return true;
-			
 			}
-		
 		}
-		
 		return false;
-	
 	}
-	
-	// -------------------------------------------------------------------------
-	
 
 	/**
 	 * Execute the shutdown procedure.
@@ -590,10 +410,6 @@ class ChangeRequest extends WebRequest
 	 */
 	public function shutdown()
 	{
-		
-	// nothing to do here
-	
-
 	}
 	
 	public function setParametersByRef(&$parameters)
@@ -620,9 +436,6 @@ class ChangeRequest extends WebRequest
      *
      * @param string $moduleName The module name.
      * @param string $paramName The parameter name.
-     *
-     * @author INTbonjF
-     * @date   2006-04-24
      */
     public function getModuleParameter($moduleName, $paramName)
     {
@@ -639,11 +452,7 @@ class ChangeRequest extends WebRequest
      *
      * @param string $moduleName The module name.
      * @param string $paramName The parameter name.
-     *
      * @return boolean true if the module parameter exists, false otherwise.
-     *
-     * @author INTbonjF
-     * @date   2006-04-24
      */
     public function hasModuleParameter($moduleName, $paramName)
     {
@@ -654,17 +463,10 @@ class ChangeRequest extends WebRequest
 
     /**
      * Retrieve all the parameters defined for the given module.
-     *
      * @param string $moduleName The module name.
-     *
-     * @author INTbonjF
-     * @date   2006-04-24
      */
     public function getModuleParameters($moduleName)
     {
         return $this->getParameter($moduleName."Param");
     }
-	
 }
-
-?>
