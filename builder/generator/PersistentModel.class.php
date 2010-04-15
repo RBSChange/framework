@@ -206,6 +206,47 @@ class generator_PersistentModel
 		f_util_FileUtils::writeAndCreateContainer($compiledFilePath, serialize($modelsByModule), f_util_FileUtils::OVERRIDE);
 	}
 	
+	public static function buildPublishListenerInfos()
+	{
+		$publishListenerInfos = array();
+		$rc = RequestContext::getInstance();
+		foreach (self::loadModels() as $model)
+		{	
+			$pubproperty = $model->getPropertyByName('publicationstatus');
+			if ($pubproperty)
+			{
+				if ($pubproperty->isLocalized())
+				{
+					$langs = $rc->getSupportedLanguages();
+				}
+				else
+				{
+					$langs = array($rc->getDefaultLang());
+				}
+				$publishListenerInfos[$model->getName()] = $langs;
+			}
+		}	
+		$compiledFilePath = f_util_FileUtils::buildChangeBuildPath('publishListenerInfos.ser');
+		f_util_FileUtils::writeAndCreateContainer($compiledFilePath, serialize($publishListenerInfos), f_util_FileUtils::OVERRIDE);
+	}
+	
+	public static function buildDocumentPropertyInfos()
+	{
+		$documentPropertyInfos = array();
+		foreach (self::loadModels() as $model)
+		{	
+			foreach ($model->getProperties() as $property)
+			{
+				if ($property->isDocument())
+				{
+					$documentPropertyInfos[$property->getName()] = true;
+				}
+			}
+		}
+		$compiledFilePath = f_util_FileUtils::buildChangeBuildPath('relationNameInfos.ser');
+		f_util_FileUtils::writeAndCreateContainer($compiledFilePath, serialize(array_keys($documentPropertyInfos)), f_util_FileUtils::OVERRIDE);		
+	}
+	
 	/**
 	 * @param String $xml
 	 * @param String $module

@@ -54,10 +54,17 @@ class commands_CompileDocuments extends commands_AbstractChangeCommand
 
 			$this->message('Model modules_' . $model->getModuleName() . '/' . $model->getDocumentName() . ' generated.');
 		}
+		
+		$this->message("== Compile Models by Module ==");
 		generator_PersistentModel::buildModelsByModuleNameCache();
 		
-		// For the list of models generate backoffice styles.
-		// FIXME: this must be done after all model files are generated.
+		$this->message("== Compile Publication Infos ==");
+		generator_PersistentModel::buildPublishListenerInfos();
+		
+		$this->message("== Compile Document Property ==");
+		generator_PersistentModel::buildDocumentPropertyInfos();
+		
+		$this->message("== Generate final document class and bo style ==");
 		foreach ($models as $model)
 		{
 			try
@@ -67,7 +74,8 @@ class commands_CompileDocuments extends commands_AbstractChangeCommand
 				
 				$documentGenerator->generateFinalPersistentDocumentFile();
 				
-				$documentGenerator->addStyleInBackofficeFile();
+				builder_BackofficeStyleUpdater::updateCssByDocument($model);
+
 			}
 			catch (Exception $e)
 			{
@@ -75,7 +83,6 @@ class commands_CompileDocuments extends commands_AbstractChangeCommand
 				$this->debugMessage($e->getTraceAsString());
 			}
 		}
-		$this->okMessage("Backoffice styles generated.");
-		$this->quitOk("Documents compiled");
+		$this->quitOk("Documents compiled");	
 	}
 }

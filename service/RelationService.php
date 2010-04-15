@@ -24,23 +24,16 @@ class RelationService extends BaseService
 	
 	public final function compile()
 	{
-		$result = array();		
-		$models = f_persistentdocument_PersistentDocumentModel::getDocumentModels();
-		
-		foreach ($models as $model) 
+		$result = array();	
+		$compiledFilePath = f_util_FileUtils::buildChangeBuildPath('relationNameInfos.ser');
+		if (!file_exists($compiledFilePath))
 		{
-			$table = $model->getTableName();
-			//$infos = new PropertyInfo();
-			foreach ($model->getPropertiesInfos() as $name => $infos) 
-			{
-				if ($infos->isDocument())
-				{
-					if (!isset($result[$name]))
-					{
-						$result[$name] = $this->getPersistentProvider()->getRelationId($name);
-					}
-				}
-			}
+			throw new Exception('Please execute compile-documents before this command');
+		}
+		$names = unserialize(file_get_contents($compiledFilePath));
+		foreach ($names as $name) 
+		{
+			$result[$name] = $this->getPersistentProvider()->getRelationId($name);
 		}
 		$relationsPath = f_util_FileUtils::buildChangeBuildPath('relations.php');
 		f_util_FileUtils::writeAndCreateContainer($relationsPath , '<?php $relations = unserialize('.var_export(serialize($result), true).');', f_util_FileUtils::OVERRIDE);

@@ -83,4 +83,25 @@ class f_util_System
 		}
 		return explode("\n", $out);
 	}
+	
+	/**
+	 * @param string $relativeScriptPath to WEBEDIT_HOME
+	 * @param array $arguments
+	 */
+	public static function execHTTPScript($relativeScriptPath, $arguments = array())
+	{
+		$url = Framework::getBaseUrl() .'/changescriptexec.php';
+		$rc = curl_init();
+		curl_setopt($rc, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($rc, CURLOPT_USERAGENT, 'RBSChange/3.0');
+		curl_setopt($rc, CURLOPT_REFERER, $url);
+		$postData = http_build_query(array('phpscript' => $relativeScriptPath, 'argv' => $arguments), '', '&');
+		curl_setopt($rc, CURLOPT_POSTFIELDS, $postData);
+		curl_setopt($rc, CURLOPT_POST, true);
+		curl_setopt($rc, CURLOPT_FOLLOWLOCATION, 0);
+		curl_setopt($rc, CURLOPT_URL, $url);
+		$data = curl_exec($rc);
+		curl_close($rc);
+		return $data;		
+	}
 }

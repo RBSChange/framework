@@ -12,6 +12,11 @@ class f_listener_PublishListener
 	 */
 	public function onHourChange($sender, $params)
 	{
+		if (Framework::isInfoEnabled())
+		{
+			Framework::info(__METHOD__);
+		}
+		
 		$date = $params['date'];
 		if (Framework::isDebugEnabled())
 		{
@@ -27,63 +32,51 @@ class f_listener_PublishListener
 		}
 		$end = date_Calendar::getInstance($date)->add(date_Calendar::HOUR, 1)->toString();	
 		$documentsArray = array_chunk($this->getDocumentIdsToProcess($start, $end), 500);
+		$script = 'framework/listener/publishDocumentsBatch.php';
 		foreach ($documentsArray as $chunk)
 		{
-			$processHandle = popen("php " . dirname(__FILE__) . DIRECTORY_SEPARATOR . "publishDocumentsBatch.php " . implode(" ", $chunk), "r");
-			while ( ($string = fread($processHandle, 1000)) != false)
-			{
-				// do nothing
-			}
-			pclose($processHandle);
+			f_util_System::execHTTPScript($script, $chunk);
 		}
 	}
 	
 	private function getDocumentIdsToProcess($start, $end)
 	{
 		$toProcess = array();
-		foreach (f_persistentdocument_PersistentDocumentModel::getDocumentModels() as $model)
+		$compiledFilePath = f_util_FileUtils::buildChangeBuildPath('publishListenerInfos.ser');
+		if (file_exists($compiledFilePath))
 		{
-			if (strpos($model->getName(), 'modules_test/') === 0 || $model->publishOnDayChange() === false)
-			{
-				continue;
-			}
-			
-			$pubproperty = $model->getProperty('publicationstatus');
-			if (is_null($pubproperty))
-			{
-				return array();
-			}
-			
+			$models = unserialize(file_get_contents($compiledFilePath));
 			$rc = RequestContext::getInstance();
-			
-			if ($model->isLocalized() && $pubproperty->isLocalized())
+			foreach ($models as $modelName => $langs) 
 			{
-				$langs = $rc->getSupportedLanguages();
-			}
-			else
-			{
-				$langs = array($rc->getDefaultLang());
-			}
-			
-			foreach ($langs as $lang)
-			{
-				try
+				foreach ($langs as $lang)
 				{
-					$rc->beginI18nWork($lang);
-					$query = f_persistentdocument_PersistentProvider::getInstance()->createQuery($model->getName());
-					$query->add(Restrictions::in('publicationstatus', array('ACTIVE', 'PUBLICATED')))->add(Restrictions::eq('model', $model->getName()))->add(Restrictions::orExp(Restrictions::between('startpublicationdate', $start, $end), Restrictions::between('endpublicationdate', $start, $end)))->setProjection(Projections::property('id', 'id'));
-					$results = $query->find();
-					foreach ($results as $resultArray)
+					try
 					{
-						$toProcess[] = $resultArray['id'] . '/' . $lang;
+						$rc->beginI18nWork($lang);
+						$query = f_persistentdocument_PersistentProvider::getInstance()->createQuery($modelName, false);
+						$query->add(Restrictions::in('publicationstatus', array('ACTIVE', 'PUBLICATED')))
+								->add(Restrictions::orExp(Restrictions::between('startpublicationdate', $start, $end), 
+										Restrictions::between('endpublicationdate', $start, $end)))
+								->setProjection(Projections::property('id', 'id'));
+								
+						$results = $query->find();
+						foreach ($results as $resultArray)
+						{
+							$toProcess[] = $resultArray['id'] . '/' . $lang;
+						}
+						$rc->endI18nWork();
 					}
-					$rc->endI18nWork();
-				}
-				catch (Exception $e)
-				{
-					$rc->endI18nWork($e);
+					catch (Exception $e)
+					{
+						$rc->endI18nWork($e);
+					}
 				}
 			}
+		}
+		else
+		{
+			Framework::error(__METHOD__ . ' File not found ' . $compiledFilePath);
 		}
 		return $toProcess;
 	}

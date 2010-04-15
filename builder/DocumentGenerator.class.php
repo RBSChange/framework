@@ -207,91 +207,26 @@ class builder_DocumentGenerator
 		}
 		elseif ($this->modelObject->isIndexable())
 		{
-			// First time we run all this, classes eventually do not exist
-			$parentMissing = false;
-			$cl = ClassLoader::getInstance();
+			$ok = false;
 			$model = $this->modelObject;
-			while ($model->hasParentModel())
+			while ($model)
 			{
-				$parentModel = $model->getParentModel();
-				if (!$cl->existsNoLoad($parentModel->getDocumentClassName()) ||
-				 !$cl->existsNoLoad($parentModel->getDocumentClassName()."base"))
+				$parentfilePath = f_util_FileUtils::buildWebeditPath('modules', $model->getModuleName(), 'persistentdocument', $model->getDocumentName() . '.class.php');
+				if (file_exists($parentfilePath))
 				{
-					$parentMissing = true;
+					$content = file_get_contents($parentfilePath);
+					if (strpos($content, ' indexer_IndexableDocument'))
+					{
+						$ok = true;
+						break;	
+					}
 				}
-				$model = $parentModel;
+				$model = $model->hasParentModel() ? $model->getParentModel() : null;
 			}
 			
-			if (!$parentMissing)
+			if (!$ok)
 			{
-			$className = $this->module."_persistentdocument_".$this->name;
-			$classNameBase = $className."base";
-			
-			$class = new ReflectionClass($className);
-			if (!$class->hasMethod("getIndexedDocument"))
-			{
-				echo "Adding getIndexedDocument() method to $filePath\n";
-				$bracketLevel = 0;
-
-				$getIndexedDocumentCode = explode("\n", "	/**
-	 * Get the indexable document
-	 *
-	 * @return indexer_IndexedDocument
-	 */
-	public function getIndexedDocument()");
-				foreach (explode("\n", $this->modelObject->generatePhpOverride()) as $line)
-				{
-					$trimed = trim($line);
-					// WARNING: very sensitive parsing. Be sure it is compatible with DocumentClass.tpl
-					if ($trimed == "{" )
-					{
-						$bracketLevel++;
-					}
-					elseif($trimed == "}")
-					{
-						$bracketLevel--;
-					}
-
-					if ($bracketLevel == 2)
-					{
-						$getIndexedDocumentCode[] = $line;
-					}
-				}
-				$getIndexedDocumentCode[] = "	}";
-
-				$bracketLevel = 0;
-				$added = false;
-				$lines = f_util_FileUtils::readArray($filePath);
-				$newLines = array();
-				foreach ($lines as $line)
-				{
-					$trimed = trim($line);
-					if ($trimed == "{" )
-					{
-						$bracketLevel++;
-					}
-					elseif($trimed == "}")
-					{
-						$bracketLevel--;
-					}
-					if (strpos($line, $classNameBase) !== false)
-					{
-						if (!$class->implementsInterface("indexer_IndexableDocument"))
-						{
-							$line .= " implements indexer_IndexableDocument";
-						}
-					}	
-					$newLines[] = $line;
-					
-					if ($bracketLevel == 1 && !$added)
-					{
-						$newLines = array_merge($newLines, $getIndexedDocumentCode);
-						$added = true;
-					}
-				}
-
-				f_util_FileUtils::write($filePath, join("\n", $newLines), f_util_FileUtils::OVERRIDE);
-			}			
+				echo "WARNING: $filePath not implement indexer_IndexableDocument interface\n";
 			}
 		}
 

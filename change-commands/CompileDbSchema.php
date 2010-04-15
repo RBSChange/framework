@@ -61,7 +61,8 @@ class commands_CompileDbSchema extends commands_AbstractChangeCommand
 		catch (Exception $e)
 		{
 			Framework::exception($e);
-			$this->errorMessage('Unable to compile \'relation.php\'. See logs for details.');
+			$this->errorMessage('Unable to compile \'relation.php\'. ' . $e->getMessage());
+			$this->errorMessage('See logs for more details.');
 		}
 
 		$this->message('=== Generate Tree tables ===');
@@ -76,8 +77,6 @@ class commands_CompileDbSchema extends commands_AbstractChangeCommand
 		$this->message("=== Cleaning Framework cache (f_cache) ... ===");
 		$persistentProvider->clearFrameworkCache();
 		$this->okMessage("f_cache cleaned");
-		
-		$this->message("");
 		
 		$this->quitOk("DB Schema compiled");
 	}

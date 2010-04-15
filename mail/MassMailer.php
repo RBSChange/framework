@@ -71,53 +71,48 @@ class MassMailer
 		@rename($this->getOutboxPathForSource($source), $this->getTrashPathForSource($source));
 	}
 	
+	
+	public function batchSend()
+	{
+		$pathsToProcess = $this->getMessagesToSend();
+		$scriptRelativePath = 'framework/bin/massMailerSend.php';
+		foreach (array_chunk($pathsToProcess, 500) as $messagePathArray)
+		{
+			f_util_System::execHTTPScript($scriptRelativePath, $messagePathArray);
+		}
+	}
+	
 	/**
 	 * @param array $messagePaths
 	 * @param string $batchPath
 	 */
-	public function batchSend($messagePaths, $batchPath)
+	public function sendMessagePaths($messagePaths)
 	{
-		if (f_util_ArrayUtils::isEmpty($messagePaths) == 1)
+		foreach ($messagePaths as $mailMessagePath)
 		{
-			$pathsToProcess = self::getInstance()->getMessagesToSend();
-			foreach (array_chunk($pathsToProcess, 500) as $messagePathArray)
+			try
 			{
-				$processHandle = popen('php ' . $batchPath . ' ' . implode(' ', $messagePathArray), 'r');
-				while ($string = fread($processHandle, 1024))
+				$mailMessage = unserialize(gzuncompress(file_get_contents($mailMessagePath)));
+				$sourceId = $mailMessage->getSource();
+				if ($mailMessage instanceof MailMessage)
 				{
-					echo $string;
-				}
-				pclose($processHandle);
-			}
-		}
-		else
-		{
-			foreach ($messagePaths as $mailMessagePath)
-			{
-				try
-				{
-					$mailMessage = unserialize(gzuncompress(file_get_contents($mailMessagePath)));
-					$sourceId = $mailMessage->getSource();
-					if ($mailMessage instanceof MailMessage)
+					$returnValue = MailService::getInstance()->send($mailMessage);
+					if ($returnValue === true)
 					{
-						$returnValue = MailService::getInstance()->send($mailMessage);
-						if ($returnValue === true)
-						{
-							$this->successLog($mailMessage->getSender(), $mailMessage->getReceiver(), 'send', $sourceId);
-							f_event_EventManager::dispatchEvent('sendMailSuccess', $this, array('message' => $mailMessage));
-						}
-						else
-						{
-							$this->errorLog($mailMessage->getSender(), $mailMessage->getReceiver(), 'send', $sourceId);
-							f_event_EventManager::dispatchEvent('sendMailFailed', $this, array('message' => $mailMessage));
-						}
+						$this->successLog($mailMessage->getSender(), $mailMessage->getReceiver(), 'send', $sourceId);
+						f_event_EventManager::dispatchEvent('sendMailSuccess', $this, array('message' => $mailMessage));
 					}
-					@unlink($mailMessagePath);
+					else
+					{
+						$this->errorLog($mailMessage->getSender(), $mailMessage->getReceiver(), 'send', $sourceId);
+						f_event_EventManager::dispatchEvent('sendMailFailed', $this, array('message' => $mailMessage));
+					}
 				}
-				catch (Exception $e)
-				{
-					Framework::exception($e);
-				}
+				@unlink($mailMessagePath);
+			}
+			catch (Exception $e)
+			{
+				Framework::exception($e);
 			}
 		}
 	}

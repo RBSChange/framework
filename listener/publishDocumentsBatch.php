@@ -1,8 +1,5 @@
 <?php
-
-define("WEBEDIT_HOME", realpath('.'));
-require_once WEBEDIT_HOME . "/framework/Framework.php";
-
+$controller = Controller::newInstance("controller_ChangeController");
 
 $tm = f_persistentdocument_TransactionManager::getInstance();
 $rc = RequestContext::getInstance();
@@ -10,11 +7,9 @@ $is = indexer_IndexService::getInstance();
 $is->setAutocommit(false);
 try
 {
-	$updatedDocumentCount = 0;
 	$tm->beginTransaction();
-	for ($i = 1; $i < (int)$_SERVER['argc']; $i++)
+	foreach ($_POST['argv'] as $documentIdAndLang) 
 	{
-		$documentIdAndLang = $_SERVER['argv'][$i];
 		list($id, $lang) = explode("/", $documentIdAndLang);
 		try
 		{
@@ -28,7 +23,6 @@ try
 		{
 			$rc->endI18nWork($e);
 		}
-	
 	}
 	$tm->commit();
 }
