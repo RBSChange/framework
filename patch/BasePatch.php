@@ -107,6 +107,16 @@ abstract class patch_BasePatch
 		$scriptReader = import_ScriptReader::getInstance();
 		$scriptReader->execute(FileResolver::getInstance()->setPackageName('modules_' . $this->getModuleName())->setDirectory('patch')->getPath($this->getNumber() . DIRECTORY_SEPARATOR . $scriptName));
 	}
+	
+	/**
+	 * @param String $scriptName
+	 * @param String $module
+	 */
+	protected function executeModuleScript($scriptName, $module)
+	{
+		$scriptReader = import_ScriptReader::getInstance();
+		$scriptReader->executeModuleScript($module, $scriptName);
+	}
 
 	/**
 	 * Executes an SQL file.
