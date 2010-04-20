@@ -155,7 +155,7 @@ class ApacheService extends BaseService
 		}
 		else
 		{
-			f_util_FileUtils::write($filePath, $content);
+			f_util_FileUtils::writeAndCreateContainer($filePath, $content);
 		}
 	}
 	
@@ -212,6 +212,10 @@ class ApacheService extends BaseService
 	private function clearSpecificConfFilesForModule($module)
 	{
 		$dir = $this->getApacheDirectory();
+		if (!is_dir($dir))
+		{
+			return;
+		}
 		foreach (f_util_FileUtils::getDirFiles($dir) as $filePath)
 		{
 			$fileName = basename($filePath);
