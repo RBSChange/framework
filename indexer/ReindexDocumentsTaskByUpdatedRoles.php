@@ -16,7 +16,6 @@ class f_tasks_ReindexDocumentsByUpdatedRolesTask extends task_SimpleSystemTask
 		{
 			$frontIds =  array_merge($frontIds, indexer_IndexService::getInstance()->getIndexableDocumentIdsForModifiedRole($roleName));
 			$backIds = array_merge($backIds, indexer_IndexService::getInstance()->getBackofficeIndexableDocumentIdsForModifiedRole($roleName));
-			
 		}
 		
 		$this->processIds(array_unique($frontIds), 'front');
@@ -25,15 +24,11 @@ class f_tasks_ReindexDocumentsByUpdatedRolesTask extends task_SimpleSystemTask
 	
 	private function processIds($ids, $mode)
 	{
+		$scriptPath = 'framework/indexer/chunkDocumentIndexer.php';
+		$modeParam = array($mode);
 		foreach (array_chunk($ids, 100) as $chunk)
-		{
-			$processHandle = popen("php " .  f_util_FileUtils::buildFrameworkPath('indexer', 'batchIndexer.php') . " $mode " . implode(" ", $chunk), "r");
-			while ( ($string = fread($processHandle, 1000)) != false)
-			{
-				// Nothing
-			}
-			pclose($processHandle);
+		{	
+			f_util_System::execHTTPScript($scriptPath, array_merge($modeParam, $chunk));
 		}
-		
 	}
 }
