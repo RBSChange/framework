@@ -947,7 +947,8 @@ abstract class f_util_FileUtils
 		{
 			throw new Exception("Could not chmod $mode $file");
 		}
-		if ($recursive)
+		
+		if ($recursive && is_dir($file))
 		{
 			//echo "Recursive chmod ".$this->file." ".$this->mode." ".$mode."\n";
 			$dir = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($file), RecursiveIteratorIterator::SELF_FIRST);
@@ -1014,7 +1015,7 @@ abstract class f_util_FileUtils
 			}
 		}
 
-		if ($recursive)
+		if ($recursive && is_dir($file))
 		{
 			$dir = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($file), RecursiveIteratorIterator::SELF_FIRST);
 			foreach ($dir as $fileInfo)
