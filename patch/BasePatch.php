@@ -368,4 +368,15 @@ abstract class patch_BasePatch
 		}
 		return $packagePath;
 	}
+	
+	
+	/**
+	 * @param string $relativeScriptPath to WEBEDIT_HOME
+	 * @param array $arguments
+	 * @return String
+	 */
+	protected function execChangeCommand($commandName, $arguments = array())
+	{
+		return f_util_System::execChangeCommand($commandName, $arguments);
+	}
 }

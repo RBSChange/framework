@@ -177,6 +177,16 @@
 				<entry name="name">Module Actions</entry>
 				<entry name="path">%AG_MODULE_DIR%/%MODULE_NAME%/actions</entry>
 			</ModuleActions>
+			<ModuleChangeCommands>
+				<entry name="name">Module Commands</entry>
+				<entry name="path">%AG_MODULE_DIR%/%MODULE_NAME%/change-commands</entry>
+				<entry name="recursive">true</entry>
+			</ModuleChangeCommands>
+			<ModuleChangeDevCommands>
+				<entry name="name">Module Dev Commands</entry>
+				<entry name="path">%AG_MODULE_DIR%/%MODULE_NAME%/changedev-commands</entry>
+				<entry name="recursive">true</entry>
+			</ModuleChangeDevCommands>
 			<ModuleLib>
 				<entry name="name">Module Lib</entry>
 				<entry name="path">%AG_MODULE_DIR%/%MODULE_NAME%/lib/</entry>

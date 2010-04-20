@@ -104,4 +104,37 @@ class f_util_System
 		curl_close($rc);
 		return $data;		
 	}
+	
+	/**
+	 * @param string $relativeScriptPath to WEBEDIT_HOME
+	 * @param array $arguments
+	 */
+	public static function execChangeHTTPCommand($commandName, $arguments = array())
+	{
+		return self::execHTTPScript("framework/bin/changeHTTP.php", array_merge(array($commandName), $arguments));
+	}
+	
+	/**
+	 * @param string $relativeScriptPath to WEBEDIT_HOME
+	 * @param array $arguments
+	 */
+	public static function execChangeConsoleCommand($commandName, $arguments = array())
+	{
+		return self::exec("change.php $commandName " . implode(" ", $arguments)); 
+	}
+	
+	/**
+	 * @param string $relativeScriptPath to WEBEDIT_HOME
+	 * @param array $arguments
+	 */
+	public static function execChangeCommand($commandName, $arguments = array())
+	{
+		if (isset($_SERVER['REMOTE_ADDR']))
+		{
+			// Mode web
+			return self::execChangeHTTPCommand($commandName, $arguments);
+		}
+		return self::execChangeConsoleCommand($commandName, $arguments);
+	}
+	
 }

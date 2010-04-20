@@ -21,7 +21,7 @@ if (isset($_POST['phpscript']) && isset($_POST['argv']) && is_array($_POST['argv
 	$scriptPath = WEBEDIT_HOME .'/' . $_POST['phpscript'];	
 	if (Framework::isInfoEnabled())
 	{
-		Framework::info("execute $scriptPath with (" . count($_SERVER['argv']) . " args)");
+		Framework::info("execute $scriptPath with (" . count($_POST['argv']) . " args)");
 	}
 	chdir(WEBEDIT_HOME);
 		
