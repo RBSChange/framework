@@ -107,15 +107,6 @@ class commands_InitProject extends commands_AbstractChangeCommand
 			}
 		}
 				
-		// media directory
-		f_util_FileUtils::mkdir("media/original");
-		f_util_FileUtils::mkdir("media/formatted");
-		f_util_FileUtils::cp("$builderResourcePath/resources/phpEngineDisabled.htaccess", "media/.htaccess", f_util_FileUtils::OVERRIDE);
-
-		// securemedia directory
-		f_util_FileUtils::mkdir("securemedia/original");
-		f_util_FileUtils::cp("$builderResourcePath/resources/phpEngineDisabled.htaccess", "securemedia/.htaccess", f_util_FileUtils::OVERRIDE);
-
 		// cache directory
 		f_util_FileUtils::mkdir("cache/".$this->getProfile());
 
@@ -125,7 +116,6 @@ class commands_InitProject extends commands_AbstractChangeCommand
 		// log directory
 		f_util_FileUtils::mkdir("log/".$this->getProfile());
 
-		// various directories. FIXME: still used ?
 		f_util_FileUtils::mkdir("mailbox");
 		f_util_FileUtils::mkdir("modules");
 

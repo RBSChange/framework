@@ -33,10 +33,7 @@ class commands_ApplyWebappPolicy extends commands_AbstractChangeCommand
 		
 		$apacheGroup = $this->getApacheGroup();
 		$user = $this->getUser();
-		$dirs = array(WEB_CACHE_DIR, PROJECT_OVERRIDE,  
-				f_util_FileUtils::buildWebeditPath('bin'),
-				f_util_FileUtils::buildChangeBuildPath('apache'),
-				f_util_FileUtils::buildChangeBuildPath('seo'));
+		$dirs = array(WEB_CACHE_DIR, PROJECT_OVERRIDE, "media", "securemedia");
 		
 		foreach ($dirs as $dir)
 		{
@@ -54,6 +51,11 @@ class commands_ApplyWebappPolicy extends commands_AbstractChangeCommand
 			{
 				$this->warnMessage("WARN on Apply '$dir' dir policy: " . $e->getMessage());
 			}
+		}
+
+		foreach (glob(WEBEDIT_HOME."/*.php") as $phpFile)
+		{
+			f_util_FileUtils::chmod($phpFile, "755");
 		}
 		
 		$this->quitOk("Webapp files policy applied");
