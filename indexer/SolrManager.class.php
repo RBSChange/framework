@@ -607,7 +607,7 @@ class indexer_SolrManager
 		$lang = $indexableDocumentFields['lang']['value'];
 		$indexableDocumentFields[$lang . '_aggregateText']['value'] = $indexableDocumentFields['label']['value'] . "\n" . $indexableDocumentFields['text']['value'];
 		$indexableDocumentFields[$lang . '_aggregateText']['type'] = indexer_Field::INDEXED;
-		$indexableDocumentFields[$lang . '_sortableLabel']['value'] = strtolower(preg_replace('/[\s]/', '', $indexableDocumentFields['label']['value']));
+		$indexableDocumentFields[$lang . '_sortableLabel']['value'] = mb_strtolower(preg_replace('/[\s]/u', '', $indexableDocumentFields['label']['value']), "UTF-8");
 		$indexableDocumentFields[$lang . '_sortableLabel']['type'] = indexer_Field::INDEXED;
 	}
 	
