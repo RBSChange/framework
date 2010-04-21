@@ -28,6 +28,11 @@ class indexer_IndexService extends BaseService
 	private $indexerModeSwitches = array();
 	
 	/**
+	 * @var array
+	 */
+	private $modelsInfos;
+	
+	/**
 	 * Get the service instance.
 	 *
 	 * @return indexer_IndexService
@@ -69,6 +74,40 @@ class indexer_IndexService extends BaseService
 		return f_util_ArrayUtils::lastElement($this->indexerModeSwitches);
 	}
 	
+	public function loadModelsInfos()
+	{
+		$compiledFilePath = f_util_FileUtils::buildChangeBuildPath('indexableDocumentInfos.ser');
+		if (!file_exists($compiledFilePath))
+		{
+			throw new Exception("File not found : $compiledFilePath. compile-documents needed");
+		}
+		$this->modelsInfos = unserialize(file_get_contents($compiledFilePath));
+	}
+	
+	/**
+	 * @return string[]
+	 */
+	public function getBackOfficeModelsName()
+	{
+		if ($this->modelsInfos === null)
+		{
+			$this->loadModelsInfos();
+		}
+		return $this->modelsInfos['bo'];
+	}
+	
+	/**
+	 * @return string[]
+	 */
+	public function getFrontOfficeModelsName()
+	{
+		if ($this->modelsInfos === null)
+		{
+			$this->loadModelsInfos();
+		}
+		return $this->modelsInfos['fo'];
+	}	
+	
 	/**
 	 * @throws IllegalArgumentException
 	 * @param f_persistentdocument_PersistentDocument $document
@@ -105,10 +144,8 @@ class indexer_IndexService extends BaseService
 		}
 	}
 	
-
 	/**
 	 * Update the indexer_IndexableDocument $document in the index. 
-	 *
 	 * @param f_persistentdocument_PersistentDocument $document
 	 */
 	public function update($document)
@@ -127,7 +164,6 @@ class indexer_IndexService extends BaseService
 	
 	/**
 	 * Update the indexer_IndexableDocument $document in the index. 
-	 *
 	 * @param f_persistentdocument_PersistentDocument $document
 	 */
 	public function updateBackoffice($document)
@@ -146,9 +182,7 @@ class indexer_IndexService extends BaseService
 	
 	/**
 	 * Delete the indexer_IndexableDocument $document from the index.
-	 * 
-	 * @throws IllegalArgumentException
-	 * @param indexer_IndexableDocument $document
+	 * @param f_persistentdocument_PersistentDocument $document
 	 */
 	public function delete($document)
 	{
@@ -166,9 +200,7 @@ class indexer_IndexService extends BaseService
 	
 	/**
 	 * Delete the indexer_IndexableDocument $document from the index.
-	 * 
-	 * @throws IllegalArgumentException
-	 * @param indexer_IndexableDocument $document
+	 * @param f_persistentdocument_PersistentDocument $document
 	 */
 	public function deleteBackoffice($document)
 	{
@@ -220,8 +252,6 @@ class indexer_IndexService extends BaseService
 		}
 	}
 	
-	/**
-	 */
 	public function clearIndex()
 	{
 		$this->clearBackofficeIndex();
@@ -453,9 +483,10 @@ class indexer_IndexService extends BaseService
 	public function getIndexableDocumentIds()
 	{
 		$indexableDocumentIds = array();
-		foreach ($this->getIndexablePersistentModels() as $model)
+		foreach ($this->getFrontOfficeModelsName() as $modelName)
 		{
-			$query = $this->getIndexableDocumentsByDocumentModelQuery($model)->setProjection(Projections::property('id', 'id'));
+			$query = $this->getIndexableDocumentsByModelNameQuery($modelName)
+				->setProjection(Projections::property('id', 'id'));
 			foreach ($query->find() as $idArray)
 			{
 				$indexableDocumentIds[] = $idArray['id'];
@@ -470,9 +501,11 @@ class indexer_IndexService extends BaseService
 	public function getBackofficeIndexableDocumentIds()
 	{
 		$indexableDocumentIds = array();
-		foreach ($this->getBackofficeIndexablePersistentModels() as $model)
+		foreach ($this->getBackOfficeModelsName() as $modelName)
 		{
-			$query = $this->getBackofficeIndexableDocumentsByDocumentModelQuery($model)->setProjection(Projections::property('id', 'id'));
+			$query = $this->getIndexableDocumentsByModelNameQuery($modelName)
+				->setProjection(Projections::property('id', 'id'));
+
 			foreach ($query->find() as $idArray)
 			{
 				$indexableDocumentIds[] = $idArray['id'];
@@ -482,20 +515,30 @@ class indexer_IndexService extends BaseService
 	}
 	
 	/**
+	 * @deprecated use isModelNameIndexable
 	 * @param f_persistentdocument_PersistentDocumentModel $model
 	 * @return Boolean
 	 */
 	public function isModelIndexable($model)
 	{
-		if ($this->getIndexerMode() == self::BACKOFFICE_SUFFIX)
-		{
-			return $model->isBackofficeIndexable();
-		}
-		return $model->isIndexable();
+		return $this->isModelNameIndexable($model->getName());
 	}
 	
 	/**
-	 * @param f_persistentdocument_PersistentDocumentImpl $document
+	 * @param string $modelName
+	 * @return boolean
+	 */
+	public function isModelNameIndexable($modelName)
+	{
+		if ($this->getIndexerMode() == self::BACKOFFICE_SUFFIX)
+		{
+			return in_array($modelName, $this->getBackOfficeModelsName());
+		}
+		return in_array($modelName, $this->getFrontOfficeModelsName());
+	}	
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
 	 * @return Array<Integer>
 	 */
 	public function getBackendAccessorIds($document)
@@ -517,6 +560,7 @@ class indexer_IndexService extends BaseService
 	
 
 	/**
+	 * @param f_persistentdocument_PersistentDocument $document
 	 * @return Integer[]
 	 */
 	private function getFrontendAccessorIds($document)
@@ -600,6 +644,9 @@ class indexer_IndexService extends BaseService
 	}
 	
 
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 */
 	private function addDocument($document)
 	{
 		if (!$this->isIndexingOperationPossible($document))
@@ -621,14 +668,10 @@ class indexer_IndexService extends BaseService
 		{
 			$this->manager->add($indexedDocument);
 		}
-		else if (Framework::isInfoEnabled())
-		{
-			Framework::info(__METHOD__ . ' $document->getIndexedDocument() ' . $this->getIndexerMode() . 'did not return an indexer_IndexedDocument (id =' . $document->getId() . ')');
-		}
 	}
 	
 	/**
-	 * @param indexer_IndexableDocument $document
+	 * @param f_persistentdocument_PersistentDocument $document
 	 */
 	private function updateDocument($document)
 	{
@@ -640,20 +683,24 @@ class indexer_IndexService extends BaseService
 		
 		if ($this->getIndexerMode() == self::INDEXER_MODE_BACKOFFICE)
 		{
-			$indexedDocument = $document->getBackofficeIndexedDocument();
+			$indexedDocument = $this->buildBackIndexedDocument($document);
 		}
 		else
 		{
-			$indexedDocument = $document->getIndexedDocument();
+			$indexedDocument = $this->buildFrontIndexedDocument($document);
 		}
 		
-		if ($indexedDocument === null)
+		if ($indexedDocument instanceof indexer_IndexedDocument)
 		{
-			$this->deleteDocument($document);
+			$this->manager->add($indexedDocument);
 		}
 		else
 		{
-			$this->addDocument($document);
+			$id = $document->getId();
+			foreach ($document->getI18nInfo()->getLangs() as $lang)
+			{
+				$this->manager->delete($id .'/' .$lang);
+			}
 		}
 	}
 	
@@ -667,22 +714,25 @@ class indexer_IndexService extends BaseService
 			Framework::warn(__METHOD__ . ' Can not delete document ' . $document->getId() . ' from index, please check your config and document model.');
 			return;
 		}
+		
 		$id = $document->getId();
-		foreach (RequestContext::getInstance()->getSupportedLanguages() as $lang)
+		foreach ($document->getI18nInfo()->getLangs() as $lang)
 		{
-			if ($document->isLangAvailable($lang))
-			{
-				$this->manager->delete("$id/$lang");
-			}
+			$this->manager->delete($id .'/' .$lang);
 		}
 	}
 		
 	/**
-	 * @throws IllegalArgumentException
-	 * @param indexer_IndexableDocument $document
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @return indexer_IndexedDocument
 	 */
 	private function buildFrontIndexedDocument($document)
 	{
+		if (!$document->isPublished())
+		{
+			return null;
+		}
+
 		$indexedDocument = $document->getIndexedDocument();
 		if ($indexedDocument instanceof indexer_IndexedDocument)
 		{
@@ -762,11 +812,16 @@ class indexer_IndexService extends BaseService
 	}
 	
 	/**
-	 * @throws IllegalArgumentException
 	 * @param f_persistentdocument_PersistentDocumentImpl $document
+	 * @return indexer_IndexedDocument
 	 */
 	private function buildBackIndexedDocument($document)
 	{
+		if ($document->getPublicationstatus() === 'DEPRECATED')
+		{
+			return null;
+		}
+		
 		$backofficeIndexDocument = $document->getBackofficeIndexedDocument();
 		if ($backofficeIndexDocument instanceof indexer_IndexedDocument)
 		{
@@ -779,13 +834,13 @@ class indexer_IndexService extends BaseService
 			$hasBlock = false;
 			if (f_util_ClassUtils::methodExists($document, 'getHtmlLinkAttributeForIndexer'))
 			{
-				$backofficeIndexDocument->setStringField(tree_parser_XmlTreeParser::HTMLLINK_ATTRIBUTE, f_util_ClassUtils::callMethodOn($document, 'getHtmlLinkAttributeForIndexer'));
+				$backofficeIndexDocument->setStringField('htmllink', f_util_ClassUtils::callMethodOn($document, 'getHtmlLinkAttributeForIndexer'));
 				$hasHtmlLink = true;
 			}
 			
 			if (f_util_ClassUtils::methodExists($document, 'getBlockAttributeForIndexer'))
 			{
-				$backofficeIndexDocument->setStringField(tree_parser_XmlTreeParser::BLOCK_ATTRIBUTE, f_util_ClassUtils::callMethodOn($document, 'getBlockAttributeForIndexer'));
+				$backofficeIndexDocument->setStringField('block', f_util_ClassUtils::callMethodOn($document, 'getBlockAttributeForIndexer'));
 				$hasBlock = true;
 			}
 			
@@ -796,12 +851,12 @@ class indexer_IndexService extends BaseService
 			
 			if ($hasHtmlLink === false)
 			{
-				$backofficeIndexDocument->setStringField(tree_parser_XmlTreeParser::HTMLLINK_ATTRIBUTE, $attributes[tree_parser_XmlTreeParser::HTMLLINK_ATTRIBUTE]);
+				$backofficeIndexDocument->setStringField('htmllink', $attributes['htmllink']);
 			}
 			
 			if ($hasBlock === false)
 			{
-				$backofficeIndexDocument->setStringField(tree_parser_XmlTreeParser::BLOCK_ATTRIBUTE, $attributes[tree_parser_XmlTreeParser::BLOCK_ATTRIBUTE]);
+				$backofficeIndexDocument->setStringField('block', $attributes['block']);
 			}
 			return $backofficeIndexDocument;
 		}
@@ -819,83 +874,40 @@ class indexer_IndexService extends BaseService
 		}
 		return self::DEFAULT_SOLR_INDEXER_CLIENT;
 	}
-	
+
 	/**
-	 * @param f_persistentdocument_PersistentDocumentModel $model
+	 * @param string $modelName
 	 * @return f_persistentdocument_criteria_Query
 	 */
-	private function getIndexableDocumentsByDocumentModelQuery($model)
+	private function getIndexableDocumentsByModelNameQuery($modelName)
 	{
-		return f_persistentdocument_PersistentProvider::getInstance()->createQuery($model->getName(), false);
+		return f_persistentdocument_PersistentProvider::getInstance()->createQuery($modelName, false);
 	}
 	
+		
 	/**
-	 * @param f_persistentdocument_PersistentDocumentModel $model
-	 * @return f_persistentdocument_criteria_Query
-	 */
-	private function getBackofficeIndexableDocumentsByDocumentModelQuery($model)
-	{
-		return f_persistentdocument_PersistentProvider::getInstance()->createQuery($model->getName(), false)->add(Restrictions::ne('publicationstatus', 'DEPRECATED'));
-	}
-	
-	/**
-	 * @return array<f_persistentdocument_PersistentDocumentModel>
-	 */
-	private function getIndexablePersistentModels()
-	{
-		$indexableModels = array();
-		$models = f_persistentdocument_PersistentDocumentModel::getDocumentModels();
-		foreach ($models as $model)
-		{
-			if ($this->isModelIndexable($model))
-			{
-				$indexableModels[] = $model;
-			}
-		}
-		return $indexableModels;
-	}
-	
-	/**
-	 * @return array<f_persistentdocument_PersistentDocumentModel>
-	 */
-	private function getBackofficeIndexablePersistentModels()
-	{
-		$indexableModels = array();
-		$models = f_persistentdocument_PersistentDocumentModel::getDocumentModels();
-		foreach ($models as $model)
-		{
-			if ($model->isBackofficeIndexable())
-			{
-				$indexableModels[] = $model;
-			}
-		}
-		return $indexableModels;
-	}
-	
-	/**
-	 * 
-	 *
-	 * @param f_persistentdocument_PersistentDocumentImpl $document
+	 * @param f_persistentdocument_PersistentDocument $document
 	 * @return array();
 	 */
 	private function getBackofficeAttributes($document)
 	{
 		$attributes = array();
 		$model = $document->getPersistentModel();
-		if (f_util_ClassUtils::methodExists($document, tree_parser_XmlTreeParser::DEFAULT_NAVIGATIONLABEL_METHOD))
+		if (f_util_ClassUtils::methodExists($document, 'getNavigationtitle'))
 		{
-			$label = f_util_ClassUtils::callMethodOn($document, tree_parser_XmlTreeParser::DEFAULT_NAVIGATIONLABEL_METHOD);
+			$label = f_util_ClassUtils::callMethodOn($document, 'getNavigationtitle');
 		}
 		else
 		{
 			$label = $document->getLabel();
 		}
-		
-		$attributes[tree_parser_XmlTreeParser::HTMLLINK_ATTRIBUTE] = sprintf(tree_parser_XmlTreeParser::DEFAULT_HTMLLINK_TEMPLATE, $document->getId(), RequestContext::getInstance()->getLang(), RequestContext::getInstance()->getLang(), f_Locale::translateUI($label));
+		$lang = RequestContext::getInstance()->getLang();
+		$escapedLabel = htmlspecialchars(f_Locale::translateUI($label), null, 'UTF-8');
+		$attributes['htmllink'] = '<a class="link" href="javascript:;" cmpref="'.$document->getId().'" lang="'.$lang.'" xml:lang="'.$lang.'">'.$escapedLabel.'</a>';
 		if (!($document instanceof generic_persistentdocument_folder))
 		{
-			$attributes[tree_parser_XmlTreeParser::BLOCK_ATTRIBUTE] = str_replace('/', '_', $model->getName());
-			$document->buildTreeAttributes($model->getModuleName(), tree_parser_TreeParser::TYPE_MULTI_LIST, $attributes);
+			$attributes['block'] = str_replace('/', '_', $model->getName());
+			$document->buildTreeAttributes($model->getModuleName(), 'wmultilist', $attributes);
 		}
 		return $attributes;
 	}
@@ -978,14 +990,18 @@ class indexer_IndexService extends BaseService
 		{
 			return array();
 		}
-		$models = ModuleService::getInstance()->getDefinedDocumentModels(f_permission_PermissionService::getModuleNameByRole($roleName));
+		$modelNames = ModuleService::getInstance()->getDefinedDocumentModelNames(f_permission_PermissionService::getModuleNameByRole($roleName));
 		$indexableDocumentIds = array();
-		foreach ($models as $model)
+		foreach ($modelNames as $modelName)
 		{
-			$query = $this->getBackofficeIndexableDocumentsByDocumentModelQuery($model)->setProjection(Projections::property('id', 'id'));
-			foreach ($query->find() as $idArray)
+			if (in_array($modelName, $this->getBackOfficeModelsName()))
 			{
-				$indexableDocumentIds[] = $idArray['id'];
+				$query = $this->getIndexableDocumentsByModelNameQuery($modelName)
+						->setProjection(Projections::property('id', 'id'));
+				foreach ($query->find() as $idArray)
+				{
+					$indexableDocumentIds[] = $idArray['id'];
+				}
 			}
 		}
 		return $indexableDocumentIds;

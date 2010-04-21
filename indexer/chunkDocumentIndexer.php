@@ -72,6 +72,7 @@ function indexDocumentChunk($ids, $backIndexing)
 							{
 								Framework::info('Index BO ' . $document->__toString());
 							}
+							echo "Add Backoffice: " . $document->__toString() . "\n";
 							$is->addBackoffice($document);
 						}
 					}
@@ -83,6 +84,7 @@ function indexDocumentChunk($ids, $backIndexing)
 							{
 								Framework::info('Index FO ' . $document->__toString());
 							}
+							echo "Add Frontoffice: " . $document->__toString() . "\n";
 							$is->add($document);
 						}
 					}

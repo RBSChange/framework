@@ -247,6 +247,30 @@ class generator_PersistentModel
 		f_util_FileUtils::writeAndCreateContainer($compiledFilePath, serialize(array_keys($documentPropertyInfos)), f_util_FileUtils::OVERRIDE);		
 	}
 	
+	public static function buildIndexableDocumentInfos()
+	{
+		$indexableDocumentInfos = array('fo' => array(), 'bo' => array());
+		foreach (self::loadModels() as $model)
+		{	
+			$moduleName = strtoupper($model->getModuleName());
+			$documentName = strtoupper($model->getDocumentName());
+			if ($model->hasURL() &&  $model->isIndexable() 
+					&& !defined('MOD_'. $moduleName .'_'.$documentName .'_DISABLE_INDEXATION'))
+			{
+				$indexableDocumentInfos['fo'][] = $model->getName();
+			}
+			
+			if ($model->isBackofficeIndexable() && 
+				(!defined('MOD_'. $moduleName .'_'.$documentName .'_DISABLE_BACKOFFICE_INDEXATION') 
+					|| !constant('MOD_'. $moduleName .'_'.$documentName .'_DISABLE_BACKOFFICE_INDEXATION')))
+			{
+				$indexableDocumentInfos['bo'][] = $model->getName();
+			}
+		}
+		$compiledFilePath = f_util_FileUtils::buildChangeBuildPath('indexableDocumentInfos.ser');
+		f_util_FileUtils::writeAndCreateContainer($compiledFilePath, serialize($indexableDocumentInfos), f_util_FileUtils::OVERRIDE);		
+	}
+	
 	/**
 	 * @param String $xml
 	 * @param String $module
