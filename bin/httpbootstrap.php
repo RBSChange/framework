@@ -98,6 +98,7 @@ class c_ChangeBootStrap
 	static $DEP_CHANGE_PROJECT = 9;
 
 	/**
+	 * WEBEDIT_HOME
 	 * @var String
 	 */
 	private $wd;
@@ -142,7 +143,22 @@ class c_ChangeBootStrap
 	private $looseVersions = false;
 
 	private static $currentDownloadInfo;
+	
+	/**
+	 * @var Boolean
+	 */
+	private $onlyCheck = false;
 
+	/**
+	 * @var c_ChangeBootStrap
+	 */
+	private static $instance;
+	
+	/**
+	 * @var boolean
+	 */
+	private $useLocalOnly = false;
+	
 	/**
 	 * @param String $path
 	 */
@@ -152,14 +168,7 @@ class c_ChangeBootStrap
 		$this->wd = $path;
 		self::$instance = $this;
 	}
-
-	/**
-	 * @var Boolean
-	 */
-	private $onlyCheck = false;
-
-	private static $instance;
-
+	
 	/**
 	 * @return c_ChangeBootStrap
 	 */
@@ -199,10 +208,14 @@ class c_ChangeBootStrap
 	
 	function ignorePearInstall()
 	{
-		$pearDir = $this->expandLocalPath($this->getProperties()->getProperty("PEAR_DIR", "pear"));
-		$this->pearDir = array("path" => realpath($pearDir), "writeable" => false, "installed" => true);
+		$this->setUseLocalOnly(true);
 	}
-
+	
+	function setUseLocalOnly($localOnly)
+	{
+		$this->useLocalOnly = $localOnly;
+	}
+	
 	/**
 	 * @var String
 	 */
@@ -268,19 +281,22 @@ class c_ChangeBootStrap
 		if ($this->pearDir === null)
 		{
 			$pearDir = $this->expandLocalPath($this->getProperties()->getProperty("PEAR_DIR", "pear"));
-			if (!file_exists($pearDir) && !@mkdir($pearDir, 0777, true))
+			if ($this->useLocalOnly)
 			{
-				throw new Exception("Could not create $pearDir");
+				$installed = file_exists($pearDir."/PEAR/pearcmd.php");
+				$this->pearDir = array("path" => realpath($pearDir), "writeable" => false, "installed" => $installed);
 			}
-			if (is_file($pearDir))
+			else
 			{
-				throw new Exception("$pearDir exists and is not a directory");
-			}
-			$installed = file_exists($pearDir."/PEAR/pearcmd.php");
-			$this->pearDir = array("path" => realpath($pearDir), "writeable" => is_writeable($pearDir), "installed" => $installed);
-			if (!$this->pearDir["writeable"])
-			{
-				c_warning("Your pear installation ($pearDir) is not writeable: you will not be able to add pear packages to it. Make it writeable or choose an other path where you can write in.");
+				if (!file_exists($pearDir) && !@mkdir($pearDir, 0777, true))
+				{
+					throw new Exception("Could not create $pearDir");
+				}
+				if (is_file($pearDir))
+				{
+					throw new Exception("$pearDir exists and is not a directory");
+				}
+				$this->pearDir = array("path" => realpath($pearDir), "writeable" => is_writeable($pearDir), "installed" => $installed);
 			}
 		}
 	}
@@ -292,7 +308,7 @@ class c_ChangeBootStrap
 		$this->assert_ext("curl", "Curl extension is required to download packages");
 		if (C_DEBUG)
 		{
-		 	$this->assert_ext("zip", "Zip extension is recommanded to unpack packages.", true);
+			$this->assert_ext("zip", "Zip extension is recommanded to unpack packages.", true);
 		}
 
 		// Check change.xml existence
@@ -302,21 +318,13 @@ class c_ChangeBootStrap
 			throw new Exception("Could not find $descPath");
 		}
 
-		$desc = new DOMDocument();
-		if ($desc->load($descPath) === false)
-		{
-			throw new Exception("Could not load $descPath");
-		}
-
-		$triedComponents = array();
-		$components = array();
-		$this->checkAndLoadDependencies($desc, $components, $triedComponents);
-
+		$components = null;
 		if ($target != "")
 		{
 			$scriptPath = null;
 			if (cboot_StringUtils::startsWith($target, "dep:"))
 			{
+				$this->checkAndLoadDependencies($components);
 				list(, $component, $relativePath) = explode(":", $target);
 				if (isset($components[$component]))
 				{
@@ -362,85 +370,13 @@ class c_ChangeBootStrap
 			}
 			if (!is_file($descComputedPath) || filemtime($descComputedPath) < $lastUserConfigActionTime)
 			{
-				$computedComponents = array();
-				// TODO: getPearInfo only if at least on pear dependency
-				$this->loadPearInfo();
-				$computedComponents["PEAR_DIR"] = $this->pearDir["path"]."/PEAR";
-				$repo = array_keys($this->getLocalRepositories());
-				$computedComponents["LOCAL_REPOSITORY"] = $repo[0];
-				$computedComponents["WWW_GROUP"] = $this->getProperties()->getProperty("WWW_GROUP", "www-data");
-				$proxy = $this->getProxy();
-				if ($proxy !== null)
-				{
-					$proxyInfo = explode(":", $proxy);
-					if (!isset($proxyInfo[1]))
-					{
-						$proxyInfo[1] = "80";
-					}
-					$computedComponents["OUTGOING_HTTP_PROXY_HOST"] = $proxyInfo[0];
-					$computedComponents["OUTGOING_HTTP_PROXY_PORT"] = $proxyInfo[1];
-				}
-				$computedComponents["c_bootstrap"] = __FILE__;
-				foreach ($components as $componentInfo)
-				{
-					$type = $componentInfo[0];
-					$name = $componentInfo[1];
-					$version = $componentInfo[2];
-					$computedDeps = null;
-					$typeStr = $this->getDepTypeAsString($type);
-
-					if (isset($computedComponents[$typeStr][$name]) && $computedComponents[$typeStr][$name]["version"] == $version)
-					{
-						continue;
-					}
-					if ($componentInfo["path"] !== null)
-					{
-						$computedDeps = $this->getComputedDepencies($componentInfo["path"]);
-						if (!isset($computedComponents[$typeStr]))
-						{
-							$computedComponents[$typeStr] = array();
-						}
-					}
-
-					$computedComponents[$typeStr][$name] = array("version" => $version, "path" => $componentInfo["path"]);
-
-					if ($computedDeps === null)
-					{
-						continue;
-					}
-					foreach ($computedDeps as $componentType => $deps)
-					{
-						$componentTypeStr = $this->getDepTypeAsString($componentType);
-						foreach ($deps as $componentName => $componentVersions)
-						{
-							if (!isset($computedComponents[$componentTypeStr]))
-							{
-								$computedComponents[$componentTypeStr] = array();
-							}
-							$componentVersion = end($componentVersions);
-							if (!isset($computedComponents[$componentTypeStr][$componentName]))
-							{
-								$componentPath = $this->getComponentPath($componentType, $componentName, $componentVersion);
-								$computedComponents[$componentTypeStr][$componentName] = array("version" => $componentVersion, "path" => $componentPath);
-							}
-							else
-							{
-								$actualVersion = $computedComponents[$componentTypeStr][$componentName]["version"];
-								if ($this->compareVersion($componentVersion, $actualVersion) > 0)
-								{
-									$componentPath = $this->getComponentPath($componentType, $componentName, $componentVersion);
-									$computedComponents[$componentTypeStr][$componentName] = array("version" => $componentVersion, "path" => $componentPath);
-								}
-							}
-						}
-					}
-				}
+				$computedComponents = $this->generateComputedChangeComponents($components);
 				if (!file_put_contents($descComputedPath, serialize($computedComponents)))
 				{
 					throw new Exception("Could not write to ".$descComputedPath.". Please adjust permissions");
 				}
 			}
-			
+
 			if (!isset($_SERVER["argv"]) || !is_array($_SERVER["argv"])) 
 			{	
 				$_SERVER["argv"] = array();
@@ -453,6 +389,7 @@ class c_ChangeBootStrap
 			if ($scriptPath !== null)
 			{
 				array_walk($_SERVER["argv"], array($this, "escapeArg"));
+				$returnCode = 0;
 				passthru("php $scriptPath ".join(" ", $_SERVER["argv"]), $returnCode);
 				exit($returnCode);
 			}
@@ -466,6 +403,90 @@ class c_ChangeBootStrap
 				$scriptFunction($_SERVER["argv"], $computedDeps);
 			}
 		}
+	}
+	
+	private function generateComputedChangeComponents($components)
+	{
+		if ($components === null)
+		{
+			$this->checkAndLoadDependencies($components);
+		}
+
+		$computedComponents = array();
+		$computedComponents["PEAR_DIR"] = $this->expandLocalPath($this->getProperties()->getProperty("PEAR_DIR", "pear"));
+		$repo = array_keys($this->getLocalRepositories());
+		$computedComponents["LOCAL_REPOSITORY"] = $repo[0];
+		$computedComponents["WWW_GROUP"] = $this->getProperties()->getProperty("WWW_GROUP", "www-data");
+		$proxy = $this->getProxy();
+		if ($proxy !== null)
+		{
+			$proxyInfo = explode(":", $proxy);
+			if (!isset($proxyInfo[1]))
+			{
+				$proxyInfo[1] = "80";
+			}
+			$computedComponents["OUTGOING_HTTP_PROXY_HOST"] = $proxyInfo[0];
+			$computedComponents["OUTGOING_HTTP_PROXY_PORT"] = $proxyInfo[1];
+		}
+		$computedComponents["c_bootstrap"] = __FILE__;
+		
+		foreach ($components as $componentInfo)
+		{
+			$type = $componentInfo[0];
+			$name = $componentInfo[1];
+			$version = $componentInfo[2];
+			$computedDeps = null;
+			$typeStr = $this->getDepTypeAsString($type);
+			
+			if (isset($computedComponents[$typeStr][$name]) && $computedComponents[$typeStr][$name]["version"] == $version)
+			{
+				continue;
+			}
+			
+			if ($componentInfo["path"] !== null)
+			{
+				$computedDeps = $this->getComputedDepencies($componentInfo["path"]);
+				if (! isset($computedComponents[$typeStr]))
+				{
+					$computedComponents[$typeStr] = array();
+				}
+			}
+			
+			$computedComponents[$typeStr][$name] = array("version" => $version, "path" => $componentInfo["path"]);			
+			if ($computedDeps === null)
+			{
+				continue;
+			}
+			
+			foreach ($computedDeps as $componentType => $deps)
+			{
+				$componentTypeStr = $this->getDepTypeAsString($componentType);
+				foreach ($deps as $componentName => $componentVersions)
+				{
+					if (!isset($computedComponents[$componentTypeStr]))
+					{
+						$computedComponents[$componentTypeStr] = array();
+					}
+					$componentVersion = end($componentVersions);
+					if (! isset($computedComponents[$componentTypeStr][$componentName]))
+					{
+						$componentPath = $this->getComponentPath($componentType, $componentName, $componentVersion);
+						$computedComponents[$componentTypeStr][$componentName] = array("version" => $componentVersion, "path" => $componentPath);
+					}
+					else
+					{
+						$actualVersion = $computedComponents[$componentTypeStr][$componentName]["version"];
+						if ($this->compareVersion($componentVersion, $actualVersion) > 0)
+						{
+							$componentPath = $this->getComponentPath($componentType, $componentName, $componentVersion);
+							$computedComponents[$componentTypeStr][$componentName] = array("version" => $componentVersion, "path" => $componentPath);
+						}
+					}
+				}
+			}
+		}
+
+		return $computedComponents;
 	}
 
 	function autoload($className)
@@ -574,7 +595,7 @@ class c_ChangeBootStrap
 				throw new Exception("Could not create $linkDir");
 			}
 			$linkTarget = $componentPath."/".$relPath;
-			if ((!is_link($linkPath) || (readlink($linkPath) != $linkTarget && $dummy = unlink($linkPath)))
+			if ((!is_link($linkPath) || (readlink($linkPath) != $linkTarget && unlink($linkPath)))
 			&& !symlink($linkTarget, $linkPath))
 			{
 				throw new Exception("Could not symlink ".$componentPath."/".$relPath." to $linkPath");
@@ -735,11 +756,19 @@ class c_ChangeBootStrap
 	}
 
 	/**
-	 * @param DOMDocument $desc
-	 * @return String the framework path
+	 * @param array $components
 	 */
-	private function checkAndLoadDependencies($desc, &$components, &$triedComponents)
+	private function checkAndLoadDependencies(&$components)
 	{
+		$desc = new DOMDocument();
+		$loaded = $desc->load($this->getDescriptorPath());
+		if ($loaded === false)
+		{
+			throw new Exception("Could not load " . $this->getDescriptorPath());
+		}
+	
+		$triedComponents = array();
+		
 		$xpath = new DOMXPath($desc);
 		$xpath->registerNamespace("c", "http://www.rbs.fr/schema/change-project/1.0");
 		$nodes = $xpath->query("c:dependencies/c:framework");
@@ -784,6 +813,7 @@ class c_ChangeBootStrap
 			try
 			{
 				$triedComponents[$componentInfo[0].'/'.$componentInfo[1]] = array($componentInfo[2]);
+				$componentPath = null;
 				if ($this->hasComponentLocally($componentInfo[0], $componentInfo[1], $componentInfo[2], false, $componentPath))
 				{
 					c_debug($this->getFullName($componentInfo[0], $componentInfo[1], $componentInfo[2])." is present locally");
@@ -810,7 +840,7 @@ class c_ChangeBootStrap
 		if (!file_exists($componentPath."/.computedDeps.ser"))
 		{
 			// probably a dev repository => we do not store the file as the result can evolve
-			list($declaredDeps, $computedDeps) = $this->getDependencies($componentPath);
+			list(, $computedDeps) = $this->getDependencies($componentPath);
 			return $computedDeps;
 		}
 		$computedDeps = unserialize(file_get_contents($componentPath."/.computedDeps.ser"));
@@ -833,7 +863,6 @@ class c_ChangeBootStrap
 		if ($this->onlyCheck)
 		{
 			$keys = array_keys($this->localRepositories);
-			$repo = $keys[0];
 			c_message("Check ".substr(str_replace($keys, "", $componentPath." dependencies"), 1));
 		}
 		else
@@ -875,6 +904,7 @@ class c_ChangeBootStrap
 						else
 						{
 							$triedComponents[$componentType.'/'.$componentName][] = $version;
+							$subComponentPath = null;
 							if (!$this->hasComponentLocally($componentType, $componentName, $version, false, $subComponentPath))
 							{
 								$this->downloadComponent($triedComponents, $componentType, $componentName, $version);
@@ -913,7 +943,8 @@ class c_ChangeBootStrap
 			return 0;
 		}
 		//echo "Compare $version1 to $version2\n";
-		$matches1 = null;
+		$matches1 = array();
+		$matches2 = array();
 		$versionPattern = '/^([^.+])(\.[^.]+)*(-[0-9]+){0,1}(\.r[0-9]+){0,1}$/';
 		if (!preg_match($versionPattern, $version1, $matches1) || !preg_match($versionPattern, $version2, $matches2))
 		{
@@ -971,6 +1002,8 @@ class c_ChangeBootStrap
 	 * @param String $componentType {change-module|change-lib|change-tool|lib}
 	 * @param String $componentName
 	 * @param String $version
+	 * @param Boolean $optionnal
+	 * @param String $componentPath
 	 * @return Boolean
 	 */
 	private function hasComponentLocally($componentType, $componentName, $version, $optionnal = false, &$componentPath)
@@ -1001,6 +1034,13 @@ class c_ChangeBootStrap
 		}
 		elseif ($componentType == self::$DEP_PEAR)
 		{
+			$this->loadPearInfo();		
+			if ($this->useLocalOnly) 
+			{
+				$this->componentLocallyOK($componentType, $componentName, $version);
+				return true;
+			}
+
 			if (strpos($componentName, '/') === false)
 			{
 				$packageName = "pear/".$componentName;
@@ -1009,14 +1049,9 @@ class c_ChangeBootStrap
 			{
 				$packageName = $componentName;
 			}
-
-			$this->loadPearInfo();
+					
 			if ($this->pearDir["installed"])
-			{
-				if ($this->pearDir["installed"] && !$this->pearDir["writeable"])
-				{
-					return true;
-				}
+			{	
 				$pearDir = $this->pearDir["path"];
 				c_debug("Search for $componentType/$componentName in $pearDir");
 				try
@@ -1028,9 +1063,7 @@ class c_ChangeBootStrap
 						$cmd .= " -c ".$this->pearDir["path"]."/pear.conf";
 					}
 					$cmd .= " info $packageName";
-					c_debug("Exec : $cmd");
 					$result = cboot_System::execArray($cmd);
-					c_debug("Exec : " . implode("\n", $result));
 					foreach ($result as $resultLine)
 					{
 						$matches = null;
@@ -1056,7 +1089,7 @@ class c_ChangeBootStrap
 				}
 				catch (Exception $e)
 				{
-					c_message("ERR : ". $e->getMessage());
+					// This could be pear that exited with a non zero value
 				}
 				$this->installPearPackage($packageName, $version);
 				$this->componentLocallyOK($componentType, $componentName, $version);
@@ -1064,13 +1097,12 @@ class c_ChangeBootStrap
 			}
 			else
 			{
+				
 				$this->installPear();
 				$this->installPearPackage($packageName, $version);
 				$this->componentLocallyOK($componentType, $componentName, $version);
 				return true;
 			}
-			$this->componentLocallyKO($componentType, $componentName, $version);
-			return false;
 		}
 		elseif ($componentType == self::$DEP_BIN)
 		{
@@ -1106,7 +1138,7 @@ class c_ChangeBootStrap
 		{
 			return null;
 		}
-		foreach ($this->getLocalRepositories() as $localRepoPath => $writable)
+		foreach (array_keys($this->getLocalRepositories()) as $localRepoPath)
 		{
 			if (is_dir($localRepoPath."/".$relativePath))
 			{
@@ -1134,6 +1166,7 @@ class c_ChangeBootStrap
 				"n",
 				"n",
 				""));
+			$goPearPath = null;
 			if (!$this->hasComponentLocally(self::$DEP_LIB, "go-pear", "281637", false, $goPearPath))
 			{
 				$triedDummy = array();
@@ -1354,7 +1387,7 @@ class c_ChangeBootStrap
 			try
 			{
 				$content = $this->getRepositoryContent($repository);
-				foreach ($content as $componentName => $signature)
+				foreach (array_keys($content) as $componentName)
 				{
 					if (cboot_StringUtils::startsWith($componentName, $modulePrefix))
 					{
@@ -1605,6 +1638,10 @@ class c_ChangeBootStrap
 		if ($this->hasComponentLocally($componentType, $componentName, $version, false, $componentPath))
 		{
 			return $componentPath;
+		}
+		else if ($this->useLocalOnly)
+		{
+			return $this->getComponentPath($componentType, $componentName, $version);
 		}
 		$triedComponents = array();
 		$this->downloadComponent($triedComponents, $componentType, $componentName, $version);
