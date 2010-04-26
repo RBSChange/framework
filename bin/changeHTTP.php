@@ -3,10 +3,10 @@ $C_BOOT_STRAP_AS_LIB = true;
 require_once 'httpbootstrap.php';
 
 $bootStrap = new c_ChangeBootStrap(WEBEDIT_HOME);
-$bootStrap->setAutoloadPath(AG_CACHE_DIR."/autoload");
+$bootStrap->setAutoloadPath(WEBEDIT_HOME."/.change/autoload");
 $bootStrap->setLooseVersions(false);
 $bootStrap->addPropertiesLocation(WEBEDIT_HOME);
-$bootStrap->ignorePearInstall();
+$bootStrap->addPropertiesLocation("/etc/change");
 $bootStrap->dispatch('func:executeChangeCmd');
 
 function executeChangeCmd($argv, $computedDeps)
@@ -21,7 +21,9 @@ function executeChangeCmd($argv, $computedDeps)
 		$script->setBootStrap($bootStrap);
 		$script->setEnvVar("computedDeps", $computedDeps);
 		registerCommands($script, $computedDeps, $bootStrap);
+		ob_start();
 		$script->execute($argv);
+		ob_flush();
 	}
 }
 

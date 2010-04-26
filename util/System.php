@@ -87,15 +87,21 @@ class f_util_System
 	/**
 	 * @param string $relativeScriptPath to WEBEDIT_HOME
 	 * @param array $arguments
+	 * @param boolean $noFramework
 	 */
-	public static function execHTTPScript($relativeScriptPath, $arguments = array())
+	public static function execHTTPScript($relativeScriptPath, $arguments = array(), $noFramework = false)
 	{
 		$url = Framework::getBaseUrl() .'/changescriptexec.php';
 		$rc = curl_init();
 		curl_setopt($rc, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($rc, CURLOPT_USERAGENT, 'RBSChange/3.0');
 		curl_setopt($rc, CURLOPT_REFERER, $url);
-		$postData = http_build_query(array('phpscript' => $relativeScriptPath, 'argv' => $arguments), '', '&');
+		$postDataArray = array('phpscript' => $relativeScriptPath, 'argv' => $arguments);
+		if ($noFramework)
+		{
+			$postDataArray['noframework'] = 'true';
+		}
+		$postData = http_build_query($postDataArray, '', '&');
 		curl_setopt($rc, CURLOPT_POSTFIELDS, $postData);
 		curl_setopt($rc, CURLOPT_POST, true);
 		curl_setopt($rc, CURLOPT_FOLLOWLOCATION, 0);
@@ -111,7 +117,7 @@ class f_util_System
 	 */
 	public static function execChangeHTTPCommand($commandName, $arguments = array())
 	{
-		return self::execHTTPScript("framework/bin/changeHTTP.php", array_merge(array($commandName), $arguments));
+		return self::execHTTPScript("framework/bin/changeHTTP.php", array_merge(array($commandName), $arguments), true);
 	}
 	
 	/**
