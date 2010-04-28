@@ -713,9 +713,12 @@ class c_ChangeBootStrap
 	 */
 	private function expandLocalPath($path)
 	{
-		if (!strncmp($path, "~/", 2))
+		if ($path !== null)
 		{
-			return getenv("HOME")."/".substr($path, 2);
+			if (!strncmp($path, "~/", 2))
+			{
+				return getenv("HOME")."/".substr($path, 2);
+			}
 		}
 		return $path;
 	}
@@ -1107,6 +1110,7 @@ class c_ChangeBootStrap
 			case "lib":
 				return self::$DEP_LIB;
 			case "lib-pear":
+			case "pearlibs":
 				return self::$DEP_PEAR_LIB;
 			case "extension":
 				return self::$DEP_EXTENSION;
@@ -1708,28 +1712,30 @@ class c_ChangeBootStrap
 	{
 		if ($this->pearInfos === null)
 		{
-			$pearDir = $this->getProperties()->getProperty("PEAR_DIR");
-			$pearCmd = $this->getProperties()->getProperty("PEAR_CMD");		
-			$pearConf = $this->getProperties()->getProperty("PEAR_CONF");
-			$include_path = $this->getProperties()->getProperty("PEAR_INCLUDE_PATH");
+			$pearDir = $this->expandLocalPath($this->getProperties()->getProperty("PEAR_DIR"));
+			$pearCmd =  $this->expandLocalPath($this->getProperties()->getProperty("PEAR_CMD"));		
+			$pearConf =  $this->expandLocalPath($this->getProperties()->getProperty("PEAR_CONF"));
+			$include_path =  $this->expandLocalPath($this->getProperties()->getProperty("PEAR_INCLUDE_PATH"));
 			
 			if ($pearDir !== null && $pearCmd === null && $pearConf === null && $include_path === null)
 			{
 				//Previous config
 				$pearCmd = $pearDir.'/bin/pear';
 				$pearConf = $pearDir.'/pear.conf';
+				if (!file_exists($pearConf))
+				{
+					$pearConf = null;
+				}
 			}
 			
 			if ($pearCmd !== null)
 			{
-				$pearCmd = $this->expandLocalPath($pearCmd);
 				if (!file_exists($pearCmd))
 				{
 					if ($pearDir === null)
 					{
 						throw new Exception("Missing PEAR_DIR config parameter");
 					}
-					$pearDir = $this->expandLocalPath($pearDir);
 					$this->installPear($pearDir);
 					clearstatcache();
 					
@@ -1744,8 +1750,7 @@ class c_ChangeBootStrap
 				throw new Exception("Missing PEAR_DIR or PEAR_INCLUDE_PATH config parameter");
 			}
 			if ($pearConf !== null) 
-			{
-				$pearConf = $this->expandLocalPath($pearConf);			
+			{		
 				if (!file_exists($pearConf))
 				{
 					throw new Exception("Missing PEAR_CONF value ($pearConf), file not found.");
@@ -1755,10 +1760,6 @@ class c_ChangeBootStrap
 			if ($include_path === null)
 			{
 				$include_path = $pearDir . '/PEAR';
-			}
-			else
-			{
-				$include_path = $this->expandLocalPath($include_path);
 			}
 						
 			if (!file_exists($include_path) && !@mkdir($include_path, 0777, true))
