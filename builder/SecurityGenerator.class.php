@@ -1,8 +1,6 @@
 <?php
 /**
  * SecurityGenerator
- * @author inthause
- * @date Fri Jun 01 17:55:17 CEST 2007
  */
 class builder_SecurityGenerator
 {
@@ -23,12 +21,6 @@ class builder_SecurityGenerator
 
 	private $baseBackOfficeAction;
 
-	/**
-	 * Constructor of builder_SecurityGenerator
-	 */
-	function __construct()
-	{
-	}
 	
 	public function buildSecurity()
 	{
@@ -72,12 +64,18 @@ class builder_SecurityGenerator
 		return $this->baseModuleAction;
 	}
 	
-	
+	/**
+	 * @param boolean $bool
+	 */
 	public function setQuiet($bool)
 	{
 		$this->quiet = $bool;
 	}
 
+	/**
+	 * @param string $moduleName
+	 * @return array
+	 */
 	public function getRolesFields($moduleName)
 	{
 		$baseRightsPath = f_util_FileUtils::buildWebeditPath('modules', $moduleName, self::CONFIG_DIR_NAME, self::ROLE_DEF_FILE_NAME);
@@ -426,16 +424,25 @@ class ModuleRoles
 				case 'rootrole':
 				case 'role':
 				case 'frontendrole':
-					$role = new RoleInfo($node->nodeName);
+					$role = $this->getRoleByName($node->getAttribute('name'));
+					if ($role === null)
+					{
+						$role = new RoleInfo($node->nodeName);
+						$this->roles[] = $role;
+					}
 					$role->loadXmlRole($node);
-					$this->roles[] = $role;
 					break;
 				default:
 					break;
 			}
 		}
 	}
-
+	
+	
+	/**
+	 * @param string $roleName
+	 * @return RoleInfo
+	 */
 	public function getRoleByName($roleName)
 	{
 		foreach ($this->roles as $role)
@@ -448,6 +455,11 @@ class ModuleRoles
 		return null;
 	}
 
+	/**
+	 * @param string $name
+	 * @param string $documentName
+	 * @return ActionInfo
+	 */
 	private function getActionInfo($name, $documentName = null)
 	{
 		$fullName = is_null($documentName) ? $name : $name . '.' . $documentName;
