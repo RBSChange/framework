@@ -156,7 +156,7 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 			$lang = key($labels);
 			if ($lang != $contextLang)
 			{
-				foreach ($this->getDocumentModel()->getPropertiesInfos() as $name => $property)
+				foreach ($this->getPersistentModel()->getPropertiesInfos() as $name => $property)
 				{
 					$this->propertyUpdated($name);
 				}

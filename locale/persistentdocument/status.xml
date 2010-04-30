@@ -34,10 +34,10 @@
 	</entity>
 	
 	<entity id="active.enddate">
-		<locale lang="fr">Le document n'est plus publiable</locale>
+		<locale lang="fr">le document n'est plus publiable</locale>
 	</entity>
 	
 	<entity id="active.startedate">
-		<locale lang="fr">Le document n'est pas encore publiable</locale>
+		<locale lang="fr">le document n'est pas encore publiable</locale>
 	</entity>	
 </localization>

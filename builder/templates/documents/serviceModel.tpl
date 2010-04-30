@@ -65,7 +65,6 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 //
 //	}
 
-
 	/**
 	 * @param <{$module}>_persistentdocument_<{$name}> $document
 	 * @param Integer $parentNodeId Parent node ID where to save the document.
@@ -285,12 +284,12 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 //	}
 
 	/**
-	 * this method is call before save the duplicate document.
+	 * this method is call before saving the duplicate document.
 	 * If this method not override in the document service, the document isn't duplicable.
 	 * An IllegalOperationException is so launched.
 	 *
-	 * @param f_persistentdocument_PersistentDocument $newDocument
-	 * @param f_persistentdocument_PersistentDocument $originalDocument
+	 * @param <{$module}>_persistentdocument_<{$name}> $newDocument
+	 * @param <{$module}>_persistentdocument_<{$name}> $originalDocument
 	 * @param Integer $parentNodeId
 	 *
 	 * @throws IllegalOperationException
@@ -298,6 +297,21 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 //	protected function preDuplicate($newDocument, $originalDocument, $parentNodeId)
 //	{
 //		throw new IllegalOperationException('This document cannot be duplicated.');
+//	}
+
+	/**
+	 * this method is call after saving the duplicate document.
+	 * $newDocument has an id affected.
+	 * Traitment of the children of $originalDocument.
+	 *
+	 * @param <{$module}>_persistentdocument_<{$name}> $newDocument
+	 * @param <{$module}>_persistentdocument_<{$name}> $originalDocument
+	 * @param Integer $parentNodeId
+	 *
+	 * @throws IllegalOperationException
+	 */
+//	protected function postDuplicate($newDocument, $originalDocument, $parentNodeId)
+//	{
 //	}
 
 	/**
@@ -324,7 +338,7 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 //	}
 
 	/**
-	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param <{$module}>_persistentdocument_<{$name}> $document
 	 * @return website_persistentdocument_page | null
 	 */
 //	public function getDisplayPage($document)
@@ -332,5 +346,17 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 <{if $model->hasParentModel()}>
 //		return parent::getDisplayPage($document);
 <{/if}>
+//	}
+
+	/**
+	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param string $forModuleName
+	 * @param array $allowedSections
+	 * @return array
+	 */
+//	public function getResume($document, $forModuleName, $allowedSections = null)
+//	{
+//		$resume = parent::getResume($document, $forModuleName, $allowedSections);
+//		return $resume;
 //	}
 }
