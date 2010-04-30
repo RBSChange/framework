@@ -11,7 +11,12 @@ class f_web_oauth_Consumer
 	 */
 	private $secret;
 	
-	public function __construct($key, $secret)
+	/**
+	 * @var String
+	 */
+	private $callback;
+	
+	public function __construct($key, $secret = null)
 	{
 		$this->setSecret($secret);
 		$this->setKey($key);
@@ -47,4 +52,20 @@ class f_web_oauth_Consumer
 	{
 		$this->secret = $secret;
 	}
+	/**
+	 * @return String
+	 */
+	public function getCallback()
+	{
+		return $this->callback;
+	}
+	
+	/**
+	 * @param String $callback
+	 */
+	public function setCallback($callback)
+	{
+		$this->callback = $callback;
+	}
+
 }

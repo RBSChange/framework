@@ -6,6 +6,16 @@ class f_web_oauth_Util
 	{
 		return str_replace('%7E', '~', rawurlencode($input));
 	}
+	
+	static function getSignatureClassNameFromSignatureName($signName)
+	{
+		$signatureClassName = 'f_web_oauth_Signature';
+		foreach (explode('-', $signName) as $parts)
+		{
+			$signatureClassName .= ucfirst(strtolower($parts));
+		}
+		return $signatureClassName;
+	}
 
 }
 
@@ -19,6 +29,8 @@ class f_web_oauth_Request
 	
 	private $mGetParameters = array();
 	private $mPostParameters = array();
+	
+	private $mIncomingHeaders = array();
 	/**
 	 * @var unknown_type
 	 */
@@ -43,6 +55,8 @@ class f_web_oauth_Request
 	private $isSigned = false;
 	
 	private $mBaseSignature = "";
+	
+	private $mSignature;
 	/**
 	 * @param String $url
 	 * @param f_web_oauth_Consumer $consumer
@@ -143,9 +157,8 @@ class f_web_oauth_Request
 		}
 	}
 	
-	public function sign()
+	private function buildOauthParameters()
 	{
-		$mergedRequest = array();
 		$timestamp = time();
 		$nonce = sha1(f_util_StringUtils::randomString(16, false) . $timestamp);
 		if ($this->mMethod == self::METHOD_GET)
@@ -172,6 +185,27 @@ class f_web_oauth_Request
 				$this->mPostParameters['oauth_token'] = $this->mToken->getKey();
 			}
 		}
+	}
+	
+
+	public function sign()
+	{
+		$this->buildOauthParameters();
+		$signature = $this->getSignature();
+		if ($this->mMethod == self::METHOD_GET)
+		{
+			$this->mGetParameters['oauth_signature'] = $signature;
+		}
+		else
+		{
+			$this->mPostParameters['oauth_signature'] = $signature;
+		}
+	
+	}
+	
+	public function getSignature()
+	{
+		$mergedRequest = array();	
 		foreach ($this->mGetParameters as $name => $value)
 		{
 			if ($name == "oauth_signature")
@@ -207,15 +241,7 @@ class f_web_oauth_Request
 			}
 		}
 		$this->mBaseSignature = $this->mMethod . '&' . f_web_oauth_Util::encode($this->mSignatureRequestUrl) . '&' . f_web_oauth_Util::encode(implode('&', $parts));
-		$finalSignature = $this->mSignatureClassInstance->buildSignatureFromRequest($this);
-		if ($this->mMethod == self::METHOD_GET)
-		{
-			$this->mGetParameters['oauth_signature'] = $finalSignature;
-		}
-		else
-		{
-			$this->mPostParameters['oauth_signature'] = $finalSignature;
-		}
+		return $this->mSignatureClassInstance->buildSignatureFromRequest($this);
 	}
 	
 	public function getUrl()
@@ -230,7 +256,7 @@ class f_web_oauth_Request
 		$params = ($this->mMethod == self::METHOD_GET ? $this->mGetParameters : $this->mPostParameters);
 		$parts = array();
 		$parts[] = 'oauth_token="' . f_web_oauth_Util::encode($this->mToken ? $this->mToken->getKey() : '') . '"';
-		$parts[] = 'oauth_signature_method="' . f_web_oauth_Util::encode($this->mSignatureMethod) . '"';
+		$parts[] = 'oauth_signature_method="' . f_web_oauth_Util::encode($this->mSignatureClassInstance->getName()) . '"';
 		$parts[] = 'oauth_signature="' . f_web_oauth_Util::encode($params['oauth_signature']) . '"';
 		$parts[] = 'oauth_consumer_key="' . f_web_oauth_Util::encode($params['oauth_consumer_key']) . '"';
 		$parts[] = 'oauth_timestamp="' . f_web_oauth_Util::encode($params['oauth_timestamp']) . '"';
