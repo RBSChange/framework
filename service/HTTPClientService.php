@@ -119,11 +119,8 @@ class HTTPClient
 	 */
 	public function post($url, $params)
 	{
-		foreach ($params as $key => $value)
-		{
-			$params[$key] = $key.'='.$value;
-		}
-		$this->setOption(CURLOPT_POSTFIELDS, implode('&', $params));
+		$query = http_build_query($params, null , '&');		
+		$this->setOption(CURLOPT_POSTFIELDS, $query);
 		$this->setOption(CURLOPT_POST, true);
 		return $this->execute($url);
 	}
