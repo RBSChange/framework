@@ -1855,6 +1855,7 @@ class f_persistentdocument_DocumentService extends BaseService
 				if ($currentStatus == 'ACTIVE')
 				{
 					$document->setPublicationstatus('PUBLICATED');
+					$this->removeActivePublicationStatusInfo($document);
 					$this->pp->updateDocument($document);
 					$eventName = 'persistentDocumentPublished';
 					$published = true;
@@ -1947,6 +1948,17 @@ class f_persistentdocument_DocumentService extends BaseService
 		else if ($statusInfo !== null)
 		{
 			$document->setMeta('ActivePublicationStatusInfo', $statusInfo);
+		}
+	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 */
+	protected final function removeActivePublicationStatusInfo($document)
+	{
+		if ($document->hasMeta('ActivePublicationStatusInfo'))
+		{
+			$document->setMeta('ActivePublicationStatusInfo', null);
 		}
 	}
 
@@ -2532,9 +2544,9 @@ class f_persistentdocument_DocumentService extends BaseService
 	}
 
 	/**
-	 * this method is call before save the duplicate document.
-	 * $newDocument has a id affected
-	 * Traitment of the children of $originalDocument
+	 * this method is call after saving the duplicate document.
+	 * $newDocument has an id affected.
+	 * Traitment of the children of $originalDocument.
 	 *
 	 * @param f_persistentdocument_PersistentDocument $newDocument
 	 * @param f_persistentdocument_PersistentDocument $originalDocument
