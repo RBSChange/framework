@@ -63,6 +63,15 @@ class BeanAggregateModel implements f_mvc_BeanModel
 		return isset($this->beanPropertiesInfos[$propertyName]);
 	}
 	
+	/**
+	 * @see f_mvc_BeanModel::getBeanConstraints()
+	 *
+	 * @return String
+	 */
+	function getBeanConstraints()
+	{
+	}
+
 	private $beanName;
 	
 	/**
