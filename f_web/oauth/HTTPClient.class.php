@@ -31,8 +31,9 @@ class f_web_oauth_HTTPClient
 		}
 		if ($this->mOauthRequest->getMethod() == f_web_oauth_Request::METHOD_POST)
 		{
-			return $this->mBackend->post($this->mOauthRequest->getUrl(), $this->mOauthRequest->getPostParameters(), true);
+			return $this->mBackend->post($this->mOauthRequest->getUrl(), $this->mOauthRequest->getPostParameters());
 		}
+		
 		return $this->mBackend->get($this->mOauthRequest->getUrl());
 	}
 	
