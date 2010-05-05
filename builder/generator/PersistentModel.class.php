@@ -212,7 +212,16 @@ class generator_PersistentModel
 		$rc = RequestContext::getInstance();
 		foreach (self::loadModels() as $model)
 		{	
-			$pubproperty = $model->getPropertyByName('publicationstatus');
+			if (!$model->hasPublishOnDayChange()) {continue;}
+			
+			$modelName = $model->getName();
+			while ($model)
+			{
+				$pubproperty = $model->getPropertyByName('publicationstatus');
+				if ($pubproperty !== null) {break;}
+				$model = $model->getParentModelOrInjected();
+			}
+			
 			if ($pubproperty)
 			{
 				if ($pubproperty->isLocalized())
@@ -223,7 +232,7 @@ class generator_PersistentModel
 				{
 					$langs = array($rc->getDefaultLang());
 				}
-				$publishListenerInfos[$model->getName()] = $langs;
+				$publishListenerInfos[$modelName] = $langs;
 			}
 		}	
 		$compiledFilePath = f_util_FileUtils::buildChangeBuildPath('publishListenerInfos.ser');
