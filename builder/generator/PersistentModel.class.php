@@ -2014,7 +2014,8 @@ class generator_PersistentModel
 		$result = array();
 		foreach ($this->properties as $property)
 		{
-			if (array_search($property->getName(), array('id', 'model')) !== false || $property->isOverride())
+			if (array_search($property->getName(), array('id', 'model')) !== false 
+				|| $property->isOverride() || !$property->getType())
 			{
 				continue;
 			}

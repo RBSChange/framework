@@ -81,8 +81,6 @@ class commands_GenerateDatabase extends commands_AbstractChangeCommand
 		$array = array();
 			
 		$ms = ModuleService::getInstance();
-		$fileResolver = FileResolver::getInstance();
-
 		foreach ($ms->getModules() as $module)
 		{
 			$array[] = f_util_FileUtils::buildChangeBuildPath(str_replace('_', DIRECTORY_SEPARATOR, $module), 'dataobject');
@@ -132,9 +130,16 @@ class commands_GenerateDatabase extends commands_AbstractChangeCommand
 					{
 						$persistentProvider->executeSQLScript($query);
 					}
+					catch (BaseException $e)
+					{
+						if ($e->getAttribute('errorcode') != 1060)
+						{
+							$this->errorMessage(__METHOD__ . ' ERROR : ' . $e->getMessage());
+						}
+					}
 					catch (Exception $e)
 					{
-						$this->errorMessage(__METHOD__ . ' ERROR : ' . $query);
+						$this->errorMessage(__METHOD__ . ' ERROR : ' . $e->getMessage());
 					}
 				}
 			}
