@@ -666,7 +666,7 @@ class f_persistentdocument_DocumentService extends BaseService
 						Framework::debug("Supression de la référence à la correction ". $persistentDocument->getId() . " du document " . $correctionOfId);
 					}
 					$original = $this->getDocumentInstance($correctionOfId);
-					$original->setCorrectionid(0);
+					$original->setCorrectionid(null);
 					$this->pp->updateDocument($original);
 					RequestContext::getInstance()->endI18nWork();
 				}
@@ -1938,16 +1938,17 @@ class f_persistentdocument_DocumentService extends BaseService
 	 */
 	protected final function setActivePublicationStatusInfo($document, $statusInfo)
 	{
-		if ($document->hasMeta('ActivePublicationStatusInfo'))
+		$metaName = 'ActPubStatInf'.RequestContext::getInstance()->getLang();
+		if ($document->hasMeta($metaName))
 		{
-			if ($document->getMeta('ActivePublicationStatusInfo') !== $statusInfo)
+			if ($document->getMeta($metaName) !== $statusInfo)
 			{
-				$document->setMeta('ActivePublicationStatusInfo', $statusInfo);
+				$document->setMeta($metaName, $statusInfo);
 			}
 		}
 		else if ($statusInfo !== null)
 		{
-			$document->setMeta('ActivePublicationStatusInfo', $statusInfo);
+			$document->setMeta($metaName, $statusInfo);
 		}
 	}
 	
@@ -1956,9 +1957,10 @@ class f_persistentdocument_DocumentService extends BaseService
 	 */
 	protected final function removeActivePublicationStatusInfo($document)
 	{
-		if ($document->hasMeta('ActivePublicationStatusInfo'))
+		$metaName = 'ActPubStatInf'.RequestContext::getInstance()->getLang();
+		if ($document->hasMeta($metaName))
 		{
-			$document->setMeta('ActivePublicationStatusInfo', null);
+			$document->setMeta($metaName, null);
 		}
 	}
 
@@ -2809,9 +2811,9 @@ class f_persistentdocument_DocumentService extends BaseService
 						$data['publication']['workflow'] = date_Converter::convertDateToLocal($info[0]['creationdate']) . " : " .$info[0]['label'];
 					}
 				}
-				else if ($status === 'ACTIVE' && $document->hasMeta('ActivePublicationStatusInfo'))
+				else if ($status === 'ACTIVE' && $document->hasMeta('ActPubStatInf'.$lang))
 				{
-					$data['publication']['status'] .= ' (' . f_Locale::translateUI($document->getMeta('ActivePublicationStatusInfo')) . ')';
+					$data['publication']['status'] .= ' (' . f_Locale::translateUI($document->getMeta('ActPubStatInf'.$lang)) . ')';
 				}
 			}
 
