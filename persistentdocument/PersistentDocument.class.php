@@ -137,7 +137,7 @@ interface f_persistentdocument_PersistentDocument
 	 * @return Boolean
 	 */
 	function isLangAvailable($lang);
-
+	
 	/**
 	 * @return String
 	 */
@@ -261,6 +261,16 @@ interface f_persistentdocument_PersistentDocument
 	 * @return boolean
 	 */
 	function isPublished();
+	
+	/**
+	 * @return Boolean
+	 */
+	public function hasCorrection();
+	
+	/**
+	 * @return Boolean
+	 */
+	public function isCorrection();
 
 	/**
 	 * @param string $moduleName

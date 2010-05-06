@@ -713,7 +713,7 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 	 */
 	public function hasCorrection()
 	{
-		return $this->getPersistentModel()->useCorrection() && $this->getCorrectionid() != null;
+		return $this->getPersistentModel()->useCorrection() && $this->getCorrectionid() > 0;
 	}
 	
 	/**
@@ -721,7 +721,7 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 	 */
 	public function isCorrection()
 	{
-		return $this->getPersistentModel()->useCorrection() && $this->getCorrectionofid() != null;
+		return $this->getPersistentModel()->useCorrection() && $this->getCorrectionofid() > 0;
 	}
 
 	/**
