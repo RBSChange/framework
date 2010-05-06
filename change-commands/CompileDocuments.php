@@ -37,9 +37,12 @@ class commands_CompileDocuments extends commands_AbstractChangeCommand
 		
 		//Cleaning dataobject folders
 		$sqlpath = f_util_FileUtils::buildChangeBuildPath('modules', '*', 'dataobject', '*');
-		// TODO: remove exec
-		exec('rm -f ' . $sqlpath);
-
+		
+		foreach (glob($sqlpath) as $path) 
+		{
+			unlink($path);
+		}
+		
 		// For the list of models generate persistent.
 		foreach ($models as $model)
 		{
