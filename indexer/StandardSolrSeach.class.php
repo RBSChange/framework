@@ -46,7 +46,7 @@ class indexer_StandardSolrSearch
 				}
 			}
 			
-			$queryString .= "&" . join(',', $sortingString). "&";
+			$queryString .= "&sort=" . join(',', $sortingString). "&";
 		}
 
 		// Pagination
