@@ -73,7 +73,7 @@ class commands_AddAction extends commands_AbstractChangedevCommand
 		f_util_FileUtils::write($actionFile, $result);
 		$class = $moduleName.'_'.$actionName . 'Action';
 		ClassResolver::getInstance()->appendToAutoloadFile($class, realpath($actionFile));
-		$this->quitOk("Action $actioName added in module $moduleName
+		$this->quitOk("Action $actionName added in module $moduleName
 Please now edit $actionFile.");
 	}
 }
