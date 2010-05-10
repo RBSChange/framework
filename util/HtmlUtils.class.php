@@ -50,7 +50,7 @@ abstract class f_util_HtmlUtils
 		{
 			self::$htmlFilters = Framework::getConfigurationValue('framework/htmlfilters', array());
 		}
-		foreach (self::$htmlFilters as $filterName => $params)
+		foreach (self::$htmlFilters as $params)
 		{
 	        $out = preg_replace_callback($params['regexp'],  explode("::", $params["method"]), $out);
 		}
@@ -136,7 +136,8 @@ abstract class f_util_HtmlUtils
         $attributeArray = array();
         if (! empty($string))
         {
-            preg_match_all("/\s*([\w:]*)\s*=\s*\"(.*?)\"/i", $string, $matches, PREG_SET_ORDER);
+            $matches = array();
+        	preg_match_all("/\s*([\w:]*)\s*=\s*\"(.*?)\"/i", $string, $matches, PREG_SET_ORDER);
             foreach ($matches as $matche)
             {
                 $attributeArray[strtolower($matche[1])] = isset($matche[3]) ? $matche[3] : $matche[2];
@@ -229,6 +230,7 @@ abstract class f_util_HtmlUtils
         {
             if (isset($attributes['href']) && !empty($attributes['href']))
             {
+            	$documentInfos = array();
             	if (preg_match('/original\/((?:[0-9]{1,3}\/)+)([a-z]{2})\//i', $attributes['href'], $documentInfos))
             	{
             		$documentId = intval(str_replace('/', '', $documentInfos[1]));
