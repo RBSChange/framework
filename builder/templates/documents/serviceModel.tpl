@@ -359,4 +359,14 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 //		$resume = parent::getResume($document, $forModuleName, $allowedSections);
 //		return $resume;
 //	}
+
+	/**
+	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param string $bockName
+	 * @return array with entries 'module' and 'template'. 
+	 */
+//	public function getSolrserachResultItemTemplate($document, $bockName)
+//	{
+//		return array('module' => '<{$module}>', 'template' => '<{$moduleUCFirst}>-Inc-<{$nameUCFirst}>ResultDetail');
+//	}
 }

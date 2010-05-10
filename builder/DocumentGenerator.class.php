@@ -435,9 +435,10 @@ class builder_DocumentGenerator
 		// Assign all necessary variable
 		$generator->assign_by_ref('name', $this->name);
 		$generator->assign_by_ref('module', $this->module);
+		$generator->assign_by_ref('moduleUCFirst', ucfirst($this->module));
 		$generator->assign_by_ref('date', $this->date );
 		$generator->assign_by_ref('author', $this->author );
-		$generator->assign_by_ref('nameUCFirst', ucfirst($this->name) );
+		$generator->assign_by_ref('nameUCFirst', ucfirst($this->name));
 		$generator->assign_by_ref('model', $this->modelObject);
 
 		// Execute template and return result
