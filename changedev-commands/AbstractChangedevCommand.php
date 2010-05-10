@@ -1,9 +1,14 @@
 <?php
 abstract class commands_AbstractChangedevCommand extends commands_AbstractChangeCommand
 {
-	protected function changecmd($cmdName, $params)
+	/**
+	 * @param string $cmdName
+	 * @param array $params
+	 */
+	protected function changecmd($cmdName, $params = array())
 	{
 		$this->loadFramework();
-		c_System::exec("php ".FRAMEWORK_HOME."/bin/change.php $cmdName ".join(" ", $params), $cmdName);
+		$this->log("Execute: $cmdName...");
+		f_util_System::execChangeCommand($cmdName, $params);
 	}
 }
