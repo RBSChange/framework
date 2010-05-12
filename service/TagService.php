@@ -339,6 +339,7 @@ class TagService extends BaseService
 	 *
 	 * @param f_persistentdocument_PersistentDocument $document The document on which to add the tag.
 	 * @param string $tag The tag to add.
+	 * @param boolean $auto
 	 *
 	 * @throws InvalidTagException
 	 * @throws IllegalArgumentException
