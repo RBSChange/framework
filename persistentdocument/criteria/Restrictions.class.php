@@ -327,14 +327,6 @@ class Restrictions
 	}
 
 	/**
-	 * Return the negation of an expression
-	 */
-	static function not($expression)
-	{
-		return new f_persistentdocument_criteria_NotExpression($expression);
-	}
-
-	/**
 	 * Return the disjuction of 1..n expressions
 	 */
 	static function orExp()
