@@ -61,7 +61,7 @@ class commands_AddModule extends commands_AbstractChangedevCommand
 		// Make auto generated file
 		$moduleGenerator = new builder_ModuleGenerator($moduleName);
 		$moduleGenerator->setAuthor($this->getAuthor());
-		$moduleGenerator->setVersion('3.0.0');
+		$moduleGenerator->setVersion(FRAMEWORK_VERSION);
 		$moduleGenerator->setTitle(ucfirst($moduleName) . ' module');
 		$moduleGenerator->setIcon($icon);
 		$moduleGenerator->setUseTopic($useTopic);
