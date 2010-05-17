@@ -17,6 +17,7 @@ class f_web_oauth_HTTPClient
 	{
 		$this->mOauthRequest = $request;
 		$this->mBackend = HTTPClientService::getNewHTTPClient();
+		$this->mBackend->setTimeOut(5);
 	}
 	
 	/**

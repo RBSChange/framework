@@ -186,6 +186,7 @@ class HTTPClient
 	 */
 	private function execute($url = null)
 	{
+		Framework::info(__METHOD__ . ": " . $url);
 		if ($this->proxyHost && $this->proxyPort)
 		{
 			$this->setOption(CURLOPT_PROXY, $this->proxyHost.':'.$this->proxyPort);
@@ -194,8 +195,10 @@ class HTTPClient
 		$this->setOptions(array(
 			CURLOPT_REFERER => $this->referer,
 			CURLOPT_TIMEOUT => $this->timeOut,
+			CURLOPT_CONNECTTIMEOUT => $this->timeOut,
 			CURLOPT_FOLLOWLOCATION => $this->followRedirects,
 			CURLOPT_URL => $url,
+			CURLOPT_DNS_USE_GLOBAL_CACHE => 1,
 			CURLOPT_HEADERFUNCTION => array($this, 'readHeaders')
 		));
 		
