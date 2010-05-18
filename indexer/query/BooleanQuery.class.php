@@ -38,6 +38,20 @@ class indexer_BooleanQuery extends indexer_QueryBase implements indexer_Query
 	{
 		return new indexer_BooleanQuery('AND');
 	}
+	
+	/**
+	 * @param String $opStr "AND" or "OR"
+	 * @return indexer_BooleanQuery
+	 */
+	public static function byStringInstance($opStr)
+	{
+		switch (strtoupper($opStr))
+		{
+			case "OR": return self::orInstance();
+			case "AND": return self::andInstance();
+			default: throw new Exception("Unknown operator: ".$opStr);
+		}
+	}
 
 	/**
 	 * Returns a new 'NOT' boolean query instance
@@ -59,6 +73,11 @@ class indexer_BooleanQuery extends indexer_QueryBase implements indexer_Query
 		$this->queries[] = $query;
 	}
 
+	public function getSubqueries()
+	{
+		return $this->queries;
+	}
+
 	/**
 	 * Returns the number of subqueries added.
 	 *
@@ -77,13 +96,13 @@ class indexer_BooleanQuery extends indexer_QueryBase implements indexer_Query
 		$elems = array();
 		foreach ($this->queries as $query)
 		{
-			if($query instanceof indexer_Query)
-			{
-				$elems[] = $query->toSolrString();
-			}
-			else if (is_string($query))
+			if (is_string($query))
 			{
 				$elems[] = $query;
+			}
+			elseif (f_util_ClassUtils::methodExists($query, "toSolrString"))
+			{
+				$elems[] = $query->toSolrString();
 			}
 		}
 		if (count($elems) == 0)
@@ -91,7 +110,7 @@ class indexer_BooleanQuery extends indexer_QueryBase implements indexer_Query
 			throw new IllegalArgumentException("Can not build Boolean Query containing no clauses");
 		}
 
-		$result = "(" . join(' ' . $this->type . ' ', $elems) .")";
+		$result = "(" . join('%20' . $this->type . '%20', $elems) .")";
 
 		$boostValue = $this->getBoost();
 		if (!is_null($boostValue))
