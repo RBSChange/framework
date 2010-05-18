@@ -27,6 +27,15 @@ class indexer_SearchResult
 	{
 		return $this->fields;
 	}
+	
+	/**
+	 * @param String $name
+	 * @return Boolean
+	 */
+	function hasProperty($name)
+	{
+		return array_key_exists($name, $this->fields);
+	}
 
 	/**
 	 * Private getProperty
@@ -90,21 +99,29 @@ class indexer_SearchResult
 	}
 	
 	/**
-	 * Magic "getter" method 
-	 * 
+	 * Magic "getter" method
 	 */
 	public function __call($method, $args)
 	{
-		if( substr($method, 0, 3) != "get")
+		if (f_util_StringUtils::beginsWith($method, "getHighlighted"))
 		{
-			throw new Exception('Unimplemented Method: ' . $method);
+			$propName = f_util_StringUtils::lowerCaseFirstLetter(substr($method, 14));
+			return $this->getHighlightedProperty($propName);
 		}
-		
-		if (f_util_StringUtils::endsWith($method, 'Date'))
+		elseif (f_util_StringUtils::beginsWith($method, "get"))
 		{
-			return indexer_Field::solrDateToDate($this->getProperty(f_util_StringUtils::lowerCaseFirstLetter(substr($method, 3, -4))));
+			if (f_util_StringUtils::endsWith($method, 'Date'))
+			{
+				return indexer_Field::solrDateToDate($this->getProperty(f_util_StringUtils::lowerCaseFirstLetter(substr($method, 3, -4))));
+			}
+			return $this->getProperty(f_util_StringUtils::lowerCaseFirstLetter(substr($method, 3)));
 		}
-		return $this->getProperty(f_util_StringUtils::lowerCaseFirstLetter(substr($method, 3)));
+		elseif (f_util_StringUtils::beginsWith($method, "has"))
+		{
+			$propName = f_util_StringUtils::lowerCaseFirstLetter(substr($method, 3));
+			return $this->hasProperty($propName);
+		}
+		throw new Exception('Unimplemented Method: ' . $method);
 	}
 
 	private function getHighlightedProperty($name)
@@ -113,12 +130,10 @@ class indexer_SearchResult
 		{
 			$result = substr($this->getProperty($name),0,256);
 		}
-
-		if (!array_key_exists($name, $this->fields['highlighting']))
+		elseif (!array_key_exists($name, $this->fields['highlighting']))
 		{
 			$result = substr($this->getProperty($name),0,256);
 		}
-		
 		else 
 		{
 			$result = $this->fields['highlighting'][$name];
