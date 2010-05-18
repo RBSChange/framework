@@ -8,12 +8,12 @@ class indexer_SolrServerRequest
 	const METHOD_POST = "POST";
 	const DEFAULT_CONNECTION_TIMEOUT = 60;
 	const DEFAULT_TIMEOUT = 60;
-	
+
 	/**
 	 * @var String
 	 */
 	private $url;
-	
+
 	/**
 	 * @var String
 	 */
@@ -21,12 +21,12 @@ class indexer_SolrServerRequest
 	private $curlHandle;
 	private $data;
 	private $timeout;
-	
+
 	public function __construct($url)
 	{
-		$this->url = $url;	
-		$this->initCurlHandle();
+		$this->url = $url;
 		$this->setMethod(self::METHOD_GET);
+		$this->initCurlHandle();
 	}
 	/**
 	 * @return String
@@ -35,7 +35,7 @@ class indexer_SolrServerRequest
 	{
 		return $this->method;
 	}
-	
+
 	/**
 	 * @param String $method
 	 */
@@ -43,24 +43,46 @@ class indexer_SolrServerRequest
 	{
 		$this->method = $method;
 	}
-	
+
+	/**
+	 * @var indexer_Cache
+	 */
+	private $cache;
+
+	/**
+	 * @param indexer_Cache $cache
+	 */
+	public function setCache($cache)
+	{
+		$this->cache = $cache;
+	}
+
+	private $headers = array();
+
 	/**
 	 * @return String
 	 */
 	public function execute()
-	{		
-		if (Framework::isDebugEnabled())
+	{
+		$time = -microtime(true);
+		$cachedQuery = null;
+		if ($this->cache !== null)
 		{
-			$time = -microtime(true);
+			$cachedQuery = $this->cache->get(md5($this->url));
+			if ($cachedQuery !== null)
+			{
+				//curl_setopt($this->curlHandle, CURLOPT_HEADER, true);
+				/*curl_setopt($this->curlHandle, CURLOPT_TIMEVALUE, $cachedQuery->getTime());
+				curl_setopt($this->curlHandle, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);*/
+				$this->headers[] = "If-Modified-Since: ".gmdate('D, d M Y H:i:s \G\M\T', $cachedQuery->getTime());
+				//$this->headers[] = "If-Modified-Since: Thu, 06 May 2010 17:50:09 GMT";
+			}
 		}
 		if ($this->getMethod() == self::METHOD_POST)
 		{
-			curl_setopt($this->curlHandle, CURLOPT_POSTFIELDS, $this->data);			
+			curl_setopt($this->curlHandle, CURLOPT_POSTFIELDS, $this->data);
 		}
-		else 
-		{
-			 curl_setopt($this->curlHandle, CURLOPT_POSTFIELDS, "");
-		}
+			
 		if (Framework::isDebugEnabled())
 		{
 			Framework::debug(__METHOD__ . " : " . $this->url . " data: " . $this->data);
@@ -70,32 +92,41 @@ class indexer_SolrServerRequest
 		{
 			curl_setopt($this->curlHandle, CURLOPT_TIMEOUT, $this->getTimeout());
 		}
+			
+		curl_setopt($this->curlHandle, CURLOPT_HTTPHEADER, $this->headers);
 		$data = curl_exec($this->curlHandle);
 		$errno = curl_errno($this->curlHandle);
+		$httpReturnCode = curl_getinfo($this->curlHandle, CURLINFO_HTTP_CODE);
 		curl_close($this->curlHandle);
 		if ($errno)
-		{	
+		{
 			throw new IndexException(__METHOD__ . " (URL = " . $this->url . ") failed with error number " . $errno);
 		}
-		if (Framework::isDebugEnabled())
+
+		$time += microtime(true);
+		if ($this->cache !== null)
 		{
-			$time += microtime(true);
-			Framework::debug(__CLASS__ . ': ' . $this->getMethod() . ' Request on ' . $this->url . ' took ' . $time . ' seconds.');
+			
+			if ($cachedQuery !== null && $httpReturnCode == 304)
+			{
+				return $cachedQuery->getData();
+			}
+			// TODO: cache only if time > ...
+			$cachedQuery = new indexer_CachedQuery($this->url, $data);
+			$this->cache->store($cachedQuery);
 		}
 		return $data;
 	}
-	
+
 	/**
 	 * @param String $type
 	 */
 	public function setContentType($type)
 	{
-		if ($this->curlHandle !== null)
-		{
-			curl_setopt($this->curlHandle, CURLOPT_HTTPHEADER, array("Content-Type: $type"));	
-		}
+		$this->headers[] = "Content-Type: $type";
+
 	}
-	
+
 	/**
 	 * @param String $data
 	 */
@@ -103,17 +134,18 @@ class indexer_SolrServerRequest
 	{
 		$this->data = $data;
 	}
-	
+
 	private function initCurlHandle()
 	{
 		$this->curlHandle = curl_init();
+		$this->headers = array();
 		if ($this->getMethod() == self::METHOD_GET)
-		{ 
+		{
 			curl_setopt($this->curlHandle, CURLOPT_POST, 0);
 		}
-		else 
+		else
 		{
-			$this->setContentType("application/x-www-form-urlencoded; charset=UTF-8");
+			$this->headers[] = "Content-Type: application/x-www-form-urlencoded; charset=UTF-8";
 			curl_setopt($this->curlHandle, CURLOPT_POST, 1);
 		}
 		curl_setopt($this->curlHandle, CURLOPT_URL, $this->url);
@@ -122,7 +154,7 @@ class indexer_SolrServerRequest
 		curl_setopt($this->curlHandle, CURLOPT_DNS_USE_GLOBAL_CACHE, 1);
 		curl_setopt($this->curlHandle, CURLOPT_RETURNTRANSFER, 1);
 	}
-	
+
 	/**
 	 * @param Integer $secs
 	 */
