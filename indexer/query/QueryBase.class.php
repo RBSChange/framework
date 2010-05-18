@@ -14,6 +14,10 @@ class indexer_QueryBase
 	private $lang = null;
 	private $boost = null;
 	private $clientId;
+	/**
+	 * @var String[]
+	 */
+	private $facets = array();
 
 	public function setSortOnField($name, $descending=true)
 	{
@@ -48,6 +52,38 @@ class indexer_QueryBase
 	}
 
 	/**
+	 * @param String|indexer_Facet $fieldName
+	 */
+	public function addFacet($fieldNameOrFacetObject)
+	{
+		if (is_string($fieldNameOrFacetObject))
+		{
+			$facet = new indexer_Facet($fieldNameOrFacetObject);
+		}
+		elseif ($fieldNameOrFacetObject instanceof indexer_Facet)
+		{
+			$facet = $fieldNameOrFacetObject;
+		}
+		$this->facets[] = $facet;
+	}
+
+	/**
+	 * @return Boolean
+	 */
+	public function hasFacet()
+	{
+		return count($this->facets) > 0;
+	}
+
+	/**
+	 * @return indexer_Facet[]
+	 */
+	public function getFacets()
+	{
+		return $this->facets;
+	}
+
+	/**
 	 * @return indexer_Query
 	 */
 	public function getFilterQuery()
@@ -64,7 +100,7 @@ class indexer_QueryBase
 		$accessorFilterQuery = $this->getAccessorFilterQuery();
 		if ($accessorFilterQuery !== null)
 		{
-			$boolQuery->add($accessorFilterQuery);	 
+			$boolQuery->add($accessorFilterQuery);
 		}
 		if ($boolQuery->getSubqueryCount() > 0)
 		{
@@ -90,7 +126,7 @@ class indexer_QueryBase
 				return null;
 			}
 		}
-		else 
+		else
 		{
 			$currentUser = $userService->getCurrentFrontEndUser();
 		}
@@ -178,7 +214,7 @@ class indexer_QueryBase
 	{
 		return $this->boost;
 	}
-	
+
 	public function setClientId($value)
 	{
 		$this->clientId = $value;

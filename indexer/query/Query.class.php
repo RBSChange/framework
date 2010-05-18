@@ -72,6 +72,16 @@ interface indexer_Query
 	public function getReturnedHitsCount();
 	
 	/**
+	 * @return String[] 
+	 */
+	public function getFacets();
+	
+	/**
+	 * @return Boolean
+	 */
+	public function hasFacet();
+	
+	/**
 	 * Sets the fields the query should retrieve.  Returns $this.
 	 * 
 	 * @example myQuery->setLimit(array('id', 'model')) will only return id and model of the matching hits.
@@ -157,5 +167,3 @@ interface indexer_Query
 	
 	public function setClientId($value);
 }
-
-

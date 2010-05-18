@@ -14,6 +14,9 @@ class indexer_StandardSolrSearch
 	 */
 	private $clientId;
 	
+	/**
+	 * @param indexer_Query $q
+	 */
 	public function __construct($q)
 	{
 		$this->query = $q;
@@ -100,6 +103,16 @@ class indexer_StandardSolrSearch
 		{
 			$queryString.="&hl=true;&hl.fl=label_$lang,text_$lang";
 		}
+		
+		// facets
+		if ($this->query->hasFacet())
+		{
+			$queryString .= "&facet=true&facet.missing=true&facet.mincount=1";
+			foreach ($this->query->getFacets() as $facet)
+			{
+				$queryString .= $facet->toSolrString();
+			}
+		}
 		return trim($queryString);
 	}
 	
@@ -113,7 +126,6 @@ class indexer_StandardSolrSearch
 			return 'q=' . $this->query->toSolrString();	
 		}
 		return 'client=' . $this->clientId . '&q=' . $this->query->toSolrString();
-		
 	}
 	
 	/**
