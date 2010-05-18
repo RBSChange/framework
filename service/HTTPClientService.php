@@ -3,7 +3,7 @@
  * @package framework.service
  */
 class HTTPClientService extends BaseService
-{	
+{
 	/**
 	 * @var HTTPClientService
 	 */
@@ -20,7 +20,7 @@ class HTTPClientService extends BaseService
 		}
 		return self::$instance;
 	}
-	
+
 	/**
 	 * @return HTTPClient
 	 */
@@ -36,7 +36,7 @@ class HTTPClient
 	 * @var Integer
 	 */
 	private $httpReturnCode = -1;
-	
+
 	/**
 	 * @var Integer
 	 */
@@ -45,41 +45,41 @@ class HTTPClient
 	 * @var resource
 	 */
 	private $curlResource;
-	
+
 	private $followRedirects = true;
 	private $timeOut = 60;
 	private $referer = '';
-	
+
 	private $proxyHost;
 	private $proxyPort;
-	
+
 	private $acceptCookies;
 	private $cookieName;
-		
+
 	public function __construct($acceptCookies = true)
 	{
 		$this->curlResource = curl_init();
 		$this->setOption(CURLOPT_RETURNTRANSFER, true);
-		
+
 		// Cookies handling.
 		$this->acceptCookies = $acceptCookies;
 		if ($this->acceptCookies)
 		{
 			$this->cookieName = uniqid('./.');
 			$this->setOptions(array(
-				CURLOPT_COOKIEJAR => $this->cookieName,
-				CURLOPT_COOKIEFILE => $this->cookieName,
+			CURLOPT_COOKIEJAR => $this->cookieName,
+			CURLOPT_COOKIEFILE => $this->cookieName,
 			));
 		}
-		
+
 		// Set default proxy.
 		if (defined('OUTGOING_HTTP_PROXY_HOST') && OUTGOING_HTTP_PROXY_HOST
-			 && defined('OUTGOING_HTTP_PROXY_PORT') && OUTGOING_HTTP_PROXY_PORT)
+		&& defined('OUTGOING_HTTP_PROXY_PORT') && OUTGOING_HTTP_PROXY_PORT)
 		{
 			$this->setProxy(OUTGOING_HTTP_PROXY_HOST, OUTGOING_HTTP_PROXY_PORT);
 		}
 	}
-	
+
 	public function __destruct()
 	{
 		if ($this->curlResource !== null)
@@ -87,7 +87,7 @@ class HTTPClient
 			$this->close();
 		}
 	}
-	
+
 	/**
 	 * @return void
 	 */
@@ -100,7 +100,7 @@ class HTTPClient
 		}
 		$this->curlResource = null;
 	}
-	
+
 	/**
 	 * @param String $url
 	 * @return String
@@ -111,7 +111,61 @@ class HTTPClient
 		$this->setOption(CURLOPT_POST, false);
 		return $this->execute($url);
 	}
-	
+
+	public function download($url, $path)
+	{
+		// TODO: refactor with get, use default curl handler
+		if (!is_writable(dirname($path)))
+		{
+			throw new Exception("Can not write to $path");
+		}
+		$tmpPath = tempnam(null, "httpclientdownload");
+		register_shutdown_function(array("f_util_FileUtils", "unlink"), $tmpPath);
+		$fp = fopen($tmpPath, 'w');
+		if (!$fp)
+		{
+			throw new Exception("Could not open ".$tmpPath." for writing");
+		}
+		$ch = curl_init(str_replace(" ", "%20", $url));
+		if ($ch === false)
+		{
+			fclose($fp);
+			throw new Exception("Could not download $url");
+		}
+		
+		if ($this->proxyHost && $this->proxyPort)
+		{
+			$this->setOption(CURLOPT_PROXY, $this->proxyHost.':'.$this->proxyPort, $ch);
+		}
+		$this->setOption(CURLOPT_TIMEOUT, 300, $ch);
+		$this->setOption(CURLOPT_CONNECTTIMEOUT, 5, $ch);
+		if (curl_setopt($ch, CURLOPT_FILE, $fp) === false)
+		{
+			fclose($fp);
+			throw new Exception("Could not set curl option for download");
+		}
+
+		// FIXME anything to do with data ?
+		$data = curl_exec($ch);
+		$errno = curl_errno($this->curlResource);
+		if ($errno)
+		{
+			throw new Exception("Error curlerrno: ".$errno);
+		}
+		$contentLength = curl_getinfo($ch, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
+		curl_close($ch);
+		fclose($fp);
+		$dlLen = filesize($tmpPath);
+		if ($dlLen == 0 || ($contentLength !== null && $contentLength != $dlLen))
+		{
+			throw new Exception("Partial download: ($dlLen/$contentLength)");
+		}
+		if (!rename($tmpPath, $path))
+		{
+			throw new Exception("Could not create $path");
+		}
+	}
+
 	/**
 	 * @param String $url
 	 * @param Array<String, String> $params
@@ -124,7 +178,7 @@ class HTTPClient
 		$this->setOption(CURLOPT_POST, true);
 		return $this->execute($url);
 	}
-	
+
 	/**
 	 * @param String $host
 	 * @param Integer $port
@@ -134,7 +188,7 @@ class HTTPClient
 		$this->proxyHost = $host;
 		$this->proxyPort = $port;
 	}
-	
+
 	/**
 	 * @param Boolean $value
 	 */
@@ -142,7 +196,7 @@ class HTTPClient
 	{
 		$this->followRedirects = $value;
 	}
-	
+
 	/**
 	 * @param Integer $value
 	 */
@@ -150,7 +204,7 @@ class HTTPClient
 	{
 		$this->timeOut = $value;
 	}
-	
+
 	/**
 	 * @param string $referer
 	 */
@@ -158,17 +212,24 @@ class HTTPClient
 	{
 		$this->referer = $referer;
 	}
-		
+
 	/**
 	 * @param Integer $option
 	 * @param mixed $value
 	 * @see curl_setopt() for available options.
 	 */
-	public function setOption($option, $value)
+	public function setOption($option, $value, $ch = null)
 	{
-		curl_setopt($this->curlResource, $option, $value);
+		if ($ch === null)
+		{
+			$ch = $this->curlResource;
+		}
+		if (curl_setopt($ch, $option, $value) === false)
+		{
+			throw new Exception("Unable to set curl option ".$option);
+		}
 	}
-	
+
 	/**
 	 * @param Array<Integer, mixed> $options
 	 * @see curl_setopt() for available options.
@@ -178,7 +239,7 @@ class HTTPClient
 	{
 		curl_setopt_array($this->curlResource, $options);
 	}
-	
+
 	/**
 	 * @param String $url
 	 * @param String $postFields
@@ -191,7 +252,7 @@ class HTTPClient
 		{
 			$this->setOption(CURLOPT_PROXY, $this->proxyHost.':'.$this->proxyPort);
 		}
-		
+
 		$this->setOptions(array(
 			CURLOPT_REFERER => $this->referer,
 			CURLOPT_TIMEOUT => $this->timeOut,
@@ -201,17 +262,17 @@ class HTTPClient
 			CURLOPT_DNS_USE_GLOBAL_CACHE => 1,
 			CURLOPT_HEADERFUNCTION => array($this, 'readHeaders')
 		));
-		
+
 		$data = curl_exec($this->curlResource);
 		$errno = curl_errno($this->curlResource);
 		if ($errno)
-		{	
+		{
 			Framework::error(__METHOD__ . ': curl_errno : ' . $errno);
 		}
 		$this->httpReturnCode = curl_getinfo($this->curlResource, CURLINFO_HTTP_CODE);
 		return $data;
 	}
-	
+
 	private function readHeaders($ch, $header)
 	{
 		$trimmedHeader = trim($header);
@@ -221,7 +282,7 @@ class HTTPClient
 		}
 		return strlen($header);
 	}
-	
+
 	/**
 	 * @return Integer
 	 */
@@ -229,7 +290,7 @@ class HTTPClient
 	{
 		return $this->httpReturnCode;
 	}
-	
+
 	/**
 	 * @return Array
 	 */
