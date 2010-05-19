@@ -167,13 +167,6 @@
 		</dependency>
 		
 		<dependency>
-			<name>extension/soap</name>
-			<versions>
-			   <version>unknown</version>
-			</versions>
-		</dependency>
-		
-		<dependency>
 			<name>extension/json</name>
 			<versions>
 			   <version>unknown</version>
