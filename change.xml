@@ -11,6 +11,13 @@
 	<dependencies>
 		<!-- Runtime dependencies -->
 		<dependency>
+			<name>pear/PEAR</name>
+			<versions>
+				<version>1.9.0</version>
+			</versions>
+		</dependency>
+		
+		<dependency>
 			<name>pear/Date</name>
 			<versions>
 				<version>1.4.7</version>
