@@ -34,7 +34,7 @@ class commands_ApplyProjectPolicy extends commands_AbstractChangeCommand
 		$user = $this->getAuthor();
 		$apacheGroup = $this->getApacheGroup();
 		
-		$readWriteDirs = array("cache", "build", "log", "mailbox", "modules"); 
+		$readWriteDirs = array("cache", "build", "log", "mailbox", "modules", "override"); 
 		foreach ($readWriteDirs as $dir)
 		{
 			$this->message("Apply '$dir' dir policy");

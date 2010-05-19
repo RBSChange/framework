@@ -65,7 +65,14 @@ class commands_InitWebapp extends commands_AbstractChangeCommand
 			{
 				if (!file_exists($to)) 
 				{
-					f_util_FileUtils::cp($htAccess, $to);
+					try 
+					{
+						f_util_FileUtils::cp($htAccess, $to);
+					} 
+					catch (Exception $e)
+					{
+						$this->warnMessage($e->getMessage());
+					}
 				}
 			}
 		}
