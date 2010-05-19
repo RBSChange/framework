@@ -93,6 +93,34 @@ class commands_InitProject extends commands_AbstractChangeCommand
 				$newToAutoload[] = "libs/".$libName;
 			}
 		}
+				
+		if (isset($computedDeps["PEAR_DIR"]) && isset($computedDeps["lib-pear"]))
+		{
+			$pearDir = $computedDeps["PEAR_DIR"]; 
+			f_util_FileUtils::mkdir("libs/pearlibs");
+			foreach ($computedDeps["lib-pear"] as $libName => $libInfo)
+			{
+				$this->message("Symlink pearlibs/$libName-".$libInfo["version"]);
+				if (f_util_FileUtils::symlink($libInfo["path"], "libs/pearlibs/".$libName, f_util_FileUtils::OVERRIDE))
+				{
+					if ($computedDeps['PEAR_WRITEABLE'])
+					{
+						$this->message("copy libs/pearlibs/".$libName . " to " . $pearDir);
+						f_util_FileUtils::cp("libs/pearlibs/".$libName, $pearDir, 
+							f_util_FileUtils::OVERRIDE + f_util_FileUtils::APPEND, array('change.xml', 'tests', 'docs'));
+					}
+					else
+					{
+						$this->message("Please check if $libName-".$libInfo["version"] . " PEAR extension is correctly installed!");
+					}
+				}
+			}
+			$newToAutoload[] = $pearDir;
+		}
+		else
+		{
+			$newToAutoload[] = $computedDeps["PEAR_DIR"];
+		}
 		
 		foreach ($computedDeps["change-lib"] as $libName => $libInfo)
 		{

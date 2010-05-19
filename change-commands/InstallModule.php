@@ -34,8 +34,7 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 	 */
 	function getParameters($completeParamCount, $params, $options)
 	{
-		$bootStrap = new c_ChangeBootStrap(getcwd());
-		return $bootStrap->getRemoteModules();
+		return c_ChangeBootStrap::getLastInstance()->getRemoteModules();
 	}
 
 	/**
@@ -53,8 +52,7 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 			return $this->quitError("'$moduleFullName' is not a valid component name");
 		}
 		
-		$bootStrap = new c_ChangeBootStrap(WEBEDIT_HOME);
-		
+		$bootStrap = $this->getParent()->getBootStrap();
 		$index = strpos($moduleFullName, "-");
 		$moduleName = substr($moduleFullName, 0, $index);
 		$moduleVersion = substr($moduleFullName, $index+1);
@@ -141,6 +139,7 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 		{
 			$this->changecmd("import-init-data", array($modInfo["name"]));
 		}
+		
                 $this->changecmd("init-webapp");
 		
 		$doc = f_util_DOMUtils::getDocument(WEBEDIT_HOME."/change.xml");
