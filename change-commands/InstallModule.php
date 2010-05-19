@@ -123,14 +123,14 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 		{
 			$this->message("Symlink ".$libInfo["name"]."-".$libInfo["version"]);
 			f_util_FileUtils::symlink($libInfo["path"], WEBEDIT_HOME."/libs/".$libInfo["name"]);
-			$this->changecmd("update-autoload ".WEBEDIT_HOME."/libs/".$libInfo["name"]);
+			$this->changecmd("update-autoload", array(WEBEDIT_HOME."/libs/".$libInfo["name"]));
 		}
 		
 		foreach ($modulesToInstall as $modInfo)
 		{
 			$this->message("Symlink ".$modInfo["name"]."-".$modInfo["version"]);
 			f_util_FileUtils::symlink($modInfo["path"], WEBEDIT_HOME."/modules/".$modInfo["name"]);
-			$this->changecmd("update-autoload ".WEBEDIT_HOME."/modules/".$modInfo["name"]);
+			$this->changecmd("update-autoload", array(WEBEDIT_HOME."/modules/".$modInfo["name"]));
 		}
 		
 		$this->changecmd("compile-all");
@@ -139,9 +139,7 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 		{
 			$this->changecmd("import-init-data", array($modInfo["name"]));
 		}
-		
-                $this->changecmd("init-webapp");
-		
+        $this->changecmd("init-webapp");
 		$doc = f_util_DOMUtils::getDocument(WEBEDIT_HOME."/change.xml");
 		$xpath = new DOMXPath($doc);
 		$xpath->registerNamespace("c", "http://www.rbs.fr/schema/change-project/1.0");
