@@ -91,24 +91,23 @@ class f_util_System
 	 */
 	public static function execHTTPScript($relativeScriptPath, $arguments = array(), $noFramework = false)
 	{
-		$url = Framework::getBaseUrl() .'/changescriptexec.php';
-		$rc = curl_init();
-		curl_setopt($rc, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($rc, CURLOPT_USERAGENT, 'RBSChange/3.0');
-		curl_setopt($rc, CURLOPT_REFERER, $url);
-		$postDataArray = array('phpscript' => $relativeScriptPath, 'argv' => $arguments);
+		list($name, $secret) = explode('#', file_get_contents(WEBEDIT_HOME . '/build/config/oauth/script/consumer.txt'));
+		$consumer = new f_web_oauth_Consumer($name, $secret);
+
+		list($name, $secret) = explode('#', file_get_contents(WEBEDIT_HOME . '/build/config/oauth/script/token.txt'));	
+		$token = new f_web_oauth_Token($name, $secret);
+		
+		$request = new f_web_oauth_Request(Framework::getBaseUrl() .'/changescriptexec.php', $consumer, f_web_oauth_Request::METHOD_POST);
+		$request->setParameter('phpscript', $relativeScriptPath);
 		if ($noFramework)
 		{
-			$postDataArray['noframework'] = 'true';
+			$request->setParameter('noframework', 'true');
 		}
-		$postData = http_build_query($postDataArray, '', '&');
-		curl_setopt($rc, CURLOPT_POSTFIELDS, $postData);
-		curl_setopt($rc, CURLOPT_POST, true);
-		curl_setopt($rc, CURLOPT_FOLLOWLOCATION, 0);
-		curl_setopt($rc, CURLOPT_URL, $url);
-		$data = curl_exec($rc);
-		curl_close($rc);
-		return $data;		
+		$request->setParameter('argv', $arguments);
+		$request->setToken($token);
+		$client = new f_web_oauth_HTTPClient($request);
+		$client->getBackendClientInstance()->setTimeOut(0);
+		return $client->execute();		
 	}
 	
 	/**
