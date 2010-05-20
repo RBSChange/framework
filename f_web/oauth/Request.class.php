@@ -16,7 +16,44 @@ class f_web_oauth_Util
 		}
 		return $signatureClassName;
 	}
-
+	
+	static function parseOauthAutorizationHeader()
+	{
+		if (!isset($_SERVER['HTTP_AUTHORIZATION']))
+		{
+			return array();
+		}
+		$rawHeader = $_SERVER['HTTP_AUTHORIZATION'];
+		if (strpos($rawHeader, 'OAuth') !== 0)
+		{
+			return array();
+		}
+		$headers = array();
+		foreach (explode(',', trim(substr($rawHeader, 5))) as $part)
+		{
+			$firstEqual = strpos($part, '=');
+			$name = substr($part, 0, $firstEqual);
+			$value = substr($part, $firstEqual+1);
+			if (strlen($value) > 1 && $value[0] == '"' && $value[strlen($value)-1] == '"')
+			{	
+				$value = substr($value, 1, strlen($value)-2);
+			}
+			$headers[$name] = $value;
+		}
+		return $headers;
+	}
+	
+	/**
+	 * @param f_web_oauth_Request $request
+	 * @param Array $parameters
+	 */
+	static function setParametersFromArray($request, $parameters)
+	{
+		foreach ($parameters as $name => $value)
+		{
+			$request->setParameter($name, $value);
+		}
+	}
 }
 
 class f_web_oauth_Request
@@ -229,11 +266,25 @@ class f_web_oauth_Request
 		{
 			foreach ($values as $value)
 			{
-				$parts[] = f_web_oauth_Util::encode($name) . '=' . f_web_oauth_Util::encode($value);
+				$parts[] = $this->encodeValue($name, $value);
 			}
 		}
 		$this->mBaseSignature = $this->mMethod . '&' . f_web_oauth_Util::encode($this->mSignatureRequestUrl) . '&' . f_web_oauth_Util::encode(implode('&', $parts));
 		return $this->mSignatureClassInstance->buildSignatureFromRequest($this);
+	}
+	
+	private function encodeValue($name, $value)
+	{	
+		if (!is_array($value))
+		{
+			return f_web_oauth_Util::encode($name) . '=' . f_web_oauth_Util::encode($value);
+		}
+		$subvalues = array();
+		foreach ($value as $key => $val)
+		{
+			$subvalues[] = $this->encodeValue($name.'['.$key.']', $val);
+		}
+		return implode('&', $subvalues);
 	}
 	
 	public function getUrl($includeOauthParamsInGet = false)
