@@ -44,7 +44,17 @@ Warn: if you changed CHANGE_USE_CORRECTION or CHANGE_USE_WORKFLOW, please run ch
 			// Framework is loaded and configuration may have changed
 			Framework::reloadConfiguration(PROFILE);
 		}
-		
+		if (!file_exists(WEBEDIT_HOME . '/build/config/oauth/script/consumer.txt'))
+		{
+			mkdir(WEBEDIT_HOME . '/build/config/oauth/script', 0777, true);
+			$profile = file_get_contents(WEBEDIT_HOME . '/profile');
+			file_put_contents(WEBEDIT_HOME . '/build/config/oauth/script/consumer.txt', $profile .'#' . $profile);
+		}
+		if (!file_exists(WEBEDIT_HOME . '/build/config/oauth/script/token.txt'))
+		{			
+			$ts = time();
+			file_put_contents(WEBEDIT_HOME . '/build/config/oauth/script/token.txt', md5($ts . mt_rand()) .'#' . md5($ts . mt_rand()));
+		}		
 		$this->quitOk("Config compiled");
 	}
 }
