@@ -19,6 +19,10 @@ class f_web_oauth_Util
 	
 	static function parseOauthAutorizationHeader()
 	{
+		if (!isset($_SERVER['HTTP_AUTHORIZATION']))
+		{
+			return array();
+		}
 		$rawHeader = $_SERVER['HTTP_AUTHORIZATION'];
 		if (strpos($rawHeader, 'OAuth') !== 0)
 		{
