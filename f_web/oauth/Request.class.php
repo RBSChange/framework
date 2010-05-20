@@ -33,12 +33,15 @@ class f_web_oauth_Util
 		{
 			$firstEqual = strpos($part, '=');
 			$name = substr($part, 0, $firstEqual);
-			$value = substr($part, $firstEqual+1);
-			if (strlen($value) > 1 && $value[0] == '"' && $value[strlen($value)-1] == '"')
-			{	
-				$value = substr($value, 1, strlen($value)-2);
+			if (strpos($name, 'oauth_') === 0)
+			{
+				$value = substr($part, $firstEqual+1);
+				if (strlen($value) > 1 && $value[0] == '"' && $value[strlen($value)-1] == '"')
+				{	
+					$value = substr($value, 1, strlen($value)-2);
+				}
+				$headers[$name] = $value;
 			}
-			$headers[$name] = $value;
 		}
 		return $headers;
 	}
