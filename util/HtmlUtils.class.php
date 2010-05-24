@@ -428,19 +428,21 @@ abstract class f_util_HtmlUtils
         try
         {
             $rq->beginI18nWork($lang);
-            $document = DocumentHelper::getDocumentInstance($documentId);
+           	$document = DocumentHelper::getDocumentInstance($documentId);
+            
             if ($document instanceof media_persistentdocument_media && $document->getMediatype() == MediaHelper::TYPE_FLASH)
             {
                 $link = self::renderFlashTag($document, $attributes);
             } 
             else if ($document instanceof media_persistentdocument_media && $document->getMediatype() == MediaHelper::TYPE_IMAGE)
             {
-            	$attributes['href'] = media_MediaService::getInstance()->generateUrl($document, $lang);
+            	$attributes['href'] = media_MediaService::getInstance()->generateUrl($document, $lang);	
                 $link = self::buildLink($attributes, $content);
             }
             else if ($document instanceof media_persistentdocument_file)
             {
             	$attributes['href'] = media_FileService::getInstance()->generateDownloadUrl($document, $lang);
+            	$document->addDownloadAttributes($attributes);       	
                 $link = self::buildLink($attributes, $content);
             }
             else
@@ -448,6 +450,7 @@ abstract class f_util_HtmlUtils
                 $attributes['href'] = LinkHelper::getDocumentUrl($document, $lang);
                 $link = self::buildLink($attributes, $content);
             }
+            
             $rq->endI18nWork();
         } 
         catch (Exception $e)
