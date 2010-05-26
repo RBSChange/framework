@@ -134,7 +134,15 @@ abstract class f_util_FileUtils
 	static private function rglob($pattern = '*', $flags = 0, $path = '')
 	{
 		$paths = glob($path.'*', GLOB_MARK|GLOB_ONLYDIR|GLOB_NOSORT);
+		if (!$paths)
+		{
+			$paths = array();
+		}
 		$files = glob($path.$pattern, $flags);
+		if (!$files)
+        {
+        	$files = array();
+        }
 		foreach ($paths as $path)
 		{
 			$files = array_merge($files, self::rglob($pattern, $flags, $path));
