@@ -12,19 +12,16 @@ $bootStrap->dispatch('func:executeChangeCmd');
 function executeChangeCmd($argv, $computedDeps)
 {
 	global $bootStrap;
-	if (isset($_POST['argv']))
-	{		
-		$frameworkInfo = $computedDeps["change-lib"]["framework"];
-		$bootStrap->appendToAutoload($frameworkInfo["path"]);
-		$argv = $_POST['argv'];
-		$script = new c_Changescripthttp('change.php', $frameworkInfo['path']);
-		$script->setBootStrap($bootStrap);
-		$script->setEnvVar("computedDeps", $computedDeps);
-		registerCommands($script, $computedDeps, $bootStrap);
-		ob_start();
-		$script->execute($argv);
-		ob_flush();
-	}
+	$argv = isset($_POST['argv']) ? $_POST['argv'] : array();
+	$frameworkInfo = $computedDeps["change-lib"]["framework"];
+	$bootStrap->appendToAutoload($frameworkInfo["path"]);
+	$script = new c_Changescripthttp('change.php', $frameworkInfo['path']);
+	$script->setBootStrap($bootStrap);
+	$script->setEnvVar("computedDeps", $computedDeps);
+	registerCommands($script, $computedDeps, $bootStrap);
+	ob_start();
+	$script->execute($argv);
+	ob_flush();
 }
 
 /**
