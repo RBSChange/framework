@@ -539,25 +539,28 @@ class indexer_IndexService extends BaseService
 	
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param indexer_IndexedDocument $indexedDocument
 	 * @return Array<Integer>
 	 */
-	public function getBackendAccessorIds($document)
+	private function getBackendAccessorIds($document, $indexedDocument)
 	{
 		$ps = f_permission_PermissionService::getInstance();
 		$model = $document->getPersistentModel();
-		$packageName = 'modules_' . $model->getOriginalModuleName();
-		$roleService = f_permission_PermissionService::getRoleServiceByModuleName($model->getOriginalModuleName());
+		$fields = $indexedDocument->getFields();
+		$module = $fields['module' . indexer_Field::STRING]['value'];
+		$packageName = 'modules_' . $module;
 		
+		$roleService = f_permission_PermissionService::getRoleServiceByModuleName($module);		
 		if ($roleService === null || count($roleService->getRoles()) === 0)
 		{
 			// We have no role service or no roles declared
 			return array(self::PUBLIC_DOCUMENT_ACCESSOR_ID);
 		}
+		
 		$definitionPointId = $ps->getDefinitionPointForPackage($document->getId(), $packageName);
 		$permissionName = $packageName . '.Update.' . $model->getOriginalDocumentName();
 		return $ps->getAccessorIdsForPermissionAndDocumentId($permissionName, $definitionPointId);
 	}
-	
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
@@ -827,7 +830,7 @@ class indexer_IndexService extends BaseService
 		{
 			if (!$backofficeIndexDocument->hasDocumentAccessors())
 			{
-				$backofficeIndexDocument->setDocumentAccessors($this->getBackendAccessorIds($document));
+				$backofficeIndexDocument->setDocumentAccessors($this->getBackendAccessorIds($document, $backofficeIndexDocument));
 			}
 			$this->setAncestors($document, $backofficeIndexDocument);
 			$hasHtmlLink = false;
