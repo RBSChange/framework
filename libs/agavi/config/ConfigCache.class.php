@@ -256,7 +256,7 @@ class ConfigCache extends AgaviObject
 	 */
 	public static function import ($config, $once = true)
 	{			
-		if (strpos($config, '/modules/') !== false) {return;}
+		if (strpos($config, 'modules/') !== false) {return;}
 		$cache = self::checkConfig($config);
 		if ($once) {
 			include_once($cache);
