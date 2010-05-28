@@ -13,7 +13,6 @@ abstract class f_util_FileUtils
 		$result = @file_put_contents($filepath.'/write.test','this is a write test');
 		@unlink($filepath.'/write.test');
 
-
 		if ($result>0)
 		{
 			if ($dh = opendir($filepath)) 
@@ -28,7 +27,34 @@ abstract class f_util_FileUtils
 		}
 		throw new Exception("directory not writable: $filepath");
 	}
-
+	
+	/**
+	 * @param string $path
+	 * @return string
+	 */
+	static function normalizePath($path)
+	{
+		return (DIRECTORY_SEPARATOR === '/') ? $path : str_replace('/', DIRECTORY_SEPARATOR, $path);
+	}
+	
+	/**
+	 * @param string $path
+	 * @return string
+	 */
+	static function isLink($filepath)
+	{
+		if (DIRECTORY_SEPARATOR === '/')
+		{
+			return is_link($filepath);
+		}
+		
+		if (file_exists($filepath) && self::normalizePath($filepath) != readlink($filepath))
+		{
+			return true;
+		}
+		return false;
+	}	
+	
 	/**
 	 * "ln -s $linkTarget $linkPath"
 	 * @param String $linkTarget
@@ -37,15 +63,16 @@ abstract class f_util_FileUtils
 	 * @throws Exception if the target is not readable or the symlink creation failed
 	 * @return Boolean true if link has to be created or updated
 	 */
-	function symlink($linkTarget, $linkPath, $options = 0)
+	static function symlink($linkTarget, $linkPath, $options = 0)
 	{
 		if (!is_readable($linkTarget))
 		{
 			throw new Exception("$linkTarget does not exist");
 		}
-		if (file_exists($linkPath) || is_link($linkPath))
+		$isLink = self::isLink($linkPath);
+		if (file_exists($linkPath) || $isLink)
 		{
-			if (is_link($linkPath) && realpath(readlink($linkPath)) == realpath($linkTarget))
+			if ($isLink && realpath(readlink($linkPath)) == realpath($linkTarget))
 			{
 				// nothing to do
 				return false;
@@ -134,15 +161,9 @@ abstract class f_util_FileUtils
 	static private function rglob($pattern = '*', $flags = 0, $path = '')
 	{
 		$paths = glob($path.'*', GLOB_MARK|GLOB_ONLYDIR|GLOB_NOSORT);
-		if (!$paths)
-		{
-			$paths = array();
-		}
+		if (!is_array($paths)){$paths = array();}
 		$files = glob($path.$pattern, $flags);
-		if (!$files)
-        {
-        	$files = array();
-        }
+		if (!is_array($files)){$files = array();}
 		foreach ($paths as $path)
 		{
 			$files = array_merge($files, self::rglob($pattern, $flags, $path));
@@ -211,7 +232,7 @@ abstract class f_util_FileUtils
 	 */
 	private static function buildAbsolutePathFromArray($args)
 	{
-		if (f_util_StringUtils::beginsWith($args[0], DIRECTORY_SEPARATOR))
+		if (DIRECTORY_SEPARATOR !== '/' || f_util_StringUtils::beginsWith($args[0], DIRECTORY_SEPARATOR))
 		{
 			return join(DIRECTORY_SEPARATOR, $args);
 		}
@@ -753,7 +774,7 @@ abstract class f_util_FileUtils
 				//echo $destFile."\n";
 				if ($info->isDir())
 				{
-					if (is_dir($destFile) || (is_link($destFile) && is_dir(readlink($destFile))))
+					if (is_dir($destFile) || (self::isLink($destFile) && is_dir(readlink($destFile))))
 					{
 						continue;
 					}
@@ -936,6 +957,15 @@ abstract class f_util_FileUtils
 	 */
 	public static function chmod($file, $mode, $recursive = true, $filesMode = null)
 	{
+		if (!function_exists('posix_getuid'))
+		{
+			if (Framework::isDebugEnabled())
+			{
+				Framework::debug(__METHOD__ . ' diasabled');
+			}
+			//Unable to execute this function
+			return;
+		}
 		$uid = posix_getuid();
 		if (is_string($mode))
 		{
@@ -996,6 +1026,16 @@ abstract class f_util_FileUtils
 	 */
 	public static function chown($file, $owner, $group, $recursive = true)
 	{
+		if (!function_exists('posix_getuid'))
+		{
+			if (Framework::isDebugEnabled())
+			{
+				Framework::debug(__METHOD__ . ' diasabled');
+			}
+			//Unable to execute this function
+			return;
+		}
+		
 		$uid = posix_getuid();
 		if ($group !== null)
 		{

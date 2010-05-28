@@ -233,7 +233,7 @@ class config_ProjectParser
 				// <define name="AG_WEBAPP_NAME">Fred's Change</define>
 				if ($quoteCount == 0 || ($quoteCount & 1))
 				{
-					$value = '"' . addcslashes($value, '"') . '"';
+					$value = var_export($value, true);
 				}
 			}
 			$globalConstants[$name] = 'define(\'' . $name . '\', ' . $value . ');';

@@ -210,6 +210,11 @@ class c_ChangeBootStrap
 		}
 		return $this->name;
 	}
+	
+	function normalizePath($path)
+	{
+		return (DIRECTORY_SEPARATOR === '/') ? $path : str_replace('/', DIRECTORY_SEPARATOR, $path);
+	}
 
 	/**
 	 * @param String $name
@@ -374,7 +379,7 @@ class c_ChangeBootStrap
 		
 		$repo = array_keys($this->getLocalRepositories());
 		$computedComponents["LOCAL_REPOSITORY"] = $repo[0];
-		$computedComponents["WWW_GROUP"] = $this->getProperties()->getProperty("WWW_GROUP", "www-data");
+		$computedComponents["WWW_GROUP"] = $this->getProperties()->getProperty("WWW_GROUP", "");
 		$proxy = $this->getProxy();
 		if ($proxy !== null)
 		{
@@ -483,14 +488,12 @@ class c_ChangeBootStrap
 
 	function setAutoloadPath($autoloadPath = ".change/autoload")
 	{
-		if ($autoloadPath[0] != "/")
+		if ($autoloadPath === '.change/autoload')
 		{
-			$this->autoloadPath = $this->wd."/".$autoloadPath;
+			$autoloadPath =  $this->wd."/".$autoloadPath;
 		}
-		else
-		{
-			$this->autoloadPath = $autoloadPath;
-		}
+		
+		$this->autoloadPath = $this->normalizePath($autoloadPath);
 		if (!is_dir($this->autoloadPath) && !mkdir($this->autoloadPath, 0777, true))
 		{
 			throw new Exception("Could not create autoload directory ".$this->autoloadPath);
@@ -514,8 +517,7 @@ class c_ChangeBootStrap
 	function appendToAutoload($componentPath, $followDeps = true)
 	{
 		$autoloadPath = $this->getAutoloadPath();
-		$autoloadedFlag = $autoloadPath."/".str_replace('/', '_', $componentPath).".autoloaded";
-
+		$autoloadedFlag = $this->normalizePath($autoloadPath."/".md5($componentPath).".autoloaded");
 		if (!$this->autoloadRegistered)
 		{
 			if (!is_dir($autoloadPath) && !@mkdir($autoloadPath, 0777, true))
@@ -553,14 +555,14 @@ class c_ChangeBootStrap
 
 		foreach ($classes as $className => $relPath)
 		{
-			$linkPath = $autoloadPath."/".str_replace('_', '/', $className).'/to_include';
+			$linkPath = $this->normalizePath($autoloadPath."/".str_replace('_', '/', $className).'/to_include');
 			$linkDir = dirname($linkPath);
 			if (!is_dir($linkDir) && !mkdir($linkDir, 0777, true))
 			{
 				throw new Exception("Could not create $linkDir");
 			}
-			$linkTarget = $componentPath."/".$relPath;
-			if ((!is_link($linkPath) || (readlink($linkPath) != $linkTarget && unlink($linkPath)))
+			$linkTarget = $this->normalizePath($componentPath."/".$relPath);
+			if ((!is_file($linkPath) || (readlink($linkPath) != $linkTarget && unlink($linkPath)))
 			&& !symlink($linkTarget, $linkPath))
 			{
 				throw new Exception("Could not symlink ".$componentPath."/".$relPath." to $linkPath");
@@ -2427,10 +2429,10 @@ class cboot_Properties
 		{
 			$val = false;
 		}
-		else
+		elseif (is_string($val))
 		{
 			$valLength = strlen($val);
-			if ($val[0] == "'" && $val[$valLength-1] == "'" || $val[0] == "\"" && $val[$valLength-1] == "\"")
+			if (($valLength > 1) && $val[0] == "'" && $val[$valLength-1] == "'" || $val[0] == "\"" && $val[$valLength-1] == "\"")
 			{
 				$val = substr($val, 1, -1);
 			}

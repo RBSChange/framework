@@ -15,7 +15,7 @@ class f_SimpleCache
 
 	public function __construct($id, $keyParameters, $cacheSpecs)
 	{
-		$this->id = $id;
+		$this->id = str_replace(':', '_', $id);
 		$this->keyParameters = md5(serialize($keyParameters));
 		$this->cacheSpecs = $cacheSpecs;
 		foreach ($cacheSpecs as $cacheSpec)
@@ -211,7 +211,7 @@ class f_SimpleCache
 		{
 			if (is_numeric($spec))
 			{
-				$byIdRegister = $baseById . implode('/', str_split($spec, 3)).'/'.$this->id.'|'.$this->keyParameters;
+				$byIdRegister = $baseById . implode('/', str_split($spec, 3)).'/'.$this->id.'_'.$this->keyParameters;
 				if (!file_exists($byIdRegister))
 				{
 					f_util_FileUtils::mkdir(dirname($byIdRegister));

@@ -22,7 +22,7 @@ class f_web_ResourceLink extends f_web_HttpLink
      */
     public function setPath($path)
     {
-        $this->path = $path;
+        $this->path = str_replace('\\', '/', $path);
         return $this;
     }
     
