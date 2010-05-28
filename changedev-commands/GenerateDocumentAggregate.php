@@ -28,7 +28,7 @@ class commands_GenerateDocumentAggregate extends commands_AbstractChangedevComma
 		return array("--override");
 	}
 	
-	function getParameters($completeParamCount, $params, $options)
+	function getParameters($completeParamCount, $params, $options, $current)
 	{
 		if ($completeParamCount == 0)
 		{

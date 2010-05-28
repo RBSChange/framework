@@ -29,7 +29,7 @@ class commands_Indexer extends commands_AbstractChangeCommand
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
 	 * @return String[] or null
 	 */
-	function getParameters($completeParamCount, $params, $options)
+	function getParameters($completeParamCount, $params, $options, $current)
 	{
 		if ($completeParamCount == 0)
 		{
