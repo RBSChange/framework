@@ -47,7 +47,7 @@ function reloadCron($token, $sleepOnPing)
 	}
 	if ($sleepOnPing) 
 	{
-		sleep(60);
+		sleep(30);
 	}
 	$pingURl = task_PlannedTaskRunner::buildPingURL($token);
 	task_PlannedTaskRunner::pingChangeCronURL($pingURl);
