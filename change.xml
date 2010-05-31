@@ -33,14 +33,6 @@
 		</dependency>
 		
 		<!-- media & uixul modules. TODO: add FileUtils::getMime() that uses FileInfo and refactor -->
-		
-		<dependency>
-			<name>extension/mysql</name>
-			<versions>
-				<version>5.0.22</version>
-			</versions>
-		</dependency>
-
 		<dependency>
 			<name>extension/SimpleXML</name>
 			<versions>
@@ -55,13 +47,6 @@
 			<name>change-lib/change-script</name>
 			<versions>	
 				<version>3.2</version>
-			</versions>
-		</dependency>
-
-		<dependency>
-			<name>change-lib/change-dbadmin</name>
-			<versions>	
-				<version>3.0</version>
 			</versions>
 		</dependency>
 		
