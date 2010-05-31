@@ -905,15 +905,8 @@ class generator_PersistentModel
 
 		$this->extend = null;
 		$pp = f_persistentdocument_PersistentProvider::getInstance();
-		if ($pp instanceof f_persistentdocument_PersistentProviderOci && $this->tableNameOci)
-		{
-			$this->tableName = $this->tableNameOci;
-		}
-
-		if (is_null($this->tableName))
-		{
-			$this->tableName = strtolower("m_". $this->moduleName ."_doc_" .$this->documentName);
-		}
+		$properties = array('tableName' => $this->tableName, 'moduleName' => $this->moduleName, 'documentName' => $this->documentName, 'tableNameOci' => $this->tableNameOci);
+		$this->tableName = $pp->generateTableName($properties);
 
 		foreach (array_reverse($baseDocument->properties) as $property)
 		{

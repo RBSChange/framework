@@ -323,7 +323,16 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 		$this->setDriver(null);
 	}
+	
 
+	/**
+	 * @return array<".mysql.sql", ";">
+	 */
+	public function getScriptFileInfos()
+	{
+		return array(".mysql.sql", ";");
+	}
+	
 	protected function escapeFieldName($fieldName)
 	{
 		return '`' . $fieldName . '`';

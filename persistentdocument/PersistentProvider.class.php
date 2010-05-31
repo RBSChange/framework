@@ -351,6 +351,38 @@ abstract class f_persistentdocument_PersistentProvider
 	{
 		return $row["id"];
 	}
+	
+	/**
+	 * @return array<string, string>
+	 * return[0] => allowed file Extension
+	 * return[1] => sql script Separator
+	 */
+	public function getScriptFileInfos()
+	{
+		return array(null, null);
+	}
+	
+	/**
+	 * @param array<tableName=>string, moduleName=>string, documentName=>string, tableNameOci=>string> $properties
+	 * @return string
+	 */
+	public function generateTableName($properties)
+	{
+		if ($properties['tableName'])
+		{
+			return $properties['tableName'];
+		}
+		return strtolower("m_". $properties['moduleName'] ."_doc_" . $properties['documentName']);
+	}
+
+	/**
+	 * @param array<dbMapping=>string, name=>string, dbMappingOci=>string> $properties
+	 * @return string
+	 */
+	public function generateFieldName($properties)
+	{
+		return (is_null($properties['dbMapping'])) ?  strtolower($properties['name']) : $properties['dbMapping'];
+	}
 
 	/**
 	 * @param f_persistentdocument_criteria_Query $query
@@ -363,13 +395,8 @@ abstract class f_persistentdocument_PersistentProvider
 			// implicit this projection
 			$query->setProjection(Projections::this());
 		}
-
+		$params = array();
 		$queryStr = $this->buildQueryString($query, $params);
-
-		/*
-		 echo "QUERY STRING : ".$queryStr."\n";
-		 echo "PARAMS ".var_export($params, true)."\n";
-		 */
 
 		$statement = $this->prepareStatement($queryStr);
 		// N.B.: we must check if errorCode is a real error code since execute()

@@ -302,7 +302,6 @@
 		<!-- PERSISTENT PROVIDER -->
 		<persistent_provider>
 			<entry name="mysql">f_persistentdocument_PersistentProviderMySql</entry>
-			<entry name="oci">f_persistentdocument_PersistentProviderOci</entry>
 		</persistent_provider>
 
 		<!-- PDF SERVICE -->

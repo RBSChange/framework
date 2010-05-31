@@ -562,11 +562,8 @@ class generator_PersistentProperty
 	public function getDbName()
 	{
 		$pp = f_persistentdocument_PersistentProvider::getInstance();
-		if ($pp instanceof f_persistentdocument_PersistentProviderOci && $this->dbMappingOci)
-		{
-			return $this->dbMappingOci;
-		}
-		return (is_null($this->dbMapping)) ?  strtolower($this->name) : $this->dbMapping;
+		$properties = array('dbMapping' => $this->dbMapping, 'name' => $this->name, 'dbMappingOci' => $this->dbMappingOci);
+		return $pp->generateFieldName($properties);
 	}
 
 	/**

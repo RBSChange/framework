@@ -53,23 +53,13 @@ class commands_GenerateDatabase extends commands_AbstractChangeCommand
 		}
 		
 		// populate the database
-		$allowedExtension = null;
-		$sqlSeparator = null;
-		if ($pp instanceof f_persistentdocument_PersistentProviderMySql)
-		{
-			$allowedExtension = ".mysql.sql";
-			$sqlSeparator = ";";
-		}
-		elseif ($pp instanceof f_persistentdocument_PersistentProviderOci)
-		{
-			$allowedExtension = ".oci.sql";
-			$sqlSeparator = "/\n";
-		}
-		else
+		list($allowedExtension, $sqlSeparator) = $pp->getScriptFileInfos();
+		if ($allowedExtension === null)
 		{
 			return $this->quitError("Can not generate database for using ".get_class($pp)." for driver");
 		}
 		$this->setupDatabase($pp, $allowedExtension, $sqlSeparator);
+		return null;
 	}
 
 	/**
