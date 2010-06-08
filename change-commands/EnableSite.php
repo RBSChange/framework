@@ -41,6 +41,8 @@ class commands_EnableSite extends commands_AbstractChangeCommand
 			return $this->quitError("Unable to unlink $flagFile");
 		}
 		
+		f_util_System::execHTTPScript('changecron.php', array(), true);
+		
 		$this->quitOk("Site has been enabled. To disable it, use 'change.php disable-site'.");
 	}
 }
