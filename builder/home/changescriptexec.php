@@ -62,14 +62,14 @@ if ($headers['oauth_signature'] !== f_web_oauth_Util::encode($request->getSignat
 	header("HTTP/1.1 401 Unauthorized");
 	die("Invalid signature");
 }
-if (isset($_POST['phpscript']) && isset($_POST['argv']) && is_array($_POST['argv']))
+if (isset($_POST['phpscript']) && (!isset($_POST['argv']) || is_array($_POST['argv'])))
 {
 	$scriptPath = WEBEDIT_HOME . '/' . $_POST['phpscript'];
 	if (defined('FRAMEWORK_HOME'))
 	{
 		if (Framework::isInfoEnabled())
 		{
-			Framework::info("execute $scriptPath with (" . count($_POST['argv']) . " args)");
+			Framework::info("execute $scriptPath with (" . (isset($_POST['argv']) ? count($_POST['argv']) : 'null') . " args)");
 		}
 	}
 	chdir(WEBEDIT_HOME);

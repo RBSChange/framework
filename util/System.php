@@ -103,7 +103,10 @@ class f_util_System
 		{
 			$request->setParameter('noframework', 'true');
 		}
-		$request->setParameter('argv', $arguments);
+		if (count($arguments) > 0)
+		{
+			$request->setParameter('argv', $arguments);
+		}
 		$request->setToken($token);
 		$client = new f_web_oauth_HTTPClient($request);
 		$client->getBackendClientInstance()->setTimeOut(0);
