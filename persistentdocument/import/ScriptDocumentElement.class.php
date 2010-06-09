@@ -172,7 +172,6 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 	 */
 	protected function getParentNodeId()
 	{
-		$document = $this->getPersistentDocument();
 		$parent = $this->getParentDocument();
 		return ($parent !== null) ? $parent->getPersistentDocument()->getId() : null;
 	}
@@ -205,6 +204,19 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 		return $type;
 	}
 
+	/**
+	 * @return f_persistentdocument_PersistentDocument
+	 */
+	protected function getParentInTree()
+	{
+		$parentDoc = $this->getParentDocument();
+		if ($parentDoc !== null && $parentDoc->getPersistentDocument()->getTreeId())
+		{
+			return $parentDoc->getPersistentDocument();
+		}
+		return null;
+	}
+	
 	// Private methods.
 
 	/**
@@ -216,12 +228,11 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 	{
 		$persistentProvider = f_persistentdocument_PersistentProvider::getInstance();
 		$query = $persistentProvider->createQuery($type)->add(Restrictions::eq($propName, $propValue));
-
-		$parentDoc = $this->getParentDocument();
+		
+		$parentDoc = $this->getParentInTree();
 		if ($parentDoc !== null)
 		{
-			$parent = $parentDoc->getPersistentDocument();
-			$query->add(Restrictions::childOf($parent->getId()));
+			$query->add(Restrictions::childOf($parentDoc->getId()));
 		}
 
 		$documents = $query->find();

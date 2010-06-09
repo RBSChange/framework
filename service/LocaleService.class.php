@@ -30,11 +30,10 @@ class LocaleService extends BaseService
 		$provider = f_persistentdocument_PersistentProvider::getInstance();
 		$provider->clearTranslationCache();
 
-		// Processing modules :
-		$this->processModules();
 
-		// Processing framework :
+		$this->processModules();
 		$this->processFramework();
+		$this->processThemes();		
 	}
 
 	/**
@@ -51,6 +50,21 @@ class LocaleService extends BaseService
 		// Processing module : $moduleName
 		$this->processModule($moduleName);
 	}
+
+	/**
+	 * Regenerate locale for a theme and save in databases
+	 *
+	 * @param string $themeName Example: themes_webfactory
+	 */
+	public function regenerateLocalesForTheme($themeName)
+	{
+		// Clear the corresponding entries in databases
+		$provider = f_persistentdocument_PersistentProvider::getInstance();
+		$provider->clearTranslationCache($themeName);
+
+		$this->processTheme($themeName);
+	}
+	
 
 	/**
 	 * Regenerate locale for the framework and save in databases
@@ -76,7 +90,16 @@ class LocaleService extends BaseService
 			$this->processModule($moduleName);
 		}
 	}
-
+	
+	private function processThemes()
+	{
+		foreach (glob("themes/*", GLOB_ONLYDIR) as $theme)
+		{
+			$themeName = "themes_" . basename($theme);
+			$this->processTheme($themeName);
+		}
+	}	
+	
 	/**
 	 * Compile locale for a module
 	 *
@@ -92,6 +115,23 @@ class LocaleService extends BaseService
 		{
 			$this->processDir($moduleName, $path);
 		}
+	}
+	
+	/**
+	 * Compile locale for a theme
+	 *
+	 * @param string $themeName Example: themes_webfactory
+	 */
+	private function processTheme($themeName)
+	{
+		$availablePaths = FileResolver::getInstance()->setPackageName($themeName)->setDirectory('locale')->getPaths('');
+		$availablePaths = array_reverse($availablePaths);
+
+		// For all path found for the locale of module insert all localization keys
+		foreach ($availablePaths as $path)
+		{
+			$this->processDir($themeName, $path);
+		}		
 	}
 
 	/**

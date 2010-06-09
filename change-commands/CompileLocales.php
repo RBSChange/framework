@@ -39,6 +39,11 @@ class commands_CompileLocales extends commands_AbstractChangeCommand
 		{
 			$components[] = basename($module);
 		}
+		foreach (glob("themes/*", GLOB_ONLYDIR) as $module)
+		{
+			$components[] = "themes/" . basename($module);
+		}		
+		
 		return array_diff($components, $params);
 	}
 
@@ -66,6 +71,10 @@ class commands_CompileLocales extends commands_AbstractChangeCommand
 			{
 				$ls->regenerateLocalesForFramework();
 				$this->okMessage('Framework locales compiled');
+			}
+			else if (strpos($componentName, 'themes/') === 0)
+			{
+				$ls->regenerateLocalesForTheme(str_replace('/', '_', $componentName));
 			}
 			else
 			{

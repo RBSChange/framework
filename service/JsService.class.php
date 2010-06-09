@@ -365,7 +365,8 @@ class JsService extends BaseService
 				unset($scriptRegistryOrdered[$scriptName]);
 			}
 		}
-
+		
+		
 		$mergedScriptHash = md5(serialize($scriptRegistryOrdered));
 		$mergedScriptFileName = $mergedScriptHash . '-' . RequestContext::getInstance()->getLang() . '.js';
 		$mergedScriptPath = f_util_FileUtils::buildWebCachePath('js', $mergedScriptFileName);
@@ -530,9 +531,7 @@ class JsService extends BaseService
 	 * @return string Path
 	 */
 	public function getFileSystemName($script)
-	{
-		$lang = RequestContext::getInstance()->getLang();
-
+	{		
 		// Case #1 - a cached JS file matches the requirement :
 		$fileLocation = f_util_FileUtils::buildWebCachePath('js', $script . '.js');
 		if (is_readable($fileLocation))
