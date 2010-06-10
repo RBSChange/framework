@@ -48,9 +48,10 @@ class TemplateLoader extends FileLoader implements ResourceLoader
 	public function load($filename)
 	{
 		//$this->resolver->addCurrentWebsiteToPotentialDirectories();
-		$currentPage = website_WebsiteModuleService::getInstance()->getCurrentPage();
-		if ($currentPage)
+		$currentPageId = website_WebsiteModuleService::getInstance()->getCurrentPageId();
+		if ($currentPageId)
 		{
+			$currentPage = DocumentHelper::getDocumentInstance($currentPageId, "modules_website/page");
 			list($theme, ) = explode('/', $currentPage->getTemplate());
 			
 
