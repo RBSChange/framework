@@ -404,6 +404,23 @@ class f_web_CSSStylesheet
 			}
 			else if ($cssText[$i] === '}' && !$inComment)
 			{
+				if ($inDeclarationBlock && !f_util_StringUtils::isEmpty($declarationText))
+				{
+					if ($lastDeclaration !== null)
+					{
+						$currentRule->addDeclaration($lastDeclaration);
+						$lastDeclaration = null;
+					}
+					$lastDeclaration = new f_web_CSSDeclaration();
+					$lastDeclaration->setCssText(trim($declarationText));
+					if (f_util_ArrayUtils::isNotEmpty($comments))
+					{
+						$lastDeclaration->setComments($comments);
+						$comments = array();
+					}
+					$declarationText = "";
+				}
+				
 
 				// End of declarations
 				$inSelector = true;
@@ -451,7 +468,7 @@ class f_web_CSSStylesheet
 					$comments = array();
 				}
 			}
-			else if ($cssText[$i] === ";" && !$inParenthesis && !$inComment)
+			else if ($cssText[$i] === ";"  && !$inParenthesis && !$inComment)
 			{
 				if ($inDeclarationBlock && !f_util_StringUtils::isEmpty($declarationText))
 				{

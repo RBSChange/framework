@@ -1058,4 +1058,21 @@ class f_persistentdocument_criteria_QueryIntersection
 	{
 		return f_persistentdocument_PersistentProvider::getInstance()->findIntersectionIds($this);
 	}
+	
+	/**
+	 * @param Integer $offset
+	 * @param Integer $count
+	 * @return f_persistentdocument_PersistentDocument[]
+	 */
+	function findAtOffset($offset, $count, &$totalCount = null)
+	{
+		$ids = $this->findIds();
+		$totalCount = count($ids);
+		if ($totalCount == 0 || $offset >= $totalCount)
+		{
+			return array();
+		}
+		$pp = f_persistentdocument_PersistentProvider::getInstance();
+		return $pp->find($pp->createQuery($this->getDocumentModel()->getName())->add(Restrictions::in("id", array_slice($ids, $offset, $count))));
+	}
 }
