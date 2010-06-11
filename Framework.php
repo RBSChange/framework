@@ -391,6 +391,7 @@ class Framework
 	 * or throw a ConfigurationException if the $path configuration does not exist
 	 * @param String $path
 	 * @param Boolean $strict
+	 * @throws ConfigurationException if the $path configuration does not exist
 	 * @example Framework::getConfiguration('databases')
 	 * @example Framework::getConfiguration('databases/webapp')
 	 * @return String | false if the path was not founded and strict value if false
@@ -415,7 +416,7 @@ class Framework
 
 	/**
 	 * Return an array with part of configuration of Framework
-	 * or throw a ConfigurationException if the $path configuration does not exist
+	 * or null if the $path configuration does not exist
 	 * @param String $path
 	 * @param String $defaultValue
 	 */
