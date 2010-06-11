@@ -37,12 +37,78 @@ class indexer_SolrManager
 	
 	private $dirty = false;
 	
+	/**
+	 * Used for select queries, if configured.
+	 * See <code>project/config/indexer/SolrManager/cacheClass</code>
+	 * configuration section.
+	 * @var indexer_Cache
+	 */
+	private static $cache;
+	
+	/**
+	 * Value of <code>project/config/indexer/SolrManager/schemaVersion</code>
+	 * configuration section.
+	 * @var String
+	 */
+	private static $schemaVersion;
+	
+	/**
+	 * @var Boolean
+	 */
+	private static $confReaded = false;
+	
 	public function __construct($indexURL)
 	{
 		$this->setBaseURL($indexURL);
 		if (defined('SOLR_INDEXER_DISABLE_BATCH_MODE'))
 		{
 			$this->batchMode = (bool)SOLR_INDEXER_DISABLE_BATCH_MODE;
+		}
+		self::readConfiguration();
+	}
+	
+	/**
+	 * @return String
+	 */
+	public static function getSchemaVersion()
+	{
+		self::readConfiguration();
+		return self::$schemaVersion;
+	}
+	
+	/**
+	 * @return boolean
+	 */
+	public static function hasAggregateText()
+	{
+		return self::getSchemaVersion() != "2.0.4";
+	}
+	
+	/**
+	 * @return boolean
+	 */
+	public static function hasFacetAbility()
+	{
+		return self::getSchemaVersion() != "2.0.4";
+	}
+	
+	protected static function readConfiguration()
+	{
+		if (!self::$confReaded)
+		{
+			$className = Framework::getConfigurationValue("indexer/SolrManager/cacheClass");
+			if ($className !== null)
+			{
+				$class = new ReflectionClass($className);
+				if (!$class->isSubclassOf(new ReflectionClass("indexer_Cache")))
+				{
+					throw new Exception($className." is not a indexer_Cache subclass");
+				}
+				self::$cache = $class->newInstance();
+			}
+			
+			self::$schemaVersion = Framework::getConfigurationValue("indexer/SolrManager/schemaVersion", "2.0.4");
+			self::$confReaded = true;
 		}
 	}
 	
@@ -73,18 +139,16 @@ class indexer_SolrManager
 		}
 		// Build Query String
 		$queryString = $solrSearch->getQueryString();
-		$queryString = str_replace(array('+', '-', ':'), array('%2B', '%2D', '%3A'), $queryString);
-		$queryString = preg_replace('/[\s]/', '+', $queryString);
-		
+	
 		if ($usePost)
 		{
-			$solrQuery = new indexer_SolrServerRequest($this->getUrl());
+			$solrQuery = $this->getReadSolrRequest($this->getUrl());
 			$solrQuery->setMethod(indexer_SolrServerRequest::METHOD_POST);
 			$solrQuery->setPostData($queryString);
 		}
 		else
 		{
-			$solrQuery = new indexer_SolrServerRequest($this->getUrl() . '/?' . $queryString);
+			$solrQuery = $this->getReadSolrRequest($this->getUrl() . '/?' . $queryString);
 		}
 		return $solrQuery->execute();
 	}
@@ -165,7 +229,7 @@ class indexer_SolrManager
 			{
 				unset($this->deleteQueue[$clientId][$indexableDocumentId]);
 			}
-			if (!isset($this->updateQueue[$clientId]))
+			elseif (!isset($this->updateQueue[$clientId]))
 			{
 				$this->updateQueue[$clientId] = array();
 			}
@@ -233,7 +297,7 @@ class indexer_SolrManager
 					// Build the finalId
 					$this->xmlWriterAdd->startElement('field');
 					$this->xmlWriterAdd->writeAttribute('name', 'finalId');
-					$this->xmlWriterAdd->text($this->xmlentities($this->xmlentities(strval($this->getClientId() . $values[0]))));
+					$this->xmlWriterAdd->text($this->xmlentities(strval($this->getClientId() . $values[0])));
 					$this->xmlWriterAdd->endElement();
 					break;
 				case 'lang':
@@ -244,7 +308,7 @@ class indexer_SolrManager
 				default:
 					break;
 			}
-			//We build the DOMElement for the field and append it to the document.
+			// We build the DOMElement for the field and append it to the document.
 			foreach ($values as $value)
 			{
 				$this->xmlWriterAdd->startElement('field');
@@ -252,7 +316,6 @@ class indexer_SolrManager
 				$this->xmlWriterAdd->text($this->xmlentities(strval($value)));
 				$this->xmlWriterAdd->endElement();
 			}
-		
 		}
 		$this->xmlWriterAdd->endElement();
 		if (!$this->batchMode)
@@ -392,7 +455,15 @@ class indexer_SolrManager
 	
 	public function rebuildSpellCheckIndexForLang($lang)
 	{
-		$queryString = '/?client=' . $this->getClientId() . '&qt=spellchecker_' . $lang . '&cmd=rebuild';
+		if (self::getSchemaVersion() == "2.0.4")
+		{
+			$queryString = '/?client=' . $this->getClientId() . '&qt=spellchecker_' . $lang . '&cmd=rebuild';
+		}
+		else
+		{
+			$queryString = '/?client=' . $this->getClientId() .
+				'&q=*:*&rows=0&spellcheck=true&spellcheck.build=true&spellcheck.q=change&qt=/spellchecker_' . $lang;
+		}
 		$this->setTask(self::SELECT_TASK);
 		$this->getData($queryString, -1);
 	}
@@ -495,18 +566,6 @@ class indexer_SolrManager
 	 * @param unknown_type $queryString
 	 * @return unknown
 	 */
-	protected function postData($data)
-	{
-		$solrQuery = new indexer_SolrServerRequest($this->getUrl());
-		$solrQuery->setMethod(indexer_SolrServerRequest::METHOD_POST);
-		$solrQuery->setPostData($data);
-		return $this->parseServerAnswer($solrQuery->execute());
-	}
-	
-	/**
-	 * @param unknown_type $queryString
-	 * @return unknown
-	 */
 	protected function getData($queryString, $timeout = null)
 	{
 		$solrQuery = new indexer_SolrServerRequest($this->getUrl() . $queryString);
@@ -516,6 +575,20 @@ class indexer_SolrManager
 		}
 		$solrQuery->setMethod(indexer_SolrServerRequest::METHOD_GET);
 		return $this->parseServerAnswer($solrQuery->execute());
+	}
+	
+	/**
+	 * @param String $url
+	 * @return indexer_SolrServerRequest
+	 */
+	protected function getReadSolrRequest($url)
+	{
+		$request = new indexer_SolrServerRequest($url);
+		if (self::$cache !== null)
+		{
+			$request->setCache(self::$cache);
+		}
+		return $request;
 	}
 	
 	/**
@@ -550,7 +623,7 @@ class indexer_SolrManager
 	 */
 	private function xmlentities($string)
 	{
-		return str_replace(array('&', '<', '>', '\'', '"'), array('&amp;', '&lt;', '&gt;', '&#39;', '&quot;'), $string);
+		return str_replace(array('&', '<', '>', '"'), array('&amp;', '&lt;', '&gt;', '&quot;'), $string);
 	}
 	
 	/**
@@ -605,9 +678,15 @@ class indexer_SolrManager
 	private function addExtraInformation(&$indexableDocumentFields)
 	{
 		$lang = $indexableDocumentFields['lang']['value'];
-		$indexableDocumentFields[$lang . '_aggregateText']['value'] = $indexableDocumentFields['label']['value'] . "\n" . $indexableDocumentFields['text']['value'];
-		$indexableDocumentFields[$lang . '_aggregateText']['type'] = indexer_Field::INDEXED;
-		$indexableDocumentFields[$lang . '_sortableLabel']['value'] = mb_strtolower(preg_replace('/[\s]/u', '', $indexableDocumentFields['label']['value']), "UTF-8");
+		
+		// TODO: schema
+		if ($schema != "3.0.3")
+		{
+			$indexableDocumentFields[$lang . '_aggregateText']['value'] = $indexableDocumentFields['label']['value'] . "\n" . $indexableDocumentFields['text']['value'];
+			$indexableDocumentFields[$lang . '_aggregateText']['type'] = indexer_Field::INDEXED;
+		}
+		
+		$indexableDocumentFields[$lang . '_sortableLabel']['value'] = mb_strtolower(trim(preg_replace('/[\s+]/u', ' ', $indexableDocumentFields['label']['value'])), "UTF-8");
 		$indexableDocumentFields[$lang . '_sortableLabel']['type'] = indexer_Field::INDEXED;
 	}
 	
@@ -658,6 +737,6 @@ class indexer_SolrManager
 	private function deleteByQuery($query)
 	{
 		$this->setTask(self::UPDATE_TASK);
-		$this->sendXMLData('<delete><query>' . $query->toSolrString() . '</query></delete>');
+		$this->sendXMLData('<delete><query>' . urldecode($query->toSolrString()) . '</query></delete>');
 	}
 }

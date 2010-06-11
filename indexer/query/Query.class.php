@@ -159,6 +159,11 @@ interface indexer_Query
 	public function getBoost();
 	
 	/**
+	 * @return String[]
+	 */
+	public function getTerms();
+	
+	/**
 	 * Get a Solr compatible query string.
 	 * 
 	 * @return String

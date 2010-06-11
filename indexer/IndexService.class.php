@@ -306,14 +306,19 @@ class indexer_IndexService extends BaseService
 	 * (search on label and full text with a boost on the label). 
 	 * 
 	 * @param indexer_Query $query
+	 * @param indexer_Query $doSuggestion
 	 * @return indexer_SearchResults
 	 */
-	public function search(indexer_Query $query)
+	public function search(indexer_Query $query, $doSuggestion = false)
 	{
 		try
 		{
 			$this->beginFrontIndexerMode();
 			$solrSearch = new indexer_StandardSolrSearch($query);
+			if ($doSuggestion)
+			{
+				$solrSearch->doSuggestion();
+			}
 			$data = $this->manager->query($solrSearch);
 			$searchResults = new indexer_SolrSearchResults($data, $solrSearch);
 			$this->endIndexerMode();
@@ -392,6 +397,41 @@ class indexer_IndexService extends BaseService
 	}
 	
 	/**
+	 * Get a suggestion for a term list. This method is only here for compatibility
+	 * with old SolR schema (2.0.4). You should use indexer_StandardSolrSearch::doSuggestion() method
+	 * @param String[] $words
+	 * @param String $lang
+	 * @return String
+	 */
+	public function getSuggestionForWords($words, $lang = null)
+	{
+		if (indexer_SolrManager::getSchemaVersion() == "2.0.4")
+		{
+			throw new Exception("This method only works with SolR 1.4 + change schema 3.0.3");
+		}
+		try
+		{
+			$this->beginFrontIndexerMode();
+			$query = new indexer_SuggestionSolrSearch($words, $lang);
+			$query->setSuggestionCount(1);
+			$data = $this->manager->query($query);
+			$this->endIndexerMode();
+			
+			$dataDom = f_util_DOMUtils::fromString($data);
+			$elem = $dataDom->findUnique("lst[@name='spellcheck']/lst[@name='suggestions']/str[@name='collation']");
+			if ($elem !== null)
+			{
+				return $elem->textContent;
+			}
+			return null;
+		}
+		catch (Exception $e)
+		{
+			$this->endIndexerMode($e);
+		}
+	}
+	
+	/**
 	 * Get an array of at most $count suggestions for the word $word from the spellchecker for $lang. 
 	 *
 	 * @param String $word
@@ -410,7 +450,22 @@ class indexer_IndexService extends BaseService
 				$query->setSuggestionCount($count);
 			}
 			$data = $this->manager->query($query);
-			$searchResults = $this->manager->getArrayPropertyFromData('suggestions', $data);
+			$schemaVersion = indexer_SolrManager::getSchemaVersion();
+			if ($schemaVersion == "2.0.4")
+			{
+				$searchResults = $this->manager->getArrayPropertyFromData('suggestions', $data);
+			}
+			else
+			{
+				$dataDom = f_util_DOMUtils::fromString($data);
+				$elems = $dataDom->find("lst[@name='spellcheck']/lst[@name='suggestions']/lst[@name='".str_replace("'", "&#39;", $word)."']/arr[@name='suggestion']/str");
+				$searchResults = array();
+				foreach ($elems as $elem)
+				{
+					$searchResults[] = $elem->textContent;
+				}
+			}
+			
 			$this->endIndexerMode();
 		}
 		catch (Exception $e)

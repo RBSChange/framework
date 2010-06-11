@@ -17,8 +17,12 @@ class indexer_FSCache implements indexer_Cache
 {
 	private $dir;
 	
-	function __construct($dir)
+	function __construct($dir = null)
 	{
+		if ($dir === null)
+		{
+			$dir = Framework::getConfigurationValue("indexer/FSCache/directory", "solr_requests");
+		}
 		$this->dir = $dir;
 	}
 	
@@ -26,13 +30,18 @@ class indexer_FSCache implements indexer_Cache
 	{
 		$queryRelPath = "";
 		$queryIdLen = strlen($queryId);
-		for ($i = 0; $i < $queryIdLen; $i++)
+		$maxSplit = min(array($queryIdLen, 10));
+		for ($i = 0; $i < $maxSplit; $i++)
 		{
 			if ($i != 0 && $i % 2 == 0)
 			{
 				$queryRelPath .= "/";
 			}
 			$queryRelPath .= $queryId[$i];
+		}
+		if ($maxSplit < $queryIdLen)
+		{
+			$queryRelPath .= "/".substr($queryId, $maxSplit);
 		}
 		return f_util_FileUtils::buildCachePath($this->dir, $queryRelPath);
 	}

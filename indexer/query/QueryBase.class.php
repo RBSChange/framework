@@ -2,7 +2,7 @@
 /**
  * @package framework.indexer.query
  */
-class indexer_QueryBase
+abstract class indexer_QueryBase
 {
 	private $sortArray;
 	private $showScore = true;
@@ -12,7 +12,7 @@ class indexer_QueryBase
 	private $limitToFields = array();
 	private $highlight = false;
 	private $lang = null;
-	private $boost = null;
+	protected $boost = null;
 	private $clientId;
 	/**
 	 * @var String[]
@@ -218,5 +218,13 @@ class indexer_QueryBase
 	public function setClientId($value)
 	{
 		$this->clientId = $value;
+	}
+	
+	/**
+	 * @return String[]
+	 */
+	public function getTerms()
+	{
+		return array();
 	}
 }

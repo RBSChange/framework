@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<schema name="example" version="1.1">
+<!-- WARNING: this is designed for SolR 1.4 -->
+<schema name="change-3.0.3" version="1.2">
 	<types>
 		<fieldtype name="string" class="solr.StrField" sortMissingLast="true" omitNorms="true" />
 
@@ -28,106 +29,198 @@
 				<filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords_es.txt" />
 				<filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords_it.txt" />
 				<filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords_pt.txt" />
-				<filter class="solr.ISOLatin1AccentFilterFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
+				<filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
 				<filter class="solr.LengthFilterFactory" min="5" max="25" />
 			</analyzer>
 		</fieldtype>
 
+		<!-- generic text field (no specific language processing). Changes must
+		 be synchronized with text_ws_aggr field -->
 		<fieldtype name="text_ws" class="solr.TextField" positionIncrementGap="100">
 			<analyzer>
-				<tokenizer class="solr.WhitespaceTokenizerFactory" />
-				<filter class="solr.LowerCaseFilterFactory" />
+				<tokenizer class="solr.StandardTokenizerFactory" />
+        		<filter class="solr.LowerCaseFilterFactory" />
+        		<filter class="solr.ASCIIFoldingFilterFactory" />
 			</analyzer>
 		</fieldtype>
-
+		
+		<!-- text_<lang> fields: specific language processing. Changes must be
+		 synchronized with text_<lang>_aggr fields -->
+		
 		<fieldtype name="text_en" class="solr.TextField" positionIncrementGap="100">
 			<analyzer>
-				<tokenizer class="solr.WhitespaceTokenizerFactory" />
+				<tokenizer class="solr.StandardTokenizerFactory" />
 				<filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords_en.txt" />
 				<filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" />
 				<filter class="solr.LowerCaseFilterFactory" />
-				<filter class="solr.EnglishPorterFilterFactory" protected="protwords.txt" />
-				<filter class="solr.RemoveDuplicatesTokenFilterFactory" />
+				<filter class="solr.EnglishPorterFilterFactory" />
 			</analyzer>
 		</fieldtype>
 
-		<fieldtype name="text_fr" class="solr.TextField">
+		<fieldtype name="text_fr" class="solr.TextField" positionIncrementGap="100">
 			<analyzer>
 				<tokenizer class="solr.StandardTokenizerFactory" />
+				<!-- This is for all stuff like "d'accueil, s'ennuyer, ..." -->
+				<filter class="solr.PatternReplaceFilterFactory" pattern="([a-zA-Z])'([a-zA-Z]+)" replacement="$2" replace="all"/>
 				<filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords_fr.txt" />
-				<filter class="solr.StandardFilterFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
 				<filter class="solr.SnowballPorterFilterFactory" language="French" />
-				<filter class="solr.ISOLatin1AccentFilterFactory" />
+				<filter class="solr.ASCIIFoldingFilterFactory" />
 			</analyzer>
 		</fieldtype>
 
-		<fieldtype name="text_de" class="solr.TextField">
+		<fieldtype name="text_de" class="solr.TextField" positionIncrementGap="100">
 			<analyzer>
 				<tokenizer class="solr.StandardTokenizerFactory" />
 				<filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords_de.txt" />
-				<filter class="solr.StandardFilterFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
 				<filter class="solr.SnowballPorterFilterFactory" language="German2" />
-				<filter class="solr.ISOLatin1AccentFilterFactory" />
+				<filter class="solr.ASCIIFoldingFilterFactory" />
 			</analyzer>
 		</fieldtype>
 
-		<fieldtype name="text_es" class="solr.TextField">
+		<fieldtype name="text_es" class="solr.TextField" positionIncrementGap="100">
 			<analyzer>
 				<tokenizer class="solr.StandardTokenizerFactory" />
 				<filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords_es.txt" />
-				<filter class="solr.StandardFilterFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
 				<filter class="solr.SnowballPorterFilterFactory" language="Spanish" />
-				<filter class="solr.ISOLatin1AccentFilterFactory" />
+				<filter class="solr.ASCIIFoldingFilterFactory" />
 			</analyzer>
 		</fieldtype>
 
-		<fieldtype name="text_nl" class="solr.TextField">
+		<fieldtype name="text_nl" class="solr.TextField" positionIncrementGap="100">
 			<analyzer>
 				<tokenizer class="solr.StandardTokenizerFactory" />
 				<filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords_nl.txt" />
-				<filter class="solr.StandardFilterFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
 				<filter class="solr.SnowballPorterFilterFactory" language="Dutch" />
-				<filter class="solr.ISOLatin1AccentFilterFactory" />
+				<filter class="solr.ASCIIFoldingFilterFactory" />
 			</analyzer>
 		</fieldtype>
 
-		<fieldtype name="text_it" class="solr.TextField">
+		<fieldtype name="text_it" class="solr.TextField" positionIncrementGap="100">
 			<analyzer>
 				<tokenizer class="solr.StandardTokenizerFactory" />
 				<filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords_it.txt" />
-				<filter class="solr.StandardFilterFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
 				<filter class="solr.SnowballPorterFilterFactory" language="Italian" />
-				<filter class="solr.ISOLatin1AccentFilterFactory" />
+				<filter class="solr.ASCIIFoldingFilterFactory" />
 			</analyzer>
 		</fieldtype>
 
-		<fieldtype name="text_pt" class="solr.TextField">
+		<fieldtype name="text_pt" class="solr.TextField" positionIncrementGap="100">
 			<analyzer>
 				<tokenizer class="solr.StandardTokenizerFactory" />
 				<filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords_pt.txt" />
-				<filter class="solr.StandardFilterFactory" />
 				<filter class="solr.LowerCaseFilterFactory" />
 				<filter class="solr.SnowballPorterFilterFactory" language="Portuguese" />
-				<filter class="solr.ISOLatin1AccentFilterFactory" />
+				<filter class="solr.ASCIIFoldingFilterFactory" />
+			</analyzer>
+		</fieldtype>
+		
+		<!-- Field Types for aggregate fields: incrementGap = 0, so it is possible
+		to cumulate words from different "parts" in the same simple text query
+		 (silly: should be possible to define incrementGap on field... -->
+		<fieldtype name="text_ws_aggr" class="solr.TextField">
+			<analyzer>
+				<tokenizer class="solr.StandardTokenizerFactory" />
+        		<filter class="solr.LowerCaseFilterFactory" />
+        		<filter class="solr.ASCIIFoldingFilterFactory" />
+			</analyzer>
+		</fieldtype>
+		
+		<fieldtype name="text_en_aggr" class="solr.TextField" >
+			<analyzer>
+				<tokenizer class="solr.StandardTokenizerFactory" />
+				<filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords_en.txt" />
+				<filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" />
+				<filter class="solr.LowerCaseFilterFactory" />
+				<filter class="solr.EnglishPorterFilterFactory" />
 			</analyzer>
 		</fieldtype>
 
+		<fieldtype name="text_fr_aggr" class="solr.TextField">
+			<analyzer>
+				<tokenizer class="solr.StandardTokenizerFactory" />
+				<!-- This is for all stuff like "d'accueil, s'ennuyer, ..." -->
+				<filter class="solr.PatternReplaceFilterFactory" pattern="([a-zA-Z])'([a-zA-Z]+)" replacement="$2" replace="all"/>
+				<filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords_fr.txt" />
+				<filter class="solr.LowerCaseFilterFactory" />
+				<filter class="solr.SnowballPorterFilterFactory" language="French" />
+				<filter class="solr.ASCIIFoldingFilterFactory" />
+			</analyzer>
+		</fieldtype>
+
+		<fieldtype name="text_de_aggr" class="solr.TextField">
+			<analyzer>
+				<tokenizer class="solr.StandardTokenizerFactory" />
+				<filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords_de.txt" />
+				<filter class="solr.LowerCaseFilterFactory" />
+				<filter class="solr.SnowballPorterFilterFactory" language="German2" />
+				<filter class="solr.ASCIIFoldingFilterFactory" />
+			</analyzer>
+		</fieldtype>
+
+		<fieldtype name="text_es_aggr" class="solr.TextField">
+			<analyzer>
+				<tokenizer class="solr.StandardTokenizerFactory" />
+				<filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords_es.txt" />
+				<filter class="solr.LowerCaseFilterFactory" />
+				<filter class="solr.SnowballPorterFilterFactory" language="Spanish" />
+				<filter class="solr.ASCIIFoldingFilterFactory" />
+			</analyzer>
+		</fieldtype>
+
+		<fieldtype name="text_nl_aggr" class="solr.TextField">
+			<analyzer>
+				<tokenizer class="solr.StandardTokenizerFactory" />
+				<filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords_nl.txt" />
+				<filter class="solr.LowerCaseFilterFactory" />
+				<filter class="solr.SnowballPorterFilterFactory" language="Dutch" />
+				<filter class="solr.ASCIIFoldingFilterFactory" />
+			</analyzer>
+		</fieldtype>
+
+		<fieldtype name="text_it_aggr" class="solr.TextField">
+			<analyzer>
+				<tokenizer class="solr.StandardTokenizerFactory" />
+				<filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords_it.txt" />
+				<filter class="solr.LowerCaseFilterFactory" />
+				<filter class="solr.SnowballPorterFilterFactory" language="Italian" />
+				<filter class="solr.ASCIIFoldingFilterFactory" />
+			</analyzer>
+		</fieldtype>
+
+		<fieldtype name="text_pt_aggr" class="solr.TextField">
+			<analyzer>
+				<tokenizer class="solr.StandardTokenizerFactory" />
+				<filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords_pt.txt" />
+				<filter class="solr.LowerCaseFilterFactory" />
+				<filter class="solr.SnowballPorterFilterFactory" language="Portuguese" />
+				<filter class="solr.ASCIIFoldingFilterFactory" />
+			</analyzer>
+		</fieldtype>
+		
+		<!-- Completion process field type: generate shingles for a text field
+		 value -->
+		<fieldtype name="text_complete" class="solr.TextField" positionIncrementGap="100">
+			<analyzer>
+				<tokenizer class="solr.StandardTokenizerFactory" />
+				<filter class="solr.LowerCaseFilterFactory" />
+				<filter class="solr.ShingleFilterFactory" maxShingleSize="5" outputUnigrams="true" />
+			</analyzer>
+		</fieldtype>
 	</types>
 
 	<fields>
-
 		<!-- Client relative document id, concatenation of the change document id and the document lang -->
 		<field name="id" type="string" indexed="true" stored="true" />
 		<!-- Id of the client -->
 		<field name="client" type="string" indexed="true" stored="false" />
 		<!-- Final id, which has to be stored  -->
-		<field name="finalId" type="string" indexed="true" stored="true" />
+		<field name="finalId" type="string" indexed="true" stored="false" />
 
 		<!-- Change document model name string -->
 		<field name="documentModel" type="string" indexed="true" stored="true" />
@@ -141,6 +234,7 @@
 		<!-- Allowed accessor ids for the document -->
 		<field name="document_ancestor" type="integer" indexed="true" stored="false" multiValued="true" />
 
+		<!-- Spell checking fields -->
 		<field name="fr_words" type="text_spellcheck" indexed="true" stored="false" multiValued="true" />
 		<field name="en_words" type="text_spellcheck" indexed="true" stored="false" multiValued="true" />
 		<field name="de_words" type="text_spellcheck" indexed="true" stored="false" multiValued="true" />
@@ -149,14 +243,21 @@
 		<field name="it_words" type="text_spellcheck" indexed="true" stored="false" multiValued="true" />
 		<field name="pt_words" type="text_spellcheck" indexed="true" stored="false" multiValued="true" />
 		
-		<!-- Aggregate Text -->
-		<field name="fr_aggregateText" type="text_ws"  indexed="true" stored="false" />
-		<field name="en_aggregateText" type="text_ws"  indexed="true" stored="false" />
-		<field name="de_aggregateText" type="text_ws"  indexed="true" stored="false" />
-		<field name="nl_aggregateText" type="text_ws"  indexed="true" stored="false" />
-		<field name="es_aggregateText" type="text_ws"  indexed="true" stored="false" />
-		<field name="it_aggregateText" type="text_ws"  indexed="true" stored="false" />
-		<field name="pt_aggregateText" type="text_ws"  indexed="true" stored="false" />
+		<!-- Aggregate text : exact match field -->
+		<field name="aggregateText" type="text_ws_aggr"  indexed="true" stored="false" multiValued="true" />
+		
+		<!-- Text completion : specific aggregateText field and dynamic fields-->
+		<field name="aggregateText_complete" type="text_complete"  indexed="true" stored="false" multiValued="true" />
+		<field name="*_complete" type="text_complete"  indexed="true" stored="false" multiValued="true" />
+		
+		<!-- Aggregate text, localized -->
+		<field name="fr_aggregateText" type="text_fr_aggr"  indexed="true" stored="false" multiValued="true" />
+		<field name="en_aggregateText" type="text_en_aggr"  indexed="true" stored="false" multiValued="true" />
+		<field name="de_aggregateText" type="text_de_aggr"  indexed="true" stored="false" multiValued="true" />
+		<field name="nl_aggregateText" type="text_nl_aggr"  indexed="true" stored="false" multiValued="true" />
+		<field name="es_aggregateText" type="text_es_aggr"  indexed="true" stored="false" multiValued="true" />
+		<field name="it_aggregateText" type="text_it_aggr"  indexed="true" stored="false" multiValued="true" />
+		<field name="pt_aggregateText" type="text_pt_aggr"  indexed="true" stored="false" multiValued="true" />
 		
 		<!-- Sortable Labels -->
 		<field name="fr_sortableLabel" type="string"  indexed="true" stored="false" />
@@ -189,6 +290,7 @@
 	<!-- SolrQueryParser configuration: defaultOperator="AND|OR" -->
 	<solrQueryParser defaultOperator="OR" />
 
+	<!-- Suggestion fields -->
 	<copyField source="label_fr" dest="fr_words" />
 	<copyField source="label_en" dest="en_words" />
 	<copyField source="label_de" dest="de_words" />
@@ -204,4 +306,32 @@
 	<copyField source="text_es" dest="es_words" />
 	<copyField source="text_it" dest="it_words" />
 	<copyField source="text_pt" dest="pt_words" />
+
+	<!-- Aggregate text -->
+	<copyField source="*_fr" dest="aggregateText" />
+	<copyField source="*_en" dest="aggregateText" />
+	<copyField source="*_de" dest="aggregateText" />
+	<copyField source="*_nl" dest="aggregateText" />
+	<copyField source="*_es" dest="aggregateText" />
+	<copyField source="*_it" dest="aggregateText" />
+	<copyField source="*_pt" dest="aggregateText" />
+	
+	<!-- Aggregate text completion -->
+	<copyField source="*_fr" dest="aggregateText_complete" />
+	<copyField source="*_en" dest="aggregateText_complete" />
+	<copyField source="*_de" dest="aggregateText_complete" />
+	<copyField source="*_nl" dest="aggregateText_complete" />
+	<copyField source="*_es" dest="aggregateText_complete" />
+	<copyField source="*_it" dest="aggregateText_complete" />
+	<copyField source="*_pt" dest="aggregateText_complete" />
+	
+	<!-- Aggregate text, localized -->
+	<copyField source="*_fr" dest="fr_aggregateText" />
+	<copyField source="*_en" dest="en_aggregateText" />
+	<copyField source="*_de" dest="de_aggregateText" />
+	<copyField source="*_nl" dest="nl_aggregateText" />
+	<copyField source="*_es" dest="es_aggregateText" />
+	<copyField source="*_it" dest="it_aggregateText" />
+	<copyField source="*_pt" dest="pt_aggregateText" />
+	
 </schema>

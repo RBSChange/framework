@@ -18,6 +18,8 @@ comme
 comment
 dans
 des
+de
+d
 du
 dedans
 dehors
@@ -51,6 +53,7 @@ je
 juste
 la
 le
+l
 les
 leur
 là

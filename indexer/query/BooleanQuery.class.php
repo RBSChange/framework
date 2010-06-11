@@ -87,6 +87,27 @@ class indexer_BooleanQuery extends indexer_QueryBase implements indexer_Query
 	{
 		return count($this->queries);
 	}
+	
+	/**
+	 * @return String[]
+	 */
+	public function getTerms()
+	{
+		$terms = array();
+		foreach ($this->queries as $query)
+		{
+			$terms = array_merge($terms, $query->getTerms());
+		}
+		return array_unique($terms);
+	}
+	
+	/**
+	 * @return Boolean
+	 */
+	public function isEmpty()
+	{
+		return $this->getSubqueryCount() == 0;
+	}
 
 	/**
 	 * @return String

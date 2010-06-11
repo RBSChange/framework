@@ -11,73 +11,111 @@ class indexer_SolrSearchResults extends ArrayObject implements indexer_SearchRes
 	private $maxScore;
 	private $results = array();
 	private $rows = 0;
+	/**
+	 * @var indexer_FacetResult[]
+	 */
+	private $facetResults;
+	/**
+	 * @var String
+	 */
+	private $suggestion;
 
 	public function __construct($data = null)
 	{
-		if( ($xml = simplexml_load_string($data)) === false )
+		$dom = f_util_DOMUtils::fromString($data);
+		$resultElem = $dom->findUnique("result[@name = 'response']");
+		if ($resultElem === null)
 		{
-			throw new IndexException(__METHOD__ . "Unexpected indexer reply content " .$data);
+			throw new Exception("No result from SolR ".$data);
 		}
 
-		$status = $xml->result;
-		$attr = $status->attributes();
-		$this->totalHits = intval($attr->numFound);
-		$this->offset = intval($attr->start);
-		$this->maxScore = floatval($attr->maxScore);
-		$this->returnedHits = count($xml->result->doc);
+		$this->totalHits = intval($resultElem->getAttribute("numFound"));
+		$this->offset = intval($resultElem->getAttribute("start"));
+		$this->maxScore = floatval($resultElem->getAttribute("maxScore"));
 
-		foreach ($xml->result->doc as $doc)
+		$docs = $dom->find("doc", $resultElem);
+		$this->returnedHits = $docs->length;
+
+		for ($i = 0; $i < $docs->length; $i++)
 		{
+			$docElem = $docs->item($i);
 			$result = new indexer_SearchResult();
-			foreach ($doc as $item)
+			for ($j = 0; $j < $docElem->childNodes->length; $j++)
 			{
-				$value = $item;
+				$fieldElem = $docElem->childNodes->item($j);
+				$name = $this->trimFieldSuffix($fieldElem->getAttribute("name"));
+				if ($fieldElem->tagName == "arr")
+				{
+					$value = array();
+					for ($k = 0; $k < $fieldElem->childNodes->length; $k++)
+					{
+						$value[] = $fieldElem->childNodes->item($k)->textContent;
+					}
+				}
+				else
+				{
+					$value = $fieldElem->textContent;
+				}
 				// trim suffix if needed
-				$name = $this->trimFieldSuffix($item->attributes()->name);
 				if ($name == "score")
 				{
 					$result->setProperty("normalizedScore", $this->normalizeScore((float)$value));
 				}
-				$result->setProperty((string)$name, (string)$value);
+				$result->setProperty($name, $value);
 			}
 			$this->results[] = $result;
 		}
 
-		// Deal with highlighting
-		foreach ($xml->lst as $lst)
-		{
-			if ($lst->attributes()->name == "responseHeader")
-			{
-				if ($lst->lst->attributes()->name == "params")
-				{
-					foreach ($lst->lst->str as $string)
-					{
-						if ($string->attributes()->name == "rows")
-						{
-							$this->rows = intval($string);
-						}
-					}
-				}
-			}
+		$this->rows = intval($dom->findUnique("lst[@name = 'responseHeader']/lst[@name = 'params']/str[@name = 'rows']")->textContent);
 
-			if ($lst->attributes()->name == "highlighting")
+		// Deal with facet
+		$facetResults = array();
+		$facetFieldsElem = $dom->findUnique("lst[@name = 'facet_counts']/lst[@name = 'facet_fields']");
+		if ($facetFieldsElem !== null)
+		{
+			for ($i = 0; $i < $facetFieldsElem->childNodes->length; $i++)
 			{
-				// We received some highlighting results
-				$idx = 0;
-				foreach ($lst->lst as $docHighligting)
+				$childNode = $facetFieldsElem->childNodes->item($i);
+				if ($childNode->nodeType !== XML_ELEMENT_NODE)
 				{
-					$hlArray = array();
-					foreach ($docHighligting->arr as $field)
-					{
-						$fieldName = $this->trimFieldSuffix((string)$field->attributes()->name);
-						$hlArray[$fieldName] = (string)$field->str;
-					}
-					$this->results[$idx]->setProperty("highlighting", $hlArray);
-					$idx++;
+					continue;
 				}
+				$facetResult = new indexer_FacetResult($childNode, $this->totalHits);
+				$facetResults[$facetResult->getFieldName()] = $facetResult;
 			}
 		}
-		parent::__construct($this->results); 
+		$this->facetResults = $facetResults;
+		
+		// Suggestions
+		$suggestionElem = $dom->findUnique("lst[@name='spellcheck']/lst[@name='suggestions']/str[@name='collation']");
+		if ($suggestionElem !== null)
+		{
+			$this->suggestion = $suggestionElem->textContent;
+		}
+
+		// Deal with highlighting
+		$hightlightElem = $dom->findUnique("lst[@name='highlighting']");
+		if ($hightlightElem !== null) 
+		{
+			// We received some highlighting results
+			$idx = 0;
+			foreach ($dom->find("lst", $hightlightElem) as $hightlightLst)
+			{
+				$hlArray = array();
+				foreach ($dom->find("arr", $hightlightLst) as $hightlightArr)
+				{
+					$fieldName = $this->trimFieldSuffix($hightlightArr->getAttribute("name"));
+					$lstStr = $dom->findUnique("str", $hightlightArr);
+					if ($lstStr !== null)
+					{
+						$hlArray[$fieldName] = $lstStr->textContent;
+					}
+				}
+				$this->results[$idx]->setProperty("highlighting", $hlArray);
+				$idx++;
+			}
+		}
+		parent::__construct($this->results);
 	}
 
 
@@ -103,12 +141,40 @@ class indexer_SolrSearchResults extends ArrayObject implements indexer_SearchRes
 		return $this->rows;
 	}
 
-	private function trimFieldSuffix($fieldName)
+	/**
+	 * @return indexer_FacetResult
+	 */
+	public function getFacetResult($fieldName)
 	{
-		$elems = preg_split('/_([a-z]{2}|idx_float|idx_int|idx_str|idx_dt)$/', $fieldName);
-		return $elems[0];
+		if (!isset($this->facetResults[$fieldName]))
+		{
+			return null;
+		}
+		return $this->facetResults[$fieldName];
+	}
+
+	/**
+	 * @return indexer_FacetResult[]
+	 */
+	public function getFacetResults()
+	{
+		return $this->facetResults;
 	}
 	
+	/**
+	 * @return String
+	 */
+	public function getSuggestion()
+	{
+		return $this->suggestion;
+	}
+
+	private function trimFieldSuffix($fieldName)
+	{
+		$elems = preg_split('/_([a-z]{2}||idx_float|idx_int|idx_str|idx_dt)$/', $fieldName);
+		return $elems[0];
+	}
+
 	private function normalizeScore($value)
 	{
 		if ( is_null($this->maxScore) || $this->maxScore < 0.1 )

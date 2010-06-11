@@ -71,11 +71,7 @@ class indexer_SolrServerRequest
 			$cachedQuery = $this->cache->get(md5($this->url));
 			if ($cachedQuery !== null)
 			{
-				//curl_setopt($this->curlHandle, CURLOPT_HEADER, true);
-				/*curl_setopt($this->curlHandle, CURLOPT_TIMEVALUE, $cachedQuery->getTime());
-				curl_setopt($this->curlHandle, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);*/
 				$this->headers[] = "If-Modified-Since: ".gmdate('D, d M Y H:i:s \G\M\T', $cachedQuery->getTime());
-				//$this->headers[] = "If-Modified-Since: Thu, 06 May 2010 17:50:09 GMT";
 			}
 		}
 		if ($this->getMethod() == self::METHOD_POST)
@@ -106,7 +102,6 @@ class indexer_SolrServerRequest
 		$time += microtime(true);
 		if ($this->cache !== null)
 		{
-			
 			if ($cachedQuery !== null && $httpReturnCode == 304)
 			{
 				return $cachedQuery->getData();

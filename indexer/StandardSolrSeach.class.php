@@ -15,6 +15,11 @@ class indexer_StandardSolrSearch
 	private $clientId;
 	
 	/**
+	 * @var Boolean
+	 */
+	private $doSuggestion = false;
+	
+	/**
 	 * @param indexer_Query $q
 	 */
 	public function __construct($q)
@@ -41,11 +46,11 @@ class indexer_StandardSolrSearch
 			{
 				if ($descending == true)
 				{
-					$sortingString[] = $name." desc";
+					$sortingString[] = $name."+desc";
 				}
 				else
 				{
-					$sortingString[] = $name." asc";
+					$sortingString[] = $name."+asc";
 				}
 			}
 			
@@ -117,15 +122,41 @@ class indexer_StandardSolrSearch
 	}
 	
 	/**
+	 * Enable suggestion
+	 */
+	function doSuggestion()
+	{
+		$this->doSuggestion = true;
+	}
+	
+	/**
+	 * @return Boolean
+	 */
+	function getDoSuggestion()
+	{
+		return $this->doSuggestion;
+	}
+	
+	/**
 	 * @return String
 	 */
 	private function getBaseQueryString()
 	{
-		if (f_util_StringUtils::isEmpty($this->clientId))
+		$query = array();
+		if (f_util_StringUtils::isNotEmpty($this->clientId))
 		{
-			return 'q=' . $this->query->toSolrString();	
+			$query[] = 'client=' . $this->clientId;	
 		}
-		return 'client=' . $this->clientId . '&q=' . $this->query->toSolrString();
+		if ($this->doSuggestion)
+		{
+			$terms = $this->query->getTerms();
+			if (f_util_ArrayUtils::isNotEmpty($terms))
+			{
+				$query[] = '&spellcheck.collate=true&spellcheck=true&spellcheck.q='.join("+", $terms).'&qt=/spellchecker_' . $this->query->getLang().'&spellcheck.count=1';
+			}
+		}
+		$query[] = 'q=' . $this->query->toSolrString();
+		return join("&", $query);
 	}
 	
 	/**

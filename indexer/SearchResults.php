@@ -33,5 +33,15 @@ interface indexer_SearchResults
 	public function getReturnedHits();
 	
 	public function getRequestedHitsPerPageCount();
+	
+	/**
+	 * @return indexer_FacetResult
+	 */
+	public function getFacetResult($fieldName);
+	
+	/**
+	 * @return indexer_FacetResult[]
+	 */
+	public function getFacetResults();
 }
 

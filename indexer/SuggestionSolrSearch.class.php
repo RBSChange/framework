@@ -1,9 +1,9 @@
 <?php
 /**
- * Auto-generated doc comment
+ * @deprecated use indexer_StandardSolrSearch::doSuggestion() method with
+ * solr-1.4 and change >= 3.0.3
  * @package framework.indexer
  */
-
 class indexer_SuggestionSolrSearch
 {
 	/**
@@ -30,12 +30,22 @@ class indexer_SuggestionSolrSearch
 	private $clientId;
 	
 	/**
-	 * @param String $word
+	 * @var Boolean
+	 */
+	private $multiple;
+	
+	/**
+	 * @param String|String[] $wordOrWords can be an array only if Solr1.4 & change schema 3.0.3 used
 	 * @param String $lang
 	 */
-	public function __construct($word, $lang = null)
+	public function __construct($wordOrWords, $lang = null)
 	{
-		$this->query = $word;
+		$this->multiple = is_array($wordOrWords);
+		if ($this->multiple)
+		{
+			$wordOrWords = join("+", $wordOrWords);
+		}
+		$this->query = $wordOrWords;
 		$this->lang = is_null($lang) ? RequestContext::getInstance()->getLang() : $lang;
 	}
 	
@@ -52,7 +62,25 @@ class indexer_SuggestionSolrSearch
 		{
 			$clientFilter = 'client=' . $this->clientId . '&';
 		}
-		$queryString = $clientFilter . 'qt=spellchecker_' . $this->lang . '&q=' . $this->query . '&suggestionCount=' . $this->suggestionCount;
+		
+		$schemaVersion = indexer_SolrManager::getSchemaVersion();
+		if ($schemaVersion == "2.0.4")
+		{
+			if ($this->multiple)
+			{
+				throw new Exception(__METHOD__.": solr schema 2.0.4 can not deal with multiple words");
+			}
+			$queryString = $clientFilter . 'qt=spellchecker_' . $this->lang . '&q=' . $this->query . '&suggestionCount=' . $this->suggestionCount;	
+		}
+		else
+		{
+			$queryString = $clientFilter . '&q=*:*&rows=0&spellcheck=true&spellcheck.q='.$this->query.'&qt=/spellchecker_' . $this->lang.'&spellcheck.count='.$this->suggestionCount;
+			if ($this->multiple)
+			{
+				$queryString .= "&spellcheck.collate=true";	
+			}
+		}
+		
 		return trim($queryString);
 	}
 	
