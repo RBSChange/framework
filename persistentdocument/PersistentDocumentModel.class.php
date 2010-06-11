@@ -61,6 +61,20 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	{
 		return str_replace('/', '_', $modelName);
 	}
+	
+	/**
+	 * @param String $modelName modules_<module>/<document>
+	 * @return array<String, String> keys module & document
+	 */
+	public static function getModelInfo($modelName)
+	{
+		$matches = null;
+		if (preg_match('#^modules_(.*)/(.*)$#', $modelName, $matches))
+		{
+			return array("module" => $matches[1], "document" => $matches[2]);
+		}
+		throw new Exception("Invalid model name $modelName");
+	}
 
 	/**
 	 * Get instance from complet document model name
