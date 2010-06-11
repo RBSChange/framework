@@ -382,26 +382,29 @@ class config_ProjectParser
 		$constants = array();
 		$moduleXmlFiles = array();
 
-		// Parse version of list of modules
-		foreach (glob(WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'modules'. DIRECTORY_SEPARATOR . '*', GLOB_ONLYDIR) as $modulePath)
+		foreach (new DirectoryIterator(WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'modules') as $fileInfo)
 		{
-			$moduleName = basename($modulePath);
-			$ini = array();
-			$moduleXmlFile = implode(DIRECTORY_SEPARATOR, array($modulePath , 'config', 'module.xml'));
-			if (is_readable($moduleXmlFile))
+			if (!$fileInfo->isDot() && $fileInfo->isDir())
 			{
-				$ini = $this->parseModuleXmlConfig($moduleXmlFile, $ini);
-				$moduleXmlFiles[$moduleName] = simplexml_load_file($moduleXmlFile);
-			}
-			$moduleXmlWebAppFile = implode(DIRECTORY_SEPARATOR, array(WEBEDIT_HOME, 'override', 'modules', $moduleName, 'config', 'module.xml'));
-			if (is_readable($moduleXmlWebAppFile))
-			{
-				$ini = $this->parseModuleXmlConfig($moduleXmlWebAppFile, $ini);
-				$moduleXmlFiles[$moduleName] = simplexml_load_file($moduleXmlWebAppFile);
-			}
-			if (count($ini) > 0)
-			{
-				$this->buildPhpModuleConfig($ini, $moduleName, $constants);
+				$modulePath = $fileInfo->getPathname();
+				$moduleName = basename($modulePath);
+				$ini = array();
+				$moduleXmlFile = implode(DIRECTORY_SEPARATOR, array($modulePath , 'config', 'module.xml'));
+				if (is_readable($moduleXmlFile))
+				{
+					$ini = $this->parseModuleXmlConfig($moduleXmlFile, $ini);
+					$moduleXmlFiles[$moduleName] = simplexml_load_file($moduleXmlFile);
+				}
+				$moduleXmlWebAppFile = implode(DIRECTORY_SEPARATOR, array(WEBEDIT_HOME, 'override', 'modules', $moduleName, 'config', 'module.xml'));
+				if (is_readable($moduleXmlWebAppFile))
+				{
+					$ini = $this->parseModuleXmlConfig($moduleXmlWebAppFile, $ini);
+					$moduleXmlFiles[$moduleName] = simplexml_load_file($moduleXmlWebAppFile);
+				}
+				if (count($ini) > 0)
+				{
+					$this->buildPhpModuleConfig($ini, $moduleName, $constants);
+				}
 			}
 		}
 		return array($constants, $moduleXmlFiles);

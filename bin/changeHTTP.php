@@ -34,27 +34,32 @@ function registerCommands($script, $computedDeps, $bootStrap)
 	$frameworkInfo = $computedDeps["change-lib"]["framework"];
 	$bootStrap->appendToAutoload($frameworkInfo["path"]);
 	$script->addCommandDir($frameworkInfo["path"].'/change-commands');
-	$script->addGhostCommandDir($frameworkInfo["path"].'/changedev-commands');		
-	foreach (glob(WEBEDIT_HOME . "/modules/*", GLOB_ONLYDIR) as $module)
-	{
-		$modulePath = realpath($module);
-		$moduleName = basename($module);
-		$inAutoload = false;
-		if (is_dir($modulePath."/change-commands"))
-		{
-			$script->addCommandDir($modulePath."/change-commands", "$moduleName|Module $moduleName commands");
-			$bootStrap->appendToAutoload($modulePath);
-			$inAutoload = true;
-		}
+	$script->addGhostCommandDir($frameworkInfo["path"].'/changedev-commands');	
 
-		$ghostPath = $modulePath.'/changedev-commands';
-		if (is_dir($ghostPath))
+	$path = WEBEDIT_HOME . "/modules/";
+	foreach (new DirectoryIterator($path) as $filePath => $fileInfo)
+	{
+		if (!$fileInfo->isDot() && $fileInfo->isDir())
 		{
-			$script->addGhostCommandDir($ghostPath, "$moduleName|Module $moduleName commands");
-			if (!$inAutoload)
+			$modulePath = realpath($fileInfo->getPathname());
+			$moduleName = basename($fileInfo->getPathname());
+			$moduleInAutoload = false;
+			if (is_dir($modulePath."/change-commands"))
 			{
 				$bootStrap->appendToAutoload($modulePath);
+				$moduleInAutoload = true;
+				$script->addCommandDir($modulePath."/change-commands", "$moduleName|Module $moduleName commands");
+			}
+	
+			$ghostPath = $modulePath.'/changedev-commands';
+			if (is_dir($ghostPath))
+			{
+				$script->addGhostCommandDir($ghostPath, "$moduleName|Module $moduleName commands");
+				if (!$moduleInAutoload)
+				{
+					$bootStrap->appendToAutoload($modulePath);
+				}
 			}
 		}
-	}	
+	}
 }
