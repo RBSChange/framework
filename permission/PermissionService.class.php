@@ -795,10 +795,10 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 		if (is_null($currentNode))
 		{
 			// FIXME: Here we can't handle virtual tree nodes.
-			$rootNode = $this->getRootNodeByDocumentId($nodeId);
-			if ( $this->isDefinitionPoint($rootNode->getId()) )
+			$rootNodeId = $this->getRootNodeIdByDocumentId($nodeId);
+			if ( $this->isDefinitionPoint($rootNodeId) )
 			{
-				return $rootNode->getId();
+				return $rootNodeId;
 			}
 			return null;
 		}
@@ -892,11 +892,16 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 	 * @param Integer $docId
 	 * @return Integer
 	 */
-	private function getRootNodeByDocumentId($docId)
+	private function getRootNodeIdByDocumentId($docId)
 	{
 		$doc = DocumentHelper::getDocumentInstance($docId);
+		$rootFolderId = $doc->getTreeId();
+		if ($rootFolderId !== null)
+		{
+			return $rootFolderId;
+		}
 		$module = $doc->getPersistentModel()->getModuleName();
-		return $this->pp->getNodeByDocumentId(ModuleService::getInstance()->getRootFolderId($module));
+		return ModuleService::getInstance()->getRootFolderId(str_replace('modules_', '', $module));
 	}
 
 	/**
