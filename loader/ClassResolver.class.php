@@ -105,6 +105,7 @@ class ClassResolver implements ResourceResolver
 		$path = $this->getRessourcePath($className);
 		if ($path === null)
 		{
+			$matches = array();
 			if (AG_DEVELOPMENT_MODE && preg_match('/(.*)_replaced[0-9]+$/', $className, $matches))
 			{
 				$className = $matches[1];
@@ -319,7 +320,7 @@ class ClassResolver implements ResourceResolver
 		$ini = Framework::getConfiguration('autoload');
 
 		// let's do our fancy work
-		foreach ($ini as $name => $entry)
+		foreach ($ini as $entry)
 		{
 			// file mapping or directory mapping?
 			if (isset($entry['path']))
@@ -359,7 +360,8 @@ class ClassResolver implements ResourceResolver
 					foreach ($modulesList as $module)
 					{
 						$path = str_replace('%MODULE_NAME%', $module, $sourcePath);
-						if ($matches = glob($path))
+						$matches = $this->glob($path);
+						if ($matches)
 						{
 							$files = $finder->in($matches);
 						}
@@ -372,7 +374,8 @@ class ClassResolver implements ResourceResolver
 				}
 				else
 				{
-					if ($matches = glob($path))
+					$matches = $this->glob($path);
+					if ($matches)
 					{
 						$files = $finder->in($matches);
 					}
@@ -396,6 +399,28 @@ class ClassResolver implements ResourceResolver
 		}
 	}
 
+	private function glob($path)
+	{	
+		if (strpos($path,  '*') !== false  && basename($path) !== '*')
+		{
+			$result = glob($path);
+			return (is_array($result) && count($result) > 0) ? $result : false;
+		}
+		$cleanPath = str_replace('/*', '', $path);
+		$result = array($cleanPath);
+		if (is_dir($cleanPath))
+		{
+			foreach (new DirectoryIterator($cleanPath) as $fileInfo)
+			{
+				if (!$fileInfo->isDot())
+				{
+					$result[] = realpath($fileInfo->getPathname());
+				}
+			}
+		}
+		return count($result) > 0 ? $result : false;
+	}
+	
 	/**
 	 * @param String $basePattern
 	 * @return String[]

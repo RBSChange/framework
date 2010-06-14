@@ -177,16 +177,16 @@
 				<entry name="name">Module Actions</entry>
 				<entry name="path">%AG_MODULE_DIR%/%MODULE_NAME%/actions</entry>
 			</ModuleActions>
-			<ModuleChangeCommands>
+			<!--ModuleChangeCommands>
 				<entry name="name">Module Commands</entry>
 				<entry name="path">%AG_MODULE_DIR%/%MODULE_NAME%/change-commands</entry>
 				<entry name="recursive">true</entry>
-			</ModuleChangeCommands>
-			<ModuleChangeDevCommands>
+			</ModuleChangeCommands-->
+			<!--ModuleChangeDevCommands>
 				<entry name="name">Module Dev Commands</entry>
 				<entry name="path">%AG_MODULE_DIR%/%MODULE_NAME%/changedev-commands</entry>
 				<entry name="recursive">true</entry>
-			</ModuleChangeDevCommands>
+			</ModuleChangeDevCommands-->
 			<ModuleLib>
 				<entry name="name">Module Lib</entry>
 				<entry name="path">%AG_MODULE_DIR%/%MODULE_NAME%/lib/</entry>
@@ -208,16 +208,16 @@
 				<entry name="name">Module Persistent Document filter classes</entry>
 				<entry name="path">%AG_MODULE_DIR%/%MODULE_NAME%/persistentdocument/filters/</entry>
 			</ModulePersistentDocumentFilterClasses>
-			<ModuleTests>
+			<!--ModuleTests>
 				<entry name="name">Module Tests</entry>
 				<entry name="path">%AG_MODULE_DIR%/%MODULE_NAME%/tests/</entry>
 				<entry name="recursive">true</entry>
-			</ModuleTests>
-			<ModulePatch>
+			</ModuleTests -->
+			<!--ModulePatch>
 				<entry name="name">Module Patch</entry>
 				<entry name="path">%AG_MODULE_DIR%/%MODULE_NAME%/patch/</entry>
 				<entry name="recursive">true</entry>
-			</ModulePatch>
+			</ModulePatch-->
 			<WebappModuleActions>
 				<entry name="name">WebApp Module Actions</entry>
 				<entry name="path">%PROJECT_OVERRIDE%/modules/*/actions</entry>
