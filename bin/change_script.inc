@@ -65,29 +65,33 @@ if (is_array($ghostChangeScripts))
 }
 if (is_dir(getcwd()."/modules"))
 {
-	foreach (glob("modules/*", GLOB_ONLYDIR) as $module)
+	$path = getcwd()."/modules";
+	foreach (new DirectoryIterator($path) as $fileInfo)
 	{
-		$modulePath = realpath($module);
-		$moduleInAutoload = false;
-		$moduleName = basename($module);
-		if (is_dir($module."/".$script->getName()."-commands"))
+		if (!$fileInfo->isDot() && $fileInfo->isDir())
 		{
-			$bootStrap->appendToAutoload($modulePath);
-			$moduleInAutoload = true;
-			$script->addCommandDir($modulePath."/".$script->getName()."-commands", "$moduleName|Module $moduleName commands");
-		}
-
-		if (is_array($ghostChangeScripts))
-		{
-			foreach ($ghostChangeScripts as $ghostName)
+			$moduleName = basename($fileInfo->getPathname());
+			$modulePath =  (isset($computedDeps['module'][$moduleName])) ? $computedDeps['module'][$moduleName]['path'] : realpath($fileInfo->getPathname());
+			$moduleInAutoload = false;
+			if (is_dir($modulePath."/".$script->getName()."-commands"))
 			{
-				$ghostPath = $modulePath.'/'.$ghostName."-commands";
-				if (is_dir($ghostPath))
+				$bootStrap->appendToAutoload($modulePath);
+				$moduleInAutoload = true;
+				$script->addCommandDir($modulePath."/".$script->getName()."-commands", "$moduleName|Module $moduleName commands");
+			}
+	
+			if (is_array($ghostChangeScripts))
+			{
+				foreach ($ghostChangeScripts as $ghostName)
 				{
-					$script->addGhostCommandDir($ghostPath, "$moduleName|Module $moduleName commands");
-					if (!$moduleInAutoload)
+					$ghostPath = $modulePath.'/'.$ghostName."-commands";
+					if (is_dir($ghostPath))
 					{
-						$bootStrap->appendToAutoload($modulePath);
+						$script->addGhostCommandDir($ghostPath, "$moduleName|Module $moduleName commands");
+						if (!$moduleInAutoload)
+						{
+							$bootStrap->appendToAutoload($modulePath);
+						}
 					}
 				}
 			}
