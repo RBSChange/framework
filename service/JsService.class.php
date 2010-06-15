@@ -387,6 +387,7 @@ class JsService extends BaseService
 			foreach ($scriptRegistryOrdered as $scriptPath => $skin)
 			{
 				$fileSystemName = $this->getFileSystemName($scriptPath);
+				
 				if (is_null($fileSystemName) === false)
 				{
 					$fileId = array('file' => $scriptPath);
@@ -544,6 +545,18 @@ class JsService extends BaseService
 		if (preg_match('/^modules\.(\w+)\.(.*)/i', $script, $match))
 		{
 			$package = 'modules_' . $match[1];
+			$path = Package::makeSystemPath($match[2]) . '.js';
+				
+			$fileLocation = FileResolver::getInstance()->setPackageName($package)->setDirectory(dirname($path))->getPath(basename($path));
+				
+			if (is_readable($fileLocation))
+			{
+				return $fileLocation;
+			}
+		}
+		else if (preg_match('/^themes\.(\w+)\.(.*)/i', $script, $match))
+		{
+			$package = 'themes_' . $match[1];
 			$path = Package::makeSystemPath($match[2]) . '.js';
 				
 			$fileLocation = FileResolver::getInstance()->setPackageName($package)->setDirectory(dirname($path))->getPath(basename($path));
