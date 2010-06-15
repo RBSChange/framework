@@ -97,7 +97,7 @@ class f_util_System
 		list($name, $secret) = explode('#', file_get_contents(WEBEDIT_HOME . '/build/config/oauth/script/token.txt'));	
 		$token = new f_web_oauth_Token($name, $secret);
 		
-		$request = new f_web_oauth_Request(Framework::getBaseUrl() .'/changescriptexec.php', $consumer, f_web_oauth_Request::METHOD_POST);
+		$request = new f_web_oauth_Request(Framework::getUIBaseUrl() .'/changescriptexec.php', $consumer, f_web_oauth_Request::METHOD_POST);
 		$request->setParameter('phpscript', $relativeScriptPath);
 		if ($noFramework)
 		{
