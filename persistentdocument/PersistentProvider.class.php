@@ -649,7 +649,6 @@ abstract class f_persistentdocument_PersistentProvider
 			$errorCode = $this->errorCode();
 			$msg = "Driver ERROR Code (". $this->errorCode() . ") : " . var_export($this->errorInfo(), true)."\n";
 		}
-		echo f_util_ProcessUtils::getBackTrace();
 		throw new f_DatabaseException($errorCode, $msg);
 	}
 
