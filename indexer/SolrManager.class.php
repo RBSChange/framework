@@ -55,7 +55,7 @@ class indexer_SolrManager
 	/**
 	 * @var Boolean
 	 */
-	private static $confReaded = false;
+	private static $confRead = false;
 	
 	public function __construct($indexURL)
 	{
@@ -94,7 +94,7 @@ class indexer_SolrManager
 	
 	protected static function readConfiguration()
 	{
-		if (!self::$confReaded)
+		if (!self::$confRead)
 		{
 			$className = Framework::getConfigurationValue("indexer/SolrManager/cacheClass");
 			if ($className !== null)
@@ -108,7 +108,7 @@ class indexer_SolrManager
 			}
 			
 			self::$schemaVersion = Framework::getConfigurationValue("indexer/SolrManager/schemaVersion", "2.0.4");
-			self::$confReaded = true;
+			self::$confRead = true;
 		}
 	}
 	
@@ -679,8 +679,7 @@ class indexer_SolrManager
 	{
 		$lang = $indexableDocumentFields['lang']['value'];
 		
-		// TODO: schema
-		if ($schema != "3.0.3")
+		if (self::getSchemaVersion() != "3.0.3")
 		{
 			$indexableDocumentFields[$lang . '_aggregateText']['value'] = $indexableDocumentFields['label']['value'] . "\n" . $indexableDocumentFields['text']['value'];
 			$indexableDocumentFields[$lang . '_aggregateText']['type'] = indexer_Field::INDEXED;
