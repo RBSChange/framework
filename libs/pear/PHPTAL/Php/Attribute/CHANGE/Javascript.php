@@ -1,8 +1,4 @@
 <?php
-// change:media
-//
-//   <img change:image="[attributeName ][front/]image_name[ width][ height][ format]" />
-
 /**
  * @package phptal.php.attribute
  * @author INTbonjF
@@ -12,6 +8,10 @@ class PHPTAL_Php_Attribute_CHANGE_javascript extends PHPTAL_Php_Attribute
 {
     public function start()
     {
+    	if (website_BlockController::getInstance()->getContext()->inBackofficeMode())
+    	{
+    		return;
+    	}
         // split attributes to translate
         $expressions = $this->tag->generator->splitExpression($this->expression);
 
