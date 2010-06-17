@@ -88,10 +88,39 @@ class config_ProjectParser
 				
 				if (!isset($globalConstantsForProfile["TMP_PATH"]))
 				{
-					$tmpfile = tempnam(null, 'loc_');
-					$TMP_PATH = var_export(dirname($tmpfile), true);
-					$globalConstantsForProfile["TMP_PATH"] = 'define(\'TMP_PATH\', '.$TMP_PATH.');';
-					unlink($tmpfile);
+					if (function_exists('sys_get_temp_dir'))
+					{
+						$TMP_PATH = sys_get_temp_dir();
+					}
+					else
+					{
+						$tmpfile = @tempnam(null, 'loc_');
+						if ($tmpfile)
+						{
+							$TMP_PATH = dirname($tmpfile);
+							@unlink($tmpfile);
+						}
+						else  if (DIRECTORY_SEPARATOR === '\\')
+						{
+							if (isset($_ENV['TMP']))
+							{
+								$TMP_PATH = $_ENV['TMP'];
+							} 
+							else if (isset($_ENV['TEMP']))
+							{
+								$TMP_PATH = $_ENV['TEMP'];
+							}
+							else 
+							{
+								throw new Exception('Please define TMP_PATH in project.xml config file');
+							}
+						}
+						else
+						{
+							$TMP_PATH ='/tmp';
+						}
+					}
+					$globalConstantsForProfile["TMP_PATH"] = 'define(\'TMP_PATH\', '. var_export($TMP_PATH, true).');';
 				}
 
 				// Remove module constants already set in global ones.

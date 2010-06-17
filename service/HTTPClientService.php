@@ -119,7 +119,7 @@ class HTTPClient
 		{
 			throw new Exception("Can not write to $path");
 		}
-		$tmpPath = tempnam(null, "httpclientdownload");
+		$tmpPath =  f_util_FileUtils::getTmpFile("httpclientdownload");
 		register_shutdown_function(array("f_util_FileUtils", "unlink"), $tmpPath);
 		$fp = fopen($tmpPath, 'w');
 		if (!$fp)

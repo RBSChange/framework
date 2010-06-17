@@ -482,11 +482,13 @@ abstract class f_util_FileUtils
 	/**
 	 * This method create a temporary file and returns it's path.
 	 * You can prefix the name of the temporary file
+	 * @param string $prefix
+	 * @return string
 	 */
 	static public function getTmpFile($prefix = null)
 	{
 		$prefix = (f_util_StringUtils::isEmpty($prefix)) ? 'change_' : $prefix;
-		$filePath = tempnam(null, $prefix);
+		$filePath = tempnam(TMP_PATH, $prefix);
 		return $filePath;
 	}
 
@@ -695,7 +697,7 @@ abstract class f_util_FileUtils
 		ftp_pasv($connectionId, true);
 
 		// Send file.
-		$temporaryFile = tempnam('/tmp', 'temp-');
+		$temporaryFile = self::getTmpFile('temp-');
 		file_put_contents($temporaryFile, $content);
 		$result = ftp_put($connectionId, $remotePath, $temporaryFile, FTP_ASCII);
 		unlink($temporaryFile);
@@ -885,7 +887,7 @@ abstract class f_util_FileUtils
 		ftp_pasv($connectionId, true);
 
 		// Send file.
-		$temporaryFile = tempnam('/tmp', 'temp-');
+		$temporaryFile = self::getTmpFile('temp-');
 		$result = ftp_get($connectionId, $temporaryFile, $remotePath, FTP_ASCII);
 		$fileContent = file_get_contents($temporaryFile);
 		unlink($temporaryFile);
