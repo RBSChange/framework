@@ -1030,7 +1030,8 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 		$result = array();
 		if (self::roleExists($roleName))
 		{
-			$defPoint = $this->getDefinitionPoint($documentId);
+			$packageName = 'modules_' . self::getModuleNameByRole($roleName);
+			$defPoint = $this->getDefinitionPointForPackage($documentId, $packageName);
 			if (is_null($defPoint))
 			{
 				return $result;

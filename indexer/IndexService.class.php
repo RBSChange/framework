@@ -623,23 +623,17 @@ class indexer_IndexService extends BaseService
 	 */
 	private function getFrontendAccessorIds($document)
 	{
-		$treeNode = TreeService::getInstance()->getInstanceByDocument($document);
-		$users = array();
-		if ($treeNode !== null)
+		$userIds = array();
+		$page = $document->getDocumentService()->getDisplayPage($document);
+		if ($page !== null)
 		{
-			$ancestors = $treeNode->getAncestors();
-			$parent = f_util_ArrayUtils::lastElement($ancestors);
-			if ($parent !== null && $parent->getPersistentDocument() instanceof website_persistentdocument_topic)
-			{
-				$ps = f_permission_PermissionService::getInstance();
-				$users = $ps->getAccessorIdsForRoleByDocumentId('modules_website.AuthenticatedFrontUser', $parent->getId());
-			}
+			$userIds = f_permission_PermissionService::getInstance()->getAccessorIdsForRoleByDocumentId('modules_website.AuthenticatedFrontUser', $page->getId());
 		}
-		if (count($users) == 0)
+		if (count($userIds) == 0)
 		{
-			$users[] = indexer_IndexService::PUBLIC_DOCUMENT_ACCESSOR_ID;
+			$userIds[] = indexer_IndexService::PUBLIC_DOCUMENT_ACCESSOR_ID;
 		}
-		return $users;
+		return $userIds;
 	}
 	
 	/**
