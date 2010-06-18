@@ -62,8 +62,10 @@ class f_persistentdocument_DocumentService extends BaseService
 	 */
 	public static function getInstanceByDocumentModelName($modelName)
 	{
-		$model = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($modelName);
-		return $model->getDocumentService();
+		list($package, $documentName) = explode('/', $modelName);
+		$moduleName = str_replace('modules_', '', $package);
+		$serviceClassName = $moduleName.'_'.ucfirst($documentName).'Service';
+		return  f_util_ClassUtils::callMethod($serviceClassName, 'getInstance');
 	}
 
 	/**
