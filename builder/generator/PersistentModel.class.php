@@ -280,6 +280,20 @@ class generator_PersistentModel
 		f_util_FileUtils::writeAndCreateContainer($compiledFilePath, serialize($indexableDocumentInfos), f_util_FileUtils::OVERRIDE);		
 	}
 	
+	public static function buildAllowedDocumentInfos()
+	{
+		$allowedDocumentInfos = array ('hasUrl' => array());
+		foreach (self::loadModels() as $model)
+		{	
+			if ($model->hasURL())
+			{
+				$allowedDocumentInfos['hasUrl'][] = $model->getName();
+			}
+		}
+		$compiledFilePath = f_util_FileUtils::buildChangeBuildPath('allowedDocumentInfos.ser');
+		f_util_FileUtils::writeAndCreateContainer($compiledFilePath, serialize($allowedDocumentInfos), f_util_FileUtils::OVERRIDE);	
+	}
+	
 	/**
 	 * @param String $xml
 	 * @param String $module

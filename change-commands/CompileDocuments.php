@@ -70,6 +70,9 @@ class commands_CompileDocuments extends commands_AbstractChangeCommand
 		$this->message("== Compile Indexable Document ==");
 		generator_PersistentModel::buildIndexableDocumentInfos();
 		
+		$this->message("== Compile Allowed Document ==");
+		generator_PersistentModel::buildAllowedDocumentInfos();
+		
 		$this->message("== Generate final document class and bo style ==");
 		foreach ($models as $model)
 		{
