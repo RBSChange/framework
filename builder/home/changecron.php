@@ -2,6 +2,10 @@
 ignore_user_abort(true);
 define('WEBEDIT_HOME', dirname(realpath(__FILE__)));
 require_once WEBEDIT_HOME . "/framework/Framework.php";
+if (defined('DISABLE_CHANGECRON_EXECUTION') && constant('DISABLE_CHANGECRON_EXECUTION') == true)
+{
+	exit(0);
+}
 if (Framework::isInfoEnabled())
 {
 	Framework::info($_SERVER['REMOTE_ADDR'] ." - ". $_SERVER['REQUEST_URI']);
