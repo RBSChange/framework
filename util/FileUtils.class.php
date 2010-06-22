@@ -372,6 +372,10 @@ abstract class f_util_FileUtils
 		{
 			foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directoryPath, RecursiveDirectoryIterator::KEY_AS_PATHNAME), RecursiveIteratorIterator::CHILD_FIRST) as $file => $info)
 			{
+				if ($info->getFilename() === '.' || $info->getFilename() === '..')
+				{
+					continue;
+				}
 				if ($info->isDir())
 				{
 					rmdir($file);
