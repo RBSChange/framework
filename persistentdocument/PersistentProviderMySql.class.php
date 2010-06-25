@@ -1362,39 +1362,75 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 				}
 				else if ($projection instanceof f_persistentdocument_criteria_PropertyProjection)
 				{
-					$property = $qBuilder->getModel()->getProperty($projection->getPropertyName());
+					$propNameInfo = explode(".", $projection->getPropertyName());
+					$propNameInfoCount = count($propNameInfo);
+					$property = $qBuilder->getModel()->getProperty($propNameInfo[0]);
 					if ($property->isDocument())
 					{
-						$query->addDocumentProjection($projection->getAs());
 						$relationAlias = 'ra' . $subdoc;
 						$documentalias = 'sd' . $subdoc;
+						
+						if ($propNameInfoCount == 1)
+						{
+							$query->addDocumentProjection($projection->getAs());
+							$qBuilder->addField($documentalias . '.document_id as ' . $projection->getAs() . '_id');
+							$qBuilder->addField($documentalias . '.document_model as ' . $projection->getAs() . '_model');
+							$qBuilder->addField($documentalias . '.treeid as ' . $projection->getAs() . '_treeid');
+
+							foreach ($this->getI18nFieldNames() as $i18nFieldName)
+							{
+								$qBuilder->addField($documentalias . '.' . $i18nFieldName . ' as ' . $projection->getAs() . '_' . $i18nFieldName);
+							}
+							
+							$documentTableName = "f_document";
+						}
+						elseif ($propNameInfoCount == 2)
+						{
+							$projectionModel = $property->getDocumentModel();
+							$subProperty = $projectionModel->getProperty($propNameInfo[1]);
+							$subPropertyDbMapping = $subProperty->getDbMapping();
+							$documentTableName = $projectionModel->getTableName();
+							if ($subProperty->isLocalized())
+							{
+								$documentTableName .= $this->getI18nSuffix();
+								$subPropertyDbMapping .= $this->getI18nSuffix();
+								$qBuilder->addWhere($documentalias.'.lang_i18n = \'' . RequestContext::getInstance()->getLang() . '\'');
+							}
+							
+							$qBuilder->addField($documentalias.'.'.$subPropertyDbMapping.' as '.$projection->getAs());
+						}
+						else
+						{
+							throw new Exception("Unsupported nested projection count (> 1): ".$projection->getPropertyName());
+						}
+						
 						if ($property->isArray())
 						{
 							$qBuilder->addFrom('inner join f_relation '.$relationAlias.' on '.$relationAlias.'.relation_id1 = t0.document_id');
-							$qBuilder->addFrom('inner join f_document '.$documentalias.' on '.$documentalias.'.document_id = '.$relationAlias.'.relation_id2');
+							$qBuilder->addFrom('inner join '.$documentTableName.' '.$documentalias.' on '.$documentalias.'.document_id = '.$relationAlias.'.relation_id2');
 						}
 						else
 						{
 							$columnName = $qBuilder->getQualifiedColumnName($property->getDbMapping());
-							$qBuilder->addFrom('inner join f_document '.$documentalias.' on '.$documentalias.'.document_id = '.$columnName);
-						}
-
-						$qBuilder->addField($documentalias . '.document_id as ' . $projection->getAs() . '_id');
-						$qBuilder->addField($documentalias . '.document_model as ' . $projection->getAs() . '_model');
-						$qBuilder->addField($documentalias . '.treeid as ' . $projection->getAs() . '_treeid');					
-						foreach ($this->getI18nFieldNames() as $i18nFieldName)
-						{
-							$qBuilder->addField($documentalias . '.' . $i18nFieldName . ' as ' . $projection->getAs() . '_' . $i18nFieldName);
+							$qBuilder->addFrom('inner join '.$documentTableName.' '.$documentalias.' on '.$documentalias.'.document_id = '.$columnName);
 						}
 							
 						if ($projection->getGroup())
 						{
-							$qBuilder->addGroupBy($documentalias . '.document_id');
-							$qBuilder->addGroupBy($documentalias . '.document_model');
-							$qBuilder->addGroupBy($documentalias . '.treeid');
-							foreach ($this->getI18nFieldNames() as $i18nFieldName)
+							if ($propNameInfoCount == 1)
 							{
-								$qBuilder->addGroupBy($documentalias . '.' . $i18nFieldName);
+								$qBuilder->addGroupBy($documentalias . '.document_id');
+								$qBuilder->addGroupBy($documentalias . '.document_model');
+								$qBuilder->addGroupBy($documentalias . '.treeid');
+								foreach ($this->getI18nFieldNames() as $i18nFieldName)
+								{
+									$qBuilder->addGroupBy($documentalias . '.' . $i18nFieldName);
+								}
+							}
+							else
+							{
+								// TODO
+								throw new Exception("Unsupported operation: group");
 							}
 						}
 
