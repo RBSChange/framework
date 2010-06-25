@@ -313,7 +313,14 @@ class JsService extends BaseService
 		{
 			foreach (self::$orderedScripts[$scriptName] as $value)
 			{
-				self::getInstance()->addDependencies($value, $depArray);
+				if ($this === self::getInstance())
+				{
+					$this->addDependencies($value, $depArray);
+				}
+				else
+				{
+					$this->addDependencies($value, self::$scriptRegistry);
+				}
 			}
 		}
 		$depArray[$scriptName] = null;
