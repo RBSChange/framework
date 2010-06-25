@@ -208,6 +208,19 @@ class PropertyInfo
 	{
 		return $this->m_isDocument;
 	}
+	
+	/**
+	 * Shortcut to get document model if the property is a document property 
+	 * @return f_persistentdocument_PersistentDocumentModel
+	 */
+	public function getDocumentModel()
+	{
+		if (!$this->m_isDocument)
+		{
+			throw new Exception("Invalid call to ".__METHOD__.": ".$this->m_name." is not a document property");
+		}
+		return f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($this->m_type);
+	}
 
 	/**
 	 * Indicates whether the property is multi-valued or not.
