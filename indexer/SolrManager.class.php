@@ -81,7 +81,7 @@ class indexer_SolrManager
 	 */
 	public static function hasAggregateText()
 	{
-		return self::getSchemaVersion() != "2.0.4";
+		return self::getSchemaVersion() !== "2.0.4";
 	}
 	
 	/**
@@ -89,7 +89,15 @@ class indexer_SolrManager
 	 */
 	public static function hasFacetAbility()
 	{
-		return self::getSchemaVersion() != "2.0.4";
+		return self::getSchemaVersion() !== "2.0.4";
+	}
+	
+	/**
+	 * @return boolean
+	 */
+	public static function hasVolatileDynamicFields()
+	{
+		return self::getSchemaVersion() !== "2.0.4";
 	}
 	
 	protected static function readConfiguration()

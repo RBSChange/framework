@@ -13,16 +13,24 @@ final class indexer_Field
 	
 	// Custom fields
 	
-
-
+	// Dynamic (and stored) fields
 	const STRING = '_idx_str';
 	const DATE = '_idx_dt';
 	const INTEGER = '_idx_int';
 	const INTEGER_MULTI = '_idx_mul_int';
 	const FLOAT = '_idx_float';
 	
+	// Dynamic (non stored) fields.
+	// WARN: this only works with schema >= 3.0.3
+	const STRING_VOLATILE = '_vol_str';
+	const DATE_VOLATILE = '_vol_dt';
+	const INTEGER_VOLATILE = '_vol_int';
+	const INTEGER_MULTI_VOLATILE = '_vol_mul_int';
+	const FLOAT_VOLATILE = '_vol_float';
+	
 	const PARENT_WEBSITE = '__solrsearch_parentwebsite_id';
 	const PARENT_TOPIC = 'parentTopicId';
+	
 	const SOLR_DATE_FORMAT = 'Y-m-dTH:i:sZ';
 	
 	/**
@@ -61,6 +69,18 @@ final class indexer_Field
 	/**
 	 * @return String
 	 */
+	static function getVolatileStringFieldName($baseName)
+	{
+		if (indexer_SolrManager::hasVolatileDynamicFields())
+		{
+			return $baseName . self::STRING_VOLATILE;
+		}
+		return $baseName . self::STRING;
+	}
+	
+	/**
+	 * @return String
+	 */
 	static function getIntegerFieldName($baseName)
 	{
 		return $baseName . self::INTEGER;
@@ -69,9 +89,67 @@ final class indexer_Field
 	/**
 	 * @return String
 	 */
+	static function getVolatileIntegerFieldName($baseName)
+	{
+		if (indexer_SolrManager::hasVolatileDynamicFields())
+		{
+			return $baseName . self::INTEGER_VOLATILE;
+		}
+		return $baseName . self::INTEGER;
+	}
+	
+	/**
+	 * @return String
+	 */
+	static function getIntegerMultiFieldName($baseName)
+	{
+		return $baseName . self::INTEGER;
+	}
+	
+	/**
+	 * @return String
+	 */
+	static function getVolatileIntegerMultiFieldName($baseName)
+	{
+		if (indexer_SolrManager::hasVolatileDynamicFields())
+		{
+			return $baseName . self::INTEGER_MULTI_VOLATILE;
+		}
+		return $baseName . self::INTEGER_MULTI;
+	}
+	
+	/**
+	 * @return String
+	 */
 	static function getFloatFieldName($baseName)
 	{
 		return $baseName . self::FLOAT;
+	}
+	
+	/**
+	 * @return String
+	 */
+	static function getVolatileFloatFieldName($baseName)
+	{
+		if (indexer_SolrManager::hasVolatileDynamicFields())
+		{
+			return $baseName . self::FLOAT_VOLATILE;
+		}
+		return $baseName . self::FLOAT;
+	}
+	
+	/**
+	 * @param String $fieldName
+	 * @return String
+	 */
+	static function getSimpleFieldName($fieldName)
+	{
+		$matches = null;
+		if (preg_match('/^(.*)_(idx|vol)_(str|float|int|mul_int|dt)$/', $fieldName, $matches))
+		{
+			return $matches[1];
+		}
+		return $fieldName;
 	}
 }
 
@@ -90,7 +168,22 @@ class indexer_IndexedDocument
 	{
 		if (!is_null($value))
 		{
-			$this->fields[$name . indexer_Field::STRING] = array('value' => $value, 'type' => indexer_Field::INDEXED | indexer_Field::STORED | indexer_Field::TOKENIZED);
+			$this->fields[$name . indexer_Field::STRING] = array('value' => $value, 'type' => indexer_Field::INDEXED | indexer_Field::STORED);
+		}
+	}
+	
+	/**
+	 * Set the Field named $name to $value and treat it as a (non stored) simple string
+	 *
+	 * @param String $name
+	 * @param String $value
+	 */
+	public function setVolatileStringField($name, $value)
+	{
+		if (!is_null($value))
+		{
+			$suffix = (indexer_SolrManager::hasVolatileDynamicFields()) ? indexer_Field::STRING_VOLATILE : indexer_Field::STRING;
+			$this->fields[$name . $suffix] = array('value' => $value, 'type' => indexer_Field::INDEXED);
 		}
 	}
 	
@@ -119,12 +212,27 @@ class indexer_IndexedDocument
 	{
 		if (!is_null($date))
 		{
-			$this->fields[$name . indexer_Field::DATE] = array('value' => date_DateFormat::format($date, indexer_Field::SOLR_DATE_FORMAT), 'type' => indexer_Field::INDEXED | indexer_Field::STORED | indexer_Field::TOKENIZED);
+			$this->fields[$name . indexer_Field::DATE] = array('value' => date_DateFormat::format($date, indexer_Field::SOLR_DATE_FORMAT), 'type' => indexer_Field::INDEXED | indexer_Field::STORED);
 		}
 	}
 	
 	/**
-	 * Set the field name $name to value $int and treat it as an integer
+	 * Set the Field named $name to $date and treat it as a Date (non stored)
+	 *
+	 * @param String $name
+	 * @param date_Calendar $date
+	 */
+	public function setVolatileDateField($name, $date)
+	{
+		if (!is_null($date))
+		{
+			$suffix = (indexer_SolrManager::hasVolatileDynamicFields()) ? indexer_Field::DATE_VOLATILE : indexer_Field::DATE;
+			$this->fields[$name . $suffix] = array('value' => date_DateFormat::format($date, indexer_Field::SOLR_DATE_FORMAT), 'type' => indexer_Field::INDEXED);
+		}
+	}
+	
+	/**
+	 * Set the field name $name to value $int and treat it as a multivalued integer
 	 *
 	 * @param String $name
 	 * @param mixed $int
@@ -136,13 +244,38 @@ class indexer_IndexedDocument
 		{
 			if($multivalued)
 			{
-				$type = indexer_Field::INDEXED | indexer_Field::MULTIVALUED;
+				$type = indexer_Field::INDEXED | indexer_Field::MULTIVALUED | indexer_Field::STORED;
 				$suffix = indexer_Field::INTEGER_MULTI;
 			}
 			else
 			{
-				$type = indexer_Field::INDEXED | indexer_Field::STORED | indexer_Field::TOKENIZED;
+				$type = indexer_Field::INDEXED | indexer_Field::STORED;
 				$suffix = indexer_Field::INTEGER;
+			}
+			$this->fields[$name . $suffix] = array('value' => $int, 'type' => $type);
+		}
+	}
+	
+	/**
+	 * Set the field name $name to value $int and treat it as a multivalued integer (non stored)
+	 *
+	 * @param String $name
+	 * @param mixed $int
+	 * @param Boolean $multivalued
+	 */
+	public function setVolatileIntegerField($name, $int, $multivalued = false)
+	{
+		if (!is_null($int))
+		{
+			if($multivalued)
+			{
+				$type = indexer_Field::INDEXED | indexer_Field::MULTIVALUED;
+				$suffix = (indexer_SolrManager::hasVolatileDynamicFields()) ? indexer_Field::INTEGER_MULTI_VOLATILE : indexer_Field::INTEGER_MULTI;
+			}
+			else
+			{
+				$type = indexer_Field::INDEXED;
+				$suffix = (indexer_SolrManager::hasVolatileDynamicFields()) ? indexer_Field::INTEGER_VOLATILE : indexer_Field::INTEGER;
 			}
 			$this->fields[$name . $suffix] = array('value' => $int, 'type' => $type);
 		}
@@ -177,7 +310,7 @@ class indexer_IndexedDocument
 	}
 	
 	/**
-	 * Set the field name $name to value $integer and treat it as an integer
+	 * Set the field name $name to value $float and treat it as a decimal
 	 *
 	 * @param String $name
 	 * @param Float $float
@@ -187,6 +320,21 @@ class indexer_IndexedDocument
 		if (!is_null($float))
 		{
 			$this->fields[$name . indexer_Field::FLOAT] = array('value' => $float, 'type' => indexer_Field::INDEXED | indexer_Field::STORED | indexer_Field::TOKENIZED);
+		}
+	}
+	
+	/**
+	 * Set the field name $name to value $float and treat it as a decimal (non stored)
+	 *
+	 * @param String $name
+	 * @param Float $float
+	 */
+	public function setVolatileFloatField($name, $float)
+	{
+		if (!is_null($float))
+		{
+			$suffix = (indexer_SolrManager::hasVolatileDynamicFields()) ? indexer_Field::FLOAT_VOLATILE : indexer_Field::FLOAT;
+			$this->fields[$name . $suffix] = array('value' => $float, 'type' => indexer_Field::INDEXED | indexer_Field::STORED | indexer_Field::TOKENIZED);
 		}
 	}
 	
