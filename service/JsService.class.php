@@ -16,10 +16,12 @@ class JsService extends BaseService
 
 	/**
 	 * Scripts registry.
-	 * TODO: should be private !
+	 * TODO: should be private and not static !
 	 * @var array
 	 */
 	public static $scriptRegistry = array();
+	
+	private $registery = array();
 
 
 	/**
@@ -31,7 +33,7 @@ class JsService extends BaseService
 
 
 	/**
-	 * Gets a JsService instance.
+	 * Gets the JsService instance.
 	 *
 	 * @return JsService
 	 */
@@ -43,7 +45,16 @@ class JsService extends BaseService
 		}
 		return self::$instance;
 	}
-
+	
+	/**
+	 * Gets a JsService instance.
+	 *
+	 * @return JsService
+	 */
+	public static function newInstance()
+	{
+		return self::getServiceClassInstance(get_class());
+	}
 
 	/**
 	 * Registers the given script.
@@ -53,15 +64,25 @@ class JsService extends BaseService
 	 */
 	public function registerScript($scriptPath, $skin = null)
 	{
-		if (array_key_exists($scriptPath, self::$scriptRegistry) === false)
+		if ($this === self::getInstance())
+		{	
+			if (array_key_exists($scriptPath, self::$scriptRegistry) === false)
+			{
+				self::$scriptRegistry[$scriptPath] = $skin;
+				$this->computedRegisteredScripts = null;
+			}
+		}
+		else
 		{
-			self::$scriptRegistry[$scriptPath] = $skin;
-			$this->computedRegisteredScripts = null;
+			if (array_key_exists($scriptPath, $this->registery) === false)
+			{
+				$this->registery[$scriptPath] = $skin;
+				$this->computedRegisteredScripts = null;
+			}
 		}
 
 		return $this;
 	}
-
 
 	/**
 	 * Unregisters the given script.
@@ -71,10 +92,21 @@ class JsService extends BaseService
 	 */
 	public function unregisterScript($scriptPath)
 	{
-		if (array_key_exists($scriptPath, self::$scriptRegistry) === true)
+		if ($this === self::getInstance())
 		{
-			unset(self::$scriptRegistry[$scriptPath]);
-			$this->computedRegisteredScripts = null;
+			if (array_key_exists($scriptPath, self::$scriptRegistry) === true)
+			{
+				unset(self::$scriptRegistry[$scriptPath]);
+				$this->computedRegisteredScripts = null;
+			}
+		}
+		else
+		{
+			if (array_key_exists($scriptPath, $this->registery) === true)
+			{
+				unset($this->registery[$scriptPath]);
+				$this->computedRegisteredScripts = null;
+			}
 		}
 
 		return $this;
@@ -281,7 +313,7 @@ class JsService extends BaseService
 		{
 			foreach (self::$orderedScripts[$scriptName] as $value)
 			{
-				$this->addDependencies($value, $depArray);
+				self::getInstance()->addDependencies($value, $depArray);
 			}
 		}
 		$depArray[$scriptName] = null;
@@ -293,9 +325,16 @@ class JsService extends BaseService
 		if ($this->computedRegisteredScripts === null)
 		{
 			$this->loadOrderedScripts();
-			$script = array();
 			$scriptRegistry = array();
-			foreach (self::$scriptRegistry as $scriptName => $value )
+			if ($this === self::getInstance())
+			{
+				$registery = self::$scriptRegistry;
+			}
+			else
+			{
+				$registery = $this->registery;
+			}
+			foreach ($registery as $scriptName => $value )
 			{
 				$this->addDependencies($scriptName, $scriptRegistry);
 			}
