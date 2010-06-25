@@ -419,6 +419,7 @@ class Framework
 	 * or null if the $path configuration does not exist
 	 * @param String $path
 	 * @param String $defaultValue
+	 * @return mixed | null
 	 */
 	public static function getConfigurationValue($path, $defaultValue = null)
 	{
