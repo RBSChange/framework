@@ -66,6 +66,36 @@ abstract class indexer_QueryBase
 		}
 		$this->facets[] = $facet;
 	}
+	
+	public function addStringFacet($fieldName)
+	{
+		$this->addFacet($fieldName.indexer_Field::STRING);
+	}
+	
+	public function addVolatileStringFacet($fieldName)
+	{
+		$this->addFacet($fieldName.indexer_Field::STRING_VOLATILE);
+	}
+	
+	public function addIntegerFacet($fieldName)
+	{
+		$this->addFacet($fieldName.indexer_Field::INTEGER);
+	}
+	
+	public function addVolatileIntegerFacet($fieldName)
+	{
+		$this->addFacet($fieldName.indexer_Field::INTEGER_VOLATILE);
+	}
+	
+	public function addFloatFacet($fieldName)
+	{
+		$this->addFacet($fieldName.indexer_Field::FLOAT);
+	}
+	
+	public function addVolatileFloatFacet($fieldName)
+	{
+		$this->addFacet($fieldName.indexer_Field::FLOAT_VOLATILE);
+	}
 
 	/**
 	 * @return Boolean
