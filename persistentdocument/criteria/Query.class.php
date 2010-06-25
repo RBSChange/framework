@@ -983,7 +983,7 @@ class f_persistentdocument_criteria_QueryIntersection
 	
 	/**
 	 * @param f_persistentdocument_criteria_Query $query
-	 * @return f_persistentdocument_criteria_QueryGroup
+	 * @return f_persistentdocument_criteria_QueryIntersection
 	 */
 	function add($query)
 	{
@@ -994,7 +994,7 @@ class f_persistentdocument_criteria_QueryIntersection
 		}
 
 		//Ordered queries at first
-		if ($query->hasOrders() && count($this->queries) > 0)
+		if (f_util_ClassUtils::methodExists($query, "hasOrders") && $query->hasOrders() && count($this->queries) > 0)
 		{
 			$this->queries = array_merge(array($query), $this->queries);
 		}
@@ -1003,14 +1003,6 @@ class f_persistentdocument_criteria_QueryIntersection
 			$this->queries[] = $query;
 		}
 		
-		if ($query->getMaxResults() > 0)
-		{
-			if ($this->maxResult == -1 || $this->maxResult > $query->getMaxResults())
-			{
-				$this->maxResult = $query->getMaxResults();
-			}
-			$query->setMaxResults(-1);
-		}
 		return $this;
 	}
 	
@@ -1022,6 +1014,9 @@ class f_persistentdocument_criteria_QueryIntersection
 		return $this->maxResult;
 	}
 	
+	/**
+	 * @return f_persistentdocument_PersistentDocumentModel
+	 */
 	function getDocumentModel()
 	{
 		return $this->documentModel;
@@ -1057,6 +1052,105 @@ class f_persistentdocument_criteria_QueryIntersection
 	function findIds()
 	{
 		return f_persistentdocument_PersistentProvider::getInstance()->findIntersectionIds($this);
+	}
+	
+	function getIds()
+	{
+		return $this->findIds();
+	}
+	
+	/**
+	 * @param Integer $offset
+	 * @param Integer $count
+	 * @return f_persistentdocument_PersistentDocument[]
+	 */
+	function findAtOffset($offset, $count, &$totalCount = null)
+	{
+		$ids = $this->findIds();
+		$totalCount = count($ids);
+		if ($totalCount == 0 || $offset >= $totalCount)
+		{
+			return array();
+		}
+		$pp = f_persistentdocument_PersistentProvider::getInstance();
+		return $pp->find($pp->createQuery($this->getDocumentModel()->getName())->add(Restrictions::in("id", array_slice($ids, $offset, $count))));
+	}
+}
+
+class f_persistentdocument_criteria_QueryUnion
+{
+	/**
+	 * @var f_persistentdocument_criteria_Query[]
+	 */
+	private $queries = array();
+	/**
+	 * @var f_persistentdocument_PersistentDocumentModel
+	 */
+	private $documentModel;
+	
+	/**
+	 * @param f_persistentdocument_criteria_Query $query
+	 * @return f_persistentdocument_criteria_QueryUnion
+	 */
+	function add($query)
+	{
+		$queryModel = $query->getDocumentModel();
+		if ($this->documentModel === null)
+		{
+			$this->documentModel = $queryModel;
+		}
+
+		$this->queries[] = $query;
+		
+		return $this;
+	}
+	
+	/**
+	 * @return f_persistentdocument_PersistentDocumentModel
+	 */
+	function getDocumentModel()
+	{
+		return $this->documentModel;
+	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocumentModel $documentModel
+	 */
+	public function setDocumentModel($documentModel)
+	{
+		$this->documentModel = $documentModel;
+	}
+	
+	/**
+	 * @return f_persistentdocument_criteria_Query[]
+	 */
+	function getQueries()
+	{
+		return $this->queries;
+	}
+	
+	/**
+	 * @return f_persistentdocument_PersistentDocument[]
+	 */
+	function find()
+	{
+		return f_persistentdocument_PersistentProvider::getInstance()->findUnion($this);
+	}
+	
+	/**
+	 * @return Integer[]
+	 */
+	function findIds()
+	{
+		return f_persistentdocument_PersistentProvider::getInstance()->findUnionIds($this);
+	}
+	
+	/**
+	 * @return Integer[]
+	 */
+	function getIds()
+	{
+		return $this->findIds();
 	}
 	
 	/**

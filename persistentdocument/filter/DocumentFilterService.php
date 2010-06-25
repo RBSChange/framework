@@ -38,13 +38,31 @@ class f_persistentdocument_DocumentFilterService extends BaseService
 	 */
 	public function getFilterArrayFromJson($json)
 	{
-		if (f_util_StringUtils::isEmpty($json)) {return array();}
-		
-		$filtersInfo = JsonService::getInstance()->decode($json);
+		if (is_string($json))
+		{
+			if (f_util_StringUtils::isEmpty($json)) {return array();}
+			$filtersInfo = JsonService::getInstance()->decode($json);
+		}
+		else
+		{
+			$filtersInfo = $json;
+		}
 		$filters = array();
 		foreach ($filtersInfo as $filterInfo)
 		{
-			$filters[] = $this->getFilterInstanceFromInfo($filterInfo);
+			if ($filterInfo['class'] == 'filterSection')
+			{
+				$section = array();
+				foreach ($filterInfo["filters"] as $sectionItemInfo)
+				{
+					$section[] = $this->getFilterInstanceFromInfo($sectionItemInfo);
+				}
+				$filters[] = $section;
+			}
+			else
+			{
+				$filters[] = $this->getFilterInstanceFromInfo($filterInfo);
+			}
 		}
 		return $filters;
 	}
@@ -88,12 +106,54 @@ class f_persistentdocument_DocumentFilterService extends BaseService
 	 */
 	public function getQueryIntersectionFromJson($json)
 	{
-		$group = new f_persistentdocument_criteria_QueryIntersection();
-		foreach ($this->getFilterArrayFromJson($json) as $filter)
+		$info = JsonService::getInstance()->decode($json);
+		// !isset() for filter <= 3.0.2 compatibility
+		if (!isset($info["operator"]) || $info["operator"] == "and")
 		{
-			$group->add($filter->getQuery());
+			// filter <= 3.0.2 compatibility
+			$elementsInfo = (isset($info["elements"])) ? $info["elements"] : $info; 
+			$group = new f_persistentdocument_criteria_QueryIntersection();
+			foreach ($this->getFilterArrayFromJson($elementsInfo) as $filter)
+			{
+				if (is_array($filter))
+				{
+					$subGroup  = new f_persistentdocument_criteria_QueryUnion();
+					foreach ($filter as $f)
+					{
+						$subGroup->add($f->getQuery());
+					}
+					$group->add($subGroup);
+				}
+				else
+				{
+					$group->add($filter->getQuery());
+				}
+			}
+			return $group;
 		}
-		return $group;
+		elseif ($info["operator"] == "or")
+		{
+			// No need for filter <= 3.0.2 as or operator didn't exist
+			$intersection = new f_persistentdocument_criteria_QueryIntersection();
+			$group = new f_persistentdocument_criteria_QueryUnion();
+			foreach ($this->getFilterArrayFromJson($info["elements"]) as $filter)
+			{
+				if (is_array($filter))
+				{
+					$subGroup  = new f_persistentdocument_criteria_QueryIntersection();
+					foreach ($filter as $f)
+					{
+						$subGroup->add($f->getQuery());
+					}
+					$group->add($subGroup);
+				}
+				else
+				{
+					$group->add($filter->getQuery());
+				}
+			}
+			return $intersection->add($group);
+		}
 	}
 	
 	/**

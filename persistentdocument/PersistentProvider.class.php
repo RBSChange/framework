@@ -507,49 +507,21 @@ abstract class f_persistentdocument_PersistentProvider
 		$idRows = null;
 		foreach ($intersection->getQueries() as $groupedQuery)
 		{
-			$hasIdProjection = false;
-			$hasThisProjection = false;
-			$newProjections = array();
-			if ($groupedQuery->hasProjection())
+			if (f_util_ClassUtils::methodExists($groupedQuery, "getIds"))
 			{
-				foreach ($groupedQuery->getProjection() as $projection)
+				$ids = $groupedQuery->getIds();
+				$result = array();
+				foreach ($ids as $id)
 				{
-					if ($projection instanceof f_persistentdocument_criteria_ThisProjection)
-					{
-						// FIXME: remove other documentProjections ... ?
-						$hasThisProjection = true;
-						continue;
-					}
-					if ($projection instanceof f_persistentdocument_criteria_PropertyProjection)
-					{
-						if ($projection->getAs() == "id")
-						{
-							$hasIdProjection = true;
-						}
-					}
-					$newProjections[] = $projection;
+					$result[] = array("id" => $id);
 				}
 			}
-			elseif ($groupedQuery->hasHavingCriterion() && !$groupedQuery->hasProjection())
+			else
 			{
-				// implicit this projection
-				$hasThisProjection = true;
+				$this->addIdProjectionIfNeeded($groupedQuery);
+				//$result = $this->find($groupedQuery);
+				$result = $groupedQuery->find();
 			}
-
-			if (!$hasIdProjection)
-			{
-				if ($hasThisProjection || $groupedQuery->hasHavingCriterion())
-				{
-					$newProjections[] = Projections::groupProperty("id");
-				}
-				else
-				{
-					$newProjections[] = Projections::property("id");
-				}
-			}
-			$groupedQuery->setProjectionArray($newProjections);
-
-			$result = $this->find($groupedQuery);
 			if ($idRows === null)
 			{
 				$idRows = $result;
@@ -559,12 +531,105 @@ abstract class f_persistentdocument_PersistentProvider
 				$idRows = array_uintersect($idRows, $result, array($this, "compareRows"));
 			}
 		}
-
+		
+		/* TODO: uncomment when order implemented
 		if ($intersection->getMaxResults() > 0)
 		{
 			return array_slice(array_map(array($this, "getIdFromRow"), $idRows), 0 , $intersection->getMaxResults());
 		}
+		*/
 		return array_map(array($this, "getIdFromRow"), $idRows);
+	}
+	
+	protected function addIdProjectionIfNeeded($groupedQuery)
+	{
+		$hasIdProjection = false;
+		$hasThisProjection = false;
+		$newProjections = array();
+		if ($groupedQuery->hasProjection())
+		{
+			foreach ($groupedQuery->getProjection() as $projection)
+			{
+				if ($projection instanceof f_persistentdocument_criteria_ThisProjection)
+				{
+					// FIXME: remove other documentProjections ... ?
+					$hasThisProjection = true;
+					continue;
+				}
+				if ($projection instanceof f_persistentdocument_criteria_PropertyProjection)
+				{
+					if ($projection->getAs() == "id")
+					{
+						$hasIdProjection = true;
+						// continue; // FIXME .. ?
+					}
+				}
+				$newProjections[] = $projection;
+			}
+		}
+		elseif ($groupedQuery->hasHavingCriterion() && !$groupedQuery->hasProjection())
+		{
+			// implicit this projection
+			$hasThisProjection = true;
+		}
+	
+		if (!$hasIdProjection)
+		{
+			if ($hasThisProjection || $groupedQuery->hasHavingCriterion())
+			{
+				$newProjections[] = Projections::groupProperty("id");
+			}
+			else
+			{
+				$newProjections[] = Projections::property("id");
+			}
+		}
+		$groupedQuery->setProjectionArray($newProjections);
+	}
+	
+	/**
+	 * @param f_persistentdocument_criteria_QueryUnion $union
+	 * @return Integer[]
+	 */
+	public function findUnionIds($union)
+	{
+		// TODO: use UNION SQL operator
+		$idRows = array();
+		foreach ($union->getQueries() as $groupedQuery)
+		{
+			if (f_util_ClassUtils::methodExists($groupedQuery, "getIds"))
+			{
+				$ids = $groupedQuery->getIds();
+				$newIdRows = array();
+				foreach ($ids as $id)
+				{
+					$newIdRows[] = array("id" => $id);
+				}
+			}
+			else
+			{
+				$this->addIdProjectionIfNeeded($groupedQuery);
+				//$newIdRows = $this->find($groupedQuery);
+				$newIdRows = $groupedQuery->find();
+			}
+			$idRows = array_merge($idRows, $newIdRows);
+		}
+		
+		return array_unique(array_map(array($this, "getIdFromRow"), $idRows));
+	}
+	
+	/**
+	 * @param f_persistentdocument_criteria_QueryIntersection $union
+	 * @return f_persistentdocument_PersistentDocument[]
+	 */
+	public function findUnion($union)
+	{
+		$ids = $this->findUnionIds($union);
+		if (count($ids) == 0)
+		{
+			return array();
+		}
+		return $this->find($this->createQuery($union->getDocumentModel()->getName())->add(Restrictions::in("id", $ids)));
 	}
 
 	/**

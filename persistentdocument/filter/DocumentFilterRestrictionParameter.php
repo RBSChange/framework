@@ -34,10 +34,10 @@ class f_persistentdocument_DocumentFilterRestrictionParameter extends f_persiste
 	 * @param String $restriction
 	 * @return f_persistentdocument_DocumentFilterRestrictionParameter
 	 */
-	static function getNewInstance($propertyInfo = null, $restriction = null)
+	static function getNewInstance($propertyInfo = null, $restriction = null, $restrictionType = 'Restrictions')
 	{
 		$param = new f_persistentdocument_DocumentFilterRestrictionParameter($propertyInfo, $restriction);
-		$param->restrictionType = 'Restrictions';
+		$param->restrictionType = $restrictionType;
 		return $param;
 	}
 	
