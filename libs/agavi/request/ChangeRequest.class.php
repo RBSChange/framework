@@ -266,6 +266,11 @@ class ChangeRequest extends WebRequest
 	{
 		return (count($_FILES) > 0);
 	}
+	
+	public function hasNonEmptyParameter($paramName)
+	{
+		return $this->hasParameter($paramName) && f_util_StringUtils::isNotEmpty($this->getParameter($paramName));
+	}
 
 	/**
 	 * Initialize this Request.
