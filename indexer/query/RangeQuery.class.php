@@ -18,7 +18,16 @@ class indexer_RangeQuery extends indexer_QueryBase implements indexer_Query
 	 * @var String
 	 */
 	private $field = null;
+	
+	private $sepStart = "[";
+	private $sepEnd = "]";
 
+	/**
+	 * Construct a range, including min and max. Use <code>setExclusive()</code> to exclude min and max
+	 * @param String $field
+	 * @param String $min
+	 * @param String $max
+	 */
 	public function __construct($field, $min = null, $max = null)
 	{
 		if (is_null($max) && is_null($min))
@@ -67,13 +76,23 @@ class indexer_RangeQuery extends indexer_QueryBase implements indexer_Query
 		$this->min = $value;
 		return $this;
 	}
+	
+	/**
+	 * @return indexer_RangeQuery
+	 */
+	public function setExclusive()
+	{
+		$this->sepStart = "{";
+		$this->sepEnd = "}";
+		return $this;
+	}
 
 	/**
 	 * @return String
 	 */
 	public function toSolrString()
 	{
-		return $this->field . ":[" . $this->wildCardIfNull($this->min) . ' TO ' . $this->wildCardIfNull($this->max) . "]";
+		return $this->field . ":".$this->sepStart . $this->wildCardIfNull($this->min) . '%20TO%20' . $this->wildCardIfNull($this->max) . $this->sepEnd;
 	}
 
 	/**
