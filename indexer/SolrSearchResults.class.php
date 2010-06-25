@@ -11,6 +11,7 @@ class indexer_SolrSearchResults extends ArrayObject implements indexer_SearchRes
 	private $maxScore;
 	private $results = array();
 	private $rows = 0;
+	
 	/**
 	 * @var indexer_FacetResult[]
 	 */
@@ -70,20 +71,53 @@ class indexer_SolrSearchResults extends ArrayObject implements indexer_SearchRes
 
 		// Deal with facet
 		$facetResults = array();
-		$facetFieldsElem = $dom->findUnique("lst[@name = 'facet_counts']/lst[@name = 'facet_fields']");
-		if ($facetFieldsElem !== null)
+		$facetCountsElem = $dom->findUnique("lst[@name = 'facet_counts']");
+		if ($facetCountsElem !== null)
 		{
-			for ($i = 0; $i < $facetFieldsElem->childNodes->length; $i++)
+			$facetFieldsElem = $dom->findUnique("lst[@name = 'facet_fields']", $facetCountsElem);
+			if ($facetFieldsElem !== null)
 			{
-				$childNode = $facetFieldsElem->childNodes->item($i);
-				if ($childNode->nodeType !== XML_ELEMENT_NODE)
+				for ($i = 0; $i < $facetFieldsElem->childNodes->length; $i++)
 				{
-					continue;
+					$childNode = $facetFieldsElem->childNodes->item($i);
+					if ($childNode->nodeType !== XML_ELEMENT_NODE)
+					{
+						continue;
+					}
+					$facetResult = new indexer_FacetResult($childNode, $this->totalHits);
+					$facetResults[$facetResult->getSimpleFieldName()] = $facetResult;
 				}
-				$facetResult = new indexer_FacetResult($childNode, $this->totalHits);
-				$facetResults[$facetResult->getFieldName()] = $facetResult;
+			}
+			$facetQueriesElem = $dom->findUnique("lst[@name = 'facet_queries']", $facetCountsElem);
+			if ($facetQueriesElem !== null)
+			{
+				$rangeFacets = array();
+				foreach ($dom->find("int", $facetQueriesElem) as $facetIntElem)
+				{
+					$matches = null;
+					if (preg_match('/^(.*):(\[.*\])$/', $facetIntElem->getAttribute("name"), $matches))
+					{
+						$fieldName = $matches[1];
+						$range = $matches[2];
+						if (!isset($rangeFacets[$fieldName]))
+						{
+							$rangeFacets[$fieldName] = array();
+						}
+						$rangeFacets[$fieldName][] = new indexer_RangeFacetCount($range, intval($facetIntElem->textContent));
+					}
+					else
+					{
+						// For now, only simple range queries supported for facets
+					}
+				}
+				foreach ($rangeFacets as $fieldName => $facetCounts)
+				{
+					$facetResult = new indexer_RangeFacetResult($fieldName, $facetCounts, $this->totalHits);
+					$facetResults[$facetResult->getSimpleFieldName()] = $facetResult;
+				}
 			}
 		}
+		
 		$this->facetResults = $facetResults;
 		
 		// Suggestions
@@ -118,7 +152,6 @@ class indexer_SolrSearchResults extends ArrayObject implements indexer_SearchRes
 		parent::__construct($this->results);
 	}
 
-
 	public function getTotalHitsCount()
 	{
 		return $this->totalHits;
@@ -146,11 +179,12 @@ class indexer_SolrSearchResults extends ArrayObject implements indexer_SearchRes
 	 */
 	public function getFacetResult($fieldName)
 	{
-		if (!isset($this->facetResults[$fieldName]))
+		$simpleFieldName = indexer_Field::getSimpleFieldName($fieldName);
+		if (!isset($this->facetResults[$simpleFieldName]))
 		{
 			return null;
 		}
-		return $this->facetResults[$fieldName];
+		return $this->facetResults[$simpleFieldName];
 	}
 
 	/**

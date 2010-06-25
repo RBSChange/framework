@@ -2,6 +2,7 @@
 class indexer_FacetCount
 {
 	private $value;
+	private $label;
 	private $count;
 
 	function __construct($value, $count)
@@ -25,6 +26,26 @@ class indexer_FacetCount
 	{
 		$this->value = $value;
 	}
+	
+	/**
+	 * @return String
+	 */
+	function getLabel()
+	{
+		if ($this->label === null)
+		{
+			return $this->getValueUcFirst();
+		}
+		return $this->label;
+	}
+	
+	/**
+	 * @param String $label
+	 */
+	function setLabel($label)
+	{
+		return $this->label = $label;
+	}
 
 	/**
 	 * @return String
@@ -45,5 +66,67 @@ class indexer_FacetCount
 	function isEmpty()
 	{
 		return $this->count == 0;
+	}
+	
+	function isNotEmpty()
+	{
+		return !$this->isEmpty();
+	}
+}
+
+class indexer_RangeFacetCount extends indexer_FacetCount 
+{
+	/**
+	 * @var String
+	 */
+	private $min, $max;
+	
+	function __construct($value, $count)
+	{
+		$matches = null;
+		if (preg_match('/^\[([^ ]*) TO ([^ ]*)\]$/', $value, $matches))
+		{
+			if ($matches[1] != "*")
+			{
+				$this->min = $matches[1];
+			}
+			if ($matches[2] != "*")
+			{
+				$this->max = $matches[2];
+			}
+		}
+		
+		if ($this->min === null)
+		{
+			$substitution = array("max" => $this->max);
+			$this->setLabel(f_Locale::translate("&framework.indexer.To-rangefacet;", $substitution));
+		}
+		elseif ($this->max === null)
+		{
+			$substitution = array("min" => $this->min);
+			$this->setLabel(f_Locale::translate("&framework.indexer.From-rangefacet;", $substitution));
+		}
+		else
+		{
+			$substitution = array("min" => $this->min, "max" => $this->max);
+			$this->setLabel(f_Locale::translate("&framework.indexer.From-to-rangefacet;", $substitution));	
+		}
+		parent::__construct($value, $count);
+	}
+	
+	/**
+	 * @return String
+	 */
+	function getMin()
+	{
+		return $this->min;
+	}
+	
+	/**
+	 * @return String
+	 */
+	function getMax()
+	{
+		return $this->max;
 	}
 }

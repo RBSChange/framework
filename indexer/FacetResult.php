@@ -4,14 +4,14 @@
  */
 class indexer_FacetResult extends ArrayObject
 {
-	private $fieldName;
-	private $nonEmptyCount = 0;
-	private $missingCount = 0;
-	private $nonMissingPercentage;
+	protected $fieldName, $fieldLabel, $simpleFieldName;
+	protected $nonEmptyCount = 0;
+	protected $missingCount = 0;
+	protected $nonMissingPercentage;
 
 	function __construct($lstElem, $totalHits)
 	{
-		$this->fieldName = $lstElem->getAttribute("name");
+		$this->setFieldName($lstElem->getAttribute("name"));
 		$facetCounts = array();
 		$words = $lstElem->getElementsByTagName("int");
 		for ($i = 0; $i < $words->length; $i++)
@@ -19,12 +19,13 @@ class indexer_FacetResult extends ArrayObject
 			$facetElem = $words->item($i);
 			if ($facetElem->hasAttribute("name"))
 			{
-				$facetCount = new indexer_FacetCount($facetElem->getAttribute("name"), intval($facetElem->textContent));
+				$facetCount = new indexer_FacetCount($facetElem->getAttribute("name"),
+					intval($facetElem->textContent));
 				if (!$facetCount->isEmpty())
 				{
 					$this->nonEmptyCount++;
 				}
-				$facetCounts[] = $facetCount;
+				$facetCounts[$facetCount->getValue()] = $facetCount;
 			}
 			else
 			{
@@ -38,11 +39,31 @@ class indexer_FacetResult extends ArrayObject
 		parent::__construct($facetCounts);
 	}
 
+	/**
+	 * @return String
+	 */
 	function getFieldName()
 	{
 		return $this->fieldName;
 	}
+	
+	protected function setFieldName($fieldName)
+	{
+		$this->fieldName = $fieldName;
+		$this->simpleFieldName = indexer_Field::getSimpleFieldName($fieldName);
+	}
+	
+	/**
+	 * @return String
+	 */
+	function getSimpleFieldName()
+	{
+		return $this->simpleFieldName;
+	}
 
+	/**
+	 * @return indexer_FacetCount[]
+	 */
 	function getFirstEntries()
 	{
 		return array_slice($this->getArrayCopy(), 0, min($this->count(), 6));
@@ -55,7 +76,16 @@ class indexer_FacetResult extends ArrayObject
 	
 	function getFieldLabel()
 	{
-		return f_Locale::translate("&modules.alsatica.frontoffice.Facet-".$this->fieldName."-label;");
+		if ($this->fieldLabel !== null)
+		{
+			return $this->fieldLabel;
+		}
+		return f_Locale::translate("&framework.indexer.Facet-".$this->getSimpleFieldName()."-label;");
+	}
+	
+	function setFieldLabel($fieldLabel)
+	{
+		$this->fieldLabel = $fieldLabel;
 	}
 	
 	function getEntryCount()
@@ -78,7 +108,7 @@ class indexer_FacetResult extends ArrayObject
 		return $this->missingCount;
 	}
 	
-	private function setTotalHits($totalHit)
+	protected function setTotalHits($totalHit)
 	{
 		$this->nonMissingPercentage = (($totalHit - $this->missingCount) * 100) / $totalHit;
 	}
@@ -86,5 +116,46 @@ class indexer_FacetResult extends ArrayObject
 	function getNonMissingPercentage()
 	{
 		return $this->nonMissingPercentage;
+	}
+	
+	/**
+	 * @param String $value
+	 * @return indexer_FacetCount
+	 */
+	function getByValue($value)
+	{
+		foreach ($this as $facetCount)
+		{
+			if ($facetCount->getValue() == $value)
+			{
+				return $facetCount;
+			}
+		}
+		return null;
+	}
+}
+
+/**
+ * This is an array of indexer_RangeFacetCount
+ */
+class indexer_RangeFacetResult extends indexer_FacetResult
+{
+	function __construct($fieldName, $facetCounts, $totalHits)
+	{
+		$this->setFieldName($fieldName);
+		foreach ($facetCounts as $facetCount)
+		{
+			if (!$facetCount->isEmpty())
+			{
+				$this->nonEmptyCount++;
+			}
+			$this->offsetSet($facetCount->getValue(), $facetCount);
+		}
+		// no meaning for range query
+		$this->missingCount = null;
+		if ($totalHits > 0)
+		{
+			$this->setTotalHits($totalHits);
+		}
 	}
 }
