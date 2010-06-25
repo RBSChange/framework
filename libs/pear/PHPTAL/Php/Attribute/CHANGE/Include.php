@@ -20,10 +20,25 @@ class PHPTAL_Php_Attribute_CHANGE_include extends ChangeTalAttribute
 		return true;
 	}
 	
-	public static function renderInclude($params)
+	/**
+	 * @param array $params
+	 * @param PHPTAL_Context $ctx
+	 */
+	public static function renderInclude($params, $ctx)
 	{
 		$template = TemplateLoader::getInstance()->setPackageName("modules_" . $params['module'])->setMimeContentType($params['type'])
 		->load($params['template']);
+		if (isset($params["transmitAll"]) && $params["transmitAll"] == "true")
+		{
+			foreach($ctx as $key => $value)
+			{
+				if ($key[0] !== '_')
+				{
+   					$template->setAttribute($key, $value);
+				}
+			}
+			unset($params["transmitAll"]);
+		}
 		foreach ($params as $name => $value) 
 		{
 			if ($name == "template" || $name == "module" || $name == "type")
