@@ -38,6 +38,11 @@ class indexer_PhraseQuery extends indexer_TermQuery
 		return urlencode($this->toStringPrefix().'"'.$this->escapeValue($this->value).'"'.$this->toStringSuffix());
 	}
 	
+	protected function escapeValue($value)
+	{
+		return str_replace('"', '\\"', $value);
+	}
+	
 	/**
 	 * @return String[]
 	 */

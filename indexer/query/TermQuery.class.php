@@ -56,14 +56,22 @@ class indexer_TermQuery extends indexer_QueryBase implements indexer_Query
 		return $this;
 	}
 
+	/**
+	 * @return indexer_TermQuery
+	 */
 	function required()
 	{
 		$this->required = true;
+		return $this;
 	}
 
+	/**
+	 * @return indexer_TermQuery
+	 */
 	function prohibited()
 	{
 		$this->prohibited = true;
+		return $this;
 	}
 	
 	/**
@@ -145,7 +153,10 @@ class indexer_TermQuery extends indexer_QueryBase implements indexer_Query
 	
 	protected function escapeValue($value)
 	{
-		return str_replace(array('+', '-', ':', '^', '"'), array('%2B', '%2D', '%3A', '%5E', '%22'), $value);
+		return str_replace(
+			array('\\', '+', '-', '(', ')', '{', '}', '^', '"', '~', '?', ':', '[', ']'),
+            array('\\\\', '\\+', '\\-', '\\(', '\\)', '\\{', '\\}', '\\^', '\\"', '\\~', '\\?', '\\:', '\\[', '\\]'),
+			$value);
 	}
 
 	/**
@@ -162,5 +173,49 @@ class indexer_TermQuery extends indexer_QueryBase implements indexer_Query
 	public function getTerms()
 	{
 		return array($this->value);
+	}
+}
+
+class indexer_StringTermQuery extends indexer_TermQuery
+{
+	/**
+	 * @param String $fieldName
+	 */
+	function __construct($fieldName, $value = null)
+	{
+		parent::__construct(indexer_Field::getStringFieldName($fieldName), $value);
+	}
+}
+
+class indexer_VolatileStringTermQuery extends indexer_TermQuery
+{
+	/**
+	 * @param String $fieldName
+	 */
+	function __construct($fieldName, $value = null)
+	{
+		parent::__construct(indexer_Field::getVolatileStringFieldName($fieldName), $value);
+	}
+}
+
+class indexer_VolatileIntegerTermQuery extends indexer_TermQuery
+{
+	/**
+	 * @param String $fieldName
+	 */
+	function __construct($fieldName, $value = null)
+	{
+		parent::__construct(indexer_Field::getVolatileIntegerFieldName($fieldName), $value);
+	}
+}
+
+class indexer_VolatileFloatTermQuery extends indexer_TermQuery
+{
+	/**
+	 * @param String $fieldName
+	 */
+	function __construct($fieldName, $value = null)
+	{
+		parent::__construct(indexer_Field::getVolatileFloatFieldName($fieldName), $value);
 	}
 }
