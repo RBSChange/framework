@@ -506,7 +506,17 @@ class paginator_Url
 		else
 		{
 			$path = implode($this->currentPath);
-			$this->urlRequestParts[$path] =  $path. "=" . urlencode($value);
+			if ($value === null)
+			{
+				if (isset($this->urlRequestParts[$path]))
+				{
+					unset($this->urlRequestParts[$path]);
+				}
+			}
+			else
+			{
+				$this->urlRequestParts[$path] =  $path. "=" . urlencode($value);
+			}
 		}
 		array_pop($this->currentPath);
 	}
