@@ -183,16 +183,46 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 	{
 		$documentModel = f_persistentdocument_PersistentDocumentModel::getInstance($moduleName, $documentName);
 		$sqls = array();
-		$sqls[] = "ALTER TABLE `".$documentModel->getTableName()."` ADD COLUMN ".$property->generateSql("mysql");
+		
+		$tableName = $documentModel->getTableName();
+		$columnName = $property->getDbName();
+		$infos = $this->getTableInfo($tableName);
+		if (!isset($infos[$columnName]))
+		{
+			$sqls[] = "ALTER TABLE `".$tableName."` ADD COLUMN ".$property->generateSql("mysql");	
+		}
+		else
+		{
+			$sqls[] = "ALTER TABLE `".$tableName."` MODIFY COLUMN ".$property->generateSql("mysql");
+		}
 		if ($property->isLocalized())
 		{
-			$sqls[] = "ALTER TABLE `".$documentModel->getTableName().$this->getI18nSuffix()."` ADD COLUMN ".$property->generateSql("mysql", true);
+			$i18nInfos = $this->getTableInfo($tableName.$this->getI18nSuffix());
+			$i18nColumnName = $property->getDbName().$this->getI18nSuffix();
+			if (!isset($i18nInfos[$i18nColumnName]))
+			{
+				$sqls[] = "ALTER TABLE `".$tableName.$this->getI18nSuffix()."` ADD COLUMN ".$property->generateSql("mysql", true);
+			}
+			else
+			{
+				$sqls[] = "ALTER TABLE `".$tableName.$this->getI18nSuffix()."` MODIFY ".$property->generateSql("mysql", true);
+			}
 		}
 		foreach ($sqls as $sql)
 		{
 			$this->executeSQLScript($sql);
 		}
 		return $sqls;
+	}
+	
+	private function getTableInfo($tableName)
+	{
+		$infos = array();
+		foreach ($this->executeSQLSelect("desc ".$tableName)->fetchAll(PDO::FETCH_ASSOC) as $row)
+		{
+			$infos[$row["Field"]] = $row;
+		}
+		return $infos;
 	}
 	
 	/**
