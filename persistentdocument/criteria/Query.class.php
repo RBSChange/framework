@@ -1039,6 +1039,14 @@ class f_persistentdocument_criteria_QueryIntersection
 	}
 	
 	/**
+	 * @return Boolean
+	 */
+	function isEmpty()
+	{
+		return count($this->queries) == 0;
+	}
+	
+	/**
 	 * @return f_persistentdocument_PersistentDocument[]
 	 */
 	function find()
@@ -1127,6 +1135,14 @@ class f_persistentdocument_criteria_QueryUnion
 	function getQueries()
 	{
 		return $this->queries;
+	}
+	
+	/**
+	 * @return Boolean
+	 */
+	function isEmpty()
+	{
+		return count($this->queries) == 0;
 	}
 	
 	/**
