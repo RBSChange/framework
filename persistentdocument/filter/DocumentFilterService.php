@@ -154,6 +154,10 @@ class f_persistentdocument_DocumentFilterService extends BaseService
 			}
 			return $intersection->add($group);
 		}
+		else
+		{
+			throw new Exception("Unknown operator ".$info["operator"]);
+		}
 	}
 	
 	/**
@@ -163,12 +167,79 @@ class f_persistentdocument_DocumentFilterService extends BaseService
 	 */
 	public function checkValueFromJson($json, $value)
 	{
-		$filters = $this->getFilterArrayFromJson($json);
-		foreach ($filters as $filter) 
+		$info = JsonService::getInstance()->decode($json);
+		// !isset() for filter <= 3.0.2 compatibility
+		if (!isset($info["operator"]) || $info["operator"] == "and")
 		{
-			if (!$filter->checkValue($value)) return false;
+			// filter <= 3.0.2 compatibility
+			$elementsInfo = (isset($info["elements"])) ? $info["elements"] : $info; 
+			
+			$filters = $this->getFilterArrayFromJson($elementsInfo);
+			if (f_util_ArrayUtils::isEmpty($filters))
+			{
+				return true;
+			}
+			foreach ($filters as $filter) 
+			{
+				if (is_array($filter))
+				{
+					$subFilterValue = false;
+					foreach ($filter as $subFilter)
+					{
+						if ($subFilter->checkValue($value))
+						{
+							$subFilterValue = true;
+							break;
+						}
+					}
+					if (!$subFilterValue)
+					{
+						return false;
+					}
+				}
+				else
+				{
+					if (!$filter->checkValue($value)) return false;
+				}
+			}
+			return true;
 		}
-		return true;
+		elseif ($info["operator"] == "or")
+		{
+			$filters = $this->getFilterArrayFromJson($info["elements"]);
+			if (f_util_ArrayUtils::isEmpty($filters))
+			{
+				return true;
+			}
+			foreach ($filters as $filter) 
+			{
+				if (is_array($filter))
+				{
+					$subFilterValue = true;
+					foreach ($filter as $subFilter)
+					{
+						if (!$subFilter->checkValue($value))
+						{
+							$subFilterValue = false;
+							break;
+						}
+					}
+					if ($subFilterValue)
+					{
+						return true;
+					}
+				}
+				else
+				{
+					if ($filter->checkValue($value)) return true;
+				}
+			}
+			return false;
+		}
+		else
+		{
+			throw new Exception("Unknown operator ".$info["operator"]);
+		}
 	}
 	
 	private $filtersByModel = null;
