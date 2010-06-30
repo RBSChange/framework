@@ -135,8 +135,13 @@ class f_persistentdocument_DocumentFilterService extends BaseService
 		{
 			// No need for filter <= 3.0.2 as or operator didn't exist
 			$intersection = new f_persistentdocument_criteria_QueryIntersection();
+			$filters = $this->getFilterArrayFromJson($info["elements"]);
+			if (f_util_ArrayUtils::isEmpty($filters))
+			{
+				return $intersection;
+			}
 			$group = new f_persistentdocument_criteria_QueryUnion();
-			foreach ($this->getFilterArrayFromJson($info["elements"]) as $filter)
+			foreach ($filters as $filter)
 			{
 				if (is_array($filter))
 				{

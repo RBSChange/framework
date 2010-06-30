@@ -43,9 +43,16 @@ class commands_CompileDocuments extends commands_AbstractChangeCommand
 			unlink($path);
 		}
 		
+		$docInjections = array();
+		
 		// For the list of models generate persistent.
 		foreach ($models as $model)
 		{
+			if ($model->inject())
+			{
+				$docInjections[$model->getFinalModuleName()."/".$model->getFinalDocumentName()] = $model->getModuleName()."/".$model->getDocumentName();
+			}
+			
 			// Get a document Generator.
 			$documentGenerator = new builder_DocumentGenerator($model->getModuleName(), $model->getDocumentName(), false);
 
@@ -92,6 +99,30 @@ class commands_CompileDocuments extends commands_AbstractChangeCommand
 				$this->debugMessage($e->getTraceAsString());
 			}
 		}
-		$this->quitOk("Documents compiled");	
+		
+		$mustCompileConfig = false;
+		$currentDocInjections = Framework::getConfigurationValue("injection/document", array());
+		if (count($currentDocInjections) != count($docInjections))
+		{
+			$mustCompileConfig = true;
+		}
+		else
+		{
+			foreach ($docInjections as $replaced => $replacer)
+			{
+				if (!isset($currentDocInjections[$replaced]) || $currentDocInjections[$replaced] != $replacer)
+				{
+					$mustCompileConfig = true;
+					break;
+				}
+			}
+		}
+		
+		if ($mustCompileConfig)
+		{
+			$this->getParent()->executeCommand("compile-config");
+		}
+		
+		$this->quitOk("Documents compiled");
 	}
 }
