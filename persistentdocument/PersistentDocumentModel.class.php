@@ -742,7 +742,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	 */
 	public final function getInverseProperty($name)
 	{
-		return $this->m_invertProperties[$name];
+		return (array_key_exists($name, $this->m_invertProperties)) ? $this->m_invertProperties[$name] : null;
 	}
 
 	/**
