@@ -291,6 +291,11 @@ f_persistentdocument_PersistentProvider::getInstance()->delProperty('$moduleName
 		// TODO: locales, forms
 
 		$this->getParent()->executeCommand("compile-documents");
+		if ($newProp->isDocument())
+		{
+			$this->getParent()->executeCommand("compile-db-schema");
+		}
+		
 		$newPath = "modules/$moduleName/persistentdocument/$documentName.xml";
 		$this->message("Executed SQL:\n".join("\n", $sqls)."
 
