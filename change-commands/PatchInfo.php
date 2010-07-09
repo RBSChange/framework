@@ -49,6 +49,7 @@ class commands_PatchInfo extends commands_AbstractChangeCommand
 			}
 			return $patches;
 		}
+		return null;
 	}
 
 	/**

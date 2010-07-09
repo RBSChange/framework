@@ -73,7 +73,7 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 		}
 		
 		$modulePath = $bootStrap->installComponent(c_ChangeBootStrap::$DEP_MODULE, $moduleName, $moduleVersion);
-		list ($declaredDeps, $computedDeps) = $bootStrap->getDependencies($modulePath);
+		list ( , $computedDeps) = $bootStrap->getDependencies($modulePath);
 		
 		$modulesToInstall = array();
 		$libsToInstall = array();
@@ -154,6 +154,6 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 			$this->okMessage("Project descriptor updated");
 		}
 		
-		$this->quitOk("Install OK");
+		return $this->quitOk("Install OK");
 	}
 }

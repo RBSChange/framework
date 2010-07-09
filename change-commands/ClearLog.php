@@ -58,6 +58,6 @@ class commands_ClearLog extends commands_AbstractChangeCommand
 			return $this->quitError('The profile ' . $profile . ' doest not exist.');
 		}
 
-		$this->quitOk("Log files cleared");
+		return $this->quitOk("Log files cleared");
 	}
 }

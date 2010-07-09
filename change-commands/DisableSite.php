@@ -41,6 +41,6 @@ class commands_DisableSite extends commands_AbstractChangeCommand
 			return $this->quitError("Unable to touch $flagFile");
 		}
 		
-		$this->quitOk("Site has been disabled. To enable it, use 'change.php enable-site'.");
+		return $this->quitOk("Site has been disabled. To enable it, use 'change.php enable-site'.");
 	}
 }

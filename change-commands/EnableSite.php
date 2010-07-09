@@ -43,6 +43,6 @@ class commands_EnableSite extends commands_AbstractChangeCommand
 		
 		f_util_System::execHTTPScript('changecron.php', array(), true);
 		
-		$this->quitOk("Site has been enabled. To disable it, use 'change.php disable-site'.");
+		return $this->quitOk("Site has been enabled. To disable it, use 'change.php disable-site'.");
 	}
 }

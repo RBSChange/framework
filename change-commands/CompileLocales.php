@@ -35,12 +35,14 @@ class commands_CompileLocales extends commands_AbstractChangeCommand
 		{
 			$components[] = "framework";
 		}
-		foreach (glob("modules/*", GLOB_ONLYDIR) as $module)
+		foreach (glob("modules/*/locale", GLOB_ONLYDIR) as $path)
 		{
+			$module = dirname($path);
 			$components[] = basename($module);
 		}
-		foreach (glob("themes/*", GLOB_ONLYDIR) as $module)
+		foreach (glob("themes/*/locale", GLOB_ONLYDIR) as $path)
 		{
+			$module = dirname($path);
 			$components[] = "themes/" . basename($module);
 		}		
 		

@@ -67,6 +67,6 @@ class commands_UpdateAutoload extends commands_AbstractChangeCommand
 		{
 			return $this->quitError("Some errors: ".$this->getErrorCount());
 		}
-		$this->quitOk("Autoload updated");
+		return $this->quitOk("Autoload updated");
 	}
 }
