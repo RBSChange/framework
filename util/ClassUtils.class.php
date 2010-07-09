@@ -15,7 +15,7 @@ abstract class f_util_ClassUtils
 		}
 		return self::getMethod($methodParts[0], $methodParts[1]);
 	}
-
+	
 	/**
 	 * @param String $fullMethodName
 	 * @param String $methodName
@@ -31,7 +31,7 @@ abstract class f_util_ClassUtils
 		}
 		return $classObj->getMethod($methodName);
 	}
-
+	
 	/**
 	 * @param String $fullMethodName
 	 * @example callMethod('util_f_util_ClassUtils::getMethod', 'util_f_util_ClassUtils::callMethod') returns the ReflectionMethod util_f_util_ClassUtils::callMethod
@@ -48,7 +48,7 @@ abstract class f_util_ClassUtils
 		$args = func_get_args();
 		return $method->invokeArgs(null, array_splice($args, 1));
 	}
-
+	
 	/**
 	 * @param String $fullMethodName
 	 * @example callMethod('util_f_util_ClassUtils', 'getMethod', 'util_f_util_ClassUtils::callMethod') returns the ReflectionMethod util_f_util_ClassUtils::callMethod
@@ -65,7 +65,7 @@ abstract class f_util_ClassUtils
 		$args = func_get_args();
 		return $method->invokeArgs(null, array_splice($args, 2));
 	}
-
+	
 	/**
 	 * @param String $fullMethodName
 	 * @example callMethod('util_f_util_ClassUtils::getMethod', array('util_f_util_ClassUtils::callMethod')) returns the ReflectionMethod util_f_util_ClassUtils::callMethod
@@ -81,7 +81,7 @@ abstract class f_util_ClassUtils
 		}
 		return $method->invokeArgs(null, $args);
 	}
-
+	
 	/**
 	 * @param String $fullMethodName
 	 * @example callMethod('util_f_util_ClassUtils', 'getMethod', array('util_f_util_ClassUtils::callMethod')) returns the ReflectionMethod util_f_util_ClassUtils::callMethod
@@ -97,7 +97,7 @@ abstract class f_util_ClassUtils
 		}
 		return $method->invokeArgs(null, $args);
 	}
-
+	
 	/**
 	 * @param Object $objectInstance
 	 * @param String $methodName
@@ -110,7 +110,7 @@ abstract class f_util_ClassUtils
 		$args = func_get_args();
 		return $method = $classObj->getMethod($methodName)->invokeArgs($objectInstance, array_splice($args, 2));
 	}
-
+	
 	/**
 	 * @param Object $objectInstance
 	 * @param String $methodName
@@ -123,7 +123,7 @@ abstract class f_util_ClassUtils
 		$classObj = new ReflectionObject($objectInstance);
 		return $classObj->getMethod($methodName)->invokeArgs($objectInstance, $args);
 	}
-
+	
 	/**
 	 * @param String $className
 	 * @example newInstance($className, $arg1, $arg2, $arg3 ...)
@@ -135,7 +135,7 @@ abstract class f_util_ClassUtils
 		$args = func_get_args();
 		return $classObj->newInstanceArgs(array_slice($args, 1));
 	}
-
+	
 	public static function newInstanceSandbox($className, $expectedClassName)
 	{
 		$classObj = new ReflectionClass($className);
@@ -151,7 +151,7 @@ abstract class f_util_ClassUtils
 		{
 			throw new Exception("$className is not a subclass of $expectedClass");
 		}
-
+		
 		$args = func_get_args();
 		$constructorArgs = array_slice($args, 2);
 		if (empty($constructorArgs))
@@ -160,7 +160,7 @@ abstract class f_util_ClassUtils
 		}
 		return $classObj->newInstanceArgs($constructorArgs);
 	}
-
+	
 	/**
 	 * Indicates whether the class $className exists or not.
 	 *
@@ -179,7 +179,7 @@ abstract class f_util_ClassUtils
 	{
 		return ClassLoader::getInstance()->existsNoLoad($className);
 	}
-
+	
 	/**
 	 * Indicates whether the method $methodName exists in class $className.
 	 *
@@ -193,7 +193,7 @@ abstract class f_util_ClassUtils
 	{
 		return method_exists($objectOrClassName, $methodName);
 	}
-
+	
 	/**
 	 * @param mixed $objectOrClassName Class name or instance.
 	 * @param string $propertyName
@@ -214,7 +214,7 @@ abstract class f_util_ClassUtils
 		$class = self::getReflectionClassFromInstanceOrClassName($objectOrClassName);
 		return $class->hasProperty($propertyName) && $class->getProperty($propertyName)->isPublic();
 	}
-
+	
 	/**
 	 * @param mixed $objectOrClassName
 	 * @return array<ReflectionMethod>
@@ -223,7 +223,7 @@ abstract class f_util_ClassUtils
 	{
 		return self::getReflectionClassFromInstanceOrClassName($objectOrClassName)->getMethods();
 	}
-
+	
 	/**
 	 * @param String $metaName
 	 * @param ReflectionMethod|ReflectionProperty|ReflectionClass $methodOrPropertyOrClass
@@ -231,10 +231,10 @@ abstract class f_util_ClassUtils
 	 */
 	public static function hasMeta($metaName, $methodOrPropertyOrClass)
 	{
-		$regexp = '/@'.$metaName.'($|\s|\()/m';
-		return preg_match($regexp, $methodOrPropertyOrClass->getDocComment()) > 0;
+		$regexp = '/@' . $metaName . '($|\s|\()/m';
+		return preg_match($regexp, self::getDocComment($methodOrPropertyOrClass)) > 0;
 	}
-
+	
 	/**
 	 * @param String $metaName
 	 * @param ReflectionMethod|ReflectionProperty|ReflectionClas $methodOrPropertyOrClass
@@ -242,17 +242,16 @@ abstract class f_util_ClassUtils
 	 */
 	public static function getMetaValue($metaName, $methodOrPropertyOrClass)
 	{
-		$regexp = '/@'.$metaName.'\(([^\)]*)\)/m';
+		$regexp = '/@' . $metaName . '\(([^\)]*)\)/m';
 		$matches = null;
 		// TODO: handle multiple values, ie string indexed array. ex: '(name1="value1",name2=value2,name3={value3, value4})'
-		//echo $methodOrProperty->getDocComment();
-		if (preg_match($regexp, $methodOrPropertyOrClass->getDocComment(), $matches))
+		if (preg_match($regexp, self::getDocComment($methodOrPropertyOrClass), $matches))
 		{
 			return $matches[1];
 		}
 		return null;
 	}
-
+	
 	/**
 	 * @param String $metaName
 	 * @param ReflectionMethod $method
@@ -261,16 +260,23 @@ abstract class f_util_ClassUtils
 	 */
 	public static function getFieldMetaValue($metaName, $method, $property)
 	{
-		$regexp = '/@'.$metaName.'\(([^\)]*)\)/m';
+		$regexp = '/@' . $metaName . '\(([^\)]*)\)/m';
 		$matches = null;
 		// TODO: handle multiple values, ie string indexed array. ex: '(name1="value1",name2=value2,name3={value3, value4})'
-		//echo $methodOrProperty->getDocComment();
-		if (($method !== null && preg_match($regexp, $method->getDocComment(), $matches)) ||
-		($property !== null && preg_match($regexp, $property->getDocComment(), $matches)))
+		if (($method !== null && preg_match($regexp, self::getDocComment($method), $matches)) || ($property !== null && preg_match($regexp, self::getDocComment($property), $matches)))
 		{
 			return $matches[1];
 		}
 		return null;
+	}
+	
+	static function getDocComment(&$reflectionObj)
+	{
+		if (extension_loaded("eaccelerator") && !defined("EACCELERATOR_PRESERVE_DOC_COMMENT") && !($reflectionObj instanceof f_util_ReflectionObjWrapper))
+		{
+			$reflectionObj = new f_util_ReflectionObjWrapper($reflectionObj);
+		}
+		return $reflectionObj->getDocComment();
 	}
 	
 	/**
@@ -281,9 +287,9 @@ abstract class f_util_ClassUtils
 	{
 		$regexp = '/@return[ ]+([^ ]*)/m';
 		$matches = null;
-		if (preg_match($regexp, $method->getDocComment(), $matches))
+		if (preg_match($regexp, self::getDocComment($method), $matches))
 		{
-			return trim($matches[1]);	
+			return trim($matches[1]);
 		}
 		return null;
 	}
@@ -295,16 +301,17 @@ abstract class f_util_ClassUtils
 	 */
 	public static function getParamType($method, $paramName)
 	{
-		$regexp = '/@param[ ]+([^ ]*)[ ]+\$'.$paramName.'( .*){0,1}$/m';
+		$regexp = '/@param[ ]+([^ ]*)[ ]+\$' . $paramName . '( .*){0,1}$/m';
 		$matches = null;
-		if (preg_match($regexp, $method->getDocComment(), $matches))
+		if (preg_match($regexp, self::getDocComment($method), $matches))
 		{
-			return trim($matches[1]);	
+			return trim($matches[1]);
 		}
 		return null;
 	}
-
+	
 	// private methods
+	
 
 	/**
 	 * @param mixed $objectOrClassName
@@ -320,9 +327,161 @@ abstract class f_util_ClassUtils
 		else if (is_string($objectOrClassName))
 		{
 			$className = $objectOrClassName;
-		} else {
+		}
+		else
+		{
 			throw new IllegalArgumentException('$object must be an object or a string.');
 		}
 		return new ReflectionClass($className);
+	}
+}
+
+/**
+ * A wrapper for a "ReflectionObject" (ReflectionClass, ReflectionProperty
+ *  or ReflectionMethod instance) that re-implements getDocComment() to hack
+ *  eaccelerator behaviour ; See http://eaccelerator.net/ticket/229
+ */
+class f_util_ReflectionObjWrapper
+{
+	private $docComment;
+	private $obj;
+	
+	/**
+	 * @param ReflectionClass|ReflectionProperty|ReflectionMethod $obj
+	 */
+	function __construct($obj)
+	{
+		$this->obj = $obj;
+	}
+	
+	/**
+	 * @return String
+	 */
+	function getDocComment()
+	{
+		if ($this->docComment !== null)
+		{
+			return $this->docComment;
+		}
+		
+		if ($this->obj instanceof ReflectionProperty)
+		{
+			$propName = '$' . $this->obj->getName();
+			$class = $this->obj->getDeclaringClass();
+			$fileName = $class->getFileName();
+			$lines = file($fileName, FILE_IGNORE_NEW_LINES);
+			if ($lines === false)
+			{
+				throw new Exception("Could not read $fileName");
+			}
+			$code = "<?php " . join("\n", array_slice($lines, $class->getStartLine() - 1, $class->getEndLine() - $class->getStartLine() + 1));
+			$braceLevel = 0;
+			$lastComment = null;
+			foreach (token_get_all($code) as $token)
+			{
+				if (is_array($token))
+				{
+					$type = $token[0];
+					$value = $token[1];
+				}
+				else
+				{
+					if ($token == '{')
+					{
+						$braceLevel ++;
+					}
+					else if ($token == '}')
+					{
+						$braceLevel --;
+					}
+					$type = null;
+					$value = $token;
+				}
+				
+				switch ($type)
+				{
+					case T_DOC_COMMENT :
+						$lastComment = $value;
+						break;
+					case T_VARIABLE :
+						if ($braceLevel == 1 && $propName == $value)
+						{	
+							return $lastComment;
+						}
+						break;
+					case T_PRIVATE:
+					case T_PROTECTED:
+					case T_PUBLIC:
+						break;
+					default:
+						if (trim($value) != "")
+						{
+							$lastComment = null;
+						}
+				}
+			}
+			throw new Exception("Could not find ".$this->obj->getName()." property");
+		}
+		
+		// $this->obj is ReflectionClass or ReflectionMethod
+		
+		$fileName = $this->obj->getFileName();
+		$startLine = $this->obj->getStartLine();
+		$lines = file($fileName, FILE_IGNORE_NEW_LINES);
+		$docComment = array();
+		$inComment = false;
+		
+		// probably could be better
+		for ($i = $startLine - 1; $i > 0; $i --)
+		{
+			$line = $lines[$i];
+			if (!$inComment)
+			{
+				$matches = null;
+				if (preg_match('#^(.*)\*/(.*)$#', $line, $matches))
+				{
+					if (isset($matches[2]) && substr(trim($matches[2]), 0, 2) != '//' && (strpos($matches[2], "}") !== false || strpos($matches[2], ";") !== false))
+					{
+						$this->docComment = "";
+						return $this->docComment;
+					}
+					
+					$startCommentIndex = strpos($matches[1], "/*");
+					if ($startCommentIndex !== false)
+					{
+						$this->docComment = substr($matches[1], $startCommentIndex) . "*/";
+						return $this->docComment;
+					}
+					
+					$docComment[] = $matches[1] . "*/";
+					$inComment = true;
+				}
+				elseif (strpos($line, ";") !== false || strpos($line, "}") !== false)
+				{
+					$this->docComment = "";
+					return $this->docComment;
+				}
+			}
+			else
+			{
+				$startCommentIndex = strpos($line, "/*");
+				if ($startCommentIndex !== false)
+				{
+					$docComment[] = substr($line, $startCommentIndex);
+					break;
+				}
+				else
+				{
+					$docComment[] = $lines[$i];
+				}
+			}
+		}
+		
+		return join("\n", array_reverse($docComment));
+	}
+	
+	function __call($method, $args)
+	{
+		return f_util_ClassUtils::callMethodArgsOn($this->obj, $method, $args);
 	}
 }

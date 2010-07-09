@@ -28,8 +28,10 @@ if (!function_exists('spl_object_hash')) {
 }
 
 /**
- * WARNING: eaccelerator can brake this code. See http://eaccelerator.net/ticket/229
- * and compile eaccelerator using "--with-eaccelerator-doc-comment-inclusion" option
+ * WARNING: if you plan to use eaccelerator, please compile it with
+ * "--with-eaccelerator-doc-comment-inclusion" and define EACCELERATOR_PRESERVE_DOC_COMMENT
+ * for better performances.
+ * See http://eaccelerator.net/ticket/229
  */
 class f_mvc_DynBean implements f_mvc_Bean
 {
@@ -242,7 +244,7 @@ class f_mvc_DynBeanModel implements f_mvc_BeanModel
 					}
 				}
 				// For public properties, the definition MUST be on the property, we do not care about the setter.
-				preg_match("/\s*@var\s+(\S+)\s+/m", $property->getDocComment(), $matches);
+				preg_match("/\s*@var\s+(\S+)\s+/m", f_util_ClassUtils::getDocComment($property), $matches);
 			}
 			elseif ($getSetCount === 2)
 			{
@@ -275,9 +277,9 @@ class f_mvc_DynBeanModel implements f_mvc_BeanModel
 					// or
 					// 4. property doc comment
 					// TODO: detect arrays
-					if (preg_match("/\s*@param\s+(\S+)\s+\\$".$firstParameter->getName()."\s*/m", $setter->getDocComment(), $matches)
-					|| preg_match("/\s*@return\s+(\S+)\s+/m", $getter->getDocComment(), $matches)
-					|| ($property !== null && preg_match("/\s*@var\s+(\S+)\s+/m", $property->getDocComment(), $matches)))
+					if (preg_match("/\s*@param\s+(\S+)\s+\\$".$firstParameter->getName()."\s*/m", f_util_ClassUtils::getDocComment($setter), $matches)
+					|| preg_match("/\s*@return\s+(\S+)\s+/m", f_util_ClassUtils::getDocComment($getter), $matches)
+					|| ($property !== null && preg_match("/\s*@var\s+(\S+)\s+/m", f_util_ClassUtils::getDocComment($property), $matches)))
 					{
 						// nothing, just to have a $matches
 					}
