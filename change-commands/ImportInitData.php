@@ -33,12 +33,13 @@ class commands_ImportInitData extends commands_AbstractChangeCommand
 		if ($completeParamCount == 0)
 		{
 			$modules = array();
-			foreach (glob("modules/*", GLOB_ONLYDIR) as $module)
+			foreach (glob("modules/*/setup", GLOB_ONLYDIR) as $path)
 			{
-				$modules[] = basename($module);
+				$modules[] = basename(dirname($path));
 			}
 			return $modules;
 		}
+		return null;
 	}
 
 	/**

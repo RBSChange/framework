@@ -34,33 +34,34 @@ class commands_ApplyPatch extends commands_AbstractChangeCommand
 		{
 			return null;
 		}
-		$this->loadFramework();
+		
 		$list = PatchService::getInstance()->check();
 		if (f_util_ArrayUtils::isEmpty($list))
 		{
 			return null;
 		}
+		
 		if ($completeParamCount == 0)
 		{
 			$components = array();
-			foreach ($list as $packageName => $patchList)
+			foreach (array_keys($list) as $packageName)
 			{
 				$components[] = str_replace('modules_', '', $packageName);
 			}
 			return $components;
 		}
-		if ($completeParamCount == 1)
+		
+		$packageName = $params[0];
+		if ($packageName != "framework")
 		{
-			$packageName = $params[0];
-			if ($packageName != "framework")
-			{
-				$packageName = "modules_".$packageName;
-			}
-			if (isset($list[$packageName]))
-			{
-				return $list[$packageName];
-			}
+			$packageName = "modules_".$packageName;
 		}
+		
+		if (isset($list[$packageName]))
+		{
+			return $list[$packageName];
+		}
+		return null;
 	}
 
 	/**
@@ -112,7 +113,7 @@ class commands_ApplyPatch extends commands_AbstractChangeCommand
 			$patch = new $className($this);
 			$patch->executePatch();
 			PatchService::getInstance()->patchApply($moduleName, $patchNumber, $patch->isCodePatch());
-			return $this->quitOk('Patch "' . $moduleName.'/'.$patchNumber . '" successfully applied.');
+			
 		}
 		catch (ClassNotFoundException $e)
 		{
@@ -124,5 +125,7 @@ Please check the README file to know how to apply this patch.");
 		{
 			return $this->quitError("Application of patch \"".$moduleName."/".$patchNumber."\" failed:\n".$e->getMessage()."\n".$e->getTraceAsString());
 		}
+		
+		return $this->quitOk('Patch "' . $moduleName.'/'.$patchNumber . '" successfully applied.');
 	}
 }

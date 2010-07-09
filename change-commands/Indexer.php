@@ -35,6 +35,7 @@ class commands_Indexer extends commands_AbstractChangeCommand
 		{
 			return $this->actions;
 		}
+		return null;
 	}
 	
 	/**

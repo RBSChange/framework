@@ -58,7 +58,9 @@ class commands_ImportData extends commands_AbstractChangeCommand
 			}
 			return $scripts;
 		}
+		return null;
 	}
+	
 	/**
 	 * @param String[] $params
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true

@@ -230,7 +230,7 @@ class commands_InitProject extends commands_AbstractChangeCommand
 	private function substitueVars($content, $substitutions)
 	{
 		$from = array();
-		foreach ($substitutions as $key => $value)
+		foreach (array_keys($substitutions) as $key)
 		{
 			$from[] = '${'.$key.'}';
 		}
