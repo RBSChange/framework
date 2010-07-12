@@ -20,6 +20,11 @@ class indexer_StandardSolrSearch
 	private $doSuggestion = false;
 	
 	/**
+	 * @var String[]
+	 */
+	private $suggestionTerms = array();
+	
+	/**
 	 * @param indexer_Query $q
 	 */
 	public function __construct($q)
@@ -123,10 +128,12 @@ class indexer_StandardSolrSearch
 	
 	/**
 	 * Enable suggestion
+	 * @param String[] $suggestionTerms
 	 */
-	function doSuggestion()
+	function doSuggestion($suggestionTerms)
 	{
 		$this->doSuggestion = true;
+		$this->suggestionTerms = $suggestionTerms;
 	}
 	
 	/**
@@ -149,7 +156,7 @@ class indexer_StandardSolrSearch
 		}
 		if ($this->doSuggestion)
 		{
-			$terms = $this->query->getTerms();
+			$terms = $this->suggestionTerms;
 			if (f_util_ArrayUtils::isNotEmpty($terms))
 			{
 				$query[] = '&spellcheck.collate=true&spellcheck=true&spellcheck.q='.join("+", $terms).'&qt=/spellchecker_' . $this->query->getLang().'&spellcheck.count=1';
