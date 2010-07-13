@@ -306,18 +306,18 @@ class indexer_IndexService extends BaseService
 	 * (search on label and full text with a boost on the label). 
 	 * 
 	 * @param indexer_Query $query
-	 * @param indexer_Query $doSuggestion
+	 * @param String[] $suggestionTerms
 	 * @return indexer_SearchResults
 	 */
-	public function search(indexer_Query $query, $doSuggestion = false)
+	public function search(indexer_Query $query, $suggestionTerms = null)
 	{
 		try
 		{
 			$this->beginFrontIndexerMode();
 			$solrSearch = new indexer_StandardSolrSearch($query);
-			if ($doSuggestion)
+			if (f_util_ArrayUtils::isNotEmpty($suggestionTerms))
 			{
-				$solrSearch->doSuggestion();
+				$solrSearch->doSuggestion($suggestionTerms);
 			}
 			$data = $this->manager->query($solrSearch);
 			$searchResults = new indexer_SolrSearchResults($data, $solrSearch);

@@ -19,31 +19,40 @@
 <!-- WARNING: this is designed for SolR 1.4 -->
 <config>
 	<abortOnConfigurationError>${solr.abortOnConfigurationError:true}</abortOnConfigurationError>
+	
+	<dataDir>${solr.data.dir:./data}</dataDir>
 
 	<indexDefaults>
 		<!-- Values here affect all index writers and act as a default unless overridden. -->
 		<useCompoundFile>false</useCompoundFile>
-		<mergeFactor>10</mergeFactor>
-		<maxBufferedDocs>1000</maxBufferedDocs>
-		<maxMergeDocs>2147483647</maxMergeDocs>
+		<mergeFactor>${solr.mergefactor:10}</mergeFactor>
+		<!-- Sets the amount of RAM that may be used by Lucene indexing
+      		for buffering added documents and deletions before they are
+      		flushed to the Directory.  -->
+    	<ramBufferSizeMB>${solr.ramBufferSizeMB:32}</ramBufferSizeMB>
 		<maxFieldLength>10000</maxFieldLength>
 		<writeLockTimeout>1000</writeLockTimeout>
 		<commitLockTimeout>10000</commitLockTimeout>
+		<luceneAutoCommit>${solr.autocommit:false}</luceneAutoCommit>
+		<lockType>native</lockType>
+		<!-- If both ramBufferSizeMB and maxBufferedDocs is set, then Lucene will flush
+     		based on whichever limit is hit first.  -->
+    	<!--<maxBufferedDocs>1000</maxBufferedDocs>-->
 	</indexDefaults>
 
 	<mainIndex>
 		<!-- options specific to the main on-disk lucene index -->
 		<useCompoundFile>false</useCompoundFile>
-		<mergeFactor>10</mergeFactor>
-		<maxBufferedDocs>1000</maxBufferedDocs>
-		<maxMergeDocs>2147483647</maxMergeDocs>
+		<mergeFactor>${solr.mergefactor:10}</mergeFactor>
 		<maxFieldLength>10000</maxFieldLength>
-
 		<!-- If true, unlock any held write or commit locks on startup. 
 			This defeats the locking mechanism that allows multiple
 			processes to safely access a lucene index, and should be
 			used with care. -->
-		<unlockOnStartup>false</unlockOnStartup>
+		<unlockOnStartup>${solr.unlockonstartup:false}</unlockOnStartup>
+		<!-- If true, IndexReaders will be reopened (often more efficient) instead
+         of closed and then opened.  -->
+		<reopenReaders>true</reopenReaders>
 	</mainIndex>
 
 	<!-- the default high-performance update handler -->
@@ -70,16 +79,16 @@
 			autowarmCount - the number of entries to prepopulate from
 			and old cache.
 		-->
-		<filterCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="256" />
+		<filterCache class="solr.LRUCache" size="${solr.filterCacheSize:512}" initialSize="${solr.filterCacheInitialSize:512}" autowarmCount="${solr.filterCacheAutowarmCount:256}" />
 
 		<!-- queryResultCache caches results of searches - ordered lists of
 			document ids (DocList) based on a query, a sort, and the range
 			of documents requested.  -->
-		<queryResultCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="256" />
+		<queryResultCache class="solr.LRUCache" size="${solr.queryResultCacheSize:512}" initialSize="${solr.queryResultCacheInitialSize:512}" autowarmCount="${solr.queryResultCacheAutowarmCount:256}" />
 
 		<!-- documentCache caches Lucene Document objects (the stored fields for each document).
 			Since Lucene internal document ids are transient, this cache will not be autowarmed.  -->
-		<documentCache class="solr.LRUCache" size="512" initialSize="512" autowarmCount="0" />
+		<documentCache class="solr.LRUCache" size="${solr.documentCacheSize:512}" initialSize="${solr.documentCacheInitialSize:256}" autowarmCount="${solr.documentCacheAutowarmCount:0}" />
 
 		<!-- If true, stored fields that are not requested will be loaded lazily.
 		-->
@@ -133,64 +142,6 @@
 			<str name="echoParams">explicit</str>
 		</lst>
 	</requestHandler>
-
-	<!-- **** BEGIN Change dismax definitions ***** -->
-	<requestHandler name="dismax_fr" class="solr.DisMaxRequestHandler">
-		<lst name="defaults">
-			<str name="echoParams">explicit</str>
-			<float name="tie">0.01</float>
-			<str name="qf">text_fr^1.0 label_fr^2.0</str>
-		</lst>
-	</requestHandler>
-
-	<requestHandler name="dismax_en" class="solr.DisMaxRequestHandler">
-		<lst name="defaults">
-			<str name="echoParams">explicit</str>
-			<float name="tie">0.01</float>
-			<str name="qf">text_en^1.0 label_en^2.0</str>
-		</lst>
-	</requestHandler>
-
-	<requestHandler name="dismax_de" class="solr.DisMaxRequestHandler">
-		<lst name="defaults">
-			<str name="echoParams">explicit</str>
-			<float name="tie">0.01</float>
-			<str name="qf">text_de^1.0 label_de^2.0</str>
-		</lst>
-	</requestHandler>
-
-	<requestHandler name="dismax_nl" class="solr.DisMaxRequestHandler">
-		<lst name="defaults">
-			<str name="echoParams">explicit</str>
-			<float name="tie">0.01</float>
-			<str name="qf">text_nl^1.0 label_nl^2.0</str>
-		</lst>
-	</requestHandler>
-
-	<requestHandler name="dismax_es" class="solr.DisMaxRequestHandler">
-		<lst name="defaults">
-			<str name="echoParams">explicit</str>
-			<float name="tie">0.01</float>
-			<str name="qf">text_es^1.0 label_es^2.0</str>
-		</lst>
-	</requestHandler>
-
-	<requestHandler name="dismax_it" class="solr.DisMaxRequestHandler">
-		<lst name="defaults">
-			<str name="echoParams">explicit</str>
-			<float name="tie">0.01</float>
-			<str name="qf">text_it^1.0 label_it^2.0</str>
-		</lst>
-	</requestHandler>
-
-	<requestHandler name="dismax_pt" class="solr.DisMaxRequestHandler">
-		<lst name="defaults">
-			<str name="echoParams">explicit</str>
-			<float name="tie">0.01</float>
-			<str name="qf">text_pt^1.0 label_pt^2.0</str>
-		</lst>
-	</requestHandler>
-	<!-- **** END Change dismax definitions ***** -->
 
 	<!-- ***** BEGIN Change spellchecker definition ******* -->
 	

@@ -36,7 +36,7 @@ abstract class f_util_ArrayUtils
 	 * @param array $array
 	 * @return boolean True if $array is empty
 	 */
-	public static function isEmpty(&$array)
+	public static function isEmpty($array)
 	{
 		return $array === null || count($array) == 0;
 	}
@@ -45,7 +45,7 @@ abstract class f_util_ArrayUtils
 	 * @param array $array
 	 * @return boolean True if $array is not empty
 	 */
-	public static function isNotEmpty(&$array)
+	public static function isNotEmpty($array)
 	{
 		return !self::isEmpty($array);
 	}
