@@ -35,9 +35,12 @@ class Framework
 	 */
 	private static $benchStepsIndex = -1;
 
+	/**
+	 * @return String
+	 */
 	public static function getVersion()
 	{
-		return "3.0.0";
+		return "3.0.3";
 	}
 
 	/**
