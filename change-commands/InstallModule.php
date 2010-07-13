@@ -34,7 +34,7 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 	 */
 	function getParameters($completeParamCount, $params, $options, $current)
 	{
-		return c_ChangeBootStrap::getLastInstance()->getRemoteModules();
+		return c_ChangeBootStrap::getLastInstance()->getRemoteModules(Framework::getVersion());
 	}
 
 	/**
