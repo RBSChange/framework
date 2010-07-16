@@ -37,6 +37,15 @@ class PatchService extends BaseService
 	}
 	
 	/**
+	 * @return PatchService
+	 */
+	public static function resetInstance()
+	{
+		self::$instance = null;
+		return self::getInstance();
+	}
+	
+	/**
 	 * Return All available patch
 	 * @return array<pakageName => array<patchname>>
 	 */
