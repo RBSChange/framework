@@ -6,7 +6,9 @@ class commands_CompileConfig extends commands_AbstractChangeCommand
 	 */
 	function getUsage()
 	{
-		return "";
+		return "[options]
+Where options in:
+  --no-auto-changes: do not launch other commands on configuration changes";
 	}
 	
 	function getAlias()
