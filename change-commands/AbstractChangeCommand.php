@@ -1,6 +1,9 @@
 <?php
 abstract class commands_AbstractChangeCommand extends c_ChangescriptCommand
 {
+	/**
+	 * @return String
+	 */
 	protected function getAuthor()
 	{
 		$user = getenv("USER");
@@ -11,22 +14,34 @@ abstract class commands_AbstractChangeCommand extends c_ChangescriptCommand
 		return $user;
 	}
 
+	/**
+	 * @return String
+	 */
 	protected function getUser()
 	{
 		return $this->getAuthor();
 	}
 
+	/**
+	 * @return String
+	 */
 	protected function getApacheGroup()
 	{
 		$cdeps = $this->getComputedDeps();
 		return $cdeps["WWW_GROUP"];
 	}
 
+	/**
+	 * @return array
+	 */
 	protected function getComputedDeps()
 	{
 		return $this->getEnvVar("computedDeps");
 	}
 
+	/**
+	 * @return void
+	 */
 	protected function loadFramework()
 	{
 		if (!file_exists("framework"))
@@ -89,6 +104,9 @@ abstract class commands_AbstractChangeCommand extends c_ChangescriptCommand
 		return f_util_FileUtils::symlink($frameworkInfo["path"], "framework", f_util_FileUtils::OVERRIDE);
 	}
 
+	/**
+	 * @return String
+	 */
 	protected function getProfile()
 	{
 		if (file_exists("profile"))

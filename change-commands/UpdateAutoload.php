@@ -50,11 +50,11 @@ class commands_UpdateAutoload extends commands_AbstractChangeCommand
 				if (is_dir($path))
 				{
 					$this->message("Adding $path directory to autoload");
-					ClassResolver::getInstance()->appendDir($path);
+					ClassResolver::getInstance()->appendDir($path, true);
 					continue;
 				}
 				$this->message("Adding $path file to autoload");
-				ClassResolver::getInstance()->appendFile($path);
+				ClassResolver::getInstance()->appendFile($path, true);
 			}
 		}
 		

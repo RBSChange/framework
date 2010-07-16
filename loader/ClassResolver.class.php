@@ -532,14 +532,20 @@ class ClassResolver implements ResourceResolver
 	/**
 	 * @param String $class full class name
 	 * @param String $filePath the file defining the class
+	 * @param Boolean $override
 	 * @return String the cache path
 	 */
-	public function appendToAutoloadFile($class, $filePath)
+	public function appendToAutoloadFile($class, $filePath, $override = false)
 	{
 		$cacheFile = $this->getCachePath($class);
 		if (!file_exists($cacheFile))
 		{
 			f_util_FileUtils::mkdir(dirname($cacheFile));
+			symlink($filePath, $cacheFile);
+		}
+		elseif ($override)
+		{
+			unlink($cacheFile);
 			symlink($filePath, $cacheFile);
 		}
 		return $cacheFile;
@@ -563,26 +569,32 @@ class ClassResolver implements ResourceResolver
 
 	/**
 	 * @param String $filePath
+	 * @param Boolean $override
 	 * @return String[] the name of the classes defined in the file
 	 */
-	public function appendFile($filePath)
+	public function appendFile($filePath, $override = false)
 	{
-		return $this->constructClassList(array($filePath));
+		return $this->constructClassList(array($filePath), $override);
 	}
 
 	/**
 	 * @param String $dirPath
+	 * @param Boolean $override
 	 */
-	public function appendDir($dirPath)
+	public function appendDir($dirPath, $override = false)
 	{
 		foreach (f_util_FileUtils::find("*.php", $dirPath) as $filePath)
 		{
 			//echo __METHOD__." $filePath\n";
-			$this->appendFile($filePath);
+			$this->appendFile($filePath, $override);
 		}
 	}
 
-	private function constructClassList($files)
+	/**
+	 * @param array $files
+	 * @param Boolean $override
+	 */
+	private function constructClassList($files, $override = false)
 	{
 		foreach ($files as $file)
 		{
@@ -595,7 +607,7 @@ class ClassResolver implements ResourceResolver
 				{
 					$className = $tokenArray[$index+2][1];
 					$definedClasses[] = $className;
-					$cachePaths[] = $this->appendToAutoloadFile($className, $file);
+					$cachePaths[] = $this->appendToAutoloadFile($className, $file, $override);
 				}
 			}
 
