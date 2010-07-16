@@ -7,6 +7,7 @@ class config_ProjectParser
 {
 	/**
 	 * Merge specific config file of project with defulat config file and save config file in cache/config
+	 * @return array old and current configuration
 	 */
 	public function execute($computedDeps)
 	{
@@ -19,6 +20,33 @@ class config_ProjectParser
 
 		// Cache config dir.
 		$cacheConfigDir = WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'build' . DIRECTORY_SEPARATOR . 'config';
+		
+		$currentProfile = (defined("PROFILE") ? PROFILE : trim(file_get_contents(WEBEDIT_HOME."/profile")));
+		$cacheFile = $cacheConfigDir."/project.".$currentProfile.".xml.php";
+		$oldConfig = null;
+		$oldDefines = array();
+		if (is_file($cacheFile))
+		{
+			$lines = file($cacheFile, FILE_IGNORE_NEW_LINES);
+			if ($lines !== false)
+			{
+				unset($lines[0]);
+				foreach ($lines as $lineIndex => $line)
+				{
+					$matches = null;
+					if (preg_match('/^define\(\'(.*)\', (.*)\);$/', $line, $matches))
+					{
+						$lines[$lineIndex] = '$oldDefines[\'' .$matches[1] .'\'] = \''.str_replace("'", "\\'", $matches[2]).'\';';
+					}
+					elseif (substr($line, 0, 20) == 'Framework::$config =') 
+					{
+						$lines[$lineIndex] = '$oldConfig ='.substr($line, 20);
+					}
+				}
+				$oldConfigCode = join("\n", $lines);
+				eval($oldConfigCode);
+			}
+		}
 
 		// Config Dir for over write.
 		$fileList = scandir($configDir);
@@ -75,6 +103,7 @@ class config_ProjectParser
 		{
 			if (!is_dir($configDir . DIRECTORY_SEPARATOR . $profilFile) && preg_match('/^project.+\.xml$/', $profilFile) && $profilFile != "project.xml")
 			{
+				$profileName = substr(basename($profilFile), 8, -4);
 				// Create array for manage configuration.
 				$configList = array('packageversion' => $packagesVersion);
 
@@ -202,9 +231,24 @@ class config_ProjectParser
 				$content .= "\n // Framework::\$config PART // \n";
 				$content .= "Framework::\$config = " . var_export($configList, true) . ';';
 				
+				if ($oldConfig !== null && $profileName == $currentProfile)
+				{
+					$currentDefines = array();
+					foreach (array_merge($globalConstantsForProfile, $moduleContantsForProfile) as $defineLine)
+					{
+						$matches = null;
+						if (preg_match('/^define\(\'(.*)\', (.*)\);$/', $defineLine, $matches))
+						{
+							$currentDefines[$matches[1]] = $matches[2];
+						}
+					}
+					$currentConfig = array("config" => $configList, "defines" => $currentDefines);
+				}
+				
 				$this->writeFile($cacheConfigDir . DIRECTORY_SEPARATOR . $profilFile . '.php', $content);
 			}
 		}
+		return ($oldConfig !== null) ? array("old" => array("defines" => $oldDefines, "config" => $oldConfig), "current" => $currentConfig) : null;
 	}
 
 	private function writeFile($path, $content)

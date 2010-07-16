@@ -32,13 +32,9 @@ class commands_CompileConfig extends commands_AbstractChangeCommand
 		$this->message("== Compile config ==");
 		
 		$projectParser = new config_ProjectParser();
-		$projectParser->execute($this->getComputedDeps());
+		$oldAndCurrent = $projectParser->execute($this->getComputedDeps());
+		$this->getParent()->setEnvVar("commands_CompileConfig_oldAndCurrent", $oldAndCurrent);
 		
-		$this->warnMessage("Warn: some targets can depend on the configuration file. Please run the target that depends on
-if AG_LOGGING_LEVEL was modified please execute compile-js-dependencies.
-Warn: if AG_SUPPORTED_LANGUAGES was updated, please execute change generate-database to update database structure.
-Warn: if you changed CHANGE_USE_CORRECTION or CHANGE_USE_WORKFLOW, please run change compile-documents.");
-
 		if (defined("FRAMEWORK_HOME"))
 		{
 			// Framework is loaded and configuration may have changed
@@ -54,7 +50,53 @@ Warn: if you changed CHANGE_USE_CORRECTION or CHANGE_USE_WORKFLOW, please run ch
 		{			
 			$ts = time();
 			file_put_contents(WEBEDIT_HOME . '/build/config/oauth/script/token.txt', md5($ts . mt_rand()) .'#' . md5($ts . mt_rand()));
-		}		
+		}
+		
+		if ($oldAndCurrent !== null)
+		{
+			$old = $oldAndCurrent["old"];
+			$current = $oldAndCurrent["current"];
+			
+			if ($old["defines"]["AG_LOGGING_LEVEL"] != $current["defines"]["AG_LOGGING_LEVEL"])
+			{
+				$this->message("AG_LOGGING_LEVEL changed");
+				if (isset($options["no-auto-changes"]))
+				{
+					$this->warnMessage("You must run manually compile-js-dependencies");
+				}
+				else
+				{
+					$this->getParent()->executeCommand("compile-js-dependencies");
+				}
+			}
+			if ($old["defines"]["AG_SUPPORTED_LANGUAGES"] != $current["defines"]["AG_SUPPORTED_LANGUAGES"])
+			{
+				$this->message("AG_SUPPORTED_LANGUAGES changed");
+				if (isset($options["no-auto-changes"]))
+				{
+					$this->warnMessage("You must run manually generate-database");
+				}
+				else
+				{
+					$this->getParent()->executeCommand("generate-database");	
+				}
+			}
+			if ($old["defines"]["CHANGE_USE_CORRECTION"] != $current["defines"]["CHANGE_USE_CORRECTION"]
+			 || $old["defines"]["CHANGE_USE_WORKFLOW"] != $current["defines"]["CHANGE_USE_WORKFLOW"])
+			{
+				$this->message("CHANGE_USE_CORRECTION or CHANGE_USE_WORKFLOW changed");
+				if (isset($options["no-auto-changes"]))
+				{
+					$this->warnMessage("You must run manually compile-documents");
+				}
+				else
+				{
+					$this->getParent()->executeCommand("compile-documents");	
+				}
+				
+			}
+		}
+		
 		$this->quitOk("Config compiled");
 	}
 }
