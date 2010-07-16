@@ -53,7 +53,7 @@ abstract class f_persistentdocument_DocumentFilterImpl implements f_persistentdo
 	/**
 	 * @var f_persistentdocument_DocumentFilterParameter[]
 	 */
-	private $parameters;
+	private $parameters = array();
 	
 	/**
 	 * @return String

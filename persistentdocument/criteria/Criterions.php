@@ -146,7 +146,7 @@ class f_persistentdocument_criteria_InExpression implements f_persistentdocument
 	 */
 	public function __construct($propertyName, $values, $not = false)
 	{
-		if ($values[0] instanceof f_persistentdocument_PersistentDocument)
+		if (f_util_ArrayUtils::isNotEmpty($values) && f_util_ArrayUtils::firstElement($values) instanceof f_persistentdocument_PersistentDocument)
 		{
 			$this->propertyName = $propertyName.".id";
 			$this->values = DocumentHelper::getIdArrayFromDocumentArray($values);
