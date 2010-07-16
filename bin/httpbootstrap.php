@@ -210,11 +210,6 @@ class c_ChangeBootStrap
 		}
 		return $this->name;
 	}
-	
-	function normalizePath($path)
-	{
-		return (DIRECTORY_SEPARATOR === '/') ? $path : str_replace('/', DIRECTORY_SEPARATOR, $path);
-	}
 
 	/**
 	 * @param String $name
@@ -379,7 +374,7 @@ class c_ChangeBootStrap
 		
 		$repo = array_keys($this->getLocalRepositories());
 		$computedComponents["LOCAL_REPOSITORY"] = $repo[0];
-		$computedComponents["WWW_GROUP"] = $this->getProperties()->getProperty("WWW_GROUP", "");
+		$computedComponents["WWW_GROUP"] = $this->getProperties()->getProperty("WWW_GROUP", "www-data");
 		$proxy = $this->getProxy();
 		if ($proxy !== null)
 		{
@@ -425,7 +420,7 @@ class c_ChangeBootStrap
 			}
 			
 			foreach ($computedDeps as $componentType => $deps)
-			{		
+			{
 				if ($componentType === self::$DEP_PEAR && $computedComponents["USE_CHANGE_PEAR_LIB"])
 				{
 					$componentType = self::$DEP_PEAR_LIB;
@@ -446,10 +441,19 @@ class c_ChangeBootStrap
 					else
 					{
 						$actualVersion = $computedComponents[$componentTypeStr][$componentName]["version"];
-						if ($this->compareVersion($componentVersion, $actualVersion) > 0)
+						$compareResult = $this->compareVersion($componentVersion, $actualVersion);
+						if ($compareResult != 0)
 						{
-							$componentPath = $this->getComponentPath($componentType, $componentName, $componentVersion);
-							$computedComponents[$componentTypeStr][$componentName] = array("version" => $componentVersion, "path" => $componentPath);
+							if (preg_replace('/-[0-9]+$/', '', $actualVersion) 
+							   != preg_replace('/-[0-9]+$/', '', $componentVersion))
+							{
+								c_warning($this->getDepTypeAsString($componentType)."/$componentName is requested for versions $componentVersion and $actualVersion => it is possible you will encounter problems.");   	
+							}
+							if ($compareResult > 0)
+							{
+								$componentPath = $this->getComponentPath($componentType, $componentName, $componentVersion);
+								$computedComponents[$componentTypeStr][$componentName] = array("version" => $componentVersion, "path" => $componentPath);
+							}
 						}
 					}
 				}
@@ -488,12 +492,14 @@ class c_ChangeBootStrap
 
 	function setAutoloadPath($autoloadPath = ".change/autoload")
 	{
-		if ($autoloadPath === '.change/autoload')
+		if ($autoloadPath[0] != "/")
 		{
-			$autoloadPath =  $this->wd."/".$autoloadPath;
+			$this->autoloadPath = $this->wd."/".$autoloadPath;
 		}
-		
-		$this->autoloadPath = $this->normalizePath($autoloadPath);
+		else
+		{
+			$this->autoloadPath = $autoloadPath;
+		}
 		if (!is_dir($this->autoloadPath) && !mkdir($this->autoloadPath, 0777, true))
 		{
 			throw new Exception("Could not create autoload directory ".$this->autoloadPath);
@@ -517,7 +523,8 @@ class c_ChangeBootStrap
 	function appendToAutoload($componentPath, $followDeps = true)
 	{
 		$autoloadPath = $this->getAutoloadPath();
-		$autoloadedFlag = $this->normalizePath($autoloadPath."/".md5($componentPath).".autoloaded");
+		$autoloadedFlag = $autoloadPath."/".str_replace('/', '_', $componentPath).".autoloaded";
+
 		if (!$this->autoloadRegistered)
 		{
 			if (!is_dir($autoloadPath) && !@mkdir($autoloadPath, 0777, true))
@@ -555,14 +562,14 @@ class c_ChangeBootStrap
 
 		foreach ($classes as $className => $relPath)
 		{
-			$linkPath = $this->normalizePath($autoloadPath."/".str_replace('_', '/', $className).'/to_include');
+			$linkPath = $autoloadPath."/".str_replace('_', '/', $className).'/to_include';
 			$linkDir = dirname($linkPath);
 			if (!is_dir($linkDir) && !mkdir($linkDir, 0777, true))
 			{
 				throw new Exception("Could not create $linkDir");
 			}
-			$linkTarget = $this->normalizePath($componentPath."/".$relPath);
-			if ((!is_file($linkPath) || (readlink($linkPath) != $linkTarget && unlink($linkPath)))
+			$linkTarget = $componentPath."/".$relPath;
+			if ((!is_link($linkPath) || (readlink($linkPath) != $linkTarget && unlink($linkPath)))
 			&& !symlink($linkTarget, $linkPath))
 			{
 				throw new Exception("Could not symlink ".$componentPath."/".$relPath." to $linkPath");
@@ -747,24 +754,43 @@ class c_ChangeBootStrap
 		$components = array();
 		if ($nodes->length == 1)
 		{
-			$frameworkVersion = $nodes->item(0)->textContent;
+			$frameworkElem = $nodes->item(0);
+			$frameworkVersion = $frameworkElem->textContent;
+			if ($frameworkElem->hasAttribute("hotfixes"))
+			{
+				$hotfixes = explode(",", $frameworkElem->getAttribute("hotfixes"));
+				if (count($hotfixes) > 0)
+				{
+					$frameworkVersion .= "-".max($hotfixes);
+				}
+			}
 			$components["framework"] = array(self::$DEP_CHANGE_LIB, "framework", $frameworkVersion);
 		}
 
 		foreach ($xpath->query("c:dependencies/c:modules/c:module") as $moduleElem)
 		{
 			$matches = array();
-			if (!preg_match('/^(.*)-([0-9].*)$/', $moduleElem->textContent, $matches))
+			if (!preg_match('/^(.*?)-([0-9].*)$/', $moduleElem->textContent, $matches))
 			{
 				throw new Exception("Invalid version number module ".$moduleElem->textContent);
 			}
-			$components["module/".$matches[1]] = array(self::$DEP_MODULE, $matches[1], $matches[2]);
+			$moduleName = $matches[1];
+			$moduleVersion = $matches[2];
+			if ($moduleElem->hasAttribute("hotfixes"))
+			{
+				$hotfixes = explode(",", $moduleElem->getAttribute("hotfixes"));
+				if (count($hotfixes) > 0)
+				{
+					$moduleVersion .= "-".max($hotfixes);
+				}
+			}
+			$components["module/".$moduleName] = array(self::$DEP_MODULE, $moduleName, $moduleVersion);
 		}
 
 		foreach ($xpath->query("c:dependencies/c:libs/c:lib") as $libElem)
 		{
 			$matches = array();
-			if (!preg_match('/^(.*)-([0-9].*)$/', $libElem->textContent, $matches))
+			if (!preg_match('/^(.*?)-([0-9].*)$/', $libElem->textContent, $matches))
 			{
 				throw new Exception("Invalid version number library ".$libElem->textContent);
 			}
@@ -774,7 +800,7 @@ class c_ChangeBootStrap
 		foreach ($xpath->query("c:dependencies/c:change-libs/c:lib") as $libElem)
 		{
 			$matches = array();
-			if (!preg_match('/^(.*)-([0-9].*)$/', $libElem->textContent, $matches))
+			if (!preg_match('/^(.*?)-([0-9].*)$/', $libElem->textContent, $matches))
 			{
 				throw new Exception("Invalid version number change library ".$libElem->textContent);
 			}
@@ -868,23 +894,30 @@ class c_ChangeBootStrap
 						{
 							c_debug("Already tried $componentType/$componentName-$version");
 						}
-						elseif ($this->compareVersion($version, $triedComponents[$componentType.'/'.$componentName][$triedComponentsCount-1]) <= 0)
-						{
-							$triedComponents[$componentType.'/'.$componentName][] = $version;
-							usort($triedComponents[$componentType.'/'.$componentName], array($this, "compareVersion"));
-							c_message("We already got a newer version than $version for $componentType/$componentName (".$triedComponents[$componentType.'/'.$componentName][$triedComponentsCount].")");
-						}
 						else
 						{
+							$actualVersion = $triedComponents[$componentType.'/'.$componentName][$triedComponentsCount-1];
 							$triedComponents[$componentType.'/'.$componentName][] = $version;
-							$subComponentPath = null;
-							if (!$this->hasComponentLocally($componentType, $componentName, $version, $subComponentPath))
+							usort($triedComponents[$componentType.'/'.$componentName], array($this, "compareVersion"));
+							/*
+							// If actualVersion & version are just "hotfix" different, it is ok
+							if (preg_replace('/-[0-9]+$/', '', $actualVersion) 
+							   != preg_replace('/-[0-9]+$/', '', $version))
 							{
-								$this->downloadComponent($triedComponents, $componentType, $componentName, $version);
+								c_warning($this->getDepTypeAsString($componentType)."/$componentName is requested for versions $version and $actualVersion.");   	
 							}
-							elseif ($this->deepCheck && $subComponentPath !== null)
+*/
+							if ($this->compareVersion($version, $actualVersion) > 0)
 							{
-								$this->checkAndLoadComponentDependencies($triedComponents, $subComponentPath);
+								$subComponentPath = null;
+								if (!$this->hasComponentLocally($componentType, $componentName, $version, $subComponentPath))
+								{
+									$this->downloadComponent($triedComponents, $componentType, $componentName, $version);
+								}
+								elseif ($this->deepCheck && $subComponentPath !== null)
+								{
+									$this->checkAndLoadComponentDependencies($triedComponents, $subComponentPath);
+								}
 							}
 						}
 					}
@@ -1062,6 +1095,45 @@ class c_ChangeBootStrap
 			{
 				return $localRepoPath."/".$relativePath;
 			}
+			else
+			{
+				$matches = null;
+				if (preg_match('/^(.*)-([0-9]*)$/', $version, $matches))
+				{
+					// requested version is hotfix, nothing to do
+					/*
+					$rootVersion = $matches[1];
+					$hotfixNumber = $matches[2];
+					$rootRelativePath = $this->getRelativeComponentPath($componentType, $componentName, $rootVersion);
+					if (is_dir($localRepoPath."/".$rootRelativePath))
+					{
+						return $localRepoPath."/".$rootRelativePath;
+					}
+					*/
+				}
+				else
+				{
+					$hotfixes = glob($localRepoPath."/".$relativePath."-*", GLOB_ONLYDIR);
+					if (count($hotfixes) > 0)
+					{
+						// return last hotfix
+						$maxhotFix = 0;
+						foreach ($hotfixes as $hotfix)
+						{
+							$matches = null;
+							if (preg_match('/^(.*)-([0-9]*)$/', basename($hotfix), $matches))
+							{
+								$hotfixNumber = intval($matches[2]);
+								if ($hotfixNumber > $maxhotFix)
+								{
+									$maxhotFix = $hotfixNumber;
+								}
+							}
+						}
+						return $localRepoPath."/".$relativePath."-".$maxhotFix;
+					}	
+				}
+			}
 		}
 		return null;
 	}
@@ -1095,6 +1167,10 @@ class c_ChangeBootStrap
 
 	private function getType($typeStr)
 	{
+		if (is_int($typeStr))
+		{
+			return $typeStr;
+		}
 		switch ($typeStr)
 		{
 			case "modules":
@@ -1190,12 +1266,16 @@ class c_ChangeBootStrap
 				$elementName = $result->item($i)->getAttribute("url");
 				if ($elementName == "framework")
 				{
-					$elementName = self::$DEP_CHANGE_LIB."/framework";
+					$elementType = self::$DEP_CHANGE_LIB;
+					$elementName = $elementType."/framework";
 				}
-				elseif (substr($elementName, 0, 8) == "modules/")
+				else
 				{
-					$elementName = self::$DEP_MODULE."/".substr($elementName, 8);
+					$elementInfo = explode("/", $elementName);
+					$elementType = $this->getType($elementInfo[0]);
+					$elementName = $elementType."/".$elementInfo[1];
 				}
+				
 				foreach ($xpath->query("versions/version", $result->item($i)) as $versionElem)
 				{
 					$version = $versionElem->textContent;
@@ -1233,29 +1313,50 @@ class c_ChangeBootStrap
 			}
 
 			$this->repositoryContents[$repository] = $components;
-			return $components;
+			
+			//var_export($components);
 		}
 		return $this->repositoryContents[$repository];
 	}
-
-	function getRemoteModules()
+	
+	public function getHotfixes($releaseName)
 	{
-		// TODO: add dependencies to be able to check project compatibility
-		// TODO: add caching
+		$hotfixes = array();
+		
 		ob_start();
-		$modules = array();
-		$modulePrefix = self::$DEP_MODULE."/";
-		$modulePrefixLen = strlen($modulePrefix);
 		foreach ($this->getRepositories() as $repository)
 		{
 			try
 			{
-				$content = $this->getRepositoryContent($repository);
-				foreach (array_keys($content) as $componentName)
+				$index = $this->download($repository."/release-index.xml");
+				$indexDom = new DOMDocument();
+				if (!@$indexDom->loadXML($index))
 				{
-					if (cboot_StringUtils::startsWith($componentName, $modulePrefix))
+					throw new Exception("Could not load $repository release index");
+				}
+				$indexXpath = new DOMXPath($indexDom);
+				foreach ($indexXpath->query("release[@name = '$releaseName']") as $releaseElem)
+				{						
+					$releaseFile = ($releaseElem->getAttribute("pending") == "true" ? "pendingrelease" : "release") . "-".$releaseElem->getAttribute("name").".xml";
+					$releaseContent = $this->download($repository."/".$releaseFile);
+					$releaseDom = new DOMDocument();
+					if (!@$releaseDom->loadXML($releaseContent))
 					{
-						$modules[] = substr($componentName, $modulePrefixLen);
+						throw new Exception("Could not load $repository $releaseFile");
+					}
+					$releaseXpath = new DOMXPath($releaseDom);
+					foreach ($releaseXpath->query("//hotfix[not(@pending)]") as $hotfixElem)
+					{
+						$componentElem = $hotfixElem->parentNode;
+						$componentName = $componentElem->getAttribute("name");
+						$componentType = $componentElem->tagName;
+						$componentFullname = $componentType."/".$componentName;
+						if (!isset($hotfixes[$componentFullname]))
+						{
+							$hotfixes[$componentFullname] = array();
+						}
+						$hotfixes[$componentFullname][] = $componentElem->getAttribute("version").
+							"-".$hotfixElem->getAttribute("number");
 					}
 				}
 			}
@@ -1265,7 +1366,87 @@ class c_ChangeBootStrap
 			}
 		}
 		ob_get_clean();
-		return array_unique($modules);
+		return $hotfixes;
+	}
+
+	function getRemoteModules($releaseName = null)
+	{
+		if ($releaseName === null)
+		{
+			// TODO: add dependencies to be able to check project compatibility
+			// TODO: add caching
+			ob_start();
+			$modules = array();
+			$modulePrefix = self::$DEP_MODULE."/";
+			$modulePrefixLen = strlen($modulePrefix);
+			foreach ($this->getRepositories() as $repository)
+			{
+				try
+				{
+					$content = $this->getRepositoryContent($repository);
+					foreach (array_keys($content) as $componentName)
+					{
+						if (cboot_StringUtils::startsWith($componentName, $modulePrefix))
+						{
+							$modules[] = substr($componentName, $modulePrefixLen);
+						}
+					}
+				}
+				catch (Exception $e)
+				{
+					c_debug($e->getMessage());
+				}
+			}
+			ob_get_clean();
+			return array_unique($modules);
+		}
+		else
+		{
+			ob_start();
+			$modules = array();
+			
+			foreach ($this->getRepositories() as $repository)
+			{
+				try
+				{
+					$index = $this->download($repository."/release-index.xml");
+					$indexDom = new DOMDocument();
+					if (!@$indexDom->loadXML($index))
+					{
+						throw new Exception("Could not load $repository release index");
+					}
+					$indexXpath = new DOMXPath($indexDom);
+					foreach ($indexXpath->query("release[@name = '$releaseName']") as $releaseElem)
+					{						
+						$releaseFile = ($releaseElem->getAttribute("pending") == "true" ? "pendingrelease" : "release") . "-".$releaseElem->getAttribute("name").".xml";
+						$releaseContent = $this->download($repository."/".$releaseFile);
+						$releaseDom = new DOMDocument();
+						if (!@$releaseDom->loadXML($releaseContent))
+						{
+							throw new Exception("Could not load $repository $releaseFile");
+						}
+						$releaseXpath = new DOMXPath($releaseDom);
+						foreach ($releaseXpath->query("module[@available='true']") as $moduleElem)
+						{
+							$modules[] = $moduleElem->getAttribute("name")."-".$moduleElem->getAttribute("version");
+							/*
+							Ignore hotfixes here...
+							foreach ($releaseXpath->query("hotfix", $moduleElem) as $hotfixElem)
+							{
+								$modules[] = $moduleElem->getAttribute("name")."-".$moduleElem->getAttribute("version")."-".$hotfixElem->getAttribute("number");
+							}
+							*/
+						}
+					}
+				}
+				catch (Exception $e)
+				{
+					c_debug($e->getMessage());
+				}
+			}
+			ob_get_clean();
+			return array_unique($modules);
+		}
 	}
 
 	// Dependencies
@@ -1507,6 +1688,7 @@ class c_ChangeBootStrap
 
 	function installComponent($componentType, $componentName, $version)
 	{
+		$componentType = $this->getType($componentType);
 		$componentPath = null;
 		if ($this->hasComponentLocally($componentType, $componentName, $version, $componentPath))
 		{
@@ -2429,10 +2611,10 @@ class cboot_Properties
 		{
 			$val = false;
 		}
-		elseif (is_string($val))
+		else
 		{
 			$valLength = strlen($val);
-			if (($valLength > 1) && $val[0] == "'" && $val[$valLength-1] == "'" || $val[0] == "\"" && $val[$valLength-1] == "\"")
+			if ($val[0] == "'" && $val[$valLength-1] == "'" || $val[0] == "\"" && $val[$valLength-1] == "\"")
 			{
 				$val = substr($val, 1, -1);
 			}

@@ -34,7 +34,30 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 	 */
 	function getParameters($completeParamCount, $params, $options, $current)
 	{
-		return c_ChangeBootStrap::getLastInstance()->getRemoteModules(Framework::getVersion());
+		$bootStrap = c_ChangeBootStrap::getLastInstance();
+		$remoteModules = $bootStrap->getRemoteModules(Framework::getVersion());
+		$moduleService = ModuleService::getInstance();
+		foreach ($remoteModules as $key => $module)
+		{
+			$matches = null;
+			if (!preg_match('/^(.*?)-([0-9].*)$/', $module, $matches))
+			{
+				// this should not happen ...
+				continue;
+			}
+			$moduleName = $matches[1];
+			if (!$moduleService->moduleExists($moduleName))
+			{
+				continue;
+			}
+			$installedVersion = $moduleService->getModuleVersion($moduleName);
+			$remoteVersion = $matches[2];
+			if ($bootStrap->compareVersion($installedVersion, $remoteVersion) <= 0)
+			{
+				unset($remoteModules[$key]);
+			}
+		}
+		return $remoteModules;
 	}
 
 	/**
@@ -47,15 +70,15 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 		$moduleFullName = $params[0];
 		$this->message("== Install module $moduleFullName ==");
 		
-		if (!preg_match("/^.*-[0-9].*$/", $moduleFullName))
+		$matches = null;
+		if (!preg_match("/^(.*?)-([0-9].*)$/", $moduleFullName, $matches))
 		{
 			return $this->quitError("'$moduleFullName' is not a valid component name");
 		}
 		
 		$bootStrap = $this->getParent()->getBootStrap();
-		$index = strpos($moduleFullName, "-");
-		$moduleName = substr($moduleFullName, 0, $index);
-		$moduleVersion = substr($moduleFullName, $index+1);
+		$moduleName = $matches[1];
+		$moduleVersion = $matches[2];
 		
 		$installedVersion = ModuleService::getInstance()->getModuleVersion("modules_".$moduleName);
 		if ($installedVersion !== null)
@@ -77,6 +100,7 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 		
 		$modulesToInstall = array();
 		$libsToInstall = array();
+		$pearLibsToInstall = array();
 		
 		$this->message("Check dependencies integrity");
 		
@@ -110,6 +134,10 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 							$libsToInstall[] = array("path" => $bootStrap->getComponentPath($depType, $depName, $depVersion),
 							"name" => $depName, "version" => $depVersion);
 							break;
+						case "lib-pear":
+							$pearLibsToInstall[] = array("path" => $bootStrap->getComponentPath($depType, $depName, $depVersion),
+							"name" => $depName, "version" => $depVersion);
+							break;
 					}
 				}
 			}
@@ -124,6 +152,34 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 			$this->message("Symlink ".$libInfo["name"]."-".$libInfo["version"]);
 			f_util_FileUtils::symlink($libInfo["path"], WEBEDIT_HOME."/libs/".$libInfo["name"]);
 			$this->changecmd("update-autoload", array(WEBEDIT_HOME."/libs/".$libInfo["name"]));
+		}
+		
+		if (count($pearLibsToInstall) > 0)
+		{
+			if (isset($projectDeps["PEAR_DIR"]) &&  isset($projectDeps["lib-pear"]))
+			{
+				$pearDir = $projectDeps["PEAR_DIR"];
+				foreach ($pearLibsToInstall as $libInfo)
+				{
+					$libName = $libInfo["name"];
+					
+					$this->message("Symlink pearlibs/$libName-".$libInfo["version"]);
+					if (f_util_FileUtils::symlink($libInfo["path"], WEBEDIT_HOME."/libs/pearlibs/".$libName, f_util_FileUtils::OVERRIDE))
+					{
+						if ($projectDeps['PEAR_WRITEABLE'])
+						{
+							$this->message("copy libs/pearlibs/".$libName . " to " . $pearDir);
+							f_util_FileUtils::cp(WEBEDIT_HOME."/libs/pearlibs/".$libName, $pearDir, 
+							f_util_FileUtils::OVERRIDE + f_util_FileUtils::APPEND, array('change.xml', 'tests', 'docs'));
+						}
+						else
+						{
+							$this->message("Please check if $libName-".$libInfo["version"] . " PEAR extension is correctly installed!");
+						}
+					}
+				}
+				$this->changecmd("update-autoload", array($pearDir));
+			}
 		}
 		
 		foreach ($modulesToInstall as $modInfo)
@@ -141,13 +197,11 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 		}
         $this->changecmd("init-webapp");
 		$doc = f_util_DOMUtils::getDocument(WEBEDIT_HOME."/change.xml");
-		$xpath = new DOMXPath($doc);
-		$xpath->registerNamespace("c", "http://www.rbs.fr/schema/change-project/1.0");
-		if ($xpath->query("c:dependencies/c:modules/c:module[text() = '$moduleFullName']")->length == 0)
+		$doc->registerNamespace("c", "http://www.rbs.fr/schema/change-project/1.0");
+		if (!$doc->exists("c:dependencies/c:modules/c:module[text() = '$moduleFullName']"))
 		{
-			$modulesElem = $xpath->query("c:dependencies/c:modules")->item(0);
+			$modulesElem = $doc->findUnique("c:dependencies/c:modules");
 			$moduleElem = $doc->createElement("module", $moduleFullName);
-			//$moduleElem = $doc->createElementNS("http://www.rbs.fr/schema/change-project/1.0", "c:module", $moduleFullName);
 			$modulesElem->appendChild($moduleElem);
 			
 			f_util_FileUtils::write(WEBEDIT_HOME."/change.xml", $doc->saveXML(), f_util_FileUtils::OVERRIDE);
