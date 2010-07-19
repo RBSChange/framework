@@ -264,6 +264,10 @@ class ModuleService extends BaseService
 	public final function getModuleVersion($moduleName)
 	{
 		$this->initializeIfNeeded();
+		if (substr($moduleName, 0, 8) !== 'modules_')
+		{
+			$moduleName = 'modules_' . $moduleName;
+		}
 		if (isset($this->packages[$moduleName]))
 		{
 			return $this->packages[$moduleName];

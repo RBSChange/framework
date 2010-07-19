@@ -393,9 +393,7 @@ class f_util_StringUtils
 	 */
 	 public static function var_dump_desc($in_varToDump = null)
 	 {
-	 	ob_start();
-		var_dump($in_varToDump);
-		return ob_get_clean();
+		return var_export($in_varToDump, true);
 	 }
 
 	 /**

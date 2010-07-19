@@ -66,8 +66,12 @@ class indexer_SolrSearchResults extends ArrayObject implements indexer_SearchRes
 			}
 			$this->results[] = $result;
 		}
-
-		$this->rows = intval($dom->findUnique("lst[@name = 'responseHeader']/lst[@name = 'params']/str[@name = 'rows']")->textContent);
+		$node = $dom->findUnique("lst[@name = 'responseHeader']/lst[@name = 'params']/str[@name = 'rows']");
+		if ($node)
+		{
+			$this->rows = intval($node->textContent);
+		}
+		
 
 		// Deal with facet
 		$facetResults = array();

@@ -415,7 +415,10 @@ class JsService extends BaseService
 		
 		$mergedScriptHash = md5(serialize($scriptRegistryOrdered));
 		$mergedScriptFileName = $mergedScriptHash . '-' . RequestContext::getInstance()->getLang() . '.js';
-		$mergedScriptPath = f_util_FileUtils::buildWebCachePath('js', $mergedScriptFileName);
+		$cacheBaseDir = f_util_FileUtils::buildWebCachePath('js');
+		// be sure the directory is writeable
+		f_util_FileUtils::mkdir($cacheBaseDir);
+		$mergedScriptPath = $cacheBaseDir.'/'.$mergedScriptFileName;
 
 		if (file_exists($mergedScriptPath) && $inline == false && $mimeContentType == K::HTML)
 		{
@@ -447,7 +450,7 @@ class JsService extends BaseService
 					$fileId['uilang'] = $rc->getUILang();
 
 					$fileLocationId = implode('-', $fileId);
-					$fileLocation = f_util_FileUtils::buildWebCachePath('js',  $fileLocationId);
+					$fileLocation = $cacheBaseDir.'/'.$fileLocationId;
 						
 					if (!is_null($skin) && $skin)
 					{

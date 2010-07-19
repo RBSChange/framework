@@ -290,17 +290,13 @@ class f_persistentdocument_DocumentFilterService extends BaseService
 		{
 			if (isset($this->filtersByModel[$modelName]))
 			{
-			//var_dump($this->filtersByModel[$modelName]);
-				
 				$filtersTemp = $this->filtersByModel[$modelName]['all'];
-				//var_dump($filtersTemp);
 				foreach ($methods as $method)
 				{
 					if (isset($this->filtersByModel[$modelName][$method]))
 					{
 						$filtersTemp = array_intersect($filtersTemp, $this->filtersByModel[$modelName][$method]);
 					}
-					//var_dump($filtersTemp);
 				}
 				$filters = array_merge($filters, $filtersTemp);
 			}

@@ -157,7 +157,7 @@ class indexer_StandardSolrSearch
 		if ($this->doSuggestion)
 		{
 			$terms = $this->suggestionTerms;
-			if (f_util_ArrayUtils::isNotEmpty($terms))
+			if ($terms !== null && f_util_ArrayUtils::isNotEmpty($terms))
 			{
 				$query[] = '&spellcheck.collate=true&spellcheck=true&spellcheck.q='.join("+", $terms).'&qt=/spellchecker_' . $this->query->getLang().'&spellcheck.count=1';
 			}

@@ -372,17 +372,18 @@ abstract class f_util_FileUtils
 		{
 			foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directoryPath, RecursiveDirectoryIterator::KEY_AS_PATHNAME), RecursiveIteratorIterator::CHILD_FIRST) as $file => $info)
 			{
-				if ($info->getFilename() === '.' || $info->getFilename() === '..')
+				$fileName = $info->getFilename();
+				if ($fileName === '.' || $fileName === '..')
 				{
 					continue;
 				}
-				if ($info->isDir())
-				{
-					rmdir($file);
-				}
-				else
+				if ($info->isFile() || self::isLink($info->getPathname()))
 				{
 					unlink($file);
+				}
+				else if ($info->isDir())
+				{
+					rmdir($file);
 				}
 			}
 			if (!$onlyContent)
