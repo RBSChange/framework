@@ -119,6 +119,8 @@ class commands_ApplyHotfix extends commands_CheckHotfix
 			}
 		}
 		
+		f_util_System::execChangeCommand("disable-site");
+		
 		// TODO refactor with install-module
 		
 		foreach ($libsToInstall as $libInfo)
@@ -242,6 +244,8 @@ class commands_ApplyHotfix extends commands_CheckHotfix
 			$depElem->setAttribute("hotfixes", join(",", $hotfixAttr));
 			f_util_DOMUtils::save($descDom, WEBEDIT_HOME."/change.xml");
 		}
+		
+		f_util_System::execChangeCommand("enable-site");
 		
 		return $this->quitOK("hotfix ".$hotfix." applied successfully");
 	}
