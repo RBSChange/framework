@@ -8,7 +8,7 @@ abstract class commands_AbstractChangedevCommand extends commands_AbstractChange
 	protected function changecmd($cmdName, $params = array())
 	{
 		$this->loadFramework();
-		$this->log("Execute: $cmdName...");
+		$this->log("Execute: $cmdName ".join(" ", $params)."...");
 		f_util_System::execChangeCommand($cmdName, $params);
 	}
 }
