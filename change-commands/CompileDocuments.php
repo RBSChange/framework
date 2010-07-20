@@ -36,9 +36,15 @@ class commands_CompileDocuments extends commands_AbstractChangeCommand
 		$models = generator_PersistentModel::loadModels();
 		
 		//Cleaning dataobject folders
-		$sqlpath = f_util_FileUtils::buildChangeBuildPath('modules', '*', 'dataobject', '*');
-		
+		$sqlpath = f_util_FileUtils::buildChangeBuildPath('modules', '*', 'dataobject', '*');		
 		foreach (glob($sqlpath) as $path) 
+		{
+			unlink($path);
+		}
+		
+		//Cleaning persistentdocument folders
+		$docpath = f_util_FileUtils::buildChangeBuildPath('modules', '*', 'persistentdocument', '*');		
+		foreach (glob($docpath) as $path) 
 		{
 			unlink($path);
 		}

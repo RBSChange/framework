@@ -11,46 +11,8 @@ class <{$model->getFinalDocumentClassName()}>model extends f_persistentdocument_
 	protected function __construct()
 	{
 		parent::__construct($this->getName());
-
-		$this->m_properties = array(
-<{foreach from=$model->getProperties() item=property}>
-			'<{$property->getName()}>' => new PropertyInfo('<{$property->getName()}>', '<{$property->getType()}>', <{$property->getMinOccurs()}>, <{$property->getMaxOccurs()}>, '<{$property->getDbName()}>', '<{$model->getTableName()}>',
-				<{$model->escapeBoolean($property->isPrimaryKey())}>, <{$model->escapeBoolean($property->isCascadeDelete())}>, <{$model->escapeBoolean($property->isTreeNode())}>, <{$model->escapeBoolean($property->isArray())}>, <{$model->escapeBoolean($property->isDocument())}>, <{$model->escapeString($property->getDefaultValue())}>, <{$model->escapeString($property->getConstraints())}>, <{$model->escapeBoolean($property->isLocalized())}>, <{$model->escapeBoolean($property->isIndexed())}>, <{$model->escapeBoolean($property->hasSpecificIndex())}>, <{$model->escapeString($property->getFromList())}>),
-<{/foreach}>
-		);
-		
-		$this->m_serialisedproperties = array(
-<{foreach from=$model->getSerializedProperties() item=property}>
-			'<{$property->getName()}>' => new PropertyInfo('<{$property->getName()}>', '<{$property->getType()}>', <{$property->getMinOccurs()}>, <{$property->getMaxOccurs()}>, null, null,
-				false, false, false, <{$model->escapeBoolean($property->isArray())}>, <{$model->escapeBoolean($property->isDocument())}>, <{$model->escapeString($property->getDefaultValue())}>, <{$model->escapeString($property->getConstraints())}>, <{$model->escapeBoolean($property->isLocalized())}>, <{$model->escapeBoolean($property->isIndexed())}>, <{$model->escapeBoolean($property->hasSpecificIndex())}>, <{$model->escapeString($property->getFromList())}>),
-<{/foreach}>
-		);
-
 		$this->m_preservedPropertiesNames = array(<{foreach from=$model->getPreservedPropertiesNames() item=name}>'<{$name}>' => true,<{/foreach}>);
-
-		$this->m_formProperties = array(
-<{foreach from=$model->getFormProperties() item=property}>
-			'<{$property->getName()}>' => new FormPropertyInfo('<{$property->getName()}>', '<{$property->getControlType()}>', '<{$property->getDisplay()}>', <{$model->escapeBoolean($property->isRequired())}>, '<{$property->getLabel()}>', '<{$property->getSerializedAttributes()}>'),
-<{/foreach}>
-		);
-
-		$this->m_childrenProperties = array(
-<{foreach from=$model->getChildrenProperties() item=property}>
-			'<{$property->getName()}>' => new ChildPropertyInfo('<{$property->getName()}>', '<{$property->getType()}>'),
-<{/foreach}>
-		);
-
 		$this->m_statuses = array(<{foreach from=$model->getStatuses() item=status}>'<{$status}>',<{/foreach}>);
-
-		// These properties are order by "inheritance order": the parent before the child.
-		// This is required in f_persistentdocument_PersistentDocumentModel::findTreePropertiesNamesByType().
-		$this->m_invertProperties = array(
-<{foreach from=$model->getInverseProperties() item=property}>
-			'<{$property->getName()}>' => new PropertyInfo('<{$property->getName()}>', '<{$property->getType()}>', <{$property->getMinOccurs()}>, <{$property->getMaxOccurs()}>, '<{$property->getRelationName()}>', '<{$property->getTableName()}>',
-				<{$model->escapeBoolean($property->isPrimaryKey())}>, <{$model->escapeBoolean($property->isCascadeDelete())}>, <{$model->escapeBoolean($property->isTreeNode())}>, <{$model->escapeBoolean($property->isArray())}>, <{$model->escapeBoolean($property->isDocument())}>, <{$model->escapeString($property->getDefaultValue())}>, <{$model->escapeString($property->getConstraints())}>, <{$model->escapeBoolean($property->isLocalized())}>, <{$model->escapeBoolean($property->isIndexed())}>, <{$model->escapeBoolean($property->hasSpecificIndex())}>, <{$model->escapeString($property->getFromList())}>),
-<{/foreach}>
-		);
-
 <{if ($model->getFinalChildren())}>	
 		$this->m_childrenNames = array(
 <{foreach from=$model->getFinalChildren() item=children}>
@@ -64,6 +26,60 @@ class <{$model->getFinalDocumentClassName()}>model extends f_persistentdocument_
 <{/if}> 
 	}
 
+	protected final function loadProperties()
+	{
+		$this->m_properties = array(
+<{foreach from=$model->getProperties() item=property}>
+			'<{$property->getName()}>' => new PropertyInfo('<{$property->getName()}>', '<{$property->getType()}>', <{$property->getMinOccurs()}>, <{$property->getMaxOccurs()}>, '<{$property->getDbName()}>', '<{$model->getTableName()}>',
+				<{$model->escapeBoolean($property->isPrimaryKey())}>, <{$model->escapeBoolean($property->isCascadeDelete())}>, <{$model->escapeBoolean($property->isTreeNode())}>, <{$model->escapeBoolean($property->isArray())}>, <{$model->escapeBoolean($property->isDocument())}>, <{$model->escapeString($property->getDefaultValue())}>, <{$model->escapeString($property->getConstraints())}>, <{$model->escapeBoolean($property->isLocalized())}>, <{$model->escapeBoolean($property->isIndexed())}>, <{$model->escapeBoolean($property->hasSpecificIndex())}>, <{$model->escapeString($property->getFromList())}>),
+<{/foreach}>
+		);
+	}
+	
+	protected final function loadSerialisedProperties()
+	{
+		$this->m_serialisedproperties = array(
+<{foreach from=$model->getSerializedProperties() item=property}>
+			'<{$property->getName()}>' => new PropertyInfo('<{$property->getName()}>', '<{$property->getType()}>', <{$property->getMinOccurs()}>, <{$property->getMaxOccurs()}>, null, null,
+				false, false, false, <{$model->escapeBoolean($property->isArray())}>, <{$model->escapeBoolean($property->isDocument())}>, <{$model->escapeString($property->getDefaultValue())}>, <{$model->escapeString($property->getConstraints())}>, <{$model->escapeBoolean($property->isLocalized())}>, <{$model->escapeBoolean($property->isIndexed())}>, <{$model->escapeBoolean($property->hasSpecificIndex())}>, <{$model->escapeString($property->getFromList())}>),
+<{/foreach}>
+		);	
+	}
+	
+	protected final function loadFormProperties()
+	{
+<{if ($model->useDocumentEditor())}>	
+		$this->m_formProperties = array();		
+<{else}>
+		$this->m_formProperties = array(
+<{foreach from=$model->getFormProperties() item=property}>
+			'<{$property->getName()}>' => new FormPropertyInfo('<{$property->getName()}>', '<{$property->getControlType()}>', '<{$property->getDisplay()}>', <{$model->escapeBoolean($property->isRequired())}>, '<{$property->getLabel()}>', '<{$property->getSerializedAttributes()}>'),
+<{/foreach}>
+		);		
+<{/if}> 
+	}
+	
+	protected final function loadInvertProperties()
+	{
+		// These properties are order by "inheritance order": the parent before the child.
+		// This is required in f_persistentdocument_PersistentDocumentModel::findTreePropertiesNamesByType().
+		$this->m_invertProperties = array(
+<{foreach from=$model->getInverseProperties() item=property}>
+			'<{$property->getName()}>' => new PropertyInfo('<{$property->getName()}>', '<{$property->getType()}>', <{$property->getMinOccurs()}>, <{$property->getMaxOccurs()}>, '<{$property->getRelationName()}>', '<{$property->getTableName()}>',
+				<{$model->escapeBoolean($property->isPrimaryKey())}>, <{$model->escapeBoolean($property->isCascadeDelete())}>, <{$model->escapeBoolean($property->isTreeNode())}>, <{$model->escapeBoolean($property->isArray())}>, <{$model->escapeBoolean($property->isDocument())}>, <{$model->escapeString($property->getDefaultValue())}>, <{$model->escapeString($property->getConstraints())}>, <{$model->escapeBoolean($property->isLocalized())}>, <{$model->escapeBoolean($property->isIndexed())}>, <{$model->escapeBoolean($property->hasSpecificIndex())}>, <{$model->escapeString($property->getFromList())}>),
+<{/foreach}>
+		);
+	}	
+	
+	protected final function loadChildrenProperties()
+	{
+		$this->m_childrenProperties = array(
+<{foreach from=$model->getChildrenProperties() item=property}>
+			'<{$property->getName()}>' => new ChildPropertyInfo('<{$property->getName()}>', '<{$property->getType()}>'),
+<{/foreach}>
+		);
+	}
+	
 	/**
 	 * @return String
 	 */
@@ -246,49 +262,5 @@ class <{$model->getFinalDocumentClassName()}>model extends f_persistentdocument_
 	public function getEditModule()
 	{
 		return <{$model->escapeString($model->getEditModule())}>;
-	}
-
-	/**
-	 * @return String
-	 */
-	public function __toString()
-	{
-		return $this->getName();
-	}
-
-	/**
-	 * @deprecated use isLocalized()
-	 * @return Boolean
-	 */
-	public final function isInternationalized()
-	{
-		return $this->isLocalized();
-	}
-
-	/**
-	 * @deprecated For compatibility only
-	 * @return String
-	 */
-	public final function getComponentClassName()
-	{
-		return <{$model->escapeString($model->getComponentClassName())}>;
-	}
-
-	/**
-	 * @deprecated For compatibility only
-	 * @return String
-	 */
-	public final function getClassName()
-	{
-		return $this->getComponentClassName();
-	}
-
-	/**
-	 * @deprecated For compatibility only
-	 * @return array<mixed>
-	 */
-	public final function getSynchronize()
-	{
-		return array();
 	}
 }

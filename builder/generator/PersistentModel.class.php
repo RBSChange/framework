@@ -705,7 +705,13 @@ class generator_PersistentModel
 		}
 		return $this->moduleName;
 	}
-
+	
+	function useDocumentEditor()
+	{
+		$path = f_util_FileUtils::buildWebeditPath('modules', $this->getFinalModuleName(), 'config', 'perspective.xml');
+		return file_exists($path);
+	}
+	
 	function getFinalDocumentName()
 	{
 		if ($this->inject)
