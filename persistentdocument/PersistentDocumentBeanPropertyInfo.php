@@ -221,11 +221,6 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 		{
 			return true;
 		}
-		
-		if ($this->formPropertyInfo !== null)
-		{
-			return $this->formPropertyInfo->isRequired();
-		}
 		return false;
 	}
 	
@@ -240,11 +235,6 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 		if ($propertyName == 'id' || $propertyName == 'model')
 		{
 			return true;
-		}
-		
-		if ($this->formPropertyInfo !== null)
-		{
-			return $this->formPropertyInfo->isHidden();
 		}
 		return false;
 	}
@@ -312,8 +302,7 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 		
 		if ($this->attachedList === null)
 		{
-			$extraAttributes = $this->formPropertyInfo->getAttributes();
-			$this->attachedList = list_ListService::getInstance()->getByListId($extraAttributes['list-id']);
+			$this->attachedList = list_ListService::getInstance()->getByListId($this->propertyInfo->getFromList());
 		}
 		return $this->attachedList;
 	}
@@ -327,15 +316,7 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 	{
 		if ($this->hasAttachedList === null)
 		{
-			$this->hasAttachedList = false;
-			if ($this->formPropertyInfo !== null)
-			{
-				$extraAttributes = $this->formPropertyInfo->getAttributes();
-				if (isset($extraAttributes['list-id']))
-				{
-					$this->hasAttachedList = true;
-				}
-			}
+			$this->hasAttachedList = f_util_StringUtils::isNotEmpty($this->propertyInfo->getFromList());
 		}
 		return $this->hasAttachedList;
 	}
