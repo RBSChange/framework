@@ -194,6 +194,7 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 		foreach ($modulesToInstall as $modInfo)
 		{
 			$this->changecmd("import-init-data", array($modInfo["name"]));
+			$this->changecmd("init-patch-db", array("modules_".$modInfo["name"]));
 		}
         $this->changecmd("init-webapp");
 		$doc = f_util_DOMUtils::getDocument(WEBEDIT_HOME."/change.xml");
