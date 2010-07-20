@@ -265,7 +265,8 @@ class HTTPClient
 
 		$data = curl_exec($this->curlResource);
 		$errno = curl_errno($this->curlResource);
-		if ($errno)
+		// 52 is just CURLE_GOT_NOTHING
+		if ($errno && $errno != 52)
 		{
 			Framework::error(__METHOD__ . ': curl_errno : ' . $errno);
 		}
