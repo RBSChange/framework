@@ -294,9 +294,9 @@ class PatchService extends BaseService
 	
 	/**
 	 * Update patch repository with the last available patch
-	 *
+	 * @param String $targetPackage
 	 */
-	public function updateRepository()
+	public function updateRepository($targetPackage = null)
 	{
 		$patchs = $this->getAllPatch();
 		$this->initialDbPatchList = null;
@@ -308,7 +308,7 @@ class PatchService extends BaseService
 			$tm->beginTransaction();
 			foreach ($patchs as $packageName => $patchNames)
 			{
-				if (count($patchNames) > 0)
+				if (count($patchNames) > 0 && ($targetPackage === null || $packageName == $targetPackage))
 				{
 					$patchName = end($patchNames);
 					$result[$packageName] = $patchName;

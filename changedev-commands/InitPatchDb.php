@@ -6,7 +6,7 @@ class commands_InitPatchDb extends commands_AbstractChangeCommand
 	 */
 	function getUsage()
 	{
-		return "";
+		return "[component]";
 	}
 	
 	function getAlias()
@@ -21,6 +21,22 @@ class commands_InitPatchDb extends commands_AbstractChangeCommand
 	{
 		return "init patch DB";
 	}
+	
+	/**
+	 * @param Integer $completeParamCount the parameters that are already complete in the command line
+	 * @param String[] $params
+	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
+	 * @return String[] or null
+	 */
+	function getParameters($completeParamCount, $params, $options, $current)
+	{
+		if ($completeParamCount == 0)
+		{
+			$components = array("framework", "webapp");
+			$components = array_merge($components, ModuleService::getInstance()->getModules());
+			return $components;
+		}
+	}
 
 	/**
 	 * @param String[] $params
@@ -32,7 +48,8 @@ class commands_InitPatchDb extends commands_AbstractChangeCommand
 		$this->message("== Init patch DB ==");
 		$this->loadFramework();
 
-		PatchService::getInstance()->updateRepository();
+		$targetPackage = isset($params[0]) ? $params[0] : null; 
+		PatchService::getInstance()->updateRepository($targetPackage);
 		
 		$this->quitOk('Patch repository successfully updated');
 	}
