@@ -1,6 +1,11 @@
 <?php
 ignore_user_abort(true);
 define('WEBEDIT_HOME', dirname(realpath(__FILE__)));
+if (file_exists(WEBEDIT_HOME."/site_is_disabled"))
+{
+	exit(0);
+}
+
 require_once WEBEDIT_HOME . "/framework/Framework.php";
 if (defined('DISABLE_CHANGECRON_EXECUTION') && constant('DISABLE_CHANGECRON_EXECUTION') == true)
 {
