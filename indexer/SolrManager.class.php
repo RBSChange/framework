@@ -79,6 +79,14 @@ class indexer_SolrManager
 	/**
 	 * @return boolean
 	 */
+	public static function hasSuggestionInOnRequest()
+	{
+		return self::getSchemaVersion() !== "2.0.4";
+	}
+	
+	/**
+	 * @return boolean
+	 */
 	public static function hasAggregateText()
 	{
 		return self::getSchemaVersion() !== "2.0.4";

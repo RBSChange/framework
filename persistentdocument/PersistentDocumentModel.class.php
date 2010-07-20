@@ -266,11 +266,6 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	/**
 	 * @return Boolean
 	 */
-	abstract public function isInternationalized();
-
-	/**
-	 * @return Boolean
-	 */
 	abstract public function isLocalized();
 	
 	/**
@@ -388,58 +383,16 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 
 
 	/**********************************************************/
-	/* CSV Import configuration                               */
-	/**********************************************************/
-	abstract public function getSynchronize();
-
-	public function getSynchronizedComponents()
-	{
-		$results=array();
-		foreach ($this->getSynchronize() as $componentName => $sourceinfo)
-		{
-			try
-			{
-				foreach ($sourceinfo as $sourceName => $datasource)
-				{
-					foreach ($datasource  as $datasourcesTag)
-					{
-						$results[$sourceName][$datasourcesTag["ressource"]][$componentName][]= $datasourcesTag;
-					}
-
-				}
-
-			}
-			catch(ClassException $e)
-			{
-				$e->shutdown();
-				$this->statuses=array();
-				//no workflow
-			}
-
-		}
-		return $results;
-	}
-
-	public static function getSynchronizationSources()
-	{
-		$results=array();
-		foreach (self::getDocumentModels() as $type => $documentModel)
-		{
-			$sources = $documentModel->getSynchronizedComponents();
-			$results[$type] = $sources;
-		}
-		return $results;
-	}
-
-	/**********************************************************/
 	/* Properties Informations                                 */
 	/**********************************************************/
-
+	protected abstract function loadProperties();
+	
 	/**
 	 * @return array<String, PropertyInfo> ie. <propName, propertyInfo> 
 	 */
 	public final function getPropertiesInfos()
 	{
+		if ($this->m_properties === null){$this->loadProperties();}
 		return $this->m_properties;
 	}
 	
@@ -481,6 +434,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	 */
 	public final function getProperty($propertyName)
 	{
+		if ($this->m_properties === null){$this->loadProperties();}
 		if (isset($this->m_properties[$propertyName]))
 		{
 			return $this->m_properties[$propertyName];
@@ -488,11 +442,14 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 		return null;
 	}
 	
+	protected abstract function loadSerialisedProperties();
+	
 	/**
 	 * @return array<String, PropertyInfo> ie. <propName, propertyInfo> 
 	 */
 	public final function getSerializedPropertiesInfos()
 	{
+		if ($this->m_serialisedproperties === null) {$this->loadSerialisedProperties();}
 		return $this->m_serialisedproperties;
 	}
 	
@@ -502,6 +459,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	 */	
 	public final function getSerializedProperty($propertyName)
 	{
+		if ($this->m_serialisedproperties === null) {$this->loadSerialisedProperties();}
 		if (isset($this->m_serialisedproperties[$propertyName]))
 		{
 			return $this->m_serialisedproperties[$propertyName];
@@ -514,6 +472,8 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	 */	
 	public final function getEditablePropertiesInfos()
 	{
+		if ($this->m_properties === null){$this->loadProperties();}
+		if ($this->m_serialisedproperties === null) {$this->loadSerialisedProperties();}
 		return array_merge($this->m_properties, $this->m_serialisedproperties);
 	}	
 		
@@ -523,14 +483,18 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	 */	
 	public final function getEditableProperty($propertyName)
 	{
+		if ($this->m_properties === null){$this->loadProperties();}
 		if (isset($this->m_properties[$propertyName]))
 		{
 			return $this->m_properties[$propertyName];
 		} 
-		else if (isset($this->m_serialisedproperties[$propertyName]))
+		
+		if ($this->m_serialisedproperties === null) {$this->loadSerialisedProperties();}
+		if (isset($this->m_serialisedproperties[$propertyName]))
 		{
 			return $this->m_serialisedproperties[$propertyName];
 		}
+		
 		return null;
 	}		
 
@@ -630,11 +594,14 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 		return array_values($componentNames);
 	}
 
+	protected abstract function loadFormProperties();
+	
 	/**
 	 * @return array<FormPropertyInfo>
 	 */
 	public final function getFormPropertiesInfos()
 	{
+		if ($this->m_formProperties === null) {$this->loadFormProperties();}
 		return $this->m_formProperties;
 	}
 
@@ -645,18 +612,22 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	 */
 	public final function getFormProperty($propertyName)
 	{
-		if (array_key_exists($propertyName, $this->m_formProperties))
+		if ($this->m_formProperties === null) {$this->loadFormProperties();}
+		if (isset($this->m_formProperties[$propertyName]))
 		{
 			return $this->m_formProperties[$propertyName];
 		}
 		return null;
 	}
-
+	
+	protected abstract function loadChildrenProperties();
+	
 	/**
 	 * @return array<ChildPropertyInfo>
 	 */
 	public final function getChildrenPropertiesInfos()
 	{
+		if ($this->m_childrenProperties === null) {$this->loadChildrenProperties();}
 		return $this->m_childrenProperties;
 	}
 
@@ -667,7 +638,8 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	 */
 	public final function getChildProperty($propertyName)
 	{
-		if (array_key_exists($propertyName, $this->m_childrenProperties))
+		if ($this->m_childrenProperties === null) {$this->loadChildrenProperties();}
+		if (isset($this->m_childrenProperties[$propertyName]))
 		{
 			return $this->m_childrenProperties[$propertyName];
 		}
@@ -680,6 +652,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	 */
 	public final function isChildValidType($modelName)
 	{
+		if ($this->m_childrenProperties === null) {$this->loadChildrenProperties();}
 		foreach ($this->m_childrenProperties as $childProperty)
 		{
 			if ($childProperty->getType() == $modelName || $childProperty->getType() == '*')
@@ -724,16 +697,29 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	 */
 	public final function isDocumentIdPrimaryKey()
 	{
+		if ($this->m_properties === null){$this->loadProperties();}
 		return $this->m_properties['id']->isPrimaryKey();
 	}
 
+	protected abstract function loadInvertProperties();
+
+	/**
+	 * @return array<PropertyInfo>
+	 */
+	public final function getInverseProperties()
+	{
+		if ($this->m_invertProperties === null) {$this->loadInvertProperties();}
+		return $this->m_invertProperties;
+	}
+	
 	/**
 	 * @param String $name
 	 * @return Boolean
 	 */
 	public final function hasInverseProperty($name)
 	{
-		return array_key_exists($name, $this->m_invertProperties);
+		if ($this->m_invertProperties === null) {$this->loadInvertProperties();}
+		return isset($this->m_invertProperties[$name]);
 	}
 
 	/**
@@ -742,15 +728,12 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	 */
 	public final function getInverseProperty($name)
 	{
-		return (array_key_exists($name, $this->m_invertProperties)) ? $this->m_invertProperties[$name] : null;
-	}
-
-	/**
-	 * @return array<PropertyInfo>
-	 */
-	public final function getInverseProperties()
-	{
-		return $this->m_invertProperties;
+		if ($this->m_invertProperties === null) {$this->loadInvertProperties();}
+		if (isset($this->m_invertProperties[$name]))
+		{
+			return $this->m_invertProperties[$name];
+		}
+		return null;
 	}
 
 	/**
@@ -946,4 +929,48 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	 * @return String or null
 	 */
 	abstract public function getEditModule();
+
+	/**
+	 * @return String
+	 */
+	public function __toString()
+	{
+		return $this->getName();
+	}
+	
+	/**
+	 * @deprecated use isLocalized()
+	 * @return Boolean
+	 */
+	public final function isInternationalized()
+	{
+		return $this->isLocalized();
+	}
+
+	/**
+	 * @deprecated For compatibility only
+	 * @return String
+	 */
+	public final function getComponentClassName()
+	{
+		return null;
+	}
+	
+	/**
+	 * @deprecated For compatibility only
+	 * @return String
+	 */
+	public final function getClassName()
+	{
+		return null;
+	}
+
+	/**
+	 * @deprecated For compatibility only
+	 * @return array<mixed>
+	 */
+	public final function getSynchronize()
+	{
+		return array();
+	}
 }

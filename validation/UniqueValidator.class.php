@@ -7,7 +7,7 @@ class validation_UniqueValidator extends validation_ValidatorImpl implements val
 	/**
 	 * @var f_persistentdocument_PersistentDocument
 	 */
-	protected  $document;
+	protected $document;
 	
 	/**
 	 * @var String
@@ -23,34 +23,32 @@ class validation_UniqueValidator extends validation_ValidatorImpl implements val
 	 * @var Integer
 	 */
 	protected $parentId;
-
+	
 	/**
 	 * @var f_persistentdocument_PersistentProvider
 	 */
 	protected $pp;
-
-
+	
 	/**
 	 * Validate $data and append error message in $errors.
 	 *
 	 * @param validation_Property $Field
 	 * @param validation_Errors $errors
-	 *
 	 * @return void
 	 */
 	protected function doValidate(validation_Property $field, validation_Errors $errors)
 	{
 		if ($this->getParameter() == true)
 		{
-			if ( empty($this->documentPropertyName) )
+			if (empty($this->documentPropertyName))
 			{
 				throw new ValidatorConfigurationException('validation_UniqueValidator requires a valid document property name.');
 			}
-
+			
 			if ($this->document instanceof f_persistentdocument_PersistentDocument)
 			{
 				$this->documentModelName = $this->document->getDocumentModelName();
-				if (is_null($this->pp))
+				if ($this->pp === null)
 				{
 					$this->pp = $this->document->getProvider();
 				}
@@ -58,60 +56,71 @@ class validation_UniqueValidator extends validation_ValidatorImpl implements val
 			}
 			else
 			{
-				if ( ! $this->pp instanceof f_persistentdocument_PersistentProvider )
+				if (!$this->pp instanceof f_persistentdocument_PersistentProvider)
 				{
 					throw new ValidatorConfigurationException('validation_UniqueValidator requires a valid PersistentProvider.');
 				}
-				if ( empty($this->documentModelName) )
+				if (empty($this->documentModelName))
 				{
 					throw new ValidatorConfigurationException('validation_UniqueValidator requires a valid Document Model name.');
 				}
 				$model = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($this->documentModelName);
 			}
-
+			
 			$query = $this->pp->createQuery($this->documentModelName);
-
+			
 			// For string properties, the UniqueValidator is case INsensitive.
 			$propertyObject = $model->getProperty($this->documentPropertyName);
 			if ($propertyObject->isDocument())
 			{
-				$query->add(Restrictions::eq($this->documentPropertyName.'.id', $field->getValue()));
+				$query->add(Restrictions::eq($this->documentPropertyName . '.id', $field->getValue()));
 			}
 			else
 			{
 				$query->add(Restrictions::eq($this->documentPropertyName, $field->getValue(), $propertyObject->isString()));
 			}
-
+			
 			$result = $this->pp->findUnique($query);
-
-			if ( ! is_null($result) && (is_null($this->document) || $this->document->isNew() || !DocumentHelper::equals($this->document, $result)))
+			
+			if ($result !== null && ($this->document === null || $this->document->isNew() || !DocumentHelper::equals($this->document, $result)))
 			{
 				$this->reject($field->getName(), $errors);
 			}
 		}
 	}
-
+	
+	/**
+	 * @param integer $parentId
+	 */
 	public final function setParentNodeId($parentId)
 	{
 		$this->parentId = $parentId;
 	}
 	
-	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 */
 	public final function setDocument($document)
 	{
 		$this->document = $document;
 	}
-
+	
+	/**
+	 * @param string $documentModelName
+	 */
 	public final function setDocumentModelName($documentModelName)
 	{
 		$this->documentModelName = $documentModelName;
 	}
-
+	
+	/**
+	 * @param string $documentPropertyName
+	 */
 	public final function setDocumentPropertyName($documentPropertyName)
 	{
 		$this->documentPropertyName = $documentPropertyName;
 	}
-
+	
 	/**
 	 * @param f_persistentdocument_PersistentProvider $pp
 	 */
@@ -119,7 +128,7 @@ class validation_UniqueValidator extends validation_ValidatorImpl implements val
 	{
 		$this->pp = $pp;
 	}
-
+	
 	/**
 	 * Sets the value of the unique validator's parameter.
 	 *
@@ -131,7 +140,7 @@ class validation_UniqueValidator extends validation_ValidatorImpl implements val
 		{
 			$this->setPersistentProvider(f_persistentdocument_PersistentProvider::getInstance());
 			$parts = explode(',', $value);
-			$this->setDocumentModelName($parts[0]);		
+			$this->setDocumentModelName($parts[0]);
 			$this->setDocumentPropertyName($parts[1]);
 			if (isset($parts[2]) && $parts[2] !== '')
 			{

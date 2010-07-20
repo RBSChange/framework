@@ -151,7 +151,7 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 	 */
 	private function setDocumentProperties()
 	{
-		// this must be the first line as it manipulates attributes (especially byXXX attributes)
+		// This must be the first line as it manipulates attributes (especially byXxx attributes).
 		$document = $this->getPersistentDocument();
 		$properties = $this->computeAttributes($this->getDocumentProperties());
 		$this->affectDocumentProperties($document, $properties);
@@ -292,8 +292,8 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 			{
 				Framework::exception($e);
 			}
-			return null;
 		}
+		return null;
 	}
 
 	/**
