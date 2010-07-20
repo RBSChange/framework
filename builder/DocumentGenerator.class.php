@@ -271,12 +271,7 @@ class builder_DocumentGenerator
 	{
 		$buildPathPersistentDocuments = CHANGE_BUILD_DIR . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . $this->module . DIRECTORY_SEPARATOR . 'persistentdocument' . DIRECTORY_SEPARATOR;
 		f_util_FileUtils::mkdir($buildPathPersistentDocuments);
-
-		// Generate documentNamebase.class.php and save it in /modules/moduleName/persistentdocument/documentNamebase.class.php
-		// Generate documentNamemodel.class.php and save it in /modules/moduleName/persistentdocument/documentNamemodel.class.php
 		$filePath = $buildPathPersistentDocuments . $this->name . 'model_and_base.class.php';
-		
-		
 		$fileContent = "<?php\n";
 		if (!$this->modelObject->injected())
 		{
@@ -289,9 +284,8 @@ class builder_DocumentGenerator
 		{
 			$fileContent .= $this->modelObject->getReplacer()->generatePhpModel();
 		}
-
-			$fileContent .= "\n".$this->modelObject->generatePhpBaseClass();
-
+		$fileContent .= "\n".$this->modelObject->generatePhpBaseClass();
+		
 		if (!$this->modelObject->inject())
 		{
 			if ($this->modelObject->isInternationalized())
@@ -299,9 +293,8 @@ class builder_DocumentGenerator
 				$fileContent .= "\n".$this->modelObject->generatePhpI18nClass();
 			}
 		}
-
-		f_util_FileUtils::saveFile($filePath, $fileContent, true);
-		
+		f_util_FileUtils::saveFile($filePath, $fileContent, true);	
+			
 		$classResolver = ClassResolver::getInstance();
 		// Add the classes to autoload file. It's necessary to call without regenerate cache_autoload.php
 		if (!$this->modelObject->inject())
@@ -313,6 +306,8 @@ class builder_DocumentGenerator
 		{
 			$classResolver->appendToAutoloadFile($this->module .'_persistentdocument_' . $this->name . 'I18n', $filePath);
 		}
+		
+
 	}
 
 	public function updateRights()

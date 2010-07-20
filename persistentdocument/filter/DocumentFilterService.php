@@ -43,9 +43,13 @@ class f_persistentdocument_DocumentFilterService extends BaseService
 			if (f_util_StringUtils::isEmpty($json)) {return array();}
 			$filtersInfo = JsonService::getInstance()->decode($json);
 		}
-		else
+		else if (is_array($json))
 		{
 			$filtersInfo = $json;
+		}
+		else 
+		{
+			return array();
 		}
 		$filters = array();
 		foreach ($filtersInfo as $filterInfo)
