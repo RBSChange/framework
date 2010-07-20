@@ -330,7 +330,7 @@ class ConfigCache extends AgaviObject
 			}
 
 			// close file pointer
-			fclose($fp);
+			closedir($fp);
 
 		} else {
 
