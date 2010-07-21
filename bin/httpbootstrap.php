@@ -490,9 +490,16 @@ class c_ChangeBootStrap
 	private $autoloadRegistered = false;
 	private $refreshAutoload = false;
 
+	function isPathAbsolute ($path)
+	{
+		return 	$path[0] === '/' || 
+				$path[0] === '\\' ||
+				(strlen($path) > 3 && ctype_alpha($path[0]) && $path[1] === ':' && ($path[2] === '\\' || $path[2] === '/'));
+	}
+	
 	function setAutoloadPath($autoloadPath = ".change/autoload")
 	{
-		if ($autoloadPath[0] != "/")
+		if (!$this->isPathAbsolute($autoloadPath))
 		{
 			$this->autoloadPath = $this->wd."/".$autoloadPath;
 		}
@@ -569,7 +576,7 @@ class c_ChangeBootStrap
 				throw new Exception("Could not create $linkDir");
 			}
 			$linkTarget = $componentPath."/".$relPath;
-			if ((!is_link($linkPath) || (readlink($linkPath) != $linkTarget && unlink($linkPath)))
+			if ((!file_exists($linkPath) || (readlink($linkPath) != $linkTarget && unlink($linkPath)))
 			&& !symlink($linkTarget, $linkPath))
 			{
 				throw new Exception("Could not symlink ".$componentPath."/".$relPath." to $linkPath");
@@ -626,7 +633,7 @@ class c_ChangeBootStrap
 	{
 		if ($this->descriptorPath === null)
 		{
-			if ($this->descriptor[0] == "/")
+			if ($this->isPathAbsolute($this->descriptor))
 			{
 				$this->descriptorPath = $this->descriptor;
 			}
@@ -1313,8 +1320,6 @@ class c_ChangeBootStrap
 			}
 
 			$this->repositoryContents[$repository] = $components;
-			
-			//var_export($components);
 		}
 		return $this->repositoryContents[$repository];
 	}
