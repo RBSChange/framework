@@ -1124,7 +1124,7 @@ class f_util_StringUtils
      */
     public static function isEmpty($string)
     {
-    	return is_null($string) || (!is_array($string) && strlen(trim($string))) == 0;
+    	return $string === null || (!is_array($string) && strlen(trim($string))) == 0;
     }
     
     /**

@@ -121,7 +121,7 @@ class Framework
 
 	private static function getLogLevel()
 	{
-		if (is_null(self::$logLevel))
+		if (self::$logLevel === null)
 		{
 			self::$logLevel = constant('Logger::'.AG_LOGGING_LEVEL);
 			if (self::$logLevel == false) throw new FrameworkException('invalid-AG_LOGGING_LEVEL');
