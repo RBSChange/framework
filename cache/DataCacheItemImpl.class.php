@@ -7,6 +7,10 @@ class f_DataCacheItemImpl implements f_DataCacheItem
 	private $keyParameters;
 	private $patterns;
 	private $timeLimit;
+	private $creationTime = null;
+	private $isValid = false;
+	private $registrationPath = null;
+	private $cachePath = null;
 	private $data;
 		
 	/**
@@ -39,9 +43,9 @@ class f_DataCacheItemImpl implements f_DataCacheItem
 	 */
 	public function getCreationTime()
 	{
-		if (isset($this->data["creationTime"]) && $this->data["creationTime"] != null)
+		if ($this->creationTime !== null)
 		{
-			return $this->data["creationTime"];
+			return $this->creationTime;
 		}
 		return null;
 	}
@@ -81,20 +85,26 @@ class f_DataCacheItemImpl implements f_DataCacheItem
 	/**
 	 * @see f_DataCacheItem::getValue()
 	 *
-	 * @param String $key (optional)
+	 * @param String $key
 	 * @return Mixed
 	 */
-	public function getValue($key = null)
+	public function getValue($key)
 	{
-		if ($key === null)
-		{
-			return $this->data;
-		}
 		if (isset($this->data[$key]) && $this->data[$key] != null)
 		{
 			return $this->data[$key];
 		}
 		return null;
+	}
+	
+	/**
+	 * @see f_DataCacheItem::getValues()
+	 *
+	 * @return Array
+	 */
+	public function getValues()
+	{
+		return $this->data;
 	}
 	
 	/**
@@ -112,23 +122,54 @@ class f_DataCacheItemImpl implements f_DataCacheItem
 	}
 	
 	/**
+	 * @see f_DataCacheItem::setCreationTime()
+	 *
+	 * @param Integer $timestamp
+	 */
+	public function setCreationTime($timestamp)
+	{
+		$this->creationTime = $timestamp;
+	}
+	
+	public function setRegistrationPath($path)
+	{
+		$this->registrationPath = $path;
+	}
+	
+	public function getRegistrationPath()
+	{
+		return $this->registrationPath;
+	}
+	
+	public function setCachePath($path)
+	{
+		$this->cachePath = $path;
+	}
+	
+	public function getCachePath()
+	{
+		return $this->cachePath;
+	}
+	
+	/**
 	 * @see f_DataCacheItem::setValue()
 	 *
-	 * @param Mixed $key
+	 * @param String $key
 	 * @param Mixed $value
 	 */
-	public function setValue($key, $value = null)
+	public function setValue($key, $value)
 	{
-		if ($value === null)
-		{
-			$this->data = $key;
-		}
 		$this->data[$key] = $value;
+	}
+	
+	public function setValues($values)
+	{
+		$this->data = $values;
 	}
 	
 	public function setInvalid()
 	{
-		$this->data["isValid"] = false;
+		$this->isValid = false;
 	}
 	
 	/**
@@ -136,8 +177,7 @@ class f_DataCacheItemImpl implements f_DataCacheItem
 	 */
 	public function isValid()
 	{
-		return (isset($this->data["isValid"]) && $this->data["isValid"] 
-					&& ($this->getCreationTime()+$this->timeLimit > time()));
+		return ($this->isValid	&& ($this->getCreationTime()+$this->timeLimit > time()));
 	}
 }
 ?>

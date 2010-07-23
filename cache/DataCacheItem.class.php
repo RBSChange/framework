@@ -5,11 +5,21 @@ interface f_DataCacheItem
 	 * @return Integer (timestamp) or null
 	 */
 	public function getCreationTime();
+	
+	/**
+	 * @param Integer (timestamp) $timestamp
+	 */
+	public function setCreationTime($timestamp);
 
 	/**
 	 * @param Integer $seconds
 	 */
 	public function setTTL($seconds);
+	
+	/**
+	 * @return Integer
+	 */
+	public function getTTL();
 
 	/**
 	 * @param Mixed $key
@@ -18,10 +28,40 @@ interface f_DataCacheItem
 	public function setValue($key, $value);
 	
 	/**
-	 * @param String $key (optional)
+	 * @param String $key
 	 * @return Mixed
 	 */
 	public function getValue($key);
+	
+	/**
+	 * @param Array $key
+	 */
+	public function setValues($key);
+	
+	/**
+	 * @return Array
+	 */
+	public function getValues();
+	
+	/**
+	 * @param String $key
+	 */
+	public function setRegistrationPath($key);
+	
+	/**
+	 * @return String
+	 */
+	public function getRegistrationPath();
+	
+	/**
+	 * @param String $key
+	 */
+	public function setCachePath($key);
+	
+	/**
+	 * @return String
+	 */
+	public function getCachePath();
 	
 	/**
 	 * @return String
@@ -34,13 +74,15 @@ interface f_DataCacheItem
 	public function getKeyParameters();
 	
 	/**
-	 * @return Integer
-	 */
-	public function getTTL();
-	
-	/**
 	 * @return Array
 	 */
 	public function getPatterns();
+	
+	public function setInvalid();
+	
+	/**
+	 * @return Boolean
+	 */
+	public function isValid();
 }
 ?>
