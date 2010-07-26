@@ -40,7 +40,7 @@ class Framework
 	 */
 	public static function getVersion()
 	{
-		return "3.0.3";
+		return "3.0.4";
 	}
 
 	/**
