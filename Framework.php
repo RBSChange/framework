@@ -427,7 +427,7 @@ class Framework
 	public static function getConfigurationValue($path, $defaultValue = null)
 	{
 		$value = self::getConfiguration($path, false);
-		if ($value === false || f_util_StringUtils::isEmpty($value))
+		if ($value === false || (is_string($value) && f_util_StringUtils::isEmpty($value)) || (is_array($value) && f_util_ArrayUtils::isEmpty($value)))
 		{
 			return $defaultValue;
 		}
