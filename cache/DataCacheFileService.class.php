@@ -43,7 +43,7 @@ class f_DataCacheFileService extends f_DataCacheService
 			$newPatterns = array();
 		}
 		$item = $this->getNewCacheItem($namespace, $keyParameters, $newPatterns);
-		
+		$item->setValidity(true);
 		if ($this->exists($item))
 		{
 			$dirPath = $this->getCachePath($item);

@@ -173,11 +173,19 @@ class f_DataCacheItemImpl implements f_DataCacheItem
 	}
 	
 	/**
+	 * @param Boolean $isValid
+	 */
+	public function setValidity($isValid)
+	{
+		$this->isValid = $isValid;
+	}
+	
+	/**
 	 * @return Boolean
 	 */
 	public function isValid()
 	{
-		return ($this->isValid	&& ($this->getCreationTime()+$this->timeLimit > time()));
+		return $this->isValid && $this->getCreationTime() !== null && ($this->getCreationTime()+$this->timeLimit > time());
 	}
 }
 ?>

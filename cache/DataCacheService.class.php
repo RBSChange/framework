@@ -259,25 +259,25 @@ class f_DataCacheService extends BaseService
 		$this->dispatch = false;
 	}
 	
-	private function commitClear()
+	/*private function commitClear()
 	{
 		
-	}
+	}*/
 
 	/**
 	 * @param Array $docIds
 	 */
-	private function commitClearByDocIds($docIds)
+	/*private function commitClearByDocIds($docIds)
 	{
 		
-	}
+	}*/
 	
 	/**
 	 * @param Array $dirsToClear
 	 */
-	private function buildInvalidCacheList($dirsToClear)
+	/*private function buildInvalidCacheList($dirsToClear)
 	{
 		
-	}
+	}*/
 }
 ?>

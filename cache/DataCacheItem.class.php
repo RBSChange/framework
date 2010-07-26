@@ -81,6 +81,11 @@ interface f_DataCacheItem
 	public function setInvalid();
 	
 	/**
+	 * @param Boolean $isValid
+	 */
+	public function setValidity($isValid);
+	
+	/**
 	 * @return Boolean
 	 */
 	public function isValid();
