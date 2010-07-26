@@ -108,8 +108,18 @@ class ApacheService extends BaseService
 	 */
 	private function applyReplacements($content)
 	{
-		$dr = (DIRECTORY_SEPARATOR === '/') ? DOCUMENT_ROOT : str_replace(DIRECTORY_SEPARATOR, '/', DOCUMENT_ROOT);
-		$wh = (DIRECTORY_SEPARATOR === '/') ? WEBEDIT_HOME : str_replace(WEBEDIT_HOME, '/', WEBEDIT_HOME);
+		$from = array();
+		$to = array();
+		
+		if (DIRECTORY_SEPARATOR === "\\")
+		{
+			$from[] = DIRECTORY_SEPARATOR;
+			$to[] = '/';
+		}
+		$from[] = ' ';
+		$to[] = "\\ ";
+		$dr = str_replace($from, $to, DOCUMENT_ROOT);
+		$wh = str_replace($from, $to, WEBEDIT_HOME);
 		return str_replace(array('%{DOCUMENT_ROOT}', '%{WEBEDIT_HOME}'), 
 							array($dr, $wh), $content);
 	}
