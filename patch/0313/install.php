@@ -27,6 +27,7 @@ class framework_patch_0313 extends patch_BasePatch
 		$libDest = f_util_FileUtils::buildWebeditPath("libs", "change-script");
 		f_util_FileUtils::symlink($libSrc, $libDest, f_util_FileUtils::OVERRIDE);
 		f_util_System::execChangeHTTPCommand("update-autoload", array($libDest));
+		f_util_FileUtils::rmdir(f_util_FileUtils::buildWebeditPath(".change", "autoload"));
 	}
 	
 	/**
