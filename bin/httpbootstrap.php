@@ -530,7 +530,7 @@ class c_ChangeBootStrap
 	function appendToAutoload($componentPath, $followDeps = true)
 	{
 		$autoloadPath = $this->getAutoloadPath();
-		$autoloadedFlag = $autoloadPath."/".str_replace('/', '_', $componentPath).".autoloaded";
+		$autoloadedFlag = $autoloadPath."/".md5($componentPath).".autoloaded";
 
 		if (!$this->autoloadRegistered)
 		{
@@ -1936,7 +1936,8 @@ class c_ChangeBootStrap
 			}
 			if ($include_path === null && $pearDir === null)
 			{
-				throw new Exception("Missing PEAR_DIR or PEAR_INCLUDE_PATH config parameter");
+				$include_path = "pear";
+				c_warning("Working with default PEAR_INCLUDE_PATH: 'pear'");
 			}
 			if ($pearConf !== null) 
 			{		
@@ -2619,7 +2620,7 @@ class cboot_Properties
 		else
 		{
 			$valLength = strlen($val);
-			if ($val[0] == "'" && $val[$valLength-1] == "'" || $val[0] == "\"" && $val[$valLength-1] == "\"")
+			if ($valLength > 0 && $val[0] == "'" && $val[$valLength-1] == "'" || $val[0] == "\"" && $val[$valLength-1] == "\"")
 			{
 				$val = substr($val, 1, -1);
 			}
