@@ -17,7 +17,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 			$connectionString .= $config["authentication"]["username"].':'.$config["authentication"]["password"].'@';
 		}
 		
-		$connectionString .= implode(",", $config["serversSimpleCache"]);
+		$connectionString .= implode(",", $config["serversDataCacheService"]);
 		
 		if ($connectionString != null)
 		{
@@ -49,34 +49,6 @@ class f_DataCacheMongoService extends f_DataCacheService
 	}
 	
 	/**
-	 * @param String $namespace
-	 * @param Mixed $keyParameters
-	 * @param String $subCache (optional)
-	 * @param Array	$newPatterns
-	 * @return f_DataCacheItem or null or String
-	 */
-	public function readFromCache($namespace, $keyParameters, $newPatterns = null)
-	{
-		if ($newPatterns !== null)
-		{
-			$returnItem = true;
-		}
-		else 
-		{
-			$returnItem = false;
-			$newPatterns = array();
-		}
-		
-		$item = $this->getData($this->getNewCacheItem($namespace, $keyParameters, $newPatterns));
-		
-		if ($this->exists($item) || $returnItem)
-		{
-			return $item;
-		}
-		return null;
-	}
-	
-	/**
 	 * @param f_DataCacheItem $item
 	 */
 	public function writeToCache($item)
@@ -98,35 +70,6 @@ class f_DataCacheMongoService extends f_DataCacheService
 		{
 			Framework::exception($e);
 		}
-	}
-	
-	/**
-	 * @param f_DataCacheItem $item
-	 * @param String $subCache
-	 * @return Boolean
-	 */
-	public function exists($item, $subCache = null)
-	{
-		$result = $item->isValid();
-		if ($subCache !== null)
-		{
-			$subResult = $item->getValue($subCache) !== null;
-		}
-		else 
-		{
-			$subResult = true;
-		}
-		return $result && $subResult;
-	}
-	
-	/**
-	 * This is the same as BlockCache::commitClear()
-	 * but designed for the context of <code>register_shutdown_function()</code>,
-	 * to be sure the correct umask is used.
-	 */
-	public function shutdownCommitClear()
-	{
-		$this->commitClear();
 	}
 	
 	public function cleanExpiredCache()
@@ -179,7 +122,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 		$this->dispatch = $dispatch || $this->dispatch;
 	}
 	
-	private function commitClear()
+	protected function commitClear()
 	{
 		if (Framework::isDebugEnabled())
 		{
@@ -235,7 +178,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 	/**
 	 * @param Array $docIds
 	 */
-	private function commitClearByDocIds($docIds)
+	protected function commitClearByDocIds($docIds)
 	{
 		try
 		{
@@ -253,7 +196,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 	/**
 	 * @param Array $dirsToClear
 	 */
-	private function buildInvalidCacheList($dirsToClear)
+	protected function buildInvalidCacheList($dirsToClear)
 	{
 		try
 		{
@@ -271,7 +214,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 	/**
 	 * @param f_DataCacheItem $item
 	 */
-	private function register($item)
+	protected function register($item)
 	{
 		if (!$this->isRegistered($item))
 		{	
@@ -305,7 +248,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 		}
 	}
 	
-	private function isRegistered($item, $id = null, $keyParameters = null)
+	protected function isRegistered($item, $id = null, $keyParameters = null)
 	{
 		if ($id === null && $keyParameters === null)
 		{
@@ -337,7 +280,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 	 * @param f_DataCacheItem $item
 	 * @return f_DataCacheItem
 	 */
-	private function getData($item)
+	protected function getData($item)
 	{
 		try
 		{

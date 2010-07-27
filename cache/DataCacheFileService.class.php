@@ -69,6 +69,7 @@ class f_DataCacheFileService extends f_DataCacheService
 	 */
 	public function writeToCache($item)
 	{
+		f_util_FileUtils::mkdir($this->getCachePath($item));
 		$this->register($item);
 		$data = $item->getValues();
 		try
@@ -100,8 +101,8 @@ class f_DataCacheFileService extends f_DataCacheService
 	public function exists($item, $subCache = null)
 	{
 		$cachePath = $this->getCachePath($item, $subCache);
-		$subCaches = f_util_FileUtils::getDirFiles($cachePath);
-		$result = file_exists($cachePath) && $subCaches !== null && $this->isValid($item)
+		//$subCaches = f_util_FileUtils::getDirFiles($cachePath);
+		$result = file_exists($cachePath) && f_util_FileUtils::getDirFiles($cachePath) !== null && $this->isValid($item)
 			&& ($item->getTTL() === null || (time() - filemtime($cachePath)) < $item->getTTL()); 
 		$this->markAsBeingRegenerated($item);
 		return $result;
@@ -168,7 +169,7 @@ class f_DataCacheFileService extends f_DataCacheService
 		$this->dispatch = $dispatch || $this->dispatch;
 	}
 	
-	private function commitClear()
+	protected function commitClear()
 	{
 		if (Framework::isDebugEnabled())
 		{
@@ -237,7 +238,7 @@ class f_DataCacheFileService extends f_DataCacheService
 	/**
 	 * @param Array $docIds
 	 */
-	private function commitClearByDocIds($docIds)
+	protected function commitClearByDocIds($docIds)
 	{
 		foreach ($docIds as $id)
 		{
@@ -260,7 +261,7 @@ class f_DataCacheFileService extends f_DataCacheService
 	/**
 	 * @param Array $dirsToClear
 	 */
-	private function buildInvalidCacheList($dirsToClear)
+	protected function buildInvalidCacheList($dirsToClear)
 	{
 		foreach ($dirsToClear as $dir)
 		{
@@ -281,14 +282,14 @@ class f_DataCacheFileService extends f_DataCacheService
 	 * @param f_DataCacheItem $item
 	 * @return String
 	 */
-	private function getCachePath($item, $subCache = null)
+	protected function getCachePath($item, $subCache = null)
 	{
 		$cachePath = $item->getCachePath();
 		if ($cachePath === null)
 		{
 			$cachePath = f_util_FileUtils::buildCachePath('simplecache', $item->getNamespace(), $item->getKeyParameters());
 			$item->setCachePath($cachePath);
-			f_util_FileUtils::mkdir($cachePath);
+			//f_util_FileUtils::mkdir($cachePath);
 		}
 		if ($subCache === null)
 		{
@@ -301,7 +302,7 @@ class f_DataCacheFileService extends f_DataCacheService
 	 * @param f_DataCacheItem $item
 	 * @return Boolean
 	 */
-	private function isValid($item)
+	protected function isValid($item)
 	{
 		return !file_exists($this->getCachePath($item, self::INVALID_CACHE_ENTRY));
 	}
@@ -309,7 +310,7 @@ class f_DataCacheFileService extends f_DataCacheService
 	/**
 	 * @param f_DataCacheItem $item
 	 */
-	private function markAsBeingRegenerated($item)
+	protected function markAsBeingRegenerated($item)
 	{
 		if (!$this->isValid($item))
 		{
@@ -321,7 +322,7 @@ class f_DataCacheFileService extends f_DataCacheService
 	 * @param f_DataCacheItem $item
 	 * @return String
 	 */
-	private function getRegistrationPath($item)
+	protected function getRegistrationPath($item)
 	{
 		$registrationPath = $item->getRegistrationPath();
 		
@@ -336,7 +337,7 @@ class f_DataCacheFileService extends f_DataCacheService
 	/**
 	 * @param f_DataCacheItem $item
 	 */
-	private function register($item)
+	protected function register($item)
 	{
 		$registrationPath = $this->getRegistrationPath($item);
 		if (!file_exists($registrationPath))
@@ -355,14 +356,14 @@ class f_DataCacheFileService extends f_DataCacheService
 				$tm->rollBack($e);
 			}
 		}
-		$baseById = f_util_FileUtils::buildCachePath($this->registrationFolder, 'byDocId');
-
+		//$baseById = f_util_FileUtils::buildCachePath($this->registrationFolder, 'byDocId');
+		$baseById = $this->registrationFolder.DIRECTORY_SEPARATOR.'byDocId';
+		
 		foreach ($item->getPatterns() as $spec)
 		{
 			if (is_numeric($spec))
 			{
-				$byIdRegister = $baseById . implode(DIRECTORY_SEPARATOR, str_split($spec, 3)) . DIRECTORY_SEPARATOR;
-				$byIdRegister .= $item->getNamespace() . '_' . $item->getKeyParameters();
+				$byIdRegister = $baseById.DIRECTORY_SEPARATOR.implode(DIRECTORY_SEPARATOR, str_split($spec, 3)).DIRECTORY_SEPARATOR.$item->getNamespace().'_'.$item->getKeyParameters();
 				if (!file_exists($byIdRegister))
 				{
 					f_util_FileUtils::mkdir(dirname($byIdRegister));

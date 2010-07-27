@@ -491,3 +491,132 @@ class f_SimpleCache
 		return f_persistentdocument_PersistentProvider::getInstance();
 	}
 }
+
+class f_SimpleCacheReplacement
+{
+	/**
+	 * @var f_DataCacheItem
+	 */
+	private $cacheItem = null;
+
+	public function __construct($id, $keyParameters, $cacheSpecs)
+	{
+		$this->cacheItem = f_DataCacheService::getInstance()->readFromCache($id, $keyParameters, $cacheSpecs);
+	}
+	
+	/**
+	 * @param Integer $timeLimit max time to live, in seconds
+	 */
+	private function setTimeLimit($timeLimit)
+	{
+		$this->cacheItem->setTTL($timeLimit);
+	}
+
+	static function isEnabled()
+	{
+		return f_DataCacheService::getInstance()->isEnabled();
+	}
+
+	public function exists($subCache)
+	{
+		f_DataCacheService::getInstance()->exists($this->cacheItem, $subCache);
+	}
+
+	public function setInvalid()
+	{
+		$this->cacheItem->setInvalid();
+	}
+
+	public function readFromCache($subCache)
+	{
+		return $this->cacheItem->getValue($subCache);
+	}
+
+	public function writeToCache($subCache, $content)
+	{
+		$this->cacheItem->setValue($subCache, $content);
+		f_DataCacheService::getInstance()->writeToCache($this->cacheItem);
+	}
+
+	public function getCachePath($subCache)
+	{
+		$this->cacheItem->getCachePath();
+	}
+
+	public static function clearCacheById($id)
+	{
+		f_DataCacheService::getInstance()->clearCacheByNamespace($id);
+	}
+
+	static function commitClearByDocIds($docIds)
+	{
+		foreach ($docIds as $id)
+		{
+			f_DataCacheService::getInstance()->clearCacheByDocId($id);
+		}
+	}
+
+	/**
+	 * @param String $id
+	 */
+	public static function clear($id = null, $dispatch = true)
+	{
+		if ($id === null)
+		{
+			f_DataCacheService::getInstance()->clearAll();
+		}
+		else 
+		{
+			f_DataCacheService::getInstance()->clearCacheByNamespace($id);
+		}
+	}
+
+
+	public final function clearSubCache($subCache, $dispatch = true)
+	{
+		f_DataCacheService::getInstance()->clearSubCache($this->cacheItem, $subCache, $dispatch);
+	}
+
+	/**
+	 * This is the same as BlockCache::commitClear()
+	 * but designed for the context of <code>register_shutdown_function()</code>,
+	 * to be sure the correct umask is used.
+	 */
+	public static function shutdownCommitClear()
+	{
+		f_DataCacheService::getInstance()->shutdownCommitClear();
+	}
+
+	public static function commitClearDispatched($ids = null)
+	{
+		return true;
+	}
+
+	/**
+	 */
+	public static function commitClear()
+	{
+		return true;
+	}
+
+	public static function cleanExpiredCache()
+	{
+		f_DataCacheService::getInstance()->cleanExpiredCache();
+	}
+
+	/**
+	 * @param f_persistentdocument_PersistentDocumentModel $model
+	 */
+	public static function clearCacheByModel($model)
+	{
+		f_DataCacheService::getInstance()->clearCacheByModel($model);
+	}
+
+	/**
+	 * @param f_persistentdocument_PersistentDocumentModel $model
+	 */
+	public static function clearCacheByTag($tag)
+	{
+		f_DataCacheService::getInstance()->clearCacheByTag($tag);
+	}
+}

@@ -40,7 +40,7 @@ class f_DataCacheService extends BaseService
 	/**
 	 * @return Boolean
 	 */
-	function isEnabled()
+	public function isEnabled()
 	{
 		return !defined("DISABLE_DATACACHE") || constant("DISABLE_DATACACHE") !== true;
 	}
@@ -50,15 +50,25 @@ class f_DataCacheService extends BaseService
 	 * @param Mixed $keyParameters
 	 * @param String $subCache (optional)
 	 * @param Array	$newPatterns
-	 * @return f_DataCacheItem or null
+	 * @return f_DataCacheItem or null or String
 	 */
 	public function readFromCache($namespace, $keyParameters, $newPatterns = null)
 	{
 		if ($newPatterns !== null)
 		{
-			$cacheItem = $this->getNewCacheItem($namespace, $keyParameters, $newPatterns);
-			$cacheItem->setInvalid();
-			return $cacheItem;
+			$returnItem = true;
+		}
+		else 
+		{
+			$returnItem = false;
+			$newPatterns = array();
+		}
+		
+		$item = $this->getData($this->getNewCacheItem($namespace, $keyParameters, $newPatterns));
+		
+		if ($returnItem || $this->exists($item))
+		{
+			return $item;
 		}
 		return null;
 	}
@@ -78,7 +88,16 @@ class f_DataCacheService extends BaseService
 	 */
 	public function exists($item, $subCache = null)
 	{
-		return false;
+		$result = $item->isValid();
+		if ($subCache !== null)
+		{
+			$subResult = $item->getValue($subCache) !== null;
+		}
+		else 
+		{
+			$subResult = true;
+		}
+		return $result && $subResult;
 	}
 	
 	/**
@@ -149,7 +168,7 @@ class f_DataCacheService extends BaseService
 	
 	public function cleanExpiredCache()
 	{
-		
+		return true;
 	}
 	
 	/**
@@ -160,6 +179,16 @@ class f_DataCacheService extends BaseService
 	public function shutdownCommitClear()
 	{
 		$this->commitClear();
+	}
+	
+	/**
+	 * @param f_DataCacheItem $item
+	 * @param String $subCache
+	 * @param Boolean $dispatch (optional)
+	 */
+	public function clearSubCache($item, $subCache, $dispatch = true)
+	{
+		return true;
 	}
 	
 	/**
@@ -259,25 +288,14 @@ class f_DataCacheService extends BaseService
 		$this->dispatch = false;
 	}
 	
-	/*private function commitClear()
-	{
-		
-	}*/
-
 	/**
-	 * @param Array $docIds
+	 * @param f_DataCacheItem $item
+	 * @return f_DataCacheItem
 	 */
-	/*private function commitClearByDocIds($docIds)
+	protected function getData($item)
 	{
-		
-	}*/
-	
-	/**
-	 * @param Array $dirsToClear
-	 */
-	/*private function buildInvalidCacheList($dirsToClear)
-	{
-		
-	}*/
+		$item->setValidity(false);
+		return $item;
+	}
 }
 ?>

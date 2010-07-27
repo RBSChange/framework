@@ -20,7 +20,7 @@ class listener_SimpleCacheListener
 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentUpdated");}
 		$document = $params['document'];
 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
-		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
+		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
 	}
 	
 	/**
@@ -60,7 +60,7 @@ class listener_SimpleCacheListener
 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentDeleted");}
 		$document = $params['document'];
 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
-		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
+		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
 	}
 
 	/**
@@ -72,7 +72,7 @@ class listener_SimpleCacheListener
 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentPublished");}
 		$document = $params['document'];
 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
-		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
+		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
 	}
 
 	/**
@@ -84,7 +84,7 @@ class listener_SimpleCacheListener
 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentDeactivated");}
 		$document = $params['document'];
 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
-		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
+		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
 	}
 
 	/**
@@ -96,7 +96,7 @@ class listener_SimpleCacheListener
 		if (Framework::isDebugEnabled()) Framework::debug("[". __CLASS__ . "]: onPersistentDocumentUnPublished");
 		$document = $params['document'];
 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
-		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
+		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
 	}
 
 	/**
@@ -108,7 +108,7 @@ class listener_SimpleCacheListener
 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentFiled");}
 		$document = $params['document'];
 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
-		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
+		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
 	}
 
 	/**
@@ -120,7 +120,7 @@ class listener_SimpleCacheListener
 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentInTrash");}
 		$document = $params['document'];
 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
-		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
+		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
 	}
 
 	/**
@@ -132,7 +132,7 @@ class listener_SimpleCacheListener
 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onChildrenOrdered");}
 		$document = $params['parent'];
 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
-		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
+		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
 	}
 	
 	public function onPersistentTreeNodeOrdered($sender, $params)
@@ -141,7 +141,7 @@ class listener_SimpleCacheListener
 		$parentNode = $params['parentNode'];
 		$document = DocumentHelper::getDocumentInstance($parentNode->getId());
 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
-		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
+		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
 	}
 	
     public function onSimpleCacheClearedNode($sender, $params)
@@ -151,16 +151,16 @@ class listener_SimpleCacheListener
 		{
 			if (isset($params['ids']))
 			{
-		    	f_DataCacheService::getInstance()->commitClearDispatched($params['ids']);
+		    	f_DataCacheService::getInstance()->clearCacheByNamespace($params['ids']);
 			}
 			if (isset($params['docIds']))
 			{
-		    	f_DataCacheService::getInstance()->commitClearByDocIds($params['docIds']);
+		    	f_DataCacheService::getInstance()->clearCacheByDocId($params['docIds']);
 			}
 		}
 		else
 		{
-		    f_DataCacheService::getInstance()->commitClearDispatched();
+		    f_DataCacheService::getInstance()->clearAll();
 		}
     }
     
