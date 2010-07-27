@@ -2620,7 +2620,7 @@ class cboot_Properties
 		else
 		{
 			$valLength = strlen($val);
-			if ($valLength > 0 && $val[0] == "'" && $val[$valLength-1] == "'" || $val[0] == "\"" && $val[$valLength-1] == "\"")
+			if ($valLength > 0 && (($val[0] == "'" && $val[$valLength-1] == "'") || ($val[0] == "\"" && $val[$valLength-1] == "\"")))
 			{
 				$val = substr($val, 1, -1);
 			}
