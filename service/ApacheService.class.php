@@ -110,7 +110,7 @@ class ApacheService extends BaseService
 	{
 		$from = array();
 		$to = array();
-		
+
 		if (DIRECTORY_SEPARATOR === "\\")
 		{
 			$from[] = DIRECTORY_SEPARATOR;
@@ -121,7 +121,7 @@ class ApacheService extends BaseService
 		$dr = str_replace($from, $to, DOCUMENT_ROOT);
 		$wh = str_replace($from, $to, WEBEDIT_HOME);
 		return str_replace(array('%{DOCUMENT_ROOT}', '%{WEBEDIT_HOME}'), 
-							array($dr, $wh), $content);
+				array($dr, $wh), $content);
 	}
 	
 	/**

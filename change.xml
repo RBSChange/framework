@@ -46,7 +46,7 @@
 		<dependency>
 			<name>change-lib/change-script</name>
 			<versions>	
-				<version>3.2</version>
+				<version>3.3</version>
 			</versions>
 		</dependency>
 		
