@@ -144,6 +144,11 @@ class f_DataCacheFileService extends f_DataCacheService
 		}
 	}
 	
+	public function clearCommand()
+	{
+		f_util_FileUtils::cleanDir(f_util_FileUtils::buildCachePath("simplecache"));
+	}
+	
 	/**
 	 * @param f_DataCacheItem $item
 	 * @param String $subCache

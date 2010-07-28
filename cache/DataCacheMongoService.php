@@ -122,6 +122,12 @@ class f_DataCacheMongoService extends f_DataCacheService
 		$this->dispatch = $dispatch || $this->dispatch;
 	}
 	
+	public function clearCommand()
+	{
+		self::$mongoCollection->drop();
+		self::$mongoRegistration->drop();
+	}
+	
 	protected function commitClear()
 	{
 		if (Framework::isDebugEnabled())

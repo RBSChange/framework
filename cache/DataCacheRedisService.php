@@ -81,6 +81,24 @@ class f_DataCacheRedisService extends f_DataCacheService
 		$this->dispatch = $dispatch || $this->dispatch;
 	}
 	
+	public function clearCommand()
+	{
+		$keys = self::$redis->getKeys(self::REDIS_KEY_PREFIX.'*');
+		if (!is_array($keys))
+		{
+			$keys = array();
+		}
+		$registrationKeys = self::$redis->getKeys(self::REDIS_REGISTRATION_KEY_PREFIX.'*');
+		if (!is_array($registrationKeys))
+		{
+			$registrationKeys = array();
+		}
+		
+		$allKeys = array_merge($keys, $registrationKeys);
+		
+		self::$redis->delete($allKeys);
+	}
+	
 	protected function commitClear()
 	{
 		if (Framework::isDebugEnabled())

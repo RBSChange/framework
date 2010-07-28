@@ -191,6 +191,11 @@ class f_DataCacheService extends BaseService
 		return true;
 	}
 	
+	public function clearCommand()
+	{
+		return true;
+	}
+	
 	/**
 	 * @param Array $cacheSpecs
 	 * @return Array

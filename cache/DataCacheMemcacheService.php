@@ -75,6 +75,11 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 		$this->dispatch = $dispatch || $this->dispatch;
 	}
 	
+	public function clearCommand()
+	{
+		self::$memcache->flush();
+	}
+	
 	protected function commitClear()
 	{
 		if (Framework::isDebugEnabled())
