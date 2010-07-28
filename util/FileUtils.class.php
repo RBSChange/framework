@@ -79,9 +79,29 @@ abstract class f_util_FileUtils
 			}
 			if ($options & self::OVERRIDE)
 			{
-				if (!unlink($linkPath) || !symlink($linkTarget, $linkPath))
+				if (DIRECTORY_SEPARATOR === '/')
 				{
-					throw new Exception("Could not create symlink $linkPath => $linkTarget");
+					if (!unlink($linkPath) || !symlink($linkTarget, $linkPath))
+					{
+						throw new Exception("Could not create symlink $linkPath => $linkTarget");
+					}
+				}
+				else
+				{
+					if (is_dir($linkPath))
+					{
+						if (!rmdir($linkPath) || !symlink($linkTarget, $linkPath))
+						{
+							throw new Exception("Could not create symlink $linkPath => $linkTarget (win)");
+						}	
+					}
+					else
+					{
+						if (!unlink($linkPath) || !symlink($linkTarget, $linkPath))
+						{
+							throw new Exception("Could not create symlink $linkPath => $linkTarget (win)");
+						}	
+					}
 				}
 				return true;
 			}
