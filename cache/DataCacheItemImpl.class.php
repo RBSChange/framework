@@ -11,6 +11,7 @@ class f_DataCacheItemImpl implements f_DataCacheItem
 	private $isValid = false;
 	private $registrationPath = null;
 	private $cachePath = null;
+	private $regenerated = false;
 	private $data;
 		
 	/**
@@ -186,6 +187,16 @@ class f_DataCacheItemImpl implements f_DataCacheItem
 	public function isValid()
 	{
 		return $this->isValid && $this->getCreationTime() !== null && ($this->getCreationTime()+$this->timeLimit > time());
+	}
+	
+	public function isRegenerated()
+	{
+		return $this->regenerated;
+	}
+	
+	public function markAsBeingRegenerated()
+	{
+		$this->regenerated = true;
 	}
 }
 ?>

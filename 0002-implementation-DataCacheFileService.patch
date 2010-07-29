@@ -1,7 +1,7 @@
 From f421945838c59a8a6e8542e9ec8cd29ae285de31 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?K=C3=A9vin=20O'NEILL?= <kevin.oneill@rbs.fr>
 Date: Fri, 23 Jul 2010 17:06:07 +0200
-Subject: [PATCH 2/4] implementation DataCacheFileService
+Subject: [PATCH 2/5] implementation DataCacheFileService
 
 ---
  cache/DataCacheFileService.class.php   |  248 +++++++++++++++++++++++++++-----

@@ -80,6 +80,19 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 		self::$memcache->flush();
 	}
 	
+	/**
+	 * @param String $pattern
+	 */
+	public function getCacheIdsForPattern($pattern)
+	{
+		$object = self::$memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$pattern);
+		if (f_util_StringUtils::isNotEmpty($object))
+		{
+			return unserialize($object);
+		}
+		return array();
+	}
+	
 	protected function commitClear()
 	{
 		if (Framework::isDebugEnabled())
@@ -111,7 +124,12 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 			}
 			if (!empty($this->docIdToClear))
 			{
-				self::commitClearByDocIds($this->docIdToClear);
+				$docIds = array();
+				foreach ($this->docIdToClear as $docId => $value)
+				{
+					$docIds[] = $docId;
+				}
+				self::commitClearByDocIds($docIds);
 			}
 			
 			if ($this->dispatch)

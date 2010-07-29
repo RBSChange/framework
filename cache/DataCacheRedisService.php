@@ -99,6 +99,35 @@ class f_DataCacheRedisService extends f_DataCacheService
 		self::$redis->delete($allKeys);
 	}
 	
+	/**
+	 * @param String $pattern
+	 */
+	public function getCacheIdsForPattern($pattern)
+	{
+		$keys = self::$redis->getKeys(self::REDIS_REGISTRATION_KEY_PREFIX.'*');
+		$objects = self::$redis->getMultiple($keys);
+		
+		$docs = array();
+		
+		for ($i = 0; $i < count($keys); $i++)
+		{
+			$object = unserialize($objects[$i]);
+			
+			if (isset($object["pattern"]))
+			{
+				foreach ($object["pattern"] as $p)
+				{
+					if ($p == $pattern)
+					{
+						$docs[] = substr($keys[$i], strlen(self::REDIS_REGISTRATION_KEY_PREFIX));
+					}
+				}
+			}
+		}
+		
+		return $docs;
+	}
+	
 	protected function commitClear()
 	{
 		if (Framework::isDebugEnabled())
@@ -135,7 +164,12 @@ class f_DataCacheRedisService extends f_DataCacheService
 			}
 			if (!empty($this->docIdToClear))
 			{
-				self::commitClearByDocIds($this->docIdToClear);
+				$docIds = array();
+				foreach ($this->docIdToClear as $docId => $value)
+				{
+					$docIds[] = self::REDIS_REGISTRATION_KEY_PREFIX.$docId;
+				}
+				self::commitClearByDocIds($docIds);
 			}
 			
 			if ($this->dispatch)
@@ -164,11 +198,17 @@ class f_DataCacheRedisService extends f_DataCacheService
 	{
 		$keys = self::$redis->getMultiple($docIds);
 		$keyParameters = array();
+		
 		foreach ($keys as $k)
 		{
+			if ($k === false)
+			{
+				continue;
+			}
 			$a = unserialize($k);
 			$keyParameters[] = self::REDIS_KEY_PREFIX.$a["keyParameters"];
 		}
+		
 		self::$redis->delete($keyParameters);
 	}
 

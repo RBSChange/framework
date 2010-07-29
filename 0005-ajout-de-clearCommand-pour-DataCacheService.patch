@@ -1,0 +1,5347 @@
+From a6f1cc7e5b031fff597ab4b6325e4d071f8b4d67 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?K=C3=A9vin=20O'NEILL?= <kevin.oneill@rbs.fr>
+Date: Wed, 28 Jul 2010 09:52:47 +0200
+Subject: [PATCH 5/5] ajout de clearCommand pour DataCacheService
+
+---
+ 0001-debut-de-reorganisation-du-code.patch         | 2447 ++++++++++++++++++++
+ 0002-implementation-DataCacheFileService.patch     | 1015 ++++++++
+ 0003-implementation-DataCacheMongoService.patch    |  492 ++++
+ ...che-and-Redis-support-on-DataCacheService.patch | 1236 ++++++++++
+ cache/DataCacheFileService.class.php               |    5 +
+ cache/DataCacheMemcacheService.php                 |    5 +
+ cache/DataCacheMongoService.php                    |    6 +
+ cache/DataCacheRedisService.php                    |   18 +
+ cache/DataCacheService.class.php                   |    5 +
+ change-commands/ClearSimplecache.php               |    3 +-
+ 10 files changed, 5231 insertions(+), 1 deletions(-)
+ create mode 100644 0001-debut-de-reorganisation-du-code.patch
+ create mode 100644 0002-implementation-DataCacheFileService.patch
+ create mode 100644 0003-implementation-DataCacheMongoService.patch
+ create mode 100644 0004-NEW-Memcache-and-Redis-support-on-DataCacheService.patch
+
+diff --git a/0001-debut-de-reorganisation-du-code.patch b/0001-debut-de-reorganisation-du-code.patch
+new file mode 100644
+index 0000000..dd062f6
+--- /dev/null
++++ b/0001-debut-de-reorganisation-du-code.patch
+@@ -0,0 +1,2447 @@
++From d9ed16018a4517ea2db1983e77d4d10c3f35932b Mon Sep 17 00:00:00 2001
++From: =?UTF-8?q?K=C3=A9vin=20O'NEILL?= <kevin.oneill@rbs.fr>
++Date: Thu, 22 Jul 2010 15:29:51 +0200
++Subject: [PATCH 1/4] debut de reorganisation du code
++
++---
++ Framework.php                                      |    2 +-
++ cache/DataCacheFileService.class.php               |  203 ++++++++++++++++++++
++ cache/DataCacheItem.class.php                      |   46 +++++
++ cache/DataCacheItemImpl.class.php                  |  143 ++++++++++++++
++ cache/DataCachePatternHelper.class.php             |   40 ++++
++ cache/DataCacheService.class.php                   |  129 +++++++++++++
++ util/StringUtils.class.php                         |    2 +-
++ 7 files changed, 563 insertions(+), 2 deletions(-)
++ mode change 100644 => 100755 ChangeProject.php
++ mode change 100644 => 100755 Framework.php
++ mode change 100644 => 100755 aop/AOP.php
++ mode change 100644 => 100755 aop/samples/advices.php
++ mode change 100644 => 100755 aop/samples/classes.php
++ mode change 100644 => 100755 aop/samples/classes_replacement.php
++ mode change 100644 => 100755 bin/httpbootstrap.php
++ mode change 100644 => 100755 builder/BackofficeActionUpdater.class.php
++ mode change 100644 => 100755 builder/BackofficeStyleUpdater.class.php
++ mode change 100644 => 100755 builder/DocumentGenerator.class.php
++ mode change 100644 => 100755 builder/Generator.class.php
++ mode change 100644 => 100755 builder/ListenersGenerator.class.php
++ mode change 100644 => 100755 builder/LocaleFileGenerator.class.php
++ mode change 100644 => 100755 builder/ModuleGenerator.class.php
++ mode change 100644 => 100755 builder/SecurityGenerator.class.php
++ mode change 100644 => 100755 builder/TestFactoryGenerator.class.php
++ mode change 100644 => 100755 builder/generator/ChildrenProperty.class.php
++ mode change 100644 => 100755 builder/generator/FormProperty.class.php
++ mode change 100644 => 100755 builder/generator/PersistentModel.class.php
++ mode change 100644 => 100755 builder/generator/PersistentProperty.class.php
++ mode change 100644 => 100755 builder/generator/Workflow.class.php
++ mode change 100644 => 100755 cache/CacheService.class.php
++ create mode 100755 cache/DataCacheFileService.class.php
++ create mode 100755 cache/DataCacheItem.class.php
++ create mode 100755 cache/DataCacheItemImpl.class.php
++ create mode 100755 cache/DataCachePatternHelper.class.php
++ create mode 100755 cache/DataCacheService.class.php
++ mode change 100644 => 100755 cache/SimpleCache.class.php
++ mode change 100644 => 100755 change-commands/AbstractChangeCommand.php
++ mode change 100644 => 100755 change-commands/ApplyHotfix.php
++ mode change 100644 => 100755 change-commands/ApplyPatch.php
++ mode change 100644 => 100755 change-commands/ApplyProjectPolicy.php
++ mode change 100644 => 100755 change-commands/ApplyWebappPolicy.php
++ mode change 100644 => 100755 change-commands/CheckHotfix.php
++ mode change 100644 => 100755 change-commands/CheckPatch.php
++ mode change 100644 => 100755 change-commands/ClearAll.php
++ mode change 100644 => 100755 change-commands/ClearCache.php
++ mode change 100644 => 100755 change-commands/ClearLog.php
++ mode change 100644 => 100755 change-commands/ClearSimplecache.php
++ mode change 100644 => 100755 change-commands/ClearTemplateCache.php
++ mode change 100644 => 100755 change-commands/ClearWebappCache.php
++ mode change 100644 => 100755 change-commands/CompileAll.php
++ mode change 100644 => 100755 change-commands/CompileAop.php
++ mode change 100644 => 100755 change-commands/CompileConfig.php
++ mode change 100644 => 100755 change-commands/CompileDbSchema.php
++ mode change 100644 => 100755 change-commands/CompileDocumentFilters.php
++ mode change 100644 => 100755 change-commands/CompileDocuments.php
++ mode change 100644 => 100755 change-commands/CompileJsDependencies.php
++ mode change 100644 => 100755 change-commands/CompileListeners.php
++ mode change 100644 => 100755 change-commands/CompileLocales.php
++ mode change 100644 => 100755 change-commands/CompilePermissions.php
++ mode change 100644 => 100755 change-commands/CompilePhptal.php
++ mode change 100644 => 100755 change-commands/CompileRoles.php
++ mode change 100644 => 100755 change-commands/CompileTags.php
++ mode change 100644 => 100755 change-commands/DisableSite.php
++ mode change 100644 => 100755 change-commands/EnableSite.php
++ mode change 100644 => 100755 change-commands/ImportData.php
++ mode change 100644 => 100755 change-commands/ImportInitData.php
++ mode change 100644 => 100755 change-commands/Indexer.php
++ mode change 100644 => 100755 change-commands/InitFilePolicy.php
++ mode change 100644 => 100755 change-commands/InitGenericModules.php
++ mode change 100644 => 100755 change-commands/InitProject.php
++ mode change 100644 => 100755 change-commands/InitWebapp.php
++ mode change 100644 => 100755 change-commands/InstallModule.php
++ mode change 100644 => 100755 change-commands/PatchInfo.php
++ mode change 100644 => 100755 change-commands/UpdateAutoload.php
++ mode change 100644 => 100755 changedev-commands/AbstractChangedevCommand.php
++ mode change 100644 => 100755 changedev-commands/AddAction.php
++ mode change 100644 => 100755 changedev-commands/AddCommand.php
++ mode change 100644 => 100755 changedev-commands/AddDocument.php
++ mode change 100644 => 100755 changedev-commands/AddJsonAction.php
++ mode change 100644 => 100755 changedev-commands/AddModule.php
++ mode change 100644 => 100755 changedev-commands/AddService.php
++ mode change 100644 => 100755 changedev-commands/CreateDocument.php
++ mode change 100644 => 100755 changedev-commands/CreateNewProject.php
++ mode change 100644 => 100755 changedev-commands/CreatePatch.php
++ mode change 100644 => 100755 changedev-commands/DropDatabase.php
++ mode change 100644 => 100755 changedev-commands/EditDocument.php
++ mode change 100644 => 100755 changedev-commands/GenerateDatabase.php
++ mode change 100644 => 100755 changedev-commands/GenerateDocumentAggregate.php
++ mode change 100644 => 100755 changedev-commands/Init.php
++ mode change 100644 => 100755 changedev-commands/InitPatchDb.php
++ mode change 100644 => 100755 changedev-commands/ResetDatabase.php
++ mode change 100644 => 100755 chart/Charts.php
++ mode change 100644 => 100755 config/ProjectParser.class.php
++ mode change 100644 => 100755 date/Calendar.class.php
++ mode change 100644 => 100755 date/Converter.class.php
++ mode change 100644 => 100755 date/Date.php
++ mode change 100644 => 100755 date/DateFormat.class.php
++ mode change 100644 => 100755 date/DateTime.class.php
++ mode change 100644 => 100755 date/GregorianCalendar.class.php
++ mode change 100644 => 100755 date/InvalidDateException.class.php
++ mode change 100644 => 100755 date/TimeSpan.class.php
++ mode change 100644 => 100755 event/Event.class.php
++ mode change 100644 => 100755 event/EventManager.class.php
++ mode change 100644 => 100755 exception/BaseException.class.php
++ mode change 100644 => 100755 exception/Exceptions.php
++ mode change 100644 => 100755 exception/renderers/HtmlRenderer.class.php
++ mode change 100644 => 100755 exception/renderers/Renderer.class.php
++ mode change 100644 => 100755 exception/renderers/XmlRenderer.class.php
++ mode change 100644 => 100755 export/ExportableDocument.class.php
++ mode change 100644 => 100755 export/ExportedDocument.class.php
++ mode change 100644 => 100755 export/SparatedValuesExporter.php
++ mode change 100644 => 100755 f_mvc/Action.php
++ mode change 100644 => 100755 f_mvc/BufferedWriter.php
++ mode change 100644 => 100755 f_mvc/Context.php
++ mode change 100644 => 100755 f_mvc/Controller.php
++ mode change 100644 => 100755 f_mvc/FakeHttpRequest.php
++ mode change 100644 => 100755 f_mvc/HTTPRequest.php
++ mode change 100644 => 100755 f_mvc/HTTPSession.php
++ mode change 100644 => 100755 f_mvc/Request.php
++ mode change 100644 => 100755 f_mvc/Response.php
++ mode change 100644 => 100755 f_mvc/Session.php
++ mode change 100644 => 100755 f_mvc/Writer.php
++ mode change 100644 => 100755 f_mvc/bean/Bean.php
++ mode change 100644 => 100755 f_mvc/bean/BeanAggregateGenerator.php
++ mode change 100644 => 100755 f_mvc/bean/BeanAggregateModel.php
++ mode change 100644 => 100755 f_mvc/bean/BeanAggregatePropertyInfo.php
++ mode change 100644 => 100755 f_mvc/bean/BeanModel.php
++ mode change 100644 => 100755 f_mvc/bean/BeanPropertyInfo.php
++ mode change 100644 => 100755 f_mvc/bean/BeanPropertyInfoImpl.php
++ mode change 100644 => 100755 f_mvc/bean/BeanUtils.php
++ mode change 100644 => 100755 f_mvc/bean/BeanValueConverter.php
++ mode change 100644 => 100755 f_mvc/bean/DynBean.php
++ mode change 100644 => 100755 f_mvc/bean/converters/BooleanConverter.php
++ mode change 100644 => 100755 f_mvc/bean/converters/DateTimeConverter.php
++ mode change 100644 => 100755 f_mvc/bean/converters/DecimalConverter.php
++ mode change 100644 => 100755 f_mvc/bean/converters/DocumentConverter.php
++ mode change 100644 => 100755 f_mvc/bean/converters/DocumentsConverter.php
++ mode change 100644 => 100755 f_mvc/bean/converters/DoubleConverter.php
++ mode change 100644 => 100755 f_mvc/bean/converters/EditableListConverter.php
++ mode change 100644 => 100755 f_mvc/bean/converters/IntegerConverter.php
++ mode change 100644 => 100755 f_mvc/bean/converters/XHTMLFragmentConverter.php
++ mode change 100644 => 100755 f_web/css/CSSDeclaration.php
++ mode change 100644 => 100755 f_web/css/CSSRule.class.php
++ mode change 100644 => 100755 f_web/css/CSSStylesheet.php
++ mode change 100644 => 100755 f_web/css/CSSVariables.php
++ mode change 100644 => 100755 f_web/http/Header.class.php
++ mode change 100644 => 100755 f_web/http/Link.class.php
++ mode change 100644 => 100755 f_web/http/PageLink.class.php
++ mode change 100644 => 100755 f_web/http/ParametrizedLink.class.php
++ mode change 100644 => 100755 f_web/oauth/Consumer.class.php
++ mode change 100644 => 100755 f_web/oauth/HTTPClient.class.php
++ mode change 100644 => 100755 f_web/oauth/Request.class.php
++ mode change 100644 => 100755 f_web/oauth/Service.class.php
++ mode change 100644 => 100755 f_web/oauth/Signature.class.php
++ mode change 100644 => 100755 f_web/oauth/Token.class.php
++ mode change 100644 => 100755 i18n/I18nConfig.class.php
++ mode change 100644 => 100755 i18n/I18nInfo.class.php
++ mode change 100644 => 100755 import/SparatedValuesImporter.php
++ mode change 100644 => 100755 indexer/DismaxSolrSearch.class.php
++ mode change 100644 => 100755 indexer/FSCache.php
++ mode change 100644 => 100755 indexer/FacetCount.php
++ mode change 100644 => 100755 indexer/FacetResult.php
++ mode change 100644 => 100755 indexer/FakeSolrManager.class.php
++ mode change 100644 => 100755 indexer/IndexService.class.php
++ mode change 100644 => 100755 indexer/IndexableDocument.class.php
++ mode change 100644 => 100755 indexer/IndexedDocument.class.php
++ mode change 100644 => 100755 indexer/ReindexDocumentsTask.php
++ mode change 100644 => 100755 indexer/ReindexDocumentsTaskByUpdatedRoles.php
++ mode change 100644 => 100755 indexer/SearchResult.php
++ mode change 100644 => 100755 indexer/SearchResults.php
++ mode change 100644 => 100755 indexer/SolrManager.class.php
++ mode change 100644 => 100755 indexer/SolrSearchResults.class.php
++ mode change 100644 => 100755 indexer/SolrServerRequest.class.php
++ mode change 100644 => 100755 indexer/StandardSolrSeach.class.php
++ mode change 100644 => 100755 indexer/SuggestionSolrSearch.class.php
++ mode change 100644 => 100755 indexer/extractors/OfficeExtractor.class.php
++ mode change 100644 => 100755 indexer/extractors/PDFExtractor.class.php
++ mode change 100644 => 100755 indexer/query/BooleanQuery.class.php
++ mode change 100644 => 100755 indexer/query/Facet.php
++ mode change 100644 => 100755 indexer/query/PhraseQuery.php
++ mode change 100644 => 100755 indexer/query/Query.class.php
++ mode change 100644 => 100755 indexer/query/QueryBase.class.php
++ mode change 100644 => 100755 indexer/query/QueryHelper.class.php
++ mode change 100644 => 100755 indexer/query/RangeQuery.class.php
++ mode change 100644 => 100755 indexer/query/TermQuery.class.php
++ mode change 100644 => 100755 libs/agavi/action/BaseAction.class.php
++ mode change 100644 => 100755 libs/agavi/action/BaseJSONAction.class.php
++ mode change 100644 => 100755 libs/agavi/config/ChangeLoggingConfigHandler.class.php
++ mode change 100644 => 100755 libs/agavi/config/ConfigCache.class.php
++ mode change 100644 => 100755 libs/agavi/config/ConfigHandler.class.php
++ mode change 100644 => 100755 libs/agavi/controller/ChangeController.class.php
++ mode change 100644 => 100755 libs/agavi/controller/HttpController.class.php
++ mode change 100644 => 100755 libs/agavi/controller/XulController.class.php
++ mode change 100644 => 100755 libs/agavi/filter/FrameworkSecurityFilter.class.php
++ mode change 100644 => 100755 libs/agavi/logging/FileAppender.class.php
++ mode change 100644 => 100755 libs/agavi/logging/Logger.class.php
++ mode change 100644 => 100755 libs/agavi/logging/LoggerManager.class.php
++ mode change 100644 => 100755 libs/agavi/logging/LoggingFileAppender.class.php
++ mode change 100644 => 100755 libs/agavi/logging/Message.class.php
++ mode change 100644 => 100755 libs/agavi/logging/PassthruLayout.class.php
++ mode change 100644 => 100755 libs/agavi/logging/PriorityLogger.class.php
++ mode change 100644 => 100755 libs/agavi/logging/StderrAppender.class.php
++ mode change 100644 => 100755 libs/agavi/logging/StdoutAppender.class.php
++ mode change 100644 => 100755 libs/agavi/request/ChangeRequest.class.php
++ mode change 100644 => 100755 libs/agavi/storage/ChangeSessionStorage.php
++ mode change 100644 => 100755 libs/agavi/user/FrameworkSecurityUser.class.php
++ mode change 100644 => 100755 libs/agavi/view/BaseView.class.php
++ mode change 100644 => 100755 libs/gotcha/gotcha.php
++ mode change 100644 => 100755 libs/json.php
++ mode change 100644 => 100755 libs/odtphp2pdf/Odtphp2PDFClient.php
++ mode change 100644 => 100755 libs/pear/Mail/mime.php
++ mode change 100644 => 100755 libs/pear/Mail/mimePart.php
++ mode change 100644 => 100755 libs/pear/PHPTAL.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/CommentFilter.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Context.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Dom/Defs.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Dom/Node.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Dom/Parser.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Dom/XmlParser.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Dom/XmlnsState.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Exception.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/FileSource.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Filter.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/GetTextTranslator.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Namespace.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Namespace/CHANGE.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Namespace/I18N.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Namespace/METAL.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Namespace/PHPTAL.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Namespace/TAL.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/CHANGE/ChangeTalAttribute.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/CHANGE/Date.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/CHANGE/I18nattr.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/CHANGE/Id.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/CHANGE/Include.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/CHANGE/Javascript.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/CHANGE/PHPTAL_CHANGE.class.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/CHANGE/Price.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/CHANGE/Select.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/CHANGE/Translate.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/I18N/Attributes.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/I18N/Data.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/I18N/Domain.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/I18N/Name.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/I18N/Source.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/I18N/Target.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/I18N/Translate.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/METAL/DefineMacro.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/METAL/DefineSlot.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/METAL/FillSlot.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/METAL/UseMacro.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/PHPTAL/Debug.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/PHPTAL/Id.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/PHPTAL/Tales.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/TAL/Attributes.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/TAL/Comment.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/TAL/Condition.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/TAL/Content.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/TAL/Define.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/TAL/OmitTag.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/TAL/OnError.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/TAL/Repeat.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Attribute/TAL/Replace.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/CodeGenerator.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/CodeWriter.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/ElementWriter.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Node.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/State.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/TalesChainExecutor.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/TalesInternal.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Php/Transformer.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/RepeatController.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Source.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/SourceResolver.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/StringSource.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Tales.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/TalesRegistry.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/TranslationService.php
++ mode change 100644 => 100755 libs/pear/PHPTAL/Trigger.php
++ mode change 100644 => 100755 listener/BackofficeIndexListener.class.php
++ mode change 100644 => 100755 listener/IndexListener.class.php
++ mode change 100644 => 100755 listener/PublishListener.class.php
++ mode change 100644 => 100755 listener/SimpleCacheListener.class.php
++ mode change 100644 => 100755 loader/ClassLoader.class.php
++ mode change 100644 => 100755 loader/ClassResolver.class.php
++ mode change 100644 => 100755 loader/FileLoader.class.php
++ mode change 100644 => 100755 loader/FileResolver.class.php
++ mode change 100644 => 100755 loader/Loader.class.php
++ mode change 100644 => 100755 loader/Resolver.class.php
++ mode change 100644 => 100755 loader/ResourceLoader.class.php
++ mode change 100644 => 100755 loader/ResourceResolver.class.php
++ mode change 100644 => 100755 loader/ServiceLoader.class.php
++ mode change 100644 => 100755 loader/TemplateLoader.class.php
++ mode change 100644 => 100755 loader/TemplateResolver.class.php
++ mode change 100644 => 100755 mail/FakeMailService.class.php
++ mode change 100644 => 100755 mail/MailMessage.class.php
++ mode change 100644 => 100755 mail/MailService.class.php
++ mode change 100644 => 100755 mail/Mailer.class.php
++ mode change 100644 => 100755 mail/MailerMail.class.php
++ mode change 100644 => 100755 mail/MailerSendmail.class.php
++ mode change 100644 => 100755 mail/MailerSmtp.class.php
++ mode change 100644 => 100755 mail/MassMailer.php
++ mode change 100644 => 100755 mail/MessageRecipients.class.php
++ mode change 100644 => 100755 mail/NullMailService.class.php
++ mode change 100644 => 100755 mail/PopMailMessage.php
++ mode change 100644 => 100755 object/Browscap.class.php
++ mode change 100644 => 100755 object/ComponentTypeObject.class.php
++ mode change 100644 => 100755 object/ConstantObject.class.php
++ mode change 100644 => 100755 object/InitDataSetup.class.php
++ mode change 100644 => 100755 object/Locale.class.php
++ mode change 100644 => 100755 object/Package.class.php
++ mode change 100644 => 100755 object/RequestContext.class.php
++ mode change 100644 => 100755 object/TagObject.class.php
++ mode change 100644 => 100755 object/TemplateObject.class.php
++ mode change 100644 => 100755 object/XmlObject.class.php
++ mode change 100644 => 100755 paginator/Paginator.class.php
++ mode change 100644 => 100755 patch/0300/install.php
++ mode change 100644 => 100755 patch/0301/install.php
++ mode change 100644 => 100755 patch/0302/install.php
++ mode change 100644 => 100755 patch/0303/install.php
++ mode change 100644 => 100755 patch/0304/install.php
++ mode change 100644 => 100755 patch/0305/install.php
++ mode change 100644 => 100755 patch/0306/install.php
++ mode change 100644 => 100755 patch/0307/install.php
++ mode change 100644 => 100755 patch/0308/install.php
++ mode change 100644 => 100755 patch/0309/install.php
++ mode change 100644 => 100755 patch/0310/install.php
++ mode change 100644 => 100755 patch/0311/install.php
++ mode change 100644 => 100755 patch/0312/install.php
++ mode change 100644 => 100755 patch/BasePatch.php
++ mode change 100644 => 100755 pdf/UrlPDFService.class.php
++ mode change 100644 => 100755 permission/ACL.class.php
++ mode change 100644 => 100755 permission/MissingPermissionException.class.php
++ mode change 100644 => 100755 permission/PermissionService.class.php
++ mode change 100644 => 100755 permission/RoleService.class.php
++ mode change 100644 => 100755 persistentdocument/CacheService.class.php
++ mode change 100644 => 100755 persistentdocument/ChildPropertyInfo.class.php
++ mode change 100644 => 100755 persistentdocument/DocumentService.class.php
++ mode change 100644 => 100755 persistentdocument/FormPropertyInfo.class.php
++ mode change 100644 => 100755 persistentdocument/I18PersistentDocument.class.php
++ mode change 100644 => 100755 persistentdocument/PersistentDocument.class.php
++ mode change 100644 => 100755 persistentdocument/PersistentDocumentArray.php
++ mode change 100644 => 100755 persistentdocument/PersistentDocumentBeanPropertyInfo.php
++ mode change 100644 => 100755 persistentdocument/PersistentDocumentDeserializer.class.php
++ mode change 100644 => 100755 persistentdocument/PersistentDocumentHelper.class.php
++ mode change 100644 => 100755 persistentdocument/PersistentDocumentImpl.class.php
++ mode change 100644 => 100755 persistentdocument/PersistentDocumentModel.class.php
++ mode change 100644 => 100755 persistentdocument/PersistentDocumentSerializer.class.php
++ mode change 100644 => 100755 persistentdocument/PersistentProvider.class.php
++ mode change 100644 => 100755 persistentdocument/PersistentProviderMySql.class.php
++ mode change 100644 => 100755 persistentdocument/PersistentRelation.class.php
++ mode change 100644 => 100755 persistentdocument/PersistentTreeNode.class.php
++ mode change 100644 => 100755 persistentdocument/PropertyInfo.class.php
++ mode change 100644 => 100755 persistentdocument/TransactionManager.class.php
++ mode change 100644 => 100755 persistentdocument/criteria/Criterions.php
++ mode change 100644 => 100755 persistentdocument/criteria/HavingRestrictions.class.php
++ mode change 100644 => 100755 persistentdocument/criteria/Junctions.class.php
++ mode change 100644 => 100755 persistentdocument/criteria/Order.class.php
++ mode change 100644 => 100755 persistentdocument/criteria/Projections.class.php
++ mode change 100644 => 100755 persistentdocument/criteria/Query.class.php
++ mode change 100644 => 100755 persistentdocument/criteria/Restrictions.class.php
++ mode change 100644 => 100755 persistentdocument/criteria/TreeCriterions.php
++ mode change 100644 => 100755 persistentdocument/filter/DocumentFilter.php
++ mode change 100644 => 100755 persistentdocument/filter/DocumentFilterParameter.php
++ mode change 100644 => 100755 persistentdocument/filter/DocumentFilterRestrictionParameter.php
++ mode change 100644 => 100755 persistentdocument/filter/DocumentFilterService.php
++ mode change 100644 => 100755 persistentdocument/filter/DocumentFilterValueParameter.php
++ mode change 100644 => 100755 persistentdocument/import/ScriptBaseElement.class.php
++ mode change 100644 => 100755 persistentdocument/import/ScriptBindingElement.class.php
++ mode change 100644 => 100755 persistentdocument/import/ScriptDocumentElement.class.php
++ mode change 100644 => 100755 persistentdocument/import/ScriptDocumentRefElement.class.php
++ mode change 100644 => 100755 persistentdocument/import/ScriptObjectElement.php
++ mode change 100644 => 100755 persistentdocument/import/ScriptReader.class.php
++ mode change 100644 => 100755 persistentdocument/import/ScriptScriptElement.class.php
++ mode change 100644 => 100755 persistentdocument/import/ScriptTagElement.class.php
++ mode change 100644 => 100755 persistentdocument/transformer/DefaultTransformer.class.php
++ mode change 100644 => 100755 persistentdocument/transformer/Transformer.class.php
++ mode change 100644 => 100755 persistentdocument/transformer/Transformers.class.php
++ mode change 100644 => 100755 service/ApacheService.class.php
++ mode change 100644 => 100755 service/BaseService.class.php
++ mode change 100644 => 100755 service/HTTPClientService.php
++ mode change 100644 => 100755 service/InitDataService.class.php
++ mode change 100644 => 100755 service/Injection.php
++ mode change 100644 => 100755 service/JsService.class.php
++ mode change 100644 => 100755 service/JsonService.class.php
++ mode change 100644 => 100755 service/LocaleService.class.php
++ mode change 100644 => 100755 service/ModuleBaseService.class.php
++ mode change 100644 => 100755 service/ModuleService.class.php
++ mode change 100644 => 100755 service/PHPTALService.class.php
++ mode change 100644 => 100755 service/PatchService.class.php
++ mode change 100644 => 100755 service/RelationService.php
++ mode change 100644 => 100755 service/StyleService.class.php
++ mode change 100644 => 100755 service/TagService.php
++ mode change 100644 => 100755 service/TreeService.php
++ mode change 100644 => 100755 service/UserActionLoggerService.class.php
++ mode change 100644 => 100755 tree/DefaultTreeModel.class.php
++ mode change 100644 => 100755 tree/DefaultTreeNode.class.php
++ mode change 100644 => 100755 tree/DocumentTreeNode.class.php
++ mode change 100644 => 100755 tree/TreeModel.class.php
++ mode change 100644 => 100755 tree/TreeNode.class.php
++ mode change 100644 => 100755 tree/parser/TreeParser.class.php
++ mode change 100644 => 100755 tree/parser/XmlDateListTreeParser.class.php
++ mode change 100644 => 100755 tree/parser/XmlDateTreeParser.class.php
++ mode change 100644 => 100755 tree/parser/XmlListTreeParser.class.php
++ mode change 100644 => 100755 tree/parser/XmlTreeParser.class.php
++ mode change 100644 => 100755 tree/parser/attributes/AttributesBuilder.class.php
++ mode change 100644 => 100755 tree/parser/attributes/AttributesBuilderFactory.class.php
++ mode change 100644 => 100755 tree/parser/attributes/NoopAttributesBuilder.php
++ mode change 100644 => 100755 util/ArrayUtils.class.php
++ mode change 100644 => 100755 util/ClassUtils.class.php
++ mode change 100644 => 100755 util/Convert.class.php
++ mode change 100644 => 100755 util/CsvUtils.class.php
++ mode change 100644 => 100755 util/DependencyResolver.class.php
++ mode change 100644 => 100755 util/DomUtils.php
++ mode change 100644 => 100755 util/FileUtils.class.php
++ mode change 100644 => 100755 util/Finder.class.php
++ mode change 100644 => 100755 util/HtmlUtils.class.php
++ mode change 100644 => 100755 util/MemoryUtils.class.php
++ mode change 100644 => 100755 util/ObjectUtils.php
++ mode change 100644 => 100755 util/ProcessUtils.class.php
++ mode change 100644 => 100755 util/Properties.php
++ mode change 100644 => 100755 util/StringUtils.class.php
++ mode change 100644 => 100755 util/System.php
++ mode change 100644 => 100755 util/TagReplacer.class.php
++ mode change 100644 => 100755 util/TypeValidator.class.php
++ mode change 100644 => 100755 validation/BeanValidator.php
++ mode change 100644 => 100755 validation/BeginsWithValidator.class.php
++ mode change 100644 => 100755 validation/BlankValidator.class.php
++ mode change 100644 => 100755 validation/DateValidator.class.php
++ mode change 100644 => 100755 validation/DomainValidator.class.php
++ mode change 100644 => 100755 validation/EmailValidator.class.php
++ mode change 100644 => 100755 validation/EmailsValidator.class.php
++ mode change 100644 => 100755 validation/EndsWithValidator.class.php
++ mode change 100644 => 100755 validation/Errors.class.php
++ mode change 100644 => 100755 validation/FloatValidator.class.php
++ mode change 100644 => 100755 validation/HostValidator.class.php
++ mode change 100644 => 100755 validation/InListValidator.class.php
++ mode change 100644 => 100755 validation/IntegerValidator.class.php
++ mode change 100644 => 100755 validation/MatchesValidator.class.php
++ mode change 100644 => 100755 validation/MaxValidator.class.php
++ mode change 100644 => 100755 validation/MinValidator.class.php
++ mode change 100644 => 100755 validation/NotEqualValidator.class.php
++ mode change 100644 => 100755 validation/NullableValidator.class.php
++ mode change 100644 => 100755 validation/PasswordValidator.class.php
++ mode change 100644 => 100755 validation/Property.class.php
++ mode change 100644 => 100755 validation/Range.class.php
++ mode change 100644 => 100755 validation/RangeValidator.class.php
++ mode change 100644 => 100755 validation/SizeValidator.class.php
++ mode change 100644 => 100755 validation/UniqueInParentNodeValidator.class.php
++ mode change 100644 => 100755 validation/UniqueValidator.class.php
++ mode change 100644 => 100755 validation/UrlValidator.class.php
++ mode change 100644 => 100755 validation/Validator.class.php
++ mode change 100644 => 100755 validation/ValidatorHelper.class.php
++ mode change 100644 => 100755 validation/ValidatorImpl.class.php
++ mode change 100644 => 100755 validation/XmlValidator.class.php
++ mode change 100644 => 100755 validation/parsers/BooleanValueParser.class.php
++ mode change 100644 => 100755 validation/parsers/ConstraintsParser.class.php
++ mode change 100644 => 100755 validation/parsers/InListValueParser.class.php
++ mode change 100644 => 100755 validation/parsers/NullValueParser.class.php
++ mode change 100644 => 100755 validation/parsers/NumberValueParser.class.php
++ mode change 100644 => 100755 validation/parsers/RangeValueParser.class.php
++ mode change 100644 => 100755 validation/parsers/StringValueParser.class.php
++ mode change 100644 => 100755 validation/parsers/ValueParser.class.php
++
++diff --git a/ChangeProject.php b/ChangeProject.php
++old mode 100644
++new mode 100755
++diff --git a/Framework.php b/Framework.php
++old mode 100644
++new mode 100755
++index 42b6dab..ad96b49
++--- a/Framework.php
+++++ b/Framework.php
++@@ -121,7 +121,7 @@ class Framework
++ 
++ 	private static function getLogLevel()
++ 	{
++-		if (is_null(self::$logLevel))
+++		if (self::$logLevel === null)
++ 		{
++ 			self::$logLevel = constant('Logger::'.AG_LOGGING_LEVEL);
++ 			if (self::$logLevel == false) throw new FrameworkException('invalid-AG_LOGGING_LEVEL');
++diff --git a/aop/AOP.php b/aop/AOP.php
++old mode 100644
++new mode 100755
++diff --git a/aop/samples/advices.php b/aop/samples/advices.php
++old mode 100644
++new mode 100755
++diff --git a/aop/samples/classes.php b/aop/samples/classes.php
++old mode 100644
++new mode 100755
++diff --git a/aop/samples/classes_replacement.php b/aop/samples/classes_replacement.php
++old mode 100644
++new mode 100755
++diff --git a/bin/httpbootstrap.php b/bin/httpbootstrap.php
++old mode 100644
++new mode 100755
++diff --git a/builder/BackofficeActionUpdater.class.php b/builder/BackofficeActionUpdater.class.php
++old mode 100644
++new mode 100755
++diff --git a/builder/BackofficeStyleUpdater.class.php b/builder/BackofficeStyleUpdater.class.php
++old mode 100644
++new mode 100755
++diff --git a/builder/DocumentGenerator.class.php b/builder/DocumentGenerator.class.php
++old mode 100644
++new mode 100755
++diff --git a/builder/Generator.class.php b/builder/Generator.class.php
++old mode 100644
++new mode 100755
++diff --git a/builder/ListenersGenerator.class.php b/builder/ListenersGenerator.class.php
++old mode 100644
++new mode 100755
++diff --git a/builder/LocaleFileGenerator.class.php b/builder/LocaleFileGenerator.class.php
++old mode 100644
++new mode 100755
++diff --git a/builder/ModuleGenerator.class.php b/builder/ModuleGenerator.class.php
++old mode 100644
++new mode 100755
++diff --git a/builder/SecurityGenerator.class.php b/builder/SecurityGenerator.class.php
++old mode 100644
++new mode 100755
++diff --git a/builder/TestFactoryGenerator.class.php b/builder/TestFactoryGenerator.class.php
++old mode 100644
++new mode 100755
++diff --git a/builder/generator/ChildrenProperty.class.php b/builder/generator/ChildrenProperty.class.php
++old mode 100644
++new mode 100755
++diff --git a/builder/generator/FormProperty.class.php b/builder/generator/FormProperty.class.php
++old mode 100644
++new mode 100755
++diff --git a/builder/generator/PersistentModel.class.php b/builder/generator/PersistentModel.class.php
++old mode 100644
++new mode 100755
++diff --git a/builder/generator/PersistentProperty.class.php b/builder/generator/PersistentProperty.class.php
++old mode 100644
++new mode 100755
++diff --git a/builder/generator/Workflow.class.php b/builder/generator/Workflow.class.php
++old mode 100644
++new mode 100755
++diff --git a/cache/CacheService.class.php b/cache/CacheService.class.php
++old mode 100644
++new mode 100755
++diff --git a/cache/DataCacheFileService.class.php b/cache/DataCacheFileService.class.php
++new file mode 100755
++index 0000000..60a1e8c
++--- /dev/null
+++++ b/cache/DataCacheFileService.class.php
++@@ -0,0 +1,203 @@
+++<?php
+++class f_DataCacheFileService extends f_DataCacheService
+++{
+++	const INVALID_CACHE_ENTRY = 'invalidCacheEntry';
+++	
+++	private $registrationFolder = null;
+++	
+++	private function __construct()
+++	{
+++		$this->registrationFolder = f_util_FileUtils::buildCachePath('simplecache', 'registration');
+++		f_util_FileUtils::mkdir($this->registrationFolder);
+++	}
+++
+++	/**
+++	 * @return f_DataCacheService
+++	 */
+++	public static function getInstance()
+++	{
+++		if (self::$instance === null)
+++		{
+++			self::$instance = self::getServiceClassInstance(get_class());
+++		}
+++		return self::$instance;
+++	}
+++	
+++	/**
+++	 * @param String $namespace
+++	 * @param Mixed $keyParameters
+++	 * @param Array	$newPatterns
+++	 * @return f_DataCacheItem or null
+++	 */
+++	public function readFromCache($namespace, $keyParameters, $newPatterns = null)
+++	{
+++		if ($newPatterns !== null)
+++		{
+++			$returnItem = true;
+++		}
+++		else 
+++		{
+++			$returnItem = false;
+++			$newPatterns = array();
+++		}
+++		$item = $this->getNewCacheItem($namespace, $keyParameters, $newPatterns);
+++		
+++		if ($this->exists($item))
+++		{
+++			$subCaches = f_util_FileUtils::getDirFiles($this->getCachePath($item));
+++			if ($subCaches != null)
+++			{
+++				foreach ($subCaches as $subCache)
+++				{
+++					$item->setValue(basename($subCache), f_util_FileUtils::read($subCache));
+++				}
+++				return $item;
+++			}
+++		}
+++		return ($returnItem) ? $item : null;
+++	}
+++	
+++	/**
+++	 * @param f_DataCacheItem $item
+++	 */
+++	public function writeToCache(f_DataCacheItem $item)
+++	{
+++		$this->register($item);
+++		$data = $item->getValue();
+++		try
+++		{
+++			foreach ($data as $k => $v)
+++			{
+++				if ($k != "creationTime" || $k != "isValid" || $k != "cachePath" || $v !== null)
+++				{
+++					f_util_FileUtils::writeAndCreateContainer($this->getCachePath($item, $k), $v, f_util_FileUtils::OVERRIDE);
+++				}
+++			}
+++		}
+++		catch (Exception $e)
+++		{
+++			// Do not let potential partial or broken content rest on disk
+++			if ($this->exists($item))
+++			{
+++				@f_util_FileUtils::rmdir($this->getCachePath($item));
+++			}
+++			throw $e;
+++		}
+++	}
+++	
+++	/**
+++	 * @param String $pattern
+++	 */
+++	public function clearCacheByPattern($pattern)
+++	{
+++		$cacheIds = $this->getPersistentProvider()->getCacheIdsByPattern($pattern);
+++		foreach ($cacheIds as $cacheId)
+++		{
+++			if (Framework::isDebugEnabled())
+++			{
+++				Framework::debug("[". __CLASS__ . "]: clear $cacheId cache");
+++			}
+++			self::clear($cacheId);
+++		}
+++	}
+++	
+++	/**
+++	 * @param String $namespace
+++	 */
+++	public function clearCacheByNamespace($namespace)
+++	{
+++		
+++	}
+++
+++	public function clearAll()
+++	{
+++		
+++	}
+++	
+++	private function getCachePath(f_DataCacheItem $item, $subCache = null)
+++	{
+++		$cachePath = $item->getValue("cachePath");
+++		if ($cachePath === null)
+++		{
+++			$cachePath = f_util_FileUtils::buildCachePath('simplecache', $item->getNamespace(), $item->getKeyParameters());
+++			$item->setValue("cachePath", $cachePath);
+++			f_util_FileUtils::mkdir($cachePath);
+++		}
+++		if ($subCache === null)
+++		{
+++			return $cachePath;
+++		}
+++		return $cachePath . DIRECTORY_SEPARATOR . $subCache;
+++	}
+++	
+++	private function exists(f_DataCacheItem $item, $subCache = null)
+++	{
+++		$cachePath = $this->getCachePath($item, $subCache);
+++		$result = file_exists($cachePath) && $this->isValid($item)
+++			&& ($item->getTimeLimit() === null || (time() - filemtime($cachePath)) < $item->getTimeLimit()); 
+++		$this->markAsBeingRegenerated();
+++		return $result;
+++	}
+++
+++	private function isValid(f_DataCacheItem $item)
+++	{
+++		return !file_exists($this->getCachePath($item, self::INVALID_CACHE_ENTRY));
+++	}
+++	
+++	private function markAsBeingRegenerated(f_DataCacheItem $item)
+++	{
+++		if (!$this->isValid($item))
+++		{
+++			f_util_FileUtils::unlink($this->getCachePath($item, self::INVALID_CACHE_ENTRY));
+++		}
+++	}
+++
+++	private function getRegistrationPath(f_DataCacheItem $item)
+++	{
+++		$registrationPath = $item->getValue("registrationPath");
+++		
+++		if ($registrationPath === null)
+++		{
+++			$registrationPath = $this->registrationFolder . DIRECTORY_SEPARATOR . $item->getNamespace();
+++			$item->setValue("registrationPath", $registrationPath);
+++		}
+++		return $registrationPath;
+++	}
+++	
+++	private function register(f_DataCacheItem $item)
+++	{
+++		$registrationPath = $this->getRegistrationPath($item);
+++		if (!file_exists($registrationPath))
+++		{
+++			$tm = f_persistentdocument_TransactionManager::getInstance();
+++			try
+++			{
+++				$tm->beginTransaction();
+++				$pp = f_persistentdocument_PersistentProvider::getInstance();
+++				$pp->registerSimpleCache($item->getNamespace(), $this->optimizeCacheSpecs($item->getPatterns()));
+++				$tm->commit();
+++				@touch($registrationPath);
+++			}
+++			catch (Exception $e)
+++			{
+++				$tm->rollBack($e);
+++			}
+++		}
+++		$baseById = f_util_FileUtils::buildCachePath($this->registrationFolder, 'byDocId');
+++
+++		foreach ($item->getPatterns() as $spec)
+++		{
+++			if (is_numeric($spec))
+++			{
+++				$byIdRegister = $baseById . implode(DIRECTORY_SEPARATOR, str_split($spec, 3)) . DIRECTORY_SEPARATOR;
+++				$byIdRegister .= $item->getNamespace() . '_' . $item->getKeyParameters();
+++				if (!file_exists($byIdRegister))
+++				{
+++					f_util_FileUtils::mkdir(dirname($byIdRegister));
+++					f_util_FileUtils::symlink($this->getCachePath($item), $byIdRegister);
+++				}
+++			}
+++		}
+++	}
+++}
+++?>
++\ No newline at end of file
++diff --git a/cache/DataCacheItem.class.php b/cache/DataCacheItem.class.php
++new file mode 100755
++index 0000000..c852de4
++--- /dev/null
+++++ b/cache/DataCacheItem.class.php
++@@ -0,0 +1,46 @@
+++<?php
+++interface f_DataCacheItem
+++{
+++	/**
+++	 * @return Integer (timestamp) or null
+++	 */
+++	public function getCreationTime();
+++
+++	/**
+++	 * @param Integer $seconds
+++	 */
+++	public function setTTL($seconds);
+++
+++	/**
+++	 * @param Mixed $key
+++	 * @param Mixed (serializable) $value
+++	 */
+++	public function setValue($key, $value);
+++	
+++	/**
+++	 * @param String $key (optional)
+++	 * @return Mixed
+++	 */
+++	public function getValue($key);
+++	
+++	/**
+++	 * @return String
+++	 */
+++	public function getNamespace();
+++	
+++	/**
+++	 * @return String
+++	 */
+++	public function getKeyParameters();
+++	
+++	/**
+++	 * @return Integer
+++	 */
+++	public function getTTL();
+++	
+++	/**
+++	 * @return Array
+++	 */
+++	public function getPatterns();
+++}
+++?>
++\ No newline at end of file
++diff --git a/cache/DataCacheItemImpl.class.php b/cache/DataCacheItemImpl.class.php
++new file mode 100755
++index 0000000..0fb8f8a
++--- /dev/null
+++++ b/cache/DataCacheItemImpl.class.php
++@@ -0,0 +1,143 @@
+++<?php
+++class f_DataCacheItemImpl implements f_DataCacheItem
+++{
+++	const MAX_TIME_LIMIT = 86400;
+++	
+++	private $namespace;
+++	private $keyParameters;
+++	private $patterns;
+++	private $timeLimit;
+++	private $data;
+++		
+++	/**
+++	 * @param String $namespace
+++	 * @param Mixed $keyParameters
+++	 * @param Array $patterns
+++	 */
+++	public function __construct($namespace, $keyParameters, $patterns)
+++	{
+++		$this->namespace = str_replace(':', '_', $namespace);
+++		$this->keyParameters = md5(serialize($keyParameters));
+++		$this->patterns = $patterns;
+++		
+++		$this->setTTL(self::MAX_TIME_LIMIT);
+++		foreach ($patterns as $pattern)
+++		{
+++			if (f_util_StringUtils::beginsWith($pattern, "ttl/"))
+++			{
+++				$this->setTTL(intval(substr($pattern, 5)));	
+++			}
+++		}
+++		
+++		$this->data = array();
+++	}
+++	
+++	/**
+++	 * @see f_DataCacheItem::getCreationTime()
+++	 *
+++	 * @return Integer (timestamp) or null
+++	 */
+++	public function getCreationTime()
+++	{
+++		if (isset($this->data["creationTime"]) && $this->data["creationTime"] != null)
+++		{
+++			return $this->data["creationTime"];
+++		}
+++		return null;
+++	}
+++	
+++	/**
+++	 * @return String
+++	 */
+++	public function getNamespace()
+++	{
+++		return $this->namespace;
+++	}
+++	
+++	/**
+++	 * @return String
+++	 */
+++	public function getKeyParameters()
+++	{
+++		return $this->keyParameters;
+++	}
+++	
+++	/**
+++	 * @return Integer
+++	 */
+++	public function getTTL()
+++	{
+++		return $this->timeLimit;
+++	}
+++	
+++	/**
+++	 * @return Array
+++	 */
+++	public function getPatterns()
+++	{
+++		return $this->patterns;
+++	}
+++	
+++	/**
+++	 * @see f_DataCacheItem::getValue()
+++	 *
+++	 * @param String $key (optional)
+++	 * @return Mixed
+++	 */
+++	public function getValue($key = null)
+++	{
+++		if ($key === null)
+++		{
+++			return $this->data;
+++		}
+++		if (isset($this->data[$key]) && $this->data[$key] != null)
+++		{
+++			return $this->data[$key];
+++		}
+++		return null;
+++	}
+++	
+++	/**
+++	 * @see f_DataCacheItem::setTTL()
+++	 *
+++	 * @param Integer $seconds
+++	 */
+++	public function setTTL($seconds)
+++	{
+++		if ($seconds <= self::MAX_TIME_LIMIT)
+++		{
+++			$this->timeLimit = $seconds;
+++		}
+++		$this->timeLimit = self::MAX_TIME_LIMIT;
+++	}
+++	
+++	/**
+++	 * @see f_DataCacheItem::setValue()
+++	 *
+++	 * @param Mixed $key
+++	 * @param Mixed $value
+++	 */
+++	public function setValue($key, $value = null)
+++	{
+++		if ($value === null)
+++		{
+++			$this->data = $key;
+++		}
+++		$this->data[$key] = $value;
+++	}
+++	
+++	public function setInvalid()
+++	{
+++		$this->data["isValid"] = false;
+++	}
+++	
+++	/**
+++	 * @return Boolean
+++	 */
+++	public function isValid()
+++	{
+++		return (isset($this->data["isValid"]) && $this->data["isValid"] 
+++					&& ($this->getCreationTime()+$this->timeLimit > time()));
+++	}
+++}
+++?>
++\ No newline at end of file
++diff --git a/cache/DataCachePatternHelper.class.php b/cache/DataCachePatternHelper.class.php
++new file mode 100755
++index 0000000..0c0ab34
++--- /dev/null
+++++ b/cache/DataCachePatternHelper.class.php
++@@ -0,0 +1,40 @@
+++<?php
+++class f_DataCachePatternHelper
+++{
+++	/**
+++	 * @param String $modelName valid model name with optionnal '[]' decorator
+++	 * @return String
+++	 */
+++	public static function getModelPattern($modelName)
+++	{
+++		return $modelName;
+++	}
+++	
+++	/**
+++	 * @param String $tagName
+++	 * @return String
+++	 */
+++	public static function getTagPattern($tagName)
+++	{
+++		return 'tags/' . $tagName;
+++	}
+++	
+++	/**
+++	 * @param Integer $docId
+++	 * @return String
+++	 */
+++	public static function getIdPattern($docId)
+++	{
+++		return $docId;
+++	}
+++	
+++	/**
+++	 * @param Integer $docId
+++	 * @return String
+++	 */
+++	public static function getTTLPattern($seconds)
+++	{
+++		return 'ttl/' . $seconds;
+++	}
+++}
+++?>
++\ No newline at end of file
++diff --git a/cache/DataCacheService.class.php b/cache/DataCacheService.class.php
++new file mode 100755
++index 0000000..10aa4ff
++--- /dev/null
+++++ b/cache/DataCacheService.class.php
++@@ -0,0 +1,129 @@
+++<?php
+++class f_DataCacheService extends BaseService
+++{
+++	/**
+++	 * @var f_DataCacheService
+++	 */
+++	private static $instance;
+++
+++	/**
+++	 * @return f_DataCacheService
+++	 */
+++	public static function getInstance()
+++	{
+++		if (self::$instance === null)
+++		{
+++			self::$instance = self::getServiceClassInstance(get_class());
+++		}
+++		return self::$instance;
+++	}
+++	
+++	/**
+++	 * @param String $namespace
+++	 * @param Mixed $keyParameters
+++	 * @param Array $patterns
+++	 * @return f_DataCacheItem
+++	 */
+++	public function getNewCacheItem($namespace, $keyParameters, $patterns)
+++	{
+++		return new f_DataCacheItemImpl($namespace, $keyParameters, $patterns);
+++	}
+++	
+++	/**
+++	 * @return Boolean
+++	 */
+++	function isEnabled()
+++	{
+++		return constant("AG_DISABLE_SIMPLECACHE") !== true;
+++	}
+++	
+++	/**
+++	 * @param String $namespace
+++	 * @param Mixed $keyParameters
+++	 * @param Array	$newPatterns
+++	 * @return f_DataCacheItem or null
+++	 */
+++	public function readFromCache($namespace, $keyParameters, $newPatterns = null)
+++	{
+++		if ($newPatterns !== null)
+++		{
+++			return $this->getNewCacheItem($namespace, $keyParameters, $newPatterns);
+++		}
+++		return null;
+++	}
+++	
+++	/**
+++	 * @param f_DataCacheItem $item
+++	 */
+++	public function writeToCache(f_DataCacheItem $item)
+++	{
+++		
+++	}
+++	
+++	/**
+++	 * @param String $pattern
+++	 */
+++	public function clearCacheByPattern($pattern)
+++	{
+++		
+++	}
+++	
+++	/**
+++	 * @param String $namespace
+++	 */
+++	public function clearCacheByNamespace($namespace)
+++	{
+++		
+++	}
+++
+++	public function clearAll()
+++	{
+++		
+++	}
+++	
+++	protected function optimizeCacheSpecs($cacheSpecs)
+++	{
+++		if (f_util_ArrayUtils::isNotEmpty($cacheSpecs))
+++		{
+++			$finalCacheSpecs = array();
+++			foreach (array_unique($cacheSpecs) as $spec)
+++			{
+++				if (preg_match('/^modules_\w+\/\w+$/', $spec))
+++				{
+++					try
+++					{
+++						$model = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($spec);
+++						$finalCacheSpecs[] = $model->getName();
+++					}
+++					catch (Exception $e)
+++					{
+++						Framework::exception($e);
+++					}
+++				}
+++				else if (strpos($spec, 'tags/') === 0 && strpos($spec, '*') !== false)
+++				{
+++					try
+++					{
+++						$tags = TagService::getInstance()->getAvailableTagsByPattern(substr($spec,5));
+++						foreach ($tags as $tag)
+++						{
+++							$finalCacheSpecs[] = 'tags/' . $tag;
+++						}
+++					}
+++					catch (Exception $e)
+++					{
+++						Framework::exception($e);
+++					}
+++				}
+++				elseif (!is_numeric($spec))
+++				{
+++					$finalCacheSpecs[] = $spec;
+++				}
+++			}
+++
+++			return $finalCacheSpecs;
+++		}
+++		return array();
+++	}
+++}
+++?>
++\ No newline at end of file
++diff --git a/cache/SimpleCache.class.php b/cache/SimpleCache.class.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/AbstractChangeCommand.php b/change-commands/AbstractChangeCommand.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/ApplyHotfix.php b/change-commands/ApplyHotfix.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/ApplyPatch.php b/change-commands/ApplyPatch.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/ApplyProjectPolicy.php b/change-commands/ApplyProjectPolicy.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/ApplyWebappPolicy.php b/change-commands/ApplyWebappPolicy.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/CheckHotfix.php b/change-commands/CheckHotfix.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/CheckPatch.php b/change-commands/CheckPatch.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/ClearAll.php b/change-commands/ClearAll.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/ClearCache.php b/change-commands/ClearCache.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/ClearLog.php b/change-commands/ClearLog.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/ClearSimplecache.php b/change-commands/ClearSimplecache.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/ClearTemplateCache.php b/change-commands/ClearTemplateCache.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/ClearWebappCache.php b/change-commands/ClearWebappCache.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/CompileAll.php b/change-commands/CompileAll.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/CompileAop.php b/change-commands/CompileAop.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/CompileConfig.php b/change-commands/CompileConfig.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/CompileDbSchema.php b/change-commands/CompileDbSchema.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/CompileDocumentFilters.php b/change-commands/CompileDocumentFilters.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/CompileDocuments.php b/change-commands/CompileDocuments.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/CompileJsDependencies.php b/change-commands/CompileJsDependencies.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/CompileListeners.php b/change-commands/CompileListeners.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/CompileLocales.php b/change-commands/CompileLocales.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/CompilePermissions.php b/change-commands/CompilePermissions.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/CompilePhptal.php b/change-commands/CompilePhptal.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/CompileRoles.php b/change-commands/CompileRoles.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/CompileTags.php b/change-commands/CompileTags.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/DisableSite.php b/change-commands/DisableSite.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/EnableSite.php b/change-commands/EnableSite.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/ImportData.php b/change-commands/ImportData.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/ImportInitData.php b/change-commands/ImportInitData.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/Indexer.php b/change-commands/Indexer.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/InitFilePolicy.php b/change-commands/InitFilePolicy.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/InitGenericModules.php b/change-commands/InitGenericModules.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/InitProject.php b/change-commands/InitProject.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/InitWebapp.php b/change-commands/InitWebapp.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/InstallModule.php b/change-commands/InstallModule.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/PatchInfo.php b/change-commands/PatchInfo.php
++old mode 100644
++new mode 100755
++diff --git a/change-commands/UpdateAutoload.php b/change-commands/UpdateAutoload.php
++old mode 100644
++new mode 100755
++diff --git a/changedev-commands/AbstractChangedevCommand.php b/changedev-commands/AbstractChangedevCommand.php
++old mode 100644
++new mode 100755
++diff --git a/changedev-commands/AddAction.php b/changedev-commands/AddAction.php
++old mode 100644
++new mode 100755
++diff --git a/changedev-commands/AddCommand.php b/changedev-commands/AddCommand.php
++old mode 100644
++new mode 100755
++diff --git a/changedev-commands/AddDocument.php b/changedev-commands/AddDocument.php
++old mode 100644
++new mode 100755
++diff --git a/changedev-commands/AddJsonAction.php b/changedev-commands/AddJsonAction.php
++old mode 100644
++new mode 100755
++diff --git a/changedev-commands/AddModule.php b/changedev-commands/AddModule.php
++old mode 100644
++new mode 100755
++diff --git a/changedev-commands/AddService.php b/changedev-commands/AddService.php
++old mode 100644
++new mode 100755
++diff --git a/changedev-commands/CreateDocument.php b/changedev-commands/CreateDocument.php
++old mode 100644
++new mode 100755
++diff --git a/changedev-commands/CreateNewProject.php b/changedev-commands/CreateNewProject.php
++old mode 100644
++new mode 100755
++diff --git a/changedev-commands/CreatePatch.php b/changedev-commands/CreatePatch.php
++old mode 100644
++new mode 100755
++diff --git a/changedev-commands/DropDatabase.php b/changedev-commands/DropDatabase.php
++old mode 100644
++new mode 100755
++diff --git a/changedev-commands/EditDocument.php b/changedev-commands/EditDocument.php
++old mode 100644
++new mode 100755
++diff --git a/changedev-commands/GenerateDatabase.php b/changedev-commands/GenerateDatabase.php
++old mode 100644
++new mode 100755
++diff --git a/changedev-commands/GenerateDocumentAggregate.php b/changedev-commands/GenerateDocumentAggregate.php
++old mode 100644
++new mode 100755
++diff --git a/changedev-commands/Init.php b/changedev-commands/Init.php
++old mode 100644
++new mode 100755
++diff --git a/changedev-commands/InitPatchDb.php b/changedev-commands/InitPatchDb.php
++old mode 100644
++new mode 100755
++diff --git a/changedev-commands/ResetDatabase.php b/changedev-commands/ResetDatabase.php
++old mode 100644
++new mode 100755
++diff --git a/chart/Charts.php b/chart/Charts.php
++old mode 100644
++new mode 100755
++diff --git a/config/ProjectParser.class.php b/config/ProjectParser.class.php
++old mode 100644
++new mode 100755
++diff --git a/date/Calendar.class.php b/date/Calendar.class.php
++old mode 100644
++new mode 100755
++diff --git a/date/Converter.class.php b/date/Converter.class.php
++old mode 100644
++new mode 100755
++diff --git a/date/Date.php b/date/Date.php
++old mode 100644
++new mode 100755
++diff --git a/date/DateFormat.class.php b/date/DateFormat.class.php
++old mode 100644
++new mode 100755
++diff --git a/date/DateTime.class.php b/date/DateTime.class.php
++old mode 100644
++new mode 100755
++diff --git a/date/GregorianCalendar.class.php b/date/GregorianCalendar.class.php
++old mode 100644
++new mode 100755
++diff --git a/date/InvalidDateException.class.php b/date/InvalidDateException.class.php
++old mode 100644
++new mode 100755
++diff --git a/date/TimeSpan.class.php b/date/TimeSpan.class.php
++old mode 100644
++new mode 100755
++diff --git a/event/Event.class.php b/event/Event.class.php
++old mode 100644
++new mode 100755
++diff --git a/event/EventManager.class.php b/event/EventManager.class.php
++old mode 100644
++new mode 100755
++diff --git a/exception/BaseException.class.php b/exception/BaseException.class.php
++old mode 100644
++new mode 100755
++diff --git a/exception/Exceptions.php b/exception/Exceptions.php
++old mode 100644
++new mode 100755
++diff --git a/exception/renderers/HtmlRenderer.class.php b/exception/renderers/HtmlRenderer.class.php
++old mode 100644
++new mode 100755
++diff --git a/exception/renderers/Renderer.class.php b/exception/renderers/Renderer.class.php
++old mode 100644
++new mode 100755
++diff --git a/exception/renderers/XmlRenderer.class.php b/exception/renderers/XmlRenderer.class.php
++old mode 100644
++new mode 100755
++diff --git a/export/ExportableDocument.class.php b/export/ExportableDocument.class.php
++old mode 100644
++new mode 100755
++diff --git a/export/ExportedDocument.class.php b/export/ExportedDocument.class.php
++old mode 100644
++new mode 100755
++diff --git a/export/SparatedValuesExporter.php b/export/SparatedValuesExporter.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/Action.php b/f_mvc/Action.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/BufferedWriter.php b/f_mvc/BufferedWriter.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/Context.php b/f_mvc/Context.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/Controller.php b/f_mvc/Controller.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/FakeHttpRequest.php b/f_mvc/FakeHttpRequest.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/HTTPRequest.php b/f_mvc/HTTPRequest.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/HTTPSession.php b/f_mvc/HTTPSession.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/Request.php b/f_mvc/Request.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/Response.php b/f_mvc/Response.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/Session.php b/f_mvc/Session.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/Writer.php b/f_mvc/Writer.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/bean/Bean.php b/f_mvc/bean/Bean.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/bean/BeanAggregateGenerator.php b/f_mvc/bean/BeanAggregateGenerator.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/bean/BeanAggregateModel.php b/f_mvc/bean/BeanAggregateModel.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/bean/BeanAggregatePropertyInfo.php b/f_mvc/bean/BeanAggregatePropertyInfo.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/bean/BeanModel.php b/f_mvc/bean/BeanModel.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/bean/BeanPropertyInfo.php b/f_mvc/bean/BeanPropertyInfo.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/bean/BeanPropertyInfoImpl.php b/f_mvc/bean/BeanPropertyInfoImpl.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/bean/BeanUtils.php b/f_mvc/bean/BeanUtils.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/bean/BeanValueConverter.php b/f_mvc/bean/BeanValueConverter.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/bean/DynBean.php b/f_mvc/bean/DynBean.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/bean/converters/BooleanConverter.php b/f_mvc/bean/converters/BooleanConverter.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/bean/converters/DateTimeConverter.php b/f_mvc/bean/converters/DateTimeConverter.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/bean/converters/DecimalConverter.php b/f_mvc/bean/converters/DecimalConverter.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/bean/converters/DocumentConverter.php b/f_mvc/bean/converters/DocumentConverter.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/bean/converters/DocumentsConverter.php b/f_mvc/bean/converters/DocumentsConverter.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/bean/converters/DoubleConverter.php b/f_mvc/bean/converters/DoubleConverter.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/bean/converters/EditableListConverter.php b/f_mvc/bean/converters/EditableListConverter.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/bean/converters/IntegerConverter.php b/f_mvc/bean/converters/IntegerConverter.php
++old mode 100644
++new mode 100755
++diff --git a/f_mvc/bean/converters/XHTMLFragmentConverter.php b/f_mvc/bean/converters/XHTMLFragmentConverter.php
++old mode 100644
++new mode 100755
++diff --git a/f_web/css/CSSDeclaration.php b/f_web/css/CSSDeclaration.php
++old mode 100644
++new mode 100755
++diff --git a/f_web/css/CSSRule.class.php b/f_web/css/CSSRule.class.php
++old mode 100644
++new mode 100755
++diff --git a/f_web/css/CSSStylesheet.php b/f_web/css/CSSStylesheet.php
++old mode 100644
++new mode 100755
++diff --git a/f_web/css/CSSVariables.php b/f_web/css/CSSVariables.php
++old mode 100644
++new mode 100755
++diff --git a/f_web/http/Header.class.php b/f_web/http/Header.class.php
++old mode 100644
++new mode 100755
++diff --git a/f_web/http/Link.class.php b/f_web/http/Link.class.php
++old mode 100644
++new mode 100755
++diff --git a/f_web/http/PageLink.class.php b/f_web/http/PageLink.class.php
++old mode 100644
++new mode 100755
++diff --git a/f_web/http/ParametrizedLink.class.php b/f_web/http/ParametrizedLink.class.php
++old mode 100644
++new mode 100755
++diff --git a/f_web/oauth/Consumer.class.php b/f_web/oauth/Consumer.class.php
++old mode 100644
++new mode 100755
++diff --git a/f_web/oauth/HTTPClient.class.php b/f_web/oauth/HTTPClient.class.php
++old mode 100644
++new mode 100755
++diff --git a/f_web/oauth/Request.class.php b/f_web/oauth/Request.class.php
++old mode 100644
++new mode 100755
++diff --git a/f_web/oauth/Service.class.php b/f_web/oauth/Service.class.php
++old mode 100644
++new mode 100755
++diff --git a/f_web/oauth/Signature.class.php b/f_web/oauth/Signature.class.php
++old mode 100644
++new mode 100755
++diff --git a/f_web/oauth/Token.class.php b/f_web/oauth/Token.class.php
++old mode 100644
++new mode 100755
++diff --git a/i18n/I18nConfig.class.php b/i18n/I18nConfig.class.php
++old mode 100644
++new mode 100755
++diff --git a/i18n/I18nInfo.class.php b/i18n/I18nInfo.class.php
++old mode 100644
++new mode 100755
++diff --git a/import/SparatedValuesImporter.php b/import/SparatedValuesImporter.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/DismaxSolrSearch.class.php b/indexer/DismaxSolrSearch.class.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/FSCache.php b/indexer/FSCache.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/FacetCount.php b/indexer/FacetCount.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/FacetResult.php b/indexer/FacetResult.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/FakeSolrManager.class.php b/indexer/FakeSolrManager.class.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/IndexService.class.php b/indexer/IndexService.class.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/IndexableDocument.class.php b/indexer/IndexableDocument.class.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/IndexedDocument.class.php b/indexer/IndexedDocument.class.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/ReindexDocumentsTask.php b/indexer/ReindexDocumentsTask.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/ReindexDocumentsTaskByUpdatedRoles.php b/indexer/ReindexDocumentsTaskByUpdatedRoles.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/SearchResult.php b/indexer/SearchResult.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/SearchResults.php b/indexer/SearchResults.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/SolrManager.class.php b/indexer/SolrManager.class.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/SolrSearchResults.class.php b/indexer/SolrSearchResults.class.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/SolrServerRequest.class.php b/indexer/SolrServerRequest.class.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/StandardSolrSeach.class.php b/indexer/StandardSolrSeach.class.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/SuggestionSolrSearch.class.php b/indexer/SuggestionSolrSearch.class.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/extractors/OfficeExtractor.class.php b/indexer/extractors/OfficeExtractor.class.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/extractors/PDFExtractor.class.php b/indexer/extractors/PDFExtractor.class.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/query/BooleanQuery.class.php b/indexer/query/BooleanQuery.class.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/query/Facet.php b/indexer/query/Facet.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/query/PhraseQuery.php b/indexer/query/PhraseQuery.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/query/Query.class.php b/indexer/query/Query.class.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/query/QueryBase.class.php b/indexer/query/QueryBase.class.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/query/QueryHelper.class.php b/indexer/query/QueryHelper.class.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/query/RangeQuery.class.php b/indexer/query/RangeQuery.class.php
++old mode 100644
++new mode 100755
++diff --git a/indexer/query/TermQuery.class.php b/indexer/query/TermQuery.class.php
++old mode 100644
++new mode 100755
++diff --git a/libs/agavi/action/BaseAction.class.php b/libs/agavi/action/BaseAction.class.php
++old mode 100644
++new mode 100755
++diff --git a/libs/agavi/action/BaseJSONAction.class.php b/libs/agavi/action/BaseJSONAction.class.php
++old mode 100644
++new mode 100755
++diff --git a/libs/agavi/config/ChangeLoggingConfigHandler.class.php b/libs/agavi/config/ChangeLoggingConfigHandler.class.php
++old mode 100644
++new mode 100755
++diff --git a/libs/agavi/config/ConfigCache.class.php b/libs/agavi/config/ConfigCache.class.php
++old mode 100644
++new mode 100755
++diff --git a/libs/agavi/config/ConfigHandler.class.php b/libs/agavi/config/ConfigHandler.class.php
++old mode 100644
++new mode 100755
++diff --git a/libs/agavi/controller/ChangeController.class.php b/libs/agavi/controller/ChangeController.class.php
++old mode 100644
++new mode 100755
++diff --git a/libs/agavi/controller/HttpController.class.php b/libs/agavi/controller/HttpController.class.php
++old mode 100644
++new mode 100755
++diff --git a/libs/agavi/controller/XulController.class.php b/libs/agavi/controller/XulController.class.php
++old mode 100644
++new mode 100755
++diff --git a/libs/agavi/filter/FrameworkSecurityFilter.class.php b/libs/agavi/filter/FrameworkSecurityFilter.class.php
++old mode 100644
++new mode 100755
++diff --git a/libs/agavi/logging/FileAppender.class.php b/libs/agavi/logging/FileAppender.class.php
++old mode 100644
++new mode 100755
++diff --git a/libs/agavi/logging/Logger.class.php b/libs/agavi/logging/Logger.class.php
++old mode 100644
++new mode 100755
++diff --git a/libs/agavi/logging/LoggerManager.class.php b/libs/agavi/logging/LoggerManager.class.php
++old mode 100644
++new mode 100755
++diff --git a/libs/agavi/logging/LoggingFileAppender.class.php b/libs/agavi/logging/LoggingFileAppender.class.php
++old mode 100644
++new mode 100755
++diff --git a/libs/agavi/logging/Message.class.php b/libs/agavi/logging/Message.class.php
++old mode 100644
++new mode 100755
++diff --git a/libs/agavi/logging/PassthruLayout.class.php b/libs/agavi/logging/PassthruLayout.class.php
++old mode 100644
++new mode 100755
++diff --git a/libs/agavi/logging/PriorityLogger.class.php b/libs/agavi/logging/PriorityLogger.class.php
++old mode 100644
++new mode 100755
++diff --git a/libs/agavi/logging/StderrAppender.class.php b/libs/agavi/logging/StderrAppender.class.php
++old mode 100644
++new mode 100755
++diff --git a/libs/agavi/logging/StdoutAppender.class.php b/libs/agavi/logging/StdoutAppender.class.php
++old mode 100644
++new mode 100755
++diff --git a/libs/agavi/request/ChangeRequest.class.php b/libs/agavi/request/ChangeRequest.class.php
++old mode 100644
++new mode 100755
++diff --git a/libs/agavi/storage/ChangeSessionStorage.php b/libs/agavi/storage/ChangeSessionStorage.php
++old mode 100644
++new mode 100755
++diff --git a/libs/agavi/user/FrameworkSecurityUser.class.php b/libs/agavi/user/FrameworkSecurityUser.class.php
++old mode 100644
++new mode 100755
++diff --git a/libs/agavi/view/BaseView.class.php b/libs/agavi/view/BaseView.class.php
++old mode 100644
++new mode 100755
++diff --git a/libs/gotcha/gotcha.php b/libs/gotcha/gotcha.php
++old mode 100644
++new mode 100755
++diff --git a/libs/json.php b/libs/json.php
++old mode 100644
++new mode 100755
++diff --git a/libs/odtphp2pdf/Odtphp2PDFClient.php b/libs/odtphp2pdf/Odtphp2PDFClient.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/Mail/mime.php b/libs/pear/Mail/mime.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/Mail/mimePart.php b/libs/pear/Mail/mimePart.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL.php b/libs/pear/PHPTAL.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/CommentFilter.php b/libs/pear/PHPTAL/CommentFilter.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Context.php b/libs/pear/PHPTAL/Context.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Dom/Defs.php b/libs/pear/PHPTAL/Dom/Defs.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Dom/Node.php b/libs/pear/PHPTAL/Dom/Node.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Dom/Parser.php b/libs/pear/PHPTAL/Dom/Parser.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Dom/XmlParser.php b/libs/pear/PHPTAL/Dom/XmlParser.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Dom/XmlnsState.php b/libs/pear/PHPTAL/Dom/XmlnsState.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Exception.php b/libs/pear/PHPTAL/Exception.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/FileSource.php b/libs/pear/PHPTAL/FileSource.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Filter.php b/libs/pear/PHPTAL/Filter.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/GetTextTranslator.php b/libs/pear/PHPTAL/GetTextTranslator.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Namespace.php b/libs/pear/PHPTAL/Namespace.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Namespace/CHANGE.php b/libs/pear/PHPTAL/Namespace/CHANGE.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Namespace/I18N.php b/libs/pear/PHPTAL/Namespace/I18N.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Namespace/METAL.php b/libs/pear/PHPTAL/Namespace/METAL.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Namespace/PHPTAL.php b/libs/pear/PHPTAL/Namespace/PHPTAL.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Namespace/TAL.php b/libs/pear/PHPTAL/Namespace/TAL.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute.php b/libs/pear/PHPTAL/Php/Attribute.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/CHANGE/ChangeTalAttribute.php b/libs/pear/PHPTAL/Php/Attribute/CHANGE/ChangeTalAttribute.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/CHANGE/Date.php b/libs/pear/PHPTAL/Php/Attribute/CHANGE/Date.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/CHANGE/I18nattr.php b/libs/pear/PHPTAL/Php/Attribute/CHANGE/I18nattr.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/CHANGE/Id.php b/libs/pear/PHPTAL/Php/Attribute/CHANGE/Id.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/CHANGE/Include.php b/libs/pear/PHPTAL/Php/Attribute/CHANGE/Include.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/CHANGE/Javascript.php b/libs/pear/PHPTAL/Php/Attribute/CHANGE/Javascript.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/CHANGE/PHPTAL_CHANGE.class.php b/libs/pear/PHPTAL/Php/Attribute/CHANGE/PHPTAL_CHANGE.class.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/CHANGE/Price.php b/libs/pear/PHPTAL/Php/Attribute/CHANGE/Price.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/CHANGE/Select.php b/libs/pear/PHPTAL/Php/Attribute/CHANGE/Select.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/CHANGE/Translate.php b/libs/pear/PHPTAL/Php/Attribute/CHANGE/Translate.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/I18N/Attributes.php b/libs/pear/PHPTAL/Php/Attribute/I18N/Attributes.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/I18N/Data.php b/libs/pear/PHPTAL/Php/Attribute/I18N/Data.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/I18N/Domain.php b/libs/pear/PHPTAL/Php/Attribute/I18N/Domain.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/I18N/Name.php b/libs/pear/PHPTAL/Php/Attribute/I18N/Name.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/I18N/Source.php b/libs/pear/PHPTAL/Php/Attribute/I18N/Source.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/I18N/Target.php b/libs/pear/PHPTAL/Php/Attribute/I18N/Target.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/I18N/Translate.php b/libs/pear/PHPTAL/Php/Attribute/I18N/Translate.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/METAL/DefineMacro.php b/libs/pear/PHPTAL/Php/Attribute/METAL/DefineMacro.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/METAL/DefineSlot.php b/libs/pear/PHPTAL/Php/Attribute/METAL/DefineSlot.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/METAL/FillSlot.php b/libs/pear/PHPTAL/Php/Attribute/METAL/FillSlot.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/METAL/UseMacro.php b/libs/pear/PHPTAL/Php/Attribute/METAL/UseMacro.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/PHPTAL/Debug.php b/libs/pear/PHPTAL/Php/Attribute/PHPTAL/Debug.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/PHPTAL/Id.php b/libs/pear/PHPTAL/Php/Attribute/PHPTAL/Id.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/PHPTAL/Tales.php b/libs/pear/PHPTAL/Php/Attribute/PHPTAL/Tales.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/TAL/Attributes.php b/libs/pear/PHPTAL/Php/Attribute/TAL/Attributes.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/TAL/Comment.php b/libs/pear/PHPTAL/Php/Attribute/TAL/Comment.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/TAL/Condition.php b/libs/pear/PHPTAL/Php/Attribute/TAL/Condition.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/TAL/Content.php b/libs/pear/PHPTAL/Php/Attribute/TAL/Content.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/TAL/Define.php b/libs/pear/PHPTAL/Php/Attribute/TAL/Define.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/TAL/OmitTag.php b/libs/pear/PHPTAL/Php/Attribute/TAL/OmitTag.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/TAL/OnError.php b/libs/pear/PHPTAL/Php/Attribute/TAL/OnError.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/TAL/Repeat.php b/libs/pear/PHPTAL/Php/Attribute/TAL/Repeat.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Attribute/TAL/Replace.php b/libs/pear/PHPTAL/Php/Attribute/TAL/Replace.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/CodeGenerator.php b/libs/pear/PHPTAL/Php/CodeGenerator.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/CodeWriter.php b/libs/pear/PHPTAL/Php/CodeWriter.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/ElementWriter.php b/libs/pear/PHPTAL/Php/ElementWriter.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Node.php b/libs/pear/PHPTAL/Php/Node.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/State.php b/libs/pear/PHPTAL/Php/State.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/TalesChainExecutor.php b/libs/pear/PHPTAL/Php/TalesChainExecutor.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/TalesInternal.php b/libs/pear/PHPTAL/Php/TalesInternal.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Php/Transformer.php b/libs/pear/PHPTAL/Php/Transformer.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/RepeatController.php b/libs/pear/PHPTAL/RepeatController.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Source.php b/libs/pear/PHPTAL/Source.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/SourceResolver.php b/libs/pear/PHPTAL/SourceResolver.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/StringSource.php b/libs/pear/PHPTAL/StringSource.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Tales.php b/libs/pear/PHPTAL/Tales.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/TalesRegistry.php b/libs/pear/PHPTAL/TalesRegistry.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/TranslationService.php b/libs/pear/PHPTAL/TranslationService.php
++old mode 100644
++new mode 100755
++diff --git a/libs/pear/PHPTAL/Trigger.php b/libs/pear/PHPTAL/Trigger.php
++old mode 100644
++new mode 100755
++diff --git a/listener/BackofficeIndexListener.class.php b/listener/BackofficeIndexListener.class.php
++old mode 100644
++new mode 100755
++diff --git a/listener/IndexListener.class.php b/listener/IndexListener.class.php
++old mode 100644
++new mode 100755
++diff --git a/listener/PublishListener.class.php b/listener/PublishListener.class.php
++old mode 100644
++new mode 100755
++diff --git a/listener/SimpleCacheListener.class.php b/listener/SimpleCacheListener.class.php
++old mode 100644
++new mode 100755
++diff --git a/loader/ClassLoader.class.php b/loader/ClassLoader.class.php
++old mode 100644
++new mode 100755
++diff --git a/loader/ClassResolver.class.php b/loader/ClassResolver.class.php
++old mode 100644
++new mode 100755
++diff --git a/loader/FileLoader.class.php b/loader/FileLoader.class.php
++old mode 100644
++new mode 100755
++diff --git a/loader/FileResolver.class.php b/loader/FileResolver.class.php
++old mode 100644
++new mode 100755
++diff --git a/loader/Loader.class.php b/loader/Loader.class.php
++old mode 100644
++new mode 100755
++diff --git a/loader/Resolver.class.php b/loader/Resolver.class.php
++old mode 100644
++new mode 100755
++diff --git a/loader/ResourceLoader.class.php b/loader/ResourceLoader.class.php
++old mode 100644
++new mode 100755
++diff --git a/loader/ResourceResolver.class.php b/loader/ResourceResolver.class.php
++old mode 100644
++new mode 100755
++diff --git a/loader/ServiceLoader.class.php b/loader/ServiceLoader.class.php
++old mode 100644
++new mode 100755
++diff --git a/loader/TemplateLoader.class.php b/loader/TemplateLoader.class.php
++old mode 100644
++new mode 100755
++diff --git a/loader/TemplateResolver.class.php b/loader/TemplateResolver.class.php
++old mode 100644
++new mode 100755
++diff --git a/mail/FakeMailService.class.php b/mail/FakeMailService.class.php
++old mode 100644
++new mode 100755
++diff --git a/mail/MailMessage.class.php b/mail/MailMessage.class.php
++old mode 100644
++new mode 100755
++diff --git a/mail/MailService.class.php b/mail/MailService.class.php
++old mode 100644
++new mode 100755
++diff --git a/mail/Mailer.class.php b/mail/Mailer.class.php
++old mode 100644
++new mode 100755
++diff --git a/mail/MailerMail.class.php b/mail/MailerMail.class.php
++old mode 100644
++new mode 100755
++diff --git a/mail/MailerSendmail.class.php b/mail/MailerSendmail.class.php
++old mode 100644
++new mode 100755
++diff --git a/mail/MailerSmtp.class.php b/mail/MailerSmtp.class.php
++old mode 100644
++new mode 100755
++diff --git a/mail/MassMailer.php b/mail/MassMailer.php
++old mode 100644
++new mode 100755
++diff --git a/mail/MessageRecipients.class.php b/mail/MessageRecipients.class.php
++old mode 100644
++new mode 100755
++diff --git a/mail/NullMailService.class.php b/mail/NullMailService.class.php
++old mode 100644
++new mode 100755
++diff --git a/mail/PopMailMessage.php b/mail/PopMailMessage.php
++old mode 100644
++new mode 100755
++diff --git a/object/Browscap.class.php b/object/Browscap.class.php
++old mode 100644
++new mode 100755
++diff --git a/object/ComponentTypeObject.class.php b/object/ComponentTypeObject.class.php
++old mode 100644
++new mode 100755
++diff --git a/object/ConstantObject.class.php b/object/ConstantObject.class.php
++old mode 100644
++new mode 100755
++diff --git a/object/InitDataSetup.class.php b/object/InitDataSetup.class.php
++old mode 100644
++new mode 100755
++diff --git a/object/Locale.class.php b/object/Locale.class.php
++old mode 100644
++new mode 100755
++diff --git a/object/Package.class.php b/object/Package.class.php
++old mode 100644
++new mode 100755
++diff --git a/object/RequestContext.class.php b/object/RequestContext.class.php
++old mode 100644
++new mode 100755
++diff --git a/object/TagObject.class.php b/object/TagObject.class.php
++old mode 100644
++new mode 100755
++diff --git a/object/TemplateObject.class.php b/object/TemplateObject.class.php
++old mode 100644
++new mode 100755
++diff --git a/object/XmlObject.class.php b/object/XmlObject.class.php
++old mode 100644
++new mode 100755
++diff --git a/paginator/Paginator.class.php b/paginator/Paginator.class.php
++old mode 100644
++new mode 100755
++diff --git a/patch/0300/install.php b/patch/0300/install.php
++old mode 100644
++new mode 100755
++diff --git a/patch/0301/install.php b/patch/0301/install.php
++old mode 100644
++new mode 100755
++diff --git a/patch/0302/install.php b/patch/0302/install.php
++old mode 100644
++new mode 100755
++diff --git a/patch/0303/install.php b/patch/0303/install.php
++old mode 100644
++new mode 100755
++diff --git a/patch/0304/install.php b/patch/0304/install.php
++old mode 100644
++new mode 100755
++diff --git a/patch/0305/install.php b/patch/0305/install.php
++old mode 100644
++new mode 100755
++diff --git a/patch/0306/install.php b/patch/0306/install.php
++old mode 100644
++new mode 100755
++diff --git a/patch/0307/install.php b/patch/0307/install.php
++old mode 100644
++new mode 100755
++diff --git a/patch/0308/install.php b/patch/0308/install.php
++old mode 100644
++new mode 100755
++diff --git a/patch/0309/install.php b/patch/0309/install.php
++old mode 100644
++new mode 100755
++diff --git a/patch/0310/install.php b/patch/0310/install.php
++old mode 100644
++new mode 100755
++diff --git a/patch/0311/install.php b/patch/0311/install.php
++old mode 100644
++new mode 100755
++diff --git a/patch/0312/install.php b/patch/0312/install.php
++old mode 100644
++new mode 100755
++diff --git a/patch/BasePatch.php b/patch/BasePatch.php
++old mode 100644
++new mode 100755
++diff --git a/pdf/UrlPDFService.class.php b/pdf/UrlPDFService.class.php
++old mode 100644
++new mode 100755
++diff --git a/permission/ACL.class.php b/permission/ACL.class.php
++old mode 100644
++new mode 100755
++diff --git a/permission/MissingPermissionException.class.php b/permission/MissingPermissionException.class.php
++old mode 100644
++new mode 100755
++diff --git a/permission/PermissionService.class.php b/permission/PermissionService.class.php
++old mode 100644
++new mode 100755
++diff --git a/permission/RoleService.class.php b/permission/RoleService.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/CacheService.class.php b/persistentdocument/CacheService.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/ChildPropertyInfo.class.php b/persistentdocument/ChildPropertyInfo.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/DocumentService.class.php b/persistentdocument/DocumentService.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/FormPropertyInfo.class.php b/persistentdocument/FormPropertyInfo.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/I18PersistentDocument.class.php b/persistentdocument/I18PersistentDocument.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/PersistentDocument.class.php b/persistentdocument/PersistentDocument.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/PersistentDocumentArray.php b/persistentdocument/PersistentDocumentArray.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/PersistentDocumentBeanPropertyInfo.php b/persistentdocument/PersistentDocumentBeanPropertyInfo.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/PersistentDocumentDeserializer.class.php b/persistentdocument/PersistentDocumentDeserializer.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/PersistentDocumentHelper.class.php b/persistentdocument/PersistentDocumentHelper.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/PersistentDocumentImpl.class.php b/persistentdocument/PersistentDocumentImpl.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/PersistentDocumentModel.class.php b/persistentdocument/PersistentDocumentModel.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/PersistentDocumentSerializer.class.php b/persistentdocument/PersistentDocumentSerializer.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/PersistentProvider.class.php b/persistentdocument/PersistentProvider.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/PersistentProviderMySql.class.php b/persistentdocument/PersistentProviderMySql.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/PersistentRelation.class.php b/persistentdocument/PersistentRelation.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/PersistentTreeNode.class.php b/persistentdocument/PersistentTreeNode.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/PropertyInfo.class.php b/persistentdocument/PropertyInfo.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/TransactionManager.class.php b/persistentdocument/TransactionManager.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/criteria/Criterions.php b/persistentdocument/criteria/Criterions.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/criteria/HavingRestrictions.class.php b/persistentdocument/criteria/HavingRestrictions.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/criteria/Junctions.class.php b/persistentdocument/criteria/Junctions.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/criteria/Order.class.php b/persistentdocument/criteria/Order.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/criteria/Projections.class.php b/persistentdocument/criteria/Projections.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/criteria/Query.class.php b/persistentdocument/criteria/Query.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/criteria/Restrictions.class.php b/persistentdocument/criteria/Restrictions.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/criteria/TreeCriterions.php b/persistentdocument/criteria/TreeCriterions.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/filter/DocumentFilter.php b/persistentdocument/filter/DocumentFilter.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/filter/DocumentFilterParameter.php b/persistentdocument/filter/DocumentFilterParameter.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/filter/DocumentFilterRestrictionParameter.php b/persistentdocument/filter/DocumentFilterRestrictionParameter.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/filter/DocumentFilterService.php b/persistentdocument/filter/DocumentFilterService.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/filter/DocumentFilterValueParameter.php b/persistentdocument/filter/DocumentFilterValueParameter.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/import/ScriptBaseElement.class.php b/persistentdocument/import/ScriptBaseElement.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/import/ScriptBindingElement.class.php b/persistentdocument/import/ScriptBindingElement.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/import/ScriptDocumentElement.class.php b/persistentdocument/import/ScriptDocumentElement.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/import/ScriptDocumentRefElement.class.php b/persistentdocument/import/ScriptDocumentRefElement.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/import/ScriptObjectElement.php b/persistentdocument/import/ScriptObjectElement.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/import/ScriptReader.class.php b/persistentdocument/import/ScriptReader.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/import/ScriptScriptElement.class.php b/persistentdocument/import/ScriptScriptElement.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/import/ScriptTagElement.class.php b/persistentdocument/import/ScriptTagElement.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/transformer/DefaultTransformer.class.php b/persistentdocument/transformer/DefaultTransformer.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/transformer/Transformer.class.php b/persistentdocument/transformer/Transformer.class.php
++old mode 100644
++new mode 100755
++diff --git a/persistentdocument/transformer/Transformers.class.php b/persistentdocument/transformer/Transformers.class.php
++old mode 100644
++new mode 100755
++diff --git a/service/ApacheService.class.php b/service/ApacheService.class.php
++old mode 100644
++new mode 100755
++diff --git a/service/BaseService.class.php b/service/BaseService.class.php
++old mode 100644
++new mode 100755
++diff --git a/service/HTTPClientService.php b/service/HTTPClientService.php
++old mode 100644
++new mode 100755
++diff --git a/service/InitDataService.class.php b/service/InitDataService.class.php
++old mode 100644
++new mode 100755
++diff --git a/service/Injection.php b/service/Injection.php
++old mode 100644
++new mode 100755
++diff --git a/service/JsService.class.php b/service/JsService.class.php
++old mode 100644
++new mode 100755
++diff --git a/service/JsonService.class.php b/service/JsonService.class.php
++old mode 100644
++new mode 100755
++diff --git a/service/LocaleService.class.php b/service/LocaleService.class.php
++old mode 100644
++new mode 100755
++diff --git a/service/ModuleBaseService.class.php b/service/ModuleBaseService.class.php
++old mode 100644
++new mode 100755
++diff --git a/service/ModuleService.class.php b/service/ModuleService.class.php
++old mode 100644
++new mode 100755
++diff --git a/service/PHPTALService.class.php b/service/PHPTALService.class.php
++old mode 100644
++new mode 100755
++diff --git a/service/PatchService.class.php b/service/PatchService.class.php
++old mode 100644
++new mode 100755
++diff --git a/service/RelationService.php b/service/RelationService.php
++old mode 100644
++new mode 100755
++diff --git a/service/StyleService.class.php b/service/StyleService.class.php
++old mode 100644
++new mode 100755
++diff --git a/service/TagService.php b/service/TagService.php
++old mode 100644
++new mode 100755
++diff --git a/service/TreeService.php b/service/TreeService.php
++old mode 100644
++new mode 100755
++diff --git a/service/UserActionLoggerService.class.php b/service/UserActionLoggerService.class.php
++old mode 100644
++new mode 100755
++diff --git a/tree/DefaultTreeModel.class.php b/tree/DefaultTreeModel.class.php
++old mode 100644
++new mode 100755
++diff --git a/tree/DefaultTreeNode.class.php b/tree/DefaultTreeNode.class.php
++old mode 100644
++new mode 100755
++diff --git a/tree/DocumentTreeNode.class.php b/tree/DocumentTreeNode.class.php
++old mode 100644
++new mode 100755
++diff --git a/tree/TreeModel.class.php b/tree/TreeModel.class.php
++old mode 100644
++new mode 100755
++diff --git a/tree/TreeNode.class.php b/tree/TreeNode.class.php
++old mode 100644
++new mode 100755
++diff --git a/tree/parser/TreeParser.class.php b/tree/parser/TreeParser.class.php
++old mode 100644
++new mode 100755
++diff --git a/tree/parser/XmlDateListTreeParser.class.php b/tree/parser/XmlDateListTreeParser.class.php
++old mode 100644
++new mode 100755
++diff --git a/tree/parser/XmlDateTreeParser.class.php b/tree/parser/XmlDateTreeParser.class.php
++old mode 100644
++new mode 100755
++diff --git a/tree/parser/XmlListTreeParser.class.php b/tree/parser/XmlListTreeParser.class.php
++old mode 100644
++new mode 100755
++diff --git a/tree/parser/XmlTreeParser.class.php b/tree/parser/XmlTreeParser.class.php
++old mode 100644
++new mode 100755
++diff --git a/tree/parser/attributes/AttributesBuilder.class.php b/tree/parser/attributes/AttributesBuilder.class.php
++old mode 100644
++new mode 100755
++diff --git a/tree/parser/attributes/AttributesBuilderFactory.class.php b/tree/parser/attributes/AttributesBuilderFactory.class.php
++old mode 100644
++new mode 100755
++diff --git a/tree/parser/attributes/NoopAttributesBuilder.php b/tree/parser/attributes/NoopAttributesBuilder.php
++old mode 100644
++new mode 100755
++diff --git a/util/ArrayUtils.class.php b/util/ArrayUtils.class.php
++old mode 100644
++new mode 100755
++diff --git a/util/ClassUtils.class.php b/util/ClassUtils.class.php
++old mode 100644
++new mode 100755
++diff --git a/util/Convert.class.php b/util/Convert.class.php
++old mode 100644
++new mode 100755
++diff --git a/util/CsvUtils.class.php b/util/CsvUtils.class.php
++old mode 100644
++new mode 100755
++diff --git a/util/DependencyResolver.class.php b/util/DependencyResolver.class.php
++old mode 100644
++new mode 100755
++diff --git a/util/DomUtils.php b/util/DomUtils.php
++old mode 100644
++new mode 100755
++diff --git a/util/FileUtils.class.php b/util/FileUtils.class.php
++old mode 100644
++new mode 100755
++diff --git a/util/Finder.class.php b/util/Finder.class.php
++old mode 100644
++new mode 100755
++diff --git a/util/HtmlUtils.class.php b/util/HtmlUtils.class.php
++old mode 100644
++new mode 100755
++diff --git a/util/MemoryUtils.class.php b/util/MemoryUtils.class.php
++old mode 100644
++new mode 100755
++diff --git a/util/ObjectUtils.php b/util/ObjectUtils.php
++old mode 100644
++new mode 100755
++diff --git a/util/ProcessUtils.class.php b/util/ProcessUtils.class.php
++old mode 100644
++new mode 100755
++diff --git a/util/Properties.php b/util/Properties.php
++old mode 100644
++new mode 100755
++diff --git a/util/StringUtils.class.php b/util/StringUtils.class.php
++old mode 100644
++new mode 100755
++index dce68db..fbf0f2a
++--- a/util/StringUtils.class.php
+++++ b/util/StringUtils.class.php
++@@ -1124,7 +1124,7 @@ class f_util_StringUtils
++      */
++     public static function isEmpty($string)
++     {
++-    	return is_null($string) || (!is_array($string) && strlen(trim($string))) == 0;
+++    	return $string === null || (!is_array($string) && strlen(trim($string))) == 0;
++     }
++     
++     /**
++diff --git a/util/System.php b/util/System.php
++old mode 100644
++new mode 100755
++diff --git a/util/TagReplacer.class.php b/util/TagReplacer.class.php
++old mode 100644
++new mode 100755
++diff --git a/util/TypeValidator.class.php b/util/TypeValidator.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/BeanValidator.php b/validation/BeanValidator.php
++old mode 100644
++new mode 100755
++diff --git a/validation/BeginsWithValidator.class.php b/validation/BeginsWithValidator.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/BlankValidator.class.php b/validation/BlankValidator.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/DateValidator.class.php b/validation/DateValidator.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/DomainValidator.class.php b/validation/DomainValidator.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/EmailValidator.class.php b/validation/EmailValidator.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/EmailsValidator.class.php b/validation/EmailsValidator.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/EndsWithValidator.class.php b/validation/EndsWithValidator.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/Errors.class.php b/validation/Errors.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/FloatValidator.class.php b/validation/FloatValidator.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/HostValidator.class.php b/validation/HostValidator.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/InListValidator.class.php b/validation/InListValidator.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/IntegerValidator.class.php b/validation/IntegerValidator.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/MatchesValidator.class.php b/validation/MatchesValidator.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/MaxValidator.class.php b/validation/MaxValidator.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/MinValidator.class.php b/validation/MinValidator.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/NotEqualValidator.class.php b/validation/NotEqualValidator.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/NullableValidator.class.php b/validation/NullableValidator.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/PasswordValidator.class.php b/validation/PasswordValidator.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/Property.class.php b/validation/Property.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/Range.class.php b/validation/Range.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/RangeValidator.class.php b/validation/RangeValidator.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/SizeValidator.class.php b/validation/SizeValidator.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/UniqueInParentNodeValidator.class.php b/validation/UniqueInParentNodeValidator.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/UniqueValidator.class.php b/validation/UniqueValidator.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/UrlValidator.class.php b/validation/UrlValidator.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/Validator.class.php b/validation/Validator.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/ValidatorHelper.class.php b/validation/ValidatorHelper.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/ValidatorImpl.class.php b/validation/ValidatorImpl.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/XmlValidator.class.php b/validation/XmlValidator.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/parsers/BooleanValueParser.class.php b/validation/parsers/BooleanValueParser.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/parsers/ConstraintsParser.class.php b/validation/parsers/ConstraintsParser.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/parsers/InListValueParser.class.php b/validation/parsers/InListValueParser.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/parsers/NullValueParser.class.php b/validation/parsers/NullValueParser.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/parsers/NumberValueParser.class.php b/validation/parsers/NumberValueParser.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/parsers/RangeValueParser.class.php b/validation/parsers/RangeValueParser.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/parsers/StringValueParser.class.php b/validation/parsers/StringValueParser.class.php
++old mode 100644
++new mode 100755
++diff --git a/validation/parsers/ValueParser.class.php b/validation/parsers/ValueParser.class.php
++old mode 100644
++new mode 100755
++-- 
++1.7.0.4
++
+diff --git a/0002-implementation-DataCacheFileService.patch b/0002-implementation-DataCacheFileService.patch
+new file mode 100644
+index 0000000..0078c2e
+--- /dev/null
++++ b/0002-implementation-DataCacheFileService.patch
+@@ -0,0 +1,1015 @@
++From f421945838c59a8a6e8542e9ec8cd29ae285de31 Mon Sep 17 00:00:00 2001
++From: =?UTF-8?q?K=C3=A9vin=20O'NEILL?= <kevin.oneill@rbs.fr>
++Date: Fri, 23 Jul 2010 17:06:07 +0200
++Subject: [PATCH 2/4] implementation DataCacheFileService
++
++---
++ cache/DataCacheFileService.class.php   |  248 +++++++++++++++++++++++++++-----
++ cache/DataCacheItem.class.php          |   52 ++++++-
++ cache/DataCacheItemImpl.class.php      |   74 ++++++++---
++ cache/DataCacheService.class.php       |  164 ++++++++++++++++++++-
++ listener/SimpleCacheListener.class.php |   70 ++++------
++ 5 files changed, 501 insertions(+), 107 deletions(-)
++
++diff --git a/cache/DataCacheFileService.class.php b/cache/DataCacheFileService.class.php
++index 60a1e8c..5eece9d 100755
++--- a/cache/DataCacheFileService.class.php
+++++ b/cache/DataCacheFileService.class.php
++@@ -3,9 +3,10 @@ class f_DataCacheFileService extends f_DataCacheService
++ {
++ 	const INVALID_CACHE_ENTRY = 'invalidCacheEntry';
++ 	
+++	private static $instance;
++ 	private $registrationFolder = null;
++ 	
++-	private function __construct()
+++	protected function __construct()
++ 	{
++ 		$this->registrationFolder = f_util_FileUtils::buildCachePath('simplecache', 'registration');
++ 		f_util_FileUtils::mkdir($this->registrationFolder);
++@@ -26,8 +27,9 @@ class f_DataCacheFileService extends f_DataCacheService
++ 	/**
++ 	 * @param String $namespace
++ 	 * @param Mixed $keyParameters
+++	 * @param String $subCache (optional)
++ 	 * @param Array	$newPatterns
++-	 * @return f_DataCacheItem or null
+++	 * @return f_DataCacheItem or null or String
++ 	 */
++ 	public function readFromCache($namespace, $keyParameters, $newPatterns = null)
++ 	{
++@@ -44,15 +46,20 @@ class f_DataCacheFileService extends f_DataCacheService
++ 		
++ 		if ($this->exists($item))
++ 		{
++-			$subCaches = f_util_FileUtils::getDirFiles($this->getCachePath($item));
+++			$dirPath = $this->getCachePath($item);
+++			$subCaches = f_util_FileUtils::getDirFiles($dirPath);
+++			if (f_util_ArrayUtils::isNotEmpty($subCaches))
+++			{
+++				$item->setCreationTime(filemtime($dirPath));
+++			}
++ 			if ($subCaches != null)
++ 			{
++ 				foreach ($subCaches as $subCache)
++ 				{
++ 					$item->setValue(basename($subCache), f_util_FileUtils::read($subCache));
++ 				}
++-				return $item;
++ 			}
+++			return $item;
++ 		}
++ 		return ($returnItem) ? $item : null;
++ 	}
++@@ -60,17 +67,17 @@ class f_DataCacheFileService extends f_DataCacheService
++ 	/**
++ 	 * @param f_DataCacheItem $item
++ 	 */
++-	public function writeToCache(f_DataCacheItem $item)
+++	public function writeToCache($item)
++ 	{
++ 		$this->register($item);
++-		$data = $item->getValue();
+++		$data = $item->getValues();
++ 		try
++ 		{
++ 			foreach ($data as $k => $v)
++ 			{
++-				if ($k != "creationTime" || $k != "isValid" || $k != "cachePath" || $v !== null)
+++				if ($v !== null)
++ 				{
++-					f_util_FileUtils::writeAndCreateContainer($this->getCachePath($item, $k), $v, f_util_FileUtils::OVERRIDE);
+++					f_util_FileUtils::write($this->getCachePath($item, $k), $v, f_util_FileUtils::OVERRIDE);
++ 				}
++ 			}
++ 		}
++@@ -86,41 +93,201 @@ class f_DataCacheFileService extends f_DataCacheService
++ 	}
++ 	
++ 	/**
++-	 * @param String $pattern
+++	 * @param f_DataCacheItem $item
+++	 * @param String $subCache
+++	 * @return Boolean
++ 	 */
++-	public function clearCacheByPattern($pattern)
+++	public function exists($item, $subCache = null)
+++	{
+++		$cachePath = $this->getCachePath($item, $subCache);
+++		$subCaches = f_util_FileUtils::getDirFiles($cachePath);
+++		$result = file_exists($cachePath) && $subCaches !== null && $this->isValid($item)
+++			&& ($item->getTTL() === null || (time() - filemtime($cachePath)) < $item->getTTL()); 
+++		$this->markAsBeingRegenerated($item);
+++		return $result;
+++	}
+++	
+++	
+++	/**
+++	 * This is the same as BlockCache::commitClear()
+++	 * but designed for the context of <code>register_shutdown_function()</code>,
+++	 * to be sure the correct umask is used.
+++	 */
+++	public function shutdownCommitClear()
+++	{
+++		umask(0002);
+++		$this->commitClear();
+++	}
+++	
+++	public function cleanExpiredCache()
++ 	{
++-		$cacheIds = $this->getPersistentProvider()->getCacheIdsByPattern($pattern);
++-		foreach ($cacheIds as $cacheId)
+++		$directoryIterator = new DirectoryIterator(f_util_FileUtils::buildChangeCachePath('simplecache'));
+++		foreach ($directoryIterator as $classNameDir)
++ 		{
++-			if (Framework::isDebugEnabled())
+++			if ($classNameDir->isDir())
++ 			{
++-				Framework::debug("[". __CLASS__ . "]: clear $cacheId cache");
+++				$subDirIterator = new DirectoryIterator($classNameDir->getPathname());
+++				foreach ($subDirIterator as $cacheKeyDir)
+++				{
+++					$invalidCacheFilePath = $cacheKeyDir->getPathname() . DIRECTORY_SEPARATOR . self::INVALID_CACHE_ENTRY;
+++					if ($cacheKeyDir->isDir() && file_exists($invalidCacheFilePath))
+++					{
+++						$fileInfo = new SplFileInfo($invalidCacheFilePath);
+++						if (abs(date_Calendar::getInstance()->getTimestamp() - $fileInfo->getMTime()) > self::MAX_TIME_LIMIT)
+++						{
+++							f_util_FileUtils::rmdir($cacheKeyDir->getPathname());
+++						}
+++					}
+++				}
++ 			}
++-			self::clear($cacheId);
++ 		}
++ 	}
++ 	
++ 	/**
++-	 * @param String $namespace
+++	 * @param f_DataCacheItem $item
+++	 * @param String $subCache
+++	 * @param Boolean $dispatch (optional)
++ 	 */
++-	public function clearCacheByNamespace($namespace)
+++	public final function clearSubCache($item, $subCache, $dispatch = true)
++ 	{
++-		
+++		$this->registerShutdown();
+++		$cachePath = $this->getCachePath($item, $subCache);
+++		if (Framework::isDebugEnabled())
+++		{
+++			Framework::debug(__METHOD__ . ' ' . $cachePath);
+++		}
+++		if (!array_key_exists($item->getNamespace(), $this->idToClear))
+++		{
+++			$this->idToClear[$item->getNamespace()] = array($item->getKeyParameters() => $subCache);
+++		}
+++		else if (is_array($this->idToClear[$item->getNamespace()]))
+++		{
+++			$this->idToClear[$item->getNamespace()][$item->getKeyParameters()] = $subCache;
+++		}
+++
+++		$this->dispatch = $dispatch || $this->dispatch;
++ 	}
+++	
+++	private function commitClear()
+++	{
+++		if (Framework::isDebugEnabled())
+++		{
+++			Framework::debug("DataCacheFileService->commitClear");
+++		}
+++		$cachePath = f_util_FileUtils::buildCachePath('simplecache');
+++		$dirsToClear = array();
+++		if ($this->clearAll)
+++		{
+++			if (Framework::isDebugEnabled())
+++			{
+++				Framework::debug("Clear all");
+++			}
+++			$dirHandler = opendir($cachePath);
+++			while ($fileName = readdir($dirHandler))
+++			{
+++				if ($fileName != '.' && $fileName != '..' && $fileName != 'registration' && $fileName != 'old')
+++				{
+++					$dirsToClear[] = $cachePath . DIRECTORY_SEPARATOR . $fileName;
+++				}
+++			}
+++			$this->buildInvalidCacheList($dirsToClear);
+++			closedir($dirHandler);
+++			if ($this->dispatch)
+++			{
+++				f_event_EventManager::dispatchEvent('simpleCacheCleared', null);
+++			}
+++		}
+++		else
+++		{
+++			$dispatchParams = array();
+++			if (!empty($this->idToClear))
+++			{
+++				foreach ($this->idToClear as $id => $subKey)
+++				{
+++					if (file_exists($cachePath . DIRECTORY_SEPARATOR . $id))
+++					{
+++						$dirsToClear[] = $cachePath . DIRECTORY_SEPARATOR . $id;
+++					}
+++				}
+++				$this->buildInvalidCacheList($dirsToClear);
+++				if ($this->dispatch)
+++				{
+++					$dispatchParams["ids"] = $this->idToClear;
+++				}
+++			}
+++			if (!empty($this->docIdToClear))
+++			{
+++				$this->commitClearByDocIds($this->docIdToClear);
+++				if ($this->dispatch)
+++				{
+++					$dispatchParams["docIds"] = $this->docIdToClear;
+++				}
+++			}
+++			if ($this->dispatch)
+++			{
+++				f_event_EventManager::dispatchEvent('simpleCacheCleared', null, $dispatchParams);
+++			}
+++		}
++ 
++-	public function clearAll()
+++		$this->clearAll = false;
+++		$this->idToClear = null;
+++		$this->docIdToClear = null;
+++	}
+++
+++	/**
+++	 * @param Array $docIds
+++	 */
+++	private function commitClearByDocIds($docIds)
++ 	{
++-		
+++		foreach ($docIds as $id)
+++		{
+++			$baseById = $this->registrationFolder.DIRECTORY_SEPARATOR.'byDocId'.DIRECTORY_SEPARATOR.implode(DIRECTORY_SEPARATOR, str_split($id, 3));
+++			if (!is_dir($baseById))
+++			{
+++				continue;
+++			}
+++			foreach (scandir($baseById) as $dir)
+++			{
+++				if ($dir == '.' || $dir == '..')
+++				{
+++					continue;
+++				}
+++				@touch($baseById.DIRECTORY_SEPARATOR.$dir.DIRECTORY_SEPARATOR.self::INVALID_CACHE_ENTRY);
+++			}
+++		}
+++	}
+++
+++	/**
+++	 * @param Array $dirsToClear
+++	 */
+++	private function buildInvalidCacheList($dirsToClear)
+++	{
+++		foreach ($dirsToClear as $dir)
+++		{
+++			$dirHandler = opendir($dir);
+++			while ($fileName = readdir($dirHandler))
+++			{
+++				if ($fileName != '.' && $fileName != '..' && !file_exists($dir . DIRECTORY_SEPARATOR . $fileName . DIRECTORY_SEPARATOR . self::INVALID_CACHE_ENTRY))
+++				{
+++					// we ignore errors because the file can disapear
+++					@touch($dir . DIRECTORY_SEPARATOR . $fileName . DIRECTORY_SEPARATOR . self::INVALID_CACHE_ENTRY);
+++				}
+++			}
+++			closedir($dirHandler);
+++		}
++ 	}
++ 	
++-	private function getCachePath(f_DataCacheItem $item, $subCache = null)
+++	/**
+++	 * @param f_DataCacheItem $item
+++	 * @return String
+++	 */
+++	private function getCachePath($item, $subCache = null)
++ 	{
++-		$cachePath = $item->getValue("cachePath");
+++		$cachePath = $item->getCachePath();
++ 		if ($cachePath === null)
++ 		{
++ 			$cachePath = f_util_FileUtils::buildCachePath('simplecache', $item->getNamespace(), $item->getKeyParameters());
++-			$item->setValue("cachePath", $cachePath);
+++			$item->setCachePath($cachePath);
++ 			f_util_FileUtils::mkdir($cachePath);
++ 		}
++ 		if ($subCache === null)
++@@ -130,21 +297,19 @@ class f_DataCacheFileService extends f_DataCacheService
++ 		return $cachePath . DIRECTORY_SEPARATOR . $subCache;
++ 	}
++ 	
++-	private function exists(f_DataCacheItem $item, $subCache = null)
++-	{
++-		$cachePath = $this->getCachePath($item, $subCache);
++-		$result = file_exists($cachePath) && $this->isValid($item)
++-			&& ($item->getTimeLimit() === null || (time() - filemtime($cachePath)) < $item->getTimeLimit()); 
++-		$this->markAsBeingRegenerated();
++-		return $result;
++-	}
++-
++-	private function isValid(f_DataCacheItem $item)
+++	/**
+++	 * @param f_DataCacheItem $item
+++	 * @return Boolean
+++	 */
+++	private function isValid($item)
++ 	{
++ 		return !file_exists($this->getCachePath($item, self::INVALID_CACHE_ENTRY));
++ 	}
++ 	
++-	private function markAsBeingRegenerated(f_DataCacheItem $item)
+++	/**
+++	 * @param f_DataCacheItem $item
+++	 */
+++	private function markAsBeingRegenerated($item)
++ 	{
++ 		if (!$this->isValid($item))
++ 		{
++@@ -152,19 +317,26 @@ class f_DataCacheFileService extends f_DataCacheService
++ 		}
++ 	}
++ 
++-	private function getRegistrationPath(f_DataCacheItem $item)
+++	/**
+++	 * @param f_DataCacheItem $item
+++	 * @return String
+++	 */
+++	private function getRegistrationPath($item)
++ 	{
++-		$registrationPath = $item->getValue("registrationPath");
+++		$registrationPath = $item->getRegistrationPath();
++ 		
++ 		if ($registrationPath === null)
++ 		{
++ 			$registrationPath = $this->registrationFolder . DIRECTORY_SEPARATOR . $item->getNamespace();
++-			$item->setValue("registrationPath", $registrationPath);
+++			$item->setRegistrationPath($registrationPath);
++ 		}
++ 		return $registrationPath;
++ 	}
++ 	
++-	private function register(f_DataCacheItem $item)
+++	/**
+++	 * @param f_DataCacheItem $item
+++	 */
+++	private function register($item)
++ 	{
++ 		$registrationPath = $this->getRegistrationPath($item);
++ 		if (!file_exists($registrationPath))
++diff --git a/cache/DataCacheItem.class.php b/cache/DataCacheItem.class.php
++index c852de4..7f9392a 100755
++--- a/cache/DataCacheItem.class.php
+++++ b/cache/DataCacheItem.class.php
++@@ -5,11 +5,21 @@ interface f_DataCacheItem
++ 	 * @return Integer (timestamp) or null
++ 	 */
++ 	public function getCreationTime();
+++	
+++	/**
+++	 * @param Integer (timestamp) $timestamp
+++	 */
+++	public function setCreationTime($timestamp);
++ 
++ 	/**
++ 	 * @param Integer $seconds
++ 	 */
++ 	public function setTTL($seconds);
+++	
+++	/**
+++	 * @return Integer
+++	 */
+++	public function getTTL();
++ 
++ 	/**
++ 	 * @param Mixed $key
++@@ -18,29 +28,61 @@ interface f_DataCacheItem
++ 	public function setValue($key, $value);
++ 	
++ 	/**
++-	 * @param String $key (optional)
+++	 * @param String $key
++ 	 * @return Mixed
++ 	 */
++ 	public function getValue($key);
++ 	
++ 	/**
+++	 * @param Array $key
+++	 */
+++	public function setValues($key);
+++	
+++	/**
+++	 * @return Array
+++	 */
+++	public function getValues();
+++	
+++	/**
+++	 * @param String $key
+++	 */
+++	public function setRegistrationPath($key);
+++	
+++	/**
++ 	 * @return String
++ 	 */
++-	public function getNamespace();
+++	public function getRegistrationPath();
+++	
+++	/**
+++	 * @param String $key
+++	 */
+++	public function setCachePath($key);
++ 	
++ 	/**
++ 	 * @return String
++ 	 */
++-	public function getKeyParameters();
+++	public function getCachePath();
++ 	
++ 	/**
++-	 * @return Integer
+++	 * @return String
++ 	 */
++-	public function getTTL();
+++	public function getNamespace();
+++	
+++	/**
+++	 * @return String
+++	 */
+++	public function getKeyParameters();
++ 	
++ 	/**
++ 	 * @return Array
++ 	 */
++ 	public function getPatterns();
+++	
+++	public function setInvalid();
+++	
+++	/**
+++	 * @return Boolean
+++	 */
+++	public function isValid();
++ }
++ ?>
++\ No newline at end of file
++diff --git a/cache/DataCacheItemImpl.class.php b/cache/DataCacheItemImpl.class.php
++index 0fb8f8a..7cc5a47 100755
++--- a/cache/DataCacheItemImpl.class.php
+++++ b/cache/DataCacheItemImpl.class.php
++@@ -7,6 +7,10 @@ class f_DataCacheItemImpl implements f_DataCacheItem
++ 	private $keyParameters;
++ 	private $patterns;
++ 	private $timeLimit;
+++	private $creationTime = null;
+++	private $isValid = false;
+++	private $registrationPath = null;
+++	private $cachePath = null;
++ 	private $data;
++ 		
++ 	/**
++@@ -39,9 +43,9 @@ class f_DataCacheItemImpl implements f_DataCacheItem
++ 	 */
++ 	public function getCreationTime()
++ 	{
++-		if (isset($this->data["creationTime"]) && $this->data["creationTime"] != null)
+++		if ($this->creationTime !== null)
++ 		{
++-			return $this->data["creationTime"];
+++			return $this->creationTime;
++ 		}
++ 		return null;
++ 	}
++@@ -81,15 +85,11 @@ class f_DataCacheItemImpl implements f_DataCacheItem
++ 	/**
++ 	 * @see f_DataCacheItem::getValue()
++ 	 *
++-	 * @param String $key (optional)
+++	 * @param String $key
++ 	 * @return Mixed
++ 	 */
++-	public function getValue($key = null)
+++	public function getValue($key)
++ 	{
++-		if ($key === null)
++-		{
++-			return $this->data;
++-		}
++ 		if (isset($this->data[$key]) && $this->data[$key] != null)
++ 		{
++ 			return $this->data[$key];
++@@ -98,6 +98,16 @@ class f_DataCacheItemImpl implements f_DataCacheItem
++ 	}
++ 	
++ 	/**
+++	 * @see f_DataCacheItem::getValues()
+++	 *
+++	 * @return Array
+++	 */
+++	public function getValues()
+++	{
+++		return $this->data;
+++	}
+++	
+++	/**
++ 	 * @see f_DataCacheItem::setTTL()
++ 	 *
++ 	 * @param Integer $seconds
++@@ -112,23 +122,54 @@ class f_DataCacheItemImpl implements f_DataCacheItem
++ 	}
++ 	
++ 	/**
+++	 * @see f_DataCacheItem::setCreationTime()
+++	 *
+++	 * @param Integer $timestamp
+++	 */
+++	public function setCreationTime($timestamp)
+++	{
+++		$this->creationTime = $timestamp;
+++	}
+++	
+++	public function setRegistrationPath($path)
+++	{
+++		$this->registrationPath = $path;
+++	}
+++	
+++	public function getRegistrationPath()
+++	{
+++		return $this->registrationPath;
+++	}
+++	
+++	public function setCachePath($path)
+++	{
+++		$this->cachePath = $path;
+++	}
+++	
+++	public function getCachePath()
+++	{
+++		return $this->cachePath;
+++	}
+++	
+++	/**
++ 	 * @see f_DataCacheItem::setValue()
++ 	 *
++-	 * @param Mixed $key
+++	 * @param String $key
++ 	 * @param Mixed $value
++ 	 */
++-	public function setValue($key, $value = null)
+++	public function setValue($key, $value)
++ 	{
++-		if ($value === null)
++-		{
++-			$this->data = $key;
++-		}
++ 		$this->data[$key] = $value;
++ 	}
++ 	
+++	public function setValues($values)
+++	{
+++		$this->data = $values;
+++	}
+++	
++ 	public function setInvalid()
++ 	{
++-		$this->data["isValid"] = false;
+++		$this->isValid = false;
++ 	}
++ 	
++ 	/**
++@@ -136,8 +177,7 @@ class f_DataCacheItemImpl implements f_DataCacheItem
++ 	 */
++ 	public function isValid()
++ 	{
++-		return (isset($this->data["isValid"]) && $this->data["isValid"] 
++-					&& ($this->getCreationTime()+$this->timeLimit > time()));
+++		return ($this->isValid	&& ($this->getCreationTime()+$this->timeLimit > time()));
++ 	}
++ }
++ ?>
++\ No newline at end of file
++diff --git a/cache/DataCacheService.class.php b/cache/DataCacheService.class.php
++index 10aa4ff..692612f 100755
++--- a/cache/DataCacheService.class.php
+++++ b/cache/DataCacheService.class.php
++@@ -1,10 +1,18 @@
++ <?php
++ class f_DataCacheService extends BaseService
++ {
+++	const MAX_TIME_LIMIT = 86400;
+++	
++ 	/**
++ 	 * @var f_DataCacheService
++ 	 */
++ 	private static $instance;
+++	
+++	protected $clearAll = false;
+++	protected $idToClear = array();
+++	protected $docIdToClear = array();
+++	protected $dispatch = false;
+++	protected $shutdownRegistered = false;
++ 
++ 	/**
++ 	 * @return f_DataCacheService
++@@ -34,12 +42,13 @@ class f_DataCacheService extends BaseService
++ 	 */
++ 	function isEnabled()
++ 	{
++-		return constant("AG_DISABLE_SIMPLECACHE") !== true;
+++		return !defined("DISABLE_DATACACHE") || constant("DISABLE_DATACACHE") !== true;
++ 	}
++ 	
++ 	/**
++ 	 * @param String $namespace
++ 	 * @param Mixed $keyParameters
+++	 * @param String $subCache (optional)
++ 	 * @param Array	$newPatterns
++ 	 * @return f_DataCacheItem or null
++ 	 */
++@@ -47,7 +56,9 @@ class f_DataCacheService extends BaseService
++ 	{
++ 		if ($newPatterns !== null)
++ 		{
++-			return $this->getNewCacheItem($namespace, $keyParameters, $newPatterns);
+++			$cacheItem = $this->getNewCacheItem($namespace, $keyParameters, $newPatterns);
+++			$cacheItem->setInvalid();
+++			return $cacheItem;
++ 		}
++ 		return null;
++ 	}
++@@ -55,17 +66,35 @@ class f_DataCacheService extends BaseService
++ 	/**
++ 	 * @param f_DataCacheItem $item
++ 	 */
++-	public function writeToCache(f_DataCacheItem $item)
+++	public function writeToCache($item)
++ 	{
++ 		
++ 	}
++ 	
++ 	/**
+++	 * @param f_DataCacheItem $item
+++	 * @param String $subCache
+++	 * @return Boolean
+++	 */
+++	public function exists($item, $subCache = null)
+++	{
+++		return false;
+++	}
+++	
+++	/**
++ 	 * @param String $pattern
++ 	 */
++ 	public function clearCacheByPattern($pattern)
++ 	{
++-		
+++		$cacheIds = $this->getPersistentProvider()->getCacheIdsByPattern($pattern);
+++		foreach ($cacheIds as $cacheId)
+++		{
+++			if (Framework::isDebugEnabled())
+++			{
+++				Framework::debug("[". __CLASS__ . "]: clear $cacheId cache");
+++			}
+++			$this->clear($cacheId);
+++		}
++ 	}
++ 	
++ 	/**
++@@ -73,14 +102,70 @@ class f_DataCacheService extends BaseService
++ 	 */
++ 	public function clearCacheByNamespace($namespace)
++ 	{
++-		
+++		$this->clear($namespace);
+++	}
+++	
+++	/**
+++	 * @param String $id
+++	 */
+++	public function clearCacheByDocId($id)
+++	{
+++		$this->registerShutdown();
+++		$this->docIdToClear[] = $id;
+++	}
+++	
+++	/**
+++	 * @param f_persistentdocument_PersistentDocumentModel $model
+++	 */
+++	public function clearCacheByModel($model)
+++	{
+++		if (Framework::isDebugEnabled())
+++		{
+++			Framework::debug("[". __CLASS__ . "]: clear cache by model:".$model->getName());
+++		}
+++		$this->clearCacheByPattern($model->getName());
+++		if ($model->isInjectedModel())
+++		{
+++			$this->clearCacheByPattern($model->getOriginalModelName());
+++		}
+++	}
+++
+++	/**
+++	 * @param String $tag
+++	 */
+++	public function clearCacheByTag($tag)
+++	{
+++		if (Framework::isDebugEnabled())
+++		{
+++			Framework::debug("[". __CLASS__ . "]: clear cache by tag:$tag");
+++		}
+++		$this->clearCacheByPattern(f_DataCachePatternHelper::getTagPattern($tag));
++ 	}
++ 
++ 	public function clearAll()
++ 	{
+++		$this->clear();
+++	}
+++	
+++	public function cleanExpiredCache()
+++	{
++ 		
++ 	}
++ 	
+++	/**
+++	 * This is the same as BlockCache::commitClear()
+++	 * but designed for the context of <code>register_shutdown_function()</code>,
+++	 * to be sure the correct umask is used.
+++	 */
+++	public function shutdownCommitClear()
+++	{
+++		$this->commitClear();
+++	}
+++	
+++	/**
+++	 * @param Array $cacheSpecs
+++	 * @return Array
+++	 */
++ 	protected function optimizeCacheSpecs($cacheSpecs)
++ 	{
++ 		if (f_util_ArrayUtils::isNotEmpty($cacheSpecs))
++@@ -125,5 +210,74 @@ class f_DataCacheService extends BaseService
++ 		}
++ 		return array();
++ 	}
+++	
+++	protected function registerShutdown()
+++	{
+++		if (!$this->shutdownRegistered)
+++		{
+++			register_shutdown_function(array($this,'shutdownCommitClear'));
+++			$this->shutdownRegistered = true;
+++		}
+++	}
+++	
+++	/**
+++	 * @param String $id
+++	 * @param Boolean $dispatch (optional)
+++	 */
+++	protected function clear($id = null, $dispatch = true)
+++	{
+++		$this->registerShutdown();
+++		if ($id === null)
+++		{
+++			$this->clearAll = true;
+++		}
+++		else
+++		{
+++			$this->idToClear[$id] = true;
+++		}
+++		$this->dispatch = $dispatch || $this->dispatch;
+++	}
+++	
+++	/**
+++	 * @param Array $ids
+++	 */
+++	protected function commitClearDispatched($ids = null)
+++	{
+++		$this->registerShutdown();
+++		if (Framework::isDebugEnabled())
+++		{
+++			Framework::debug("SimpleCache->commitClearDispatched");
+++		}
+++		if ($ids === null)
+++		{
+++			$this->clearAll = true;
+++		}
+++		else
+++		{
+++			$this->idToClear = $ids;
+++		}
+++		$this->dispatch = false;
+++	}
+++	
+++	private function commitClear()
+++	{
+++		
+++	}
+++
+++	/**
+++	 * @param Array $docIds
+++	 */
+++	private function commitClearByDocIds($docIds)
+++	{
+++		
+++	}
+++	
+++	/**
+++	 * @param Array $dirsToClear
+++	 */
+++	private function buildInvalidCacheList($dirsToClear)
+++	{
+++		
+++	}
++ }
++ ?>
++\ No newline at end of file
++diff --git a/listener/SimpleCacheListener.class.php b/listener/SimpleCacheListener.class.php
++index 79396f6..6988400 100755
++--- a/listener/SimpleCacheListener.class.php
+++++ b/listener/SimpleCacheListener.class.php
++@@ -8,21 +8,7 @@ class listener_SimpleCacheListener
++ 	{
++ 		if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentCreated");}
++ 		$document = $params['document'];
++-		f_SimpleCache::clearCacheByModel($document->getPersistentModel());
++-	}
++-	
++-	public function onPermissionsUpdated($sender, $params)
++-	{
++-	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPermissionsUpdated");}
++-		$id = $params['nodeId'];
++-		// For the moment, only a change in the front end permission changes
++-		if (!is_null($id) && array_search('modules_website.AuthenticatedFrontUser', $params['updatedRoles']) !== false )
++-		{
++-			if (Framework::isDebugEnabled())
++-			{
++-				Framework::debug("[". __CLASS__ . "]: (Re-)Indexing  Permissioned descendents for treenode (id =" . $id . ")");
++-			}
++-		}
+++		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
++ 	}
++ 	
++ 	/**
++@@ -33,8 +19,8 @@ class listener_SimpleCacheListener
++ 	{
++ 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentUpdated");}
++ 		$document = $params['document'];
++-		f_SimpleCache::clearCacheByModel($document->getPersistentModel());
++-		f_SimpleCache::clearCacheById($document->getId());
+++		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
+++		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
++ 	}
++ 	
++ 	/**
++@@ -44,7 +30,7 @@ class listener_SimpleCacheListener
++ 	public function onTagAdded ($sender, $params)
++ 	{
++ 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: ontagAdded ".$params["tag"]);}
++-		f_SimpleCache::clearCacheByTag($params["tag"]);
+++		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getTagPattern($params["tag"]));
++ 	}
++ 	/**
++ 	 * @param TagService $sender
++@@ -53,7 +39,7 @@ class listener_SimpleCacheListener
++ 	public function onTagRemoved ($sender, $params)
++ 	{
++ 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: ontagRemoved ".$params["tag"]);}
++-		f_SimpleCache::clearCacheByTag($params["tag"]);
+++		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getTagPattern($params["tag"]));
++ 	}
++ 	/**
++ 	 * @param TagService $sender
++@@ -62,7 +48,7 @@ class listener_SimpleCacheListener
++ 	public function onTagMoved ($sender, $params)
++ 	{
++ 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: ontagMoved ".$params["tag"]);}
++-		f_SimpleCache::clearCacheByTag($params["tag"]);
+++		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getTagPattern($params["tag"]));
++ 	}
++ 
++ 	/**
++@@ -72,9 +58,9 @@ class listener_SimpleCacheListener
++ 	public function onPersistentDocumentDeleted($sender, $params)
++ 	{
++ 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentDeleted");}
++-		$document = $params['document'];
++-		f_SimpleCache::clearCacheByModel($document->getPersistentModel());
++-		f_SimpleCache::clearCacheById($document->getId());
+++		$document = $params['document'];
+++		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
+++		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
++ 	}
++ 
++ 	/**
++@@ -85,8 +71,8 @@ class listener_SimpleCacheListener
++ 	{
++ 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentPublished");}
++ 		$document = $params['document'];
++-		f_SimpleCache::clearCacheByModel($document->getPersistentModel());
++-		f_SimpleCache::clearCacheById($document->getId());
+++		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
+++		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
++ 	}
++ 
++ 	/**
++@@ -97,8 +83,8 @@ class listener_SimpleCacheListener
++ 	{
++ 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentDeactivated");}
++ 		$document = $params['document'];
++-		f_SimpleCache::clearCacheByModel($document->getPersistentModel());
++-		f_SimpleCache::clearCacheById($document->getId());
+++		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
+++		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
++ 	}
++ 
++ 	/**
++@@ -109,8 +95,8 @@ class listener_SimpleCacheListener
++ 	{
++ 		if (Framework::isDebugEnabled()) Framework::debug("[". __CLASS__ . "]: onPersistentDocumentUnPublished");
++ 		$document = $params['document'];
++-		f_SimpleCache::clearCacheByModel($document->getPersistentModel());
++-		f_SimpleCache::clearCacheById($document->getId());
+++		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
+++		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
++ 	}
++ 
++ 	/**
++@@ -121,8 +107,8 @@ class listener_SimpleCacheListener
++ 	{
++ 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentFiled");}
++ 		$document = $params['document'];
++-		f_SimpleCache::clearCacheByModel($document->getPersistentModel());
++-		f_SimpleCache::clearCacheById($document->getId());
+++		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
+++		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
++ 	}
++ 
++ 	/**
++@@ -133,8 +119,8 @@ class listener_SimpleCacheListener
++ 	{
++ 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentInTrash");}
++ 		$document = $params['document'];
++-		f_SimpleCache::clearCacheByModel($document->getPersistentModel());
++-		f_SimpleCache::clearCacheById($document->getId());
+++		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
+++		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
++ 	}
++ 
++ 	/**
++@@ -145,17 +131,17 @@ class listener_SimpleCacheListener
++ 	{
++ 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onChildrenOrdered");}
++ 		$document = $params['parent'];
++-		f_SimpleCache::clearCacheByModel($document->getPersistentModel());
++-		f_SimpleCache::clearCacheById($document->getId());
+++		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
+++		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
++ 	}
++ 	
++ 	public function onPersistentTreeNodeOrdered($sender, $params)
++ 	{
++ 		if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentTreeNodeOrdered");}
++ 		$parentNode = $params['parentNode'];
++-		$document = DocumentHelper::getDocumentInstance($parentNode->getId());
++-		f_SimpleCache::clearCacheByModel($document->getPersistentModel());
++-		f_SimpleCache::clearCacheById($document->getId());
+++		$document = DocumentHelper::getDocumentInstance($parentNode->getId());
+++		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
+++		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
++ 	}
++ 	
++     public function onSimpleCacheClearedNode($sender, $params)
++@@ -165,16 +151,16 @@ class listener_SimpleCacheListener
++ 		{
++ 			if (isset($params['ids']))
++ 			{
++-		    	f_SimpleCache::commitClearDispatched($params['ids']);
+++		    	f_DataCacheService::getInstance()->commitClearDispatched($params['ids']);
++ 			}
++ 			if (isset($params['docIds']))
++ 			{
++-		    	f_SimpleCache::commitClearByDocIds($params['docIds']);
+++		    	f_DataCacheService::getInstance()->commitClearByDocIds($params['docIds']);
++ 			}
++ 		}
++ 		else
++ 		{
++-		    f_SimpleCache::commitClearDispatched();
+++		    f_DataCacheService::getInstance()->commitClearDispatched();
++ 		}
++     }
++     
++@@ -184,6 +170,6 @@ class listener_SimpleCacheListener
++ 	 */    
++     public function onDayChange($sender, $params)
++     {
++-    	f_SimpleCache::cleanExpiredCache();
+++    	f_DataCacheService::getInstance()->cleanExpiredCache();
++     }
++ }
++-- 
++1.7.0.4
++
+diff --git a/0003-implementation-DataCacheMongoService.patch b/0003-implementation-DataCacheMongoService.patch
+new file mode 100644
+index 0000000..9c0065a
+--- /dev/null
++++ b/0003-implementation-DataCacheMongoService.patch
+@@ -0,0 +1,492 @@
++From 2f6b7eb2a3dc94de9667ac216b3ac60ab85f7e50 Mon Sep 17 00:00:00 2001
++From: =?UTF-8?q?K=C3=A9vin=20O'NEILL?= <kevin.oneill@rbs.fr>
++Date: Mon, 26 Jul 2010 16:57:00 +0200
++Subject: [PATCH 3/4] implementation DataCacheMongoService
++
++---
++ cache/DataCacheFileService.class.php |    2 +-
++ cache/DataCacheItem.class.php        |    5 +
++ cache/DataCacheItemImpl.class.php    |   10 +-
++ cache/DataCacheMongoService.php      |  376 ++++++++++++++++++++++++++++++++++
++ cache/DataCacheService.class.php     |   12 +-
++ 5 files changed, 397 insertions(+), 8 deletions(-)
++ create mode 100755 cache/DataCacheMongoService.php
++
++diff --git a/cache/DataCacheFileService.class.php b/cache/DataCacheFileService.class.php
++index 5eece9d..ce1c6e5 100755
++--- a/cache/DataCacheFileService.class.php
+++++ b/cache/DataCacheFileService.class.php
++@@ -43,7 +43,7 @@ class f_DataCacheFileService extends f_DataCacheService
++ 			$newPatterns = array();
++ 		}
++ 		$item = $this->getNewCacheItem($namespace, $keyParameters, $newPatterns);
++-		
+++		$item->setValidity(true);
++ 		if ($this->exists($item))
++ 		{
++ 			$dirPath = $this->getCachePath($item);
++diff --git a/cache/DataCacheItem.class.php b/cache/DataCacheItem.class.php
++index 7f9392a..bb8fc44 100755
++--- a/cache/DataCacheItem.class.php
+++++ b/cache/DataCacheItem.class.php
++@@ -81,6 +81,11 @@ interface f_DataCacheItem
++ 	public function setInvalid();
++ 	
++ 	/**
+++	 * @param Boolean $isValid
+++	 */
+++	public function setValidity($isValid);
+++	
+++	/**
++ 	 * @return Boolean
++ 	 */
++ 	public function isValid();
++diff --git a/cache/DataCacheItemImpl.class.php b/cache/DataCacheItemImpl.class.php
++index 7cc5a47..1bffb07 100755
++--- a/cache/DataCacheItemImpl.class.php
+++++ b/cache/DataCacheItemImpl.class.php
++@@ -173,11 +173,19 @@ class f_DataCacheItemImpl implements f_DataCacheItem
++ 	}
++ 	
++ 	/**
+++	 * @param Boolean $isValid
+++	 */
+++	public function setValidity($isValid)
+++	{
+++		$this->isValid = $isValid;
+++	}
+++	
+++	/**
++ 	 * @return Boolean
++ 	 */
++ 	public function isValid()
++ 	{
++-		return ($this->isValid	&& ($this->getCreationTime()+$this->timeLimit > time()));
+++		return $this->isValid && $this->getCreationTime() !== null && ($this->getCreationTime()+$this->timeLimit > time());
++ 	}
++ }
++ ?>
++\ No newline at end of file
++diff --git a/cache/DataCacheMongoService.php b/cache/DataCacheMongoService.php
++new file mode 100755
++index 0000000..e924baf
++--- /dev/null
+++++ b/cache/DataCacheMongoService.php
++@@ -0,0 +1,376 @@
+++<?php
+++class f_DataCacheMongoService extends f_DataCacheService
+++{
+++	private static $instance;
+++	private static $mongoInstance = null;
+++	private static $mongoCollection = null;
+++	private static $mongoRegistration = null;
+++	
+++	protected function __construct()
+++	{
+++		$connectionString = null;
+++		$config = Framework::getConfiguration("mongoDB");
+++		
+++		if (isset($config["authentication"]["username"]) && isset($config["authentication"]["password"]) && 
+++			$config["authentication"]["username"] !== '' && $config["authentication"]["password"] !== '')
+++		{
+++			$connectionString .= $config["authentication"]["username"].':'.$config["authentication"]["password"].'@';
+++		}
+++		
+++		$connectionString .= implode(",", $config["serversSimpleCache"]);
+++		
+++		if ($connectionString != null)
+++		{
+++			$connectionString = "mongodb://".$connectionString;
+++		}
+++		
+++		try
+++		{
+++			self::$mongoInstance = new Mongo($connectionString);
+++			self::$mongoCollection = self::$mongoInstance->$config["database"]["name"]->dataCache;
+++			self::$mongoRegistration = self::$mongoInstance->$config["database"]["name"]->dataCacheRegistration;
+++		}
+++		catch (MongoConnnectionException $e)
+++		{
+++			Framework::exception($e);
+++		}
+++	}
+++
+++	/**
+++	 * @return f_DataCacheService
+++	 */
+++	public static function getInstance()
+++	{
+++		if (self::$instance === null)
+++		{
+++			self::$instance = self::getServiceClassInstance(get_class());
+++		}
+++		return self::$instance;
+++	}
+++	
+++	/**
+++	 * @param String $namespace
+++	 * @param Mixed $keyParameters
+++	 * @param String $subCache (optional)
+++	 * @param Array	$newPatterns
+++	 * @return f_DataCacheItem or null or String
+++	 */
+++	public function readFromCache($namespace, $keyParameters, $newPatterns = null)
+++	{
+++		if ($newPatterns !== null)
+++		{
+++			$returnItem = true;
+++		}
+++		else 
+++		{
+++			$returnItem = false;
+++			$newPatterns = array();
+++		}
+++		
+++		$item = $this->getData($this->getNewCacheItem($namespace, $keyParameters, $newPatterns));
+++		
+++		if ($this->exists($item) || $returnItem)
+++		{
+++			return $item;
+++		}
+++		return null;
+++	}
+++	
+++	/**
+++	 * @param f_DataCacheItem $item
+++	 */
+++	public function writeToCache($item)
+++	{
+++		$this->register($item);
+++		$data = $item->getValues();
+++		
+++		$data["timestamp"] = time();
+++		$data["isValid"] = true;
+++		$data["ttl"] = $item->getTTL();
+++		unset($data["_id"]);
+++		
+++		try
+++		{
+++			self::$mongoCollection->update(array("_id" => $item->getNamespace().'-'.$item->getKeyParameters()), 
+++				array('$set' => $data),	array("upsert" => true, "safe" => true));
+++		}
+++		catch (MongoCursorException $e)
+++		{
+++			Framework::exception($e);
+++		}
+++	}
+++	
+++	/**
+++	 * @param f_DataCacheItem $item
+++	 * @param String $subCache
+++	 * @return Boolean
+++	 */
+++	public function exists($item, $subCache = null)
+++	{
+++		$result = $item->isValid();
+++		if ($subCache !== null)
+++		{
+++			$subResult = $item->getValue($subCache) !== null;
+++		}
+++		else 
+++		{
+++			$subResult = true;
+++		}
+++		return $result && $subResult;
+++	}
+++	
+++	/**
+++	 * This is the same as BlockCache::commitClear()
+++	 * but designed for the context of <code>register_shutdown_function()</code>,
+++	 * to be sure the correct umask is used.
+++	 */
+++	public function shutdownCommitClear()
+++	{
+++		$this->commitClear();
+++	}
+++	
+++	public function cleanExpiredCache()
+++	{
+++		try
+++		{
+++			self::$mongoCollection->remove(array("isValid" => false), array("safe" => true));
+++			self::$mongoCollection->remove(array("timestamp" => array('$lt' => time() - self::MAX_TIME_LIMIT)), array("safe" => true));
+++		}
+++		catch (MongoCursorException $e)
+++		{
+++			Framework::exception($e);
+++			return false;
+++		}
+++		return true;
+++	}
+++	
+++	/**
+++	 * @param f_DataCacheItem $item
+++	 * @param String $subCache
+++	 * @param Boolean $dispatch (optional)
+++	 */
+++	public final function clearSubCache($item, $subCache, $dispatch = true)
+++	{
+++		$this->registerShutdown();
+++		
+++		try
+++		{
+++			self::$mongoCollection->remove(array("_id" => $item->getNamespace().'-'.$item->getKeyParameters()), array("safe" => true));
+++		}
+++		catch (MongoCursorException $e)
+++		{
+++			Framework::exception($e);
+++		}
+++		
+++		if (Framework::isDebugEnabled())
+++		{
+++			Framework::debug(__METHOD__ . ' ' . $item->getNamespace().'-'.$item->getKeyParameters().' : '.$subCache);
+++		}
+++		
+++		if (!array_key_exists($item->getNamespace(), $this->idToClear))
+++		{
+++			$this->idToClear[$item->getNamespace()] = array($item->getKeyParameters() => $subCache);
+++		}
+++		else if (is_array($this->idToClear[$item->getNamespace()]))
+++		{
+++			$this->idToClear[$item->getNamespace()][$item->getKeyParameters()] = $subCache;
+++		}
+++
+++		$this->dispatch = $dispatch || $this->dispatch;
+++	}
+++	
+++	private function commitClear()
+++	{
+++		if (Framework::isDebugEnabled())
+++		{
+++			Framework::debug("SimpleCache->commitClear");
+++		}
+++		if ($this->clearAll)
+++		{
+++			if (Framework::isDebugEnabled())
+++			{
+++				Framework::debug("Clear all");
+++			}
+++			self::$mongoCollection->update(array(), array('$set' => array("isValid" => false)), array("multiple" => true, "safe" => true));	
+++			if ($this->dispatch)
+++			{
+++				f_event_EventManager::dispatchEvent('simpleCacheCleared', null);
+++			}
+++		}
+++		else
+++		{
+++			if (!empty($this->idToClear))
+++			{
+++				$ids = array();
+++				foreach ($this->idToClear as $id => $value)
+++				{
+++					$ids[] = $id;
+++				}
+++				self::buildInvalidCacheList($ids);
+++			}
+++			if (!empty($this->docIdToClear))
+++			{
+++				self::commitClearByDocIds($this->docIdToClear);
+++			}
+++			
+++			if ($this->dispatch)
+++			{
+++				if ($this->idToClear === null)
+++				{
+++					$this->idToClear = array();
+++				}
+++				if ($this->docIdToClear === null)
+++				{
+++					$this->docIdToClear = array();
+++				}
+++				f_event_EventManager::dispatchEvent('simpleCacheCleared', null, array_merge($this->idToClear, $this->docIdToClear));
+++			}
+++		}
+++		
+++		$this->clearAll = false;
+++		$this->idToClear = null;
+++		$this->docIdToClear = null;
+++	}
+++
+++	/**
+++	 * @param Array $docIds
+++	 */
+++	private function commitClearByDocIds($docIds)
+++	{
+++		try
+++		{
+++			$keyParameters = self::$mongoRegistration->find(array("_id" => array('$in' => $docIds)),
+++				array("keyParameters" => true));
+++			self::$mongoCollection->update(array("_id" => array('$in' => $keyParameters)), 
+++				array('$set' => array("isValid" => false)), array("multiple" => true, "safe" => true));
+++		}
+++		catch (MongoCursorException $e)
+++		{
+++			Framework::exception($e);
+++		}
+++	}
+++
+++	/**
+++	 * @param Array $dirsToClear
+++	 */
+++	private function buildInvalidCacheList($dirsToClear)
+++	{
+++		try
+++		{
+++			$regex =  implode("|", $dirsToClear);
+++			self::$mongoCollection->update(array("_id" => new MongoRegex("/^($regex)-/") ), 
+++				array('$set' => array("isValid" => false)), 
+++				array("multiple" => true, "safe" => true));				
+++		}
+++		catch (MongoCursorException $e)
+++		{
+++			Framework::exception($e);
+++		}
+++	}
+++	
+++	/**
+++	 * @param f_DataCacheItem $item
+++	 */
+++	private function register($item)
+++	{
+++		if (!$this->isRegistered($item))
+++		{	
+++			try
+++			{
+++				self::$mongoRegistration->update(array("_id" => $item->getNamespace()), 
+++					array('$set' => array("pattern" => $this->optimizeCacheSpecs($item->getPatterns()))), 
+++					array("upsert" => true, "safe" => true));
+++			}
+++			catch (MongoCursorException $e)
+++			{
+++				Framework::exception($e);
+++			}
+++		}
+++		
+++		foreach ($item->getPatterns() as $spec)
+++		{
+++			if (is_numeric($spec))
+++			{
+++				try
+++				{
+++					self::$mongoRegistration->update(array("_id" => $spec), 
+++						array('$addToSet' => array("keyParameters" => $item->getNamespace().'-'.$item->getKeyParameters())), 
+++						array("upsert" => true, "safe" => true));
+++				}
+++				catch (MongoCursorException $e)
+++				{
+++					Framework::exception($e);
+++				}
+++			}
+++		}
+++	}
+++	
+++	private function isRegistered($item, $id = null, $keyParameters = null)
+++	{
+++		if ($id === null && $keyParameters === null)
+++		{
+++			try
+++			{
+++				$object = self::$mongoRegistration->findOne(array("_id" => $item->getNamespace()));
+++			}
+++			catch (MongoConnnectionException $e)
+++			{
+++				Framework::exception($e);
+++			}
+++		
+++			return ($object !== null);
+++		}
+++		
+++		try
+++		{
+++			$object = self::$mongoRegistration->findOne(array("keyParameters" => $id.'-'.$keyParameters));
+++		}
+++		catch (MongoConnnectionException $e)
+++		{
+++			Framework::exception($e);
+++		}
+++		
+++		return ($object !== null);
+++	}
+++	
+++	/**
+++	 * @param f_DataCacheItem $item
+++	 * @return f_DataCacheItem
+++	 */
+++	private function getData($item)
+++	{
+++		try
+++		{
+++			$object = self::$mongoCollection->findOne(array("_id" => $item->getNamespace().'-'.$item->getKeyParameters()));
+++		}
+++		catch (MongoConnnectionException $e)
+++		{
+++			Framework::exception($e);
+++		}
+++		
+++		if ($object !== null)
+++		{
+++			foreach ($object as $k => $v)
+++			{
+++				if ($k == "isValid")
+++				{
+++					$item->setValidity($v);
+++					continue;
+++				}
+++				if ($k == "timestamp")
+++				{
+++					$item->setCreationTime($v);
+++					continue;
+++				}
+++				if ($k == "ttl")
+++				{
+++					$item->setTTL($v);
+++					continue;
+++				}
+++				$item->setValue($k, $v);
+++			}
+++		}
+++		return $item;
+++	}
+++}
+++?>
++\ No newline at end of file
++diff --git a/cache/DataCacheService.class.php b/cache/DataCacheService.class.php
++index 692612f..f05060e 100755
++--- a/cache/DataCacheService.class.php
+++++ b/cache/DataCacheService.class.php
++@@ -259,25 +259,25 @@ class f_DataCacheService extends BaseService
++ 		$this->dispatch = false;
++ 	}
++ 	
++-	private function commitClear()
+++	/*private function commitClear()
++ 	{
++ 		
++-	}
+++	}*/
++ 
++ 	/**
++ 	 * @param Array $docIds
++ 	 */
++-	private function commitClearByDocIds($docIds)
+++	/*private function commitClearByDocIds($docIds)
++ 	{
++ 		
++-	}
+++	}*/
++ 	
++ 	/**
++ 	 * @param Array $dirsToClear
++ 	 */
++-	private function buildInvalidCacheList($dirsToClear)
+++	/*private function buildInvalidCacheList($dirsToClear)
++ 	{
++ 		
++-	}
+++	}*/
++ }
++ ?>
++\ No newline at end of file
++-- 
++1.7.0.4
++
+diff --git a/0004-NEW-Memcache-and-Redis-support-on-DataCacheService.patch b/0004-NEW-Memcache-and-Redis-support-on-DataCacheService.patch
+new file mode 100644
+index 0000000..c218577
+--- /dev/null
++++ b/0004-NEW-Memcache-and-Redis-support-on-DataCacheService.patch
+@@ -0,0 +1,1236 @@
++From 04ecfadfa5409ae9e2d93874278a8bc20cb541f9 Mon Sep 17 00:00:00 2001
++From: =?UTF-8?q?K=C3=A9vin=20O'NEILL?= <kevin.oneill@rbs.fr>
++Date: Tue, 27 Jul 2010 16:52:21 +0200
++Subject: [PATCH 4/4] [NEW] Memcache and Redis support on DataCacheService
++
++---
++ cache/CacheService.class.php           |    3 +-
++ cache/DataCacheFileService.class.php   |   31 ++--
++ cache/DataCacheMemcacheService.php     |  299 ++++++++++++++++++++++++++++++++
++ cache/DataCacheMongoService.php        |   71 +-------
++ cache/DataCacheRedisService.php        |  264 ++++++++++++++++++++++++++++
++ cache/DataCacheService.class.php       |   66 +++++---
++ cache/SimpleCache.class.php            |  129 ++++++++++++++
++ listener/SimpleCacheListener.class.php |   24 ++--
++ 8 files changed, 771 insertions(+), 116 deletions(-)
++ create mode 100644 cache/DataCacheMemcacheService.php
++ create mode 100644 cache/DataCacheRedisService.php
++
++diff --git a/cache/CacheService.class.php b/cache/CacheService.class.php
++index c2c6324..ba80d23 100755
++--- a/cache/CacheService.class.php
+++++ b/cache/CacheService.class.php
++@@ -55,7 +55,8 @@ class CacheService extends BaseService
++ 
++ 	public function clearSimpleCache()
++ 	{
++-		f_SimpleCache::clear();
+++		//f_SimpleCache::clear();
+++		f_DataCacheService::getInstance()->clearAll();
++ 	}
++ 	
++ 	/**
++diff --git a/cache/DataCacheFileService.class.php b/cache/DataCacheFileService.class.php
++index ce1c6e5..bdd4efc 100755
++--- a/cache/DataCacheFileService.class.php
+++++ b/cache/DataCacheFileService.class.php
++@@ -69,6 +69,7 @@ class f_DataCacheFileService extends f_DataCacheService
++ 	 */
++ 	public function writeToCache($item)
++ 	{
+++		f_util_FileUtils::mkdir($this->getCachePath($item));
++ 		$this->register($item);
++ 		$data = $item->getValues();
++ 		try
++@@ -100,8 +101,8 @@ class f_DataCacheFileService extends f_DataCacheService
++ 	public function exists($item, $subCache = null)
++ 	{
++ 		$cachePath = $this->getCachePath($item, $subCache);
++-		$subCaches = f_util_FileUtils::getDirFiles($cachePath);
++-		$result = file_exists($cachePath) && $subCaches !== null && $this->isValid($item)
+++		//$subCaches = f_util_FileUtils::getDirFiles($cachePath);
+++		$result = file_exists($cachePath) && f_util_FileUtils::getDirFiles($cachePath) !== null && $this->isValid($item)
++ 			&& ($item->getTTL() === null || (time() - filemtime($cachePath)) < $item->getTTL()); 
++ 		$this->markAsBeingRegenerated($item);
++ 		return $result;
++@@ -168,7 +169,7 @@ class f_DataCacheFileService extends f_DataCacheService
++ 		$this->dispatch = $dispatch || $this->dispatch;
++ 	}
++ 	
++-	private function commitClear()
+++	protected function commitClear()
++ 	{
++ 		if (Framework::isDebugEnabled())
++ 		{
++@@ -237,7 +238,7 @@ class f_DataCacheFileService extends f_DataCacheService
++ 	/**
++ 	 * @param Array $docIds
++ 	 */
++-	private function commitClearByDocIds($docIds)
+++	protected function commitClearByDocIds($docIds)
++ 	{
++ 		foreach ($docIds as $id)
++ 		{
++@@ -260,7 +261,7 @@ class f_DataCacheFileService extends f_DataCacheService
++ 	/**
++ 	 * @param Array $dirsToClear
++ 	 */
++-	private function buildInvalidCacheList($dirsToClear)
+++	protected function buildInvalidCacheList($dirsToClear)
++ 	{
++ 		foreach ($dirsToClear as $dir)
++ 		{
++@@ -281,14 +282,14 @@ class f_DataCacheFileService extends f_DataCacheService
++ 	 * @param f_DataCacheItem $item
++ 	 * @return String
++ 	 */
++-	private function getCachePath($item, $subCache = null)
+++	protected function getCachePath($item, $subCache = null)
++ 	{
++ 		$cachePath = $item->getCachePath();
++ 		if ($cachePath === null)
++ 		{
++ 			$cachePath = f_util_FileUtils::buildCachePath('simplecache', $item->getNamespace(), $item->getKeyParameters());
++ 			$item->setCachePath($cachePath);
++-			f_util_FileUtils::mkdir($cachePath);
+++			//f_util_FileUtils::mkdir($cachePath);
++ 		}
++ 		if ($subCache === null)
++ 		{
++@@ -301,7 +302,7 @@ class f_DataCacheFileService extends f_DataCacheService
++ 	 * @param f_DataCacheItem $item
++ 	 * @return Boolean
++ 	 */
++-	private function isValid($item)
+++	protected function isValid($item)
++ 	{
++ 		return !file_exists($this->getCachePath($item, self::INVALID_CACHE_ENTRY));
++ 	}
++@@ -309,7 +310,7 @@ class f_DataCacheFileService extends f_DataCacheService
++ 	/**
++ 	 * @param f_DataCacheItem $item
++ 	 */
++-	private function markAsBeingRegenerated($item)
+++	protected function markAsBeingRegenerated($item)
++ 	{
++ 		if (!$this->isValid($item))
++ 		{
++@@ -321,7 +322,7 @@ class f_DataCacheFileService extends f_DataCacheService
++ 	 * @param f_DataCacheItem $item
++ 	 * @return String
++ 	 */
++-	private function getRegistrationPath($item)
+++	protected function getRegistrationPath($item)
++ 	{
++ 		$registrationPath = $item->getRegistrationPath();
++ 		
++@@ -336,7 +337,7 @@ class f_DataCacheFileService extends f_DataCacheService
++ 	/**
++ 	 * @param f_DataCacheItem $item
++ 	 */
++-	private function register($item)
+++	protected function register($item)
++ 	{
++ 		$registrationPath = $this->getRegistrationPath($item);
++ 		if (!file_exists($registrationPath))
++@@ -355,14 +356,14 @@ class f_DataCacheFileService extends f_DataCacheService
++ 				$tm->rollBack($e);
++ 			}
++ 		}
++-		$baseById = f_util_FileUtils::buildCachePath($this->registrationFolder, 'byDocId');
++-
+++		//$baseById = f_util_FileUtils::buildCachePath($this->registrationFolder, 'byDocId');
+++		$baseById = $this->registrationFolder.DIRECTORY_SEPARATOR.'byDocId';
+++		
++ 		foreach ($item->getPatterns() as $spec)
++ 		{
++ 			if (is_numeric($spec))
++ 			{
++-				$byIdRegister = $baseById . implode(DIRECTORY_SEPARATOR, str_split($spec, 3)) . DIRECTORY_SEPARATOR;
++-				$byIdRegister .= $item->getNamespace() . '_' . $item->getKeyParameters();
+++				$byIdRegister = $baseById.DIRECTORY_SEPARATOR.implode(DIRECTORY_SEPARATOR, str_split($spec, 3)).DIRECTORY_SEPARATOR.$item->getNamespace().'_'.$item->getKeyParameters();
++ 				if (!file_exists($byIdRegister))
++ 				{
++ 					f_util_FileUtils::mkdir(dirname($byIdRegister));
++diff --git a/cache/DataCacheMemcacheService.php b/cache/DataCacheMemcacheService.php
++new file mode 100644
++index 0000000..183a145
++--- /dev/null
+++++ b/cache/DataCacheMemcacheService.php
++@@ -0,0 +1,299 @@
+++<?php
+++class f_DataCacheMemcacheService extends f_DataCacheService
+++{
+++	const MEMCACHE_KEY_PREFIX = 'memcacheDataCache-';
+++	const MEMCACHE_REGISTRATION_KEY_PREFIX = 'memcacheDataCacheRegistration-';
+++	
+++	private static $instance;
+++	private static $memcache = null;
+++	
+++	protected function __construct()
+++	{
+++		self::$memcache = new Memcache();
+++		
+++		$config = Framework::getConfiguration("memcache");
+++		
+++		if (self::$memcache->connect($config["serverDataCacheService"]["host"], $config["serverDataCacheService"]["port"]) === false)
+++		{
+++			Framework::error("SimpleCache: could not obtain memcache instance");
+++		}
+++	}
+++
+++	/**
+++	 * @return f_DataCacheService
+++	 */
+++	public static function getInstance()
+++	{
+++		if (self::$instance === null)
+++		{
+++			self::$instance = self::getServiceClassInstance(get_class());
+++		}
+++		return self::$instance;
+++	}
+++	
+++	/**
+++	 * @param f_DataCacheItem $item
+++	 */
+++	public function writeToCache($item)
+++	{	
+++		$this->register($item);
+++		$data = $item->getValues();
+++		
+++		$data["timestamp"] = time();
+++		$data["isValid"] = true;
+++		$data["ttl"] = $item->getTTL();
+++		
+++		$serialized = serialize($data);
+++		self::$memcache->set(self::MEMCACHE_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters(), $serialized, null, $item->getTTL());
+++	}
+++	
+++	/**
+++	 * @param f_DataCacheItem $item
+++	 * @param String $subCache
+++	 * @param Boolean $dispatch (optional)
+++	 */
+++	public final function clearSubCache($item, $subCache, $dispatch = true)
+++	{
+++		$this->registerShutdown();
+++		
+++		self::$memcache->delete(self::MEMCACHE_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters());
+++		
+++		if (Framework::isDebugEnabled())
+++		{
+++			Framework::debug(__METHOD__ . ' ' . $item->getNamespace().'-'.$item->getKeyParameters().' : '.$subCache);
+++		}
+++		
+++		if (!array_key_exists($item->getNamespace(), $this->idToClear))
+++		{
+++			$this->idToClear[$item->getNamespace()] = array($item->getKeyParameters() => $subCache);
+++		}
+++		else if (is_array($this->idToClear[$item->getNamespace()]))
+++		{
+++			$this->idToClear[$item->getNamespace()][$item->getKeyParameters()] = $subCache;
+++		}
+++
+++		$this->dispatch = $dispatch || $this->dispatch;
+++	}
+++	
+++	protected function commitClear()
+++	{
+++		if (Framework::isDebugEnabled())
+++		{
+++			Framework::debug("SimpleCache->commitClear");
+++		}
+++		if ($this->clearAll)
+++		{
+++			if (Framework::isDebugEnabled())
+++			{
+++				Framework::debug("Clear all");
+++			}
+++			self::$memcache->flush();
+++			if ($this->dispatch)
+++			{
+++				f_event_EventManager::dispatchEvent('simpleCacheCleared', null);
+++			}
+++		}
+++		else
+++		{
+++			if (!empty($this->idToClear))
+++			{
+++				$ids = array();
+++				foreach ($this->idToClear as $id => $value)
+++				{
+++					$ids[] = $id;
+++				}
+++				self::buildInvalidCacheList($ids);
+++			}
+++			if (!empty($this->docIdToClear))
+++			{
+++				self::commitClearByDocIds($this->docIdToClear);
+++			}
+++			
+++			if ($this->dispatch)
+++			{
+++				if ($this->idToClear === null)
+++				{
+++					$this->idToClear = array();
+++				}
+++				if ($this->docIdToClear === null)
+++				{
+++					$this->docIdToClear = array();
+++				}
+++				f_event_EventManager::dispatchEvent('simpleCacheCleared', null, array_merge($this->idToClear, $this->docIdToClear));
+++			}
+++		}
+++		
+++		$this->clearAll = false;
+++		$this->idToClear = null;
+++		$this->docIdToClear = null;
+++	}
+++
+++	/**
+++	 * @param Array $docIds
+++	 */
+++	protected function commitClearByDocIds($docIds)
+++	{
+++		foreach ($docIds as $id)
+++		{
+++			$keys = self::$memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$id);
+++			if ($keys !== false)
+++			{
+++				$keyParameters = unserialize($keys);
+++				foreach ($keyParameters as $k)
+++				{
+++					self::$memcache->delete(self::MEMCACHE_KEY_PREFIX.$k);
+++				}
+++			}
+++		}
+++	}
+++
+++	/**
+++	 * @param Array $dirsToClear
+++	 */
+++	protected function buildInvalidCacheList($dirsToClear)
+++	{
+++		foreach ($dirsToClear as $id)
+++		{
+++			$object = self::$memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$id);
+++			$object = unserialize($object);
+++			if ($object === false)
+++			{
+++				$object = array();
+++			}
+++			foreach ($object as $keyParameters)
+++			{
+++				self::$memcache->delete(self::MEMCACHE_KEY_PREFIX.$id.'-'.$keyParameters);
+++			}
+++		}
+++	}
+++	
+++	/**
+++	 * @param f_DataCacheItem $item
+++	 */
+++	protected function register($item)
+++	{
+++		if (!$this->isRegistered($item))
+++		{	
+++			self::$memcache->set(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$item->getNamespace(), serialize(array()), null, 0);
+++			
+++			foreach ($this->optimizeCacheSpecs($item->getPatterns()) as $pattern)
+++			{
+++				$object = self::$memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$pattern);
+++				$object = unserialize($object);
+++				if ($object === false)
+++				{
+++					$object = array();
+++				}
+++				array_push($object, $item->getNamespace());
+++				
+++				$serialized = serialize($object);
+++				self::$memcache->set(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$pattern, $serialized, null, 0);
+++				
+++				$object = null;
+++				$serialized = null;
+++			}
+++		}
+++		
+++		if (!$this->isRegistered($item, null, $item->getKeyParameters()))
+++		{	
+++			$object = self::$memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$item->getNamespace());
+++			
+++			$object = unserialize($object);
+++			if ($object === false)
+++				{
+++					$object = array();
+++				}
+++			array_push($object, $item->getKeyParameters());
+++				
+++			$serialized = serialize($object);
+++			self::$memcache->set(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$item->getNamespace(), $serialized, null, 0);
+++			
+++			$object = null;
+++			$serialized = null;
+++		}
+++	
+++		foreach ($item->getPatterns() as $spec)
+++		{
+++			if (is_numeric($spec))
+++			{
+++				$object = self::$memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$spec);
+++				
+++				$object = unserialize($object);
+++				$object[] = $item->getNamespace().'-'.$item->getKeyParameters();
+++				
+++				$serialized = serialize($object);
+++				self::$memcache->set(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$spec, $serialized, null, 0);
+++				
+++				$object = null;
+++				$serialized = null;
+++			}
+++		}
+++	}
+++	
+++	/**
+++	 * @param f_DataCacheItem $item
+++	 * @param unknown_type $spec
+++	 * @param unknown_type $keyParameters
+++	 * @return Boolean
+++	 */
+++	protected function isRegistered($item, $spec = null, $keyParameters = null)
+++	{
+++		if ($spec === null && $keyParameters === null)
+++		{
+++			$object = self::$memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$item->getNamespace());
+++		
+++			return ($object !== false);
+++		}
+++		
+++		if ($spec === null && $keyParameters !== null)
+++		{
+++			$object = self::$memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$item->getNamespace());
+++			if ($object === false)
+++			{
+++				return false;
+++			}
+++			$object = unserialize($object);
+++			return (in_array($keyParameters, $object));
+++		}
+++		
+++		$object = self::$memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$spec);
+++		
+++		return ($object !== false);
+++	}
+++	
+++	/**
+++	 * @param f_DataCacheItem $item
+++	 * @return f_DataCacheItem
+++	 */
+++	protected function getData($item)
+++	{
+++		$object = self::$memcache->get(self::MEMCACHE_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters());
+++		
+++		if ($object !== false)
+++		{
+++			$object = unserialize($object);
+++			
+++			foreach ($object as $k => $v)
+++			{
+++				if ($k == "isValid")
+++				{
+++					$item->setValidity($v);
+++					continue;
+++				}
+++				if ($k == "timestamp")
+++				{
+++					$item->setCreationTime($v);
+++					continue;
+++				}
+++				if ($k == "ttl")
+++				{
+++					$item->setTTL($v);
+++					continue;
+++				}
+++				$item->setValue($k, $v);
+++			}
+++		}
+++		return $item;
+++	}
+++}
+++?>
++\ No newline at end of file
++diff --git a/cache/DataCacheMongoService.php b/cache/DataCacheMongoService.php
++index e924baf..5417d4d 100755
++--- a/cache/DataCacheMongoService.php
+++++ b/cache/DataCacheMongoService.php
++@@ -17,7 +17,7 @@ class f_DataCacheMongoService extends f_DataCacheService
++ 			$connectionString .= $config["authentication"]["username"].':'.$config["authentication"]["password"].'@';
++ 		}
++ 		
++-		$connectionString .= implode(",", $config["serversSimpleCache"]);
+++		$connectionString .= implode(",", $config["serversDataCacheService"]);
++ 		
++ 		if ($connectionString != null)
++ 		{
++@@ -49,34 +49,6 @@ class f_DataCacheMongoService extends f_DataCacheService
++ 	}
++ 	
++ 	/**
++-	 * @param String $namespace
++-	 * @param Mixed $keyParameters
++-	 * @param String $subCache (optional)
++-	 * @param Array	$newPatterns
++-	 * @return f_DataCacheItem or null or String
++-	 */
++-	public function readFromCache($namespace, $keyParameters, $newPatterns = null)
++-	{
++-		if ($newPatterns !== null)
++-		{
++-			$returnItem = true;
++-		}
++-		else 
++-		{
++-			$returnItem = false;
++-			$newPatterns = array();
++-		}
++-		
++-		$item = $this->getData($this->getNewCacheItem($namespace, $keyParameters, $newPatterns));
++-		
++-		if ($this->exists($item) || $returnItem)
++-		{
++-			return $item;
++-		}
++-		return null;
++-	}
++-	
++-	/**
++ 	 * @param f_DataCacheItem $item
++ 	 */
++ 	public function writeToCache($item)
++@@ -100,35 +72,6 @@ class f_DataCacheMongoService extends f_DataCacheService
++ 		}
++ 	}
++ 	
++-	/**
++-	 * @param f_DataCacheItem $item
++-	 * @param String $subCache
++-	 * @return Boolean
++-	 */
++-	public function exists($item, $subCache = null)
++-	{
++-		$result = $item->isValid();
++-		if ($subCache !== null)
++-		{
++-			$subResult = $item->getValue($subCache) !== null;
++-		}
++-		else 
++-		{
++-			$subResult = true;
++-		}
++-		return $result && $subResult;
++-	}
++-	
++-	/**
++-	 * This is the same as BlockCache::commitClear()
++-	 * but designed for the context of <code>register_shutdown_function()</code>,
++-	 * to be sure the correct umask is used.
++-	 */
++-	public function shutdownCommitClear()
++-	{
++-		$this->commitClear();
++-	}
++-	
++ 	public function cleanExpiredCache()
++ 	{
++ 		try
++@@ -179,7 +122,7 @@ class f_DataCacheMongoService extends f_DataCacheService
++ 		$this->dispatch = $dispatch || $this->dispatch;
++ 	}
++ 	
++-	private function commitClear()
+++	protected function commitClear()
++ 	{
++ 		if (Framework::isDebugEnabled())
++ 		{
++@@ -235,7 +178,7 @@ class f_DataCacheMongoService extends f_DataCacheService
++ 	/**
++ 	 * @param Array $docIds
++ 	 */
++-	private function commitClearByDocIds($docIds)
+++	protected function commitClearByDocIds($docIds)
++ 	{
++ 		try
++ 		{
++@@ -253,7 +196,7 @@ class f_DataCacheMongoService extends f_DataCacheService
++ 	/**
++ 	 * @param Array $dirsToClear
++ 	 */
++-	private function buildInvalidCacheList($dirsToClear)
+++	protected function buildInvalidCacheList($dirsToClear)
++ 	{
++ 		try
++ 		{
++@@ -271,7 +214,7 @@ class f_DataCacheMongoService extends f_DataCacheService
++ 	/**
++ 	 * @param f_DataCacheItem $item
++ 	 */
++-	private function register($item)
+++	protected function register($item)
++ 	{
++ 		if (!$this->isRegistered($item))
++ 		{	
++@@ -305,7 +248,7 @@ class f_DataCacheMongoService extends f_DataCacheService
++ 		}
++ 	}
++ 	
++-	private function isRegistered($item, $id = null, $keyParameters = null)
+++	protected function isRegistered($item, $id = null, $keyParameters = null)
++ 	{
++ 		if ($id === null && $keyParameters === null)
++ 		{
++@@ -337,7 +280,7 @@ class f_DataCacheMongoService extends f_DataCacheService
++ 	 * @param f_DataCacheItem $item
++ 	 * @return f_DataCacheItem
++ 	 */
++-	private function getData($item)
+++	protected function getData($item)
++ 	{
++ 		try
++ 		{
++diff --git a/cache/DataCacheRedisService.php b/cache/DataCacheRedisService.php
++new file mode 100644
++index 0000000..c58775c
++--- /dev/null
+++++ b/cache/DataCacheRedisService.php
++@@ -0,0 +1,264 @@
+++<?php
+++class f_DataCacheRedisService extends f_DataCacheService
+++{
+++	const REDIS_KEY_PREFIX = 'redisDataCache-';
+++	const REDIS_REGISTRATION_KEY_PREFIX = 'redisDataCacheRegistration-';
+++	
+++	private static $instance;
+++	private static $redis = null;
+++	
+++	protected function __construct()
+++	{
+++		self::$redis = new Redis();
+++			
+++		$config = Framework::getConfiguration("redis");
+++		
+++		self::$redis->connect($config["serverDataCacheService"]["host"], $config["serverDataCacheService"]["port"]);
+++		
+++		if (isset($config["authentication"]["password"]) && $config["authentication"]["password"] !== '')
+++		{
+++			self::$redis->auth($config["authentication"]["password"]);
+++		}
+++		
+++		self::$redis->select($config["serverDataCacheService"]["database"]);
+++	}
+++
+++	/**
+++	 * @return f_DataCacheService
+++	 */
+++	public static function getInstance()
+++	{
+++		if (self::$instance === null)
+++		{
+++			self::$instance = self::getServiceClassInstance(get_class());
+++		}
+++		return self::$instance;
+++	}
+++	
+++	/**
+++	 * @param f_DataCacheItem $item
+++	 */
+++	public function writeToCache($item)
+++	{	
+++		$this->register($item);
+++		$data = $item->getValues();
+++		
+++		$data["timestamp"] = time();
+++		$data["isValid"] = true;
+++		$data["ttl"] = $item->getTTL();
+++		
+++		$serialized = serialize($data);
+++		self::$redis->set(self::REDIS_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters(), $serialized);
+++		
+++		self::$redis->setTimeout(self::REDIS_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters(), $item->getTTL());
+++	}
+++	
+++	/**
+++	 * @param f_DataCacheItem $item
+++	 * @param String $subCache
+++	 * @param Boolean $dispatch (optional)
+++	 */
+++	public final function clearSubCache($item, $subCache, $dispatch = true)
+++	{
+++		$this->registerShutdown();
+++		
+++		self::$redis->delete(self::REDIS_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters());
+++		
+++		if (Framework::isDebugEnabled())
+++		{
+++			Framework::debug(__METHOD__ . ' ' . $item->getNamespace().'-'.$item->getKeyParameters().' : '.$subCache);
+++		}
+++		
+++		if (!array_key_exists($item->getNamespace(), $this->idToClear))
+++		{
+++			$this->idToClear[$item->getNamespace()] = array($item->getKeyParameters() => $subCache);
+++		}
+++		else if (is_array($this->idToClear[$item->getNamespace()]))
+++		{
+++			$this->idToClear[$item->getNamespace()][$item->getKeyParameters()] = $subCache;
+++		}
+++
+++		$this->dispatch = $dispatch || $this->dispatch;
+++	}
+++	
+++	protected function commitClear()
+++	{
+++		if (Framework::isDebugEnabled())
+++		{
+++			Framework::debug("SimpleCache->commitClear");
+++		}
+++		if ($this->clearAll)
+++		{
+++			if (Framework::isDebugEnabled())
+++			{
+++				Framework::debug("Clear all");
+++			}
+++			$keys = self::$redis->getKeys(self::REDIS_KEY_PREFIX.'*');
+++			if (!is_array($keys))
+++			{
+++				$keys = array();
+++			}
+++			self::$redis->delete($keys);	
+++			if ($this->dispatch)
+++			{
+++				f_event_EventManager::dispatchEvent('simpleCacheCleared', null);
+++			}
+++		}
+++		else
+++		{
+++			if (!empty($this->idToClear))
+++			{
+++				$ids = array();
+++				foreach ($this->idToClear as $id => $value)
+++				{
+++					$ids[] = $id;
+++				}
+++				self::buildInvalidCacheList($ids);
+++			}
+++			if (!empty($this->docIdToClear))
+++			{
+++				self::commitClearByDocIds($this->docIdToClear);
+++			}
+++			
+++			if ($this->dispatch)
+++			{
+++				if ($this->idToClear === null)
+++				{
+++					$this->idToClear = array();
+++				}
+++				if ($this->docIdToClear === null)
+++				{
+++					$this->docIdToClear = array();
+++				}
+++				f_event_EventManager::dispatchEvent('simpleCacheCleared', null, array_merge($this->idToClear, $this->docIdToClear));
+++			}
+++		}
+++		
+++		$this->clearAll = false;
+++		$this->idToClear = null;
+++		$this->docIdToClear = null;
+++	}
+++
+++	/**
+++	 * @param Array $docIds
+++	 */
+++	protected function commitClearByDocIds($docIds)
+++	{
+++		$keys = self::$redis->getMultiple($docIds);
+++		$keyParameters = array();
+++		foreach ($keys as $k)
+++		{
+++			$a = unserialize($k);
+++			$keyParameters[] = self::REDIS_KEY_PREFIX.$a["keyParameters"];
+++		}
+++		self::$redis->delete($keyParameters);
+++	}
+++
+++	/**
+++	 * @param Array $dirsToClear
+++	 */
+++	protected function buildInvalidCacheList($dirsToClear)
+++	{
+++		$keys = array();
+++		
+++		foreach ($dirsToClear as $id)
+++		{
+++			$keys = array_merge($keys, self::$redis->getKeys(self::REDIS_KEY_PREFIX.$id.'-*'));
+++		}
+++		self::$redis->delete($keys);
+++	}
+++	
+++	/**
+++	 * @param f_DataCacheItem $item
+++	 */
+++	protected function register($item)
+++	{
+++		if (!$this->isRegistered($item))
+++		{	
+++			$object = self::$redis->get(self::REDIS_REGISTRATION_KEY_PREFIX.$item->getNamespace());
+++			if ($object !== false)
+++			{
+++				$object = unserialize($object);
+++			}
+++			$object["pattern"] = $this->optimizeCacheSpecs($item->getPatterns());
+++			
+++			$serialized = serialize($object);
+++			self::$redis->set(self::REDIS_REGISTRATION_KEY_PREFIX.$item->getNamespace(), $serialized);
+++			
+++			$object = null;
+++			$serialized = null;
+++		}
+++	
+++		foreach ($item->getPatterns() as $spec)
+++		{
+++			if (is_numeric($spec))
+++			{
+++				$object = self::$redis->get(self::REDIS_REGISTRATION_KEY_PREFIX.$spec);
+++				if ($object !== false)
+++				{
+++					$object = unserialize($object);
+++				}
+++				$object["keyParameters"] = $item->getNamespace().'-'.$item->getKeyParameters();
+++				
+++				$serialized = serialize($object);
+++				self::$redis->set(self::REDIS_REGISTRATION_KEY_PREFIX.$spec, $serialized);
+++				
+++				$object = null;
+++				$serialized = null;
+++			}
+++		}
+++	}
+++	
+++	/**
+++	 * @param f_DataCacheItem $item
+++	 * @param unknown_type $id
+++	 * @param unknown_type $keyParameters
+++	 * @return Boolean
+++	 */
+++	protected function isRegistered($item, $id = null, $keyParameters = null)
+++	{
+++		if ($id === null && $keyParameters === null)
+++		{
+++			$object = self::$redis->get(self::REDIS_REGISTRATION_KEY_PREFIX.$item->getNamespace());
+++		
+++			return ($object !== false);
+++		}
+++		return false;
+++	}
+++	
+++	/**
+++	 * @param f_DataCacheItem $item
+++	 * @return f_DataCacheItem
+++	 */
+++	protected function getData($item)
+++	{
+++		$object = self::$redis->get(self::REDIS_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters());
+++		
+++		if ($object !== false)
+++		{
+++			$object = unserialize($object);
+++			
+++			foreach ($object as $k => $v)
+++			{
+++				if ($k == "isValid")
+++				{
+++					$item->setValidity($v);
+++					continue;
+++				}
+++				if ($k == "timestamp")
+++				{
+++					$item->setCreationTime($v);
+++					continue;
+++				}
+++				if ($k == "ttl")
+++				{
+++					$item->setTTL($v);
+++					continue;
+++				}
+++				$item->setValue($k, $v);
+++			}
+++		}
+++		return $item;
+++	}
+++}
+++?>
++\ No newline at end of file
++diff --git a/cache/DataCacheService.class.php b/cache/DataCacheService.class.php
++index f05060e..32fa1cd 100755
++--- a/cache/DataCacheService.class.php
+++++ b/cache/DataCacheService.class.php
++@@ -40,7 +40,7 @@ class f_DataCacheService extends BaseService
++ 	/**
++ 	 * @return Boolean
++ 	 */
++-	function isEnabled()
+++	public function isEnabled()
++ 	{
++ 		return !defined("DISABLE_DATACACHE") || constant("DISABLE_DATACACHE") !== true;
++ 	}
++@@ -50,15 +50,25 @@ class f_DataCacheService extends BaseService
++ 	 * @param Mixed $keyParameters
++ 	 * @param String $subCache (optional)
++ 	 * @param Array	$newPatterns
++-	 * @return f_DataCacheItem or null
+++	 * @return f_DataCacheItem or null or String
++ 	 */
++ 	public function readFromCache($namespace, $keyParameters, $newPatterns = null)
++ 	{
++ 		if ($newPatterns !== null)
++ 		{
++-			$cacheItem = $this->getNewCacheItem($namespace, $keyParameters, $newPatterns);
++-			$cacheItem->setInvalid();
++-			return $cacheItem;
+++			$returnItem = true;
+++		}
+++		else 
+++		{
+++			$returnItem = false;
+++			$newPatterns = array();
+++		}
+++		
+++		$item = $this->getData($this->getNewCacheItem($namespace, $keyParameters, $newPatterns));
+++		
+++		if ($returnItem || $this->exists($item))
+++		{
+++			return $item;
++ 		}
++ 		return null;
++ 	}
++@@ -78,7 +88,16 @@ class f_DataCacheService extends BaseService
++ 	 */
++ 	public function exists($item, $subCache = null)
++ 	{
++-		return false;
+++		$result = $item->isValid();
+++		if ($subCache !== null)
+++		{
+++			$subResult = $item->getValue($subCache) !== null;
+++		}
+++		else 
+++		{
+++			$subResult = true;
+++		}
+++		return $result && $subResult;
++ 	}
++ 	
++ 	/**
++@@ -149,7 +168,7 @@ class f_DataCacheService extends BaseService
++ 	
++ 	public function cleanExpiredCache()
++ 	{
++-		
+++		return true;
++ 	}
++ 	
++ 	/**
++@@ -163,6 +182,16 @@ class f_DataCacheService extends BaseService
++ 	}
++ 	
++ 	/**
+++	 * @param f_DataCacheItem $item
+++	 * @param String $subCache
+++	 * @param Boolean $dispatch (optional)
+++	 */
+++	public function clearSubCache($item, $subCache, $dispatch = true)
+++	{
+++		return true;
+++	}
+++	
+++	/**
++ 	 * @param Array $cacheSpecs
++ 	 * @return Array
++ 	 */
++@@ -259,25 +288,14 @@ class f_DataCacheService extends BaseService
++ 		$this->dispatch = false;
++ 	}
++ 	
++-	/*private function commitClear()
++-	{
++-		
++-	}*/
++-
++ 	/**
++-	 * @param Array $docIds
++-	 */
++-	/*private function commitClearByDocIds($docIds)
++-	{
++-		
++-	}*/
++-	
++-	/**
++-	 * @param Array $dirsToClear
+++	 * @param f_DataCacheItem $item
+++	 * @return f_DataCacheItem
++ 	 */
++-	/*private function buildInvalidCacheList($dirsToClear)
+++	protected function getData($item)
++ 	{
++-		
++-	}*/
+++		$item->setValidity(false);
+++		return $item;
+++	}
++ }
++ ?>
++\ No newline at end of file
++diff --git a/cache/SimpleCache.class.php b/cache/SimpleCache.class.php
++index 3387319..a6b2803 100755
++--- a/cache/SimpleCache.class.php
+++++ b/cache/SimpleCache.class.php
++@@ -490,4 +490,133 @@ class f_SimpleCache
++ 	{
++ 		return f_persistentdocument_PersistentProvider::getInstance();
++ 	}
+++}
+++
+++class f_SimpleCacheReplacement
+++{
+++	/**
+++	 * @var f_DataCacheItem
+++	 */
+++	private $cacheItem = null;
+++
+++	public function __construct($id, $keyParameters, $cacheSpecs)
+++	{
+++		$this->cacheItem = f_DataCacheService::getInstance()->readFromCache($id, $keyParameters, $cacheSpecs);
+++	}
+++	
+++	/**
+++	 * @param Integer $timeLimit max time to live, in seconds
+++	 */
+++	private function setTimeLimit($timeLimit)
+++	{
+++		$this->cacheItem->setTTL($timeLimit);
+++	}
+++
+++	static function isEnabled()
+++	{
+++		return f_DataCacheService::getInstance()->isEnabled();
+++	}
+++
+++	public function exists($subCache)
+++	{
+++		f_DataCacheService::getInstance()->exists($this->cacheItem, $subCache);
+++	}
+++
+++	public function setInvalid()
+++	{
+++		$this->cacheItem->setInvalid();
+++	}
+++
+++	public function readFromCache($subCache)
+++	{
+++		return $this->cacheItem->getValue($subCache);
+++	}
+++
+++	public function writeToCache($subCache, $content)
+++	{
+++		$this->cacheItem->setValue($subCache, $content);
+++		f_DataCacheService::getInstance()->writeToCache($this->cacheItem);
+++	}
+++
+++	public function getCachePath($subCache)
+++	{
+++		$this->cacheItem->getCachePath();
+++	}
+++
+++	public static function clearCacheById($id)
+++	{
+++		f_DataCacheService::getInstance()->clearCacheByNamespace($id);
+++	}
+++
+++	static function commitClearByDocIds($docIds)
+++	{
+++		foreach ($docIds as $id)
+++		{
+++			f_DataCacheService::getInstance()->clearCacheByDocId($id);
+++		}
+++	}
+++
+++	/**
+++	 * @param String $id
+++	 */
+++	public static function clear($id = null, $dispatch = true)
+++	{
+++		if ($id === null)
+++		{
+++			f_DataCacheService::getInstance()->clearAll();
+++		}
+++		else 
+++		{
+++			f_DataCacheService::getInstance()->clearCacheByNamespace($id);
+++		}
+++	}
+++
+++
+++	public final function clearSubCache($subCache, $dispatch = true)
+++	{
+++		f_DataCacheService::getInstance()->clearSubCache($this->cacheItem, $subCache, $dispatch);
+++	}
+++
+++	/**
+++	 * This is the same as BlockCache::commitClear()
+++	 * but designed for the context of <code>register_shutdown_function()</code>,
+++	 * to be sure the correct umask is used.
+++	 */
+++	public static function shutdownCommitClear()
+++	{
+++		f_DataCacheService::getInstance()->shutdownCommitClear();
+++	}
+++
+++	public static function commitClearDispatched($ids = null)
+++	{
+++		return true;
+++	}
+++
+++	/**
+++	 */
+++	public static function commitClear()
+++	{
+++		return true;
+++	}
+++
+++	public static function cleanExpiredCache()
+++	{
+++		f_DataCacheService::getInstance()->cleanExpiredCache();
+++	}
+++
+++	/**
+++	 * @param f_persistentdocument_PersistentDocumentModel $model
+++	 */
+++	public static function clearCacheByModel($model)
+++	{
+++		f_DataCacheService::getInstance()->clearCacheByModel($model);
+++	}
+++
+++	/**
+++	 * @param f_persistentdocument_PersistentDocumentModel $model
+++	 */
+++	public static function clearCacheByTag($tag)
+++	{
+++		f_DataCacheService::getInstance()->clearCacheByTag($tag);
+++	}
++ }
++\ No newline at end of file
++diff --git a/listener/SimpleCacheListener.class.php b/listener/SimpleCacheListener.class.php
++index 6988400..1d1404d 100755
++--- a/listener/SimpleCacheListener.class.php
+++++ b/listener/SimpleCacheListener.class.php
++@@ -20,7 +20,7 @@ class listener_SimpleCacheListener
++ 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentUpdated");}
++ 		$document = $params['document'];
++ 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
++-		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
+++		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
++ 	}
++ 	
++ 	/**
++@@ -60,7 +60,7 @@ class listener_SimpleCacheListener
++ 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentDeleted");}
++ 		$document = $params['document'];
++ 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
++-		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
+++		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
++ 	}
++ 
++ 	/**
++@@ -72,7 +72,7 @@ class listener_SimpleCacheListener
++ 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentPublished");}
++ 		$document = $params['document'];
++ 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
++-		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
+++		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
++ 	}
++ 
++ 	/**
++@@ -84,7 +84,7 @@ class listener_SimpleCacheListener
++ 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentDeactivated");}
++ 		$document = $params['document'];
++ 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
++-		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
+++		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
++ 	}
++ 
++ 	/**
++@@ -96,7 +96,7 @@ class listener_SimpleCacheListener
++ 		if (Framework::isDebugEnabled()) Framework::debug("[". __CLASS__ . "]: onPersistentDocumentUnPublished");
++ 		$document = $params['document'];
++ 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
++-		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
+++		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
++ 	}
++ 
++ 	/**
++@@ -108,7 +108,7 @@ class listener_SimpleCacheListener
++ 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentFiled");}
++ 		$document = $params['document'];
++ 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
++-		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
+++		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
++ 	}
++ 
++ 	/**
++@@ -120,7 +120,7 @@ class listener_SimpleCacheListener
++ 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentInTrash");}
++ 		$document = $params['document'];
++ 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
++-		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
+++		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
++ 	}
++ 
++ 	/**
++@@ -132,7 +132,7 @@ class listener_SimpleCacheListener
++ 	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onChildrenOrdered");}
++ 		$document = $params['parent'];
++ 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
++-		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
+++		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
++ 	}
++ 	
++ 	public function onPersistentTreeNodeOrdered($sender, $params)
++@@ -141,7 +141,7 @@ class listener_SimpleCacheListener
++ 		$parentNode = $params['parentNode'];
++ 		$document = DocumentHelper::getDocumentInstance($parentNode->getId());
++ 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
++-		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getIdPattern($document->getId()));
+++		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
++ 	}
++ 	
++     public function onSimpleCacheClearedNode($sender, $params)
++@@ -151,16 +151,16 @@ class listener_SimpleCacheListener
++ 		{
++ 			if (isset($params['ids']))
++ 			{
++-		    	f_DataCacheService::getInstance()->commitClearDispatched($params['ids']);
+++		    	f_DataCacheService::getInstance()->clearCacheByNamespace($params['ids']);
++ 			}
++ 			if (isset($params['docIds']))
++ 			{
++-		    	f_DataCacheService::getInstance()->commitClearByDocIds($params['docIds']);
+++		    	f_DataCacheService::getInstance()->clearCacheByDocId($params['docIds']);
++ 			}
++ 		}
++ 		else
++ 		{
++-		    f_DataCacheService::getInstance()->commitClearDispatched();
+++		    f_DataCacheService::getInstance()->clearAll();
++ 		}
++     }
++     
++-- 
++1.7.0.4
++
+diff --git a/cache/DataCacheFileService.class.php b/cache/DataCacheFileService.class.php
+index bdd4efc..3a76414 100755
+--- a/cache/DataCacheFileService.class.php
++++ b/cache/DataCacheFileService.class.php
+@@ -144,6 +144,11 @@ class f_DataCacheFileService extends f_DataCacheService
+ 		}
+ 	}
+ 	
++	public function clearCommand()
++	{
++		f_util_FileUtils::cleanDir(f_util_FileUtils::buildCachePath("simplecache"));
++	}
++	
+ 	/**
+ 	 * @param f_DataCacheItem $item
+ 	 * @param String $subCache
+diff --git a/cache/DataCacheMemcacheService.php b/cache/DataCacheMemcacheService.php
+index 183a145..ea1ee4a 100644
+--- a/cache/DataCacheMemcacheService.php
++++ b/cache/DataCacheMemcacheService.php
+@@ -75,6 +75,11 @@ class f_DataCacheMemcacheService extends f_DataCacheService
+ 		$this->dispatch = $dispatch || $this->dispatch;
+ 	}
+ 	
++	public function clearCommand()
++	{
++		self::$memcache->flush();
++	}
++	
+ 	protected function commitClear()
+ 	{
+ 		if (Framework::isDebugEnabled())
+diff --git a/cache/DataCacheMongoService.php b/cache/DataCacheMongoService.php
+index 5417d4d..baa0e29 100755
+--- a/cache/DataCacheMongoService.php
++++ b/cache/DataCacheMongoService.php
+@@ -122,6 +122,12 @@ class f_DataCacheMongoService extends f_DataCacheService
+ 		$this->dispatch = $dispatch || $this->dispatch;
+ 	}
+ 	
++	public function clearCommand()
++	{
++		self::$mongoCollection->drop();
++		self::$mongoRegistration->drop();
++	}
++	
+ 	protected function commitClear()
+ 	{
+ 		if (Framework::isDebugEnabled())
+diff --git a/cache/DataCacheRedisService.php b/cache/DataCacheRedisService.php
+index c58775c..abee48b 100644
+--- a/cache/DataCacheRedisService.php
++++ b/cache/DataCacheRedisService.php
+@@ -81,6 +81,24 @@ class f_DataCacheRedisService extends f_DataCacheService
+ 		$this->dispatch = $dispatch || $this->dispatch;
+ 	}
+ 	
++	public function clearCommand()
++	{
++		$keys = self::$redis->getKeys(self::REDIS_KEY_PREFIX.'*');
++		if (!is_array($keys))
++		{
++			$keys = array();
++		}
++		$registrationKeys = self::$redis->getKeys(self::REDIS_REGISTRATION_KEY_PREFIX.'*');
++		if (!is_array($registrationKeys))
++		{
++			$registrationKeys = array();
++		}
++		
++		$allKeys = array_merge($keys, $registrationKeys);
++		
++		self::$redis->delete($allKeys);
++	}
++	
+ 	protected function commitClear()
+ 	{
+ 		if (Framework::isDebugEnabled())
+diff --git a/cache/DataCacheService.class.php b/cache/DataCacheService.class.php
+index 32fa1cd..e42e4aa 100755
+--- a/cache/DataCacheService.class.php
++++ b/cache/DataCacheService.class.php
+@@ -191,6 +191,11 @@ class f_DataCacheService extends BaseService
+ 		return true;
+ 	}
+ 	
++	public function clearCommand()
++	{
++		return true;
++	}
++	
+ 	/**
+ 	 * @param Array $cacheSpecs
+ 	 * @return Array
+diff --git a/change-commands/ClearSimplecache.php b/change-commands/ClearSimplecache.php
+index bd1cd75..56aeda0 100755
+--- a/change-commands/ClearSimplecache.php
++++ b/change-commands/ClearSimplecache.php
+@@ -32,7 +32,8 @@ class commands_ClearSimplecache extends commands_AbstractChangeCommand
+ 		$this->message("== Clear simple cache ==");
+ 		
+ 		$this->loadFramework();
+-		f_util_FileUtils::cleanDir(f_util_FileUtils::buildCachePath("simplecache"));
++		//f_util_FileUtils::cleanDir(f_util_FileUtils::buildCachePath("simplecache"));
++		f_DataCacheService::getInstance()->clearCommand();
+ 		
+ 		$this->quitOk("Simple cache directory cleared");
+ 	}
+-- 
+1.7.0.4
+

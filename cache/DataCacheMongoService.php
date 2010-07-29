@@ -128,6 +128,20 @@ class f_DataCacheMongoService extends f_DataCacheService
 		self::$mongoRegistration->drop();
 	}
 	
+	/**
+	 * @param String $pattern
+	 */
+	public function getCacheIdsForPattern($pattern)
+	{
+		$cursor = self::$mongoRegistration->find(array("pattern" => $pattern), array("_id" => true));
+		$cacheids = array();
+		foreach ($cursor as $result)
+		{
+			$cacheids[] = $result['_id'];
+		}
+		return $cacheids;
+	}
+	
 	protected function commitClear()
 	{
 		if (Framework::isDebugEnabled())
@@ -159,7 +173,12 @@ class f_DataCacheMongoService extends f_DataCacheService
 			}
 			if (!empty($this->docIdToClear))
 			{
-				self::commitClearByDocIds($this->docIdToClear);
+				$docIds = array();
+				foreach ($this->docIdToClear as $docId => $value)
+				{
+					$docIds[] = $docId;
+				}	
+				self::commitClearByDocIds($docIds);
 			}
 			
 			if ($this->dispatch)
@@ -188,8 +207,16 @@ class f_DataCacheMongoService extends f_DataCacheService
 	{
 		try
 		{
-			$keyParameters = self::$mongoRegistration->find(array("_id" => array('$in' => $docIds)),
-				array("keyParameters" => true));
+			$keyParameters = array();
+			foreach ($docIds as $id)
+			{
+				$cursor = self::$mongoRegistration->find(array("_id" => $id));
+				foreach ($cursor as $k)
+				{
+					$keyParameters = array_merge($keyParameters, $k["keyParameters"]);
+				}
+			}
+			
 			self::$mongoCollection->update(array("_id" => array('$in' => $keyParameters)), 
 				array('$set' => array("isValid" => false)), array("multiple" => true, "safe" => true));
 		}

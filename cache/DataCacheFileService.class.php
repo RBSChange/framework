@@ -101,7 +101,6 @@ class f_DataCacheFileService extends f_DataCacheService
 	public function exists($item, $subCache = null)
 	{
 		$cachePath = $this->getCachePath($item, $subCache);
-		//$subCaches = f_util_FileUtils::getDirFiles($cachePath);
 		$result = file_exists($cachePath) && f_util_FileUtils::getDirFiles($cachePath) !== null && $this->isValid($item)
 			&& ($item->getTTL() === null || (time() - filemtime($cachePath)) < $item->getTTL()); 
 		$this->markAsBeingRegenerated($item);
@@ -147,6 +146,22 @@ class f_DataCacheFileService extends f_DataCacheService
 	public function clearCommand()
 	{
 		f_util_FileUtils::cleanDir(f_util_FileUtils::buildCachePath("simplecache"));
+	}
+	
+	/**
+	 * @param String $pattern
+	 */
+	public function clearCacheByPattern($pattern)
+	{
+		$cacheIds = $this->getPersistentProvider()->getCacheIdsByPattern($pattern);
+		foreach ($cacheIds as $cacheId)
+		{
+			if (Framework::isDebugEnabled())
+			{
+				Framework::debug("[". __CLASS__ . "]: clear $cacheId cache");
+			}
+			$this->clear($cacheId);
+		}
 	}
 	
 	/**
@@ -223,7 +238,12 @@ class f_DataCacheFileService extends f_DataCacheService
 			}
 			if (!empty($this->docIdToClear))
 			{
-				$this->commitClearByDocIds($this->docIdToClear);
+				$docIdsToClear = array();
+				foreach ($this->docIdToClear as $docId => $subKey)
+				{
+					$docIdsToClear[] = $docId;
+				}
+				$this->commitClearByDocIds($docIdsToClear);
 				if ($this->dispatch)
 				{
 					$dispatchParams["docIds"] = $this->docIdToClear;
@@ -294,7 +314,6 @@ class f_DataCacheFileService extends f_DataCacheService
 		{
 			$cachePath = f_util_FileUtils::buildCachePath('simplecache', $item->getNamespace(), $item->getKeyParameters());
 			$item->setCachePath($cachePath);
-			//f_util_FileUtils::mkdir($cachePath);
 		}
 		if ($subCache === null)
 		{
@@ -361,7 +380,6 @@ class f_DataCacheFileService extends f_DataCacheService
 				$tm->rollBack($e);
 			}
 		}
-		//$baseById = f_util_FileUtils::buildCachePath($this->registrationFolder, 'byDocId');
 		$baseById = $this->registrationFolder.DIRECTORY_SEPARATOR.'byDocId';
 		
 		foreach ($item->getPatterns() as $spec)

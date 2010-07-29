@@ -97,7 +97,13 @@ class f_DataCacheService extends BaseService
 		{
 			$subResult = true;
 		}
-		return $result && $subResult;
+		$result = $result && $subResult;
+		if (!$result && !$item->isRegenerated())
+		{
+			$item->markAsBeingRegenerated();
+			$this->writeToCache($item);
+		}
+		return $result;
 	}
 	
 	/**
@@ -105,7 +111,7 @@ class f_DataCacheService extends BaseService
 	 */
 	public function clearCacheByPattern($pattern)
 	{
-		$cacheIds = $this->getPersistentProvider()->getCacheIdsByPattern($pattern);
+		$cacheIds = $this->getCacheIdsForPattern($pattern);
 		foreach ($cacheIds as $cacheId)
 		{
 			if (Framework::isDebugEnabled())
@@ -130,7 +136,7 @@ class f_DataCacheService extends BaseService
 	public function clearCacheByDocId($id)
 	{
 		$this->registerShutdown();
-		$this->docIdToClear[] = $id;
+		$this->docIdToClear[$id] = true;
 	}
 	
 	/**
@@ -179,6 +185,11 @@ class f_DataCacheService extends BaseService
 	public function shutdownCommitClear()
 	{
 		$this->commitClear();
+	}
+	
+	protected function commitClear()
+	{
+		return true;
 	}
 	
 	/**
