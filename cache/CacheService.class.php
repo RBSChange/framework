@@ -26,6 +26,15 @@ class CacheService extends BaseService
 			$this->deleteRecursively($directory);
 		}
 	}
+
+	public function clearMediaformatCache()
+	{
+		$directory = f_util_FileUtils::buildChangeCachePath('mediaformat');
+		if (is_dir($directory))
+		{
+			$this->deleteRecursively($directory);
+		}
+	}
 	
 	public function clearCssCache()
 	{
@@ -44,12 +53,13 @@ class CacheService extends BaseService
 	
 	public function clearAllWebappCache()
 	{
-		$toClear = array('binding', 'js', 'htmlpreview', 'mediaformat');
+		$toClear = array('binding', 'js', 'htmlpreview');
 		foreach ($toClear as $directory)
 		{
 			$this->clearWebCache($directory);
 		}
 		$this->clearCssCache();
+		$this->clearMediaformatCache();
 		$this->incrementWebappCacheVersion();
 	}
 
