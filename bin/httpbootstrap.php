@@ -189,10 +189,8 @@ class c_ChangeBootStrap
 	function setCheckOnly()
 	{
 		$this->onlyCheck = true;
-		$repo = tempnam(null, "ChangeBootStrapCheckRepo");
-		unlink($repo);
-		mkdir($repo);
-		$this->setAutoloadPath($repo."/autoload");
+		$repo = $this->wd."/.change/check";
+		$this->setAutoloadPath(".change/check/autoload");
 		$this->localRepositories = array($repo => true);
 		$this->pearInfos = array("include_path" => null, "path" => null, "writeable" => true, "installed" => true);
 	}
@@ -529,6 +527,7 @@ class c_ChangeBootStrap
 
 	function appendToAutoload($componentPath, $followDeps = true)
 	{
+		$this->loadProjectHotfixes();
 		$autoloadPath = $this->getAutoloadPath();
 		$autoloadedFlag = $autoloadPath."/".md5($componentPath).".autoloaded";
 
@@ -542,7 +541,7 @@ class c_ChangeBootStrap
 			$this->autoloadRegistered = true;
 		}
 
-		if (isset($this->autoloaded[$componentPath]) || (!$this->refreshAutoload) && file_exists($autoloadedFlag))
+		if (isset($this->autoloaded[$componentPath]) || (!$this->refreshAutoload && file_exists($autoloadedFlag)))
 		{
 			$this->autoloaded[$componentPath] = true;
 			return;
@@ -738,6 +737,12 @@ class c_ChangeBootStrap
 		}
 		return $path;
 	}
+	
+	/**
+	 * @var array
+	 */
+	private $projectHotfixes = null;
+	private $projectHotfixesLoaded = false;
 
 	/**
 	 * @param array $components
@@ -765,10 +770,24 @@ class c_ChangeBootStrap
 			$frameworkVersion = $frameworkElem->textContent;
 			if ($frameworkElem->hasAttribute("hotfixes"))
 			{
-				$hotfixes = explode(",", $frameworkElem->getAttribute("hotfixes"));
+				$hotfixes = explode(",", str_replace(" ", "", $frameworkElem->getAttribute("hotfixes")));
 				if (count($hotfixes) > 0)
 				{
-					$frameworkVersion .= "-".max($hotfixes);
+					if ($this->projectHotfixes === null)
+					{
+						$this->projectHotfixes = array();
+					}
+					if (!isset($this->projectHotfixes[self::$DEP_CHANGE_LIB]))
+					{
+						$this->projectHotfixes[self::$DEP_CHANGE_LIB] = array();
+					}
+					if (!isset($this->projectHotfixes[self::$DEP_CHANGE_LIB]["framework"]))
+					{
+						$this->projectHotfixes[self::$DEP_CHANGE_LIB]["framework"] = array();
+					}
+					$hotfixNumber = max($hotfixes);
+					$this->projectHotfixes[self::$DEP_CHANGE_LIB]["framework"][$frameworkVersion] = $hotfixNumber;
+					$frameworkVersion .= "-".$hotfixNumber;
 				}
 			}
 			$components["framework"] = array(self::$DEP_CHANGE_LIB, "framework", $frameworkVersion);
@@ -785,10 +804,24 @@ class c_ChangeBootStrap
 			$moduleVersion = $matches[2];
 			if ($moduleElem->hasAttribute("hotfixes"))
 			{
-				$hotfixes = explode(",", $moduleElem->getAttribute("hotfixes"));
+				$hotfixes = explode(",", str_replace(" ", "", $moduleElem->getAttribute("hotfixes")));
 				if (count($hotfixes) > 0)
 				{
-					$moduleVersion .= "-".max($hotfixes);
+					if ($this->projectHotfixes === null)
+					{
+						$this->projectHotfixes = array();
+					}
+					if (!isset($this->projectHotfixes[self::$DEP_MODULE]))
+					{
+						$this->projectHotfixes[self::$DEP_MODULE] = array();
+					}
+					if (!isset($this->projectHotfixes[self::$DEP_MODULE][$moduleName]))
+					{
+						$this->projectHotfixes[self::$DEP_MODULE][$moduleName] = array();
+					}
+					$hotfixNumber = max($hotfixes);
+					$this->projectHotfixes[self::$DEP_MODULE][$moduleName][$moduleVersion] = $hotfixNumber;
+					$moduleVersion .= "-".$hotfixNumber;
 				}
 			}
 			$components["module/".$moduleName] = array(self::$DEP_MODULE, $moduleName, $moduleVersion);
@@ -839,11 +872,84 @@ class c_ChangeBootStrap
 				c_error($e->getMessage(), ($this->onlyCheck) ? null : 1);
 			}
 		}
+		$this->projectHotfixesLoaded = true;
+	}
+	
+	/**
+	 * @return Boolean
+	 */
+	private function hasHotfixes()
+	{
+		return $this->projectHotfixes !== null;
+	}
+
+	private function loadProjectHotfixes()
+	{
+		if ($this->projectHotfixesLoaded)
+		{
+			return;
+		}
+		
+		$this->projectHotfixes = null;
+		$desc = $this->getDescriptorPath();
+		if (file_exists($desc))
+		{
+			$doc = cboot_DOMUtils::fromPath($desc);
+			$doc->registerNamespace("c", "http://www.rbs.fr/schema/change-project/1.0");
+			$frameworkElem = $doc->findUnique("c:dependencies/c:framework[@hotfixes]");
+			if ($frameworkElem !== null)
+			{
+				$hotfixes = explode(",", str_replace(" ", "", $frameworkElem->getAttribute("hotfixes")));
+				if (count($hotfixes) > 0)
+				{
+					if (!isset($this->projectHotfixes[self::$DEP_CHANGE_LIB]))
+					{
+						$this->projectHotfixes[self::$DEP_CHANGE_LIB] = array();
+					}
+					if (!isset($this->projectHotfixes[self::$DEP_CHANGE_LIB]["framework"]))
+					{
+						$this->projectHotfixes[self::$DEP_CHANGE_LIB]["framework"] = array();
+					}
+					$hotfix = max($hotfixes);
+					$this->projectHotfixes[self::$DEP_CHANGE_LIB]["framework"][$frameworkElem->textContent] = $hotfix;
+				}
+			}
+			$modulesElem = $doc->find("c:dependencies/c:modules/c:module[@hotfixes]");
+			if ($modulesElem->length > 0)
+			{
+				if ($this->projectHotfixes === null)
+				{
+					$this->projectHotfixes = array();
+				}
+				$this->projectHotfixes[self::$DEP_MODULE] = array();
+				foreach ($modulesElem as $moduleElem)
+				{
+					$hotfixes = explode(",", str_replace(" ", "", $moduleElem->getAttribute("hotfixes")));
+					if (count($hotfixes) > 0)
+					{
+						$hotfix = max($hotfixes);
+						$matches = null;
+						if (!preg_match('/^(.*?)-([0-9].*)$/', $moduleElem->textContent, $matches))
+						{
+							throw new Exception("Invalid version number module ".$moduleElem->textContent);
+						}
+						$moduleName = $matches[1];
+						$moduleVersion = $matches[2];
+						if (!isset($this->projectHotfixes[self::$DEP_MODULE][$moduleName]))
+						{
+							$this->projectHotfixes[self::$DEP_MODULE][$moduleName] = array();
+						}
+						$this->projectHotfixes[self::$DEP_MODULE][$moduleName][$moduleVersion] = $hotfix;
+					}
+				}
+			}
+		}
+		$this->projectHotfixesLoaded = true;
 	}
 
 	private function getComputedDepencies($componentPath)
 	{
-		if (!file_exists($componentPath."/.computedDeps.ser"))
+		if (!file_exists($componentPath."/.computedDeps.ser") || $this->hasHotfixes())
 		{
 			// probably a dev repository => we do not store the file as the result can evolve
 			list(, $computedDeps) = $this->getDependencies($componentPath);
@@ -1137,8 +1243,11 @@ class c_ChangeBootStrap
 								}
 							}
 						}
-						return $localRepoPath."/".$relativePath."-".$maxhotFix;
-					}	
+						if ($maxhotFix != 0)
+						{
+							return $localRepoPath."/".$relativePath."-".$maxhotFix;
+						}
+					}
 				}
 			}
 		}
@@ -1373,6 +1482,10 @@ class c_ChangeBootStrap
 		ob_get_clean();
 		return $hotfixes;
 	}
+	
+	function getHotfixesForDescriptor($descriptorPath)
+	{
+	}
 
 	function getRemoteModules($releaseName = null)
 	{
@@ -1461,7 +1574,7 @@ class c_ChangeBootStrap
 	*/
 	function getDependencies($dir)
 	{
-		if (is_file($dir."/.computedDeps.ser") && is_file($dir."/.declaredDeps.ser"))
+		if (!$this->hasHotfixes() && is_file($dir."/.computedDeps.ser") && is_file($dir."/.declaredDeps.ser"))
 		{
 			$declaredDeps = @unserialize(@file_get_contents($dir."/.declaredDeps.ser"));
 			$computedDeps = @unserialize(@file_get_contents($dir."/.computedDeps.ser"));
@@ -1574,9 +1687,14 @@ class c_ChangeBootStrap
 
 			$versions = array();
 
-			foreach ($xpath->query("cc:versions/cc:version", $dep) as $version)
+			foreach ($xpath->query("cc:versions/cc:version", $dep) as $versionElem)
 			{
-				$versions[] = $version->textContent;
+				$version = $versionElem->textContent;
+				if ($this->projectHotfixes !== null && isset($this->projectHotfixes[$depTypeKey][$depName][$version]))
+				{
+					$version .= "-".$this->projectHotfixes[$depTypeKey][$depName][$version];
+				}
+				$versions[] = $version;
 			}
 
 			$declaredDeps[$depTypeKey][$depName] = $versions;
@@ -3051,6 +3169,222 @@ class cboot_StringUtils
 	}
 }
 /** End lib/StringUtils.php **/ ?>
+<?php /** Begin lib/DomUtils.php **/ ?>
+<?php
+class cboot_DOMUtils
+{
+	/**
+	 * @deprecated use fromPath
+	 * @param String $path
+	 * @return cboot_DOMDocument
+	 */
+	static function getDocument($path)
+	{
+		return self::fromPath($path);
+	}
+
+	/**
+	 * @param String $path
+	 * @return cboot_DOMDocument
+	 */
+	static function fromPath($path)
+	{
+		$doc = self::newDocument();
+		if (!$doc->load($path))
+		{
+			throw new Exception("Could not load $path as an XML file");
+		}
+		// we never know ... :-|
+		$doc->formatOutput = true;
+		return $doc;
+	}
+
+	/**
+	 * @return cboot_DOMDocument
+	 */
+	static function fromString($xmlString)
+	{
+		$doc = self::newDocument();
+		if ($doc->loadXML($xmlString) === false)
+		{
+			throw new Exception("Could not load '$xmlString' as XML");
+		}
+		// we never know ... :-|
+		$doc->formatOutput = true;
+		return $doc;
+	}
+	
+	/**
+	 * @return cboot_DOMDocument
+	 */
+	static function newDocument()
+	{
+		$doc = new cboot_DOMDocument();
+		$doc->formatOutput = true;
+		$doc->preserveWhiteSpace = false;
+		return $doc;
+	}
+
+	/**
+	 * @param DOMDocument $document
+	 * @param String $path
+	 */
+	static function save($document, $path)
+	{
+		if (!file_put_contents($path, $document->saveXML()))
+		{
+			throw new Exception("Could not write document to $path");
+		}
+	}
+}
+
+class cboot_DOMDocument extends DOMDocument
+{
+	/**
+	 * @var DOMXPath
+	 */
+	private $xpath;
+
+	/**
+	 * @return DOMXPath
+	 */
+	private function getXPath()
+	{
+		if ($this->xpath === null)
+		{
+			$this->xpath = new DOMXPath($this);
+		}
+		return $this->xpath;
+	}
+
+	/**
+	 * @param String $prefix
+	 * @param String $namespaceURI
+	 * @return cboot_DOMDocument
+	 */
+	function registerNamespace($prefix, $namespaceURI)
+	{
+		if ($this->getXPath()->registerNamespace($prefix, $namespaceURI) === false)
+		{
+			throw new Exception(__METHOD__.": could not register name space $prefix/$namespaceURI");
+		}
+		return $this;
+	}
+
+	/**
+	 * @param String $xPathExpression
+	 * @param DOMNode $context
+	 * @return Boolean
+	 */
+	function exists($xPathExpression, $context = null)
+	{
+		if ($context === null)
+		{
+			$nodes = $this->getXPath()->query($xPathExpression);
+		}
+		else
+		{
+			$nodes = $this->getXPath()->query($xPathExpression, $context);			
+		}
+		return $nodes->length > 0;
+	}
+	
+	/**
+	 * @param String $xPathExpression
+	 * @param DOMNode $context
+	 * @return DOMElement
+	 */
+	function createIfNotExists($xPathExpression, $context = null)
+	{
+		$element = $this->findUnique($xPathExpression, $context);
+		if ($element !== null)
+		{
+			return $element;
+		}
+		$xPathInfo = explode("/", $xPathExpression);
+		$xPathContext = $context;
+		foreach ($xPathInfo as $xPathPart)
+		{
+			$subElement = $this->findUnique($xPathPart, $xPathContext);
+			if ($subElement === null)
+			{
+				$subElement = $this->createElement(reset(explode('[', $xPathPart)));
+				if ($xPathContext !== null)
+				{
+					$xPathContext->appendChild($subElement);
+				}
+				else
+				{
+					$this->appendChild($subElement);
+				}	
+			}
+			$xPathContext = $subElement;
+		}
+		return $subElement;
+	}
+
+	/**
+	 * @param String $xPathExpression
+	 * @param DOMNode $context
+	 * @return DOMNode
+	 */
+	function findUnique($xPathExpression, $context = null)
+	{
+		if ($context === null)
+		{
+			$nodes = $this->getXPath()->query($xPathExpression);
+		}
+		else
+		{
+			$nodes = $this->getXPath()->query($xPathExpression, $context);
+		}
+		if ($nodes->length == 0)
+		{
+			return null;
+		}
+		// TODO/FIXME: throw if length > 1 ?
+		return $nodes->item(0);
+	}
+
+	/**
+	 * @param String $xPathExpression
+	 * @param DOMNode $context
+	 * @return DOMNodeList
+	 */
+	function find($xPathExpression, $context = null)
+	{
+		if ($context === null)
+		{
+			return $this->getXPath()->query($xPathExpression);
+		}
+		return $this->getXPath()->query($xPathExpression, $context);
+	}
+
+	/**
+	 * @param String $xPathExpression
+	 * @param DOMNode $context
+	 * @return Integer the number of deleted nodes
+	 */
+	function findAndRemove($xPathExpression, $context = null)
+	{
+		$nodes = $this->find($xPathExpression, $context);
+		$length = $nodes->length;
+		foreach ($nodes as $node)
+		{
+			$node->parentNode->removeChild($node);
+		}
+		return $length;
+	}
+
+	/**
+	 * Release internal resources
+	 */
+	function release()
+	{
+		$this->xpath = null;
+	}
+}
+/** End lib/DomUtils.php **/ ?>
 <?php /** Begin lib/PclZip.php **/ ?>
 <?php
 if (!defined("PCLZIP_TEMPORARY_DIR"))
