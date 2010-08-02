@@ -78,7 +78,7 @@ class f_DataCacheService extends BaseService
 	 */
 	public function writeToCache($item)
 	{
-		
+		$item->setValidity(false);
 	}
 	
 	/**
@@ -98,11 +98,11 @@ class f_DataCacheService extends BaseService
 			$subResult = true;
 		}
 		$result = $result && $subResult;
-		if (!$result && !$item->isRegenerated())
+		/*if (!$result && !$item->isRegenerated())
 		{
 			$item->markAsBeingRegenerated();
 			$this->writeToCache($item);
-		}
+		}*/
 		return $result;
 	}
 	

@@ -12,6 +12,7 @@ class f_DataCacheItemImpl implements f_DataCacheItem
 	private $registrationPath = null;
 	private $cachePath = null;
 	private $regenerated = false;
+	private $isNew = false;
 	private $data;
 		
 	/**
@@ -29,6 +30,11 @@ class f_DataCacheItemImpl implements f_DataCacheItem
 		foreach ($patterns as $pattern)
 		{
 			if (f_util_StringUtils::beginsWith($pattern, "ttl/"))
+			{
+				$this->setTTL(intval(substr($pattern, 4)));
+				continue;	
+			}
+			if (f_util_StringUtils::beginsWith($pattern, "time:"))
 			{
 				$this->setTTL(intval(substr($pattern, 5)));	
 			}
@@ -115,11 +121,14 @@ class f_DataCacheItemImpl implements f_DataCacheItem
 	 */
 	public function setTTL($seconds)
 	{
-		if ($seconds <= self::MAX_TIME_LIMIT)
+		if ($seconds < self::MAX_TIME_LIMIT && $seconds > 0)
 		{
 			$this->timeLimit = $seconds;
 		}
-		$this->timeLimit = self::MAX_TIME_LIMIT;
+		else 
+		{
+			$this->timeLimit = self::MAX_TIME_LIMIT;
+		}
 	}
 	
 	/**
@@ -197,6 +206,16 @@ class f_DataCacheItemImpl implements f_DataCacheItem
 	public function markAsBeingRegenerated()
 	{
 		$this->regenerated = true;
+	}
+	
+	public function markAsNew()
+	{
+		$this->isNew = true;
+	}
+	
+	public function isNew()
+	{
+		return $this->isNew;
 	}
 }
 ?>

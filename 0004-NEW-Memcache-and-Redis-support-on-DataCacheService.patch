@@ -1,7 +1,7 @@
 From 04ecfadfa5409ae9e2d93874278a8bc20cb541f9 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?K=C3=A9vin=20O'NEILL?= <kevin.oneill@rbs.fr>
 Date: Tue, 27 Jul 2010 16:52:21 +0200
-Subject: [PATCH 4/5] [NEW] Memcache and Redis support on DataCacheService
+Subject: [PATCH 4/6] [NEW] Memcache and Redis support on DataCacheService
 
 ---
  cache/CacheService.class.php           |    3 +-

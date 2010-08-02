@@ -1,7 +1,7 @@
 From 2f6b7eb2a3dc94de9667ac216b3ac60ab85f7e50 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?K=C3=A9vin=20O'NEILL?= <kevin.oneill@rbs.fr>
 Date: Mon, 26 Jul 2010 16:57:00 +0200
-Subject: [PATCH 3/5] implementation DataCacheMongoService
+Subject: [PATCH 3/6] implementation DataCacheMongoService
 
 ---
  cache/DataCacheFileService.class.php |    2 +-

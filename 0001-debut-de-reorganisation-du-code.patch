@@ -1,7 +1,7 @@
 From d9ed16018a4517ea2db1983e77d4d10c3f35932b Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?K=C3=A9vin=20O'NEILL?= <kevin.oneill@rbs.fr>
 Date: Thu, 22 Jul 2010 15:29:51 +0200
-Subject: [PATCH 1/5] debut de reorganisation du code
+Subject: [PATCH 1/6] debut de reorganisation du code
 
 ---
  Framework.php                                      |    2 +-

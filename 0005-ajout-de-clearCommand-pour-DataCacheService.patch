@@ -1,7 +1,7 @@
 From a6f1cc7e5b031fff597ab4b6325e4d071f8b4d67 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?K=C3=A9vin=20O'NEILL?= <kevin.oneill@rbs.fr>
 Date: Wed, 28 Jul 2010 09:52:47 +0200
-Subject: [PATCH 5/5] ajout de clearCommand pour DataCacheService
+Subject: [PATCH 5/6] ajout de clearCommand pour DataCacheService
 
 ---
  0001-debut-de-reorganisation-du-code.patch         | 2447 ++++++++++++++++++++

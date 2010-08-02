@@ -72,12 +72,14 @@ class f_DataCacheFileService extends f_DataCacheService
 		f_util_FileUtils::mkdir($this->getCachePath($item));
 		$this->register($item);
 		$data = $item->getValues();
+		$this->markAsBeingRegenerated($item);
 		try
 		{
 			foreach ($data as $k => $v)
 			{
 				if ($v !== null)
 				{
+					f_util_FileUtils::unlink($this->getCachePath($item, $k));
 					f_util_FileUtils::write($this->getCachePath($item, $k), $v, f_util_FileUtils::OVERRIDE);
 				}
 			}
