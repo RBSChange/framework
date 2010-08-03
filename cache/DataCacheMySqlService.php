@@ -264,7 +264,7 @@ class f_DataCacheMySqlService extends f_DataCacheService
 	 */
 	protected function getData($item)
 	{
-		$query = 'SELECT * FROM `f_data_cache` WHERE `cache_key` = :id';
+		$query = 'SELECT `is_valid`, `creation_time`, `ttl`, `text_value` FROM `f_data_cache` WHERE `cache_key` = :id';
 		$stmt = self::$pdo->prepare($query);
 		$stmt->bindValue(':id', $item->getNamespace().'-'.$item->getKeyParameters(), PDO::PARAM_STR);
 		$stmt->execute();

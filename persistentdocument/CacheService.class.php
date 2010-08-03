@@ -216,6 +216,7 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 		else if ($object === null)
 		{
 			$this->deleteTransactionKeys[$key] = true;
+			return true;
 		}
 	}
 
@@ -263,28 +264,15 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 		if (is_null($this->memcache))
 		{
 			$this->memcache = new Memcache();
+			$config = Framework::getConfiguration("memcache");
 			if ($this->host === null)
 			{
-				if (defined("MemcachedCacheService_HOST"))
-				{
-					$this->host = constant("MemcachedCacheService_HOST");
-				}
-				else
-				{
-					$this->host = "localhost";
-				}
+				$this->host = $config["serverDataCacheService"]["host"];
 			}
 
 			if ($this->port === null)
 			{
-				if (defined("MemcachedCacheService_PORT"))
-				{
-					$this->port = constant("MemcachedCacheService_PORT");
-				}
-				else
-				{
-					$this->port = "11211";
-				}
+				$this->port = $config["serverDataCacheService"]["port"];
 			}
 
 			if ($this->memcache->connect($this->host, $this->port) === false)
@@ -350,6 +338,514 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 }
 
 class f_persistentdocument_NoopMemcache
+{
+	function delete() { }
+
+	function flush() { }
+
+	function close() { }
+
+	function get() { return false; }
+
+	function set() { }
+
+	function replace() { }
+}
+
+class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheService
+{
+	private static $mongoDB = null;
+	private static $mongoCollection = null;
+	private $inTransaction = false;
+	private $deleteTransactionKeys = array();
+	private $updateTransactionKeys = array();
+
+	protected function __construct()
+	{
+		// empty
+	}
+
+	function __destruct()
+	{
+		$this->closeMongo();
+	}
+
+	/**
+	 * @return f_persistentdocument_CacheService
+	 */
+	public static function getInstance()
+	{
+		return new f_persistentdocument_MongoCacheService();
+	}
+
+	/**
+	 * @param integer $key
+	 * @return mixed or null if not exists or on error
+	 */
+	public function get($key)
+	{
+		$begin = microtime(true);
+		
+		try
+		{
+		    $object = $this->getMongo()->findOne(array("_id" => $key));
+		}
+		catch (MongoConnectionException $e)
+		{
+				Framework::exception($e);
+				return false;
+		}
+		
+		if (Framework::isDebugEnabled())
+		{
+			$end = microtime(true);
+			Framework::debug("CacheService : time to get $key : ".($end-$begin)." ms");
+		}
+		return ($object === null) ? null : unserialize($object["object"]);
+	}
+
+	/**
+	 * @param array $key
+	 * @return array<mixed> or false on error
+	 */
+	public function getMultiple($keys)
+	{
+		$cursor = $this->getMongo()->find(array("_id" => array('$in' => $keys)));
+		$returnArray = array();
+		
+		foreach ($cursor as $doc)
+		{
+			$returnArray[$doc["_id"]] = unserialize($doc["object"]);
+		}
+		return $returnArray;
+	}
+
+	/**
+	 * @param integer $key
+	 * @param mixed $object if object if null, perform a delete
+	 * @return boolean
+	 */
+	public function set($key, $object)
+	{
+		if (!$this->inTransaction)
+		{
+			try
+			{
+				if ($object === null)
+				{
+					$result = $this->getMongo()->remove(array("_id" => $key), array("safe" => true));
+				}
+				else 
+				{
+					$serialized = serialize($object);
+					$result = $this->getMongo()->save(array("_id" => $key, "object" => $serialized), array("safe" => true));
+				}
+				return $result["ok"];
+			}
+			catch (MongoCursorException $e)
+			{
+				Framework::exception($e);
+				return false;
+			}
+		}
+		else if ($object === null)
+		{
+			$this->deleteTransactionKeys[$key] = true;
+			return true;
+		}
+		else
+		{
+			$this->updateTransactionKeys[$key] = $object;
+			return true;	
+		}
+	}
+
+	/**
+	 * @param integer $key
+	 * @param mixed $object
+	 * @return boolean
+	 */
+	public function update($key, $object)
+	{
+		if (!$this->inTransaction)
+		{
+			try
+			{
+				$serialized = serialize($object);
+				$result = $this->getMongo()->save(array("_id" => $key, "object" => $serialized), array("safe" => true));
+				return $result["ok"];
+			}
+			catch (MongoCursorException $e)
+			{
+				Framework::exception($e);
+				return false;
+			}
+		}
+		$this->updateTransactionKeys[$key] = $object;
+		return true;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function clear($pattern = null)
+	{
+		return true;
+	}
+
+	// private methods
+
+	/**
+	 * @return MongoCollection
+	 */
+	private function getMongo()
+	{
+		if (self::$mongoDB === null)
+		{
+			$connectionString = null;
+			$config = Framework::getConfiguration("mongoDB");
+			
+			if (isset($config["authentication"]["username"]) && isset($config["authentication"]["password"]) && 
+				$config["authentication"]["username"] !== '' && $config["authentication"]["password"] !== '')
+			{
+				$connectionString .= $config["authentication"]["username"].':'.$config["authentication"]["password"].'@';
+			}
+			
+			$connectionString .= implode(",", $config["serversCacheService"]);
+			
+			if ($connectionString != null)
+			{
+				$connectionString = "mongodb://".$connectionString;
+			}
+			
+			try
+			{
+				self::$mongoDB = new Mongo($connectionString, array("persistent" => "mongo"));
+				self::$mongoCollection = self::$mongoDB->$config["database"]["name"]->documentCache;
+			}
+			catch (MongoConnnectionException $e)
+			{
+				Framework::exception($e);
+				self::$mongoCollection = new f_persistentdocument_NoopMongo();
+			}
+		}
+		return self::$mongoCollection;
+	}
+
+	private function closeMongo()
+	{
+		if (self::$mongoDB !== null)
+		{
+			self::$mongoDB->close();
+			self::$mongoDB = null;
+			self::$mongoCollection = null;
+		}
+	}
+
+	public function beginTransaction()
+	{
+		$this->inTransaction = true;
+		$this->deleteTransactionKeys = array();
+		$this->updateTransactionKeys = array();
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function commit()
+	{
+		if ($this->inTransaction)
+		{
+			$mongo = $this->getMongo();
+			if (count($this->deleteTransactionKeys) > 0)
+			{
+				try
+				{
+					foreach (array_keys($this->deleteTransactionKeys) as $key)
+					{
+						$result = $mongo->remove(array("_id" => $key), array("safe" => true));
+						
+						if (!$result["ok"])
+						{
+							return false;
+						}
+					}
+				}
+				catch (MongoCursorException $e)
+				{
+					Framework::exception($e);
+					return false;
+				}
+			}
+			
+			try
+			{
+				foreach ($this->updateTransactionKeys as $key => $object)
+				{
+					$serialized = serialize($object);
+					$result = $mongo->save(array("_id" => $key, "object" => $serialized), array("safe" => true));
+					
+					if (!$result["ok"])
+					{
+						return false;
+					}
+				}
+			}
+			catch (MongoCursorException $e)
+			{
+				Framework::exception($e);
+				return false;
+			}
+			
+			$this->rollBack();
+			
+			return true;
+		}
+		return false;
+	}
+
+	public function rollBack()
+	{
+		$this->deleteTransactionKeys = null;
+		$this->updateTransactionKeys = null;
+		$this->inTransaction = false;
+	}
+}
+
+class f_persistentdocument_NoopMongo
+{
+	function delete() { }
+
+	function flush() { }
+
+	function close() { }
+
+	function get() { return false; }
+
+	function set() { }
+
+	function replace() { }
+}
+
+class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheService
+{
+	const REDIS_KEY_PREFIX = 'redisCacheService-';
+	private static $redis = null;
+	private $inTransaction = false;
+	private $deleteTransactionKeys = array();
+	private $updateTransactionKeys = array();
+
+	protected function __construct()
+	{
+		// empty
+	}
+
+	function __destruct()
+	{
+		$this->closeRedis();
+	}
+
+	/**
+	 * @return f_persistentdocument_CacheService
+	 */
+	public static function getInstance()
+	{
+		return new f_persistentdocument_RedisCacheService();
+	}
+
+	/**
+	 * @param integer $key
+	 * @return mixed or null if not exists or on error
+	 */
+	public function get($key)
+	{
+		$begin = microtime(true);
+		
+		$object = $this->getRedis()->get(self::REDIS_KEY_PREFIX.$key);
+		
+		if (Framework::isDebugEnabled())
+		{
+			$end = microtime(true);
+			Framework::debug("CacheService : time to get $key : ".($end-$begin)." ms");
+		}
+		return ($object === false) ? null : unserialize($object);
+	}
+
+	/**
+	 * @param array $key
+	 * @return array<mixed> or false on error
+	 */
+	public function getMultiple($keys)
+	{
+		$prefixedKeys = array();
+		
+		foreach ($keys as $key)
+		{
+			$prefixedKeys[] = self::REDIS_KEY_PREFIX.$key;
+		}
+		$cursor = $this->getRedis()->getMultiple($prefixedKeys);
+		$returnArray = array();
+		
+		foreach ($cursor as $doc)
+		{
+			$returnArray[] = ($doc === false) ? null : unserialize($doc);
+		}
+		return $returnArray;
+	}
+
+	/**
+	 * @param integer $key
+	 * @param mixed $object if object if null, perform a delete
+	 * @return boolean
+	 */
+	public function set($key, $object)
+	{
+		if (!$this->inTransaction)
+		{
+			if ($object === null)
+			{
+				$result = $this->getRedis()->delete(self::REDIS_KEY_PREFIX.$key);
+			}
+			else 
+			{
+				$serialized = serialize($object);
+				$result = $this->getRedis()->set(self::REDIS_KEY_PREFIX.$key, $serialized);
+			}
+			return ($result == true) ? true : false;
+		}
+		else if ($object === null)
+		{
+			$this->deleteTransactionKeys[self::REDIS_KEY_PREFIX.$key] = true;
+			return true;
+		}
+		else
+		{
+			$this->updateTransactionKeys[self::REDIS_KEY_PREFIX.$key] = $object;
+			return true;	
+		}
+	}
+
+	/**
+	 * @param integer $key
+	 * @param mixed $object
+	 * @return boolean
+	 */
+	public function update($key, $object)
+	{
+		if (!$this->inTransaction)
+		{
+			$serialized = serialize($object);
+			$result = $this->getRedis()->set(self::REDIS_KEY_PREFIX.$key, $serialized);
+			return $result;
+		}
+		$this->updateTransactionKeys[self::REDIS_KEY_PREFIX.$key] = $object;
+		return true;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function clear($pattern = null)
+	{
+		return true;
+	}
+
+	// private methods
+
+	/**
+	 * @return MongoCollection
+	 */
+	private function getRedis()
+	{
+		if (self::$redis === null)
+		{
+			self::$redis = new Redis();
+			
+			$config = Framework::getConfiguration("redis");
+			
+			$con = self::$redis->connect($config["serverDataCacheService"]["host"], $config["serverDataCacheService"]["port"]);
+			
+			if (isset($config["authentication"]["password"]) && $config["authentication"]["password"] !== '')
+			{
+				self::$redis->auth($config["authentication"]["password"]);
+			}
+			
+			$select = self::$redis->select($config["serverDataCacheService"]["database"]);
+			
+			if (!$con && !$select)
+			{
+				self::$redis = new f_persistentdocument_NoopRedis();
+			}
+		}
+		return self::$redis;
+	}
+
+	private function closeRedis()
+	{
+		if (self::$redis !== null)
+		{
+			self::$redis->close();
+			self::$redis = null;
+		}
+	}
+
+	public function beginTransaction()
+	{
+		$this->inTransaction = true;
+		$this->deleteTransactionKeys = array();
+		$this->updateTransactionKeys = array();
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function commit()
+	{
+		if ($this->inTransaction)
+		{
+			if (count($this->deleteTransactionKeys) > 0)
+			{
+				foreach (array_keys($this->deleteTransactionKeys) as $key)
+				{
+					if ($this->getRedis()->exists($key))
+					{
+						$result = $this->getRedis()->delete($key);
+						
+						if ($result != count($this->deleteTransactionKeys))
+						{
+							return false;
+						}
+					}
+				}
+			}
+			
+			foreach ($this->updateTransactionKeys as $key => $object)
+			{
+				$serialized = serialize($object);
+				$result = $this->getRedis()->set(self::REDIS_KEY_PREFIX.$key, $serialized);
+					
+				if (!$result)
+				{
+					return false;
+				}
+			}
+			
+			$this->rollBack();
+			
+			return true;
+		}
+		return false;
+	}
+
+	public function rollBack()
+	{
+		$this->deleteTransactionKeys = null;
+		$this->updateTransactionKeys = null;
+		$this->inTransaction = false;
+	}
+}
+
+class f_persistentdocument_NoopRedis
 {
 	function delete() { }
 
@@ -468,7 +964,7 @@ class f_persistentdocument_DatabaseCacheService extends f_persistentdocument_Cac
 			return false;
 		}
 	}
-
+	
 	/**
 	 * @return boolean
 	 */
