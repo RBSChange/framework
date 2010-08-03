@@ -28,7 +28,13 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 		if ($this->persistentDocument === null)
 		{
 			$document = null;
-			if (isset($this->attributes['byTag']))
+			if (isset($this->attributes['byDocumentId']))
+			{
+				$document = DocumentHelper::getDocumentInstance($this->attributes['byDocumentId']);
+				$model = $document->getPersistentModel();
+				unset($this->attributes['byDocumentId']);
+			}
+			else if (isset($this->attributes['byTag']))
 			{
 				$tag = $this->attributes['byTag'];
 				$model = $this->getDocumentModel();
