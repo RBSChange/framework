@@ -271,6 +271,7 @@ class HTTPClient
 			Framework::error(__METHOD__ . ': curl_errno : ' . $errno);
 		}
 		$this->httpReturnCode = curl_getinfo($this->curlResource, CURLINFO_HTTP_CODE);
+		$this->close();
 		return $data;
 	}
 

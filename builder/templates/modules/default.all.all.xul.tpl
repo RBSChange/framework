@@ -15,8 +15,4 @@
 		</vbox>
 		<tal:block change:documenteditors="module <{$name}>" />				
 	</deck>
-	<splitter collapse="after">
-		<wsplitterbutton />
-	</splitter>
-	<cressourcesselector width="210" id="ressourcesSelector" collapsed="true" />
 </hbox>

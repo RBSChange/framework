@@ -172,7 +172,7 @@ class builder_BackofficeActionUpdater
 			$actionElem->setAttribute("single", "true");
 			$actionElem->setAttribute("permission", "Insert_".$this->model->getDocumentName());
 			// TODO: icon parameter ?
-			$actionElem->setAttribute("icon", "document_add");
+			$actionElem->setAttribute("icon", "add");
 			$actionElem->setAttribute("label", "&modules.".$this->model->getModuleName().".bo.actions.Create-".$this->model->getDocumentName().";");
 
 			$actionsElem->appendChild($actionElem);

@@ -1,15 +1,11 @@
 <?php
 /**
+ * Note: sub classes must implement static function getInstance() wich usually 
+ * returns the singleton instance of the service
  * @package framework.service
  */
 abstract class BaseService
 {
-	
-	/**
-	 * Returns an instance of the Service.
-	 */
-	abstract public static function getInstance();
-	
 	protected function __construct()
 	{
 	}
