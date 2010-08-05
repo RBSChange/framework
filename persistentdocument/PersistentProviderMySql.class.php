@@ -2202,7 +2202,11 @@ class f_persistentdocument_DocumentQueryBuilder
 			foreach ($propInfo as $propName)
 			{
 				$prop = $model->getProperty($propName);
-				if (!$prop->isDocument())
+				if ($prop === null)
+				{
+					$prop = $model->getInverseProperty($propName);
+				}
+				if ($prop === null || !$prop->isDocument())
 				{
 					throw new Exception("$propName is not a document property");
 				}
