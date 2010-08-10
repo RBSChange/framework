@@ -61,7 +61,7 @@ Where options in:
 			
 			if ($old["defines"]["AG_LOGGING_LEVEL"] != $current["defines"]["AG_LOGGING_LEVEL"])
 			{
-				$this->message("AG_LOGGING_LEVEL changed");
+				$this->message("AG_LOGGING_LEVEL is now ".$current["defines"]["AG_LOGGING_LEVEL"]);
 				if (isset($options["no-auto-changes"]))
 				{
 					$this->warnMessage("You must run manually compile-js-dependencies");
@@ -96,6 +96,30 @@ Where options in:
 					$this->getParent()->executeCommand("compile-documents");	
 				}
 				
+			}
+			if ($old["defines"]["AG_DEVELOPMENT_MODE"] != $current["defines"]["AG_DEVELOPMENT_MODE"])
+			{
+				$this->message("AG_DEVELOPMENT_MODE is now ".$current["defines"]["AG_DEVELOPMENT_MODE"]);
+				
+				if (isset($options["no-auto-changes"]))
+				{
+					$this->warnMessage("You must run manually manage AOP state");
+				}
+				else
+				{
+					$this->loadFramework();
+					
+					if ($current["defines"]["AG_DEVELOPMENT_MODE"] == "true")
+					{
+						ClassResolver::getInstance()->restoreAutoloadFromAOPBackup();
+						$this->okMessage("Autoload restored from aop-backup");
+					}
+					else
+					{
+						ClassResolver::getInstance()->compileAOP();
+						$this->okMessage("AOP compiled");
+					}
+				}	
 			}
 		}
 		
