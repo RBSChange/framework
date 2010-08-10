@@ -68,7 +68,7 @@ class commands_ClearCache extends commands_AbstractChangeCommand
 		foreach ($listOfFiles as $file)
 		{
 			$absFile = $directory . DIRECTORY_SEPARATOR . $file;
-			if ( is_dir($absFile) )
+			if ( is_dir($absFile) && !is_link($absFile) )
 			{
 				if ( $file !== '.' && $file !== '..')
 				{

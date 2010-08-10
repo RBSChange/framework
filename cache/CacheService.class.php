@@ -17,7 +17,16 @@ class CacheService extends BaseService
 		}
 		return self::$instance;
 	}
-
+	
+	public function clearFrontofficeScriptsCache()
+	{
+		$directory = f_util_FileUtils::buildChangeCachePath('frontofficeScripts');
+		if (is_dir($directory))
+		{
+			$this->deleteRecursively($directory);
+		}
+	}
+	
 	public function clearTemplateCache()
 	{
 		$directory = f_util_FileUtils::buildChangeCachePath('template');
@@ -60,6 +69,7 @@ class CacheService extends BaseService
 		}
 		$this->clearCssCache();
 		$this->clearMediaformatCache();
+		$this->clearFrontofficeScriptsCache();
 		$this->incrementWebappCacheVersion();
 	}
 

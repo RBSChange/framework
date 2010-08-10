@@ -1441,7 +1441,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 						}
 						else
 						{
-							$columnName = $qBuilder->getQualifiedColumnName($property->getDbMapping());
+							$columnName = $qBuilder->getQualifiedColumnName($projection->getPropertyName());
 							$qBuilder->addFrom('inner join '.$documentTableName.' '.$documentalias.' on '.$documentalias.'.document_id = '.$columnName);
 						}
 							
