@@ -48,8 +48,7 @@ class ClassLoader implements ResourceLoader
 	 */
 	public function load($className)
 	{
-		$path = $this->resolver->getPath($className);
-		require_once($path);
+		require_once($this->resolver->getPath($className));
 		return true;
 	}
 
@@ -61,7 +60,8 @@ class ClassLoader implements ResourceLoader
 	{
 		try
 		{
-			return $this->load($className);
+			require_once($this->resolver->getPath($className));
+			return true;
 		}
 		catch (Exception $e)
 		{
@@ -95,7 +95,7 @@ class ClassLoader implements ResourceLoader
 	public function exists($className)
 	{
 		$path = $this->resolver->getPathOrNull($className);
-		if ($path !== null && file_exists(realpath($path)))
+		if ($path !== null && realpath($path) !== false)
 		{
 			require_once($path);
 			return true;
@@ -110,7 +110,7 @@ class ClassLoader implements ResourceLoader
 	public function existsNoLoad($className)
 	{
 		$path = $this->resolver->getPathOrNull($className);
-		if ($path !== null && file_exists(realpath($path)))
+		if ($path !== null && realpath($path) !== false)
 		{
 			return true;
 		}
