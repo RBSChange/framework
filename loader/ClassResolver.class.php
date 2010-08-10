@@ -59,6 +59,7 @@ class ClassResolver implements ResourceResolver
 	{
 		if ($this->aop === null)
 		{
+			require_once(FRAMEWORK_HOME . '/aop/AOP.php');
 			$this->aop = new f_AOP();
 		}
 		return $this->aop;
@@ -210,6 +211,7 @@ class ClassResolver implements ResourceResolver
 		{
 			throw new Exception(__METHOD__." is not for development mode");
 		}
+		
 		$this->restoreAutoload();
 		$aop = $this->getAOP();
 		$this->loadInjection();
@@ -608,6 +610,7 @@ class ClassResolverDevMode extends ClassResolver
 	{
 		if ($this->aop === null)
 		{
+			require_once(FRAMEWORK_HOME . '/aop/AOP.php');
 			$this->aop = new f_AOP();
 			$this->loadInjection();
 		}
