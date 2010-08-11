@@ -293,7 +293,7 @@ class ClassResolver implements ResourceResolver
 		$modulesList = $this->getListOfModulesDependencies();
 
 		$ini = Framework::getConfiguration('autoload');
-
+		
 		// let's do our fancy work
 		foreach ($ini as $entry)
 		{
@@ -305,14 +305,15 @@ class ClassResolver implements ResourceResolver
 				$path = $entry['path'];
 
 				$path = $this->replaceConstants($path);
-
+			
 				// we automatically add our php classes
 				require_once(FRAMEWORK_HOME .'/util/Finder.class.php');
 				$finder = f_util_Finder::type('file')->ignore_version_control()->name('*'.$ext);
+				$finder->follow_link();
 
 				// recursive mapping?
 				$recursive = ((isset($entry['recursive'])) ? $entry['recursive'] : false);
-
+				
 				if (!$recursive)
 				{
 					$finder->maxdepth(0);
@@ -375,7 +376,7 @@ class ClassResolver implements ResourceResolver
 	}
 
 	private function glob($path)
-	{	
+	{
 		if (strpos($path,  '*') !== false  && basename($path) !== '*')
 		{
 			$result = glob($path);
