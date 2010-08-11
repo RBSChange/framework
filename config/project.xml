@@ -31,9 +31,7 @@
 
 		<define name="AG_WEBAPP_CONTEXT"></define>
 		<define name="AG_DEVELOPMENT_MODE">false</define>
-
-		<define name="CHANGE4_CACHE_SERVICE_CLASS">f_persistentdocument_DatabaseCacheService</define>
-
+		
 		<define name="MODE_DEBUG">0</define>
 		
 		<define name="PHPTAL_PHP_CODE_DESTINATION">AG_CACHE_DIR . DIRECTORY_SEPARATOR . 'template/'</define>
@@ -98,6 +96,12 @@
 		<define name="AG_DISABLE_SIMPLECACHE">false</define>
 		
 		<define name="SECURE_SESSION_BY_IP">false</define>
+		
+		<define name="MODE_DEBUG">0</define>
+		
+		<define name="CHANGE4_CACHE_SERVICE_CLASS">f_persistentdocument_MongoCacheService</define>
+		<define name="TRACKER_MODE">mongo</define>
+		<define name="DISABLE_DATACACHE">false</define>
 	</defines>
 	<!--
 		  Config section :
@@ -136,11 +140,41 @@
 			<!--  This can be google directly or eastwood for instance -->
 			<entry name="googleChartProvider">http://chart.apis.google.com/chart</entry>
 		</charts>
+		
+		<mongoDB>
+			<authentication>
+				<entry name="username"></entry>
+				<entry name="password"></entry>
+			</authentication>
+			<database>
+				<entry name="name">db</entry>
+			</database>
+			<serversCacheService>
+				<entry name="default">localhost:27017</entry>
+			</serversCacheService>
+			<serversDataCacheService>
+				<entry name="default">localhost:27017</entry>
+			</serversDataCacheService>
+		</mongoDB>
+		<redis>
+			<authentication>
+				<entry name="password"></entry>
+			</authentication>
+			<serverDataCacheService>
+				<entry name="database">0</entry>
+				<entry name="host">127.0.0.1</entry>
+				<entry name="port">6379</entry>
+			</serverDataCacheService>
+		</redis>
+		<memcache>
+			<serverDataCacheService>
+				<entry name="host">localhost</entry>
+				<entry name="port">11211</entry>
+			</serverDataCacheService>
+		</memcache>
 
 		<injection>
-			<!--
-				  <entry name="module_aService">extensionmodule_aSubService</entry>
-				  -->
+			<entry name="f_DataCacheService">f_DataCacheMongoService</entry>
 		</injection>
 		
 		<modules>		

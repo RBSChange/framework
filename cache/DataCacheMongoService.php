@@ -5,6 +5,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 	private static $mongoInstance = null;
 	private static $mongoCollection = null;
 	private static $mongoRegistration = null;
+	private static $writeMode = false;
 	
 	protected function __construct()
 	{
@@ -17,7 +18,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 			$connectionString .= $config["authentication"]["username"].':'.$config["authentication"]["password"].'@';
 		}
 		
-		$connectionString .= implode(",", $config["serversDataCacheService"]);
+		$connectionString .= implode(",", $config["serversDataCacheServiceRead"]);
 		
 		if ($connectionString != null)
 		{
@@ -26,7 +27,18 @@ class f_DataCacheMongoService extends f_DataCacheService
 		
 		try
 		{
-			self::$mongoInstance = new Mongo($connectionString);
+			if ($config["modeCluster"])
+			{
+				self::$mongoInstance = new Mongo($connectionString, array("replicaSet" => true));
+			}
+			else 
+			{
+				self::$mongoInstance = new Mongo($connectionString);
+				if (!$config["readWriteMode"])
+				{
+					self::$writeMode = true;
+				}
+			}
 			self::$mongoCollection = self::$mongoInstance->$config["database"]["name"]->dataCache;
 			self::$mongoRegistration = self::$mongoInstance->$config["database"]["name"]->dataCacheRegistration;
 		}
@@ -53,6 +65,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 	 */
 	public function writeToCache($item)
 	{
+		$this->writeMode();
 		$this->register($item);
 		$data = $item->getValues();
 		
@@ -74,6 +87,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 	
 	public function cleanExpiredCache()
 	{
+		$this->writeMode();
 		try
 		{
 			self::$mongoCollection->remove(array("isValid" => false), array("safe" => true));
@@ -94,6 +108,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 	 */
 	public final function clearSubCache($item, $subCache, $dispatch = true)
 	{
+		$this->writeMode();
 		$this->registerShutdown();
 		
 		try
@@ -124,6 +139,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 	
 	public function clearCommand()
 	{
+		$this->writeMode();
 		self::$mongoCollection->drop();
 		self::$mongoRegistration->drop();
 	}
@@ -142,8 +158,55 @@ class f_DataCacheMongoService extends f_DataCacheService
 		return $cacheids;
 	}
 	
+	protected function writeMode()
+	{
+		if (!self::$writeMode)
+		{
+			self::$mongoCollection = null;
+			self::$mongoRegistration = null;
+			self::$mongoInstance->close();
+			self::$mongoInstance = null;
+			
+			$connectionString = null;
+			$config = Framework::getConfiguration("mongoDB");
+			
+			if (isset($config["authentication"]["username"]) && isset($config["authentication"]["password"]) && 
+				$config["authentication"]["username"] !== '' && $config["authentication"]["password"] !== '')
+			{
+				$connectionString .= $config["authentication"]["username"].':'.$config["authentication"]["password"].'@';
+			}
+			
+			$connectionString .= implode(",", $config["serversDataCacheServiceWrite"]);
+			
+			if ($connectionString != null)
+			{
+				$connectionString = "mongodb://".$connectionString;
+			}
+			
+			try
+			{
+				if ($config["modeCluster"])
+				{
+					self::$mongoInstance = new Mongo($connectionString, array("replicaSet" => true));
+				}
+				else 
+				{
+					self::$mongoInstance = new Mongo($connectionString);
+				}
+				self::$mongoCollection = self::$mongoInstance->$config["database"]["name"]->dataCache;
+				self::$mongoRegistration = self::$mongoInstance->$config["database"]["name"]->dataCacheRegistration;
+			}
+			catch (MongoConnnectionException $e)
+			{
+				Framework::exception($e);
+			}
+			self::$writeMode = true;
+		}
+	}
+	
 	protected function commitClear()
 	{
+		$this->writeMode();
 		if (Framework::isDebugEnabled())
 		{
 			Framework::debug("SimpleCache->commitClear");
@@ -205,6 +268,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 	 */
 	protected function commitClearByDocIds($docIds)
 	{
+		$this->writeMode();
 		try
 		{
 			$keyParameters = array();
@@ -231,6 +295,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 	 */
 	protected function buildInvalidCacheList($dirsToClear)
 	{
+		$this->writeMode();
 		try
 		{
 			$regex =  implode("|", $dirsToClear);
@@ -249,6 +314,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 	 */
 	protected function register($item)
 	{
+		$this->writeMode();
 		if (!$this->isRegistered($item))
 		{	
 			try
