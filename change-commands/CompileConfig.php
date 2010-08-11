@@ -103,11 +103,16 @@ Where options in:
 				
 				if (isset($options["no-auto-changes"]))
 				{
-					$this->warnMessage("You must run manually manage AOP state");
+					$this->warnMessage("You must run manually manage:
+- AOP state
+- webapp cache");
 				}
 				else
 				{
 					$this->loadFramework();
+					
+					CacheService::getInstance()->clearAllWebappCache();
+					$this->okMessage("webapp cache cleared");
 					
 					if ($current["defines"]["AG_DEVELOPMENT_MODE"] == "true")
 					{
