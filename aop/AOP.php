@@ -166,6 +166,17 @@ class f_AOP
 		}
 		return array($tokens, $path);
 	}
+	
+	private function getOriginalTokens($className)
+	{
+		$path = ClassResolver::getInstance()->getRessourcePath($className);
+		if ($path === null)
+		{
+			throw new Exception(__METHOD__." could not find $className definition file");
+		}
+		$tokens = token_get_all(f_util_FileUtils::read($path));
+		return array($tokens, $path);
+	}
 
 	/**
 	 * @param String $className
@@ -742,7 +753,7 @@ class f_AOP
 			return array(trim(substr($code, $startIndex+1, $endIndex-$startIndex-1)), $method);
 		}
 
-		list($tokens, $fileName) = $this->getTokens($className);
+		list($tokens, $fileName) = $this->getOriginalTokens($className);
 		$startIndex = 1;
 		$inClass = false;
 		$inMethod = false;
