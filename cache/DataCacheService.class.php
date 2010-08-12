@@ -65,11 +65,11 @@ class f_DataCacheService extends BaseService
 		}
 		
 		$item = $this->getData($this->getNewCacheItem($namespace, $keyParameters, $newPatterns));
-		
 		if ($returnItem || $this->exists($item))
 		{
 			return $item;
 		}
+		
 		return null;
 	}
 	

@@ -99,8 +99,8 @@
 		
 		<define name="MODE_DEBUG">0</define>
 		
-		<define name="CHANGE4_CACHE_SERVICE_CLASS">f_persistentdocument_MongoCacheService</define>
-		<define name="TRACKER_MODE">mongo</define>
+		<define name="CHANGE4_CACHE_SERVICE_CLASS">f_persistentdocument_DatabaseCacheService</define>
+		<define name="TRACKER_MODE">mysql</define>
 		<define name="DISABLE_DATACACHE">false</define>
 	</defines>
 	<!--
@@ -147,14 +147,16 @@
 				<entry name="password"></entry>
 			</authentication>
 			<database>
-				<entry name="name">db</entry>
+				<entry name="name">testCache</entry>
 			</database>
-			<serversCacheService>
+			<serversRead>
 				<entry name="default">localhost:27017</entry>
-			</serversCacheService>
-			<serversDataCacheService>
+			</serversRead>
+			<serversWrite>
 				<entry name="default">localhost:27017</entry>
-			</serversDataCacheService>
+			</serversWrite>
+			<entry name="modeCluster">false</entry>
+			<entry name="readWriteMode">false</entry>
 		</mongoDB>
 		<redis>
 			<authentication>
@@ -174,7 +176,7 @@
 		</memcache>
 
 		<injection>
-			<entry name="f_DataCacheService">f_DataCacheMongoService</entry>
+			<entry name="f_DataCacheService">f_DataCacheFileService</entry>
 		</injection>
 		
 		<modules>		

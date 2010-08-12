@@ -354,7 +354,7 @@ class f_persistentdocument_NoopMemcache
 
 class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheService
 {
-	private static $mongoDB = null;
+	//private static $mongoDB = null;
 	private static $mongoCollection = null;
 	private static $writeMode = false;
 	private $inTransaction = false;
@@ -368,7 +368,7 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 
 	function __destruct()
 	{
-		$this->closeMongo();
+		//$this->closeMongo();
 	}
 
 	/**
@@ -500,10 +500,15 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 	 */
 	private function getMongo()
 	{
-		if (self::$mongoDB === null)
+		/*if (self::$mongoDB === null)
 		{
 			$connectionString = null;
 			$config = Framework::getConfiguration("mongoDB");
+			
+			if (!$config["readWriteMode"])
+			{
+				self::$writeMode = true;
+			}
 			
 			if (isset($config["authentication"]["username"]) && isset($config["authentication"]["password"]) && 
 				$config["authentication"]["username"] !== '' && $config["authentication"]["password"] !== '')
@@ -520,17 +525,13 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 			
 			try
 			{
-				if ($config["modeCluster"])
+				if ($config["modeCluster"] && false)
 				{
 					self::$mongoDB = new Mongo($connectionString, array("replicaSet" => true));
 				}
 				else 
 				{
 					self::$mongoDB = new Mongo($connectionString);
-					if (!$config["readWriteMode"])
-					{
-						self::$writeMode = true;
-					}
 				}
 				self::$mongoCollection = self::$mongoDB->$config["database"]["name"]->documentCache;
 			}
@@ -539,13 +540,17 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 				Framework::exception($e);
 				self::$mongoCollection = new f_persistentdocument_NoopMongo();
 			}
+		}*/
+		if (self::$mongoCollection === null)
+		{
+			self::$mongoCollection = f_MongoProvider::getInstance()->getMongo()->documentCache;
 		}
 		return self::$mongoCollection;
 	}
 	
 	private function getWriteMongo()
 	{
-		if (!self::$writeMode)
+		/*if (!self::$writeMode)
 		{
 			$this->closeMongo();
 			
@@ -567,7 +572,7 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 			
 			try
 			{
-				if ($config["modeCluster"])
+				if ($config["modeCluster"] && false)
 				{
 					self::$mongoDB = new Mongo($connectionString, array("replicaSet" => true));
 				}
@@ -583,11 +588,16 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 				self::$mongoCollection = new f_persistentdocument_NoopMongo();
 			}
 			self::$writeMode = true;
+		}*/
+		if (!self::$writeMode)
+		{
+			self::$mongoCollection = f_MongoProvider::getInstance()->closeReadConnection()->getMongo(true)->documentCache;
+			self::$writeMode = true;
 		}
 		return self::$mongoCollection;
 	}
 
-	private function closeMongo()
+	/*private function closeMongo()
 	{
 		if (self::$mongoDB !== null)
 		{
@@ -595,7 +605,7 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 			self::$mongoDB = null;
 			self::$mongoCollection = null;
 		}
-	}
+	}*/
 
 	public function beginTransaction()
 	{

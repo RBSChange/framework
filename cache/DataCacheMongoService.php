@@ -2,15 +2,20 @@
 class f_DataCacheMongoService extends f_DataCacheService
 {
 	private static $instance;
-	private static $mongoInstance = null;
+	//private static $mongoInstance = null;
 	private static $mongoCollection = null;
 	private static $mongoRegistration = null;
 	private static $writeMode = false;
 	
 	protected function __construct()
 	{
-		$connectionString = null;
+		/*$connectionString = null;
 		$config = Framework::getConfiguration("mongoDB");
+		
+		if (!$config["readWriteMode"])
+		{
+			self::$writeMode = true;
+		}
 		
 		if (isset($config["authentication"]["username"]) && isset($config["authentication"]["password"]) && 
 			$config["authentication"]["username"] !== '' && $config["authentication"]["password"] !== '')
@@ -27,17 +32,13 @@ class f_DataCacheMongoService extends f_DataCacheService
 		
 		try
 		{
-			if ($config["modeCluster"])
+			if ($config["modeCluster"] && false)
 			{
 				self::$mongoInstance = new Mongo($connectionString, array("replicaSet" => true));
 			}
 			else 
 			{
 				self::$mongoInstance = new Mongo($connectionString);
-				if (!$config["readWriteMode"])
-				{
-					self::$writeMode = true;
-				}
 			}
 			self::$mongoCollection = self::$mongoInstance->$config["database"]["name"]->dataCache;
 			self::$mongoRegistration = self::$mongoInstance->$config["database"]["name"]->dataCacheRegistration;
@@ -45,7 +46,10 @@ class f_DataCacheMongoService extends f_DataCacheService
 		catch (MongoConnnectionException $e)
 		{
 			Framework::exception($e);
-		}
+		}*/
+		$mongo = f_MongoProvider::getInstance()->getMongo();
+		self::$mongoCollection = $mongo->dataCache;
+		self::$mongoRegistration = $mongo->dataCacheRegistration;
 	}
 
 	/**
@@ -162,7 +166,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 	{
 		if (!self::$writeMode)
 		{
-			self::$mongoCollection = null;
+			/*self::$mongoCollection = null;
 			self::$mongoRegistration = null;
 			self::$mongoInstance->close();
 			self::$mongoInstance = null;
@@ -185,7 +189,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 			
 			try
 			{
-				if ($config["modeCluster"])
+				if ($config["modeCluster"] && false)
 				{
 					self::$mongoInstance = new Mongo($connectionString, array("replicaSet" => true));
 				}
@@ -199,7 +203,10 @@ class f_DataCacheMongoService extends f_DataCacheService
 			catch (MongoConnnectionException $e)
 			{
 				Framework::exception($e);
-			}
+			}*/
+			$mongo = f_MongoProvider::getInstance()->closeReadConnection()->getMongo(true);
+			self::$mongoCollection = $mongo->dataCache;
+			self::$mongoRegistration = $mongo->dataCacheRegistration;
 			self::$writeMode = true;
 		}
 	}
