@@ -350,7 +350,9 @@ class generator_PersistentModel
 					$models[$model->extend]->injected = true;
 					$models[$model->extend]->replacer = $model;
 				}
-
+				
+				$model->generateS18sPropertyIfNeeded();
+				
 				$extendedModel = $models[$model->extend];
 				while ($extendedModel !== null && $extendedModel->getName() != self::BASE_MODEL)
 				{
@@ -404,6 +406,40 @@ class generator_PersistentModel
 			}
 		}
 		return array($models, $inversePropertiesByModel);
+	}
+	
+	public function generateS18sPropertyIfNeeded()
+	{
+		if (count($this->serializedproperties) > 0 && $this->getPropertyByName("s18s") === null)
+		{
+			$parent = $this->getParentModel();
+			$notFounded = true;
+			while ($parent !== null && $notFounded)
+			{
+				 $notFounded = $parent->getPropertyByName("s18s") === null;
+				 $parent = $parent->getParentModel();
+			}
+			if ($notFounded)
+			{
+				$this->initSerializedproperties = true;
+				$localized = false;
+				foreach ($this->serializedproperties as $property)
+				{
+					if ($property->isLocalized())
+					{
+						$localized = true;
+						break;
+					}
+				}
+				if (!$this->localized && $localized)
+				{
+					$this->setLocalized();
+				}
+				
+				$property = generator_PersistentProperty::generateS18sProperty($this, $localized);
+				$this->addProperty($property);
+			}
+		}
 	}
 
 	/**
