@@ -2,7 +2,7 @@
 class f_MongoProvider
 {
 	private static $instance = null;
-	private static $mongoInstanceRead = null;
+	private static $mongoInstance = null;
 	private static $mongoInstanceWrite = null;
 	private static $mongoDatabase = null;
 	private static $mongoDatabaseWrite = null;
@@ -14,18 +14,22 @@ class f_MongoProvider
 		$connectionString = null;
 		$config = Framework::getConfiguration("mongoDB");
 		
-		if ($config["readWriteMode"])
-		{
-			self::$writeMode = true;
-		}
-		
 		if (isset($config["authentication"]["username"]) && isset($config["authentication"]["password"]) && 
 			$config["authentication"]["username"] !== '' && $config["authentication"]["password"] !== '')
 		{
 			$connectionString .= $config["authentication"]["username"].':'.$config["authentication"]["password"].'@';
 		}
 		
-		$connectionString .= implode(",", $config["serversRead"]);
+		if ($config["readWriteMode"] == "true")
+		{
+			self::$writeMode = true;
+			MongoCursor::$slaveOkay = true;
+			$connectionString .= implode(",", $config["serversRead"]);
+		}
+		else 
+		{
+			$connectionString .= implode(",", $config["serversWrite"]);
+		}
 		
 		if ($connectionString != null)
 		{
@@ -34,15 +38,15 @@ class f_MongoProvider
 		
 		try
 		{
-			/*if ($config["modeCluster"] && false)
+			/*if ($config["modeCluster"] == "true")
 			{
 				self::$mongoInstance = new Mongo($connectionString, array("replicaSet" => true));
 			}
 			else 
 			{*/
-				self::$mongoInstanceRead = new Mongo($connectionString);
+				self::$mongoInstance = new Mongo($connectionString);
 			//}
-			self::$mongoDatabase = self::$mongoInstanceRead->$config["database"]["name"];
+			self::$mongoDatabase = self::$mongoInstance->$config["database"]["name"];
 		}
 		catch (MongoConnnectionException $e)
 		{
@@ -63,25 +67,28 @@ class f_MongoProvider
 	}
 	
 	/**
-	 * @param Boolean $writeMode
 	 * @return MongoDB
 	 */
-	public function getMongo($writeMode = false)
+	public function getMongo()
 	{
-		if ($writeMode && self::$writeMode)
-		{
-			$this->connectInWriteMode();
-			return self::$mongoDatabaseWrite;
-		}
 		return self::$mongoDatabase;
+	}
+	
+	/**
+	 * @return MongoDB
+	 */
+	public function getWriteMongo()
+	{
+		$this->connectInWriteMode();
+		return (self::$mongoDatabaseWrite !== null) ? self::$mongoDatabaseWrite : self::$mongoDatabase;
 	}
 	
 	public function closeReadConnection()
 	{
 		if (!self::$readConnectionClosed && self::$writeMode)
 		{
-			self::$mongoInstanceRead->close();
-			self::$mongoInstanceRead = null;
+			self::$mongoInstance->close();
+			self::$mongoInstance = null;
 			self::$mongoDatabase = null;
 			if (self::$mongoDatabaseWrite !== null)
 			{
@@ -94,7 +101,7 @@ class f_MongoProvider
 	
 	protected function connectInWriteMode()
 	{
-		if (self::$mongoInstanceWrite === null)
+		if (self::$writeMode && self::$mongoInstanceWrite === null)
 		{
 			$connectionString = null;
 			$config = Framework::getConfiguration("mongoDB");
@@ -114,7 +121,7 @@ class f_MongoProvider
 			
 			try
 			{
-				/*if ($config["modeCluster"] && false)
+				/*if ($config["modeCluster"] == "true")
 				{
 					self::$mongoInstance = new Mongo($connectionString, array("replicaSet" => true));
 				}
@@ -137,9 +144,9 @@ class f_MongoProvider
 	
 	public function __destruct()
 	{
-		if (self::$mongoInstanceRead !== null)
+		if (self::$mongoInstance !== null)
 		{
-			self::$mongoInstanceRead->close();
+			self::$mongoInstance->close();
 		}
 		if (self::$mongoInstanceWrite !== null)
 		{

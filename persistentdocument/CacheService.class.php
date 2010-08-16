@@ -354,7 +354,6 @@ class f_persistentdocument_NoopMemcache
 
 class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheService
 {
-	//private static $mongoDB = null;
 	private static $mongoCollection = null;
 	private static $writeMode = false;
 	private $inTransaction = false;
@@ -363,12 +362,15 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 
 	protected function __construct()
 	{
-		// empty
+		if (self::$mongoCollection === null)
+		{
+			self::$mongoCollection = f_MongoProvider::getInstance()->getMongo()->documentCache;
+		}
 	}
 
 	function __destruct()
 	{
-		//$this->closeMongo();
+		//$empty
 	}
 
 	/**
@@ -389,7 +391,7 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 		
 		try
 		{
-			$object = $this->getMongo()->findOne(array("_id" => $key));
+			$object = self::$mongoCollection->findOne(array("_id" => $key));
 		}
 		catch (MongoConnectionException $e)
 		{
@@ -410,7 +412,7 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 	 */
 	public function getMultiple($keys)
 	{
-		$cursor = $this->getMongo()->find(array("_id" => array('$in' => $keys)));
+		$cursor = self::$mongoCollection->find(array("_id" => array('$in' => $keys)));
 		$returnArray = array();
 		
 		foreach ($cursor as $doc)
@@ -494,118 +496,16 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 	}
 
 	// private methods
-
-	/**
-	 * @return MongoCollection
-	 */
-	private function getMongo()
-	{
-		/*if (self::$mongoDB === null)
-		{
-			$connectionString = null;
-			$config = Framework::getConfiguration("mongoDB");
-			
-			if (!$config["readWriteMode"])
-			{
-				self::$writeMode = true;
-			}
-			
-			if (isset($config["authentication"]["username"]) && isset($config["authentication"]["password"]) && 
-				$config["authentication"]["username"] !== '' && $config["authentication"]["password"] !== '')
-			{
-				$connectionString .= $config["authentication"]["username"].':'.$config["authentication"]["password"].'@';
-			}
-			
-			$connectionString .= implode(",", $config["serversDataCacheServiceRead"]);
-			
-			if ($connectionString != null)
-			{
-				$connectionString = "mongodb://".$connectionString;
-			}
-			
-			try
-			{
-				if ($config["modeCluster"] && false)
-				{
-					self::$mongoDB = new Mongo($connectionString, array("replicaSet" => true));
-				}
-				else 
-				{
-					self::$mongoDB = new Mongo($connectionString);
-				}
-				self::$mongoCollection = self::$mongoDB->$config["database"]["name"]->documentCache;
-			}
-			catch (MongoConnnectionException $e)
-			{
-				Framework::exception($e);
-				self::$mongoCollection = new f_persistentdocument_NoopMongo();
-			}
-		}*/
-		if (self::$mongoCollection === null)
-		{
-			self::$mongoCollection = f_MongoProvider::getInstance()->getMongo()->documentCache;
-		}
-		return self::$mongoCollection;
-	}
 	
 	private function getWriteMongo()
 	{
-		/*if (!self::$writeMode)
-		{
-			$this->closeMongo();
-			
-			$connectionString = null;
-			$config = Framework::getConfiguration("mongoDB");
-			
-			if (isset($config["authentication"]["username"]) && isset($config["authentication"]["password"]) && 
-				$config["authentication"]["username"] !== '' && $config["authentication"]["password"] !== '')
-			{
-				$connectionString .= $config["authentication"]["username"].':'.$config["authentication"]["password"].'@';
-			}
-			
-			$connectionString .= implode(",", $config["serversDataCacheServiceWrite"]);
-			
-			if ($connectionString != null)
-			{
-				$connectionString = "mongodb://".$connectionString;
-			}
-			
-			try
-			{
-				if ($config["modeCluster"] && false)
-				{
-					self::$mongoDB = new Mongo($connectionString, array("replicaSet" => true));
-				}
-				else 
-				{
-					self::$mongoDB = new Mongo($connectionString);
-				}
-				self::$mongoCollection = self::$mongoDB->$config["database"]["name"]->documentCache;
-			}
-			catch (MongoConnnectionException $e)
-			{
-				Framework::exception($e);
-				self::$mongoCollection = new f_persistentdocument_NoopMongo();
-			}
-			self::$writeMode = true;
-		}*/
 		if (!self::$writeMode)
 		{
-			self::$mongoCollection = f_MongoProvider::getInstance()->closeReadConnection()->getMongo(true)->documentCache;
+			self::$mongoCollection = f_MongoProvider::getInstance()->closeReadConnection()->getWriteMongo()->documentCache;
 			self::$writeMode = true;
 		}
 		return self::$mongoCollection;
 	}
-
-	/*private function closeMongo()
-	{
-		if (self::$mongoDB !== null)
-		{
-			self::$mongoDB->close();
-			self::$mongoDB = null;
-			self::$mongoCollection = null;
-		}
-	}*/
 
 	public function beginTransaction()
 	{
