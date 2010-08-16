@@ -125,6 +125,10 @@ class LocaleService extends BaseService
 	private function processTheme($themeName)
 	{
 		$availablePaths = FileResolver::getInstance()->setPackageName($themeName)->setDirectory('locale')->getPaths('');
+		if ($availablePaths === null)
+		{
+			return;
+		}
 		$availablePaths = array_reverse($availablePaths);
 
 		// For all path found for the locale of module insert all localization keys
