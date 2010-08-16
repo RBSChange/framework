@@ -1056,44 +1056,42 @@ class c_ChangeBootStrap
 	}
 
 	function compareVersion($version1, $version2)
-	{
-		if ($version1 == $version2)
-		{
-			return 0;
-		}
-		//echo "Compare $version1 to $version2\n";
-		$matches1 = array();
-		$matches2 = array();
-		$versionPattern = '/^([^.+])(\.[^.]+)*(-[0-9]+){0,1}(\.r[0-9]+){0,1}$/';
-		if (!preg_match($versionPattern, $version1, $matches1) || !preg_match($versionPattern, $version2, $matches2))
-		{
-			throw new Exception("Can not compare $version1 to $version2: invalid version");
-		}
+        {
+                if ($version1 == $version2)
+                {
+                        return 0;
+                }
+                //echo "Compare $version1 to $version2\n";
+                $matches1 = array();
+                $matches2 = array();
 
-		$matches1Count = count($matches1);
-		$matches2Count = count($matches2);
-		$count = min($matches1Count, $matches2Count);
-		for ($i = 0; $i < $count; $i++)
-		{
-			if ($matches1[$i] < $matches2[$i])
-			{
-				//echo "$version1 < $version2\n";
-				return -1;
-			}
-			elseif ($matches2[$i] < $matches2[$i])
-			{
-				//echo "$version1 > $version2\n";
-				return 1;
-			}
-		}
-		if ($matches1Count > $matches2Count)
-		{
-			//echo "$version1 > $version2\n";
-			return 1;
-		}
-		//echo "$version1 < $version2\n";
-		return -1;
-	}
+                $matches1 = explode('.', str_replace(array('r', '-'), array('', '.'), $version1));
+                $matches2 = explode('.', str_replace(array('r', '-'), array('', '.'), $version2));
+
+                $matches1Count = count($matches1);
+                $matches2Count = count($matches2);
+                $count = min($matches1Count, $matches2Count);
+                for ($i = 0; $i < $count; $i++)
+                {
+                        if (intval($matches1[$i]) < intval($matches2[$i]))
+                        {
+                                //echo "$version1 < $version2\n";
+                                return -1;
+                        }
+                        elseif (intval($matches2[$i]) < intval($matches1[$i]))
+                        {
+                                //echo "$version1 > $version2\n";
+                                return 1;
+                        }
+                }
+                if ($matches1Count > $matches2Count)
+                {
+                        //echo "$version1 > $version2\n";
+                        return 1;
+                }
+                //echo "$version1 < $version2\n";
+                return -1;
+        }
 
 	private $hasComponentLocallyCache = array();
 
