@@ -91,6 +91,14 @@ class CacheService extends BaseService
 		$this->clearTemplateCache();
 		$this->clearSimpleCache();
 	}
+	
+	/**
+	 * Indicates that the baackoffice interface should be reloaded.
+	 */
+	public function boShouldBeReloaded()
+	{
+		$this->incrementWebappCacheVersion();
+	}
 
 	/**
 	 * @param String $directory
