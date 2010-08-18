@@ -503,14 +503,6 @@ class f_SimpleCacheReplacement
 	{
 		$this->cacheItem = f_DataCacheService::getInstance()->readFromCache($id, $keyParameters, $cacheSpecs);
 	}
-	
-	/**
-	 * @param Integer $timeLimit max time to live, in seconds
-	 */
-	private function setTimeLimit($timeLimit)
-	{
-		$this->cacheItem->setTTL($timeLimit);
-	}
 
 	static function isEnabled()
 	{
@@ -519,7 +511,7 @@ class f_SimpleCacheReplacement
 
 	public function exists($subCache)
 	{
-		f_DataCacheService::getInstance()->exists($this->cacheItem, $subCache);
+		return f_DataCacheService::getInstance()->exists($this->cacheItem, $subCache);
 	}
 
 	public function setInvalid()
@@ -540,7 +532,7 @@ class f_SimpleCacheReplacement
 
 	public function getCachePath($subCache)
 	{
-		$this->cacheItem->getCachePath();
+		return $this->cacheItem->getCachePath();
 	}
 
 	public static function clearCacheById($id)

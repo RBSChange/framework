@@ -2,15 +2,36 @@
 class f_DataCacheMongoService extends f_DataCacheService
 {
 	private static $instance;
-	private static $mongoCollection = null;
-	private static $mongoRegistration = null;
-	private static $writeMode = false;
+	
+	/**
+	 * @var f_MongoProvider
+	 */
+	private $provider = null;
+	
+	/**
+	 * @var MongoCollection
+	 */	
+	private $mongoCollection = null;
+	/**
+	 * @var MongoCollection
+	 */	
+	private $mongoRegistration = null;
+	
+	private $writeMode = false;
 	
 	protected function __construct()
 	{
-		$mongo = f_MongoProvider::getInstance()->getMongo();
-		self::$mongoCollection = $mongo->dataCache;
-		self::$mongoRegistration = $mongo->dataCacheRegistration;
+		
+		if ($this->mongoCollection === null)
+		{
+			$provider = new f_MongoProvider(Framework::getConfiguration('mongoDB'));
+			if ($provider->isAvailable())
+			{
+				$this->provider = $provider;
+				$this->mongoCollection = $provider->getCollection('dataCache');
+				$this->mongoRegistration = $provider->getCollection('dataCacheRegistration');
+			}
+		}
 	}
 
 	/**
@@ -41,7 +62,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 		
 		try
 		{
-			self::$mongoCollection->update(array("_id" => $item->getNamespace().'-'.$item->getKeyParameters()), 
+			$this->mongoCollection->update(array("_id" => $item->getNamespace().'-'.$item->getKeyParameters()), 
 				array('$set' => $data),	array("upsert" => true, "safe" => true));
 		}
 		catch (MongoCursorException $e)
@@ -55,8 +76,8 @@ class f_DataCacheMongoService extends f_DataCacheService
 		$this->writeMode();
 		try
 		{
-			self::$mongoCollection->remove(array("isValid" => false), array("safe" => true));
-			self::$mongoCollection->remove(array("timestamp" => array('$lt' => time() - self::MAX_TIME_LIMIT)), array("safe" => true));
+			$this->mongoCollection->remove(array("isValid" => false), array("safe" => true));
+			$this->mongoCollection->remove(array("timestamp" => array('$lt' => time() - self::MAX_TIME_LIMIT)), array("safe" => true));
 		}
 		catch (MongoCursorException $e)
 		{
@@ -78,7 +99,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 		
 		try
 		{
-			self::$mongoCollection->remove(array("_id" => $item->getNamespace().'-'.$item->getKeyParameters()), array("safe" => true));
+			$this->mongoCollection->remove(array("_id" => $item->getNamespace().'-'.$item->getKeyParameters()), array("safe" => true));
 		}
 		catch (MongoCursorException $e)
 		{
@@ -105,8 +126,8 @@ class f_DataCacheMongoService extends f_DataCacheService
 	public function clearCommand()
 	{
 		$this->writeMode();
-		self::$mongoCollection->drop();
-		self::$mongoRegistration->drop();
+		$this->mongoCollection->drop();
+		$this->mongoRegistration->drop();
 	}
 	
 	/**
@@ -114,7 +135,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 	 */
 	public function getCacheIdsForPattern($pattern)
 	{
-		$cursor = self::$mongoRegistration->find(array("pattern" => $pattern), array("_id" => true));
+		$cursor = $this->mongoRegistration->find(array("pattern" => $pattern), array("_id" => true));
 		$cacheids = array();
 		foreach ($cursor as $result)
 		{
@@ -125,12 +146,11 @@ class f_DataCacheMongoService extends f_DataCacheService
 	
 	protected function writeMode()
 	{
-		if (!self::$writeMode)
+		if (!$this->writeMode)
 		{
-			$mongo = f_MongoProvider::getInstance()->closeReadConnection()->getWriteMongo();
-			self::$mongoCollection = $mongo->dataCache;
-			self::$mongoRegistration = $mongo->dataCacheRegistration;
-			self::$writeMode = true;
+			$this->writeMode = true;
+			$this->mongoCollection = $this->provider->getCollection('dataCache', true);	
+			$this->mongoRegistration = $this->provider->getCollection('dataCacheRegistration', true);
 		}
 	}
 	
@@ -147,7 +167,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 			{
 				Framework::debug("Clear all");
 			}
-			self::$mongoCollection->update(array(), array('$set' => array("isValid" => false)), array("multiple" => true, "safe" => true));	
+			$this->mongoCollection->update(array(), array('$set' => array("isValid" => false)), array("multiple" => true, "safe" => true));	
 			if ($this->dispatch)
 			{
 				f_event_EventManager::dispatchEvent('simpleCacheCleared', null);
@@ -158,7 +178,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 			if (!empty($this->idToClear))
 			{
 				$ids = array();
-				foreach ($this->idToClear as $id => $value)
+				foreach (array_keys($this->idToClear) as $id)
 				{
 					$ids[] = $id;
 				}
@@ -167,7 +187,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 			if (!empty($this->docIdToClear))
 			{
 				$docIds = array();
-				foreach ($this->docIdToClear as $docId => $value)
+				foreach (array_keys($this->docIdToClear) as $docId)
 				{
 					$docIds[] = $docId;
 				}	
@@ -204,14 +224,14 @@ class f_DataCacheMongoService extends f_DataCacheService
 			$keyParameters = array();
 			foreach ($docIds as $id)
 			{
-				$cursor = self::$mongoRegistration->find(array("_id" => $id));
+				$cursor = $this->mongoRegistration->find(array("_id" => $id));
 				foreach ($cursor as $k)
 				{
 					$keyParameters = array_merge($keyParameters, $k["keyParameters"]);
 				}
 			}
 			
-			self::$mongoCollection->update(array("_id" => array('$in' => $keyParameters)), 
+			$this->mongoCollection->update(array("_id" => array('$in' => $keyParameters)), 
 				array('$set' => array("isValid" => false)), array("multiple" => true, "safe" => true));
 		}
 		catch (MongoCursorException $e)
@@ -229,7 +249,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 		try
 		{
 			$regex =  implode("|", $dirsToClear);
-			self::$mongoCollection->update(array("_id" => new MongoRegex("/^($regex)-/") ), 
+			$this->mongoCollection->update(array("_id" => new MongoRegex("/^($regex)-/") ), 
 				array('$set' => array("isValid" => false)), 
 				array("multiple" => true, "safe" => true));				
 		}
@@ -249,7 +269,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 		{	
 			try
 			{
-				self::$mongoRegistration->update(array("_id" => $item->getNamespace()), 
+				$this->mongoRegistration->update(array("_id" => $item->getNamespace()), 
 					array('$set' => array("pattern" => $this->optimizeCacheSpecs($item->getPatterns()))), 
 					array("upsert" => true, "safe" => true));
 			}
@@ -265,7 +285,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 			{
 				try
 				{
-					self::$mongoRegistration->update(array("_id" => $spec), 
+					$this->mongoRegistration->update(array("_id" => $spec), 
 						array('$addToSet' => array("keyParameters" => $item->getNamespace().'-'.$item->getKeyParameters())), 
 						array("upsert" => true, "safe" => true));
 				}
@@ -283,7 +303,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 		{
 			try
 			{
-				$object = self::$mongoRegistration->findOne(array("_id" => $item->getNamespace()));
+				$object = $this->mongoRegistration->findOne(array("_id" => $item->getNamespace()));
 			}
 			catch (MongoConnnectionException $e)
 			{
@@ -295,7 +315,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 		
 		try
 		{
-			$object = self::$mongoRegistration->findOne(array("keyParameters" => $id.'-'.$keyParameters));
+			$object = $this->mongoRegistration->findOne(array("keyParameters" => $id.'-'.$keyParameters));
 		}
 		catch (MongoConnnectionException $e)
 		{
@@ -313,7 +333,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 	{
 		try
 		{
-			$object = self::$mongoCollection->findOne(array("_id" => $item->getNamespace().'-'.$item->getKeyParameters()));
+			$object = $this->mongoCollection->findOne(array("_id" => $item->getNamespace().'-'.$item->getKeyParameters()));
 		}
 		catch (MongoConnnectionException $e)
 		{

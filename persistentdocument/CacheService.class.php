@@ -153,12 +153,32 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 
 	protected function __construct()
 	{
-		// empty
+		$this->memcache = new Memcache();
+		$config = Framework::getConfiguration("memcache");
+		if ($this->host === null)
+		{
+			$this->host = $config["serverDataCacheService"]["host"];
+		}
+
+		if ($this->port === null)
+		{
+			$this->port = $config["serverDataCacheService"]["port"];
+		}
+
+		if ($this->memcache->connect($this->host, $this->port) === false)
+		{
+			Framework::error("CacheService: could not obtain memcache instance");
+			$this->memcache = null;
+		}
 	}
 
 	function __destruct()
 	{
-		$this->closeMemCache();
+		if ($this->memcache !== null)
+		{
+			$this->memcache->close();
+			$this->memcache = null;
+		}
 	}
 
 	/**
@@ -166,7 +186,12 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 	 */
 	public static function getInstance()
 	{
-		return new f_persistentdocument_MemcachedCacheService();
+		$instance = new f_persistentdocument_MemcachedCacheService();
+		if ($instance->memcache === null)
+		{
+			return new f_persistentdocument_NoopCacheService();
+		}
+		return $instance;
 	}
 
 	/**
@@ -176,7 +201,7 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 	public function get($key)
 	{
 		$begin = microtime(true);
-		$object = $this->getMemCache()->get($key);
+		$object = $this->memcache->get($key);
 		if (Framework::isDebugEnabled())
 		{
 			$end = microtime(true);
@@ -191,7 +216,7 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 	 */
 	public function getMultiple($keys)
 	{
-		return $this->getMemCache()->get($keys);
+		return $this->memcache->get($keys);
 	}
 
 	/**
@@ -205,12 +230,12 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 		{
 			if (is_null($object))
 			{
-				return $this->getMemCache()->delete($key);
+				return $this->memcache->delete($key);
 			}
 			else
 			{
-				//return $this->getMemCache()->set($key, $object, MEMCACHE_COMPRESSED, 600);
-				return $this->getMemCache()->set($key, $object, null, 3600);
+				//return $this->memcache->set($key, $object, MEMCACHE_COMPRESSED, 600);
+				return $this->memcache->set($key, $object, null, 3600);
 			}
 		}
 		else if ($object === null)
@@ -231,7 +256,7 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 		{
 			if (!$this->inTransaction)
 			{
-				$this->getMemCache()->set($key, $object, null, 3600);
+				$this->memcache->set($key, $object, null, 3600);
 			}
 			else
 			{
@@ -251,46 +276,10 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 	 */
 	public function clear($pattern = null)
 	{
-		return $this->getMemCache()->flush();
+		return $this->memcache->flush();
 	}
 
 	// private methods
-
-	/**
-	 * @return Memcache
-	 */
-	private function getMemCache()
-	{
-		if (is_null($this->memcache))
-		{
-			$this->memcache = new Memcache();
-			$config = Framework::getConfiguration("memcache");
-			if ($this->host === null)
-			{
-				$this->host = $config["serverDataCacheService"]["host"];
-			}
-
-			if ($this->port === null)
-			{
-				$this->port = $config["serverDataCacheService"]["port"];
-			}
-
-			if ($this->memcache->connect($this->host, $this->port) === false)
-			{
-				Framework::error("CacheService: could not obtain memcache instance");
-				$this->memcache = new f_persistentdocument_NoopMemcache();
-			}
-		}
-		return $this->memcache;
-	}
-
-	private function closeMemCache()
-	{
-		if (!is_null($this->memcache))
-		{
-			$this->memcache->close();
-		}
-	}
 
 	public function beginTransaction()
 	{
@@ -303,7 +292,7 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 	{
 		if ($this->inTransaction)
 		{
-			$memcache = $this->getMemCache();
+			$memcache = $this->memcache;
 			if (count($this->deleteTransactionKeys) > 0)
 			{
 				try
@@ -320,7 +309,7 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 			}
 			foreach ($this->updateTransactionKeys as $key => $object)
 			{
-				$this->getMemCache()->set($key, $object, null, 3600);
+				$this->memcache->set($key, $object, null, 3600);
 			}
 			$this->deleteTransactionKeys = null;
 			$this->updateTransactionKeys = null;
@@ -337,34 +326,25 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 	}
 }
 
-class f_persistentdocument_NoopMemcache
-{
-	function delete() { }
-
-	function flush() { }
-
-	function close() { }
-
-	function get() { return false; }
-
-	function set() { }
-
-	function replace() { }
-}
-
 class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheService
 {
-	private static $mongoCollection = null;
-	private static $writeMode = false;
+	private $provider = null;
+	private $mongoCollection = null;
+	private $writeMode = false;
 	private $inTransaction = false;
 	private $deleteTransactionKeys = array();
 	private $updateTransactionKeys = array();
 
 	protected function __construct()
 	{
-		if (self::$mongoCollection === null)
+		if ($this->mongoCollection === null)
 		{
-			self::$mongoCollection = f_MongoProvider::getInstance()->getMongo()->documentCache;
+			$provider = new f_MongoProvider(Framework::getConfiguration('mongoDB'));
+			if ($provider->isAvailable())
+			{
+				$this->provider = $provider;
+				$this->mongoCollection = $provider->getCollection('documentCache');
+			}
 		}
 	}
 
@@ -378,7 +358,12 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 	 */
 	public static function getInstance()
 	{
-		return new f_persistentdocument_MongoCacheService();
+		$instance = new f_persistentdocument_MongoCacheService();
+		if ($instance->mongoCollection === null)
+		{
+			return new f_persistentdocument_NoopCacheService();
+		}
+		return $instance;
 	}
 
 	/**
@@ -391,7 +376,7 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 		
 		try
 		{
-			$object = self::$mongoCollection->findOne(array("_id" => $key));
+			$object = $this->mongoCollection->findOne(array("_id" => $key));
 		}
 		catch (MongoConnectionException $e)
 		{
@@ -412,7 +397,7 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 	 */
 	public function getMultiple($keys)
 	{
-		$cursor = self::$mongoCollection->find(array("_id" => array('$in' => $keys)));
+		$cursor = $this->mongoCollection->find(array("_id" => array('$in' => $keys)));
 		$returnArray = array();
 		
 		foreach ($cursor as $doc)
@@ -433,18 +418,19 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 		{
 			try
 			{
+				$this->writeMode();
 				if ($object === null)
 				{
-					$result = $this->getWriteMongo()->remove(array("_id" => $key), array("safe" => true));
+					$result = $this->mongoCollection->remove(array("_id" => $key), array("safe" => true));
 				}
 				else 
 				{
 					$serialized = serialize($object);
-					$result = $this->getWriteMongo()->save(array("_id" => $key, "object" => $serialized), array("safe" => true));
+					$result = $this->mongoCollection->save(array("_id" => $key, "object" => $serialized), array("safe" => true));
 				}
 				return $result["ok"];
 			}
-			catch (MongoCursorException $e)
+			catch (Exception $e)
 			{
 				Framework::exception($e);
 				return false;
@@ -473,11 +459,12 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 		{
 			try
 			{
+				$this->writeMode();
 				$serialized = serialize($object);
-				$result = $this->getWriteMongo()->save(array("_id" => $key, "object" => $serialized), array("safe" => true));
+				$result = $this->mongoCollection->save(array("_id" => $key, "object" => $serialized), array("safe" => true));
 				return $result["ok"];
 			}
-			catch (MongoCursorException $e)
+			catch (Exception $e)
 			{
 				Framework::exception($e);
 				return false;
@@ -497,21 +484,23 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 
 	// private methods
 	
-	private function getWriteMongo()
+	private function writeMode()
 	{
-		if (!self::$writeMode)
+		if (!$this->writeMode)
 		{
-			self::$mongoCollection = f_MongoProvider::getInstance()->closeReadConnection()->getWriteMongo()->documentCache;
-			self::$writeMode = true;
+			$this->writeMode = true;
+			$this->mongoCollection = $this->provider->getCollection('documentCache', true);			
 		}
-		return self::$mongoCollection;
 	}
 
 	public function beginTransaction()
 	{
-		$this->inTransaction = true;
-		$this->deleteTransactionKeys = array();
-		$this->updateTransactionKeys = array();
+		if (!$this->inTransaction)
+		{
+			$this->inTransaction = true;
+			$this->deleteTransactionKeys = array();
+			$this->updateTransactionKeys = array();
+		}
 	}
 
 	/**
@@ -521,14 +510,14 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 	{
 		if ($this->inTransaction)
 		{
-			$mongo = $this->getWriteMongo();
 			if (count($this->deleteTransactionKeys) > 0)
 			{
 				try
 				{
+					$this->writeMode();
 					foreach (array_keys($this->deleteTransactionKeys) as $key)
 					{
-						$result = $mongo->remove(array("_id" => $key), array("safe" => true));
+						$result = $this->mongoCollection->remove(array("_id" => $key), array("safe" => true));
 						
 						if (!$result["ok"])
 						{
@@ -536,34 +525,35 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 						}
 					}
 				}
-				catch (MongoCursorException $e)
+				catch (Exception $e)
 				{
 					Framework::exception($e);
 					return false;
 				}
 			}
-			
-			try
+			if (count($this->updateTransactionKeys) > 0)
 			{
-				foreach ($this->updateTransactionKeys as $key => $object)
+				try
 				{
-					$serialized = serialize($object);
-					$result = $mongo->save(array("_id" => $key, "object" => $serialized), array("safe" => true));
-					
-					if (!$result["ok"])
+					$this->writeMode();
+					foreach ($this->updateTransactionKeys as $key => $object)
 					{
-						return false;
+						$serialized = serialize($object);
+						$result = $this->mongoCollection->save(array("_id" => $key, "object" => $serialized), array("safe" => true));
+						
+						if (!$result["ok"])
+						{
+							return false;
+						}
 					}
 				}
+				catch (Exception $e)
+				{
+					Framework::exception($e);
+					return false;
+				}
 			}
-			catch (MongoCursorException $e)
-			{
-				Framework::exception($e);
-				return false;
-			}
-			
 			$this->rollBack();
-			
 			return true;
 		}
 		return false;
@@ -577,37 +567,41 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 	}
 }
 
-class f_persistentdocument_NoopMongo
-{
-	function delete() { }
-
-	function flush() { }
-
-	function close() { }
-
-	function get() { return false; }
-
-	function set() { }
-
-	function replace() { }
-}
-
 class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheService
 {
 	const REDIS_KEY_PREFIX = 'redisCacheService-';
-	private static $redis = null;
+	private $redis = null;
 	private $inTransaction = false;
 	private $deleteTransactionKeys = array();
 	private $updateTransactionKeys = array();
 
 	protected function __construct()
 	{
-		// empty
+		$redis = new Redis();	
+		$config = Framework::getConfiguration("redis");
+		$con = $redis->connect($config["serverDataCacheService"]["host"], $config["serverDataCacheService"]["port"]);
+		if ($con)
+		{
+			if (isset($config["authentication"]["password"]) && $config["authentication"]["password"] !== '')
+			{
+				$redis->auth($config["authentication"]["password"]);
+			}
+			
+			$select = $redis->select($config["serverDataCacheService"]["database"]);
+			if ($select)
+			{
+				$this->redis = $redis;
+			}
+		}
 	}
 
 	function __destruct()
 	{
-		$this->closeRedis();
+		if ($this->redis !== null)
+		{
+			$this->redis->close();
+			$this->redis = null;
+		}
 	}
 
 	/**
@@ -615,9 +609,13 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 	 */
 	public static function getInstance()
 	{
-		return new f_persistentdocument_RedisCacheService();
+		$instance = new f_persistentdocument_RedisCacheService();
+		if ($instance->redis === null)
+		{
+			return new f_persistentdocument_NoopCacheService();
+		}
+		return $instance;
 	}
-
 	/**
 	 * @param integer $key
 	 * @return mixed or null if not exists or on error
@@ -722,36 +720,11 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 	 */
 	private function getRedis()
 	{
-		if (self::$redis === null)
+		if ($this->redis === null)
 		{
-			self::$redis = new Redis();
-			
-			$config = Framework::getConfiguration("redis");
-			
-			$con = self::$redis->connect($config["serverDataCacheService"]["host"], $config["serverDataCacheService"]["port"]);
-			
-			if (isset($config["authentication"]["password"]) && $config["authentication"]["password"] !== '')
-			{
-				self::$redis->auth($config["authentication"]["password"]);
-			}
-			
-			$select = self::$redis->select($config["serverDataCacheService"]["database"]);
-			
-			if (!$con && !$select)
-			{
-				self::$redis = new f_persistentdocument_NoopRedis();
-			}
-		}
-		return self::$redis;
-	}
 
-	private function closeRedis()
-	{
-		if (self::$redis !== null)
-		{
-			self::$redis->close();
-			self::$redis = null;
 		}
+		return $this->redis;
 	}
 
 	public function beginTransaction()
@@ -808,21 +781,6 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 		$this->updateTransactionKeys = null;
 		$this->inTransaction = false;
 	}
-}
-
-class f_persistentdocument_NoopRedis
-{
-	function delete() { }
-
-	function flush() { }
-
-	function close() { }
-
-	function get() { return false; }
-
-	function set() { }
-
-	function replace() { }
 }
 
 class f_persistentdocument_DatabaseCacheService extends f_persistentdocument_CacheService

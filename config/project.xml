@@ -141,7 +141,7 @@
 			<entry name="googleChartProvider">http://chart.apis.google.com/chart</entry>
 		</charts>
 		
-		<mongoDB>
+	<!-- 	<mongoDB>
 			<authentication>
 				<entry name="username"></entry>
 				<entry name="password"></entry>
@@ -150,30 +150,35 @@
 				<entry name="name">testCache</entry>
 			</database>
 			<serversRead>
-				<entry name="default">localhost:27017</entry>
+				<entry name="default">10.199.2.17:27017</entry>
 			</serversRead>
 			<serversWrite>
-				<entry name="default">localhost:27017</entry>
+				<entry name="default">10.199.2.17:27017</entry>
 			</serversWrite>
-			<entry name="modeCluster">false</entry>
-			<entry name="readWriteMode">false</entry>
 		</mongoDB>
+		
 		<redis>
 			<authentication>
+				<entry name="username"></entry>
 				<entry name="password"></entry>
 			</authentication>
 			<serverDataCacheService>
-				<entry name="database">0</entry>
 				<entry name="host">127.0.0.1</entry>
 				<entry name="port">6379</entry>
+				<entry name="database">0</entry>
 			</serverDataCacheService>
 		</redis>
+		
 		<memcache>
+			<authentication>
+				<entry name="username"></entry>
+				<entry name="password"></entry>
+			</authentication>
 			<serverDataCacheService>
 				<entry name="host">localhost</entry>
 				<entry name="port">11211</entry>
 			</serverDataCacheService>
-		</memcache>
+		</memcache> -->
 
 		<injection>
 			<entry name="f_DataCacheService">f_DataCacheFileService</entry>

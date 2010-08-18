@@ -1,41 +1,46 @@
 <?php
 class f_MongoProvider
 {
-	private static $instance = null;
-	private static $mongoInstance = null;
-	private static $mongoInstanceWrite = null;
-	private static $mongoDatabase = null;
-	private static $mongoDatabaseWrite = null;
-	private static $writeMode = false;
-	private static $readConnectionClosed = false;
+	private $databaseName = null;
+	private $writeConnectionString = null;
 	
-	protected function __construct()
+	private $mongoInstance = null;
+	private $mongoDatabase = null;
+	
+	public function __construct($config)
 	{
-		$connectionString = null;
-		$config = Framework::getConfiguration("mongoDB");
-		
-		if (isset($config["authentication"]["username"]) && isset($config["authentication"]["password"]) && 
-			$config["authentication"]["username"] !== '' && $config["authentication"]["password"] !== '')
+		if (isset($config["serversRead"]))
 		{
-			$connectionString .= $config["authentication"]["username"].':'.$config["authentication"]["password"].'@';
-		}
-		
-		if ($config["readWriteMode"] == "true")
-		{
-			self::$writeMode = true;
+			$hosts = implode(",", $config["serversRead"]);
 			MongoCursor::$slaveOkay = true;
-			$connectionString .= implode(",", $config["serversRead"]);
+			$writehosts = implode(",", $config["serversWrite"]);
 		}
-		else 
+		else
 		{
-			$connectionString .= implode(",", $config["serversWrite"]);
+			$hosts = implode(",", $config["serversWrite"]);
+			$writehosts = null;
+		}
+		$this->databaseName = $config["database"]["name"];
+		
+		
+		//"mongodb://[username:password@]host1[:port1][,host2[:port2:],...]/db";
+
+		if (isset($config["authentication"]))
+		{
+			$authentication = $config["authentication"]["username"].':'.$config["authentication"]["password"].'@';
+			$database = '/' . $this->databaseName;
+		}
+		else
+		{
+			$authentication = '';
+			$database = '';
 		}
 		
-		if ($connectionString != null)
+		$connectionString = "mongodb://" . $authentication . $hosts . $database;
+		if ($writehosts)
 		{
-			$connectionString = "mongodb://".$connectionString;
+			$this->writeConnectionString = "mongodb://" . $authentication . $writehosts . $database;
 		}
-		
 		try
 		{
 			/*if ($config["modeCluster"] == "true")
@@ -44,113 +49,68 @@ class f_MongoProvider
 			}
 			else 
 			{*/
-				self::$mongoInstance = new Mongo($connectionString);
+				$this->mongoInstance = new Mongo($connectionString, array("persist" => "mongo"));
 			//}
-			self::$mongoDatabase = self::$mongoInstance->$config["database"]["name"];
+			$this->mongoDatabase = $this->mongoInstance->selectDB($this->databaseName);
 		}
 		catch (MongoConnnectionException $e)
 		{
 			Framework::exception($e);
+			$this->mongoInstance = null;
+			$this->mongoDatabase = null;
 		}
-	}
-
-	/**
-	 * @return f_MongoProvider
-	 */
-	public static function getInstance()
-	{
-		if (self::$instance === null)
-		{
-			self::$instance = new f_MongoProvider();
-		}
-		return self::$instance;
 	}
 	
 	/**
-	 * @return MongoDB
+	 * @return Boolean
 	 */
-	public function getMongo()
+	public function isAvailable()
 	{
-		return self::$mongoDatabase;
+		return ($this->mongoDatabase !== null);
+	}
+	
+	public function close()
+	{
+		if ($this->isAvailable())
+		{
+			$this->mongoInstance->close();
+			$this->mongoDatabase = null;
+			$this->mongoInstance = null;
+		}
 	}
 	
 	/**
-	 * @return MongoDB
+	 * @param string $name
+	 * @return MongoCollection
 	 */
-	public function getWriteMongo()
+	public function getCollection($name, $write = false)
 	{
-		$this->connectInWriteMode();
-		return (self::$mongoDatabaseWrite !== null) ? self::$mongoDatabaseWrite : self::$mongoDatabase;
+		if ($write && $this->writeConnectionString)
+		{
+			$this->connectInWriteMode();
+		}	
+		if ($this->isAvailable())
+		{
+			return $this->mongoDatabase->selectCollection($name);
+		}
+		throw new Exception("MongoDatabase is not available.");		
 	}
 	
-	public function closeReadConnection()
+	private function connectInWriteMode()
 	{
-		if (!self::$readConnectionClosed && self::$writeMode)
+		$connectionString = $this->writeConnectionString;
+		$this->writeConnectionString = null;
+			
+		try
 		{
-			self::$mongoInstance->close();
-			self::$mongoInstance = null;
-			self::$mongoDatabase = null;
-			if (self::$mongoDatabaseWrite !== null)
-			{
-				self::$mongoDatabase = self::$mongoDatabaseWrite;
-			}
+			$this->mongoInstance = new Mongo($connectionString, array("persist" => "mongo"));
+			$this->mongoDatabase = $this->mongoInstance->selectDB($this->databaseName);
 		}
-		self::$readConnectionClosed = true;
-		return $this;
-	}
-	
-	protected function connectInWriteMode()
-	{
-		if (self::$writeMode && self::$mongoInstanceWrite === null)
+		catch (MongoConnnectionException $e)
 		{
-			$connectionString = null;
-			$config = Framework::getConfiguration("mongoDB");
-			
-			if (isset($config["authentication"]["username"]) && isset($config["authentication"]["password"]) && 
-				$config["authentication"]["username"] !== '' && $config["authentication"]["password"] !== '')
-			{
-				$connectionString .= $config["authentication"]["username"].':'.$config["authentication"]["password"].'@';
-			}
-			
-			$connectionString .= implode(",", $config["serversWrite"]);
-			
-			if ($connectionString != null)
-			{
-				$connectionString = "mongodb://".$connectionString;
-			}
-			
-			try
-			{
-				/*if ($config["modeCluster"] == "true")
-				{
-					self::$mongoInstance = new Mongo($connectionString, array("replicaSet" => true));
-				}
-				else 
-				{*/
-					self::$mongoInstanceWrite = new Mongo($connectionString);
-				//}
-				self::$mongoDatabaseWrite = self::$mongoInstanceWrite->$config["database"]["name"];
-			}
-			catch (MongoConnnectionException $e)
-			{
-				Framework::exception($e);
-			}
-			if (self::$readConnectionClosed)
-			{
-				self::$mongoDatabase = self::$mongoDatabaseWrite;
-			}
-		}
-	}
-	
-	public function __destruct()
-	{
-		if (self::$mongoInstance !== null)
-		{
-			self::$mongoInstance->close();
-		}
-		if (self::$mongoInstanceWrite !== null)
-		{
-			self::$mongoInstanceWrite->close();
+			Framework::exception($e);
+			$this->mongoDatabase = null;
+			$this->mongoInstance = null;
 		}
 	}
 }
