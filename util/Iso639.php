@@ -16,11 +16,18 @@ class f_util_Iso639
 		}
 		else
 		{
-			$isoFile = f_util_FileUtils::buildWebeditPath("framework/util/iso639/iso-639-".$lang.".txt");
-			if (!file_exists($isoFile))
+			$fileResolver = FileResolver::getInstance()->setDirectory("util/iso639")->setPackageName("framework");
+			$isoFile = $fileResolver->getPath("iso-639-".$lang.".txt");
+			if ($isoFile === null)
 			{
-				$isoFile = f_util_FileUtils::buildWebeditPath("framework/util/iso639/iso-639-".Framework::getConfigurationValue("framework/util/iso639-defaultlang", "fr").".txt");
+				$file = "iso-639-".Framework::getConfigurationValue("framework/util/iso639-defaultlang", "fr").".txt";
+				$isoFile = $fileResolver->getPath($file);
+				if ($isoFile === null)
+				{
+					throw new Exception("Could not find ".$file." file");
+				}
 			}
+			
 			$lines = f_util_FileUtils::readArray($isoFile);
 			$codes = array();
 			foreach ($lines as $line)
