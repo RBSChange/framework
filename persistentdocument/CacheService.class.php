@@ -372,16 +372,16 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 	 */
 	public function get($key)
 	{
-		$begin = microtime(true);
-		
+		$begin = microtime(true);		
 		try
 		{
 			$object = $this->mongoCollection->findOne(array("_id" => $key));
 		}
-		catch (MongoConnectionException $e)
+		catch (MongoCursorException $e)
 		{
-				Framework::exception($e);
-				return false;
+			Framework::info(var_export($this->provider, true));
+			Framework::exception($e);
+			return null;
 		}
 		if (Framework::isDebugEnabled())
 		{
@@ -414,6 +414,7 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 	 */
 	public function set($key, $object)
 	{
+		Framework::info(__METHOD__ . ' ' . $key);
 		if (!$this->inTransaction)
 		{
 			try
@@ -421,7 +422,7 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 				$this->writeMode();
 				if ($object === null)
 				{
-					$result = $this->mongoCollection->remove(array("_id" => $key), array("safe" => true));
+					$result = $this->mongoCollection->remove(array("_id" => $key), array("safe" => false));
 				}
 				else 
 				{
@@ -441,11 +442,9 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 			$this->deleteTransactionKeys[$key] = true;
 			return true;
 		}
-		else
-		{
-			$this->updateTransactionKeys[$key] = $object;
-			return true;	
-		}
+		
+		$this->updateTransactionKeys[$key] = $object;
+		return true;	
 	}
 
 	/**

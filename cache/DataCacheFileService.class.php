@@ -13,7 +13,7 @@ class f_DataCacheFileService extends f_DataCacheService
 	}
 
 	/**
-	 * @return f_DataCacheService
+	 * @return f_DataCacheFileService
 	 */
 	public static function getInstance()
 	{
@@ -102,8 +102,9 @@ class f_DataCacheFileService extends f_DataCacheService
 	 */
 	public function exists($item, $subCache = null)
 	{
+		$itemPath = $this->getCachePath($item);
 		$cachePath = $this->getCachePath($item, $subCache);
-		$result = file_exists($cachePath) && f_util_FileUtils::getDirFiles($cachePath) !== null && $this->isValid($item)
+		$result = file_exists($cachePath) && f_util_FileUtils::getDirFiles($itemPath) !== null && $this->isValid($item)
 			&& ($item->getTTL() === null || (time() - filemtime($cachePath)) < $item->getTTL()); 
 		$this->markAsBeingRegenerated($item);
 		return $result;
@@ -309,7 +310,7 @@ class f_DataCacheFileService extends f_DataCacheService
 	 * @param f_DataCacheItem $item
 	 * @return String
 	 */
-	protected function getCachePath($item, $subCache = null)
+	public function getCachePath($item, $subCache = null)
 	{
 		$cachePath = $item->getCachePath();
 		if ($cachePath === null)

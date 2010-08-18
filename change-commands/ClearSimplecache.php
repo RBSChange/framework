@@ -30,11 +30,12 @@ class commands_ClearSimplecache extends commands_AbstractChangeCommand
 	function _execute($params, $options)
 	{
 		$this->message("== Clear simple cache ==");
-		
 		$this->loadFramework();
-		//f_util_FileUtils::cleanDir(f_util_FileUtils::buildCachePath("simplecache"));
-		f_DataCacheService::getInstance()->clearCommand();
-		
+		$simpleCachePath = f_util_FileUtils::buildCachePath("simplecache");
+		if (is_dir($simpleCachePath) && !(f_DataCacheService::getInstance() instanceof f_DataCacheFileService))
+		{
+			f_util_FileUtils::cleanDir($simpleCachePath);
+		}
 		$this->quitOk("Simple cache directory cleared");
 	}
 }

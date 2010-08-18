@@ -31,7 +31,7 @@ class commands_ClearAll extends commands_AbstractChangeCommand
 		$parent->executeCommand("clearCache");
 		$parent->executeCommand("clearWebappCache");
 		$parent->executeCommand("clearSimplecache");
-		
+		$parent->executeCommand("clearDatacache");
 		$this->quitOk("All was cleared");
 	}
 }

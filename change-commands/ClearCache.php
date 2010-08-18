@@ -49,6 +49,9 @@ class commands_ClearCache extends commands_AbstractChangeCommand
 			}
 			return $this->quitOk("Cache cleared");
 		}
+		
+		$parent = $this->getParent();
+		$parent->executeCommand("clearDatacache");
 		return $this->quitError("The profile $profile does not exists");
 	}
 }

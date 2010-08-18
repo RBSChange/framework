@@ -1,5 +1,5 @@
 <?php
-class f_SimpleCache
+class f_SimpleCache_old
 {
 	const INVALID_CACHE_ENTRY = 'invalidCacheEntry';
 	private $id;
@@ -42,6 +42,7 @@ class f_SimpleCache
 
 	public function exists($subCache)
 	{
+		
 		$cachePath = $this->getCachePath($subCache);
 		$result = file_exists($cachePath) && $this->isValid()
 			&& ($this->timeLimit === null || (time() - filemtime($cachePath)) < $this->timeLimit); 
@@ -504,8 +505,13 @@ class f_SimpleCache
 	}
 }
 
-class f_SimpleCacheReplacement
+/**
+ * @deprecated use f_DataCacheService
+ *
+ */
+class f_SimpleCache
 {
+	
 	/**
 	 * @var f_DataCacheItem
 	 */
@@ -513,17 +519,21 @@ class f_SimpleCacheReplacement
 
 	public function __construct($id, $keyParameters, $cacheSpecs)
 	{
-		$this->cacheItem = f_DataCacheService::getInstance()->readFromCache($id, $keyParameters, $cacheSpecs);
+		if (Framework::isInfoEnabled())
+		{
+			Framework::info('Depreceted usage of f_SimpleCache');
+		}
+		$this->cacheItem = f_DataCacheFileService::getInstance()->readFromCache($id, $keyParameters, $cacheSpecs);
 	}
 
 	static function isEnabled()
 	{
-		return f_DataCacheService::getInstance()->isEnabled();
+		return f_DataCacheFileService::getInstance()->isEnabled();
 	}
 
 	public function exists($subCache)
 	{
-		return f_DataCacheService::getInstance()->exists($this->cacheItem, $subCache);
+		return f_DataCacheFileService::getInstance()->exists($this->cacheItem, $subCache);
 	}
 
 	public function setInvalid()
@@ -539,24 +549,25 @@ class f_SimpleCacheReplacement
 	public function writeToCache($subCache, $content)
 	{
 		$this->cacheItem->setValue($subCache, $content);
-		f_DataCacheService::getInstance()->writeToCache($this->cacheItem);
+		f_DataCacheFileService::getInstance()->writeToCache($this->cacheItem);
 	}
 
 	public function getCachePath($subCache)
 	{
-		return $this->cacheItem->getCachePath();
+		$path = f_DataCacheFileService::getInstance()->getCachePath($this->cacheItem, $subCache);
+		return  $path;
 	}
 
 	public static function clearCacheById($id)
 	{
-		f_DataCacheService::getInstance()->clearCacheByNamespace($id);
+		f_DataCacheFileService::getInstance()->clearCacheByNamespace($id);
 	}
 
 	static function commitClearByDocIds($docIds)
 	{
 		foreach ($docIds as $id)
 		{
-			f_DataCacheService::getInstance()->clearCacheByDocId($id);
+			f_DataCacheFileService::getInstance()->clearCacheByDocId($id);
 		}
 	}
 
@@ -567,18 +578,18 @@ class f_SimpleCacheReplacement
 	{
 		if ($id === null)
 		{
-			f_DataCacheService::getInstance()->clearAll();
+			f_DataCacheFileService::getInstance()->clearAll();
 		}
 		else 
 		{
-			f_DataCacheService::getInstance()->clearCacheByNamespace($id);
+			f_DataCacheFileService::getInstance()->clearCacheByNamespace($id);
 		}
 	}
 
 
 	public final function clearSubCache($subCache, $dispatch = true)
 	{
-		f_DataCacheService::getInstance()->clearSubCache($this->cacheItem, $subCache, $dispatch);
+		f_DataCacheFileService::getInstance()->clearSubCache($this->cacheItem, $subCache, $dispatch);
 	}
 
 	/**
@@ -588,7 +599,7 @@ class f_SimpleCacheReplacement
 	 */
 	public static function shutdownCommitClear()
 	{
-		f_DataCacheService::getInstance()->shutdownCommitClear();
+		f_DataCacheFileService::getInstance()->shutdownCommitClear();
 	}
 
 	public static function commitClearDispatched($ids = null)
@@ -605,7 +616,7 @@ class f_SimpleCacheReplacement
 
 	public static function cleanExpiredCache()
 	{
-		f_DataCacheService::getInstance()->cleanExpiredCache();
+		f_DataCacheFileService::getInstance()->cleanExpiredCache();
 	}
 
 	/**
@@ -613,7 +624,7 @@ class f_SimpleCacheReplacement
 	 */
 	public static function clearCacheByModel($model)
 	{
-		f_DataCacheService::getInstance()->clearCacheByModel($model);
+		f_DataCacheFileService::getInstance()->clearCacheByModel($model);
 	}
 
 	/**
@@ -621,6 +632,6 @@ class f_SimpleCacheReplacement
 	 */
 	public static function clearCacheByTag($tag)
 	{
-		f_DataCacheService::getInstance()->clearCacheByTag($tag);
+		f_DataCacheFileService::getInstance()->clearCacheByTag($tag);
 	}
 }
