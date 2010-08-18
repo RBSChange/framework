@@ -6,18 +6,17 @@ class ClassResolver implements ResourceResolver
 	 * @var ClassResolver
 	 */
 	private static $instance = null;
-
+	protected $cacheDir = null;
+	
 	/**
-	 * Array of class path
-	 * @var array
+	 * @var f_AOP
 	 */
-	private $classes = null;
-	private $cacheDir = null;
+	protected $aop;
 
 	private $keys = array('%AG_LIB_DIR%', '%AG_MODULE_DIR%', '%FRAMEWORK_HOME%', '%PROJECT_OVERRIDE%', '%WEBEDIT_HOME%', '%PROFILE%');
 	private $reps = array(AG_LIB_DIR, AG_MODULE_DIR, FRAMEWORK_HOME, PROJECT_OVERRIDE, WEBEDIT_HOME, PROFILE);
 
-	private function __construct()
+	protected function __construct()
 	{
 		require_once(FRAMEWORK_HOME . '/util/FileUtils.class.php');
 		require_once(FRAMEWORK_HOME . '/util/StringUtils.class.php');
@@ -41,33 +40,32 @@ class ClassResolver implements ResourceResolver
 	{
 		if (is_null(self::$instance) )
 		{
-			self::$instance = new ClassResolver();
+			if (AG_DEVELOPMENT_MODE)
+			{
+				self::$instance = new ClassResolverDevMode();
+			}
+			else
+			{
+				self::$instance = new ClassResolver();
+			}
 		}
 		return self::$instance;
 	}
 
 	/**
-	 * @var f_AOP
-	 */
-	private $aop;
-
-	/**
 	 * @return f_AOP
 	 */
-	private function getAOP()
+	protected function getAOP()
 	{
 		if ($this->aop === null)
 		{
+			require_once(FRAMEWORK_HOME . '/aop/AOP.php');
 			$this->aop = new f_AOP();
-			if (AG_DEVELOPMENT_MODE)
-			{
-				$this->loadInjection();
-			}
 		}
 		return $this->aop;
 	}
 
-	private function loadInjection()
+	protected function loadInjection()
 	{
 		// read config and get document injections
 		$injections = Framework::getConfiguration("injection");
@@ -98,32 +96,10 @@ class ClassResolver implements ResourceResolver
 	 *
 	 * @param string $className Name of researched class
 	 * @return string Path of resource
-	 * @throws ClassNotFoundException if not found
 	 */
 	public function getPath($className)
 	{
-		$path = $this->getRessourcePath($className);
-		if ($path === null)
-		{
-			$matches = array();
-			if (AG_DEVELOPMENT_MODE && preg_match('/(.*)_replaced[0-9]+$/', $className, $matches))
-			{
-				$className = $matches[1];
-				$path = $this->getRessourcePath($className);
-			}
-
-			if ($path === null)
-			{
-				throw new Exception("Could not find $className");
-			}
-		}
-
-		if (AG_DEVELOPMENT_MODE)
-		{
-			$path = $this->rewritePathIfAOP($className, $path);
-		}
-
-		return $path;
+		return $this->cacheDir.DIRECTORY_SEPARATOR.str_replace('_', DIRECTORY_SEPARATOR, $className).DIRECTORY_SEPARATOR."to_include";
 	}
 
 	private function getMaxModifiedTime($path, $aop, $alterations)
@@ -154,7 +130,7 @@ class ClassResolver implements ResourceResolver
 		return $maxMTime;
 	}
 
-	private function rewritePathIfAOP($className, $path, $justGivePath = false)
+	protected function rewritePathIfAOP($className, $path, $justGivePath = false)
 	{
 		$aop = $this->getAOP();
 		if (!$aop->hasAlterations())
@@ -235,6 +211,7 @@ class ClassResolver implements ResourceResolver
 		{
 			throw new Exception(__METHOD__." is not for development mode");
 		}
+		
 		$this->restoreAutoload();
 		$aop = $this->getAOP();
 		$this->loadInjection();
@@ -242,7 +219,7 @@ class ClassResolver implements ResourceResolver
 		foreach ($aop->getAlterations() as $classAlterations)
 		{
 			$className = $classAlterations[0][2];
-			$path = $this->getCachePath($className);
+			$path = $this->getCachePath($className, $this->cacheDir);
 			if (!file_exists($path))
 			{
 				throw new Exception("Could not find $className in ".$this->cacheDir);
@@ -282,6 +259,17 @@ class ClassResolver implements ResourceResolver
 			}
 		}
 	}
+	
+	/**
+	 * Typically used when switching to dev mode: restore files from aop-backup 
+	 * and clean aop folder.
+	 */
+	public function restoreAutoloadFromAOPBackup()
+	{
+		$this->restoreAutoload();
+		f_util_FileUtils::rmdir(f_util_FileUtils::buildChangeCachePath("aop-backup"));
+		f_util_FileUtils::rmdir(f_util_FileUtils::buildCachePath("aop"));
+	}
 
 	/**
 	 * @param string $className Name of researched class
@@ -289,24 +277,11 @@ class ClassResolver implements ResourceResolver
 	 */
 	public function getPathOrNull($className)
 	{
-		$path = $this->getRessourcePath($className);
-		if (AG_DEVELOPMENT_MODE && $path !== null)
-		{
-			$aopPath = $this->rewritePathIfAOP($className, $path);
-			if (file_exists($aopPath))
-			{
-				return $aopPath;
-			}
-		}
-		return $path;
+		return $this->getRessourcePath($className);
 	}
 
-	private function getCachePath($className, $baseDir = null)
+	private function getCachePath($className, $baseDir)
 	{
-		if ($baseDir === null)
-		{
-			$baseDir = $this->cacheDir;
-		}
 		return $baseDir.DIRECTORY_SEPARATOR.str_replace('_', DIRECTORY_SEPARATOR, $className).DIRECTORY_SEPARATOR."to_include";
 	}
 
@@ -318,7 +293,7 @@ class ClassResolver implements ResourceResolver
 		$modulesList = $this->getListOfModulesDependencies();
 
 		$ini = Framework::getConfiguration('autoload');
-
+		
 		// let's do our fancy work
 		foreach ($ini as $entry)
 		{
@@ -330,14 +305,15 @@ class ClassResolver implements ResourceResolver
 				$path = $entry['path'];
 
 				$path = $this->replaceConstants($path);
-
+			
 				// we automatically add our php classes
 				require_once(FRAMEWORK_HOME .'/util/Finder.class.php');
 				$finder = f_util_Finder::type('file')->ignore_version_control()->name('*'.$ext);
+				$finder->follow_link();
 
 				// recursive mapping?
 				$recursive = ((isset($entry['recursive'])) ? $entry['recursive'] : false);
-
+				
 				if (!$recursive)
 				{
 					$finder->maxdepth(0);
@@ -400,7 +376,7 @@ class ClassResolver implements ResourceResolver
 	}
 
 	private function glob($path)
-	{	
+	{
 		if (strpos($path,  '*') !== false  && basename($path) !== '*')
 		{
 			$result = glob($path);
@@ -501,31 +477,21 @@ class ClassResolver implements ResourceResolver
 	{
 		// nothing
 	}
-
+	
+	/**
+	 * @param String $resource
+	 * @return The path of the ressource or null if the intended path does not exists
+	 */
 	function getRessourcePath($resource)
 	{
 		//		echo "getRessourcePath $resource<br/>\n";
-		$cacheFile = $this->getCachePath($resource);
+		$cacheFile = $this->getCachePath($resource, $this->cacheDir);
 		//		echo "$cacheFile\n";
 		if (file_exists($cacheFile))
 		{
 			return $cacheFile;
 		}
 
-		// Define package name
-		$pearBase = PEAR_DIR . DIRECTORY_SEPARATOR . str_replace('_', '/', $resource);
-		$paths = array($pearBase . '.php', $pearBase . '.class.php');
-
-		// Return matched $path.$relativePath
-		foreach ($paths as $path)
-		{
-			if (is_readable($path))
-			{
-				// Save to file cache
-				$this->appendToAutoloadFile($resource, $path);
-				return $path;
-			}
-		}
 		return null;
 	}
 
@@ -537,7 +503,7 @@ class ClassResolver implements ResourceResolver
 	 */
 	public function appendToAutoloadFile($class, $filePath, $override = false)
 	{
-		$cacheFile = $this->getCachePath($class);
+		$cacheFile = $this->getCachePath($class, $this->cacheDir);
 		if (!file_exists($cacheFile))
 		{
 			f_util_FileUtils::mkdir(dirname($cacheFile));
@@ -560,11 +526,6 @@ class ClassResolver implements ResourceResolver
 	public final function getDefinedClasses()
 	{
 		throw new Exception("ClassResolver->getDefinedClasses() is not implemented ; please do it");
-		if (is_null($this->classes))
-		{
-			// TODO
-		}
-		return $this->classes;
 	}
 
 	/**
@@ -641,5 +602,60 @@ class ClassResolver implements ResourceResolver
 	private function replaceConstants($value)
 	{
 		return str_replace($this->keys, $this->reps, $value);
+	}
+}
+
+class ClassResolverDevMode extends ClassResolver 
+{	
+	protected function getAOP()
+	{
+		if ($this->aop === null)
+		{
+			require_once(FRAMEWORK_HOME . '/aop/AOP.php');
+			$this->aop = new f_AOP();
+			$this->loadInjection();
+		}
+		return $this->aop;
+	}
+	
+	public function getPath($className)
+	{
+		$path = $this->getRessourcePath($className);
+		if ($path === null)
+		{
+			$matches = null;
+			if (preg_match('/(.*)_replaced[0-9]+$/', $className, $matches))
+			{
+				$className = $matches[1];
+				$path = $this->getRessourcePath($className);
+			}
+
+			if ($path === null)
+			{
+				throw new Exception("Could not find $className");
+			}
+		}
+
+		$path = $this->rewritePathIfAOP($className, $path);
+
+		return $path;
+	}
+	
+	/**
+	 * @param string $className Name of researched class
+	 * @return string Path of resource or null
+	 */
+	public function getPathOrNull($className)
+	{
+		$path = $this->getRessourcePath($className);
+		if ($path !== null)
+		{
+			$aopPath = $this->rewritePathIfAOP($className, $path);
+			if (file_exists($aopPath))
+			{
+				return $aopPath;
+			}
+		}
+		return $path;
 	}
 }

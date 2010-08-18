@@ -40,7 +40,7 @@ class Framework
 	 */
 	public static function getVersion()
 	{
-		return "3.0.3";
+		return "3.0.4";
 	}
 
 	/**
@@ -537,10 +537,6 @@ require_once(FRAMEWORK_HOME . '/loader/Resolver.class.php');
 require_once(FRAMEWORK_HOME . '/loader/ResourceLoader.class.php');
 require_once(FRAMEWORK_HOME . '/loader/ClassLoader.class.php');
 require_once(FRAMEWORK_HOME . '/loader/Loader.class.php');
-if (AG_DEVELOPMENT_MODE)
-{
-	require_once(FRAMEWORK_HOME."/aop/AOP.php");
-}
 
 function f_errorHandler($errno, $errstr, $errfile, $errline)
 {
@@ -602,7 +598,6 @@ ini_set('include_path', FRAMEWORK_HOME . '/libs/agavi'
 ini_set('arg_separator.output',      '&amp;');
 ini_set('display_errors',            1);
 ini_set('magic_quotes_runtime',      0);
-ini_set('unserialize_callback_func', 'f_autoload');
 
 error_reporting(E_ALL);
 

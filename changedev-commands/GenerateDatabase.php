@@ -2,28 +2,51 @@
 class commands_GenerateDatabase extends commands_AbstractChangeCommand
 {
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getUsage()
 	{
-		return "";
+		return "[moduleName1 moduleName2 ... moduleNameN]";
 	}
 	
+	/**
+	 * @return string
+	 */
 	function getAlias()
 	{
 		return "gdb";
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getDescription()
 	{
 		return "generate database";
 	}
+	
+	/**
+	 * @param Integer $completeParamCount the parameters that are already complete in the command line
+	 * @param String[] $params
+	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
+	 * @return String[] or null
+	 */
+	function getParameters($completeParamCount, $params, $options, $current)
+	{
+		if ($completeParamCount == 0)
+		{
+			$modules = array();
+			foreach (glob("modules/*/persistentdocument", GLOB_ONLYDIR) as $path)
+			{
+				$modules[] = basename(dirname($path));
+			}
+			return $modules;
+		}
+		return null;
+	}
 
 	/**
-	 * @param String[] $params
+	 * @param string[] $params
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
 	 * @see c_ChangescriptCommand::parseArgs($args)
 	 */
@@ -32,7 +55,8 @@ class commands_GenerateDatabase extends commands_AbstractChangeCommand
 		$this->message("== Generate database ==");
 		
 		$this->loadFramework();
-		// create if needed
+		
+		// Create if needed.
 		$pp = f_persistentdocument_PersistentProvider::getInstance(); 
 		if (!$pp->checkConnection())
 		{
@@ -52,31 +76,53 @@ class commands_GenerateDatabase extends commands_AbstractChangeCommand
 			}
 		}
 		
-		// populate the database
+		// Populate the database.
 		list($allowedExtension, $sqlSeparator) = $pp->getScriptFileInfos();
 		if ($allowedExtension === null)
 		{
 			return $this->quitError("Can not generate database for using ".get_class($pp)." for driver");
 		}
-		$this->setupDatabase($pp, $allowedExtension, $sqlSeparator);
+		$this->setupDatabase($pp, $allowedExtension, $sqlSeparator, $params);
 		return null;
 	}
 
 	/**
 	 * @param f_persistentdocument_PersistentProvider $persistentProvider
+	 * @param string $allowedExtension
+	 * @param string $sqlSeparator
+	 * @param array $modules
 	 */
-	private function setupDatabase($persistentProvider, $allowedExtension, $sqlSeparator)
+	private function setupDatabase($persistentProvider, $allowedExtension, $sqlSeparator, $modules = array())
 	{
 		$scripts = array();
 		$array = array();
-			
-		$ms = ModuleService::getInstance();
-		foreach ($ms->getModules() as $module)
+		
+		$packages = array();
+		if (f_util_ArrayUtils::isNotEmpty($modules))
+		{
+			foreach ($modules as $module)
+			{
+				if ($module == 'framework')
+				{
+					$array[] = f_util_FileUtils::buildFrameworkPath('dataobject');
+				}
+				else 
+				{
+					$packages[] = 'modules_' . $module;
+				}
+			}
+		}
+		else 
+		{
+			$packages = ModuleService::getInstance()->getModules();
+			$array[] = f_util_FileUtils::buildFrameworkPath('dataobject');
+		}
+		
+		foreach ($packages as $module)
 		{
 			$array[] = f_util_FileUtils::buildChangeBuildPath(str_replace('_', DIRECTORY_SEPARATOR, $module), 'dataobject');
 			$array[] = f_util_FileUtils::buildWebeditPath(str_replace('_', DIRECTORY_SEPARATOR, $module), 'dataobject');
 		}
-		$array[] = f_util_FileUtils::buildFrameworkPath('dataobject');
 			
 		foreach ($array as $dir)
 		{
@@ -135,7 +181,7 @@ class commands_GenerateDatabase extends commands_AbstractChangeCommand
 			}
 		}
 		
-		//Generate localized label in f_document
+		// Generate localized label in f_document.
 		$this->message('Update table f_document with supported languages ...');
 		foreach (RequestContext::getInstance()->getSupportedLanguages() as $lang) 
 		{
@@ -149,7 +195,7 @@ class commands_GenerateDatabase extends commands_AbstractChangeCommand
 			}
 		}
 		
-		//Generate relation_Id
+		// Generate relation_Id.
 		$this->message('Compile document relation name ...');
 		RelationService::getInstance()->compile();
 		

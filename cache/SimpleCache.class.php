@@ -148,12 +148,24 @@ class f_SimpleCache
 			$finalCacheSpecs = array();
 			foreach (array_unique($cacheSpecs) as $spec)
 			{
-				if (preg_match('/^modules_\w+\/\w+$/', $spec))
+				if (preg_match('/^\[?modules_\w+\/\w+\]?$/', $spec))
 				{
 					try
 					{
-						$model = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($spec);
-						$finalCacheSpecs[] = $model->getName();
+						if (strpos($spec, '[') === false)
+						{
+							$finalCacheSpecs[] = $spec;
+						}
+						else 
+						{
+							$baseModelName = str_replace(array('[', ']'), '' , $spec);
+							$childrenNames = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($baseModelName)->getChildrenNames();
+							$finalCacheSpecs[] = $baseModelName;
+							if (count($childrenNames))
+							{
+								$finalCacheSpecs = array_merge($finalCacheSpecs, $childrenNames);
+							}
+						}
 					}
 					catch (Exception $e)
 					{

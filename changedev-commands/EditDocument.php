@@ -11,12 +11,13 @@ class commands_EditDocument extends commands_AbstractChangedevCommand
 		$usage = "<moduleName> <documentName> <action>\nWhere action in:
 - add-property <propertyName> <propertyType>
 - del-property <propertyName>
-- rename-property <propertyName> <newPropertyName>
+- rename-property <propertyName> <newPropertyName>";
+/*
 - change-property <propertyName>
 - manage-constraints <propertyName>
 - set-indexable <true|false>
 - set-backoffice-indexable <true|false>
-";
+*/
 		return $usage;
 	}
 

@@ -17,10 +17,28 @@ class CacheService extends BaseService
 		}
 		return self::$instance;
 	}
-
+	
+	public function clearFrontofficeScriptsCache()
+	{
+		$directory = f_util_FileUtils::buildChangeCachePath('frontofficeScripts');
+		if (is_dir($directory))
+		{
+			$this->deleteRecursively($directory);
+		}
+	}
+	
 	public function clearTemplateCache()
 	{
 		$directory = f_util_FileUtils::buildChangeCachePath('template');
+		if (is_dir($directory))
+		{
+			$this->deleteRecursively($directory);
+		}
+	}
+
+	public function clearMediaformatCache()
+	{
+		$directory = f_util_FileUtils::buildChangeCachePath('mediaformat');
 		if (is_dir($directory))
 		{
 			$this->deleteRecursively($directory);
@@ -44,12 +62,14 @@ class CacheService extends BaseService
 	
 	public function clearAllWebappCache()
 	{
-		$toClear = array('binding', 'js', 'htmlpreview', 'mediaformat');
+		$toClear = array('binding', 'js', 'htmlpreview');
 		foreach ($toClear as $directory)
 		{
 			$this->clearWebCache($directory);
 		}
 		$this->clearCssCache();
+		$this->clearMediaformatCache();
+		$this->clearFrontofficeScriptsCache();
 		$this->incrementWebappCacheVersion();
 	}
 
@@ -71,6 +91,14 @@ class CacheService extends BaseService
 		}
 		$this->clearTemplateCache();
 		$this->clearSimpleCache();
+	}
+	
+	/**
+	 * Indicates that the baackoffice interface should be reloaded.
+	 */
+	public function boShouldBeReloaded()
+	{
+		$this->incrementWebappCacheVersion();
 	}
 
 	/**

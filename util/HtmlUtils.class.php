@@ -495,6 +495,11 @@ abstract class f_util_HtmlUtils
                     {
                     	unset($attributes["format"]);
                     }
+                 	if (isset($attributes["usemediaalt"]))
+                    {
+                    	unset($attributes["usemediaalt"]);
+                    	$attributes["alt"] = htmlspecialchars($document->getTitle(), ENT_COMPAT, "UTF-8");
+                    }
                     $image = self::buildImage($attributes, $format);
                 }
             }
