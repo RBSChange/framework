@@ -1,0 +1,184 @@
+# Data from http://hapax.qc.ca/iso639-2.fr.htm
+aa:afar
+ab:abkhaze
+af:afrikaans
+ak:akan
+am:amharique
+ar:arabe
+an:aragonais
+as:assamais
+av:avar
+ae:avestique
+ay:aymará
+az:azéri
+ba:bachkir
+bm:bambara
+be:biélorusse
+bn:bengali
+bh:bihari
+bi:bêche-de-mer
+bo:tibétain
+bs:bosniaque
+br:breton
+bg:bulgare
+ca:catalan
+cs:tchèque
+ch:chamorro
+ce:tchétchène
+cu:slavon
+cv:tchouvache
+kw:cornique
+co:corse
+cr:cri
+cy:gallois
+da:danois
+de:allemand
+dv:divéhi (maldivien) 
+dz:bhoutani (dzongkha)
+el:grec moderne (1453- )
+en:anglais
+eo:espéranto
+es:espagnol (castillan)
+et:estonien
+eu:basque
+ee:éhoué (éwé)
+fo:féroïen
+fa:persan (farsi)
+fj:fidjien
+fi:finnois
+fr:français
+fy:frison
+ff:peul
+gd:gaélique écossais (erse)
+ga:irlandais (gaélique irlandais)
+gl:galicien
+gv:mannois
+gn:guarani
+gu:goudjerate
+ha:haoussa
+he:hébreu
+hz:héréro
+hi:hindi
+ho:hiri motou
+hr:croate
+hu:hongrois
+hy:arménien
+ig:igbo (ibo)
+ii:yi du Sétchouan (yi du Sseu-tch'ouan)
+iu:inuktitut (esquimau)
+ie:interlingue
+ia:interlingua
+id:indonésien
+ik:inupiaq (inoupiak)
+is:islandais
+it:italien
+jw:javanais
+ja:japonais
+kl:groenlandais
+kn:canara (kannada)
+ks:cachemiri
+ka:géorgien
+kr:kanouri
+kk:kazakh
+km:khmer (cambodgien)
+ki:kikouyou
+rw:kinyarouanda
+ky:kirghize
+kv:komi (zyriène)
+kg:kikongo
+ko:coréen
+kj:ochikouanyama
+ku:kurde
+lo:lao
+la:latin
+lv:letton (lette)
+ln:lingala
+lt:lituanien
+lb:luxembourgeois
+lg:louganda (ganda)
+mh:marshallais
+ml:malayalam
+mr:marathe
+mk:macédonien
+mg:malgache
+mt:maltais
+mo:moldave
+mn:mongol
+mi:maori
+ms:malais
+my:birman
+na:nauri
+nv:navaho
+nr:ndébélé du Sud
+nd:ndébélé du Nord
+ng:ndonga
+ne:népalais
+nl:néerlandais (flamand)
+nn:norvégien nynorsk
+nb:norvégien bokmål
+no:norvégien
+ny:tchitchéwa, nyandja
+oc:occitan ou langue d'oc (après 1500), provençal
+oj:odjibwé (saulteux, sauteux, saulteaux)
+or:oriya
+om:galla
+pa:pendjabi
+pi:pali
+pl:polonais
+pt:portugais
+ps:pachto (pachtou)
+qu:quéchua (kitchoua)
+rm:rhéto-roman
+ro:roumain
+rn:roundi
+ru:russe
+sg:sango
+sa:sanscrit
+sh:serbo-croate (désuet)
+si:singhalais
+sk:slovaque
+sl:slovène
+se:lapon du Nord (sâme du Nord)
+sm:samoan
+sn:chona (shona)
+sd:sindhi
+so:somali
+st:soutou du Sud (sotho du Sud, sésoutho)
+sq:albanais
+sc:sarde
+sr:serbe
+ss:swazi (siswati)
+su:soundanais
+sw:souahéli
+sv:suédois
+ty:tahitien
+ta:tamoul
+tt:tatar
+te:télougou
+tg:tadjik
+tl:tagal (tagalog)
+th:thaï
+ti:tigrigna
+to:kitonga (Nyassa)
+tn:setchwana (tswana)
+ts:tsonga
+tk:turkmène
+tr:turc
+tw:tchi
+ug:ouïgour
+uk:ukrainien
+ur:ourdou
+uz:ouzbek
+ve:venda
+vi:vietnamien
+vo:volapük
+wa:wallon
+wo:ouolof (wolof)
+xh:xhosa
+yi:yidiche (yiddish)
+yo:yorouba
+za:tchouang (zhuang)
+zh:chinois
+zu:zoulou
+fr:français
+es:espagnol
