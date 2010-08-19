@@ -1,0 +1,3 @@
+Version : 3.0.4
+
+libs/pear must now be created for PEAR_DIR users

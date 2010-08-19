@@ -117,9 +117,11 @@ class commands_InitProject extends commands_AbstractChangeCommand
 			}
 			$newToAutoload[] = $pearDir;
 		}
-		else
+		elseif (isset($computedDeps["PEAR_DIR"]))
 		{
-			$newToAutoload[] = $computedDeps["PEAR_DIR"];
+			$this->message("Symlink ".$computedDeps["PEAR_DIR"]." to libs/pear");
+			f_util_FileUtils::symlink($computedDeps["PEAR_DIR"], "libs/pear");
+			$newToAutoload[] = "libs/pear";
 		}
 		
 		foreach ($computedDeps["change-lib"] as $libName => $libInfo)
