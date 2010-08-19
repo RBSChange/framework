@@ -5,22 +5,31 @@ class f_DataCacheRedisService extends f_DataCacheService
 	const REDIS_REGISTRATION_KEY_PREFIX = 'redisDataCacheRegistration-';
 	
 	private static $instance;
-	private static $redis = null;
+	private $redis = null;
 	
 	protected function __construct()
 	{
-		self::$redis = new Redis();
-			
+		$redis = new Redis();	
 		$config = Framework::getConfiguration("redis");
-		
-		self::$redis->connect($config["serverDataCacheService"]["host"], $config["serverDataCacheService"]["port"]);
-		
-		if (isset($config["authentication"]["password"]) && $config["authentication"]["password"] !== '')
+		$con = $redis->connect($config["server"]["host"], $config["server"]["port"]);
+		if ($con)
 		{
-			self::$redis->auth($config["authentication"]["password"]);
+			if (isset($config["authentication"]))
+			{
+				$redis->auth($config["authentication"]["password"]);
+			}
+			
+			$select = $redis->select($config["server"]["database"]);
+			if ($select)
+			{
+				$this->redis = $redis;
+			}
 		}
 		
-		self::$redis->select($config["serverDataCacheService"]["database"]);
+		if ($this->redis === null)
+		{
+			Framework::debug("DataCacheRedisService : could not obtain redis instance");
+		}
 	}
 
 	/**
@@ -48,9 +57,9 @@ class f_DataCacheRedisService extends f_DataCacheService
 		$data["ttl"] = $item->getTTL();
 		
 		$serialized = serialize($data);
-		self::$redis->set(self::REDIS_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters(), $serialized);
+		$this->redis->set(self::REDIS_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters(), $serialized);
 		
-		self::$redis->setTimeout(self::REDIS_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters(), $item->getTTL());
+		$this->redis->setTimeout(self::REDIS_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters(), $item->getTTL());
 	}
 	
 	/**
@@ -62,7 +71,7 @@ class f_DataCacheRedisService extends f_DataCacheService
 	{
 		$this->registerShutdown();
 		
-		self::$redis->delete(self::REDIS_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters());
+		$this->redis->delete(self::REDIS_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters());
 		
 		if (Framework::isDebugEnabled())
 		{
@@ -83,12 +92,12 @@ class f_DataCacheRedisService extends f_DataCacheService
 	
 	public function clearCommand()
 	{
-		$keys = self::$redis->getKeys(self::REDIS_KEY_PREFIX.'*');
+		$keys = $this->redis->getKeys(self::REDIS_KEY_PREFIX.'*');
 		if (!is_array($keys))
 		{
 			$keys = array();
 		}
-		$registrationKeys = self::$redis->getKeys(self::REDIS_REGISTRATION_KEY_PREFIX.'*');
+		$registrationKeys = $this->redis->getKeys(self::REDIS_REGISTRATION_KEY_PREFIX.'*');
 		if (!is_array($registrationKeys))
 		{
 			$registrationKeys = array();
@@ -96,7 +105,7 @@ class f_DataCacheRedisService extends f_DataCacheService
 		
 		$allKeys = array_merge($keys, $registrationKeys);
 		
-		self::$redis->delete($allKeys);
+		$this->redis->delete($allKeys);
 	}
 	
 	/**
@@ -104,8 +113,8 @@ class f_DataCacheRedisService extends f_DataCacheService
 	 */
 	public function getCacheIdsForPattern($pattern)
 	{
-		$keys = self::$redis->getKeys(self::REDIS_REGISTRATION_KEY_PREFIX.'*');
-		$objects = self::$redis->getMultiple($keys);
+		$keys = $this->redis->getKeys(self::REDIS_REGISTRATION_KEY_PREFIX.'*');
+		$objects = $this->redis->getMultiple($keys);
 		
 		$docs = array();
 		
@@ -132,7 +141,7 @@ class f_DataCacheRedisService extends f_DataCacheService
 	{
 		if (Framework::isDebugEnabled())
 		{
-			Framework::debug("SimpleCache->commitClear");
+			Framework::debug("DataCacheRedisService->commitClear");
 		}
 		if ($this->clearAll)
 		{
@@ -140,12 +149,12 @@ class f_DataCacheRedisService extends f_DataCacheService
 			{
 				Framework::debug("Clear all");
 			}
-			$keys = self::$redis->getKeys(self::REDIS_KEY_PREFIX.'*');
+			$keys = $this->redis->getKeys(self::REDIS_KEY_PREFIX.'*');
 			if (!is_array($keys))
 			{
 				$keys = array();
 			}
-			self::$redis->delete($keys);	
+			$this->redis->delete($keys);	
 			if ($this->dispatch)
 			{
 				f_event_EventManager::dispatchEvent('simpleCacheCleared', null);
@@ -196,7 +205,7 @@ class f_DataCacheRedisService extends f_DataCacheService
 	 */
 	protected function commitClearByDocIds($docIds)
 	{
-		$keys = self::$redis->getMultiple($docIds);
+		$keys = $this->redis->getMultiple($docIds);
 		$keyParameters = array();
 		
 		foreach ($keys as $k)
@@ -209,7 +218,7 @@ class f_DataCacheRedisService extends f_DataCacheService
 			$keyParameters[] = self::REDIS_KEY_PREFIX.$a["keyParameters"];
 		}
 		
-		self::$redis->delete($keyParameters);
+		$this->redis->delete($keyParameters);
 	}
 
 	/**
@@ -221,9 +230,9 @@ class f_DataCacheRedisService extends f_DataCacheService
 		
 		foreach ($dirsToClear as $id)
 		{
-			$keys = array_merge($keys, self::$redis->getKeys(self::REDIS_KEY_PREFIX.$id.'-*'));
+			$keys = array_merge($keys, $this->redis->getKeys(self::REDIS_KEY_PREFIX.$id.'-*'));
 		}
-		self::$redis->delete($keys);
+		$this->redis->delete($keys);
 	}
 	
 	/**
@@ -233,7 +242,7 @@ class f_DataCacheRedisService extends f_DataCacheService
 	{
 		if (!$this->isRegistered($item))
 		{	
-			$object = self::$redis->get(self::REDIS_REGISTRATION_KEY_PREFIX.$item->getNamespace());
+			$object = $this->redis->get(self::REDIS_REGISTRATION_KEY_PREFIX.$item->getNamespace());
 			if ($object !== false)
 			{
 				$object = unserialize($object);
@@ -241,7 +250,7 @@ class f_DataCacheRedisService extends f_DataCacheService
 			$object["pattern"] = $this->optimizeCacheSpecs($item->getPatterns());
 			
 			$serialized = serialize($object);
-			self::$redis->set(self::REDIS_REGISTRATION_KEY_PREFIX.$item->getNamespace(), $serialized);
+			$this->redis->set(self::REDIS_REGISTRATION_KEY_PREFIX.$item->getNamespace(), $serialized);
 			
 			$object = null;
 			$serialized = null;
@@ -251,7 +260,7 @@ class f_DataCacheRedisService extends f_DataCacheService
 		{
 			if (is_numeric($spec))
 			{
-				$object = self::$redis->get(self::REDIS_REGISTRATION_KEY_PREFIX.$spec);
+				$object = $this->redis->get(self::REDIS_REGISTRATION_KEY_PREFIX.$spec);
 				if ($object !== false)
 				{
 					$object = unserialize($object);
@@ -259,7 +268,7 @@ class f_DataCacheRedisService extends f_DataCacheService
 				$object["keyParameters"] = $item->getNamespace().'-'.$item->getKeyParameters();
 				
 				$serialized = serialize($object);
-				self::$redis->set(self::REDIS_REGISTRATION_KEY_PREFIX.$spec, $serialized);
+				$this->redis->set(self::REDIS_REGISTRATION_KEY_PREFIX.$spec, $serialized);
 				
 				$object = null;
 				$serialized = null;
@@ -277,7 +286,7 @@ class f_DataCacheRedisService extends f_DataCacheService
 	{
 		if ($id === null && $keyParameters === null)
 		{
-			$object = self::$redis->get(self::REDIS_REGISTRATION_KEY_PREFIX.$item->getNamespace());
+			$object = $this->redis->get(self::REDIS_REGISTRATION_KEY_PREFIX.$item->getNamespace());
 		
 			return ($object !== false);
 		}
@@ -290,7 +299,7 @@ class f_DataCacheRedisService extends f_DataCacheService
 	 */
 	protected function getData($item)
 	{
-		$object = self::$redis->get(self::REDIS_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters());
+		$object = $this->redis->get(self::REDIS_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters());
 		
 		if ($object !== false)
 		{
@@ -319,4 +328,3 @@ class f_DataCacheRedisService extends f_DataCacheService
 		return $item;
 	}
 }
-?>

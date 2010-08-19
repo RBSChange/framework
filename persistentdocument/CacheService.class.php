@@ -146,7 +146,6 @@ class f_persistentdocument_NoopCacheService extends f_persistentdocument_CacheSe
 class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_CacheService
 {
 	private $memcache;
-	private $host, $port;
 	private $inTransaction;
 	private $deleteTransactionKeys;
 	private $updateTransactionKeys;
@@ -155,17 +154,8 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 	{
 		$this->memcache = new Memcache();
 		$config = Framework::getConfiguration("memcache");
-		if ($this->host === null)
-		{
-			$this->host = $config["serverDataCacheService"]["host"];
-		}
 
-		if ($this->port === null)
-		{
-			$this->port = $config["serverDataCacheService"]["port"];
-		}
-
-		if ($this->memcache->connect($this->host, $this->port) === false)
+		if ($this->memcache->connect($config["server"]["host"], $config["server"]["port"]) === false)
 		{
 			Framework::error("CacheService: could not obtain memcache instance");
 			$this->memcache = null;
@@ -221,14 +211,14 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 
 	/**
 	 * @param integer $key
-	 * @param mixed $object if object if null, perform a delete
+	 * @param mixed $object if object is null, perform a delete
 	 * @return boolean
 	 */
 	public function set($key, $object)
 	{
 		if (!$this->inTransaction)
 		{
-			if (is_null($object))
+			if ($object === null)
 			{
 				return $this->memcache->delete($key);
 			}
@@ -238,11 +228,13 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 				return $this->memcache->set($key, $object, null, 3600);
 			}
 		}
-		else if ($object === null)
+		
+		if ($object === null)
 		{
 			$this->deleteTransactionKeys[$key] = true;
 			return true;
 		}
+		return true;
 	}
 
 	/**
@@ -262,13 +254,13 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 			{
 				$this->updateTransactionKeys[$key] = $object;
 			}
-			return true;
 		}
 		catch (Exception $e)
 		{
 			Framework::exception($e);
 			return false;
 		}
+		return true;
 	}
 
 	/**
@@ -414,7 +406,6 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 	 */
 	public function set($key, $object)
 	{
-		Framework::info(__METHOD__ . ' ' . $key);
 		if (!$this->inTransaction)
 		{
 			try
@@ -422,7 +413,7 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 				$this->writeMode();
 				if ($object === null)
 				{
-					$result = $this->mongoCollection->remove(array("_id" => $key), array("safe" => false));
+					$result = $this->mongoCollection->remove(array("_id" => $key), array("safe" => true));
 				}
 				else 
 				{
@@ -478,7 +469,12 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 	 */
 	public function clear($pattern = null)
 	{
-		return true;
+		if ($pattern === null)
+		{
+			$result = $this->mongoCollection->drop();
+			return $result["ok"] ? true : false;
+		}
+		return $this->mongoCollection->remove(array("_id" => $pattern));
 	}
 
 	// private methods
@@ -578,15 +574,15 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 	{
 		$redis = new Redis();	
 		$config = Framework::getConfiguration("redis");
-		$con = $redis->connect($config["serverDataCacheService"]["host"], $config["serverDataCacheService"]["port"]);
+		$con = $redis->connect($config["server"]["host"], $config["server"]["port"]);
 		if ($con)
 		{
-			if (isset($config["authentication"]["password"]) && $config["authentication"]["password"] !== '')
+			if (isset($config["authentication"]))
 			{
 				$redis->auth($config["authentication"]["password"]);
 			}
 			
-			$select = $redis->select($config["serverDataCacheService"]["database"]);
+			$select = $redis->select($config["server"]["database"]);
 			if ($select)
 			{
 				$this->redis = $redis;
@@ -611,6 +607,7 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 		$instance = new f_persistentdocument_RedisCacheService();
 		if ($instance->redis === null)
 		{
+			Framework::debug("CacheService : could not obtain redis instance");
 			return new f_persistentdocument_NoopCacheService();
 		}
 		return $instance;
@@ -623,7 +620,7 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 	{
 		$begin = microtime(true);
 		
-		$object = $this->getRedis()->get(self::REDIS_KEY_PREFIX.$key);
+		$object = $this->redis->get(self::REDIS_KEY_PREFIX.$key);
 		
 		if (Framework::isDebugEnabled())
 		{
@@ -645,7 +642,7 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 		{
 			$prefixedKeys[] = self::REDIS_KEY_PREFIX.$key;
 		}
-		$cursor = $this->getRedis()->getMultiple($prefixedKeys);
+		$cursor = $this->redis->getMultiple($prefixedKeys);
 		$returnArray = array();
 		
 		foreach ($cursor as $doc)
@@ -666,12 +663,12 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 		{
 			if ($object === null)
 			{
-				$result = $this->getRedis()->delete(self::REDIS_KEY_PREFIX.$key);
+				$result = $this->redis->delete(self::REDIS_KEY_PREFIX.$key);
 			}
 			else 
 			{
 				$serialized = serialize($object);
-				$result = $this->getRedis()->set(self::REDIS_KEY_PREFIX.$key, $serialized);
+				$result = $this->redis->set(self::REDIS_KEY_PREFIX.$key, $serialized);
 			}
 			return ($result == true) ? true : false;
 		}
@@ -697,7 +694,7 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 		if (!$this->inTransaction)
 		{
 			$serialized = serialize($object);
-			$result = $this->getRedis()->set(self::REDIS_KEY_PREFIX.$key, $serialized);
+			$result = $this->redis->set(self::REDIS_KEY_PREFIX.$key, $serialized);
 			return $result;
 		}
 		$this->updateTransactionKeys[self::REDIS_KEY_PREFIX.$key] = $object;
@@ -713,18 +710,6 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 	}
 
 	// private methods
-
-	/**
-	 * @return MongoCollection
-	 */
-	private function getRedis()
-	{
-		if ($this->redis === null)
-		{
-
-		}
-		return $this->redis;
-	}
 
 	public function beginTransaction()
 	{
@@ -744,9 +729,9 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 			{
 				foreach (array_keys($this->deleteTransactionKeys) as $key)
 				{
-					if ($this->getRedis()->exists($key))
+					if ($this->redis->exists($key))
 					{
-						$result = $this->getRedis()->delete($key);
+						$result = $this->redis->delete($key);
 						
 						if ($result != count($this->deleteTransactionKeys))
 						{
@@ -759,7 +744,7 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 			foreach ($this->updateTransactionKeys as $key => $object)
 			{
 				$serialized = serialize($object);
-				$result = $this->getRedis()->set(self::REDIS_KEY_PREFIX.$key, $serialized);
+				$result = $this->redis->set(self::REDIS_KEY_PREFIX.$key, $serialized);
 					
 				if (!$result)
 				{
@@ -852,13 +837,13 @@ class f_persistentdocument_DatabaseCacheService extends f_persistentdocument_Cac
 			{
 				$this->deleteTransactionKeys[$key] = true;
 			}
-			return true;
 		}
 		catch (Exception $e)
 		{
 			Framework::exception($e);
 			return false;
 		}
+		return true;
 	}
 
 	/**
@@ -878,13 +863,13 @@ class f_persistentdocument_DatabaseCacheService extends f_persistentdocument_Cac
 			{
 				$this->updateTransactionKeys[$key] = $object;
 			}
-			return true;
 		}
 		catch (Exception $e)
 		{
 			Framework::exception($e);
 			return false;
 		}
+		return true;
 	}
 	
 	/**
@@ -895,13 +880,13 @@ class f_persistentdocument_DatabaseCacheService extends f_persistentdocument_Cac
 		try
 		{
 			$this->getPersistentProvider()->clearFrameworkCache($pattern);
-			return true;
 		}
 		catch (Exception $e)
 		{
 			Framework::exception($e);
 			return false;
 		}
+		return true;
 	}
 
 

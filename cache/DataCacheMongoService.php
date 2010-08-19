@@ -159,7 +159,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 		$this->writeMode();
 		if (Framework::isDebugEnabled())
 		{
-			Framework::debug("SimpleCache->commitClear");
+			Framework::debug("DataCacheMongoService->commitClear");
 		}
 		if ($this->clearAll)
 		{

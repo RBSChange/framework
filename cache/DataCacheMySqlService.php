@@ -106,7 +106,7 @@ class f_DataCacheMySqlService extends f_DataCacheService
 	{
 		if (Framework::isDebugEnabled())
 		{
-			Framework::debug("SimpleCache->commitClear");
+			Framework::debug("DataCacheMySqlService->commitClear");
 		}
 		if ($this->clearAll)
 		{
@@ -290,4 +290,3 @@ class f_DataCacheMySqlService extends f_DataCacheService
 		return $item;
 	}
 }
-?>

@@ -5,17 +5,17 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 	const MEMCACHE_REGISTRATION_KEY_PREFIX = 'memcacheDataCacheRegistration-';
 	
 	private static $instance;
-	private static $memcache = null;
+	private $memcache = null;
 	
 	protected function __construct()
 	{
-		self::$memcache = new Memcache();
+		$this->memcache = new Memcache();
 		
 		$config = Framework::getConfiguration("memcache");
 		
-		if (self::$memcache->connect($config["serverDataCacheService"]["host"], $config["serverDataCacheService"]["port"]) === false)
+		if ($this->memcache->connect($config["server"]["host"], $config["server"]["port"]) === false)
 		{
-			Framework::error("SimpleCache: could not obtain memcache instance");
+			Framework::error("DataCacheMemcacheService: could not obtain memcache instance");
 		}
 	}
 
@@ -44,7 +44,7 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 		$data["ttl"] = $item->getTTL();
 		
 		$serialized = serialize($data);
-		self::$memcache->set(self::MEMCACHE_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters(), $serialized, null, $item->getTTL());
+		$this->memcache->set(self::MEMCACHE_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters(), $serialized, null, $item->getTTL());
 	}
 	
 	/**
@@ -56,7 +56,7 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 	{
 		$this->registerShutdown();
 		
-		self::$memcache->delete(self::MEMCACHE_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters());
+		$this->memcache->delete(self::MEMCACHE_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters());
 		
 		if (Framework::isDebugEnabled())
 		{
@@ -77,7 +77,7 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 	
 	public function clearCommand()
 	{
-		self::$memcache->flush();
+		$this->memcache->flush();
 	}
 	
 	/**
@@ -85,7 +85,7 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 	 */
 	public function getCacheIdsForPattern($pattern)
 	{
-		$object = self::$memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$pattern);
+		$object = $this->memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$pattern);
 		if (f_util_StringUtils::isNotEmpty($object))
 		{
 			return unserialize($object);
@@ -97,7 +97,7 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 	{
 		if (Framework::isDebugEnabled())
 		{
-			Framework::debug("SimpleCache->commitClear");
+			Framework::debug("DataCacheMemcacheService->commitClear");
 		}
 		if ($this->clearAll)
 		{
@@ -105,7 +105,7 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 			{
 				Framework::debug("Clear all");
 			}
-			self::$memcache->flush();
+			$this->memcache->flush();
 			if ($this->dispatch)
 			{
 				f_event_EventManager::dispatchEvent('simpleCacheCleared', null);
@@ -158,13 +158,13 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 	{
 		foreach ($docIds as $id)
 		{
-			$keys = self::$memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$id);
+			$keys = $this->memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$id);
 			if ($keys !== false)
 			{
 				$keyParameters = unserialize($keys);
 				foreach ($keyParameters as $k)
 				{
-					self::$memcache->delete(self::MEMCACHE_KEY_PREFIX.$k);
+					$this->memcache->delete(self::MEMCACHE_KEY_PREFIX.$k);
 				}
 			}
 		}
@@ -177,7 +177,7 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 	{
 		foreach ($dirsToClear as $id)
 		{
-			$object = self::$memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$id);
+			$object = $this->memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$id);
 			$object = unserialize($object);
 			if ($object === false)
 			{
@@ -185,7 +185,7 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 			}
 			foreach ($object as $keyParameters)
 			{
-				self::$memcache->delete(self::MEMCACHE_KEY_PREFIX.$id.'-'.$keyParameters);
+				$this->memcache->delete(self::MEMCACHE_KEY_PREFIX.$id.'-'.$keyParameters);
 			}
 		}
 	}
@@ -197,11 +197,11 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 	{
 		if (!$this->isRegistered($item))
 		{	
-			self::$memcache->set(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$item->getNamespace(), serialize(array()), null, 0);
+			$this->memcache->set(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$item->getNamespace(), serialize(array()), null, 0);
 			
 			foreach ($this->optimizeCacheSpecs($item->getPatterns()) as $pattern)
 			{
-				$object = self::$memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$pattern);
+				$object = $this->memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$pattern);
 				$object = unserialize($object);
 				if ($object === false)
 				{
@@ -210,7 +210,7 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 				array_push($object, $item->getNamespace());
 				
 				$serialized = serialize($object);
-				self::$memcache->set(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$pattern, $serialized, null, 0);
+				$this->memcache->set(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$pattern, $serialized, null, 0);
 				
 				$object = null;
 				$serialized = null;
@@ -219,7 +219,7 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 		
 		if (!$this->isRegistered($item, null, $item->getKeyParameters()))
 		{	
-			$object = self::$memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$item->getNamespace());
+			$object = $this->memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$item->getNamespace());
 			
 			$object = unserialize($object);
 			if ($object === false)
@@ -229,7 +229,7 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 			array_push($object, $item->getKeyParameters());
 				
 			$serialized = serialize($object);
-			self::$memcache->set(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$item->getNamespace(), $serialized, null, 0);
+			$this->memcache->set(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$item->getNamespace(), $serialized, null, 0);
 			
 			$object = null;
 			$serialized = null;
@@ -239,13 +239,13 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 		{
 			if (is_numeric($spec))
 			{
-				$object = self::$memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$spec);
+				$object = $this->memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$spec);
 				
 				$object = unserialize($object);
 				$object[] = $item->getNamespace().'-'.$item->getKeyParameters();
 				
 				$serialized = serialize($object);
-				self::$memcache->set(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$spec, $serialized, null, 0);
+				$this->memcache->set(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$spec, $serialized, null, 0);
 				
 				$object = null;
 				$serialized = null;
@@ -263,14 +263,14 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 	{
 		if ($spec === null && $keyParameters === null)
 		{
-			$object = self::$memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$item->getNamespace());
+			$object = $this->memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$item->getNamespace());
 		
 			return ($object !== false);
 		}
 		
 		if ($spec === null && $keyParameters !== null)
 		{
-			$object = self::$memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$item->getNamespace());
+			$object = $this->memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$item->getNamespace());
 			if ($object === false)
 			{
 				return false;
@@ -279,7 +279,7 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 			return (in_array($keyParameters, $object));
 		}
 		
-		$object = self::$memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$spec);
+		$object = $this->memcache->get(self::MEMCACHE_REGISTRATION_KEY_PREFIX.$spec);
 		
 		return ($object !== false);
 	}
@@ -290,7 +290,7 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 	 */
 	protected function getData($item)
 	{
-		$object = self::$memcache->get(self::MEMCACHE_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters());
+		$object = $this->memcache->get(self::MEMCACHE_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters());
 		
 		if ($object !== false)
 		{
@@ -319,4 +319,3 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 		return $item;
 	}
 }
-?>

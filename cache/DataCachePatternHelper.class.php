@@ -37,4 +37,3 @@ class f_DataCachePatternHelper
 		return 'ttl/' . $seconds;
 	}
 }
-?>
