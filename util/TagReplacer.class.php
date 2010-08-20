@@ -76,23 +76,28 @@ class f_util_TagReplacer {
 
 	protected final function replaceConstants($content)
 	{
-		$matches = array();
-		preg_match_all("/{([A-Z0-9_:]+)}/", $content, $matches);
-		$constants = $matches[1];
-		foreach ($constants as $constant)
+		$matches = null;
+		if (preg_match_all("/{([A-Z0-9_:]+)}/", $content, $matches))
 		{
-			if (defined($constant))
+			$constants = $matches[1];
+			foreach ($constants as $constant)
 			{
-				$content = str_replace("{".$constant."}", constant($constant), $content);
+				if (defined($constant))
+				{
+					$content = str_replace("{".$constant."}", constant($constant), $content);
+				}
 			}
 		}
-		preg_match_all("/{([a-zA-Z0-9_]+::[A-Z0-9_]+)}/", $content, $matches);
-		$constants = $matches[1];
-		foreach ($constants as $constant)
+		$matches = null;
+		if (preg_match_all("/{([a-zA-Z0-9_]+::[A-Z0-9_]+)}/", $content, $matches))
 		{
-			if (defined($constant))
+			$constants = $matches[1];
+			foreach ($constants as $constant)
 			{
-				$content = str_replace("{".$constant."}", constant($constant), $content);
+				if (defined($constant))
+				{
+					$content = str_replace("{".$constant."}", constant($constant), $content);
+				}
 			}
 		}
 		return $content;
@@ -101,27 +106,30 @@ class f_util_TagReplacer {
 	protected final function replaceLocalizedStrings($content)
 	{
 		$matches = null;
-		preg_match_all('/&(?:amp;){0,1}([a-zA-Z_-]+\.[a-zA-Z0-9_.-]*);/', $content, $matches);
-		$nb = count($matches[0]);
-		if ($nb > 0)
+		$prefixes = f_Locale::getPrefixes();
+		if (preg_match_all('/&(?:amp;){0,1}('.join('|', $prefixes).')\.([a-zA-Z_-]+\.[a-zA-Z0-9_.-]*);/', $content, $matches))
 		{
-			$toreplace = array();
-			$replacements = array();
-			$inBackOffice = RequestContext::getInstance()->getMode() == RequestContext::BACKOFFICE_MODE;
-			for ($i=0; $i<$nb; $i++)
+			$nb = count($matches[0]);
+			if ($nb > 0)
 			{
-				$toreplace[] = $matches[0][$i];
-				if ($inBackOffice)
+				$toreplace = array();
+				$replacements = array();
+				$inBackOffice = RequestContext::getInstance()->getMode() == RequestContext::BACKOFFICE_MODE;
+				for ($i=0; $i<$nb; $i++)
 				{
-					$replacement = f_Locale::translateUI('&' . $matches[1][$i] . ';');	
+					$toreplace[] = $matches[0][$i];
+					if ($inBackOffice)
+					{
+						$replacement = f_Locale::translateUI('&' . $matches[1][$i].'.'.$matches[2][$i] . ';');	
+					}
+					else
+					{
+						$replacement = f_Locale::translate('&' . $matches[1][$i].'.'.$matches[2][$i] . ';');
+					}
+					$replacements[] = str_replace("\n", '\n', $replacement);
 				}
-				else
-				{
-					$replacement = f_Locale::translate('&' . $matches[1][$i] . ';');
-				}
-				$replacements[] = str_replace("\n", '\n', $replacement);
+				$content = str_replace($toreplace, $replacements, $content);
 			}
-			$content = str_replace($toreplace, $replacements, $content);
 		}
 		return $content;
 	}
