@@ -243,29 +243,19 @@ class StyleService extends BaseService
 				$styleByMedia[$mediaType][] = $styleName;
 			}
 
-			foreach ($styleByMedia as $mediaType => $styleNames)
+			foreach ($styleByMedia as $mediaType => $allStyleNames)
 			{
-				$globalFileSystemName = $this->getFileSystemNameForGlobalStyleSheet($mediaType, $styleNames);
-				if (!$this->isFileValid($globalFileSystemName))
+				sort($allStyleNames, SORT_STRING);
+				foreach (array_chunk($allStyleNames, 3) as $styleNames) 
 				{
-					$this->validFile($globalFileSystemName);
-					f_util_FileUtils::mkdir(dirname($globalFileSystemName));
-					$engine = $this->getFullEngineName($mimeContentType);
-					$handle = fopen($globalFileSystemName, 'w');
-					foreach ($styleNames as $styleName) 
-					{
-						fwrite($handle, "/* $styleName START */\n");
-						$css = $this->getCSS($styleName, $engine, $skin);
-						if ($css !== null)
-						{
-							fwrite($handle, $css);
-						}
-						fwrite($handle, "\n/* $styleName END */\n");
-					}
-					fclose($handle);
+					$styleNames[] = $mediaType . '.css';
+					$names = implode(',', $styleNames);
+					$websiteId = website_WebsiteModuleService::getInstance()->getDefaultWebsite()->getId();	
+					if ($websiteId <= 0) {$websiteId = 0;}			
+					$pathPart = array('', 'cache', 'www', 'css', $rc->getProtocol(), $websiteId, $rc->getLang(), $rc->getUserAgentType(), $rc->getUserAgentTypeVersion(), $names);				
+					$inclusionSrc = LinkHelper::getRessourceLink(implode('/', $pathPart))->getUrl();
+					$style[] = '<link rel="stylesheet" href="'.$inclusionSrc.'" type="text/css" media="'.$mediaType.'" />';	
 				}
-                $src = LinkHelper::getRessourceLink(self::CACHE_LOCATION . basename($globalFileSystemName))->getUrl();
-                $style[] = '<link rel="stylesheet" href="'.$src.'" type="text/css" media="'.$mediaType.'" />';
 			}
 		}
 		if (count($style) > 0)

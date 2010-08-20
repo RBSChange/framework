@@ -60,14 +60,30 @@ class CacheService extends BaseService
 		}
 	}
 	
+	public function clearJavascriptCache()
+	{
+		$jsDir = f_util_FileUtils::buildWebCachePath("js");
+		if (is_dir($jsDir))
+		{	
+			foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($jsDir, RecursiveDirectoryIterator::KEY_AS_PATHNAME), RecursiveIteratorIterator::CHILD_FIRST) as $file => $info)
+			{
+				if ($info->isFile() && substr($file, -3) == ".js")
+				{
+					touch($file.".deleted");
+				}
+			}
+		}
+	}
+	
 	public function clearAllWebappCache()
 	{
-		$toClear = array('binding', 'js', 'htmlpreview');
+		$toClear = array('binding', 'htmlpreview');
 		foreach ($toClear as $directory)
 		{
 			$this->clearWebCache($directory);
 		}
 		$this->clearCssCache();
+		$this->clearJavascriptCache();
 		$this->clearMediaformatCache();
 		$this->clearFrontofficeScriptsCache();
 		$this->incrementWebappCacheVersion();

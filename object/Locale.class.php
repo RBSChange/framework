@@ -2,6 +2,7 @@
 class f_Locale
 {
 	private static $cache = array();
+	private static $prefixes = array('modules', 'framework', 'themes');
 
 	const LOCALE_KEY_REGEXP = '&([a-zA-Z_-]+\.[a-zA-Z0-9_.-]*);';
 	const LOOSE_LOCALE_KEY_REGEXP = '&?([a-zA-Z_-]+\.[a-zA-Z0-9_.-]*);?';
@@ -21,6 +22,12 @@ class f_Locale
 	{
 		// empty
 	}
+	
+	public static function getPrefixes()
+	{
+		return self::$prefixes;	
+	}
+	
 
 	public static function isLocaleKey($key)
 	{

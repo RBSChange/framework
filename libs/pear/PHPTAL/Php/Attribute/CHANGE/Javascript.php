@@ -23,17 +23,16 @@ class PHPTAL_Php_Attribute_CHANGE_javascript extends PHPTAL_Php_Attribute
             switch ($attribute)
             {
             	case 'src':
-            		$src = $this->evaluate($value, true);
-					$this->tag->generator->pushCode("\$jsService = JsService::newInstance();\n\$jsService->registerScript('".$src."');\n");
+            		$src = $this->evaluate($value, true);	
+            		$code = '$jsService = JsService::newInstance();$jsService->registerScript("'.$src.'");';
+					$this->tag->generator->pushCode($code);
 					$this->doEcho('$jsService->execute("html")');
-            		$this->tag->generator->pushCode("\$jsService->unregisterScript('".$src."');\n");
 					break;
-					
             	case 'head':
             		$src = $this->evaluate($value, true);
-					$this->tag->generator->pushCode("JsService::getInstance()->registerScript('".$src."');\n");
+            		$code = '$wp = $ctx->__get("website_page");if ($wp !== null) {$wp->addScript("'.$src.'");} else {JsService::getInstance()->registerScript("'.$src.'");};';
+					$this->tag->generator->pushCode($code);
 					break;
-
             	default:
             		$array = $this->evaluate($value, true);
 					$this->tag->generator->pushRawHtml('<script type="text/javascript">');

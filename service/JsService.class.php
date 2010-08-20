@@ -92,6 +92,7 @@ class JsService extends BaseService
 	 */
 	public function unregisterScript($scriptPath)
 	{
+		
 		if ($this === self::getInstance())
 		{
 			if (array_key_exists($scriptPath, self::$scriptRegistry) === true)
@@ -158,15 +159,84 @@ class JsService extends BaseService
 	 */
 	public function execute($mimeContentType = null, $compact = false, $excluded = null)
 	{
-		return $this->generate($mimeContentType, $compact, $this->isSignedMode(), $excluded);
+		$rc = RequestContext::getInstance();
+		if (is_null($mimeContentType))
+		{
+			$mimeContentType = $rc->getMimeContentType();
+		}
+		else
+		{
+			$rc->setMimeContentType($mimeContentType);
+		}
+		
+		if ($this === self::getInstance())
+		{
+			$scriptNames = array_keys(self::$scriptRegistry);
+		}
+		else
+		{
+			$scriptNames = array_keys($this->registery);
+		}
+		if (count($scriptNames) === 0)
+		{
+			return null;
+		}		
+		$scriptNames[] = 'block.js';
+		$names = implode('/', $scriptNames);
+		$websiteId = website_WebsiteModuleService::getInstance()->getDefaultWebsite()->getId();	
+		if ($websiteId <= 0) {$websiteId = 0;}
+		$pathPart = array('', 'cache', 'www', 'js', $websiteId, $rc->getLang(), 0, $names);				
+		$inclusionSrc = LinkHelper::getRessourceLink(implode('/', $pathPart))->getUrl();
+		return '<script src="' . $inclusionSrc . '" type="text/javascript"></script>';
 	}
-
+	
 	public function executeInline($mimeContentType = null, $compact = false)
 	{
-		return $this->generate($mimeContentType, $compact, true);
+		$rc = RequestContext::getInstance();
+		if ($mimeContentType === null)
+		{
+			$mimeContentType = $rc->getMimeContentType();
+		}
+		else
+		{
+			$rc->setMimeContentType($mimeContentType);
+		}	
+		
+		$scriptRegistryOrdered = $this->getComputedRegisteredScripts();
+		$script = array();		
+		if ($mimeContentType == K::HTML)
+		{
+			$script[] = '<script type="text/javascript">';
+		}
+		else
+		{
+			$script[] = '<script type="text/javascript"><![CDATA[';
+		}
+
+		$script[] = "// **** Global Context ****";
+		$script[] = $this->getJS('init');
+		foreach ($scriptRegistryOrdered as $scriptPath => $skin)
+		{
+			$text = $this->getJS($scriptPath);
+			if (!empty($text))
+			{
+				$script[] = "// **** $scriptPath ****";
+				$script[] = str_replace(array('<![CDATA[', ']]>'), '', $text);
+			}
+		}
+						
+		if ($mimeContentType == K::HTML)
+		{
+			$script[] = '</script>';
+		}
+		else
+		{
+			$script[] = ']]></script>';
+		}
+		return implode(K::CRLF, $script);
 	}
 
-	private function readJsDependenciesFile($path, &$declaredDependencies)
+	private function readJsDependenciesFile($path, &$declaredDependencies, &$noReplacementScripts)
 	{
 		echo "Reading $path... ";
 		$doc = new DOMDocument();
@@ -180,6 +250,10 @@ class JsService extends BaseService
 		{
 				
 			$scriptName = $scriptNode->getAttribute("name");
+			if ($scriptNode->getAttribute("noreplacement") === "true")
+			{
+				$noReplacementScripts[$scriptName] = true;
+			}
 			$deps = array();
 			foreach ($xpath->query("dependencies/dependency", $scriptNode) as $depNode)
 			{
@@ -215,11 +289,12 @@ class JsService extends BaseService
 		$moduleService = ModuleService::getInstance();
 		$fileResolver = FileResolver::getInstance();
 		$declaredDependencies = array();
+		$noReplacementScripts = array();
 
 		$frameworkJsFilePath = f_util_FileUtils::buildFrameworkPath('config/jsDependencies.xml');
 		if (file_exists($frameworkJsFilePath))
 		{
-			$this->readJsDependenciesFile($frameworkJsFilePath, $declaredDependencies);
+			$this->readJsDependenciesFile($frameworkJsFilePath, $declaredDependencies, $noReplacementScripts);
 		}
 
 		foreach ($moduleService->getModules() as $packageName)
@@ -230,7 +305,7 @@ class JsService extends BaseService
 			{
 				continue;
 			}
-			$this->readJsDependenciesFile($jsDepsFilePath, $declaredDependencies);
+			$this->readJsDependenciesFile($jsDepsFilePath, $declaredDependencies, $noReplacementScripts);
 		}
 
 		foreach ($declaredDependencies as $scriptName => $deps)
@@ -260,7 +335,7 @@ class JsService extends BaseService
 			$orderedScriptDeps[$script] = $declaredDependencies[$script];
 		}
 		$jsDepsPath = f_util_FileUtils::buildChangeBuildPath('jsDependencies.php');
-		f_util_FileUtils::writeAndCreateContainer($jsDepsPath, '<?php $orderedScripts = unserialize(' . var_export(serialize($orderedScriptDeps), true) . ');', f_util_FileUtils::OVERRIDE);
+		f_util_FileUtils::writeAndCreateContainer($jsDepsPath, '<?php $orderedScripts = unserialize(' . var_export(serialize($orderedScriptDeps), true) . '); $noReplacementScripts = unserialize(' . var_export(serialize($noReplacementScripts), true) . '); ', f_util_FileUtils::OVERRIDE);
 	}
 
 	/**
@@ -268,6 +343,11 @@ class JsService extends BaseService
 	 * @var array<String, String[]>
 	 */
 	private static $orderedScripts;
+	
+	/**
+	 * Initialized by loadOrderedScripts
+	 */
+	private static $noReplacementScripts;
 
 	/**
 	 * Load ordered scripts (by dependencies).
@@ -284,6 +364,7 @@ class JsService extends BaseService
 			}
 			include_once ($jsDepsPath);
 			self::$orderedScripts = $orderedScripts;
+			self::$noReplacementScripts = $noReplacementScripts;
 		}
 	}
 
@@ -385,195 +466,35 @@ class JsService extends BaseService
 	}
 
 	/**
-	 * Executes (renders) the requires scritps.
-	 *
-	 * @param string $mimeContentType Mimi content type to use
-	 * @param boolean $compact Compact generated content
-	 * @return string Scripts URL
+	 * @param $scriptName
+	 * @param f_web_CSSVariables $skin
+	 * @return string | null
 	 */
-	private function generate($mimeContentType = null, $compact = false, $inline = false, $exclude = null)
+	public function getJS($scriptName, $skin = null)
 	{
-		$rc = RequestContext::getInstance();
-		if (is_null($mimeContentType))
+		if ($scriptName === 'init')
 		{
-			$mimeContentType = $rc->getMimeContentType();
+			return  $this->getScriptInit();
 		}
-		else
+		$fileSystemName = $this->getFileSystemName($scriptName);
+		if ($fileSystemName === null)
 		{
-			$rc->setMimeContentType($mimeContentType);
+			Framework::warn(__METHOD__ . ' Script not found: ' . $scriptName);
+			return '';
 		}
-
-		$scriptRegistryOrdered = $this->getComputedRegisteredScripts();
-		if (f_util_ArrayUtils::isNotEmpty($exclude))
+		$this->loadOrderedScripts();
+		$jsScript = file_get_contents($fileSystemName);
+		$this->loadOrderedScripts();
+		if (!array_key_exists($scriptName, self::$noReplacementScripts))
 		{
-			foreach ($exclude as $scriptName => $value)
-			{
-				unset($scriptRegistryOrdered[$scriptName]);
-			}
+			$tagReplacer = new f_util_TagReplacer();
+			$tagReplacer->setReplacement('W_HOST', Framework::getBaseUrl());
+			$tagReplacer->setReplacement('UIHOST', Framework::getUIBaseUrl());
+			$jsScript = $tagReplacer->run($jsScript, true);
 		}
-		
-		
-		$mergedScriptHash = md5(serialize($scriptRegistryOrdered));
-		$mergedScriptFileName = $mergedScriptHash . '-' . RequestContext::getInstance()->getLang() . '.js';
-		$cacheBaseDir = f_util_FileUtils::buildWebCachePath('js');
-		// be sure the directory is writeable
-		f_util_FileUtils::mkdir($cacheBaseDir);
-		$mergedScriptPath = $cacheBaseDir.'/'.$mergedScriptFileName;
-
-		if (file_exists($mergedScriptPath) && $inline == false && $mimeContentType == K::HTML)
-		{
-			$src = LinkHelper::getRessourceLink(self::CACHE_LOCATION . $mergedScriptFileName)->getUrl();
-			$script[] = '<script src="' . $src . '" type="text/javascript"></script>' . K::CRLF;
-		}
-		else
-		{
-			$init = f_util_ArrayUtils::isEmpty($exclude);
-			$mergedFile = null;
-			if ($inline == false && $mimeContentType == K::HTML)
-			{
-				$mergedFile = fopen($mergedScriptPath, 'w');
-			}
-			foreach ($scriptRegistryOrdered as $scriptPath => $skin)
-			{
-				$fileSystemName = $this->getFileSystemName($scriptPath);
-				
-				if (is_null($fileSystemName) === false)
-				{
-					$fileId = array('file' => $scriptPath);
-						
-					if ($init === true)
-					{
-						$init = false;
-						$fileId['init'] = true;
-					}
-					$fileId['lang'] = $rc->getLang();
-					$fileId['uilang'] = $rc->getUILang();
-
-					$fileLocationId = implode('-', $fileId);
-					$fileLocation = $cacheBaseDir.'/'.$fileLocationId;
-						
-					if (!is_null($skin) && $skin)
-					{
-						if (is_numeric($skin))
-						{
-							$fileLocation .= '-skin' . $skin;
-							$fileLocationId .= '-skin' . $skin;
-						}
-						else
-						{
-							$fileLocation .= '-skin-p' . time();
-							$fileLocationId .= '-skin-p' . time();
-						}
-					}
-						
-					$fileLocation .= '.js';
-						
-					if (!file_exists($fileLocation) || (filemtime($fileSystemName) >= filemtime($fileLocation)) || $mergedFile !== null)
-					{
-						$jsScript = implode('', file($fileSystemName));
-
-						if (isset($fileId['init']) && ($fileId['init'] === true))
-						{
-							$jsScript = $this->getScriptInit() . $jsScript;
-						}
-
-						if (!is_null($skin) && $skin)
-						{
-							$skinContent = StyleService::getInstance()->prepareSkin($skin);
-								
-							preg_match_all("/{SKIN::([a-zA-Z0-9_]+)(|[^}]*)?}/", $jsScript, $matches, PREG_SET_ORDER);
-								
-							foreach ($matches as $match)
-							{
-								if (isset($skinContent[$match[1]]) && $skinContent[$match[1]])
-								{
-									$jsScript = str_replace($match[0], $skinContent[$match[1]], $jsScript);
-								}
-								else if ($match[2])
-								{
-									$jsScript = str_replace($match[0], substr($match[2], 1), $jsScript);
-								}
-							}
-						}
-						else
-						{
-							preg_match_all("/{SKIN::([a-zA-Z0-9_]+)(|[^}]*)?}/", $jsScript, $matches, PREG_SET_ORDER);
-								
-							foreach ($matches as $match)
-							{
-								if ($match[2])
-								{
-									$jsScript = str_replace($match[0], substr($match[2], 1), $jsScript);
-								}
-								else
-								{
-									$jsScript = str_replace($match[0], '', $jsScript);
-								}
-							}
-						}
-
-						$tagReplacer = new f_util_TagReplacer();
-						$tagReplacer->setReplacement('W_HOST', Framework::getBaseUrl());
-						$tagReplacer->setReplacement('UIHOST', Framework::getUIBaseUrl());
-						$jsScript = $tagReplacer->run($jsScript, true);
-
-						if ($compact === true)
-						{
-							$jsScript = $this->compact($jsScript);
-						}
-						if ($mergedFile !== null)
-						{
-							fwrite($mergedFile, "// $fileLocationId \n" . $jsScript . "\n\n");
-						}
-						else
-						{
-							$fp = fopen($fileLocation, 'w');
-							if ($fp)
-							{
-								fwrite($fp, $jsScript);
-								fclose($fp);
-							}
-						}
-
-					}
-						
-					if ($inline == true)
-					{
-						if ($mimeContentType == K::HTML)
-						{
-							$src = file_get_contents($fileLocation);
-							$script[] = '<script type="text/javascript">
-					       ' . str_replace(array('<![CDATA[', ']]>'), '', $src) . '
-					       </script>' . K::CRLF;
-						}
-						else
-						{
-							$src = file_get_contents($fileLocation);
-							$script[] = '<script type="text/javascript"><![CDATA[
-					       ' . str_replace(array('<![CDATA[', ']]>'), '', $src) . '
-					       ]]></script>' . K::CRLF;
-						}
-					}
-				}
-			}
-			if ($mergedFile !== null)
-			{
-				fclose($mergedFile);
-				$src = LinkHelper::getRessourceLink(self::CACHE_LOCATION . $mergedScriptFileName)->getUrl();
-				$script[] = '<script src="' . $src . '" type="text/javascript"></script>' . K::CRLF;
-			}
-		}
-
-
-		if (empty($script) === false)
-		{
-			return implode('', $script);
-		}
-
-		return null;
+		return $jsScript;
 	}
-
-
+	
 	/**
 	 * Gets the physical path of the given script.
 	 *
