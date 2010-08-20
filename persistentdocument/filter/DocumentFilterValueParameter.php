@@ -142,8 +142,8 @@ class f_persistentdocument_DocumentFilterValueParameter extends f_persistentdocu
 	 */
 	public function validate($throwException)
 	{
-		$value = $this->value; 
-		if (!$value)
+		$value = $this->value;
+		if ($value === null || $value === '')
 		{
 			if ($throwException)
 			{
