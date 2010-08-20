@@ -323,7 +323,7 @@ class f_DataCacheService extends BaseService
 	protected $clearAll = false;
 	protected $idToClear = array();
 	protected $docIdToClear = array();
-	protected $dispatch = false;
+	protected $dispatch = true;
 	protected $shutdownRegistered = false;
 
 	/**
@@ -507,9 +507,8 @@ class f_DataCacheService extends BaseService
 	/**
 	 * @param f_DataCacheItem $item
 	 * @param String $subCache
-	 * @param Boolean $dispatch (optional)
 	 */
-	public function clearSubCache($item, $subCache, $dispatch = true)
+	public function clearSubCache($item, $subCache)
 	{
 		return true;
 	}
@@ -579,9 +578,8 @@ class f_DataCacheService extends BaseService
 	
 	/**
 	 * @param String $id
-	 * @param Boolean $dispatch (optional)
 	 */
-	protected function clear($id = null, $dispatch = true)
+	protected function clear($id = null)
 	{
 		$this->registerShutdown();
 		if ($id === null)
@@ -592,7 +590,6 @@ class f_DataCacheService extends BaseService
 		{
 			$this->idToClear[$id] = true;
 		}
-		$this->dispatch = $dispatch || $this->dispatch;
 	}
 	
 	/**
@@ -613,7 +610,6 @@ class f_DataCacheService extends BaseService
 		{
 			$this->idToClear = $ids;
 		}
-		$this->dispatch = false;
 	}
 	
 	/**
@@ -625,4 +621,12 @@ class f_DataCacheService extends BaseService
 		$item->setValidity(false);
 		return $item;
 	}
+	/**
+	 * @param Boolean $dispatch
+	 */
+	public function setDispatch($dispatch = true)
+	{
+		$this->dispatch = $dispatch;
+	}
+
 }

@@ -146,21 +146,23 @@ class listener_SimpleCacheListener
 	
     public function onSimpleCacheClearedNode($sender, $params)
     {
+    	$dc = f_DataCacheService::getInstance();
+    	$dc->setDispatch(false);
         if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onSimpleCacheClearedNode");}
 		if (is_array($params))  
 		{
 			if (isset($params['ids']))
 			{
-		    	f_DataCacheService::getInstance()->clearCacheByNamespace($params['ids']);
+		    	$dc->clearCacheByNamespace($params['ids']);
 			}
 			if (isset($params['docIds']))
 			{
-		    	f_DataCacheService::getInstance()->clearCacheByDocId($params['docIds']);
+		    	$dc->clearCacheByDocId($params['docIds']);
 			}
 		}
 		else
 		{
-		    f_DataCacheService::getInstance()->clearAll();
+		    $dc->clearAll();
 		}
     }
     

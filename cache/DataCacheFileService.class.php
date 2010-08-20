@@ -170,9 +170,8 @@ class f_DataCacheFileService extends f_DataCacheService
 	/**
 	 * @param f_DataCacheItem $item
 	 * @param String $subCache
-	 * @param Boolean $dispatch (optional)
 	 */
-	public final function clearSubCache($item, $subCache, $dispatch = true)
+	public final function clearSubCache($item, $subCache)
 	{
 		$this->registerShutdown();
 		$cachePath = $this->getCachePath($item, $subCache);
@@ -188,8 +187,6 @@ class f_DataCacheFileService extends f_DataCacheService
 		{
 			$this->idToClear[$item->getNamespace()][$item->getKeyParameters()] = $subCache;
 		}
-
-		$this->dispatch = $dispatch || $this->dispatch;
 	}
 	
 	protected function commitClear()
