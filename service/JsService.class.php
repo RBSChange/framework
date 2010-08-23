@@ -185,7 +185,8 @@ class JsService extends BaseService
 		$names = implode('/', $scriptNames);
 		$websiteId = website_WebsiteModuleService::getInstance()->getDefaultWebsite()->getId();	
 		if ($websiteId <= 0) {$websiteId = 0;}
-		$pathPart = array('', 'cache', 'www', 'js', $websiteId, $rc->getLang(), 0, $names);				
+		$protocol = website_WebsiteModuleService::getInstance()->getDefaultWebsite()->getProtocol();
+		$pathPart = array('', 'cache', 'www', 'js', $protocol, $websiteId, $rc->getLang(), 0, $names);				
 		$inclusionSrc = LinkHelper::getRessourceLink(implode('/', $pathPart))->getUrl();
 		return '<script src="' . $inclusionSrc . '" type="text/javascript"></script>';
 	}
