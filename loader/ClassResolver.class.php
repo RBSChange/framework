@@ -282,6 +282,10 @@ class ClassResolver implements ResourceResolver
 
 	private function getCachePath($className, $baseDir)
 	{
+		if (!preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $className))
+		{
+			die("Invalid class name");
+		}
 		return $baseDir.DIRECTORY_SEPARATOR.str_replace('_', DIRECTORY_SEPARATOR, $className).DIRECTORY_SEPARATOR."to_include";
 	}
 
