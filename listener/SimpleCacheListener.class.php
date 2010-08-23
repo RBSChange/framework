@@ -153,11 +153,17 @@ class listener_SimpleCacheListener
 		{
 			if (isset($params['ids']))
 			{
-		    	$dc->clearCacheByNamespace($params['ids']);
+		    	foreach (array_keys($params['ids']) as $id)
+		    	{
+					$dc->clearCacheByNamespace($id);
+		    	}
 			}
 			if (isset($params['docIds']))
 			{
-		    	$dc->clearCacheByDocId($params['docIds']);
+				foreach (array_keys($params['docIds']) as $docId)
+		    	{
+					$dc->clearCacheByDocId($docId);
+		    	}
 			}
 		}
 		else
