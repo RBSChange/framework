@@ -223,7 +223,7 @@ class f_DataCacheFileService extends f_DataCacheService
 			$dispatchParams = array();
 			if (!empty($this->idToClear))
 			{
-				foreach ($this->idToClear as $id => $subKey)
+				foreach (array_keys($this->idToClear) as $id)
 				{
 					if (file_exists($cachePath . DIRECTORY_SEPARATOR . $id))
 					{
@@ -238,15 +238,11 @@ class f_DataCacheFileService extends f_DataCacheService
 			}
 			if (!empty($this->docIdToClear))
 			{
-				$docIdsToClear = array();
-				foreach ($this->docIdToClear as $docId => $subKey)
-				{
-					$docIdsToClear[] = $docId;
-				}
+				$docIdsToClear = array_keys($this->docIdToClear);
 				$this->commitClearByDocIds($docIdsToClear);
 				if ($this->dispatch)
 				{
-					$dispatchParams["docIds"] = $this->docIdToClear;
+					$dispatchParams["docIds"] = $docIdsToClear;
 				}
 			}
 			if ($this->dispatch)

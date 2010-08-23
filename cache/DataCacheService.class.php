@@ -593,23 +593,22 @@ class f_DataCacheService extends BaseService
 	}
 	
 	/**
-	 * @param Array $ids
+	 * @param array $patternArray
+	 * @param array $idArray
 	 */
-	protected function commitClearDispatched($ids = null)
+	public function commitClearDispatched($patternArray,  $idArray)
 	{
-		$this->registerShutdown();
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("DataCacheService->commitClearDispatched");
-		}
-		if ($ids === null)
-		{
-			$this->clearAll = true;
-		}
-		else
-		{
-			$this->idToClear = $ids;
-		}
+		$this->idToClear = $patternArray;
+		$this->docIdToClear = $idArray;
+		$this->commitClear();
+	}
+	
+	/**
+	 */
+	public function clearAllDispatched()
+	{
+		$this->clearAll = true;
+		$this->commitClear();
 	}
 	
 	/**

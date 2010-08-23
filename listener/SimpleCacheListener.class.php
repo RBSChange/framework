@@ -151,24 +151,13 @@ class listener_SimpleCacheListener
         if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onSimpleCacheClearedNode");}
 		if (is_array($params))  
 		{
-			if (isset($params['ids']))
-			{
-		    	foreach (array_keys($params['ids']) as $id)
-		    	{
-					$dc->clearCacheByNamespace($id);
-		    	}
-			}
-			if (isset($params['docIds']))
-			{
-				foreach (array_keys($params['docIds']) as $docId)
-		    	{
-					$dc->clearCacheByDocId($docId);
-		    	}
-			}
+			$patternArray =  (isset($params['ids'])) ? $params['ids'] : array();
+			$idArray =  (isset($params['docIds'])) ? $params['docIds'] : array();			
+		    $dc->commitClearDispatched($patternArray, $idArray);
 		}
 		else
 		{
-		    $dc->clearAll();
+		    $dc->clearAllDispatched();
 		}
     }
     
