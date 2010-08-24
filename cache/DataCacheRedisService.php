@@ -152,10 +152,6 @@ class f_DataCacheRedisService extends f_DataCacheService
 				$keys = array();
 			}
 			$this->redis->delete($keys);	
-			if ($this->dispatch)
-			{
-				f_event_EventManager::dispatchEvent('simpleCacheCleared', null);
-			}
 		}
 		else
 		{
@@ -176,19 +172,6 @@ class f_DataCacheRedisService extends f_DataCacheService
 					$docIds[] = self::REDIS_REGISTRATION_KEY_PREFIX.$docId;
 				}
 				self::commitClearByDocIds($docIds);
-			}
-			
-			if ($this->dispatch)
-			{
-				if ($this->idToClear === null)
-				{
-					$this->idToClear = array();
-				}
-				if ($this->docIdToClear === null)
-				{
-					$this->docIdToClear = array();
-				}
-				f_event_EventManager::dispatchEvent('simpleCacheCleared', null, array_merge($this->idToClear, $this->docIdToClear));
 			}
 		}
 		

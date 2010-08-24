@@ -165,10 +165,6 @@ class f_DataCacheMongoService extends f_DataCacheService
 				Framework::debug("Clear all");
 			}
 			$this->mongoCollection->update(array(), array('$set' => array("isValid" => false)), array("multiple" => true, "safe" => true));	
-			if ($this->dispatch)
-			{
-				f_event_EventManager::dispatchEvent('simpleCacheCleared', null);
-			}
 		}
 		else
 		{
@@ -189,19 +185,6 @@ class f_DataCacheMongoService extends f_DataCacheService
 					$docIds[] = $docId;
 				}	
 				self::commitClearByDocIds($docIds);
-			}
-			
-			if ($this->dispatch)
-			{
-				if ($this->idToClear === null)
-				{
-					$this->idToClear = array();
-				}
-				if ($this->docIdToClear === null)
-				{
-					$this->docIdToClear = array();
-				}
-				f_event_EventManager::dispatchEvent('simpleCacheCleared', null, array_merge($this->idToClear, $this->docIdToClear));
 			}
 		}
 		
