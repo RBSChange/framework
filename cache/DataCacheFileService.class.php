@@ -242,7 +242,7 @@ class f_DataCacheFileService extends f_DataCacheService
 				$this->commitClearByDocIds($docIdsToClear);
 				if ($this->dispatch)
 				{
-					$dispatchParams["docIds"] = $docIdsToClear;
+					$dispatchParams["docIds"] = $this->docIdToClear;
 				}
 			}
 			if ($this->dispatch && count($dispatchParams) > 0)
