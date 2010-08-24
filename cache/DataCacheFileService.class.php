@@ -245,7 +245,7 @@ class f_DataCacheFileService extends f_DataCacheService
 					$dispatchParams["docIds"] = $docIdsToClear;
 				}
 			}
-			if ($this->dispatch)
+			if ($this->dispatch && count($dispatchParams) > 0)
 			{
 				f_event_EventManager::dispatchEvent('simpleCacheCleared', null, $dispatchParams);
 			}
