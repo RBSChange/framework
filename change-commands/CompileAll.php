@@ -34,6 +34,7 @@ class commands_CompileAll extends c_ChangescriptCommand
 		$parent = $this->getParent();
 		$parent->executeCommand("compileConfig");
 		$parent->executeCommand("compileDocuments");
+		$parent->executeCommand("compileAop");
 		$parent->executeCommand("compileDocumentFilters");
 		$parent->executeCommand("compileRoles");
 		$parent->executeCommand("compilePermissions");
@@ -43,7 +44,6 @@ class commands_CompileAll extends c_ChangescriptCommand
 		$parent->executeCommand("compileJsDependencies");
 		$parent->executeCommand("compilePhptal");
 		$parent->executeCommand("compileDbSchema");
-		$parent->executeCommand("compileAop");
 		
 		$this->quitOk("All files were compiled");
 	}
