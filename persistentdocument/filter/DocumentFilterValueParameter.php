@@ -99,13 +99,24 @@ class f_persistentdocument_DocumentFilterValueParameter extends f_persistentdocu
 						
 					case BeanPropertyType::DOCUMENT:
 						$converter = new bean_DocumentsConverter();
-						$docs = $converter->convertFromRequestToBeanValue($tmpValue);
-						$values = array();
-						foreach ($docs as $doc) 
+						try 
 						{
-							$values[] = $doc->getLabel();
+							$docs = $converter->convertFromRequestToBeanValue($tmpValue);
+							$values = array();
+							foreach ($docs as $doc) 
+							{
+								$values[] = $doc->getLabel();
+							}
+							$value = f_util_StringUtils::shortenString(implode(', ', $values), 60);
 						}
-						$value = f_util_StringUtils::shortenString(implode(', ', $values), 60);
+						catch (Exception $e)
+						{
+							if (Framework::isDebugEnabled())
+							{
+								Framework::exception($e);
+							}
+							$value = f_Locale::translateUI('&modules.uixul.bo.general.Document-not-found;');
+						}
 						break;
 						
 					case BeanPropertyType::BOOLEAN: 
