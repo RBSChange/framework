@@ -435,6 +435,15 @@ class f_DataCacheService extends BaseService
 	}
 	
 	/**
+	 * @param string $pattern
+	 * @return array
+	 */
+	public function getCacheIdsForPattern($pattern)
+	{
+		return array();
+	}
+	
+	/**
 	 * @param String $namespace
 	 */
 	public function clearCacheByNamespace($namespace)
