@@ -8,8 +8,10 @@ class PHPTAL_Php_Attribute_CHANGE_javascript extends PHPTAL_Php_Attribute
 {
     public function start()
     {
-    	if (website_BlockController::getInstance()->getContext()->inBackofficeMode())
+	$pageContext = website_BlockController::getInstance()->getContext();
+    	if ($pageContext !== null && $pageContext->inBackofficeMode())
     	{
+		// This is a page rendered in Backoffice
     		return;
     	}
         // split attributes to translate
