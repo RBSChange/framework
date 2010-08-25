@@ -35,7 +35,7 @@ class HttpController extends WebController
 	public function shutdown ()
 	{
 		parent::shutdown();
-		LoggerManager::shutdown();
+		//LoggerManager::shutdown();
 	}
 	
 	
