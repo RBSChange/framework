@@ -72,12 +72,38 @@ class f_persistentdocument_DocumentFilterService extends BaseService
 	}
 	
 	/**
+	 * @var array
+	 */
+	private $filtersByAlias;
+	
+	/**
 	 * @param Array $filterInfo
 	 * @return f_persistentdocument_DocumentFilter
 	 */
 	private function getFilterInstanceFromInfo($filterInfo)
 	{
-		$filter = f_util_ClassUtils::newInstance($filterInfo['class']);
+		$class = $filterInfo['class'];
+		
+		// Handle aliases.
+		if ($this->filtersByAlias === null)
+		{
+			$fileName = f_util_FileUtils::buildChangeBuildPath('documentFiltersByAlias.php');
+			if (file_exists($fileName))
+			{
+				$this->filtersByAlias = unserialize(f_util_FileUtils::read($fileName));
+			}
+			else
+			{
+				$this->filtersByAlias = array();
+			}
+		}
+		if (isset($this->filtersByAlias[$class]))
+		{
+			$class = $this->filtersByAlias[$class];
+		}		
+		
+		// Instanciate the filter.
+		$filter = f_util_ClassUtils::newInstance($class);
 		foreach ($filterInfo['parameters'] as $name => $parameterInfo)
 		{
 			$parameter = $filter->getParameter($name);
@@ -314,16 +340,30 @@ class f_persistentdocument_DocumentFilterService extends BaseService
 	public function compileFilters()
 	{
 		$filters = array();
+		$filtersByAlias = array();
 		
 		// Get filters in modules.
 		$modules = ModuleService::getInstance()->getModules();
 		foreach ($modules as $module)
 		{
 			$dir = $this->getFiltersDirectoryByPackage($module);
-			if (!is_null($dir))
+			if ($dir !== null)
 			{
 				foreach ($this->getFiltersInDirectory($dir, $module) as $filterClass)
 				{
+					if (f_util_ClassUtils::methodExists($filterClass, 'getAliases'))
+					{
+						foreach (f_util_ClassUtils::callMethod($filterClass, 'getAliases') as $alias)
+						{
+							$filtersByAlias[$alias]	= $filterClass;
+						}
+					}
+								
+					if (f_util_ClassUtils::callMethod($filterClass, 'isHidden'))
+					{
+						continue;
+					}					
+					
 					$modelName = f_util_ClassUtils::callMethod($filterClass, 'getDocumentModelName');
 					if (!isset($filters[$modelName]))
 					{
@@ -348,8 +388,9 @@ class f_persistentdocument_DocumentFilterService extends BaseService
 		
 		$this->filtersByModel = $filters;
 		
-		// Write filter list in file.
+		// Write filter list in files.
 		f_util_FileUtils::writeAndCreateContainer(f_util_FileUtils::buildChangeBuildPath('documentFilters.php'), serialize($filters), f_util_FileUtils::OVERRIDE);
+		f_util_FileUtils::writeAndCreateContainer(f_util_FileUtils::buildChangeBuildPath('documentFiltersByAlias.php'), serialize($filtersByAlias), f_util_FileUtils::OVERRIDE);
 	}
 	
 	/**
