@@ -93,11 +93,11 @@ class f_persistentdocument_DocumentFilterValueParameter extends f_persistentdocu
 			{
 				switch ($this->propertyInfo->getType())
 				{
-					case 'DateTime' : 
+					case BeanPropertyType::DATETIME: 
 						$value = date_DateFormat::format(date_Calendar::getInstance($tmpValue), f_Locale::translateUI('&modules.filter.bo.general.date-format;'));
 						break;
 						
-					case 'Document':
+					case BeanPropertyType::DOCUMENT:
 						$converter = new bean_DocumentsConverter();
 						$docs = $converter->convertFromRequestToBeanValue($tmpValue);
 						$values = array();
@@ -105,8 +105,13 @@ class f_persistentdocument_DocumentFilterValueParameter extends f_persistentdocu
 						{
 							$values[] = $doc->getLabel();
 						}
-						$value = f_util_StringUtils::shortenString(implode(', ', $values), 80);
+						$value = f_util_StringUtils::shortenString(implode(', ', $values), 60);
 						break;
+						
+					case BeanPropertyType::BOOLEAN: 
+						$value = f_Locale::translateUI('&modules.uixul.bo.general.' . ($tmpValue == 'true' ? 'yes' : 'no') . ';');
+						break;
+						
 					default : 
 						$value = $tmpValue;
 						break;
