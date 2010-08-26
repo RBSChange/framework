@@ -782,8 +782,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 	
 	protected function deleteNodeRecursivelyQuery($treeId)
 	{
-		return 'DELETE FROM f_tree_'.$treeId
-		. ' WHERE node_level > :node_level AND node_path like :node_path)';
+		return 'DELETE FROM f_tree_'.$treeId . ' WHERE node_level > :node_level AND node_path like :node_path';
 	}
 
 	protected function updateChildenCountQuery($treeId)
