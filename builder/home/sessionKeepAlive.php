@@ -20,9 +20,17 @@ users_UserService::getInstance()->pingBackEndUser();
 
 echo session_id() . ' - ' . $_SESSION['sessionKeepAlive'];
 
-
 if (($_SESSION['sessionKeepAlive'] % 10) == 0)
 {
-	$pingURl = task_PlannedTaskRunner::buildPingURL(null);
+	if (defined('NODE_NAME') && ModuleService::getInstance()->moduleExists('clustersafe'))
+	{
+		$node = clustersafe_WebnodeService::getInstance()->getCurrentNode();
+		$baseURL = $node->getBaseUrl();
+	}
+	else
+	{
+		$baseURL = Framework::getBaseUrl();
+	}
+	$pingURl = $baseURL .'/changecron.php';
 	task_PlannedTaskRunner::pingChangeCronURL($pingURl);
 }
