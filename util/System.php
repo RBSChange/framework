@@ -88,8 +88,9 @@ class f_util_System
 	 * @param string $relativeScriptPath to WEBEDIT_HOME
 	 * @param array $arguments
 	 * @param boolean $noFramework
+	 * @param string $baseUrl
 	 */
-	public static function execHTTPScript($relativeScriptPath, $arguments = array(), $noFramework = false)
+	public static function execHTTPScript($relativeScriptPath, $arguments = array(), $noFramework = false, $baseUrl = null)
 	{
 		list($name, $secret) = explode('#', file_get_contents(WEBEDIT_HOME . '/build/config/oauth/script/consumer.txt'));
 		$consumer = new f_web_oauth_Consumer($name, $secret);
@@ -97,7 +98,9 @@ class f_util_System
 		list($name, $secret) = explode('#', file_get_contents(WEBEDIT_HOME . '/build/config/oauth/script/token.txt'));	
 		$token = new f_web_oauth_Token($name, $secret);
 		
-		$request = new f_web_oauth_Request(Framework::getUIBaseUrl() .'/changescriptexec.php', $consumer, f_web_oauth_Request::METHOD_POST);
+		if ($baseUrl === null) {$baseUrl = 'http://'.Framework::getUIDefaultHost();}	
+		
+		$request = new f_web_oauth_Request($baseUrl .'/changescriptexec.php', $consumer, f_web_oauth_Request::METHOD_POST);
 		$request->setParameter('phpscript', $relativeScriptPath);
 		if ($noFramework)
 		{

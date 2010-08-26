@@ -135,16 +135,27 @@ class CacheService extends BaseService
 
 	private function incrementWebappCacheVersion()
 	{
-		$cacheVersionPath = f_util_FileUtils::buildWebCachePath('cacheversion.txt');
-		if (is_readable($cacheVersionPath))
+		try 
 		{
-			$version = intval(file_get_contents($cacheVersionPath))+1;
+			$this->getTransactionManager()->beginTransaction();
+			
+			$cacheVersion = $this->getPersistentProvider()->getSettingValue('modules_uixul', 'cacheVersion');
+			if ($cacheVersion === null)
+			{
+				$cacheVersion = 0;
+			}
+			else
+			{
+				$cacheVersion = intval($cacheVersion) + 1;
+			}
+			
+			$this->getPersistentProvider()->setSettingValue('modules_uixul', 'cacheVersion', $cacheVersion);
+			$this->getTransactionManager()->commit();
 		}
-		else
+		catch (Exception $e)
 		{
-			$version = 0;
+			$this->getTransactionManager()->rollBack($e);	
 		}
-		file_put_contents($cacheVersionPath, $version);
 	}
 	
 	/**

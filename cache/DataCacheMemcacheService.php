@@ -50,9 +50,8 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 	/**
 	 * @param f_DataCacheItem $item
 	 * @param String $subCache
-	 * @param Boolean $dispatch (optional)
 	 */
-	public final function clearSubCache($item, $subCache, $dispatch = true)
+	public final function clearSubCache($item, $subCache)
 	{
 		$this->registerShutdown();
 		
@@ -71,8 +70,6 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 		{
 			$this->idToClear[$item->getNamespace()][$item->getKeyParameters()] = $subCache;
 		}
-
-		$this->dispatch = $dispatch || $this->dispatch;
 	}
 	
 	public function clearCommand()
@@ -106,10 +103,6 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 				Framework::debug("Clear all");
 			}
 			$this->memcache->flush();
-			if ($this->dispatch)
-			{
-				f_event_EventManager::dispatchEvent('simpleCacheCleared', null);
-			}
 		}
 		else
 		{
@@ -130,19 +123,6 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 					$docIds[] = $docId;
 				}
 				self::commitClearByDocIds($docIds);
-			}
-			
-			if ($this->dispatch)
-			{
-				if ($this->idToClear === null)
-				{
-					$this->idToClear = array();
-				}
-				if ($this->docIdToClear === null)
-				{
-					$this->docIdToClear = array();
-				}
-				f_event_EventManager::dispatchEvent('simpleCacheCleared', null, array_merge($this->idToClear, $this->docIdToClear));
 			}
 		}
 		

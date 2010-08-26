@@ -170,9 +170,8 @@ class f_DataCacheFileService extends f_DataCacheService
 	/**
 	 * @param f_DataCacheItem $item
 	 * @param String $subCache
-	 * @param Boolean $dispatch (optional)
 	 */
-	public final function clearSubCache($item, $subCache, $dispatch = true)
+	public final function clearSubCache($item, $subCache)
 	{
 		$this->registerShutdown();
 		$cachePath = $this->getCachePath($item, $subCache);
@@ -188,8 +187,6 @@ class f_DataCacheFileService extends f_DataCacheService
 		{
 			$this->idToClear[$item->getNamespace()][$item->getKeyParameters()] = $subCache;
 		}
-
-		$this->dispatch = $dispatch || $this->dispatch;
 	}
 	
 	protected function commitClear()
@@ -226,7 +223,7 @@ class f_DataCacheFileService extends f_DataCacheService
 			$dispatchParams = array();
 			if (!empty($this->idToClear))
 			{
-				foreach ($this->idToClear as $id => $subKey)
+				foreach (array_keys($this->idToClear) as $id)
 				{
 					if (file_exists($cachePath . DIRECTORY_SEPARATOR . $id))
 					{
@@ -241,18 +238,14 @@ class f_DataCacheFileService extends f_DataCacheService
 			}
 			if (!empty($this->docIdToClear))
 			{
-				$docIdsToClear = array();
-				foreach ($this->docIdToClear as $docId => $subKey)
-				{
-					$docIdsToClear[] = $docId;
-				}
+				$docIdsToClear = array_keys($this->docIdToClear);
 				$this->commitClearByDocIds($docIdsToClear);
 				if ($this->dispatch)
 				{
 					$dispatchParams["docIds"] = $this->docIdToClear;
 				}
 			}
-			if ($this->dispatch)
+			if ($this->dispatch && count($dispatchParams) > 0)
 			{
 				f_event_EventManager::dispatchEvent('simpleCacheCleared', null, $dispatchParams);
 			}
