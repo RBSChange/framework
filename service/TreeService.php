@@ -276,7 +276,11 @@ class TreeService extends BaseService
 	 */
 	public function deleteNodeRecursively($treeNode)
 	{
-		if (!$treeNode->hasChildren()) {$this->deleteNode($treeNode);}
+		if (!$treeNode->hasChildren()) 
+		{
+			$this->deleteNode($treeNode);
+			return;
+		}
 
 		$tm = $this->getTransactionManager();
 		try

@@ -9,6 +9,11 @@ interface f_persistentdocument_DocumentFilter
 	 * @return String
 	 */
 	public static function getDocumentModelName();
+	
+	/**
+	 * @return boolean
+	 */
+	public static function isHidden();
 
 	/**
 	 * @return String
@@ -50,6 +55,14 @@ interface f_persistentdocument_DocumentFilter
  */
 abstract class f_persistentdocument_DocumentFilterImpl implements f_persistentdocument_DocumentFilter
 {
+	/**
+	 * @return boolean
+	 */
+	public static function isHidden()
+	{
+		return false;
+	}
+	
 	/**
 	 * @var f_persistentdocument_DocumentFilterParameter[]
 	 */
@@ -109,11 +122,11 @@ abstract class f_persistentdocument_DocumentFilterImpl implements f_persistentdo
 	}
 	
 	/**
-	 * @param f_persistentdocument_DocumentFilterParameter[] $parameters
+	 * @param f_persistentdocument_DocumentFilterParameter[] $parameter
 	 */
-	protected function setParameter($name, $parameters)
+	protected function setParameter($name, $parameter)
 	{
-		$this->parameters[$name] = $parameters;
+		$this->parameters[$name] = $parameter;
 	}
 	
 	/**

@@ -93,20 +93,36 @@ class f_persistentdocument_DocumentFilterValueParameter extends f_persistentdocu
 			{
 				switch ($this->propertyInfo->getType())
 				{
-					case 'DateTime' : 
+					case BeanPropertyType::DATETIME: 
 						$value = date_DateFormat::format(date_Calendar::getInstance($tmpValue), f_Locale::translateUI('&modules.filter.bo.general.date-format;'));
 						break;
 						
-					case 'Document':
+					case BeanPropertyType::DOCUMENT:
 						$converter = new bean_DocumentsConverter();
-						$docs = $converter->convertFromRequestToBeanValue($tmpValue);
-						$values = array();
-						foreach ($docs as $doc) 
+						try 
 						{
-							$values[] = $doc->getLabel();
+							$docs = $converter->convertFromRequestToBeanValue($tmpValue);
+							$values = array();
+							foreach ($docs as $doc) 
+							{
+								$values[] = $doc->getLabel();
+							}
+							$value = f_util_StringUtils::shortenString(implode(', ', $values), 60);
 						}
-						$value = f_util_StringUtils::shortenString(implode(', ', $values), 80);
+						catch (Exception $e)
+						{
+							if (Framework::isDebugEnabled())
+							{
+								Framework::exception($e);
+							}
+							$value = f_Locale::translateUI('&modules.uixul.bo.general.Document-not-found;');
+						}
 						break;
+						
+					case BeanPropertyType::BOOLEAN: 
+						$value = f_Locale::translateUI('&modules.uixul.bo.general.' . ($tmpValue == 'true' ? 'yes' : 'no') . ';');
+						break;
+						
 					default : 
 						$value = $tmpValue;
 						break;
@@ -142,8 +158,8 @@ class f_persistentdocument_DocumentFilterValueParameter extends f_persistentdocu
 	 */
 	public function validate($throwException)
 	{
-		$value = $this->value; 
-		if (!$value)
+		$value = $this->value;
+		if ($value === null || $value === '')
 		{
 			if ($throwException)
 			{
