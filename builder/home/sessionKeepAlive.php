@@ -6,6 +6,7 @@ require_once WEBEDIT_HOME . "/framework/Framework.php";
 
 $controller = Controller::newInstance("controller_ChangeController");
 $controller->setNoCache();
+RequestContext::getInstance()->setMode(RequestContext::BACKOFFICE_MODE);
 
 if (!isset($_SESSION['sessionKeepAlive']))
 {

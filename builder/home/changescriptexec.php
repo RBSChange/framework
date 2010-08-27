@@ -5,6 +5,7 @@ set_time_limit(0);
 if (!isset($_POST['noframework']) || $_POST['noframework'] !== 'true')
 {
 	require_once WEBEDIT_HOME . "/framework/Framework.php";
+	RequestContext::getInstance()->setMode(RequestContext::BACKOFFICE_MODE);
 }
 else
 {
