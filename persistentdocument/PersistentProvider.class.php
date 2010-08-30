@@ -134,6 +134,10 @@ abstract class f_persistentdocument_PersistentProvider
 		self::$databaseProfile = $profile;
 		if ($wasSetted)
 		{
+			if (Framework::isInfoEnabled())
+			{
+				Framework::info(__METHOD__ . ' ' . $profile);
+			}
 			f_persistentdocument_PersistentProvider::refresh();
 		}
 	}
