@@ -268,7 +268,11 @@ class f_persistentdocument_MemcachedExtCacheService extends f_persistentdocument
 	 */
 	public function clear($pattern = null)
 	{
-		return $this->memcache->flush();
+		if ($pattern === null)
+		{
+			return $this->memcache->flush();
+		}
+		return $this->memcache->delete($pattern);
 	}
 
 	// private methods
@@ -444,7 +448,11 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 	 */
 	public function clear($pattern = null)
 	{
-		return $this->memcache->flush();
+		if ($pattern === null)
+		{
+			return $this->memcache->flush();
+		}
+		return $this->memcache->delete($pattern);
 	}
 
 	// private methods
@@ -882,7 +890,11 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 	 */
 	public function clear($pattern = null)
 	{
-		return true;
+		if ($pattern === null)
+		{
+			return $this->redis->flushDB();
+		}
+		return $this->redis->delete(self::REDIS_KEY_PREFIX.$pattern);
 	}
 
 	// private methods
