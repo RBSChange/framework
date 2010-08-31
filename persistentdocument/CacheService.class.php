@@ -226,11 +226,13 @@ class f_persistentdocument_MemcachedExtCacheService extends f_persistentdocument
 				return $this->memcache->set($key, $object, 3600);
 			}
 		}
-		
-		if ($object === null)
+		else if ($object === null)
 		{
 			$this->deleteTransactionKeys[$key] = true;
-			return true;
+		}
+		else
+		{
+			$this->updateTransactionKeys[$key] = $object;
 		}
 		return true;
 	}
@@ -397,15 +399,16 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 			}
 			else
 			{
-				//return $this->memcache->set($key, $object, MEMCACHE_COMPRESSED, 600);
 				return $this->memcache->set($key, $object, null, 3600);
 			}
 		}
-		
-		if ($object === null)
+		else if ($object === null)
 		{
 			$this->deleteTransactionKeys[$key] = true;
-			return true;
+		}
+		else
+		{
+			$this->updateTransactionKeys[$key] = $object;
 		}
 		return true;
 	}
@@ -604,10 +607,11 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 		else if ($object === null)
 		{
 			$this->deleteTransactionKeys[$key] = true;
-			return true;
 		}
-		
-		$this->updateTransactionKeys[$key] = $object;
+		else
+		{
+			$this->updateTransactionKeys[$key] = $object;
+		}
 		return true;	
 	}
 
@@ -848,13 +852,12 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 		else if ($object === null)
 		{
 			$this->deleteTransactionKeys[self::REDIS_KEY_PREFIX.$key] = true;
-			return true;
 		}
 		else
 		{
 			$this->updateTransactionKeys[self::REDIS_KEY_PREFIX.$key] = $object;
-			return true;	
 		}
+		return true;
 	}
 
 	/**
@@ -1009,6 +1012,10 @@ class f_persistentdocument_DatabaseCacheService extends f_persistentdocument_Cac
 			else if ($object === null)
 			{
 				$this->deleteTransactionKeys[$key] = true;
+			}
+			else
+			{
+				$this->updateTransactionKeys[$key] = $object;
 			}
 		}
 		catch (Exception $e)

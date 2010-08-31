@@ -17,6 +17,11 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 	private $m_treeId;
 	
 	/**
+	 * @var integer
+	 */
+	private $m_providerId;
+	
+	/**
 	 * @var I18nInfo
 	 */
 	private $m_i18nInfo;
@@ -816,6 +821,15 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 	public function getProvider()
 	{
 		return f_persistentdocument_PersistentProvider::getInstance();
+	}
+	
+	/**
+	 * set providerId
+	 * @param string $providerId
+	 */
+	function setProviderId($providerId)
+	{
+		$this->m_providerId = $providerId;
 	}
 
 	protected function checkLoaded()

@@ -67,6 +67,12 @@ abstract class f_persistentdocument_PersistentProvider
 	 * @var array
 	 */
 	protected $connectionInfos;
+		
+	/**
+	 * @var Integer
+	 */
+	private $id;
+	
 
 	private $i18nfieldNames;
 
@@ -104,8 +110,7 @@ abstract class f_persistentdocument_PersistentProvider
 		{
 			// load database configuration into self::$m_classByDriverName
 			self::$m_classByDriverName = Framework::getConfiguration('persistent_provider');
-
-			$connectionInfos = self::_getConnectionInfos($mustValidateServerStatus);
+			$connectionInfos = self::_getConnectionInfos();
 			$driverName = $connectionInfos['protocol'];
 
 			if (!array_key_exists($driverName, self::$m_classByDriverName))
@@ -123,6 +128,14 @@ abstract class f_persistentdocument_PersistentProvider
 			self::$m_instance = $instance;
 		}
 		return self::$m_instance;
+	}
+	
+	/**
+	 * @return Integer
+	 */
+	function getId()
+	{
+		return $this->id;
 	}
 
 	/**
@@ -143,10 +156,9 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @param Boolean $mustValidateServerStatus
 	 * @return String the database profile, 'default' by default
 	 */
-	public static function getDatabaseProfileName(&$mustValidateServerStatus = false)
+	public static function getDatabaseProfileName()
 	{
 		if (self::$databaseProfile === null)
 		{
@@ -155,11 +167,12 @@ abstract class f_persistentdocument_PersistentProvider
 		return self::$databaseProfile;
 	}
 
-	protected static function _getConnectionInfos(&$mustValidateServerStatus)
+	protected static function _getConnectionInfos()
 	{
-		$profileName = self::getDatabaseProfileName($mustValidateServerStatus);
+		$profileName = self::getDatabaseProfileName();
 		$connections = Framework::getConfiguration('databases');
-		return $connections[$connections['connections'][$profileName]];
+		$connection = $connections[$connections['connections'][$profileName]];
+		return $connection;
 	}
 
 	function getConnectionInfos()
@@ -1362,11 +1375,15 @@ abstract class f_persistentdocument_PersistentProvider
 	/**
 	 * @param Integer $documentId
 	 * @param f_persistentdocumentPersistentDocument $persistentDocument
+	 * @param boolean $clearCache
 	 */
-	protected function postUpdate($documentId, $persistentDocument)
+	protected function postUpdate($documentId, $persistentDocument, $clearCache = true)
 	{
-		$this->deleteFromCache($documentId);
 		$this->putInCache($documentId, $persistentDocument);
+		if ($clearCache && $this->useDocumentCache)
+		{
+			$this->getCacheService()->set($documentId, null);
+		}
 	}
 
 	/**

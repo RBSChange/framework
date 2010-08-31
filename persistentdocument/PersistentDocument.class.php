@@ -81,6 +81,13 @@ interface f_persistentdocument_PersistentDocument
 	 * @see PERSISTENTSTATE_NEW, PERSISTENTSTATE_INITIALIZE, PERSISTENTSTATE_LOADED, PERSISTENTSTATE_MODIFIED,PERSISTENTSTATE_DELETED
 	 */
 	function getDocumentPersistentState();
+	
+	
+	/**
+	 * set providerId
+	 * @param string $providerId
+	 */
+	function setProviderId($providerId);
 
 	/**
 	 * set Document Persistent State
