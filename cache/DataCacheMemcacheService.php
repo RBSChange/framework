@@ -9,13 +9,14 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 	
 	protected function __construct()
 	{
-		$this->memcache = new Memcache();
-		
-		$config = Framework::getConfiguration("memcache");
-		
-		if ($this->memcache->connect($config["server"]["host"], $config["server"]["port"]) === false)
+		$provider = new f_MemcacheProvider(Framework::getConfiguration('memcache'));
+		if ($provider->isAvailable())
 		{
-			Framework::error("DataCacheMemcacheService: could not obtain memcache instance");
+			$this->memcache = $provider->getConnection();
+		}
+		else
+		{
+			Framework::info("DataCacheMemcacheService : could not obtain memcache instance");
 		}
 	}
 
@@ -109,7 +110,7 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 			if (!empty($this->idToClear))
 			{
 				$ids = array();
-				foreach ($this->idToClear as $id => $value)
+				foreach (array_keys($this->idToClear) as $id)
 				{
 					$ids[] = $id;
 				}
@@ -118,7 +119,7 @@ class f_DataCacheMemcacheService extends f_DataCacheService
 			if (!empty($this->docIdToClear))
 			{
 				$docIds = array();
-				foreach ($this->docIdToClear as $docId => $value)
+				foreach (array_keys($this->docIdToClear) as $docId)
 				{
 					$docIds[] = $docId;
 				}

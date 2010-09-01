@@ -9,26 +9,14 @@ class f_DataCacheRedisService extends f_DataCacheService
 	
 	protected function __construct()
 	{
-		$redis = new Redis();	
-		$config = Framework::getConfiguration("redis");
-		$con = $redis->connect($config["server"]["host"], $config["server"]["port"]);
-		if ($con)
+		$provider = new f_RedisProvider(Framework::getConfiguration('redis'));
+		if ($provider->isAvailable())
 		{
-			if (isset($config["authentication"]))
-			{
-				$redis->auth($config["authentication"]["password"]);
-			}
-			
-			$select = $redis->select($config["server"]["database"]);
-			if ($select)
-			{
-				$this->redis = $redis;
-			}
+			$this->redis = $provider->getConnection();
 		}
-		
-		if ($this->redis === null)
+		else
 		{
-			Framework::debug("DataCacheRedisService : could not obtain redis instance");
+			Framework::info("DataCacheRedisService : could not obtain redis instance");
 		}
 	}
 
@@ -158,7 +146,7 @@ class f_DataCacheRedisService extends f_DataCacheService
 			if (!empty($this->idToClear))
 			{
 				$ids = array();
-				foreach ($this->idToClear as $id => $value)
+				foreach (array_keys($this->idToClear) as $id)
 				{
 					$ids[] = $id;
 				}
@@ -167,7 +155,7 @@ class f_DataCacheRedisService extends f_DataCacheService
 			if (!empty($this->docIdToClear))
 			{
 				$docIds = array();
-				foreach ($this->docIdToClear as $docId => $value)
+				foreach (array_keys($this->docIdToClear) as $docId)
 				{
 					$docIds[] = self::REDIS_REGISTRATION_KEY_PREFIX.$docId;
 				}

@@ -152,13 +152,14 @@ class f_persistentdocument_MemcachedExtCacheService extends f_persistentdocument
 
 	protected function __construct()
 	{
-		$this->memcache = new Memcached();
-		$config = Framework::getConfiguration("memcache");
-
-		if ($this->memcache->addServer($config["server"]["host"], $config["server"]["port"]) === false)
+		$provider = new f_MemcachedProvider(Framework::getConfiguration('memcache'));
+		if ($provider->isAvailable())
 		{
-			Framework::error("CacheService: could not obtain memcache instance");
-			$this->memcache = null;
+			$this->memcache = $provider->getConnection();
+		}
+		else
+		{
+			Framework::info("CacheService : could not obtain memcache instance");
 		}
 	}
 
@@ -331,13 +332,14 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 
 	protected function __construct()
 	{
-		$this->memcache = new Memcache();
-		$config = Framework::getConfiguration("memcache");
-
-		if ($this->memcache->connect($config["server"]["host"], $config["server"]["port"]) === false)
+		$provider = new f_MemcacheProvider(Framework::getConfiguration('memcache'));
+		if ($provider->isAvailable())
 		{
-			Framework::error("CacheService: could not obtain memcache instance");
-			$this->memcache = null;
+			$this->memcache = $provider->getConnection();
+		}
+		else
+		{
+			Framework::info("CacheService : could not obtain memcache instance");
 		}
 	}
 
@@ -757,21 +759,14 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 
 	protected function __construct()
 	{
-		$redis = new Redis();	
-		$config = Framework::getConfiguration("redis");
-		$con = $redis->connect($config["server"]["host"], $config["server"]["port"]);
-		if ($con)
+		$provider = new f_RedisProvider(Framework::getConfiguration('redis'));
+		if ($provider->isAvailable())
 		{
-			if (isset($config["authentication"]))
-			{
-				$redis->auth($config["authentication"]["password"]);
-			}
-			
-			$select = $redis->select($config["server"]["database"]);
-			if ($select)
-			{
-				$this->redis = $redis;
-			}
+			$this->redis = $provider->getConnection();
+		}
+		else
+		{
+			Framework::info("CacheService : could not obtain redis instance");
 		}
 	}
 

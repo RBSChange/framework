@@ -80,7 +80,7 @@ class f_DataCacheMySqlService extends f_DataCacheService
 	public function clearCommand()
 	{
 		$query = 'DELETE FROM `f_data_cache`';
-		$stmt = self::$pdo->query($query);
+		self::$pdo->query($query);
 	}
 	
 	/**
@@ -118,7 +118,7 @@ class f_DataCacheMySqlService extends f_DataCacheService
 			if (!empty($this->idToClear))
 			{
 				$ids = array();
-				foreach ($this->idToClear as $id => $value)
+				foreach (array_keys($this->idToClear) as $id)
 				{
 					$ids[] = $id;
 				}
@@ -127,7 +127,7 @@ class f_DataCacheMySqlService extends f_DataCacheService
 			if (!empty($this->docIdToClear))
 			{
 				$docIds = array();
-				foreach ($this->docIdToClear as $docId => $value)
+				foreach (array_keys($this->docIdToClear) as $docId)
 				{
 					$docIds[] = $docId;
 				}
