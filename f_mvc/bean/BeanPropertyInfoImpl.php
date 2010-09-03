@@ -306,7 +306,7 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	 */
 	public function getConverter()
 	{
-		if ($this->hasList())
+		if ($this->hasList() && $this->getType() === BeanPropertyType::DOCUMENT)
 		{
 			$list = $this->getList();
 			if ($list instanceof list_persistentdocument_valuededitablelist)
