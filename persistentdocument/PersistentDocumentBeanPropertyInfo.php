@@ -247,7 +247,7 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 	 */
 	public function getConverter()
 	{
-		if ($this->hasList())
+		if ($this->hasList() && $this->isDocument())
 		{
 			$list = $this->getList();
 			if ($list instanceof list_persistentdocument_editablelist)
