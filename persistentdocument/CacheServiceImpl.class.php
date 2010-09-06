@@ -788,7 +788,7 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 			foreach ($this->updateTransactionKeys as $key => $object)
 			{
 				$serialized = serialize($object);
-				$result = $this->redis->set(self::REDIS_KEY_PREFIX.$key, $serialized);
+				$result = $this->redis->set($key, $serialized);
 					
 				if (!$result)
 				{
