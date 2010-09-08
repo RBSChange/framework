@@ -42,17 +42,38 @@ Where options in:
 			// Framework is loaded and configuration may have changed
 			Framework::reloadConfiguration(PROFILE);
 		}
-		if (!file_exists(WEBEDIT_HOME . '/build/config/oauth/script/consumer.txt'))
+		
+		//OAuth identification files
+		if (!is_dir(WEBEDIT_HOME . '/build/config/oauth/script'))
 		{
 			mkdir(WEBEDIT_HOME . '/build/config/oauth/script', 0777, true);
+		}
+		
+		if (Framework::hasConfiguration('oauth/consumer'))
+		{
+			$consumer = Framework::getConfiguration('oauth/consumer');
+			file_put_contents(WEBEDIT_HOME . '/build/config/oauth/script/consumer.txt', $consumer);
+		}
+		else if (!file_exists(WEBEDIT_HOME . '/build/config/oauth/script/consumer.txt'))
+		{
 			$profile = trim(file_get_contents(WEBEDIT_HOME . '/profile'));
-			file_put_contents(WEBEDIT_HOME . '/build/config/oauth/script/consumer.txt', $profile .'#' . $profile);
+			$consumer = $profile .'#' . $profile;
+			file_put_contents(WEBEDIT_HOME . '/build/config/oauth/script/consumer.txt', $consumer);
 		}
-		if (!file_exists(WEBEDIT_HOME . '/build/config/oauth/script/token.txt'))
-		{			
+		
+		if (Framework::hasConfiguration('oauth/token'))
+		{
+			$token = Framework::getConfiguration('oauth/token');
+			file_put_contents(WEBEDIT_HOME . '/build/config/oauth/script/token.txt', $token);
+		}
+		else if (!file_exists(WEBEDIT_HOME . '/build/config/oauth/script/token.txt'))
+		{	
 			$ts = time();
-			file_put_contents(WEBEDIT_HOME . '/build/config/oauth/script/token.txt', md5($ts . mt_rand()) .'#' . md5($ts . mt_rand()));
+			$token = md5($ts . mt_rand()) .'#' . md5($ts . mt_rand());
+			file_put_contents(WEBEDIT_HOME . '/build/config/oauth/script/token.txt', $token);
 		}
+		
+		
 		
 		if ($oldAndCurrent !== null)
 		{

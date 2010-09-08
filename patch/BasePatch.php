@@ -82,7 +82,7 @@ abstract class patch_BasePatch
 		$this->echoReadme();
 		$this->execute();
 		$this->getPersistentProvider()->reset();
-		$this->log("Document cache (memory and 'f_cache' database table) has been cleared.");
+		$this->log("Document cache has been cleared.");
 	}
 
 	/**
