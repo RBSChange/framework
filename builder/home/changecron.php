@@ -22,6 +22,11 @@ RequestContext::getInstance()->setMode(RequestContext::BACKOFFICE_MODE);
 if (defined('NODE_NAME') && ModuleService::getInstance()->moduleExists('clustersafe'))
 {
 	$node = clustersafe_WebnodeService::getInstance()->getCurrentNode();
+	if (!$node->isPublished()) 
+	{
+		Framework::info('Node deactivated cron stoped.');
+		exit(0);
+	}
 	$baseURL = $node->getBaseUrl();
 }
 else
