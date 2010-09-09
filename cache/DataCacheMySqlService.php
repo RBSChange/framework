@@ -2,11 +2,56 @@
 class f_DataCacheMySqlService extends f_DataCacheService
 {
 	private static $instance;
-	private static $pdo = null;
+	
+	/**
+	 * @var PDO
+	 */
+	private $pdo = null;
 	
 	protected function __construct()
 	{
-		self::$pdo = $this->getPersistentProvider()->getDriver();
+		if (Framework::hasConfiguration("mysqlDataCache"))
+		{
+			$config = Framework::getConfiguration("mysqlDataCache");
+			$protocol = 'mysql';
+			$dsnOptions = array();
+			
+			$database = isset($config['database']) ? $config['database'] : null;
+			$password = isset($config['password']) ? $config['password'] : null;
+			$username = isset($config['user']) ? $config['user'] : null;
+	
+			$dsn = $protocol.':';
+			
+			if ($database !== null)
+			{
+				$dsnOptions[] = 'dbname='.$database;	
+			}
+			$unix_socket = isset($config['unix_socket']) ? $config['unix_socket'] : null;
+			if ($unix_socket !== null)
+			{
+				$dsnOptions[] = 'unix_socket='.$unix_socket;
+			}
+			else
+			{
+				$host = isset($config['host']) ? $config['host'] : 'localhost';
+				$dsnOptions[] = 'host='.$host;
+				$port = isset($config['port']) ? $config['port'] : 3306;
+				$dsnOptions[] = 'port='.$port;
+			}
+			
+			$dsn = $protocol.':'.join(';', $dsnOptions);
+	
+			if (Framework::isDebugEnabled())
+			{
+				Framework::debug(__METHOD__ ."($dsn, $username)");
+			}
+			
+			$this->pdo = new PDO($dsn, $username, $password);
+		}
+		else 
+		{
+			$this->pdo = $this->getPersistentProvider()->getDriver();
+		}
 	}
 
 	/**
@@ -38,7 +83,7 @@ class f_DataCacheMySqlService extends f_DataCacheService
 		{
 			$query = 'UPDATE `f_data_cache` SET `text_value` = :content, `ttl` = :ttl, `is_valid` = :valid, `creation_time` = :time WHERE `cache_key` = :id';
 		}
-		$stmt = self::$pdo->prepare($query);
+		$stmt = $this->pdo->prepare($query);
 		
 		$stmt->bindValue(':id', $item->getNamespace().'-'.$item->getKeyParameters(), PDO::PARAM_STR);
 		$stmt->bindValue(':content', $serialized, PDO::PARAM_STR);
@@ -58,7 +103,7 @@ class f_DataCacheMySqlService extends f_DataCacheService
 		$this->registerShutdown();
 		
 		$query = 'DELETE FROM `f_data_cache` WHERE `cache_key` = :id';
-		$stmt = self::$pdo->prepare($query);
+		$stmt = $this->pdo->prepare($query);
 		$stmt->bindValue(':id', $item->getNamespace().'-'.$item->getKeyParameters(), PDO::PARAM_STR);
 		$stmt->execute();
 		
@@ -80,7 +125,7 @@ class f_DataCacheMySqlService extends f_DataCacheService
 	public function clearCommand()
 	{
 		$query = 'DELETE FROM `f_data_cache`';
-		self::$pdo->query($query);
+		$this->pdo->query($query);
 	}
 	
 	/**
@@ -122,7 +167,7 @@ class f_DataCacheMySqlService extends f_DataCacheService
 				{
 					$ids[] = $id;
 				}
-				self::buildInvalidCacheList($ids);
+				$this->buildInvalidCacheList($ids);
 			}
 			if (!empty($this->docIdToClear))
 			{
@@ -131,7 +176,7 @@ class f_DataCacheMySqlService extends f_DataCacheService
 				{
 					$docIds[] = $docId;
 				}
-				self::commitClearByDocIds($docIds);
+				$this->commitClearByDocIds($docIds);
 			}
 		}
 		
@@ -147,11 +192,12 @@ class f_DataCacheMySqlService extends f_DataCacheService
 	{
 		$query = 'SELECT `key_parameters` FROM `f_data_cache_doc_id_registration` WHERE `document_id` = :id';
 		$keyParameters = array();
-		
+		$docId = 0;
+		$stmt = $this->pdo->prepare($query);
+		$stmt->bindParam(':id', $docId, PDO::PARAM_INT);
 		foreach ($docIds as $docId)
 		{
-			$stmt = self::$pdo->prepare($query);
-			$stmt->bindValue(':id', $docId, PDO::PARAM_INT);
+			//$stmt->bindValue(':id', $docId, PDO::PARAM_INT);
 			$stmt->execute();
 			$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			if (f_util_ArrayUtils::isEmpty($result))
@@ -159,15 +205,21 @@ class f_DataCacheMySqlService extends f_DataCacheService
 				continue;
 			}
 			$keyParameters = array_merge($keyParameters, unserialize($result[0]["key_parameters"]));
+			$stmt->closeCursor();
 		}
-		
-		$query = 'DELETE FROM `f_data_cache` WHERE `cache_key` = :id';
-		
-		foreach ($keyParameters as $id)
+		if (count($keyParameters) > 0)
 		{
-			$stmt = self::$pdo->prepare($query);
-			$stmt->bindValue(':id', $id, PDO::PARAM_STR);
-			$stmt->execute();
+			$query2 = 'DELETE FROM `f_data_cache` WHERE `cache_key` = :id';
+			$id = "";
+			$stmt2 = $this->pdo->prepare($query2);
+			$stmt2->bindParam(':id', $id, PDO::PARAM_STR);
+			foreach ($keyParameters as $id)
+			{
+				//Framework::info(var_export($id, true));
+				//$stmt2->bindValue(':id', $id, PDO::PARAM_STR);
+				$stmt2->execute();
+				$stmt2->closeCursor();
+			}
 		}
 	}
 
@@ -177,12 +229,16 @@ class f_DataCacheMySqlService extends f_DataCacheService
 	protected function buildInvalidCacheList($dirsToClear)
 	{
 		$query = 'DELETE FROM `f_data_cache` WHERE `cache_key` LIKE :id';
-		
+		$id = "";
+		$stmt = $this->pdo->prepare($query);
+		$stmt->bindParam(':id', $id, PDO::PARAM_STR);
 		foreach ($dirsToClear as $id)
 		{
-			$stmt = self::$pdo->prepare($query);
-			$stmt->bindValue(':id', $id.'-%', PDO::PARAM_STR);
+			$id .= "-%";
+			//$stmt->bindValue(':id', $id.'-%', PDO::PARAM_STR);
+			//Framework::info(__METHOD__." : ".var_export($stmt, true));
 			$stmt->execute();
+			$stmt->closeCursor();
 		}
 	}
 	
@@ -204,35 +260,46 @@ class f_DataCacheMySqlService extends f_DataCacheService
 			$tm->rollBack($e);
 		}
 		
-		foreach ($item->getPatterns() as $spec)
+		if (count($item->getPatterns()) > 0)
 		{
-			if (is_numeric($spec))
+			$query = 'SELECT `key_parameters` FROM `f_data_cache_doc_id_registration` WHERE `document_id` = :id';
+			$stmt = $this->pdo->prepare($query);
+			$query2 = 'UPDATE `f_data_cache_doc_id_registration` SET `key_parameters` = :content WHERE `document_id` = :id';
+			$stmt2 = $this->pdo->prepare($query2);
+			$query3 = 'INSERT INTO `f_data_cache_doc_id_registration` (`document_id`, `key_parameters`) VALUES (:id, :content)';
+			$stmt3 = $this->pdo->prepare($query3);
+			foreach ($item->getPatterns() as $spec)
 			{
-				$query = 'SELECT `key_parameters` FROM `f_data_cache_doc_id_registration` WHERE `document_id` = :id';
-				$stmt = self::$pdo->prepare($query);
-				$stmt->bindValue(':id', $spec, PDO::PARAM_INT);
-				$stmt->execute();
-				$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-				if (f_util_ArrayUtils::isNotEmpty($result))
+				if (is_numeric($spec))
 				{
-					$obj = unserialize($result[0]["key_parameters"]);
-					$obj[] = $item->getNamespace().'-'.$item->getKeyParameters();
-					$serialized = serialize($obj);
-					$query2 = 'UPDATE `f_data_cache_doc_id_registration` SET `key_parameters` = :content WHERE `document_id` = :id';
-					$stmt2 = self::$pdo->prepare($query2);
-					$stmt2->bindValue(':id', $spec, PDO::PARAM_INT);
-					$stmt2->bindValue(':content', $serialized, PDO::PARAM_STR);
-					$stmt2->execute();
-				}
-				else 
-				{
-					$obj = array($item->getNamespace().'-'.$item->getKeyParameters());
-					$serialized = serialize($obj);
-					$query2 = 'INSERT INTO `f_data_cache_doc_id_registration` (`document_id`, `key_parameters`) VALUES (:id, :content)';
-					$stmt2 = self::$pdo->prepare($query2);
-					$stmt2->bindValue(':id', $spec, PDO::PARAM_INT);
-					$stmt2->bindValue(':content', $serialized, PDO::PARAM_STR);
-					$stmt2->execute();
+					$stmt->bindValue(':id', $spec, PDO::PARAM_INT);
+					$stmt->execute();
+					$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+					$stmt->closeCursor();
+					if (f_util_ArrayUtils::isNotEmpty($result))
+					{
+						$obj = unserialize($result[0]["key_parameters"]);
+						$res = array();
+						foreach (array_values($obj) as $v)
+						{
+							$res[$v] = true;
+						}
+						$obj = array_keys($res);
+						$serialized = serialize($obj);
+						$stmt2->bindValue(':id', $spec, PDO::PARAM_INT);
+						$stmt2->bindValue(':content', $serialized, PDO::PARAM_STR);
+						$stmt2->execute();
+						$stmt2->closeCursor();
+					}
+					else 
+					{
+						$obj = array($item->getNamespace().'-'.$item->getKeyParameters());
+						$serialized = serialize($obj);
+						$stmt3->bindValue(':id', $spec, PDO::PARAM_INT);
+						$stmt3->bindValue(':content', $serialized, PDO::PARAM_STR);
+						$stmt3->execute();
+						$stmt3->closeCursor();
+					}
 				}
 			}
 		}
@@ -245,7 +312,7 @@ class f_DataCacheMySqlService extends f_DataCacheService
 	protected function getData($item)
 	{
 		$query = 'SELECT `is_valid`, `creation_time`, `ttl`, `text_value` FROM `f_data_cache` WHERE `cache_key` = :id';
-		$stmt = self::$pdo->prepare($query);
+		$stmt = $this->pdo->prepare($query);
 		$stmt->bindValue(':id', $item->getNamespace().'-'.$item->getKeyParameters(), PDO::PARAM_STR);
 		$stmt->execute();
 		

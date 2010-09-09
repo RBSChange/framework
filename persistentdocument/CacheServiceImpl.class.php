@@ -776,11 +776,6 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 					if ($this->redis->exists($key))
 					{
 						$result = $this->redis->delete($key);
-						
-						if ($result != count($this->deleteTransactionKeys))
-						{
-							return false;
-						}
 					}
 				}
 			}
