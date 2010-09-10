@@ -157,21 +157,22 @@ abstract class f_util_HtmlUtils
         $attributes = self::parseAttributes(trim($matches[1]));
         $content = $matches[2];
         
-        //Check popup
-        if (isset($attributes['popup']) && $attributes['popup'] == 'true')
+        $classes = isset($attributes['class']) ? explode(' ', $attributes['class']) : array();
+  
+        //Deprecated attribute
+        if (isset($attributes['popup']))
         {
-            $attributes['onclick'] = 'return accessiblePopup(this);';
             unset($attributes['popup']);
-            
-            if (isset($attributes['class']) && !empty($attributes['class']))
+            if (!in_array('popup', $classes))
             {
-                $attributes['class'] .= ' popup';
+            	$classes[] = 'popup';
             }
-            else
-            {
-               $attributes['class'] = 'popup'; 
-            }
-            // FIX #583 - If we have a popup link, make the title RGAA compatible
+        }
+        
+        if (in_array('popup', $classes))
+        {
+        	 $attributes['onclick'] = 'return accessiblePopup(this);';
+        	// FIX #583 - If we have a popup link, make the title RGAA compatible
             if (isset($attributes['title']))
             {
             	$attributes['title'] .= ' ' . f_Locale::translate('&framework.util.htmlutils.popupTitleAddition;'); 
@@ -179,14 +180,39 @@ abstract class f_util_HtmlUtils
             else 
             {
             	$attributes['title'] =  f_Locale::translate('&framework.util.htmlutils.popupTitleAddition;'); 
-            }
-            
+            }        	
         }
         
+        if (count($classes))
+        {
+        	$attributes['class'] = implode(' ', $classes);
+        }
+        
+        $documentId  = 0;
+        if (isset($attributes['rel']))
+        {
+        	foreach (explode(',', $attributes['rel']) as $rel) 
+        	{
+        		if (strpos($rel, 'cmpref:') === 0)
+        		{
+        			$documentId = intval(substr($rel, 7));
+        			break;
+        		}
+        	}
+        }
+        
+        //Deprecated attribute
         if (isset($attributes['cmpref']))
         {
-            $documentId = intval($attributes['cmpref']);
-            unset($attributes['cmpref']);
+        	if ($documentId == 0)
+        	{
+        		$documentId = intval($attributes['cmpref']);
+        	}
+        	unset($attributes['cmpref']);
+        }
+        
+        if ($documentId > 0)
+        {  
             try
             {
                 return self::renderDocumentLink($documentId, $attributes, $content);
@@ -205,10 +231,6 @@ abstract class f_util_HtmlUtils
 	        if (isset($attributes['lang']))
 	        {
 	            $lang = $attributes['lang'];
-	        } 
-	        else if (isset($attributes['xml:lang']))
-	        {
-	            $lang = $attributes['xml:lang'];
 	        }
 	        else
 	        {
@@ -313,7 +335,7 @@ abstract class f_util_HtmlUtils
     private static function buildBrokenLink ($documentId, $content)
     {
         Framework::warn(__METHOD__ . ' Broken document link (ID=' . $documentId . ')');
-        return '<a href= "javascript:;" class= "link-broken">' . $content . '</a>';
+        return '<a href="#" class= "link-broken">' . $content . '</a>';
     }
     
     /**

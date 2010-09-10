@@ -954,8 +954,8 @@ class indexer_IndexService extends BaseService
 			$label = $document->getLabel();
 		}
 		$lang = RequestContext::getInstance()->getLang();
-		$escapedLabel = htmlspecialchars(f_Locale::translateUI($label), null, 'UTF-8');
-		$attributes['htmllink'] = '<a class="link" href="javascript:;" cmpref="'.$document->getId().'" lang="'.$lang.'" xml:lang="'.$lang.'">'.$escapedLabel.'</a>';
+		$escapedLabel = htmlspecialchars(f_Locale::translateUI($label), ENT_NOQUOTES, 'UTF-8');
+		$attributes['htmllink'] = '<a class="link" href="#" rel="cmpref:' . $document->getId() . '" lang="' . $lang . '">' . $escapedLabel . '</a>';
 		if (!($document instanceof generic_persistentdocument_folder))
 		{
 			$attributes['block'] = str_replace('/', '_', $model->getName());
