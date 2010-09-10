@@ -676,9 +676,12 @@ class f_AOP
 			{
 				if ($paramName === "adviceParameters")
 				{
-					foreach ($paramValue as $adviceParam => $adviceValue)
+					if ($paramValue !== null)
 					{
-						$adviceParameters .= '$'.$adviceParam.' = '.$adviceValue.";\n";
+						foreach ($paramValue as $adviceParam => $adviceValue)
+						{
+							$adviceParameters .= '$'.$adviceParam.' = '.$adviceValue.";\n";
+						}
 					}
 				}
 				else
