@@ -47,11 +47,11 @@ class commands_ResetDatabase extends commands_AbstractChangeCommand
 		$parent->executeCommand("dropDatabase");
 		$parent->executeCommand("compileDocuments");
 		$parent->executeCommand("generateDatabase");
+		$parent->executeCommand("clearSimplecache");
+		$parent->executeCommand("clearDatacache");
 		$parent->executeCommand("compileAll");
 		$parent->executeCommand("importInitData");
 		$parent->executeCommand("initPatchDb");
-		$parent->executeCommand("clearSimplecache");
-		
 		$this->quitOk("You now need to disconnect from the backoffice and reconnect.");
 	}
 }
