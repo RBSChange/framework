@@ -103,7 +103,7 @@ class tree_parser_XmlTreeParser extends tree_parser_TreeParser
 	const BLOCK_ATTRIBUTE = 'block';
 	
 	// Default HTML link template :
-	const DEFAULT_HTMLLINK_TEMPLATE = '<a class="link" href="javascript:;" cmpref="%s" lang="%s" xml:lang="%s">%s</a>';
+	const DEFAULT_HTMLLINK_TEMPLATE = '<a class="link" href="#" rel="cmpref:%s" lang="%s" xml:lang="%s">%s</a>';
 	
 	// "Root folder" document's type :
 	const ROOT_NODE_TYPE = 'modules_generic/rootfolder';
