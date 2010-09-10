@@ -13,33 +13,26 @@ class f_DataCacheMySqlService extends f_DataCacheService
 		if (Framework::hasConfiguration("mysqlDataCache"))
 		{
 			$config = Framework::getConfiguration("mysqlDataCache");
-			$protocol = 'mysql';
 			$dsnOptions = array();
 			
-			$database = isset($config['database']) ? $config['database'] : null;
 			$password = isset($config['password']) ? $config['password'] : null;
 			$username = isset($config['user']) ? $config['user'] : null;
-	
-			$dsn = $protocol.':';
 			
-			if ($database !== null)
+			if (isset($config['database']))
 			{
-				$dsnOptions[] = 'dbname='.$database;	
+				$dsnOptions[] = 'dbname='.$config['database'];	
 			}
-			$unix_socket = isset($config['unix_socket']) ? $config['unix_socket'] : null;
-			if ($unix_socket !== null)
+			if (isset($config['unix_socket']))
 			{
-				$dsnOptions[] = 'unix_socket='.$unix_socket;
+				$dsnOptions[] = 'unix_socket='.$config['unix_socket'];
 			}
 			else
 			{
-				$host = isset($config['host']) ? $config['host'] : 'localhost';
-				$dsnOptions[] = 'host='.$host;
-				$port = isset($config['port']) ? $config['port'] : 3306;
-				$dsnOptions[] = 'port='.$port;
+				$dsnOptions[] = 'host='.(isset($config['host']) ? $config['host'] : 'localhost');
+				$dsnOptions[] = 'port='.(isset($config['port']) ? $config['port'] : 3306);
 			}
 			
-			$dsn = $protocol.':'.join(';', $dsnOptions);
+			$dsn = 'mysql:'.join(';', $dsnOptions);
 	
 			if (Framework::isDebugEnabled())
 			{
@@ -163,19 +156,13 @@ class f_DataCacheMySqlService extends f_DataCacheService
 			if (!empty($this->idToClear))
 			{
 				$ids = array();
-				foreach (array_keys($this->idToClear) as $id)
-				{
-					$ids[] = $id;
-				}
+				$ids = array_keys($this->idToClear);
 				$this->buildInvalidCacheList($ids);
 			}
 			if (!empty($this->docIdToClear))
 			{
 				$docIds = array();
-				foreach (array_keys($this->docIdToClear) as $docId)
-				{
-					$docIds[] = $docId;
-				}
+				$docIds = array_keys($this->docIdToClear);
 				$this->commitClearByDocIds($docIds);
 			}
 		}
@@ -197,7 +184,6 @@ class f_DataCacheMySqlService extends f_DataCacheService
 		$stmt->bindParam(':id', $docId, PDO::PARAM_INT);
 		foreach ($docIds as $docId)
 		{
-			//$stmt->bindValue(':id', $docId, PDO::PARAM_INT);
 			$stmt->execute();
 			$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			if (f_util_ArrayUtils::isEmpty($result))
@@ -215,8 +201,6 @@ class f_DataCacheMySqlService extends f_DataCacheService
 			$stmt2->bindParam(':id', $id, PDO::PARAM_STR);
 			foreach ($keyParameters as $id)
 			{
-				//Framework::info(var_export($id, true));
-				//$stmt2->bindValue(':id', $id, PDO::PARAM_STR);
 				$stmt2->execute();
 				$stmt2->closeCursor();
 			}
@@ -235,8 +219,6 @@ class f_DataCacheMySqlService extends f_DataCacheService
 		foreach ($dirsToClear as $id)
 		{
 			$id .= "-%";
-			//$stmt->bindValue(':id', $id.'-%', PDO::PARAM_STR);
-			//Framework::info(__METHOD__." : ".var_export($stmt, true));
 			$stmt->execute();
 			$stmt->closeCursor();
 		}
@@ -264,6 +246,8 @@ class f_DataCacheMySqlService extends f_DataCacheService
 		{
 			$query = 'SELECT `key_parameters` FROM `f_data_cache_doc_id_registration` WHERE `document_id` = :id';
 			$stmt = $this->pdo->prepare($query);
+			$spec = 0;
+			$stmt->bindParam(':id', $spec, PDO::PARAM_INT);
 			$query2 = 'UPDATE `f_data_cache_doc_id_registration` SET `key_parameters` = :content WHERE `document_id` = :id';
 			$stmt2 = $this->pdo->prepare($query2);
 			$query3 = 'INSERT INTO `f_data_cache_doc_id_registration` (`document_id`, `key_parameters`) VALUES (:id, :content)';
@@ -272,7 +256,6 @@ class f_DataCacheMySqlService extends f_DataCacheService
 			{
 				if (is_numeric($spec))
 				{
-					$stmt->bindValue(':id', $spec, PDO::PARAM_INT);
 					$stmt->execute();
 					$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 					$stmt->closeCursor();
