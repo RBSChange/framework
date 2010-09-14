@@ -97,6 +97,7 @@ class commands_EditDocument extends commands_AbstractChangedevCommand
 					break;
 			}
 		}
+		return null;
 	}
 
 	/**
@@ -129,9 +130,10 @@ class commands_EditDocument extends commands_AbstractChangedevCommand
 				return $this->addProperty($moduleName, $documentName, $params[3], $params[4]);
 				break;
 		}
+		return null;
 	}
 
-	// private methods
+	// Private methods.
 
 	private function getEditableProperties($moduleName, $documentName)
 	{
@@ -295,6 +297,7 @@ f_persistentdocument_PersistentProvider::getInstance()->delProperty('$moduleName
 		if ($newProp->isDocument())
 		{
 			$this->getParent()->executeCommand("compile-db-schema");
+			$compileSchema = '$this->execChangeCommand(\'compile-db-schema\');' . "\n";
 		}
 		
 		$newPath = "modules/$moduleName/persistentdocument/$documentName.xml";
@@ -310,7 +313,7 @@ Use 'changedev.php create-patch $moduleName' to initiate the patch and copy-past
 \$newModel = generator_PersistentModel::loadModelFromString(f_util_FileUtils::read(\$newPath), '$moduleName', '$documentName');
 \$newProp = \$newModel->getPropertyByName('$newPropertyName');
 f_persistentdocument_PersistentProvider::getInstance()->renameProperty('$moduleName', '$documentName', \$oldProp, \$newProp);
-");
+$compileSchema");
 
 		$this->warnMessage("Do not forget to rename any method call to ".$beanProperty->getSetterName()."() or ".$beanProperty->getGetterName()."() methods in PHP or template code.");
 
@@ -337,7 +340,7 @@ f_persistentdocument_PersistentProvider::getInstance()->renameProperty('$moduleN
 
 		$isDocument = preg_match('/^modules_.*\/.*$/', $propertyType);
 
-		// Property infos
+		// Property infos.
 		$propInfo = array("min-occurs" => null, "from-list" => null, "db-mapping" => null);
 		if ($isDocument)
 		{
@@ -354,7 +357,7 @@ f_persistentdocument_PersistentProvider::getInstance()->renameProperty('$moduleN
 		}
 		ksort($propInfo);
 
-		// Default values
+		// Default values.
 		$defaultValues = array("min-occurs" => "0", "db-mapping" => strtolower($propertyName),
 			 "max-occurs" => "1", "tree-node" => "false", "cascade-delete" => "false",
 			 "inverse" => "false", "localized" => "false");
@@ -520,6 +523,7 @@ f_persistentdocument_PersistentProvider::getInstance()->renameProperty('$moduleN
 		if ($prop->isDocument())
 		{
 			$this->getParent()->executeCommand("compile-db-schema");
+			$compileSchema = '$this->execChangeCommand(\'compile-db-schema\');' . "\n";
 		}
 		
 		$newPath = "modules/$moduleName/persistentdocument/$documentName.xml";
@@ -532,6 +536,7 @@ Use 'changedev.php create-patch $moduleName' to initiate the patch and copy-past
 \$newModel = generator_PersistentModel::loadModelFromString(f_util_FileUtils::read(\$newPath), '$moduleName', '$documentName');
 \$newProp = \$newModel->getPropertyByName('$propertyName');
 f_persistentdocument_PersistentProvider::getInstance()->addProperty('$moduleName', '$documentName', \$newProp);
-");
+$compileSchema");
+		return null;
 	}
 }
