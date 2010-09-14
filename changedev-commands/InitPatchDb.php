@@ -36,6 +36,7 @@ class commands_InitPatchDb extends commands_AbstractChangeCommand
 			$components = array_merge($components, ModuleService::getInstance()->getModules());
 			return $components;
 		}
+		return null;
 	}
 
 	/**

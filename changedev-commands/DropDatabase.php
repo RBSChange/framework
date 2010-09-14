@@ -49,6 +49,6 @@ class commands_DropDatabase extends commands_AbstractChangeCommand
 		}
 		$pp->clearDB();
 		
-		$this->quitOk("Database cleared successFully");
+		return $this->quitOk("Database cleared successFully");
 	}
 }

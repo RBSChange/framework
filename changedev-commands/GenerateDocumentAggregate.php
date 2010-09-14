@@ -114,6 +114,6 @@ class commands_GenerateDocumentAggregate extends commands_AbstractChangedevComma
 			$this->message("adding $beanClassName to autoload\n");
 			ClassResolver::getInstance()->appendToAutoloadFile($beanClassName, $moduleBeanPath);
 		}
-		$this->quitOk($moduleBeanPath." file ready");
+		return $this->quitOk($moduleBeanPath." file ready");
 	}
 }

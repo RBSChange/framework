@@ -52,6 +52,6 @@ class commands_ResetDatabase extends commands_AbstractChangeCommand
 		$parent->executeCommand("compileAll");
 		$parent->executeCommand("importInitData");
 		$parent->executeCommand("initPatchDb");
-		$this->quitOk("You now need to disconnect from the backoffice and reconnect.");
+		return $this->quitOk("You now need to disconnect from the backoffice and reconnect.");
 	}
 }

@@ -56,6 +56,7 @@ class commands_CreatePatch extends commands_AbstractChangeCommand
 			}
 			return $components;
 		}
+		return null;
 	}
 
 	/**
@@ -75,6 +76,6 @@ class commands_CreatePatch extends commands_AbstractChangeCommand
 		}
 		$patchFolder = patch_BasePatch::createNewPatch($componentName, $this->getAuthor());
 
-		$this->quitOk("Patch $patchFolder successfully created\nPlease now edit $patchFolder/install.php and $patchFolder/README.");
+		return $this->quitOk("Patch $patchFolder successfully created\nPlease now edit $patchFolder/install.php and $patchFolder/README.");
 	}
 }

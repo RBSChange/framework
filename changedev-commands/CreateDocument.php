@@ -43,6 +43,7 @@ class commands_CreateDocument extends commands_AbstractChangedevCommand
 			}
 			return $components;
 		}
+		return null;
 	}
 
 	/**
@@ -67,7 +68,7 @@ class commands_CreateDocument extends commands_AbstractChangedevCommand
 		$from = f_util_FileUtils::buildFrameworkPath("builder", "resources", "base-document.xml");
 		f_util_FileUtils::cp($from, $to);
 			
-		$this->quitOk("Document $moduleName/$documentName initialized.
+		return $this->quitOk("Document $moduleName/$documentName initialized.
 You must now edit $to and later call add-document");
 	}
 }

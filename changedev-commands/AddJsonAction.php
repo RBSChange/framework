@@ -43,6 +43,7 @@ class commands_AddJsonAction extends commands_AbstractChangedevCommand
 			}
 			return $components;
 		}
+		return null;
 	}
 
 	/**

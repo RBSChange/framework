@@ -43,6 +43,7 @@ class commands_AddService extends commands_AbstractChangedevCommand
 			}
 			return $components;
 		}
+		return null;
 	}
 
 	/**
@@ -73,10 +74,15 @@ class commands_AddService extends commands_AbstractChangedevCommand
 		f_util_FileUtils::write($serviceFile, $result);
 		$class = $moduleName.'_'.$serviceName . 'Service';
 		ClassResolver::getInstance()->appendToAutoloadFile($class, realpath($serviceFile));
-		$this->quitOk("Service $serviceName added in module $moduleName
+		return $this->quitOk("Service $serviceName added in module $moduleName
 Please now edit $serviceFile.");
 	}
 
+	/**
+	 * @param string $moduleName
+	 * @param string $serviceName
+	 * @return string
+	 */
 	private function getServicePath($moduleName, $serviceName)
 	{
 		return FileResolver::getInstance()->setPackageName('modules_'.$moduleName)->setDirectory('lib/services')->getPath($serviceName.'Service.class.php');

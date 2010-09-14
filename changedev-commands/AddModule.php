@@ -33,6 +33,7 @@ class commands_AddModule extends commands_AbstractChangedevCommand
 		{
 			return array("topic", "folder");
 		}
+		return null;
 	}
 
 	/**
@@ -76,6 +77,6 @@ class commands_AddModule extends commands_AbstractChangedevCommand
 		$this->changecmd("compile-editors-config");
 		$this->changecmd("compile-roles");
 		 
-		$this->quitOk('Module ' . $moduleName . ' ready');
+		return $this->quitOk('Module ' . $moduleName . ' ready');
 	}
 }

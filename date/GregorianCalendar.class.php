@@ -378,9 +378,8 @@ class date_GregorianCalendar extends date_Calendar
 			case self::YEAR :
 				return $this->addYears($amount);
 			default :
-				throw new Exception('Unknown Calendar field: '.$field);
+				throw new Exception('Unknown Calendar field: ' . $field);
 		}
-		return $this;
 	}
 
 	/**

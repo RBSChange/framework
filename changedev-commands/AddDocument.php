@@ -57,6 +57,7 @@ class commands_AddDocument extends commands_AbstractChangedevCommand
 			}
 			return $docNames;
 		}
+		return null;
 	}
 
 	function getOptions()
@@ -109,12 +110,12 @@ Please create the document using 'create-document $moduleName $documentName'.");
 			
 		if (!$update)
 		{
-			$this->quitOk("Document $documentName added in module $moduleName.");
+			return $this->quitOk("Document $documentName added in module $moduleName.");
 		}
 		else
 		{
 			$this->warnMessage("The SQL code to build the table may have changed, but it has not been executed. Please check this before going on.");
-			$this->quitOk("Document $documentName updated in module $moduleName");
+			return $this->quitOk("Document $documentName updated in module $moduleName");
 		}
 	}
 }
