@@ -177,33 +177,33 @@ class f_DataCacheMySqlService extends f_DataCacheService
 	 */
 	protected function commitClearByDocIds($docIds)
 	{
-		$query = 'SELECT `key_parameters` FROM `f_data_cache_doc_id_registration` WHERE `document_id` = :id';
+		$query = 'SELECT `key_parameters` FROM `f_data_cache_doc_id_registration` WHERE `document_id` IN (';
 		$keyParameters = array();
-		$docId = 0;
-		$stmt = $this->pdo->prepare($query);
-		$stmt->bindParam(':id', $docId, PDO::PARAM_INT);
+		$params = array();
 		foreach ($docIds as $docId)
 		{
-			$stmt->execute();
-			$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-			if (f_util_ArrayUtils::isEmpty($result))
+			$params[] = (int)$docId;
+		}
+		$query .= implode(',', $params).")";
+		$stmt = $this->pdo->query($query);
+		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		if (f_util_ArrayUtils::isNotEmpty($result))
+		{
+			foreach (array_values($result) as $value)
 			{
-				continue;
+				$keyParameters = array_merge($keyParameters, unserialize($value["key_parameters"]));
 			}
-			$keyParameters = array_merge($keyParameters, unserialize($result[0]["key_parameters"]));
-			$stmt->closeCursor();
 		}
 		if (count($keyParameters) > 0)
 		{
-			$query2 = 'DELETE FROM `f_data_cache` WHERE `cache_key` = :id';
-			$id = "";
-			$stmt2 = $this->pdo->prepare($query2);
-			$stmt2->bindParam(':id', $id, PDO::PARAM_STR);
-			foreach ($keyParameters as $id)
+			$query2 = 'DELETE FROM `f_data_cache` WHERE `cache_key` IN (';
+			$params = array();
+			foreach ($keyParameters as $k)
 			{
-				$stmt2->execute();
-				$stmt2->closeCursor();
+				$params[] = $this->pdo->quote($k);
 			}
+			$query2 .= implode(',', $params).")";
+			$this->pdo->exec($query2);
 		}
 	}
 
@@ -212,16 +212,14 @@ class f_DataCacheMySqlService extends f_DataCacheService
 	 */
 	protected function buildInvalidCacheList($dirsToClear)
 	{
-		$query = 'DELETE FROM `f_data_cache` WHERE `cache_key` LIKE :id';
-		$id = "";
-		$stmt = $this->pdo->prepare($query);
-		$stmt->bindParam(':id', $id, PDO::PARAM_STR);
-		foreach ($dirsToClear as $id)
+		$query = 'DELETE FROM `f_data_cache` WHERE `cache_key` LIKE ';
+		$params = array();
+		foreach ($dirsToClear as $k)
 		{
-			$id .= "-%";
-			$stmt->execute();
-			$stmt->closeCursor();
+			$params[] = $this->pdo->quote($k."-%");
 		}
+		$query .= implode(' OR `cache_key` LIKE ', $params);
+		$this->pdo->exec($query);
 	}
 	
 	/**
@@ -244,41 +242,60 @@ class f_DataCacheMySqlService extends f_DataCacheService
 		
 		if (count($item->getPatterns()) > 0)
 		{
-			$query = 'SELECT `key_parameters` FROM `f_data_cache_doc_id_registration` WHERE `document_id` = :id';
-			$stmt = $this->pdo->prepare($query);
-			$spec = 0;
-			$stmt->bindParam(':id', $spec, PDO::PARAM_INT);
-			$query2 = 'UPDATE `f_data_cache_doc_id_registration` SET `key_parameters` = :content WHERE `document_id` = :id';
-			$stmt2 = $this->pdo->prepare($query2);
-			$query3 = 'INSERT INTO `f_data_cache_doc_id_registration` (`document_id`, `key_parameters`) VALUES (:id, :content)';
-			$stmt3 = $this->pdo->prepare($query3);
+			$query = 'SELECT `document_id`, `key_parameters` FROM `f_data_cache_doc_id_registration` WHERE `document_id` IN (';
+			$params = array();
 			foreach ($item->getPatterns() as $spec)
 			{
 				if (is_numeric($spec))
 				{
-					$stmt->execute();
-					$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-					$stmt->closeCursor();
-					if (f_util_ArrayUtils::isNotEmpty($result))
+					$params[] = (int)$spec;
+				}
+			}
+			if (f_util_ArrayUtils::isNotEmpty($params))
+			{
+				$query .= implode(',', $params).")";
+				$stmt = $this->pdo->query($query);
+				$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+				
+				$query2 = 'UPDATE `f_data_cache_doc_id_registration` SET `key_parameters` = :content WHERE `document_id` = :id';
+				$stmt2 = $this->pdo->prepare($query2);
+				$query3 = 'INSERT INTO `f_data_cache_doc_id_registration` (`document_id`, `key_parameters`) VALUES (:id, :content)';
+				$stmt3 = $this->pdo->prepare($query3);
+				
+				if (f_util_ArrayUtils::isNotEmpty($result))
+				{
+					$params = array();
+					foreach (array_values($result) as $value)
 					{
-						$obj = unserialize($result[0]["key_parameters"]);
-						$res = array();
-						foreach (array_values($obj) as $v)
+						if (f_util_ArrayUtils::isNotEmpty($value))
 						{
-							$res[$v] = true;
+							$obj = unserialize($value["key_parameters"]);
+							$obj[] = $item->getNamespace().'-'.$item->getKeyParameters();
+							$res = array();
+							foreach (array_values($obj) as $v)
+							{
+								$res[$v] = true;
+							}
+							$obj = array_keys($res);
+							$serialized = serialize($obj);
+							$stmt2->bindValue(':id', $value["document_id"], PDO::PARAM_INT);
+							$stmt2->bindValue(':content', $serialized, PDO::PARAM_STR);
+							$stmt2->execute();
+							$stmt2->closeCursor();
 						}
-						$obj = array_keys($res);
-						$serialized = serialize($obj);
-						$stmt2->bindValue(':id', $spec, PDO::PARAM_INT);
-						$stmt2->bindValue(':content', $serialized, PDO::PARAM_STR);
-						$stmt2->execute();
-						$stmt2->closeCursor();
+						else 
+						{
+							$params[] = $value["document_id"];
+						}
 					}
-					else 
+				}
+				if (f_util_ArrayUtils::isNotEmpty($params))
+				{
+					foreach ($params as $id)
 					{
 						$obj = array($item->getNamespace().'-'.$item->getKeyParameters());
 						$serialized = serialize($obj);
-						$stmt3->bindValue(':id', $spec, PDO::PARAM_INT);
+						$stmt3->bindValue(':id', $id, PDO::PARAM_INT);
 						$stmt3->bindValue(':content', $serialized, PDO::PARAM_STR);
 						$stmt3->execute();
 						$stmt3->closeCursor();
