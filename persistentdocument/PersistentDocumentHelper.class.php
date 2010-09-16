@@ -1039,5 +1039,72 @@ class DocumentHelper
 	{
     	return $document->isLangAvailable($lang) ? $document->getLabel() : $document->getVoLabel();
 	}
-
+	
+	/**
+	 * @example "[modules_generic_folder],!modules_generic_rootfolder"
+	 * @example "modules_generic_folder,modules_generic_systemfolder"
+	 * @param string $allow
+	 * @return string
+	 */
+	public static function expandAllowAttribute($allow)
+	{
+		$models = array();	
+		foreach (explode(',', $allow) as $type)
+		{
+			$type = trim($type);
+			if ($type === 'hasUrl')
+			{
+				$compiledFilePath = f_util_FileUtils::buildChangeBuildPath('allowedDocumentInfos.ser');
+				if (!file_exists($compiledFilePath))
+				{
+					throw new Exception("File not found : $compiledFilePath. compile-documents needed");
+				}
+				$allowedInfos = unserialize(file_get_contents($compiledFilePath));
+				foreach ($allowedInfos['hasUrl'] as $modelName)
+				{
+					$models[str_replace('/', '_', $modelName)] = true;
+				}
+			}
+			else if (strlen($type) > 0 && $type[0] == '[')
+			{
+				$info =  explode('_', str_replace(array('[', ']'), '', $type));
+				if (count($info) === 3)
+				{
+					try 
+					{
+						$model = f_persistentdocument_PersistentDocumentModel::getInstance($info[1], $info[2]);
+						$models[str_replace('/', '_', $model->getName())] = true;
+						$children = $model->getChildrenNames();
+						if (is_array($children))
+						{
+							foreach ($children as $childModelName)
+							{
+								$models[str_replace('/', '_', $childModelName)] = true;
+							}
+						}
+						continue;
+					}
+					catch (Exception $e)
+					{
+						Framework::fatal($e->getMessage());
+					}
+				}
+			}
+			else if (strlen($type) > 0 && $type[0] == '!')
+			{
+				$unsetType = substr($type, 1);
+				if (isset($models[$unsetType]))
+				{
+					unset($models[$unsetType]);
+				}
+				continue;
+			} 
+			else if (strlen($type) > 0)
+			{
+				$models[$type] = true;
+			}
+		}
+		
+		return implode(',', array_keys($models));
+	}
 }
