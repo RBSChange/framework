@@ -4,10 +4,6 @@
 		<locale lang="fr"><{$name}></locale>
 		<locale lang="en"><{$name_en}></locale>
 	</entity>
-	<entity id="tree-root-name">
-		<locale lang="fr"><{$tree_name}></locale>
-		<locale lang="en"><{$tree_name_en}></locale>
-	</entity>
 	<entity id="system-folder-name">
 		<locale lang="fr"><{$name}></locale>
 		<locale lang="en"><{$name_en}></locale>
