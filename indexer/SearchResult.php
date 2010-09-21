@@ -58,7 +58,8 @@ class indexer_SearchResult
 	public function getDocument()
 	{
 		list($id, $lang) = explode('/', $this->getId());
-		return DocumentHelper::getDocumentInstance($id);
+		$documentModelName = $this->getDocumentModel();
+		return DocumentHelper::getDocumentInstance($id, $documentModelName);
 	}
 	
 	/**
