@@ -370,10 +370,8 @@
 			-->	
 		<backoffice>
 			<browser name="firefox">
-				<version>3.6.4</version>
-				<version>3.6.6</version>
-				<version>3.6.7</version>
 				<version>3.6.8</version>
+				<version>3.6.10</version>
 			</browser>
 		</backoffice>
 	</browsers>

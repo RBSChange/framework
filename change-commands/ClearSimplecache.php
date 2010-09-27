@@ -19,7 +19,7 @@ class commands_ClearSimplecache extends commands_AbstractChangeCommand
 	 */
 	function getDescription()
 	{
-		return "clear simple cache directory";
+		return "Deprecated use clear-datacache instead";
 	}
 
 	/**
@@ -36,6 +36,9 @@ class commands_ClearSimplecache extends commands_AbstractChangeCommand
 		{
 			f_util_FileUtils::cleanDir($simpleCachePath);
 		}
+		$parent = $this->getParent();
+		$parent->executeCommand("clearDatacache");
+		
 		$this->quitOk("Simple cache directory cleared");
 	}
 }
