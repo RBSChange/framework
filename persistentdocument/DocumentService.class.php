@@ -113,11 +113,11 @@ class f_persistentdocument_DocumentService extends BaseService
 		$document->setParentNodeId($parentNodeId);
 		if ($document->isNew())
 		{
-			return $this->insert($document, $parentNodeId);
+			$this->insert($document, $parentNodeId);
 		}
 		else
 		{
-			return $this->update($document, $parentNodeId);
+			$this->update($document, $parentNodeId);
 		}
 	}
 

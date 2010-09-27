@@ -57,7 +57,7 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 	 * @param Integer $parentNodeId Parent node ID where to save the document (optionnal => can be null !).
 	 * @return void
 	 */
-//	protected function preSave($document, $parentNodeId = null)
+//	protected function preSave($document, $parentNodeId)
 //	{
 <{if $model->hasParentModel()}>
 //		parent::preSave($document, $parentNodeId);
@@ -70,7 +70,7 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 	 * @param Integer $parentNodeId Parent node ID where to save the document.
 	 * @return void
 	 */
-//	protected function preInsert($document, $parentNodeId = null)
+//	protected function preInsert($document, $parentNodeId)
 //	{
 <{if $model->hasParentModel()}>
 //		parent::preInsert($document, $parentNodeId);
@@ -82,7 +82,7 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 	 * @param Integer $parentNodeId Parent node ID where to save the document.
 	 * @return void
 	 */
-//	protected function postInsert($document, $parentNodeId = null)
+//	protected function postInsert($document, $parentNodeId)
 //	{
 <{if $model->hasParentModel()}>
 //		parent::postInsert($document, $parentNodeId);
@@ -94,7 +94,7 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 	 * @param Integer $parentNodeId Parent node ID where to save the document.
 	 * @return void
 	 */
-//	protected function preUpdate($document, $parentNodeId = null)
+//	protected function preUpdate($document, $parentNodeId)
 //	{
 <{if $model->hasParentModel()}>
 //		parent::preUpdate($document, $parentNodeId);
@@ -106,7 +106,7 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 	 * @param Integer $parentNodeId Parent node ID where to save the document.
 	 * @return void
 	 */
-//	protected function postUpdate($document, $parentNodeId = null)
+//	protected function postUpdate($document, $parentNodeId)
 //	{
 <{if $model->hasParentModel()}>
 //		parent::postUpdate($document, $parentNodeId);
@@ -118,7 +118,7 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 	 * @param Integer $parentNodeId Parent node ID where to save the document.
 	 * @return void
 	 */
-//	protected function postSave($document, $parentNodeId = null)
+//	protected function postSave($document, $parentNodeId)
 //	{
 <{if $model->hasParentModel()}>
 //		parent::postSave($document, $parentNodeId);
