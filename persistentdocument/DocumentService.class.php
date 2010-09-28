@@ -22,6 +22,24 @@ class f_persistentdocument_DocumentService extends BaseService
 {
 
 	/**
+	 * @var f_persistentdocument_DocumentService
+	 */
+	private static $instance;
+
+	/**
+	 * @return f_persistentdocument_DocumentService
+	 */
+	public static function getInstance()
+	{
+		if (self::$instance === null)
+		{
+			self::$instance = self::getServiceClassInstance(get_class());
+		}
+		return self::$instance;
+	}
+	
+	
+	/**
 	 * @var f_persistentdocument_PersistentProvider
 	 */
 	protected $pp = null;
@@ -39,24 +57,14 @@ class f_persistentdocument_DocumentService extends BaseService
 		$this->tm = $this->getTransactionManager();
 	}
 
-
 	/**
-	 * @var f_persistentdocument_DocumentService
+	 * @return f_persistentdocument_PersistentProvider
 	 */
-	private static $instance;
-
-	/**
-	 * @return f_persistentdocument_DocumentService
-	 */
-	public static function getInstance()
+	public function getProvider()
 	{
-		if (self::$instance === null)
-		{
-			self::$instance = self::getServiceClassInstance(get_class());
-		}
-		return self::$instance;
+		return $this->pp;
 	}
-
+	
 	/**
 	 * @return f_persistentdocument_DocumentService
 	 */

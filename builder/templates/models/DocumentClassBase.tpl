@@ -64,7 +64,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	 */
 	public static function getInstanceById($documentId)
 	{
-		return <{$model->getServiceClassName()}>::getInstance()->getDocumentInstance($documentId);
+		return <{$model->getServiceClassName()}>::getInstance()->getDocumentInstance($documentId, '<{$model->getFinalName()}>');
 	}
 
 	/**
