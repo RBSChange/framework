@@ -14,6 +14,9 @@ class roles_<{$module->name|capitalize}>RoleService implements f_permission_Role
 
 	private static $backOfficeActions = array(<{foreach from=$module->backOfficeActions item=action name=actions}>'<{$action}>'<{if !$smarty.foreach.actions.last}>,<{/if}><{/foreach}>);
 
+	/**
+	 * @return roles_<{$module->name|capitalize}>RoleService
+	 */
 	public static function getInstance()
 	{
 		if (is_null(self::$instance))
