@@ -1672,22 +1672,35 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 			}
 			elseif ($criterion instanceof f_persistentdocument_criteria_InExpression)
 			{
-				$sql = '('.$columnName;
-
-				if ($criterion->getNot())
+				$values = $criterion->getValues();
+				if (count($values) >= 1)
 				{
-					$sql .= ' NOT';
-				}
+					$sql = '('.$columnName;
 
-				$sql .= ' IN (';
-				$keys = array();
-				foreach ($criterion->getValues() as $value)
-				{
-					$keys[] = $qBuilder->addParam($propertyName, $value);
+					if ($criterion->getNot())
+					{
+						$sql .= ' NOT';
+					}
+	
+					$sql .= ' IN (';
+					$keys = array();
+					foreach ($values as $value)
+					{
+						$keys[] = $qBuilder->addParam($propertyName, $value);
+					}
+					$sql .= join(',', $keys);
+					$sql .= '))';
+					$qBuilder->addWhere($sql);
 				}
-				$sql .= join(',', $keys);
-				$sql .= '))';
-				$qBuilder->addWhere($sql);
+				else if ($criterion->getNot())
+				{
+					// Nothing to do: nothing is excluded, so no restriction.
+				}
+				else
+				{
+					// Nothing is included, so nothing should be returned...
+					$qBuilder->addWhere('(0)');
+				}
 			}
 			elseif ($criterion instanceof f_persistentdocument_criteria_LikeExpression)
 			{
