@@ -168,14 +168,14 @@
 		<dependency>
 			<name>pear/Mail</name>
 			<versions>	
-				<version>1.1.14</version>
+				<version>1.2.0</version>
 			</versions>
 		</dependency>
 		
 		<dependency>
 			<name>pear/Net_SMTP</name>
 			<versions>
-				<version>1.2.8</version>
+				<version>1.4.2</version>
 			</versions>
 			<description>
 			Used by MailService 
@@ -185,7 +185,7 @@
 		<dependency>
 			<name>pear/Auth_SASL</name>
 			<versions>
-				<version>1.0.3</version>
+				<version>1.0.4</version>
 			</versions>
 			<description>
 			Used by MailService 
