@@ -24,7 +24,7 @@ class f_persistentdocument_TransactionManager
 	{
 		if ($this->hasTransaction())
 		{
-			Framework::log(__CLASS__.'->__destruct() called while active transaction (' . $this->transactionCount . ')', Logger::WARN);
+			Framework::warn(__METHOD__ . ' called while active transaction (' . $this->transactionCount . ')');
 		}
 	}
 
