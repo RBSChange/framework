@@ -78,7 +78,12 @@ class MassMailer
 		$scriptRelativePath = 'framework/bin/massMailerSend.php';
 		foreach (array_chunk($pathsToProcess, 500) as $messagePathArray)
 		{
-			f_util_System::execHTTPScript($scriptRelativePath, $messagePathArray);
+			$result = f_util_System::execHTTPScript($scriptRelativePath, $messagePathArray);
+			// Log fatal errors...
+			if ($result != '1')
+			{
+				Framework::error(__METHOD__ . ' ' . $scriptRelativePath . ' an error occured: "' . $result . '"');
+			}
 		}
 	}
 	
