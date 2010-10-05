@@ -57,6 +57,11 @@ class Projections
 	{
 		return new f_persistentdocument_criteria_OperationProjection($propertyName, $as, 'sum');
 	}
+	
+	public static function distinctCount($propertyName, $as = null)
+	{
+		return new f_persistentdocument_criteria_DistinctCountProjection($propertyName, $as);
+	}	
 }
 
 interface f_persistentdocument_criteria_Projection
@@ -112,6 +117,14 @@ class f_persistentdocument_criteria_OperationProjection extends f_persistentdocu
 	public function getOperation()
 	{
 		return $this->operation;
+	}
+}
+
+class f_persistentdocument_criteria_DistinctCountProjection extends f_persistentdocument_criteria_OperationProjection
+{
+	public function __construct($propertyName, $as)
+	{
+		parent::__construct($propertyName, $as, 'distinctcount');
 	}
 }
 
