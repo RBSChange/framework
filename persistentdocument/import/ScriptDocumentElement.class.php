@@ -408,6 +408,11 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 					{
 						$propertyValue = $this->parseBoolean($propertyValue);
 					}
+					else if ($property->getType() == f_persistentdocument_PersistentDocument::PROPERTYTYPE_XHTMLFRAGMENT)
+					{
+						$propertyValue = $this->parseXHTMLFragment($propertyValue);
+					}
+					
 					if ($lang !== null && $property->isLocalized())
 					{
 						RequestContext::getInstance()->beginI18nWork($lang);
@@ -421,6 +426,48 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 				}
 			}
 		}
+	}
+	
+	/**
+	 * @param string $value
+	 * @return string
+	 */
+	protected function parseXHTMLFragment($value)
+	{
+		if (!empty($value))
+		{
+			$value = $this->replaceRefIdInString($value);
+			$value = website_XHTMLCleanerHelper::clean($value);
+		}
+		return $value;
+	}
+	
+	/**
+	 * @param string $value
+	 * @return string
+	 */
+	protected function replaceRefIdInString($value)
+	{
+		return preg_replace_callback('#\{ref-id:([^\}]+)\}#', array($this, 'getDocumentIdCallback'), $value);
+	}
+	
+	/**
+	 * @param array $matches
+	 * @return integer
+	 */
+	public function getDocumentIdCallback($matches)
+	{
+		$documentElement = $this->script->getDocumentElementById($matches[1]);
+		if ($documentElement === null)
+		{
+			throw new Exception('Reference not found: '.$matches[1]);	
+		}
+		$document = $documentElement->getPersistentDocument();
+		if ($document->isNew())
+		{
+			throw new Exception('Reference '.$matches[1].' is not persisted.');
+		}
+		return $document->getId();
 	}
 	
 	/**
