@@ -6,8 +6,10 @@ class import_ScriptDocumentRefElement extends import_ScriptDocumentElement
 	 */
 	public function process()
 	{
-		// Do nothing.
-		// Document ref must not be modified.
+		// Check persistent document existence.
+		$this->getPersistentDocument();
+		
+		// Do nothing else: document ref must not be modified.
 	}
 	
 	/**
