@@ -109,7 +109,6 @@ class f_persistentdocument_DocumentFilterRestrictionParameter extends f_persiste
 		}
 		else
 		{
-			Framework::fatal(var_export($this, true));
 			throw new Exception('Invalid property name :'.$name);
 		}
 	}
