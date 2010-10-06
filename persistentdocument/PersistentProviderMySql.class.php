@@ -1320,6 +1320,11 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 			{
 				return "count(distinct ".$qBuilder->getTableAlias().".document_id)";
 			}
+			if ($propName instanceof f_persistentdocument_criteria_DistinctCountProjection)
+			{
+				$columnName = $qBuilder->getQualifiedColumnName($propName->getPropertyName());
+				return 'count(distinct ' . $columnName .')';	
+			}
 			if ($propName instanceof f_persistentdocument_criteria_OperationProjection)
 			{
 				$columnName = $qBuilder->getQualifiedColumnName($propName->getPropertyName());
@@ -1365,6 +1370,11 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 				if ($projection instanceof f_persistentdocument_criteria_RowCountProjection)
 				{
 					$qBuilder->addField('count(distinct '.$qBuilder->getTableAlias().'.document_id) as ' . $projection->getAs());
+				}
+				else if ($projection instanceof f_persistentdocument_criteria_DistinctCountProjection)
+				{
+					$columnName = $qBuilder->getQualifiedColumnName($projection->getPropertyName());
+					$qBuilder->addField('count(distinct ' . $columnName .') as ' . $projection->getAs());
 				}
 				else if ($projection instanceof f_persistentdocument_criteria_OperationProjection)
 				{
