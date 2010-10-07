@@ -125,31 +125,14 @@ class TemplateObject
 		}
 		return $header;
 	}
-
+	
 	/**
-	 * @deprecated
-	 */
-	private $signed;
-
-	/**
-	 * @param boolean $signed
 	 * @deprecated 
 	 */
 	public function setSigned($signed)
 	{
-		$this->signed = ($signed === true) ? true : false;
 	}
-	
-	/**
-	 * @deprecated
-	 */	
-	private function isSigned()
-	{
-		return $this->signed;
-	}
-
 }
-
 
 class LocaleTranslator implements PHPTAL_TranslationService
 {
