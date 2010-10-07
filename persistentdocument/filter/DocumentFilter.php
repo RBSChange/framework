@@ -47,6 +47,16 @@ interface f_persistentdocument_DocumentFilter
 	 * @throws ValidationException
 	 */
 	public function validate($throwException);
+		
+	/**
+	 * @return boolean
+	 */
+	public function hasErrorMessage();
+	
+	/**
+	 * @return string[]
+	 */
+	public function getErrorMessages();
 }
 
 /**
@@ -256,5 +266,34 @@ abstract class f_persistentdocument_DocumentFilterImpl implements f_persistentdo
 			return $value === null ? array() : array($value->getId());
 		}
 		return $bean->$getterName();
+	}
+
+	/**
+	 * @var string[]
+	 */
+	private $errorMessages = array();
+	
+	/**
+	 * @return boolean
+	 */
+	public function hasErrorMessage()
+	{
+		return (count($this->errorMessages) > 0);
+	}
+	
+	/**
+	 * @return string[]
+	 */
+	public function getErrorMessages()
+	{
+		return $this->errorMessages;
+	}
+	
+	/**
+	 * @param string $message
+	 */
+	public function addErrorMessage($message)
+	{
+		$this->errorMessages[] = $message;
 	}
 }

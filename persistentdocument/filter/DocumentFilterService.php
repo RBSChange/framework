@@ -198,10 +198,13 @@ class f_persistentdocument_DocumentFilterService extends BaseService
 	/**
 	 * @param string $json
 	 * @param mixed $value
+	 * @param array $errorInfos
 	 * @return boolean
 	 */
-	public function checkValueFromJson($json, $value)
+	public function checkValueFromJson($json, $value, &$errorInfos = array())
 	{
+		$errorInfos["containsOr"] = false;
+		$errorInfos["errorMessages"] = array();
 		$info = JsonService::getInstance()->decode($json);
 		// !isset() for filter <= 3.0.2 compatibility
 		if (!isset($info["operator"]) || $info["operator"] == "and")
@@ -218,6 +221,7 @@ class f_persistentdocument_DocumentFilterService extends BaseService
 			{
 				if (is_array($filter))
 				{
+					$errorInfos["containsOr"] = true;
 					$subFilterValue = false;
 					foreach ($filter as $subFilter)
 					{
@@ -225,6 +229,10 @@ class f_persistentdocument_DocumentFilterService extends BaseService
 						{
 							$subFilterValue = true;
 							break;
+						}
+						else if ($subFilter->hasErrorMessage())
+						{
+							$errorInfos["errorMessages"] = array_merge($errorInfos["errorMessages"], $subFilter->getErrorMessages());
 						}
 					}
 					if (!$subFilterValue)
@@ -234,13 +242,21 @@ class f_persistentdocument_DocumentFilterService extends BaseService
 				}
 				else
 				{
-					if (!$filter->checkValue($value)) return false;
+					if (!$filter->checkValue($value))
+					{
+						if ($filter->hasErrorMessage())
+						{
+							$errorInfos["errorMessages"] = array_merge($errorInfos["errorMessages"], $filter->getErrorMessages());
+						}
+						return false;
+					}
 				}
 			}
 			return true;
 		}
 		elseif ($info["operator"] == "or")
 		{
+			$errorInfos["containsOr"] = true;
 			$filters = $this->getFilterArrayFromJson($info["elements"]);
 			if (f_util_ArrayUtils::isEmpty($filters))
 			{
@@ -256,6 +272,10 @@ class f_persistentdocument_DocumentFilterService extends BaseService
 						if (!$subFilter->checkValue($value))
 						{
 							$subFilterValue = false;
+							if ($subFilter->hasErrorMessage())
+							{
+								$errorInfos["errorMessages"] = array_merge($errorInfos["errorMessages"], $subFilter->getErrorMessages());
+							}
 							break;
 						}
 					}
@@ -266,7 +286,14 @@ class f_persistentdocument_DocumentFilterService extends BaseService
 				}
 				else
 				{
-					if ($filter->checkValue($value)) return true;
+					if ($filter->checkValue($value))
+					{
+						return true;
+					}
+					else if ($filter->hasErrorMessage())
+					{
+						$errorInfos["errorMessages"] = array_merge($errorInfos["errorMessages"], $filter->getErrorMessages());
+					}
 				}
 			}
 			return false;
