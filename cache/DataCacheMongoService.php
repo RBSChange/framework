@@ -21,7 +21,6 @@ class f_DataCacheMongoService extends f_DataCacheService
 	
 	protected function __construct()
 	{
-		
 		if ($this->mongoCollection === null)
 		{
 			$provider = new f_MongoProvider(Framework::getConfiguration('mongoDB'));

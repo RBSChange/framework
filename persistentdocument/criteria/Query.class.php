@@ -308,6 +308,30 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 	private $fetchColumnName;
 
 	/**
+	 * @var f_persistentdocument_PersistentProvider
+	 */
+	private $pp;
+	
+	/**
+	 * @param f_persistentdocument_PersistentProvider $provider
+	 * @return f_persistentdocument_criteria_QueryImpl
+	 */
+	public function setProvider($provider)
+	{
+		$this->pp = $provider;
+		return $this;
+	}
+	
+	public function getProvider()
+	{
+		if ($this->pp !== null)
+		{
+			return $this->pp;
+		}
+		return f_persistentdocument_PersistentProvider::getInstance();
+	}
+	
+	/**
 	 * @param const $fetchMode QueryConstants::FETCH_MODE_LAZY or QueryConstants::FETCH_MODE_DIRECT
 	 * @return f_persistentdocument_criteria_QueryImpl
 	 */
@@ -610,6 +634,7 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 		}
 		$c->setDocumentModelName($documentModelName);
 		$c->setParentQuery($this);
+		$c->setProvider($this->getProvider());
 		$this->addCriteria($relationName, $c);
 		return $c;
 	}
@@ -643,6 +668,7 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 		}
 		$c->setDocumentModelName($documentModelName);
 		$c->setParentQuery($this);
+		$c->setProvider($this->getProvider());
 		$this->addCriteria($propertyName, $c);
 		return $c;		
 	}
@@ -666,6 +692,7 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 		}
 		$c->setDocumentModelName($property->getType());
 		$c->setParentQuery($this);
+		$c->setProvider($this->getProvider());
 		return array($relationName, $c);
 	}
 
@@ -802,9 +829,9 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 	{
 		if ($this->fetchColumnName !== null)
 		{
-			return f_persistentdocument_PersistentProvider::getInstance()->findColumn($this, $this->fetchColumnName);
+			return $this->getProvider()->findColumn($this, $this->fetchColumnName);
 		}
-		return f_persistentdocument_PersistentProvider::getInstance()->find($this);
+		return $this->getProvider()->find($this);
 	}
 	
 	/**
@@ -816,7 +843,7 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 	 */
 	function findColumn($columnName)
 	{
-		return f_persistentdocument_PersistentProvider::getInstance()->findColumn($this, $columnName);
+		return $this->getProvider()->findColumn($this, $columnName);
 	}
 
 	/**
@@ -826,7 +853,7 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 	 */
 	function findUnique()
 	{
-		return f_persistentdocument_PersistentProvider::getInstance()->findUnique($this);
+		return $this->getProvider()->findUnique($this);
 	}
 
 	/**
@@ -982,6 +1009,30 @@ class f_persistentdocument_criteria_QueryIntersection
 	private $maxResult = -1;
 	
 	/**
+	 * @var f_persistentdocument_PersistentProvider
+	 */
+	private $pp;
+	
+	/**
+	 * @param f_persistentdocument_PersistentProvider $provider
+	 * @return f_persistentdocument_criteria_QueryImpl
+	 */
+	public function setProvider($provider)
+	{
+		$this->pp = $provider;
+		return $this;
+	}
+	
+	public function getProvider()
+	{
+		if ($this->pp !== null)
+		{
+			return $this->pp;
+		}
+		return f_persistentdocument_PersistentProvider::getInstance();
+	}
+	
+	/**
 	 * @param f_persistentdocument_criteria_Query $query
 	 * @return f_persistentdocument_criteria_QueryIntersection
 	 */
@@ -1051,7 +1102,7 @@ class f_persistentdocument_criteria_QueryIntersection
 	 */
 	function find()
 	{
-		return f_persistentdocument_PersistentProvider::getInstance()->findIntersection($this);
+		return $this->getProvider()->findIntersection($this);
 	}
 	
 	/**
@@ -1059,7 +1110,7 @@ class f_persistentdocument_criteria_QueryIntersection
 	 */
 	function findIds()
 	{
-		return f_persistentdocument_PersistentProvider::getInstance()->findIntersectionIds($this);
+		return $this->getProvider()->findIntersectionIds($this);
 	}
 	
 	function getIds()
@@ -1080,7 +1131,7 @@ class f_persistentdocument_criteria_QueryIntersection
 		{
 			return array();
 		}
-		$pp = f_persistentdocument_PersistentProvider::getInstance();
+		$pp = $this->getProvider();
 		return $pp->find($pp->createQuery($this->getDocumentModel()->getName())->add(Restrictions::in("id", array_slice($ids, $offset, $count))));
 	}
 }
@@ -1095,6 +1146,30 @@ class f_persistentdocument_criteria_QueryUnion
 	 * @var f_persistentdocument_PersistentDocumentModel
 	 */
 	private $documentModel;
+	
+	/**
+	 * @var f_persistentdocument_PersistentProvider
+	 */
+	private $pp;
+	
+	/**
+	 * @param f_persistentdocument_PersistentProvider $provider
+	 * @return f_persistentdocument_criteria_QueryImpl
+	 */
+	public function setProvider($provider)
+	{
+		$this->pp = $provider;
+		return $this;
+	}
+	
+	public function getProvider()
+	{
+		if ($this->pp !== null)
+		{
+			return $this->pp;
+		}
+		return f_persistentdocument_PersistentProvider::getInstance();
+	}
 	
 	/**
 	 * @param f_persistentdocument_criteria_Query $query
@@ -1150,7 +1225,7 @@ class f_persistentdocument_criteria_QueryUnion
 	 */
 	function find()
 	{
-		return f_persistentdocument_PersistentProvider::getInstance()->findUnion($this);
+		return $this->getProvider()->findUnion($this);
 	}
 	
 	/**
@@ -1158,7 +1233,7 @@ class f_persistentdocument_criteria_QueryUnion
 	 */
 	function findIds()
 	{
-		return f_persistentdocument_PersistentProvider::getInstance()->findUnionIds($this);
+		return $this->getProvider()->findUnionIds($this);
 	}
 	
 	/**
@@ -1182,7 +1257,7 @@ class f_persistentdocument_criteria_QueryUnion
 		{
 			return array();
 		}
-		$pp = f_persistentdocument_PersistentProvider::getInstance();
+		$pp = $this->getProvider();
 		return $pp->find($pp->createQuery($this->getDocumentModel()->getName())->add(Restrictions::in("id", array_slice($ids, $offset, $count))));
 	}
 }

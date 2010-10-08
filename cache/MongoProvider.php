@@ -96,6 +96,35 @@ class f_MongoProvider
 		throw new Exception("MongoDatabase is not available.");		
 	}
 	
+	/**
+	 * @param string $name
+	 * @return MongoDB
+	 */
+	public function getDatabase($name, $write = false)
+	{
+		if ($write && $this->writeConnectionString)
+		{
+			$this->connectInWriteMode();
+		}	
+		if ($this->isAvailable())
+		{
+			return $this->mongoInstance->selectDB($name);
+		}
+		throw new Exception("MongoDatabase is not available.");
+	}
+	
+	/**
+	 * @return Mongo
+	 */
+	public function getMongoInstance()
+	{	
+		if ($this->isAvailable())
+		{
+			return $this->mongoInstance;
+		}
+		throw new Exception("MongoInstance is not available.");
+	}
+	
 	private function connectInWriteMode()
 	{
 		$connectionString = $this->writeConnectionString;

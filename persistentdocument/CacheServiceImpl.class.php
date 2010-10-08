@@ -411,7 +411,6 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 		}
 		catch (MongoCursorException $e)
 		{
-			Framework::info(var_export($this->provider, true));
 			Framework::exception($e);
 			return null;
 		}
