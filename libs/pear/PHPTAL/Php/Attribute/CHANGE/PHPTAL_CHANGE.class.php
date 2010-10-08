@@ -17,3 +17,13 @@ class framework_PHPTAL_CHANGE
 		$namespaceCHANGE->addAttribute(new PHPTAL_NamespaceAttributeContent('translate', 8));
 	}
 }
+
+/**
+ * @param String $expression
+ * @param Boolean $nothrow
+ */
+function phptal_tales_escape($expression, $nothrow)
+{
+	$expr = PHPTAL_TalesInternal::path($expression, $nothrow);
+	return 'f_util_HtmlUtils::textToHtml('.$expr.')';
+}
