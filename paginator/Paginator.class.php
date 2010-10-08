@@ -275,7 +275,7 @@ class paginator_Paginator extends ArrayObject
 			$this->currentUrl  = paginator_Url::getInstanceFromCurrentUrl();
 			$this->currentUrl->setQueryParameter($key, $this->extraParameters);
 		}
-		$this->currentUrl->setQueryParameter($key .'[' .  self::REQUEST_PARAMETER_NAME . ']', $pageIndex);
+		$this->currentUrl->setQueryParameter($key .'[' .  self::PAGEINDEX_PARAMETER_NAME . ']', $pageIndex);
 		return $this->currentUrl->getStringRepresentation();
 
 	}
