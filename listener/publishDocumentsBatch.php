@@ -31,3 +31,4 @@ catch (Exception $e)
 	$tm->rollBack($e);
 }
 $is->commit();
+echo 'OK';
