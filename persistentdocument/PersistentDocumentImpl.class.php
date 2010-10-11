@@ -1235,7 +1235,7 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 	public function getMetaMultiple($name)
 	{
 		$this->initMetas();
-		return $this->m_metas[$name];
+		return isset($this->m_metas[$name]) ? $this->m_metas[$name] : array();
 	}
 
 	/**
@@ -1245,7 +1245,7 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 	public function getMeta($name)
 	{
 		$this->initMetas();
-		return $this->m_metas[$name];
+		return isset($this->m_metas[$name]) ? $this->m_metas[$name] : null;
 	}
 
 	/**
