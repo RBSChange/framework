@@ -151,6 +151,10 @@ class f_persistentdocument_MemcachedExtCacheService extends f_persistentdocument
 				{
 					foreach (array_keys($this->deleteTransactionKeys) as $key)
 					{
+						if (isset($this->updateTransactionKeys[$key]))
+						{
+							unset($this->updateTransactionKeys[$key]);
+						}
 						$memcache->delete($key);
 					}
 				}
@@ -331,6 +335,10 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 				{
 					foreach (array_keys($this->deleteTransactionKeys) as $key)
 					{
+						if (isset($this->updateTransactionKeys[$key]))
+						{
+							unset($this->updateTransactionKeys[$key]);
+						}
 						$memcache->delete($key);
 					}
 				}
@@ -552,18 +560,16 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 					$this->writeMode();
 					foreach (array_keys($this->deleteTransactionKeys) as $key)
 					{
-						$result = $this->mongoCollection->remove(array("_id" => $key), array("safe" => true));
-						
-						if (!$result["ok"])
+						if (isset($this->updateTransactionKeys[$key]))
 						{
-							return false;
+							unset($this->updateTransactionKeys[$key]);
 						}
+						$result = $this->mongoCollection->remove(array("_id" => $key), array("safe" => true));
 					}
 				}
 				catch (Exception $e)
 				{
 					Framework::exception($e);
-					return false;
 				}
 			}
 			if (count($this->updateTransactionKeys) > 0)
@@ -575,23 +581,15 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 					{
 						$serialized = serialize($object);
 						$result = $this->mongoCollection->save(array("_id" => $key, "object" => $serialized), array("safe" => true));
-						
-						if (!$result["ok"])
-						{
-							return false;
-						}
 					}
 				}
 				catch (Exception $e)
 				{
 					Framework::exception($e);
-					return false;
 				}
 			}
 			$this->rollBack();
-			return true;
 		}
-		return false;
 	}
 
 	public function rollBack()
@@ -772,6 +770,10 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 			{
 				foreach (array_keys($this->deleteTransactionKeys) as $key)
 				{
+					if (isset($this->updateTransactionKeys[$key]))
+					{
+						unset($this->updateTransactionKeys[$key]);
+					}
 					if ($this->redis->exists($key))
 					{
 						$result = $this->redis->delete($key);
@@ -783,18 +785,10 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 			{
 				$serialized = serialize($object);
 				$result = $this->redis->set($key, $serialized);
-					
-				if (!$result)
-				{
-					return false;
-				}
 			}
 			
 			$this->rollBack();
-			
-			return true;
 		}
-		return false;
 	}
 
 	public function rollBack()
@@ -957,7 +951,10 @@ class f_persistentdocument_DatabaseCacheService extends f_persistentdocument_Cac
 			}
 			foreach ($this->updateTransactionKeys as $key => $object)
 			{
-				$pp->setInFrameworkCache($key, $object);
+				if (!isset($this->deleteTransactionKeys[$key]))
+				{
+					$pp->setInFrameworkCache($key, $object);
+				}
 			}
 			$this->deleteTransactionKeys = null;
 			$this->updateTransactionKeys = null;
