@@ -407,9 +407,7 @@ class builder_DocumentGenerator
 	 */
 	public function addBackofficeAction($parents)
 	{
-		// Get backoffice action updater
 		$actionUpdater = new builder_BackofficeActionUpdater($this->model);
-		// Update the files module/moduleName/config/action.xml and module/moduleName/config/widgets/leftTree.xml
 		$actionUpdater->updateXmlDocument($parents);
 	}
 
