@@ -1529,18 +1529,18 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 				}
 				$inverseProperty = true;
 			}
-
+			$join = $criteria->getLeftJoin() ? 'left outer join ' : 'inner join ';
 			if ($propertyInfo->getMaxOccurs() == 1)
 			{
 				// mono-valued property
 				if ($inverseProperty)
 				{
 					$qBuilder->distinctNeeded();
-					$qBuilder->addFrom('inner join '.$subModel->getTableName().' '.$subTableAlias.' on '.$currentTableAlias.'.document_id = '.$subTableAlias.'.'.$propertyInfo->getDbMapping());
+					$qBuilder->addFrom($join.$subModel->getTableName().' '.$subTableAlias.' on '.$currentTableAlias.'.document_id = '.$subTableAlias.'.'.$propertyInfo->getDbMapping());
 				}
 				else
 				{
-					$qBuilder->addFrom('inner join '.$subModel->getTableName().' '.$subTableAlias.' on '.$subTableAlias.'.document_id = '.$currentTableAlias.'.'.$propertyInfo->getDbMapping());
+					$qBuilder->addFrom($join.$subModel->getTableName().' '.$subTableAlias.' on '.$subTableAlias.'.document_id = '.$currentTableAlias.'.'.$propertyInfo->getDbMapping());
 				}
 			}
 			else
@@ -1554,14 +1554,14 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 				if ($inverseProperty)
 				{
 					$relation_id = RelationService::getInstance()->getRelationId($propertyInfo->getDbMapping());
-					$qBuilder->addFrom('inner join f_relation '.$relationAlias.' on '.$relationAlias.'.relation_id2 = '.$currentTableAlias.'.document_id AND '.$relationAlias.'.relation_id = '.$relation_id);
-					$qBuilder->addFrom('inner join '.$subModel->getTableName().' '.$subTableAlias.' on '.$subTableAlias.'.document_id = '.$relationAlias.'.relation_id1');
+					$qBuilder->addFrom($join.'f_relation '.$relationAlias.' on '.$relationAlias.'.relation_id2 = '.$currentTableAlias.'.document_id AND '.$relationAlias.'.relation_id = '.$relation_id);
+					$qBuilder->addFrom($join.$subModel->getTableName().' '.$subTableAlias.' on '.$subTableAlias.'.document_id = '.$relationAlias.'.relation_id1');
 				}
 				else
 				{
 					$relation_id = RelationService::getInstance()->getRelationId($propertyName);
-					$qBuilder->addFrom('inner join f_relation '.$relationAlias.' on '.$relationAlias.'.relation_id1 = '.$currentTableAlias.'.document_id AND '.$relationAlias.'.relation_id = '.$relation_id);
-					$qBuilder->addFrom('inner join '.$subModel->getTableName().' '.$subTableAlias.' on '.$subTableAlias.'.document_id = '.$relationAlias.'.relation_id2');
+					$qBuilder->addFrom($join.'f_relation '.$relationAlias.' on '.$relationAlias.'.relation_id1 = '.$currentTableAlias.'.document_id AND '.$relationAlias.'.relation_id = '.$relation_id);
+					$qBuilder->addFrom($join.$subModel->getTableName().' '.$subTableAlias.' on '.$subTableAlias.'.document_id = '.$relationAlias.'.relation_id2');
 				}
 
 			}
@@ -2331,7 +2331,6 @@ class f_persistentdocument_DocumentQueryBuilder
 			(!empty($this->having)? ' having '.implode(' and ', $this->having) : '').                                     
 			((!empty($this->order))? ' order by '.implode(', ', $this->order) : '').
 			(($this->maxResults == -1)? '' : ' LIMIT '.$this->firstResult.', '.$this->maxResults);
-		
 		return $query;
 	}
 

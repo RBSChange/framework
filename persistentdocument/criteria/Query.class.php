@@ -117,6 +117,13 @@ interface f_persistentdocument_criteria_Query // extends f_persistentdocument_cr
 	 * @return f_persistentdocument_criteria_Criteria
 	 */
 	function createPropertyCriteria($propertyName, $documentModelName);
+	
+	/**
+	 * @param string $propertyName
+	 * @param string $documentModelName
+	 * @return f_persistentdocument_criteria_Criteria
+	 */
+	function createLeftCriteria($propertyName, $documentModelName = null);
 
 	/**
 	 * Shortcut for <code>$persitentProviderInstance->find($this)</code>
@@ -259,6 +266,11 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 	 * @var boolean
 	 */
 	private $inverseQuery = false;	
+	
+	/**
+	 * @var boolean
+	 */
+	private $leftJoin = false;
 	
 	/**
 	 * @var array
@@ -608,7 +620,7 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 		if (is_null($property))
 		{
 			$property = $this->model->getInverseProperty($relationName);
-			$c->setInverseQuery(true);
+			$c->inverseQuery = true;
 			if (is_null($property))
 			{
 				throw new Exception('Can not create criteria on unknown property '.$relationName);
@@ -646,17 +658,17 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 	 */
 	public function createPropertyCriteria($propertyName, $documentModelName)
 	{
-		$c = new f_persistentdocument_criteria_QueryImpl();
 		if ($this->model === null)
 		{
 			throw new Exception('Can not create criteria without model assigned (see setDocumentModelName())');
 		}
+		$c = new f_persistentdocument_criteria_QueryImpl();
 		$property = $this->model->getProperty($propertyName);
 		if (is_null($property))
 		{
 			$subModel = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($documentModelName);
 			$property = $subModel->getProperty($propertyName);
-			$c->setInverseQuery(true);
+			$c->inverseQuery = true;
 			if ($property === null)
 			{
 				throw new Exception('Can not create criteria on unknown property '.$propertyName);
@@ -672,6 +684,84 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 		$this->addCriteria($propertyName, $c);
 		return $c;		
 	}
+	
+	/**
+	 * @param string $propertyName
+	 * @param string $documentModelName
+	 * @return f_persistentdocument_criteria_Criteria
+	 */
+	function createLeftCriteria($propertyName, $documentModelName = null)
+	{
+		if ($this->model === null)
+		{
+			throw new Exception('Can not create criteria without model assigned (see setDocumentModelName())');
+		}
+		
+		$c = new f_persistentdocument_criteria_QueryImpl();
+		$subModel = null;
+		$property = null;
+		if ($documentModelName !== null)
+		{
+			$subModel = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($documentModelName);
+			$property = $subModel->getProperty($propertyName);
+			if ($property !== null)
+			{
+				if ($property->getType() === f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER
+					|| ($property->isDocument() && !$property->isArray())
+					)
+				{
+					$c->inverseQuery = true;
+				}
+				else
+				{
+					$property = null;					
+				}
+			}
+		}
+		
+		if ($property === null)
+		{
+			$property = $this->model->getProperty($propertyName);
+			if ($property === null)
+			{
+				$property = $this->model->getInverseProperty($propertyName);
+				if ($property === null)
+				{
+					throw new Exception('Property '.$propertyName . ' not found on document ' . $this->model->getName());
+				}
+				$c->inverseQuery = true;		
+			}
+			
+			if ($property->getType() !== f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER && !$property->isDocument())
+			{
+				throw new Exception('Property '.$propertyName . ' has no valid type ' . $property->getType());
+			}
+			
+			if ($subModel === null)
+			{
+				if ($property->isDocument())
+				{
+					$documentModelName = $property->getType();
+					$subModel = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($documentModelName);
+				}
+				else
+				{
+					throw new Exception('Property '.$propertyName . ' has no valid type ' . $property->getType());
+				}
+			}
+			if ($property->getType() !== f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER && !$property->isDocument())
+			{
+				throw new Exception('Property '.$propertyName . ' has no valid type ' . $property->getType());
+			}
+		}
+		
+		$c->leftJoin = true;
+		$c->setDocumentModel($subModel, true);
+		$c->setParentQuery($this);
+		$c->setProvider($this->getProvider());
+		$this->addCriteria($propertyName, $c);
+		return $c;		
+	}
 
 	public function createSubCriteria($relationName)
 	{
@@ -680,7 +770,7 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 		if (is_null($property))
 		{
 			$property = $this->model->getInverseProperty($relationName);
-			$c->setInverseQuery(true);
+			$c->inverseQuery = true;
 			if (is_null($property))
 			{
 				throw new Exception('Can not create criteria on unknown property '.$relationName);
@@ -969,14 +1059,13 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 	}
 	
 	/**
-	 * @param boolean $inverseQuery
+	 * @return boolean
 	 */
-	public function setInverseQuery($inverseQuery)
+	public function getLeftJoin()
 	{
-		$this->inverseQuery = $inverseQuery;
+		return $this->leftJoin;
 	}
-
-
+	
 	public function __toString()
 	{
 		$str = "Criterias:\n";
