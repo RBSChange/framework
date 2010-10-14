@@ -52,8 +52,18 @@ class f_DataCacheMongoService extends f_DataCacheService
 	{
 		$this->writeMode();
 		$this->register($item);
-		$data = $item->getValues();
-		
+		$data = array();
+		foreach ($item->getValues() as $key => $value)
+		{
+			if (is_string($value))
+			{
+				$data[$key] = utf8_encode($value);
+			}
+			else 
+			{
+				$data[$key] = $value;
+			}
+		}
 		$data["timestamp"] = time();
 		$data["isValid"] = true;
 		$data["ttl"] = $item->getTTL();
@@ -336,6 +346,11 @@ class f_DataCacheMongoService extends f_DataCacheService
 				if ($k == "ttl")
 				{
 					$item->setTTL($v);
+					continue;
+				}
+				if (is_string($v))
+				{
+					$item->setValue($k, utf8_decode($v));
 					continue;
 				}
 				$item->setValue($k, $v);
