@@ -178,33 +178,36 @@ class commands_EditDocument extends commands_AbstractChangedevCommand
 	 * @param f_util_DOMDocument $doc
 	 * @return String the path of archive
 	 */
-	private function updateDom($moduleName, $documentName, $doc)
+	private function updateDom($moduleName, $documentName, $doc, $makeArchive = true)
 	{
 		$path = "modules/$moduleName/persistentdocument/$documentName.xml";
-		$archiveDir = "modules/$moduleName/persistentdocument/old";
-		$revision = 0;
-		if (!is_dir($archiveDir))
+		if ($makeArchive)
 		{
-			f_util_FileUtils::mkdir($archiveDir);
-		}
-		else
-		{
-			foreach (glob("$archiveDir/$documentName*.xml") as $archive)
+			$archiveDir = "modules/$moduleName/persistentdocument/old";
+			$revision = 0;
+			if (!is_dir($archiveDir))
 			{
-				$matches = null;
-				if (preg_match('/^.*\/'.$documentName.'-([0-9]*).xml$/', $archive, $matches))
+				f_util_FileUtils::mkdir($archiveDir);
+			}
+			else
+			{
+				foreach (glob("$archiveDir/$documentName*.xml") as $archive)
 				{
-					$archiveRevision = (int) $matches[1];
-					if ($archiveRevision > $revision)
+					$matches = null;
+					if (preg_match('/^.*\/'.$documentName.'-([0-9]*).xml$/', $archive, $matches))
 					{
-						$revision = $archiveRevision;
+						$archiveRevision = (int) $matches[1];
+						if ($archiveRevision > $revision)
+						{
+							$revision = $archiveRevision;
+						}
 					}
 				}
 			}
+			$revision++;
+			$archivePath = $archiveDir."/$documentName-$revision.xml";
+			f_util_FileUtils::cp($path, $archivePath);
 		}
-		$revision++;
-		$archivePath = $archiveDir."/$documentName-$revision.xml";
-		f_util_FileUtils::cp($path, $archivePath);
 		f_util_DOMUtils::save($doc, $path);
 
 		return $archivePath;
@@ -517,7 +520,7 @@ $compileSchema");
 		$prop = $model->getPropertyByName($propertyName);
 		$sqls = f_persistentdocument_PersistentProvider::getInstance()->addProperty($moduleName, $documentName, $prop);
 
-		$this->updateDom($moduleName, $documentName, $doc);
+		$this->updateDom($moduleName, $documentName, $doc, false);
 		
 		$this->getParent()->executeCommand("compile-documents");
 		if ($prop->isDocument())
