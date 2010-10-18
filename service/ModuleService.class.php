@@ -605,10 +605,14 @@ class ModuleService extends BaseService
 	public static function getPreferenceValue($moduleName, $fieldName)
 	{
 		$pref = self::getPreferencesDocument($moduleName);
-		if (!is_null($pref))
+		if ($pref !== null)
 		{
 			$property = $pref->getPersistentModel()->getProperty($fieldName);
-			if (is_null($property))
+			if ($property === null)
+			{
+				$property = $pref->getPersistentModel()->getSerializedProperty($fieldName);
+			}
+			if ($property === null)
 			{
 				throw new Exception("Unknown property \"$fieldName\" in module \"$moduleName\"'s preferences.");
 			}
