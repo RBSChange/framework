@@ -22,6 +22,7 @@ class import_ScriptReader extends BaseService
 		$this->registerElementClass('binding', 'import_ScriptBindingElement');
 		$this->registerElementClass('tag', 'import_ScriptTagElement');
 		$this->registerElementClass('documentRef', 'import_ScriptDocumentRefElement');
+		$this->registerElementClass('execute', 'import_ScriptExecuteElement');
 	}
 
 	/**
