@@ -44,6 +44,13 @@ class commands_ResetDatabase extends commands_AbstractChangeCommand
 		}
 		
 		$parent = $this->getParent();
+		
+		//disable site bo and cron
+		$parent->executeCommand("disableSite");
+		
+		//If document cache not stored in f_cache
+		$parent->executeCommand("clearDocumentscache");
+		
 		$parent->executeCommand("dropDatabase");
 		$parent->executeCommand("compileDocuments");
 		$parent->executeCommand("generateDatabase");
@@ -52,6 +59,9 @@ class commands_ResetDatabase extends commands_AbstractChangeCommand
 		$parent->executeCommand("compileAll");
 		$parent->executeCommand("importInitData");
 		$parent->executeCommand("initPatchDb");
+		
+		//enable bo and cron
+		$parent->executeCommand("enableSite");
 		return $this->quitOk("You now need to disconnect from the backoffice and reconnect.");
 	}
 }
