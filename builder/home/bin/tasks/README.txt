@@ -1,1 +1,2 @@
-Please open each task declared in this folder and follow the instructions
+Deprecated.
+Use planned tasks from module task.
