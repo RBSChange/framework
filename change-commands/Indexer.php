@@ -132,9 +132,9 @@ class commands_Indexer extends commands_AbstractChangeCommand
 	{
 		$is = indexer_IndexService::getInstance();
 		$is->setAutoCommit(false);
-		$indexableDocuments = $is->getBackofficeIndexableDocumentIds();
-		$this->message("* Number of documents: " . count($indexableDocuments));
-		$this->processIds($indexableDocuments, 'back');
+		$modelsName = $is->getBackOfficeModelsName();
+		$this->message("* Number of Document models: " . count($modelsName));
+		$this->processModels($modelsName, 'back');
 	}
 		
 	
@@ -142,25 +142,52 @@ class commands_Indexer extends commands_AbstractChangeCommand
 	{
 		$is = indexer_IndexService::getInstance();
 		$is->setAutoCommit(false);
-		$indexableDocuments = $is->getIndexableDocumentIds();
-		$this->message("* Number of documents: " . count($indexableDocuments));
-		$this->processIds($indexableDocuments, 'front');
+		$modelsName = $is->getFrontOfficeModelsName();
+		$this->message("* Number of Document models: " . count($modelsName));
+		$this->processModels($modelsName, 'front');
 	}
 	
-	private function processIds($ids, $mode)
+	private function processModels($modelsName, $mode)
 	{
-		$totalDocumentCount = count($ids);
-		$currentDocumentCount = 0;
-		$indexerLogPath = f_util_FileUtils::buildLogPath('indexer.log');
+		$totalDocumentCount = 0;
 		$scriptPath = 'framework/indexer/chunkDocumentIndexer.php';
-		$modeParam = array($mode);
-		foreach (array_chunk($ids, 50) as $chunk)
-		{	
-			$output = f_util_System::execHTTPScript($scriptPath, array_merge($modeParam, $chunk));
-			$currentDocumentCount += count($chunk);
-			$chunkInfo = "* Documents processed: " . $currentDocumentCount."/" . $totalDocumentCount;
-			$this->message($chunkInfo);	
-			file_put_contents($indexerLogPath, $chunkInfo . "\n" . $output . "\n", FILE_APPEND);		
+		$indexerLogPath = f_util_FileUtils::buildLogPath('indexer.log');
+		$chunkSize = 100;
+		$chunkInfo = "* Start indexing $mode documents.";
+		error_log("\n". gmdate('Y-m-d H:i:s')."\t".$chunkInfo, 3, $indexerLogPath);
+		$this->message($chunkInfo);
+		
+		foreach ($modelsName as $modelName) 
+		{
+			$modeParam = array($mode);
+			$documentIndex = 0;
+			$progres = true;
+			while ($progres) 
+			{
+				$output = f_util_System::execHTTPScript($scriptPath, array($mode, $modelName, $documentIndex, $chunkSize));
+				if (!is_numeric($output))
+				{
+					$progres = false;
+					$chunkInfo = "* Error on processsing $modelName at index $documentIndex.";
+				}
+				if (intval($output) == $chunkSize)
+				{
+					$documentIndex += $chunkSize; 
+					$totalDocumentCount += $chunkSize; 
+					$chunkInfo = "* $modelName processed: " . $documentIndex;
+				}
+				else
+				{
+					$totalDocumentCount += intval($output);
+					$documentIndex += intval($output); 
+					$progres = false;
+					$chunkInfo = "* $modelName processed Total: $documentIndex";
+				}
+				error_log("\n". gmdate('Y-m-d H:i:s')."\t".$chunkInfo, 3, $indexerLogPath);
+				$this->message($chunkInfo);
+			} 	
 		}
+		error_log("\n". gmdate('Y-m-d H:i:s')."\tTotal of indexed documents: $totalDocumentCount", 3, $indexerLogPath);
+		$this->message("Total of indexed documents: $totalDocumentCount");
 	}
 }
