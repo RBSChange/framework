@@ -532,41 +532,76 @@ class indexer_IndexService extends BaseService
 		return $this->getBaseClientId();
 	}
 	
-	/**
-	 * @return array<integer>
-	 */
-	public function getIndexableDocumentIds()
+	public function indexDocumentChunk($mode, $modelName, $documentIndex, $chunkSize)
 	{
-		$indexableDocumentIds = array();
-		foreach ($this->getFrontOfficeModelsName() as $modelName)
+		$backIndexing = ($mode == 'back');
+		$persistentDocumentModel = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($modelName);
+		if ($backIndexing && ! $persistentDocumentModel->isBackofficeIndexable())
 		{
-			$query = $this->getIndexableDocumentsByModelNameQuery($modelName)
-				->setProjection(Projections::property('id', 'id'));
-			foreach ($query->find() as $idArray)
+			Framework::warn(__METHOD__ . " model " . $modelName . " is not backoffice indexable");
+			return 'ERROR';
+		}
+		if (!$backIndexing && ! $persistentDocumentModel->isIndexable())
+		{
+			Framework::warn(__METHOD__ . " model " . $modelName . " is not frontoffice indexable");
+			continue;
+		}		
+		
+		$query = $this->getIndexableDocumentsByModelNameQuery($modelName)
+				->setProjection(Projections::property('id', 'id'))
+				->setFirstResult($documentIndex)
+				->setMaxResults($chunkSize)
+				->addOrder(Order::asc('document_id'));
+		$ids = $query->findColumn('id');
+		$rc = RequestContext::getInstance();		
+		foreach ($ids as $documentId)
+		{
+			try
 			{
-				$indexableDocumentIds[] = $idArray['id'];
+				$document = DocumentHelper::getDocumentInstance($documentId);
+				foreach ($document->getI18nInfo()->getLangs() as $lang)
+				{
+					try
+					{
+						$rc->beginI18nWork($lang);	
+						if (!$document->isContextLangAvailable())
+						{
+							continue;
+						}
+						if ($backIndexing)
+						{
+							if ($document->getPublicationstatus() !== "DEPRECATED")
+							{
+								if (Framework::isInfoEnabled())
+								{
+									Framework::info("Index BO ($lang) " . $document->__toString());
+								}
+								$this->addBackoffice($document);
+							}
+						}
+						else if ($document->isPublished())
+						{
+							if (Framework::isInfoEnabled())
+							{
+								Framework::info("Index FO ($lang) " . $document->__toString());
+							}
+							$this->add($document);
+						}
+						$rc->endI18nWork();
+					}
+					catch (Exception $e)
+					{
+						$rc->endI18nWork($e);
+					}
+				}
+			}
+			catch (Exception $e)
+			{
+				Framework::exception($e);
+				echo $e->getMessage();
 			}
 		}
-		return $indexableDocumentIds;
-	}
-	
-	/**
-	 * @return array<integer>
-	 */
-	public function getBackofficeIndexableDocumentIds()
-	{
-		$indexableDocumentIds = array();
-		foreach ($this->getBackOfficeModelsName() as $modelName)
-		{
-			$query = $this->getIndexableDocumentsByModelNameQuery($modelName)
-				->setProjection(Projections::property('id', 'id'));
-
-			foreach ($query->find() as $idArray)
-			{
-				$indexableDocumentIds[] = $idArray['id'];
-			}
-		}
-		return $indexableDocumentIds;
+		return count($ids);
 	}
 	
 	/**
@@ -1010,32 +1045,32 @@ class indexer_IndexService extends BaseService
 	}
 	
 	/**
-	 * Returns the array of document ids that should be reindexed for the frontoffice when the role $roleName was 
+	 * Returns the array of document models that should be reindexed for the frontoffice when the role $roleName was 
 	 * attributed or removed to some user/group. Default implementation returns an empty array if the role is a 
 	 * backoffice role and all frontoffice documents if it is a frontoffice role.
 	 * 
 	 * @param String $roleName
 	 * @return Array
 	 */
-	public function getIndexableDocumentIdsForModifiedRole($roleName)
+	public function getIndexableDocumentModelsForModifiedRole($roleName)
 	{
 		$roleService = f_permission_PermissionService::getRoleServiceByRole($roleName);
 		if ($roleService->isBackEndRole($roleName))
 		{
 			return array();
 		}
-		return $this->getIndexableDocumentIds();
+		return $this->getFrontOfficeModelsName();
 	}
 	
 	/**
-	 * Returns the array of document ids that should be reindexed for the backoffice when the role $roleName was 
+	 * Returns the array of document models that should be reindexed for the backoffice when the role $roleName was 
 	 * attributed or removed to some user/group. Default implementation returns an empty array if the role is a 
 	 * frontoffce role and all documents belonging to the corresponding module if it is a backoffice role.
 	 * 
 	 * @param String $roleName
 	 * @return Array
 	 */
-	public function getBackofficeIndexableDocumentIdsForModifiedRole($roleName)
+	public function getBackofficeIndexableDocumentModelsForModifiedRole($roleName)
 	{
 		$roleService = f_permission_PermissionService::getRoleServiceByRole($roleName);
 		if ($roleService->isFrontEndRole($roleName))
@@ -1043,20 +1078,15 @@ class indexer_IndexService extends BaseService
 			return array();
 		}
 		$modelNames = ModuleService::getInstance()->getDefinedDocumentModelNames(f_permission_PermissionService::getModuleNameByRole($roleName));
-		$indexableDocumentIds = array();
+		$result = array();
 		foreach ($modelNames as $modelName)
 		{
 			if (in_array($modelName, $this->getBackOfficeModelsName()))
 			{
-				$query = $this->getIndexableDocumentsByModelNameQuery($modelName)
-						->setProjection(Projections::property('id', 'id'));
-				foreach ($query->find() as $idArray)
-				{
-					$indexableDocumentIds[] = $idArray['id'];
-				}
+				$result[] = $modelName;
 			}
 		}
-		return $indexableDocumentIds;
+		return $result;
 	}
 	
 	public static function shutdownCommit()
