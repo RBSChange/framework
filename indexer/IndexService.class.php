@@ -536,6 +536,12 @@ class indexer_IndexService extends BaseService
 	{
 		$backIndexing = ($mode == 'back');
 		$persistentDocumentModel = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($modelName);
+		if ($persistentDocumentModel->getName() != $modelName)
+		{
+			//Injected document not indexed
+			return 0;
+		}
+		
 		if ($backIndexing && ! $persistentDocumentModel->isBackofficeIndexable())
 		{
 			Framework::warn(__METHOD__ . " model " . $modelName . " is not backoffice indexable");
