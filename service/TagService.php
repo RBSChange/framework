@@ -685,50 +685,108 @@ class TagService extends BaseService
 
 
 	/**
-	 * Returns the unique Document that has the given exclusive $tag.
-	 *
-	 * @param string $tag The exclusive tag.
+	 * @param string $tag
+	 * @param boolean $throwIfNotFound
 	 * @return f_persistentdocument_PersistentDocument
 	 *
 	 * @throws InvalidExclusiveTagException If tag name is not valid
 	 * @throws TagException  If not or more one document founded
 	 */
-	public function getDocumentByExclusiveTag($tag, $throwIfNotFounded = true)
+	public function getDocumentByExclusiveTag($tag, $throwIfNotFound = true)
 	{
 		if (!$this->isExclusiveTag($tag))
 		{
 			throw new InvalidExclusiveTagException($tag);
 		}
+		$doc = $this->findDocumentByExclusiveTag($tag);
+		if ($doc === null && $throwIfNotFound)
+		{
+			throw new TagException('No document has the requested tag: '.$tag);
+		}
+		return $doc;
+	}
 
+
+	/**
+	 * @param string $tag
+	 * @return boolean
+	 */
+	public function hasDocumentByExclusiveTag($tag)
+	{
+		if (!$this->isExclusiveTag($tag))
+		{
+			return false;
+		}
+		$doc = $this->findDocumentByExclusiveTag($tag);
+		return ($doc !== null);
+	}
+	
+	/**
+	 * @param string $tag The exclusive tag.
+	 * @return f_persistentdocument_PersistentDocument
+	 */
+	private function findDocumentByExclusiveTag($tag)
+	{
 		$ids = $this->getPersistentProvider()->getDocumentIdsByTag($tag);
 		if (count($ids) === 1)
 		{
 			return DocumentHelper::getDocumentInstance($ids[0]);
 		}
-		if ($throwIfNotFounded)
-		{
-			throw new TagException('No document has the requested tag: '.$tag);
-		}
 		return null;
 	}
-
+	
 	/**
 	 * Returns the unique Document that has the given contextual $tag.
 	 *
-	 * @param string $tag The exclusive tag.
-	 * @param f_persistentdocument_PersistentDocument $contextDocument Parent contextual document
+	 * @param string $tag
+	 * @param f_persistentdocument_PersistentDocument $contextDocument
+	 * @param boolean $throwIfNotFound
 	 * @return f_persistentdocument_PersistentDocument
 	 *
-	 * @throws InvalidContextualTagException If tag name is not valid
-	 * @throws TagException If not or more one document founded
+	 * @throws InvalidContextualTagException
+	 * @throws TagException
 	 */
-	public function getDocumentByContextualTag($tag, $contextDocument)
+	public function getDocumentByContextualTag($tag, $contextDocument, $throwIfNotFound = true)
 	{
+		if (!($contextDocument instanceof f_persistentdocument_PersistentDocument))
+		{
+			throw new TagException('Invalid contextDocument');
+		}
+		
 		if (!$this->isContextualTag($tag))
 		{
 			throw new InvalidContextualTagException($tag);
 		}
+		$doc = $this->findDocumentByContextualTag($tag, $contextDocument);
+		if ($doc === null && $throwIfNotFound)
+		{
+			throw new TagException('No document has the requested tag: '.$tag);
+		}
+		return $doc;
+	}
 
+	/**
+	 * @param string $tag
+	 * @param f_persistentdocument_PersistentDocument $contextDocument
+	 * @return boolean
+	 */
+	public function hasDocumentByContextualTag($tag, $contextDocument)
+	{
+		if (!($contextDocument instanceof f_persistentdocument_PersistentDocument) || !$this->isContextualTag($tag))  
+		{
+			return false;
+		}
+		$doc = $this->findDocumentByContextualTag($tag, $contextDocument);
+		return ($doc !== null);
+	}	
+	
+	/**
+	 * @param string $tag
+	 * @param f_persistentdocument_PersistentDocument $contextDocument
+	 * @return f_persistentdocument_PersistentDocument || null
+	 */
+	private function findDocumentByContextualTag($tag, $contextDocument)
+	{
 		$cacheKey = $tag."|".$contextDocument->getId();
 		if (isset($this->getDocumentByContextualTagCache[$cacheKey]))
 		{
@@ -749,9 +807,9 @@ class TagService extends BaseService
 		{
 			throw new TagException('Found more than one document with a contextual tag in the same context. Tag="'.$tag.'", Context document="'.$contextDocument->__toString().'".');
 		}
-
-		throw new TagException('No document has the requested tag: '.$tag);
+		return null;
 	}
+
 	
 	/**
 	 * @param string $tag The exclusive tag.
@@ -784,18 +842,58 @@ class TagService extends BaseService
 	 * Returns the unique sibling Document that has the given $tag.
 	 * @param String $tag
 	 * @param f_persistentdocument_PersistentDocument $siblingDocument
+	 * @param boolean $throwIfNotFound
 	 * @return f_persistentdocument_PersistentDocument
 	 *
 	 * @throws InvalidTagException If tag name is not valid
 	 * @throws TagException If not or more one document founded
 	 */
-	public function getDocumentBySiblingTag($tag, $siblingDocument)
+	public function getDocumentBySiblingTag($tag, $siblingDocument, $throwIfNotFound = true)
 	{
+		if (!($siblingDocument instanceof f_persistentdocument_PersistentDocument))
+		{
+			throw new TagException('Invalid siblingDocument');
+		}
+		
 		if (!$this->isValidTag($tag))
 		{
 			throw new InvalidTagException($tag);
 		}
-
+		$doc = $this->findDocumentBySiblingTag($tag, $siblingDocument);
+		if ($doc === null && $throwIfNotFound)
+		{
+			throw new TagException('No document has the requested tag: '.$tag);
+		}
+		return $doc;
+	}
+	
+	/**
+	 * @param String $tag
+	 * @param f_persistentdocument_PersistentDocument $siblingDocument
+	 * @return boolean
+	 */
+	public function hasDocumentBySiblingTag($tag, $siblingDocument)
+	{
+		if (!($siblingDocument instanceof f_persistentdocument_PersistentDocument))
+		{
+			return false;
+		}
+		if (!$this->isValidTag($tag))
+		{
+			return false;
+		}
+		
+		$doc = $this->findDocumentBySiblingTag($tag, $siblingDocument);
+		return ($doc !== null);
+	}	
+	
+	/**
+	 * @param String $tag
+	 * @param f_persistentdocument_PersistentDocument $siblingDocument
+	 * @return f_persistentdocument_PersistentDocument
+	 */
+	private function findDocumentBySiblingTag($tag, $siblingDocument)
+	{
 		$docArray = $this->getSiblingDocuments($tag, $siblingDocument);
 		$docArrayCount = count($docArray);
 		if ($docArrayCount == 1)
@@ -807,7 +905,7 @@ class TagService extends BaseService
 			throw new TagException('Found more than one sibling document with a tag. Tag="'.$tag.'", Context document="'.$siblingDocument->__toString().'".');
 		}
 
-		throw new TagException('No document has the requested tag: '.$tag);
+		return null;
 	}
 
 	/**
