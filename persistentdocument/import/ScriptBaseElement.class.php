@@ -71,7 +71,6 @@ class import_ScriptBaseElement
 	 */
 	protected final function getAncestorByClassName($className)
 	{
-		$class = new ReflectionClass($className);
 		$parent = $this->getParent();
 		while ($parent)
 		{
@@ -103,11 +102,12 @@ class import_ScriptBaseElement
 		if (isset($this->attributes[$name]))
 		{
 			return $this->attributes[$name];
-		} else if ($this->getParent() !== null)
+		}
+		else if ($this->getParent() !== null)
 		{
 			return $this->getParent()->getAncestorAttribute($name);
 		}
-		return null;
+		return $this->script->getAttribute($name);
 	}
 
 	/**
@@ -148,6 +148,16 @@ class import_ScriptBaseElement
 				unset($this->attributes[$key]);
 			}
 			return $objects;
+		}
+		$key = $name.'-attr';
+		if (isset($this->attributes[$key]))
+		{
+			$attrname = ($this->attributes[$key]) ? $this->attributes[$key] : $key;
+			if ($remove)
+			{
+				unset($this->attributes[$key]);
+			}
+			return $this->getAncestorAttribute($attrname);
 		}		
 		return null;
 	}
@@ -176,7 +186,12 @@ class import_ScriptBaseElement
 						$value[] = $this->script->getElementById($oneValue, "import_ScriptObjectElement")->getObject();
 					}
 				}
-				
+				else if ($data[1] == 'attr')
+				{
+					$key = $data[0];
+					$attrname = $value ? $value : $key;
+					$value = $this->getAncestorAttribute($attrname);
+				}
 			}
 			$computedAttributes[$key] = $value;
 		}

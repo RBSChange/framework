@@ -28,6 +28,21 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 		if ($this->persistentDocument === null)
 		{
 			$document = null;
+			foreach ($this->attributes as $key => $value)
+			{
+				$matches = null;
+				if (preg_match('/^by([A-Z]\w+)-attr$/', $key, $matches))
+				{
+					$attrName = (isset($this->attributes[$key]) && $this->attributes[$key]) ? $this->attributes[$key] : 'by'.$matches[1];
+					$attributeValue = $this->getAncestorAttribute($attrName);
+					if ($attributeValue !== null)
+					{
+						$this->attributes['by'.$matches[1]] = $this->getAncestorAttribute($attrName);
+					}
+					unset($this->attributes[$key]);
+				}
+			}
+
 			if (isset($this->attributes['byDocumentId']))
 			{
 				$document = DocumentHelper::getDocumentInstance($this->attributes['byDocumentId']);
@@ -60,7 +75,7 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 							continue;
 						}
 						$matches = null;
-						if (preg_match("/^by([A-Z]\w+)$/", $key, $matches))
+						if (preg_match('/^by([A-Z]\w+)$/', $key, $matches))
 						{
 							$propName = strtolower($matches[1][0]).substr($matches[1], 1);
 							$document = $this->getChildDocumentByProperty($propName, $value, $model->getName());
@@ -437,6 +452,7 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 		if (!empty($value))
 		{
 			$value = $this->replaceRefIdInString($value);
+			$value = $this->replaceAttrInString($value);
 			$value = website_XHTMLCleanerHelper::clean($value);
 		}
 		return $value;
@@ -471,6 +487,24 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 	}
 	
 	/**
+	 * @param string $value
+	 * @return string
+	 */
+	protected function replaceAttrInString($value)
+	{
+		return preg_replace_callback('#\{attr:([^\}]+)\}#', array($this, 'getAttributeCallback'), $value);
+	}
+	
+	/**
+	 * @param array $matches
+	 * @return string
+	 */
+	public function getAttributeCallback($matches)
+	{
+		return $this->getAncestorAttribute($matches[1]);
+	}
+	
+	/**
 	 * @param f_persistentdocument_PersistentDocument $document
 	 * @param String $propertyName
 	 * @param Mixed $propertyValue
@@ -489,5 +523,14 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 		{
 			$this->script->addWarning('Unable to affect ' . get_class($document) . '->add' . ucfirst($propertyName) . '(' . $propertyValue . ')');
 		}
+	}
+	
+	/**
+	 * May be used inside an xml script with the "execute" element to set the byDocumentId attribute.
+	 * @param import_ScriptExecuteElement $scriptExecute
+	 */
+	public function setDocumentIdAttribute($scriptExecute)
+	{
+		$this->script->setAttribute('byDocumentId', $this->getPersistentDocument()->getId());
 	}
 }
