@@ -101,7 +101,9 @@ class indexer_TermQuery extends indexer_QueryBase implements indexer_Query
 	 */
 	function isEmpty()
 	{
-		return trim($this->value) == "";
+		$trimed = trim($this->value);
+		// TermQuery can not start with "*"
+		return $trimed == "" || $trimed[0] == "*";
 	}
 
 	/**
