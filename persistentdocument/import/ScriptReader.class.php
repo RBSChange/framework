@@ -8,6 +8,8 @@ class import_ScriptReader extends BaseService
 	private static $instance;
 
 	private $elements = array();
+	
+	private $attributes = array();
 
 	private $regiteredElementsClass = array();
 
@@ -17,12 +19,15 @@ class import_ScriptReader extends BaseService
 
 	private function initialize()
 	{
+		$this->elements = array();
+		$this->attributes = array();
 		$this->regiteredElementsClass = array();
 		$this->registerElementClass('script', 'import_ScriptScriptElement');
 		$this->registerElementClass('binding', 'import_ScriptBindingElement');
 		$this->registerElementClass('tag', 'import_ScriptTagElement');
 		$this->registerElementClass('documentRef', 'import_ScriptDocumentRefElement');
 		$this->registerElementClass('execute', 'import_ScriptExecuteElement');
+		$this->registerElementClass('attribute', 'import_ScriptAttributeElement');
 	}
 
 	/**
@@ -58,10 +63,15 @@ class import_ScriptReader extends BaseService
 
 	/**
 	 * @param String $fileName
+	 * @param attay $attributes
 	 */
-	public function execute($fileName)
+	public function execute($fileName, $attributes = array())
 	{
 		$this->initialize();
+		if (is_array($attributes))
+		{
+			$this->attributes = $attributes;
+		}
 		$this->executeInternal($fileName);		
 	}
 
@@ -245,6 +255,28 @@ class import_ScriptReader extends BaseService
 		return $this->getElementById($id, "import_ScriptDocumentElement");
 	}
 
+	/**
+	 * @param string $name
+	 * @return string 
+	 */
+	public function getAttribute($name)
+	{
+		return isset($this->attributes[$name]) ? $this->attributes[$name] : null;
+	}
+	
+	/**
+	 * @param string $name
+	 * @param string $value
+	 * @param boolean $default
+	 */
+	public function setAttribute($name, $value, $default = false)
+	{
+		if (!isset($this->attributes[$name]) || !$default)
+		{
+			$this->attributes[$name] = $value;
+		}
+	}
+	
 	/**
 	 * @param string $message
 	 */
