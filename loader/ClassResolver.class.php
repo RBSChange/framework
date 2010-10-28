@@ -255,6 +255,7 @@ class ClassResolver implements ResourceResolver
 			{
 				throw new Exception("Could not move ".$path." to ".$backupPath);
 			}
+			clearstatcache();
 			f_util_FileUtils::write($path, $newFileContent);
 		}
 	}
