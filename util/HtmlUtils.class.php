@@ -498,7 +498,7 @@ abstract class f_util_HtmlUtils
         try
         {
             $rq->beginI18nWork($lang);
-            $document = DocumentHelper::getDocumentInstance($documentId);
+            $document = DocumentHelper::getDocumentInstance($documentId);            
             if ($document instanceof media_persistentdocument_media)
             {
                 if ($document->getMediatype() == MediaHelper::TYPE_FLASH)
@@ -634,6 +634,7 @@ abstract class f_util_HtmlUtils
         	$attributes['height'] = $computedDimensions['height'];
         }
         
-        return array(LinkHelper::getDocumentUrl($document, RequestContext::getInstance()->getLang(), $format), $format);
+        $urlLang = ($document->getFilename()) ?  RequestContext::getInstance()->getLang() : $document->getLang();
+        return array(LinkHelper::getDocumentUrl($document, $urlLang, $format), $format);
     }
 }
