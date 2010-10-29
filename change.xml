@@ -42,21 +42,7 @@
 			Starting (?) from revision 1.151.2.22, it should work
 			</description>
 		</dependency>
-				
-		<dependency>		
-			<name>change-lib/change-script</name>
-			<versions>	
-				<version>3.3</version>
-			</versions>
-		</dependency>
-		
-		<dependency>
-			<name>change-lib/change-util</name>
-			<versions>	
-				<version>3.0</version>
-			</versions>
-		</dependency>
-		
+						
 		<dependency>
 			<name>extension/dom</name>
 			<versions>
