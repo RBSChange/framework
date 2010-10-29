@@ -36,7 +36,7 @@ abstract class commands_AbstractChangeCommand extends c_ChangescriptCommand
 	 */
 	protected function getComputedDeps()
 	{
-		return $this->getEnvVar("computedDeps");
+		return $this->getParent()->getBootStrap()->getComputedDependencies();
 	}
 
 	/**
@@ -44,50 +44,32 @@ abstract class commands_AbstractChangeCommand extends c_ChangescriptCommand
 	 */
 	protected function loadFramework()
 	{
-		if (!file_exists("framework"))
+		if (!class_exists("Framework", false))
 		{
-			$this->createFrameworkLink();
-			$this->getParent()->executeCommand("compile-config");
+			foreach (spl_autoload_functions() as $fct) 
+			{
+				if (is_array($fct) && ($fct[0] instanceof cboot_ClassDirAnalyzer))
+				{
+					spl_autoload_unregister($fct);
+				}
+			}
+			require_once(realpath(WEBEDIT_HOME."/framework/Framework.php"));
+			Framework::info(__METHOD__);
+			try
+			{
+				if (class_exists("Controller"))
+				{
+					$controller = Controller::getInstance();
+				}
+			}
+			catch (Exception $e)
+			{
+				$controller = Controller::newInstance("controller_ChangeController");
+			}
 		}
-		
-		$bootStrapAutoload = array ($this->getParent()->getBootStrap(), 'autoload');
-		// We unregister cli autoload before to load Framework because of possible AOP
-		// interception that only the Framework autoload is aware of
-		spl_autoload_unregister($bootStrapAutoload);
-		require_once(realpath(WEBEDIT_HOME."/framework/Framework.php"));
-		spl_autoload_register($bootStrapAutoload);
-		
-		if (!class_exists("Controller", false))
+		else
 		{
-			require_once(WEBEDIT_HOME.'/libs/agavi/controller/Controller.class.php');
-			require_once(WEBEDIT_HOME.'/libs/agavi/view/View.class.php');
-			require_once(WEBEDIT_HOME.'/libs/agavi/exception/AgaviException.class.php');
-			require_once(WEBEDIT_HOME.'/libs/agavi/exception/ControllerException.class.php');
-			require_once(WEBEDIT_HOME.'/libs/agavi/controller/WebController.class.php');
-			require_once(FRAMEWORK_HOME.'/libs/agavi/controller/HttpController.class.php');
-			require_once(FRAMEWORK_HOME.'/libs/agavi/controller/ChangeController.class.php');
-			require_once(WEBEDIT_HOME.'/libs/agavi/core/Context.class.php');
-			require_once(WEBEDIT_HOME.'/libs/agavi/action/ActionStack.class.php');
-			require_once(WEBEDIT_HOME.'/libs/agavi/request/Request.class.php');
-			require_once(WEBEDIT_HOME.'/libs/agavi/request/WebRequest.class.php');
-			require_once(FRAMEWORK_HOME.'/libs/agavi/request/ChangeRequest.class.php');
-			require_once(WEBEDIT_HOME.'/libs/agavi/storage/Storage.class.php');
-			require_once(WEBEDIT_HOME.'/libs/agavi/storage/SessionStorage.class.php');
-			require_once(WEBEDIT_HOME.'/libs/agavi/user/User.class.php');
-			require_once(WEBEDIT_HOME.'/libs/agavi/user/SecurityUser.class.php');
-			require_once(FRAMEWORK_HOME.'/libs/agavi/user/FrameworkSecurityUser.class.php');
-			require_once(WEBEDIT_HOME.'/libs/agavi/filter/Filter.class.php');
-			require_once(WEBEDIT_HOME.'/libs/agavi/filter/SecurityFilter.class.php');
-			require_once(FRAMEWORK_HOME.'/libs/agavi/filter/FrameworkSecurityFilter.class.php');
-		}
-
-		try
-		{
-			$controller = Controller::getInstance();
-		}
-		catch (ControllerException $e)
-		{
-			$controller = Controller::newInstance("controller_ChangeController");
+			Framework::info(__METHOD__ . ' Already loaded');
 		}
 	}
 
@@ -96,12 +78,8 @@ abstract class commands_AbstractChangeCommand extends c_ChangescriptCommand
 	 */
 	protected function createFrameworkLink()
 	{
-		$computedDeps = $this->getComputedDeps();
-
-		// Create framework link.
-		$frameworkInfo = $computedDeps["change-lib"]["framework"];
-		$this->message("Symlink framework-".$frameworkInfo["version"]);
-		return f_util_FileUtils::symlink($frameworkInfo["path"], "framework", f_util_FileUtils::OVERRIDE);
+		//TODO framework already exist
+		return true;
 	}
 
 	/**
@@ -115,7 +93,7 @@ abstract class commands_AbstractChangeCommand extends c_ChangescriptCommand
 		}
 		// Define profile
 		$profile = trim($this->getAuthor());
-		echo "No profile file, using user name as profile (".$profile.")\n";
+		$this->warnMessage("No profile file, using user name as profile (".$profile.")");
 		f_util_FileUtils::write("profile", $profile);
 		return $profile;
 	}

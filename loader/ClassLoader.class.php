@@ -70,12 +70,6 @@ class ClassLoader implements ResourceLoader
 			$trace = debug_backtrace();
 			if (count($trace) < 1 || ($trace[1]['function'] != 'class_exists' && $trace[1]['function'] != 'is_a'))
 			{
-				if (php_sapi_name() == "cli")
-				{
-					echo "Unable to autoload $className.\n";
-					echo "You should run 'change.php update-autoload --refresh-cli-autoload'.\n";
-					echo "If it persists, see phperror.log to trace the call.\n";
-				}
 				ob_start();
 				debug_print_backtrace();
 				$trace = ob_get_contents();

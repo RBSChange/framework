@@ -35,15 +35,11 @@ class commands_InitProject extends commands_AbstractChangeCommand
 	function _execute($params, $options)
 	{
 		$this->message("== Initializing project ==");
-
+		$parent = $this->getParent();
+		$parent->executeCommand("updateDependencies");
+		
 		$computedDeps = $this->getComputedDeps();
 		
-		$newToAutoload = array();
-		if ($this->createFrameworkLink())
-		{
-			$newToAutoload[] = "framework";
-		}
-
 		// config directory: generate default config files
 		$builderResourcePath = f_util_FileUtils::buildWebeditPath("framework", "builder");
 		f_util_FileUtils::mkdir("config");
@@ -82,64 +78,6 @@ class commands_InitProject extends commands_AbstractChangeCommand
 			$this->warnMessage($fileName.' already exists.');
 		}
 
-		// libs directory
-		f_util_FileUtils::mkdir("libs");
-
-		foreach ($computedDeps["lib"] as $libName => $libInfo)
-		{
-			$this->message("Symlink lib/$libName-".$libInfo["version"]);
-			if (f_util_FileUtils::symlink($libInfo["path"], "libs/".$libName, f_util_FileUtils::OVERRIDE))
-			{
-				$newToAutoload[] = "libs/".$libName;
-			}
-		}
-				
-		if (isset($computedDeps["PEAR_DIR"]) && isset($computedDeps["lib-pear"]))
-		{
-			$pearDir = $computedDeps["PEAR_DIR"]; 
-			f_util_FileUtils::mkdir("libs/pearlibs");
-			foreach ($computedDeps["lib-pear"] as $libName => $libInfo)
-			{
-				$this->message("Symlink pearlibs/$libName-".$libInfo["version"]);
-				if (f_util_FileUtils::symlink($libInfo["path"], "libs/pearlibs/".$libName, f_util_FileUtils::OVERRIDE))
-				{
-					if ($computedDeps['PEAR_WRITEABLE'])
-					{
-						$this->message("copy libs/pearlibs/".$libName . " to " . $pearDir);
-						f_util_FileUtils::cp("libs/pearlibs/".$libName, $pearDir, 
-							f_util_FileUtils::OVERRIDE + f_util_FileUtils::APPEND, array('change.xml', 'tests', 'docs'));
-					}
-					else
-					{
-						$this->message("Please check if $libName-".$libInfo["version"] . " PEAR extension is correctly installed!");
-					}
-				}
-			}
-			$newToAutoload[] = $pearDir;
-		}
-		elseif (isset($computedDeps["PEAR_DIR"]))
-		{
-			$this->message("Symlink ".$computedDeps["PEAR_DIR"]." to libs/pear");
-			f_util_FileUtils::symlink($computedDeps["PEAR_DIR"], "libs/pear");
-			$newToAutoload[] = "libs/pear";
-		}
-		
-		foreach ($computedDeps["change-lib"] as $libName => $libInfo)
-		{
-			if ($libName == "framework")
-			{
-				continue;
-			}
-			$this->message("Symlink change-lib/$libName-".$libInfo["version"]);
-			if (f_util_FileUtils::symlink($libInfo["path"], "libs/".$libName, f_util_FileUtils::OVERRIDE))
-			{
-				$newToAutoload[] = "libs/".$libName;
-			}
-		}
-				
-		// cache directory
-		f_util_FileUtils::mkdir("cache/".$this->getProfile());
-
 		// build directory
 		f_util_FileUtils::mkdir("build/".$this->getProfile());
 
@@ -147,16 +85,9 @@ class commands_InitProject extends commands_AbstractChangeCommand
 		f_util_FileUtils::mkdir("log/".$this->getProfile());
 
 		f_util_FileUtils::mkdir("mailbox");
-		f_util_FileUtils::mkdir("modules");
-
+		
 		$this->getParent()->executeCommand("compileConfig");
 		$this->loadFramework();
-		$classResolver = ClassResolver::getInstance();
-		foreach ($newToAutoload as $dir)
-		{
-			$this->message("Add $dir to autoload");
-			$classResolver->appendDir(realpath($dir));
-		}
 
 		// init-file-policy
 		$this->getParent()->executeCommand("applyProjectPolicy");

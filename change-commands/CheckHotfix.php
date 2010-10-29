@@ -17,55 +17,49 @@ class commands_CheckHotfix extends commands_AbstractChangeCommand
 		return "Checks for hotfix to apply";
 	}
 	
+	function getInstalledRepositoryPaths()
+	{
+		$result = array();
+		$bootStrap = $this->getParent()->getBootStrap();
+		$computedDeps = $bootStrap->getComputedDependencies();	
+		foreach ($computedDeps as $category => $components) 
+		{
+			if (!is_array($components)) {continue;}
+			foreach ($components as $componentName => $infos) 
+			{
+				if ($infos['linked'])
+				{
+					list($depType, $componentName, $version, $hotFix) = $bootStrap->explodeRepositoryPath($infos['repoRelativePath']);
+					$result[$depType .'/'. $componentName .'/'. $version] = $hotFix ? $hotFix : 0;
+				}
+			}
+		}
+		return $result;
+	}
+	
 	/**
 	 * @return array
+	 * @example   3 => '/framework/framework-3.0.3-3',
+	 * 		 	  12 => '/framework/framework-3.0.3-12',
 	 */
 	function getHotfixes()
 	{
 		$bootStrap = $this->getParent()->getBootStrap();
 		$hotfixes = $bootStrap->getHotfixes(Framework::getVersion());
-		//var_export($hotfixes);
-		$computedDeps = $this->getComputedDeps();
-		//var_export($computedDeps);
+		$computedDeps = $this->getInstalledRepositoryPaths();
+		
 		$hotfixesFiltered = array();
-		foreach ($hotfixes as $componentFullName => $hotfixVersions)
+		foreach ($hotfixes as  $hotfixPath)
 		{
-			list($componentType, $componentName) = explode("/", $componentFullName);
-			if (!isset($computedDeps[$componentType][$componentName]))
+			list($hf_depType, $hf_componentName, $hf_version, $hf_hotFix) = $bootStrap->explodeRepositoryPath($hotfixPath);
+			$hfKey = $hf_depType .'/'. $hf_componentName .'/'. $hf_version;
+			if (isset($computedDeps[$hfKey]) && $hf_hotFix > $computedDeps[$hfKey])
 			{
-				//echo "Ignore non installed ".$hotfix."\n";
-				unset($hotfixes[$componentFullName]);
-			}
-			else
-			{
-				foreach ($hotfixVersions as $hotfixKey => $hotfix)
-				{
-					$installedVersion = $computedDeps[$componentType][$componentName]["version"];
-					if ($bootStrap->compareVersion($installedVersion, $hotfix) >= 0)
-					{
-						//echo "Ignore already installed $componentFullName-$hotfix\n";
-						unset($hotfixVersions[$hotfixKey]);
-						if (count($hotfixVersions) == 0)
-						{
-							unset($hotfixes[$componentFullName]);
-						}
-					}
-					else
-					{
-						//echo "Hotfix $componentFullName,$hotfix OK ($installedVersion)\n";
-						$matches = null;
-						if (!preg_match('/^(.*)-([0-9]+)$/', $hotfix, $matches))
-						{
-							throw new Exception("Bad hotfix version ".$hotfix);
-						}
-						$hotfixNumber = intval($matches[2]);
-						$hotfixesFiltered[$hotfixNumber] = array("type" => $componentType, "name" => $componentName, "version" => $matches[1], "number" => $hotfixNumber);
-					}
-				}
+				$hotFixName = $bootStrap->convertToCategory($hf_depType) . '/' . $hf_componentName . '-' . $hf_version . '-' . $hf_hotFix; 
+				$hotfixesFiltered[$hf_hotFix] = $hotFixName;
 			}
 		}
-		ksort($hotfixesFiltered);
-		
+		ksort($hotfixesFiltered, SORT_NUMERIC);		
 		return $hotfixesFiltered;
 	}
 
@@ -77,14 +71,15 @@ class commands_CheckHotfix extends commands_AbstractChangeCommand
 	function _execute($params, $options)
 	{
 		$hotfixes = $this->getHotfixes();		
-		if (f_util_ArrayUtils::isEmpty($hotfixes))
+		if (count($hotfixes) == 0)
 		{
 			return $this->quitOk("No hotfix available for your project");
 		}
+		
 		$this->message("You should apply the following hotfixes:");
-		foreach ($hotfixes as $hotfixNumber => $componentInfo)
+		foreach ($hotfixes as $hotfixNumber => $hotfixName)
 		{
-			$this->message("- change.php apply-hotfix ".$componentInfo["type"]."/".$componentInfo["name"]."-".$componentInfo["version"]."-".$hotfixNumber);
+			$this->message(" apply-hotfix ".$hotfixName);
 		}
 	}
 }

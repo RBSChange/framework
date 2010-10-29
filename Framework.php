@@ -633,7 +633,7 @@ if (AG_USE_LOGGING)
 	require_once(FRAMEWORK_HOME."/libs/agavi/logging/LoggingFileAppender.class.php");
 	require_once(FRAMEWORK_HOME."/libs/agavi/logging/Logger.class.php");
 	require_once(FRAMEWORK_HOME."/libs/agavi/logging/LoggerManager.class.php");
-	
+	require_once(FRAMEWORK_HOME."/libs/agavi/logging/Message.class.php");
 	ConfigCache::import(AG_CONFIG_DIR . '/logging.ini');
 }
 

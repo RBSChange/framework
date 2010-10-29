@@ -13,20 +13,20 @@ class ClassResolver implements ResourceResolver
 	 */
 	protected $aop;
 
-	private $keys = array('%AG_LIB_DIR%', '%AG_MODULE_DIR%', '%FRAMEWORK_HOME%', '%PROJECT_OVERRIDE%', '%WEBEDIT_HOME%', '%PROFILE%');
-	private $reps = array(AG_LIB_DIR, AG_MODULE_DIR, FRAMEWORK_HOME, PROJECT_OVERRIDE, WEBEDIT_HOME, PROFILE);
+	private $keys;
+	private $reps;
 
 	protected function __construct()
 	{
 		require_once(FRAMEWORK_HOME . '/util/FileUtils.class.php');
 		require_once(FRAMEWORK_HOME . '/util/StringUtils.class.php');
-		$this->cacheDir = f_util_FileUtils::buildCachePath('autoload');
+		
+		$this->keys = array('%AG_LIB_DIR%', '%AG_MODULE_DIR%', '%FRAMEWORK_HOME%', '%PROJECT_OVERRIDE%', '%WEBEDIT_HOME%', '%PROFILE%');
+		$this->reps = array(AG_LIB_DIR, AG_MODULE_DIR, FRAMEWORK_HOME, PROJECT_OVERRIDE, WEBEDIT_HOME, PROFILE);
+		
+		$this->cacheDir = WEBEDIT_HOME . '/cache/autoload';
 		if (!is_dir($this->cacheDir))
 		{
-			//			if (php_sapi_name() == "cli")
-			//			{
-			//				echo "Initialize framework autoload. Please wait: can be long\n";
-			//			}
 			$this->initialize();
 		}
 	}
@@ -298,10 +298,14 @@ class ClassResolver implements ResourceResolver
 		$modulesList = $this->getListOfModulesDependencies();
 
 		$ini = Framework::getConfiguration('autoload');
-		
+
+		// we automatically add our php classes
+		require_once(FRAMEWORK_HOME .'/util/Finder.class.php');
+				
 		// let's do our fancy work
 		foreach ($ini as $entry)
 		{
+			
 			// file mapping or directory mapping?
 			if (isset($entry['path']))
 			{
@@ -309,10 +313,8 @@ class ClassResolver implements ResourceResolver
 				$ext  = isset($entry['ext']) ? $entry['ext'] : '.php';
 				$path = $entry['path'];
 
-				$path = $this->replaceConstants($path);
-			
-				// we automatically add our php classes
-				require_once(FRAMEWORK_HOME .'/util/Finder.class.php');
+				$path = $this->replaceConstants($path);				
+
 				$finder = f_util_Finder::type('file')->ignore_version_control()->name('*'.$ext);
 				$finder->follow_link();
 
@@ -411,7 +413,7 @@ class ClassResolver implements ResourceResolver
 	function getClassNames($basePattern = null)
 	{
 		$classNames = array();
-		$path = f_util_FileUtils::buildCachePath("autoload");
+		$path = WEBEDIT_HOME . '/cache/autoload';
 		$pathLength = strlen($path)+1;
 
 		if ($basePattern !== null)
@@ -455,8 +457,7 @@ class ClassResolver implements ResourceResolver
 	public function update()
 	{
 		$oldCacheDir = $this->cacheDir;
-		$this->cacheDir = f_util_FileUtils::buildCachePath('autoload_tmp');
-
+		$this->cacheDir = WEBEDIT_HOME . '/cache/autoload_tmp';
 		try
 		{
 			f_util_FileUtils::rmdir($this->cacheDir);
@@ -468,6 +469,7 @@ class ClassResolver implements ResourceResolver
 		}
 		catch (Exception $e)
 		{
+			die($e->getMessage());
 			// restore state in all cases
 			$this->cacheDir = $oldCacheDir;
 			throw $e;
