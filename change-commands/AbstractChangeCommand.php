@@ -46,6 +46,7 @@ abstract class commands_AbstractChangeCommand extends c_ChangescriptCommand
 	{
 		if (!class_exists("Framework", false))
 		{
+			$this->getParent()->getBootStrap()->appendToAutoload(WEBEDIT_HOME . '/libs/agavi');
 			foreach (spl_autoload_functions() as $fct) 
 			{
 				if (is_array($fct) && ($fct[0] instanceof cboot_ClassDirAnalyzer))
