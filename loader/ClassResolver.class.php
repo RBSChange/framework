@@ -513,10 +513,14 @@ class ClassResolver implements ResourceResolver
 		$cacheFile = $this->getCachePath($class, $this->cacheDir);
 		if (!file_exists($cacheFile))
 		{
+			if (@readlink($cacheFile) !== false)
+			{
+				unlink($cacheFile);
+			}
 			f_util_FileUtils::mkdir(dirname($cacheFile));
 			symlink($filePath, $cacheFile);
 		}
-		elseif ($override)
+		else if ($override)
 		{
 			unlink($cacheFile);
 			symlink($filePath, $cacheFile);
