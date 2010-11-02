@@ -1,7 +1,6 @@
 <?php
 umask(0002);
-
-if ( ! defined('PROFILE') )
+if (!defined('PROFILE') )
 {
 	$profile = file_get_contents(WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'profile');
 	if ( $profile === false || $profile == '' )
@@ -10,9 +9,15 @@ if ( ! defined('PROFILE') )
 	}
 	define('PROFILE', trim($profile) );
 }
+if (!defined('FRAMEWORK_HOME'))
+{
+	define('FRAMEWORK_HOME', WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'framework');
+}
+if (!defined('AG_CACHE_DIR'))
+{
+	define('AG_CACHE_DIR', WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . PROFILE);
+}
 
-define('FRAMEWORK_HOME', WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'framework');
-define('AG_CACHE_DIR', WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . PROFILE);
 define('CHANGE_LOG_DIR', WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'log' . DIRECTORY_SEPARATOR . PROFILE);
 if (!is_dir(CHANGE_LOG_DIR)) @mkdir(CHANGE_LOG_DIR, 0777, true);
 define('CHANGE_BUILD_DIR', WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'build' . DIRECTORY_SEPARATOR . PROFILE);

@@ -1,60 +1,25 @@
 <?php
+define("WEBEDIT_HOME", getcwd());
+define("CHANGE_DEV_MODE", getenv("CHANGE_DEV_MODE") == "true");
+
+$profile = @file_get_contents(WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'profile');
+if ($profile === false || empty($profile))
+{
+	header("HTTP/1.1 500 Internal Server Error");
+	echo 'Profile not defined. Please define a profile in file ./profile.';
+	exit(-1);
+}
+
+define('PROFILE', trim($profile));
+define('FRAMEWORK_HOME', WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'framework');
+define('AG_CACHE_DIR', WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . PROFILE);
+
 require_once dirname(__FILE__) . '/bootstrap.php';
+umask(0002);
 $bootStrap = new c_ChangeBootStrap(WEBEDIT_HOME);
 $bootStrap->setAutoloadPath(WEBEDIT_HOME."/cache/autoload");
-$bootStrap->dispatch('func:executeChangeCmd');
 
-function executeChangeCmd($argv, $computedDeps)
-{
-	global $bootStrap;
-	$argv = isset($_POST['argv']) ? $_POST['argv'] : array();
-	$frameworkInfo = $computedDeps["change-lib"]["framework"];
-	$script = new c_Changescripthttp('change.php', $frameworkInfo['path']);
-	$script->setBootStrap($bootStrap);
-	$script->setEnvVar("computedDeps", $computedDeps);
-	registerCommands($script, $computedDeps, $bootStrap);
-	ob_start();
-	$script->execute($argv);
-	ob_flush();
-}
-
-/**
- * @param c_Changescript $script
- * @param array $computedDeps
- * @param c_ChangeBootStrap $bootStrap
- */
-function registerCommands($script, $computedDeps, $bootStrap)
-{	
-	$frameworkInfo = $computedDeps["change-lib"]["framework"];
-	$cmdPath  = $frameworkInfo["path"].'/change-commands';
-	$bootStrap->appendToAutoload($cmdPath);
-	$script->addCommandDir($cmdPath);
-	
-	$cmdPath  = $frameworkInfo["path"].'/changedev-commands';
-	$bootStrap->appendToAutoload($cmdPath);
-	$script->addGhostCommandDir($cmdPath);	
-
-	$path = WEBEDIT_HOME . "/modules/";
-	foreach (new DirectoryIterator($path) as $fileInfo)
-	{
-		if (!$fileInfo->isDot() && $fileInfo->isDir())
-		{
-			$moduleName = basename($fileInfo->getPathname());
-			$modulePath =  (isset($computedDeps['module'][$moduleName])) ? $computedDeps['module'][$moduleName]['path'] : realpath($fileInfo->getPathname());
-			
-			$cmdPath = $modulePath."/change-commands";
-			if (is_dir($cmdPath))
-			{
-				$bootStrap->appendToAutoload($cmdPath);
-				$script->addCommandDir($cmdPath, "$moduleName|Module $moduleName commands");
-			}
-	
-			$ghostPath = $modulePath.'/changedev-commands';
-			if (is_dir($ghostPath))
-			{
-				$bootStrap->appendToAutoload($ghostPath);
-				$script->addGhostCommandDir($ghostPath, "$moduleName|Module $moduleName commands");
-			}
-		}
-	}
-}
+$argv = $_POST['argv'];
+$script = new c_Changescripthttp(__FILE__, FRAMEWORK_HOME, 'change');
+$ghostChangeScripts = array();
+require("change_script.inc");

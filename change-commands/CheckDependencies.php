@@ -75,19 +75,20 @@ class commands_CheckDependencies extends commands_AbstractChangeCommand
 					$msg .= '-' . max($infos['hotfix']);
 				}
 				
-				$msg .= ($infos['localy']) ? ' Localy' : ' Not localy';
-				$msg .= ($infos['linked']) ? ' Linked' : ' Not used';
-				
-				if ($infos['localy'] && $infos['linked'])
+				if (!$infos['localy'])
 				{
-					if (isset($options['verbose']))
-					{
-						$this->okMessage($msg);
-					}
-				}
-				else
-				{
+					$msg .= ': Not localy';
 					$this->warnMessage($msg);
+				}
+				elseif (!$infos['linked'])
+				{
+					$msg .= ': Not linked in project';
+					$this->warnMessage($msg);
+				}
+				else if (isset($options['verbose']))
+				{
+					$msg .= ': Ok';
+					$this->okMessage($msg);
 				}
 			} 
 		}

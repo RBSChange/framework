@@ -1,35 +1,21 @@
 <?php
-define("WEBEDIT_HOME", getcwd());
-define("CHANGE_DEV_MODE", getenv("CHANGE_DEV_MODE") == "true");
-if (!defined('PROFILE') )
+if (!defined("PROFILE") || !defined("WEBEDIT_HOME") || !isset($bootStrap) || !isset($script))
 {
-	$profile = file_get_contents(WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'profile');
-	if ($profile === false || $profile == '')
-	{
-		throw new Exception('Profile not defined. Please define a profile in file ./profile.');
-	}
-	define('PROFILE', trim($profile));
+	exit(-1);
+}
+if (!isset($argv)) {$argv = array();}
+
+$clearKey = array_search('--clear', $argv);
+if ($clearKey !== false)
+{
+	unset($argv[$clearKey]);
+	$bootStrap->cleanDependenciesCache();
 }
 
-// Load c_ChangeBootStrap
-//ob_start(); // avoid shebang display (when all classes are aggregated into one file).
-require_once dirname(__FILE__) . '/bootstrap.php';
-//ob_get_clean();
-$bootStrap = new c_ChangeBootStrap(WEBEDIT_HOME);
-$bootStrap->setAutoloadPath(WEBEDIT_HOME."/cache/autoload");
-
-$computedDeps = $bootStrap->getComputedDependencies();
-if (!isset($computedDeps["change-lib"]["framework"]))
-{
-	throw new Exception("Could not find change-lib/framework dependency");
-}
-$frameworkInfo = $computedDeps["change-lib"]["framework"];
-
-$script = new c_Changescript($_SERVER['argv'][0], $frameworkInfo['path']);
 $script->setBootStrap($bootStrap);
-$script->setEnvVar("computedDeps", $computedDeps);
+$script->setEnvVar('computedDeps', $bootStrap->getComputedDependencies());
 
-$cmdPath  = $frameworkInfo["path"].'/'.$script->getName()."-commands";
+$cmdPath  = FRAMEWORK_HOME . '/'.$script->getName()."-commands";
 $bootStrap->appendToAutoload($cmdPath);
 $script->addCommandDir($cmdPath);
 
@@ -37,7 +23,7 @@ if (is_array($ghostChangeScripts))
 {
 	foreach ($ghostChangeScripts as $ghostName)
 	{
-		$ghostPath = $frameworkInfo["path"].'/'.$ghostName."-commands";
+		$ghostPath = FRAMEWORK_HOME.'/'.$ghostName."-commands";
 		if (is_dir($ghostPath))
 		{
 			$bootStrap->appendToAutoload($ghostPath);
@@ -45,6 +31,7 @@ if (is_array($ghostChangeScripts))
 		}
 	}
 }
+
 $path = WEBEDIT_HOME."/modules";
 if (is_dir($path))
 {
@@ -76,4 +63,4 @@ if (is_dir($path))
 		}
 	}
 }
-$script->execute(array_slice($_SERVER['argv'], 1));
+$script->execute($argv);
