@@ -394,9 +394,9 @@ abstract class f_util_HtmlUtils
         }
         $html .= ' />';
         
-        if ($wantZoom && $document && f_util_ClassUtils::methodExists($document, 'getInfo'))
+        if ($wantZoom && $document && f_util_ClassUtils::methodExists($document, 'getCommonInfo'))
         {
-			$docInfo = $document->getInfo();        	
+			$docInfo = $document->getCommonInfo();        	
         	$askedWidth = self::min(array($format['width'], $format['max-width']));
 			$askedHeight = self::min(array($format['height'], $format['max-height']));
 			// TODO: externalize the percentage of tolerance: configuration / preferences
