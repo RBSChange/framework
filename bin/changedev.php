@@ -16,9 +16,6 @@ define('AG_CACHE_DIR', WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_
 
 require_once dirname(__FILE__) . '/bootstrap.php';
 umask(0002);
-
-define('FRAMEWORK_HOME', WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'framework');
-define('AG_CACHE_DIR', WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . PROFILE);
 $bootStrap = new c_ChangeBootStrap(WEBEDIT_HOME);
 $bootStrap->setAutoloadPath(WEBEDIT_HOME."/cache/autoload");
 
