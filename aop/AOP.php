@@ -5,17 +5,17 @@ class f_AOP
 	 * @var String[]
 	 */
 	private $classDirectories = array();
-
+	
 	/**
 	 * @var String[]
 	 */
 	private $alteredFiles = array();
-	private $lags = array();
+	
 	/**
 	 * @var array<String, Integer>
 	 */
 	private $alteredCount = array();
-
+	
 	/**
 	 * @var array<String, array<String, String[]>>
 	 */
@@ -24,7 +24,7 @@ class f_AOP
 	 * @var Integer
 	 */
 	private $alterationsDefTime;
-
+	
 	/**
 	 * @param String $className
 	 * @param String $methodName
@@ -37,7 +37,7 @@ class f_AOP
 		// echo __METHOD__."\n";
 		return $this->applyAdvice($className, $methodName, $adviceName, $adviceMethodName, 'advice_after-returning', array("adviceParameters" => $parameters));
 	}
-
+	
 	/**
 	 * @param String $className
 	 * @param String $methodName
@@ -56,7 +56,7 @@ class f_AOP
 		}
 		return $this->applyAdvice($className, $methodName, $adviceName, $adviceMethodName, 'advice_after-throwing', $params);
 	}
-
+	
 	/**
 	 * @param String $className
 	 * @param String $methodName
@@ -69,7 +69,7 @@ class f_AOP
 		// echo __METHOD__."\n";
 		return $this->applyAdvice($className, $methodName, $adviceName, $adviceMethodName, 'advice_before', array("adviceParameters" => $parameters));
 	}
-
+	
 	/**
 	 * @param String $className
 	 * @param String $methodName
@@ -82,7 +82,7 @@ class f_AOP
 		// echo __METHOD__."\n";
 		return $this->applyAdvice($className, $methodName, $adviceName, $adviceMethodName, 'advice_after', array("adviceParameters" => $parameters));
 	}
-
+	
 	/**
 	 * @param String $className
 	 * @param String $methodName
@@ -93,7 +93,7 @@ class f_AOP
 	function applyAroundAdvice($className, $methodName, $adviceName, $adviceMethodName, $parameters = null)
 	{
 		//echo __METHOD__."\n";
-		list($beforeAdviceCode, ) = $this->getMethodCode($adviceName, "before".ucfirst($adviceMethodName), false);
+		list($beforeAdviceCode, ) = $this->getMethodCode($adviceName, "before" . ucfirst($adviceMethodName), false);
 		$params = array("beforeAdviceCode" => $beforeAdviceCode);
 		if ($parameters !== null)
 		{
@@ -101,35 +101,34 @@ class f_AOP
 		}
 		return $this->applyAdvice($className, $methodName, $adviceName, $adviceMethodName, 'advice_around', $params);
 	}
-
+	
 	private function renameClass($className, $newClassName)
 	{
-		list($tokens, $fileName) = $this->getTokens($className);
-		$tokenCount = count($tokens);
+		list($tokens, ) = $this->getTokens($className);
 		foreach ($tokens as $index => $token)
 		{
-			if ($token[0] == T_CLASS && $tokens[$index+2][1] == $className)
+			if ($token[0] == T_CLASS && $tokens[$index + 2][1] == $className)
 			{
-				$tokens[$index+2][1] = $newClassName;
+				$tokens[$index + 2][1] = $newClassName;
 				break;
 			}
 		}
 		return $this->tokensToString($tokens);
 	}
-
+	
 	function renameParentClass($className, $newParentClassName)
 	{
-		list($tokens, $fileName) = $this->getTokens($className);
+		list($tokens,) = $this->getTokens($className);
 		$tokenCount = count($tokens);
 		foreach ($tokens as $index => $token)
 		{
-			if ($token[0] == T_CLASS && $tokens[$index+2][1] == $className)
+			if ($token[0] == T_CLASS && $tokens[$index + 2][1] == $className)
 			{
-				for ($i = $index; $i < $tokenCount; $i++)
+				for ($i = $index; $i < $tokenCount; $i ++)
 				{
 					if ($tokens[$i][0] == T_EXTENDS)
 					{
-						$tokens[$i+2][1] = $newParentClassName;
+						$tokens[$i + 2][1] = $newParentClassName;
 						break 2;
 					}
 				}
@@ -137,7 +136,7 @@ class f_AOP
 		}
 		return $this->tokensToString($tokens);
 	}
-
+	
 	private function tokensToString($tokens)
 	{
 		ob_start();
@@ -148,13 +147,13 @@ class f_AOP
 		}
 		return trim(ob_get_clean());
 	}
-
+	
 	private function getTokens($className)
 	{
 		$path = ClassResolver::getInstance()->getRessourcePath($className);
 		if ($path === null)
 		{
-			throw new Exception(__METHOD__." could not find $className definition file");
+			throw new Exception(__METHOD__ . " could not find $className definition file");
 		}
 		if (isset($this->alteredFiles[$path]))
 		{
@@ -167,17 +166,6 @@ class f_AOP
 		return array($tokens, $path);
 	}
 	
-	private function getOriginalTokens($className)
-	{
-		$path = ClassResolver::getInstance()->getRessourcePath($className);
-		if ($path === null)
-		{
-			throw new Exception(__METHOD__." could not find $className definition file");
-		}
-		$tokens = token_get_all(f_util_FileUtils::read($path));
-		return array($tokens, $path);
-	}
-
 	/**
 	 * @param String $className
 	 * @param String $replacerClassName
@@ -189,18 +177,16 @@ class f_AOP
 		// you can only replace a class with a subclass of it
 
 		// check parent-child relationship
-		$this->getMethod($className, "__construct");
 		$parentName = $this->getParentName($replacerClassName, false);
 		while ($parentName !== null && $parentName !== $className)
 		{
-			$parents[] = $parentName;
 			$parentName = $this->getParentName($parentName, false);
 		}
 		if ($parentName !== $className)
 		{
-			throw new Exception($replacerClassName." is not a subclass of ".$className);
+			throw new Exception($replacerClassName . " is not a subclass of " . $className);
 		}
-
+		
 		// verify constructor compatibility
 		// TODO: re-check constructors (was simplier when using Reflection API ... :( )
 		/*
@@ -224,23 +210,23 @@ class f_AOP
 		//	}
 		}
 		*/
-
-		list($classCode, $class) = $this->getMethodCode($className, null);
+		
+		list(, $class) = $this->getMethodCode($className, null);
 		list($replacerCode, $replacer) = $this->getMethodCode($replacerClassName, null);
-
+		
 		if (!isset($this->alteredCount[$className]))
 		{
 			$this->alteredCount[$className] = 0;
 		}
-
+		
 		$replacedCount = $this->alteredCount[$className];
-		$replacedClassName = $className."_replaced".$replacedCount;
+		$replacedClassName = $className . "_replaced" . $replacedCount;
 		$newCode = $this->renameClass($className, $replacedClassName);
-		$this->alteredCount[$className]++;
+		$this->alteredCount[$className] ++;
 		$aopPath = ClassResolver::getInstance()->getAOPPath($replacedClassName);
 		f_util_FileUtils::writeAndCreateContainer($aopPath, $newCode, f_util_FileUtils::OVERRIDE);
 		ClassResolver::getInstance()->appendToAutoloadFile($replacedClassName, $aopPath);
-
+		
 		ob_start();
 		echo "<?php\n";
 		echo $this->getMethodModifiers($class);
@@ -256,21 +242,20 @@ class f_AOP
 		{
 			echo $replacerParentName;
 		}
-
+		
 		echo "\n";
 		$replacerCode = $this->getReflectionObjCode($replacer);
 		$openingBracketIndex = strpos($replacerCode, "{");
 		$closingBracketIndex = strrpos($replacerCode, "}");
-		echo substr($replacerCode, $openingBracketIndex, $closingBracketIndex-$openingBracketIndex+1);
+		echo substr($replacerCode, $openingBracketIndex, $closingBracketIndex - $openingBracketIndex + 1);
 		echo "\n";
-
+		
 		$newReplacerCode = trim(ob_get_clean());
-
+		
 		// end echos
 		return $newReplacerCode;
 	}
-
-
+	
 	/**
 	 * @param String $className
 	 * @return array<String, String[]>
@@ -289,7 +274,7 @@ class f_AOP
 		//echo "No alteration for $className\n";
 		return null;
 	}
-
+	
 	/**
 	 * @param String $originalClassName
 	 * @param String $replacerClassName
@@ -300,7 +285,7 @@ class f_AOP
 		try
 		{
 			$firstChildName = $this->findFirstChild($originalClassName, $replacerClassName);
-			$newClassName = $originalClassName."_replaced".($this->getAlterationDefCount($originalClassName));
+			$newClassName = $originalClassName . "_replaced" . ($this->getAlterationDefCount($originalClassName));
 			$this->addAlteration($originalClassName, array("", "replaceClass", $originalClassName, $replacerClassName));
 			if ($firstChildName != $replacerClassName)
 			{
@@ -312,7 +297,7 @@ class f_AOP
 			// The only known case of an exception here is classes not available
 		}
 	}
-
+	
 	/**
 	 * @param String $originalClassName
 	 * @param array $alteration
@@ -325,7 +310,7 @@ class f_AOP
 		}
 		$this->alterations[$originalClassName][] = $alteration;
 	}
-
+	
 	private function getAlterationDefCount($className)
 	{
 		if (!isset($this->alterations[$className]))
@@ -334,7 +319,7 @@ class f_AOP
 		}
 		return count($this->alterations[$className]);
 	}
-
+	
 	private function loadAlterations()
 	{
 		if ($this->alterations === null)
@@ -345,7 +330,7 @@ class f_AOP
 				$doc = new DOMDocument();
 				if ($doc->load($aopConfigFile) === false)
 				{
-					throw new Exception("Could not load XML file ".$aopConfigFile);
+					throw new Exception("Could not load XML file " . $aopConfigFile);
 				}
 				// load pointcuts
 				$pointcuts = array();
@@ -353,9 +338,10 @@ class f_AOP
 				{
 					$pointcuts[$pointcutElem->getAttribute("id")] = $pointcutElem->getAttribute("expression");
 				}
-
+				
 				// load advices
 				$alterations = array();
+				$replacements = array();
 				$adviceNames = array("before" => "applyBeforeAdvice", "after-returning" => "applyAfterReturningAdvice", "after-throwing" => "applyAfterThrowingAdvice", "after" => "applyAfterAdvice", "around" => "applyAroundAdvice");
 				foreach ($doc->documentElement->childNodes as $childNode)
 				{
@@ -377,7 +363,7 @@ class f_AOP
 								$pointcutRef = $childNode->hasAttribute("pointcut-ref");
 								if (!isset($pointcuts[$pointcutRef]))
 								{
-									throw new Exception("Unknown pointcut ".$pointcutRef);
+									throw new Exception("Unknown pointcut " . $pointcutRef);
 								}
 								$pointcut = $pointcuts[$pointcutRef];
 							}
@@ -389,9 +375,9 @@ class f_AOP
 							$alteration = array($adviceClass, $aopMethod, $pointcutClass, $pointcutMethod, $adviceClass, $adviceMethod);
 							if ($tagName === "after-throwing" && $childNode->hasAttribute("exception"))
 							{
-								$alteration[] =	$childNode->getAttribute("exception");
+								$alteration[] = $childNode->getAttribute("exception");
 							}
-
+							
 							if ($childNode->hasAttribute("parameters"))
 							{
 								// "message: $this->__toString()"
@@ -404,12 +390,12 @@ class f_AOP
 										throw new Exception("Advice parameters not well formed");
 									}
 									$paramName = trim(substr($paramDef, 0, $index));
-									$paramValue = trim(substr($paramDef, $index+1));
+									$paramValue = trim(substr($paramDef, $index + 1));
 									$parameters[$paramName] = $paramValue;
 								}
 								$alteration[] = $parameters;
 							}
-
+							
 							if (!isset($alterations[$pointcutClass]))
 							{
 								$alterations[$pointcutClass] = array();
@@ -428,7 +414,7 @@ class f_AOP
 								$pointcutRef = $childNode->hasAttribute("pointcut-ref");
 								if (!isset($pointcuts[$pointcutRef]))
 								{
-									throw new Exception("Unknown pointcut ".$pointcutRef);
+									throw new Exception("Unknown pointcut " . $pointcutRef);
 								}
 								$pointcut = $pointcuts[$pointcutRef];
 							}
@@ -436,7 +422,7 @@ class f_AOP
 							{
 								throw new Exception("An advice config element must have pointcut or pointcut-ref attribute defined");
 							}
-
+							
 							// class
 							if (!$childNode->hasAttribute("class"))
 							{
@@ -444,26 +430,46 @@ class f_AOP
 							}
 							$replacerClassName = $childNode->getAttribute("class");
 							$originalClassName = $pointcut;
-
+							
 							// TODO: first argument stinks...
 							$alteration = array("", "replaceClass", $originalClassName, $replacerClassName);
-
+							
 							// TODO: refactor
-							if (!isset($alterations[$originalClassName]))
+							if (!isset($replacements[$originalClassName]))
 							{
-								$alterations[$originalClassName] = array();
+								$replacements[$originalClassName] = array();
 							}
 							$firstChildName = $this->findFirstChild($originalClassName, $replacerClassName);
 							if ($firstChildName != $replacerClassName)
 							{
-								if (!isset($alterations[$firstChildName]))
+								if (!isset($replacements[$firstChildName]))
 								{
-									$alterations[$firstChildName] = array();
+									$replacements[$firstChildName] = array();
 								}
-								$newParentClassName = $originalClassName."_replaced".count($alterations[$originalClassName]);
-								$alterations[$firstChildName][] = array("", "renameParentClass", $firstChildName, $newParentClassName);
+								$newParentClassName = $originalClassName . "_replaced" . count($alterations[$originalClassName]);
+								$replacements[$firstChildName][] = array("", "renameParentClass", $firstChildName, $newParentClassName);
 							}
-							$alterations[$originalClassName][] = $alteration;
+							$replacements[$originalClassName][] = $alteration;
+						}
+						elseif ($tagName === "add-methods")
+						{
+							$originalClassName = $childNode->getAttribute("pointcut");
+							$adviceClassName = $childNode->getAttribute("class");
+							$adviceMethod = $childNode->getAttribute("methods");
+							$propertieNamesStr = $childNode->hasAttribute("properties") ? $childNode->getAttribute("properties") : null;
+							$method = $this->getMethodCode($originalClassName, $adviceMethod, true, false);
+							if ($method === null)
+							{
+								if (!isset($alterations[$originalClassName]))
+								{
+									$alterations[$originalClassName] = array();
+								}
+								$alterations[$originalClassName][] = array("", "applyAddMethodsAdvice", $originalClassName, $adviceClassName, $adviceMethod, $propertieNamesStr);
+							}
+							else
+							{
+								throw new Exception("Method $adviceMethod already exists on $originalClassName");
+							}
 						}
 						elseif ($tagName === "pointcut")
 						{
@@ -471,11 +477,27 @@ class f_AOP
 						}
 						else
 						{
-							throw new Exception("Unknown aop config element ".$tagName." in ".$aopConfigFile);
+							throw new Exception("Unknown aop config element " . $tagName . " in " . $aopConfigFile);
 						}
 					}
 				}
-
+				
+				// Add class replacements at the end
+				if (f_util_ArrayUtils::isNotEmpty($replacements))
+				{
+					foreach ($replacements as $className => $classAlterations)
+					{
+						if (!isset($alterations[$className]))
+						{
+							$alterations[$className] = $classAlterations;
+						}
+						else
+						{
+							$alterations[$className] = array_merge($alterations[$className], $classAlterations);
+						}
+					}
+				}
+				
 				$this->alterations = $alterations;
 				$this->alterationsDefTime = filemtime($aopConfigFile);
 			}
@@ -485,7 +507,53 @@ class f_AOP
 			}
 		}
 	}
-
+	
+	private function applyAddMethodsAdvice($originalClassName, $adviceClassName, $adviceMethod, $propertieNamesStr)
+	{
+		$adviceProperties = array();
+		if (f_util_StringUtils::isNotEmpty($propertieNamesStr))
+		{
+			$propertieNames = explode(",", $propertieNamesStr);
+			foreach ($propertieNames as $propertyName)
+			{
+				$adviceProperties[] = $this->getProperty($adviceClassName, $propertyName);
+			}
+		}
+		$method = $this->getMethodCode($originalClassName, $adviceMethod, true, false);
+		if ($method === null)
+		{
+			$adviceMethodInfo = $this->getMethodCode($adviceClassName, $adviceMethod);
+			
+			list($originalClassCode, $originalClass) = $this->getMethodCode($originalClassName, null);
+			$lastBracketIndex = strrpos($originalClassCode, "}");
+			$originalClassCode = substr($originalClassCode, 0, $lastBracketIndex);
+			ob_start();
+			echo $originalClassCode;
+			echo "\n// add-methods\n";
+			foreach ($adviceProperties as $adviceProperty)
+			{
+				echo $adviceProperty->__toString();
+				echo ";\n";
+			}
+			echo $adviceMethodInfo[0];
+			echo "\n}";
+			$newLines = explode("\n", ob_get_clean());
+			
+			// replace the original method lines
+			$lines = $this->replaceCode($originalClass->getFileName(), $originalClass->getStartLine(), $originalClass->getEndLine(), $newLines);
+			if (!isset($this->alteredCount[$originalClassName]))
+			{
+				$this->alteredCount[$originalClassName] = 0;
+			}
+			$this->alteredCount[$originalClassName] ++;
+			return join("\n", $lines);
+		}
+		else
+		{
+			throw new Exception("Method $adviceMethod already exists on $originalClassName");
+		}
+	}
+	
 	private function findFirstChild($originalClassName, $replacerClassName)
 	{
 		//echo "Find first child $originalClassName $replacerClassName\n";
@@ -499,25 +567,25 @@ class f_AOP
 		//echo "First child : $firstChild\n";
 		return $firstChild;
 	}
-
+	
 	private function getParentName($className, $strict = true)
 	{
 		$path = ClassResolver::getInstance()->getRessourcePath($className);
 		if ($path === null)
 		{
-			throw new Exception(__METHOD__." could not find $className definition file");
+			throw new Exception(__METHOD__ . " could not find $className definition file");
 		}
 		$tokenArray = token_get_all(file_get_contents($path));
 		$tokenArrayCount = count($tokenArray);
 		foreach ($tokenArray as $index => $token)
 		{
-			if ($token[0] == T_CLASS && $tokenArray[$index+2][1] == $className)
+			if ($token[0] == T_CLASS && $tokenArray[$index + 2][1] == $className)
 			{
-				for ($i = $index; $i < $tokenArrayCount; $i++)
+				for ($i = $index; $i < $tokenArrayCount; $i ++)
 				{
 					if ($tokenArray[$i][0] == T_EXTENDS)
 					{
-						$parentName = $tokenArray[$i+2][1];
+						$parentName = $tokenArray[$i + 2][1];
 						return $parentName;
 					}
 				}
@@ -529,7 +597,7 @@ class f_AOP
 		}
 		return null;
 	}
-
+	
 	/**
 	 * N.B.: Must be called before getAlterations()
 	 * @return Integer
@@ -538,7 +606,7 @@ class f_AOP
 	{
 		return $this->alterationsDefTime;
 	}
-
+	
 	/**
 	 * Apply the given alterations for a given className an
 	 * returns the associated alterated file content
@@ -562,7 +630,7 @@ class f_AOP
 				$otherFileName = ClassResolver::getInstance()->getRessourcePath($alteration[2]);
 				if ($otherFileName != $fileName)
 				{
-					throw new Exception($alteration[2]." is not defined in the same file as ".$className);
+					throw new Exception($alteration[2] . " is not defined in the same file as " . $className);
 				}
 			}
 			$args = array_slice($alteration, 2);
@@ -571,7 +639,7 @@ class f_AOP
 		}
 		return $code;
 	}
-
+	
 	/**
 	 * Get all defined alterations, grouped by className
 	 * @return array<String, String[][]>
@@ -581,7 +649,7 @@ class f_AOP
 		$this->loadAlterations();
 		return $this->alterations;
 	}
-
+	
 	/**
 	 * @return Boolean
 	 */
@@ -590,7 +658,7 @@ class f_AOP
 		$this->loadAlterations();
 		return count($this->alterations) > 0;
 	}
-
+	
 	/**
 	 * @param String $directory
 	 * @return void
@@ -599,7 +667,7 @@ class f_AOP
 	{
 		$this->classDirectories[] = $directory;
 	}
-
+	
 	// private methods
 
 	/**
@@ -616,12 +684,12 @@ class f_AOP
 		if ($lines === false)
 		{
 			// this should not happen
-			throw new Exception("Could not read ".$fileName." file");
+			throw new Exception("Could not read " . $fileName . " file");
 		}
 		$this->alteredFiles[$fileName] = $lines;
 		return $lines;
 	}
-
+	
 	/**
 	 * @param String $className
 	 * @param String $methodName
@@ -637,29 +705,29 @@ class f_AOP
 		$classFileName = ClassResolver::getInstance()->getRessourcePath($className);
 		list($adviceCode, ) = $this->getMethodCode($adviceName, $adviceMethodName, false);
 		list($originalCode, $originalMethod) = $this->getMethodCode($className, $methodName);
-
+		
 		$originalMethodModifiers = $this->getMethodModifiers($originalMethod);
 		$originalMethodName = $originalMethod->getName();
-
+		
 		$originalParametersArray = array();
 		foreach ($originalMethod->getParameters() as $parameter)
 		{
 			$originalParametersArray[] = $parameter->__toString();
 		}
 		$originalParameters = join(", ", $originalParametersArray);
-
+		
 		$openingBracketIndex = strpos($originalCode, "{");
 		$closingBracketIndex = strrpos($originalCode, "}");
-		$originalMethodBody = trim(substr($originalCode, $openingBracketIndex+1, $closingBracketIndex-$openingBracketIndex-1));
-
+		$originalMethodBody = trim(substr($originalCode, $openingBracketIndex + 1, $closingBracketIndex - $openingBracketIndex - 1));
+		
 		$originalCallOp = ($originalMethod->isStatic()) ? 'self::' : '$this->';
 		$originalStatic = ($originalMethod->isStatic()) ? 'static ' : '';
-
+		
 		// construct $originalParametersCall
 		ob_start();
 		$params = $originalMethod->getParameters();
 		$paramsCount = count($params);
-		for ($i = 0; $i < $paramsCount; $i++)
+		for ($i = 0; $i < $paramsCount; $i ++)
 		{
 			if ($i > 0) echo ', ';
 			echo '$';
@@ -667,7 +735,7 @@ class f_AOP
 			echo $param->getName();
 		}
 		$originalParametersCall = ob_get_clean();
-
+		
 		$adviceParameters = "";
 		// some additional parameters could be there
 		if ($additionalParameters !== null)
@@ -680,7 +748,7 @@ class f_AOP
 					{
 						foreach ($paramValue as $adviceParam => $adviceValue)
 						{
-							$adviceParameters .= '$'.$adviceParam.' = '.$adviceValue.";\n";
+							$adviceParameters .= '$' . $adviceParam . ' = ' . $adviceValue . ";\n";
 						}
 					}
 				}
@@ -690,25 +758,25 @@ class f_AOP
 				}
 			}
 		}
-
-		$fullMethodName = $className."::".$methodName;
+		
+		$fullMethodName = $className . "::" . $methodName;
 		if (!isset($this->alteredCount[$fullMethodName]))
 		{
 			$this->alteredCount[$fullMethodName] = 0;
 		}
 		$replacedCount = $this->alteredCount[$fullMethodName];
-
+		
 		// call the template
 		ob_start();
-		require("templates/".$templateName.".php");
+		require ("templates/" . $templateName . ".php");
 		$newLines = explode("\n", ob_get_clean());
-
+		
 		// replace the original method lines
 		$lines = $this->replaceCode($classFileName, $originalMethod->getStartLine(), $originalMethod->getEndLine(), $newLines);
-		$this->alteredCount[$fullMethodName]++;
+		$this->alteredCount[$fullMethodName] ++;
 		return join("\n", $lines);
 	}
-
+	
 	/**
 	 * @param ReflectionMethod $method
 	 * @return String
@@ -717,46 +785,17 @@ class f_AOP
 	{
 		return join(" ", Reflection::getModifierNames($method->getModifiers()));
 	}
-
-	private $methods = array();
-	private function getMethod($className, $methodName)
-	{
-		if ($methodName === null)
-		{
-			$fullMethodName = $className;
-		}
-		else
-		{
-			$fullMethodName = $className."::".$methodName;
-		}
-		if (isset($this->methods[$fullMethodName]))
-		{
-			return $this->methods[$fullMethodName];
-		}
-		return null;
-	}
-
+	
 	/**
 	 * @param String $className
 	 * @param String $methodName
 	 * @param Boolean $withDeclaration
 	 * @return mixed[] (String code, <ReflectionMethod> $method)
 	 */
-	function getMethodCode($className, $methodName, $withDeclaration = true)
+	function getMethodCode($className, $methodName, $withDeclaration = true, $strict = true)
 	{
 		// echo __METHOD__." $className, $methodName, ".var_export($withDeclaration, true)."\n";
-
-		$method = $this->getMethod($className, $methodName);
-		if ($method !== null)
-		{
-			$code = $this->getReflectionObjCode($method);
-			if ($withDeclaration) return array($code, $method);
-			$startIndex = strpos($code, "{");
-			$endIndex = strrpos($code, "}");
-			return array(trim(substr($code, $startIndex+1, $endIndex-$startIndex-1)), $method);
-		}
-
-		list($tokens, $fileName) = $this->getOriginalTokens($className);
+		list($tokens, $fileName) = $this->getTokens($className);
 		$startIndex = 1;
 		$inClass = false;
 		$inMethod = false;
@@ -772,44 +811,45 @@ class f_AOP
 			{
 				if ($data == "\r\n" || $data == "\n")
 				{
-					$line++;
+					$line ++;
 				}
 			}
-
-			if ($token[0] == T_CLASS && $tokens[$index+2][1] == $className)
+			
+			if ($token[0] == T_CLASS && $tokens[$index + 2][1] == $className)
 			{
 				$inClass = true;
 				$class = new f_aop_ReflectionClass($className);
 				$class->fileName = $fileName;
 				$class->startLine = $line;
-
+				
 				// modifiers
-				$i = $index-1;
+				$i = $index - 1;
 				while ($i > 0)
 				{
 					switch ($tokens[$i][0])
 					{
-						case T_FINAL:
-							$class->addModifier(ReflectionMethod::IS_FINAL);
+						case T_FINAL :
+							$class->addModifier(ReflectionClass::IS_FINAL);
 							break;
-						case T_ABSTRACT:
-							$class->addModifier(ReflectionMethod::IS_ABSTRACT);
+						case T_ABSTRACT :
+							$class->addModifier(ReflectionClass::IS_EXPLICIT_ABSTRACT);
 							break;
-						case T_WHITESPACE:
+						case T_WHITESPACE :
 							break;
-						default:
+						default :
 							break 2;
 					}
-					$i--;
+					$i --;
 				}
-
-				$i = $index+3;
+				$classIndexStart = $i+1;
+				
+				$i = $index + 3;
 				while ($tokens[$i] != "{")
 				{
-					$i++;
-
+					$i ++;
+				
 				}
-				$classIndexStart = $i;
+				
 				$classBracketLevel = $bracketLevel;
 			}
 			else
@@ -819,64 +859,64 @@ class f_AOP
 					if (is_array($token))
 					{
 						//
-						if ($token[0] == T_FUNCTION && $tokens[$index+2][1] == $methodName)
+						if ($token[0] == T_FUNCTION && $tokens[$index + 2][1] == $methodName)
 						{
 							$inMethod = true;
 							$methodIndexStart = $index;
 							$method = new f_AOP_ReflectionMethod($methodName);
 							$method->fileName = $fileName;
 							$method->startLine = $line;
-
-							$i = $index-1;
+							
+							$i = $index - 1;
 							while ($i > 0)
 							{
 								switch ($tokens[$i][0])
 								{
-									case T_PRIVATE:
+									case T_PRIVATE :
 										$method->addModifier(ReflectionMethod::IS_PRIVATE);
 										break;
-									case T_PUBLIC:
+									case T_PUBLIC :
 										$method->addModifier(ReflectionMethod::IS_PUBLIC);
 										break;
-									case T_PROTECTED:
+									case T_PROTECTED :
 										$method->addModifier(ReflectionMethod::IS_PROTECTED);
 										break;
-									case T_STATIC:
+									case T_STATIC :
 										$method->addModifier(ReflectionMethod::IS_STATIC);
 										break;
-									case T_FINAL:
+									case T_FINAL :
 										$method->addModifier(ReflectionMethod::IS_FINAL);
 										break;
-									case T_ABSTRACT:
+									case T_ABSTRACT :
 										$method->addModifier(ReflectionMethod::IS_ABSTRACT);
 										break;
-									case T_WHITESPACE:
+									case T_WHITESPACE :
 										break;
-									default:
+									default :
 										break 2;
 								}
-								$i--;
+								$i --;
 							}
-
+							
 							if ($withDeclaration)
 							{
-								$methodIndexStart = $i+1;
+								$methodIndexStart = $i + 1;
 							}
-
-							$i = $index+3;
+							
+							$i = $index + 3;
 							while ($tokens[$i] != "{")
 							{
 								if ($tokens[$i][0] == T_VARIABLE)
 								{
 									$param = new f_AOP_ReflectionParameter(substr($tokens[$i][1], 1));
 									$method->addParameter($param);
-									$j = $i-1;
+									$j = $i - 1;
 									$paramPrefix = null;
 									while ($tokens[$j] != "," && $tokens[$j] != "(")
 									{
 										$valueStr = is_array($tokens[$j]) ? $tokens[$j][1] : $tokens[$j];
-										$paramPrefix = $valueStr.$paramPrefix;
-										$j--;
+										$paramPrefix = $valueStr . $paramPrefix;
+										$j --;
 									}
 									if ($paramPrefix == "array")
 									{
@@ -894,17 +934,17 @@ class f_AOP
 								elseif ($tokens[$i] == "=")
 								{
 									$valueStr = "";
-									$j = $i+1;
+									$j = $i + 1;
 									$parenthesisLevel = 0;
 									while ($parenthesisLevel >= 0 && $tokens[$j] != ",")
 									{
 										if ($tokens[$j] == ")")
 										{
-											$parenthesisLevel--;
+											$parenthesisLevel --;
 										}
-										else if($tokens[$j] == "(")
+										else if ($tokens[$j] == "(")
 										{
-											$parenthesisLevel++;
+											$parenthesisLevel ++;
 										}
 										if ($parenthesisLevel >= 0)
 										{
@@ -914,19 +954,19 @@ class f_AOP
 										{
 											break;
 										}
-										$j++;
+										$j ++;
 									}
-
+									
 									$param->defaultValue = trim($valueStr);
 								}
-								$i++;
+								$i ++;
 							}
-
+							
 							if (!$withDeclaration)
 							{
-								$methodIndexStart = $i+1;
+								$methodIndexStart = $i + 1;
 							}
-
+							
 							$methodBracketLevel = $bracketLevel;
 						}
 					}
@@ -934,29 +974,29 @@ class f_AOP
 					{
 						if ($token == "{")
 						{
-							$bracketLevel++;
+							$bracketLevel ++;
 						}
 						elseif ($token == "}")
 						{
-							$bracketLevel--;
+							$bracketLevel --;
 							if ($inMethod && $bracketLevel == $methodBracketLevel)
 							{
 								if ($withDeclaration)
 								{
-									$methodIndexEnd = $index+1;
+									$methodIndexEnd = $index + 1;
 								}
 								else
 								{
-									$methodIndexEnd = $index-1;
+									$methodIndexEnd = $index - 1;
 								}
 								$inMethod = false;
 								$method->endLine = $line;
-
+							
 							}
 							if ($inClass && $bracketLevel == $classBracketLevel)
 							{
 								$inClass = false;
-								$classIndexEnd = $index;
+								$classIndexEnd = $index+1;
 								$class->endLine = $line;
 							}
 						}
@@ -964,19 +1004,85 @@ class f_AOP
 				}
 			}
 		}
-
-
+		
 		if ($methodName === null)
 		{
-			$fullMethodName = $className;
-			$this->methods[$fullMethodName] = $class;
-			return array($this->tokensToString(array_slice($tokens, $classIndexStart, $classIndexEnd-$classIndexStart)), $class);
+			$code = $this->tokensToString(array_slice($tokens, $classIndexStart, $classIndexEnd - $classIndexStart));
+			if ($withDeclaration) return array($code, $class);
+			$startIndex = strpos($code, "{");
+			$endIndex = strrpos($code, "}");
+			return array(trim(substr($code, $startIndex + 1, $endIndex - $startIndex - 1)), $class);
 		}
-		$fullMethodName = $className."::".$methodName;
-		$this->methods[$fullMethodName] = $method;
-		return array($this->tokensToString(array_slice($tokens, $methodIndexStart, $methodIndexEnd-$methodIndexStart)), $method);
+		
+		if (!isset($method))
+		{
+			if ($strict)
+			{
+				throw new Exception("Could not find $className :: $methodName");
+			}
+			else
+			{
+				return null;
+			}
+		}
+		
+		$code = $this->tokensToString(array_slice($tokens, $methodIndexStart, $methodIndexEnd - $methodIndexStart));
+		if ($withDeclaration) return array($code, $method);
+		$startIndex = strpos($code, "{");
+		$endIndex = strrpos($code, "}");
+		return array(trim(substr($code, $startIndex + 1, $endIndex - $startIndex - 1)), $method);
 	}
-
+	
+	/**
+	 * @param String $className
+	 * @param String $propertyName
+	 * @return f_AOP_ReflectionProperty
+	 */
+	private function getProperty($className, $propertyName)
+	{
+		// OK: we assume an advice is NOT a target of an other advice... (then we can use ReflectionClass) 
+		$class = new ReflectionClass($className);
+		$property = $class->getProperty($propertyName);
+		
+		$p = new f_AOP_ReflectionProperty();
+		$p->name = $propertyName;
+		if ($property->isPrivate())
+		{
+			$p->addModifier(ReflectionProperty::IS_PRIVATE);
+		}
+		if ($property->isPublic())
+		{
+			$p->addModifier(ReflectionProperty::IS_PUBLIC);
+		}
+		if ($property->isProtected())
+		{
+			$p->addModifier(ReflectionProperty::IS_PROTECTED);
+		}
+		
+		$value = null;
+		if ($property->isStatic())
+		{	
+			$p->addModifier(ReflectionProperty::IS_STATIC);
+			// Objet parameter is documented as optionnal but this call generates a PHP error ...
+			$value = @$property->getValue(); 
+		}
+		else
+		{
+			$defaultProps = $class->getDefaultProperties();
+			if (isset($defaultProps[$propertyName]))
+			{
+				$value = $defaultProps[$propertyName];
+			}
+		}
+		
+		if ($value !== null)
+		{
+			$p->setDefaultValue($value);
+		}
+		
+		return $p;
+	}
+	
 	/**
 	 * @param $obj
 	 * @return String
@@ -985,7 +1091,7 @@ class f_AOP
 	{
 		return $this->getCode($reflectionObj->getFileName(), $reflectionObj->getStartLine(), $reflectionObj->getEndLine());
 	}
-
+	
 	/**
 	 * @param String $fileName
 	 * @param Integer $start
@@ -995,42 +1101,17 @@ class f_AOP
 	private function getCode($fileName, $startLine, $endLine)
 	{
 		$lines = $this->getFileNameLines($fileName);
-		list($start, $length) = $this->computeStartLength($fileName, $startLine, $endLine);
+		list($start, $length) = $this->computeStartLength($startLine, $endLine);
 		return join("\n", array_slice($lines, $start, $length));
 	}
-
-	private function computeStartLength($fileName, $startLine, $endLine)
+	
+	private function computeStartLength($startLine, $endLine)
 	{
-		$start = $startLine-1;
-		$length = $endLine-$startLine+1;
-
-		//echo "OLD: ".$start." ".$length."\n";
-		if (isset($this->lags[$fileName]))
-		{
-			foreach ($this->lags[$fileName] as $lag)
-			{
-				list($lagStart, $oldLagLength, $newLagLength) = $lag;
-				//echo "LAG: $lagStart, $oldLagLength, $newLagLength\n";
-				if ($startLine > $lagStart+1)
-				{
-					//echo "BLA $start ";
-					$start += ($newLagLength - $oldLagLength);
-					//echo "=> $start\n";
-				}
-				if ($startLine == $lagStart+1)
-				{
-					//echo "BLI $length ";
-					// we there assume that all ends with "}"...
-					$length = $newLagLength;
-					//echo "=> $length\n";
-				}
-			}
-			//echo "NEW: ".$start." ".$length."\n";
-		}
-
+		$start = $startLine - 1;
+		$length = $endLine - $startLine + 1;
 		return array($start, $length);
 	}
-
+	
 	/**
 	 * @param String $fileName
 	 * @param Integer $start
@@ -1042,14 +1123,10 @@ class f_AOP
 	{
 		// echo "ReplaceCode $fileName, $startLine, $endLine: \n==============".join("\n", $newLines)."==============\n";
 		$lines = $this->getFileNameLines($fileName);
-		list($start, $length) = $this->computeStartLength($fileName, $startLine, $endLine);
+		list($start, $length) = $this->computeStartLength($startLine, $endLine);
 		array_splice($lines, $start, $length, $newLines);
 		$this->alteredFiles[$fileName] = $lines;
-		if (!isset($this->lags[$fileName]))
-		{
-			$this->lags[$fileName] = array();
-		}
-		$this->lags[$fileName][] = array($startLine-1, $length, count($newLines));
+		
 		return $lines;
 	}
 }
@@ -1061,40 +1138,45 @@ class f_AOP_ReflectionClass
 	public $endLine;
 	public $fileName;
 	private $modifiers = 0;
-
+	
 	function __construct($name)
 	{
 		$this->name = $name;
 	}
-
+	
 	function getName()
 	{
 		return $this->name;
 	}
-
+	
 	function getFileName()
 	{
 		return $this->fileName;
 	}
-
+	
 	function getStartLine()
 	{
 		return $this->startLine;
 	}
-
+	
 	function getEndLine()
 	{
 		return $this->endLine;
 	}
-
+	
 	function addModifier($modifier)
 	{
 		$this->modifiers += $modifier;
 	}
-
+	
 	function getModifiers()
 	{
 		return $this->modifiers;
+	}
+	
+	function getModifiersString()
+	{
+		return join(" ", Reflection::getModifierNames($this->modifiers));
 	}
 }
 
@@ -1106,82 +1188,82 @@ class f_AOP_ReflectionMethod
 	public $startLine;
 	public $endLine;
 	public $fileName;
-
+	
 	function __construct($name)
 	{
 		$this->name = $name;
 	}
-
+	
 	function getName()
 	{
 		return $this->name;
 	}
-
+	
 	function addModifier($modifier)
 	{
 		$this->modifiers += $modifier;
 	}
-
+	
 	function getModifiers()
 	{
 		return $this->modifiers;
 	}
-
+	
 	function addParameter($parameter)
 	{
 		$parameter->position = count($this->parameters);
 		$this->parameters[] = $parameter;
 	}
-
+	
 	function getParameters()
 	{
 		return $this->parameters;
 	}
-
+	
 	function getFileName()
 	{
 		return $this->fileName;
 	}
-
+	
 	function getStartLine()
 	{
 		return $this->startLine;
 	}
-
+	
 	function getEndLine()
 	{
 		return $this->endLine;
 	}
-
-	public function isAbstract  ()
+	
+	public function isAbstract()
 	{
 		return ($this->modifiers & ReflectionMethod::IS_ABSTRACT) !== 0;
 	}
-	public function isConstructor ()
+	public function isConstructor()
 	{
 		return $this->name == "__construct";
 	}
-	public function isDestructor ()
+	public function isDestructor()
 	{
 		return $this->name == "__destruct";
 	}
-	public function isFinal ()
+	public function isFinal()
 	{
 		return ($this->modifiers & ReflectionMethod::IS_FINAL) !== 0;
 	}
-	public function isPrivate ()
+	public function isPrivate()
 	{
 		return ($this->modifiers & ReflectionMethod::IS_PRIVATE) !== 0;
 	}
-	public function isProtected ()
+	public function isProtected()
 	{
 		return ($this->modifiers & ReflectionMethod::IS_PROTECTED) !== 0;
 	}
-	public function isPublic ()
+	public function isPublic()
 	{
 		return ($this->modifiers & ReflectionMethod::IS_PUBLIC) !== 0 || $this->modifiers < 512;
 	}
-	public function isStatic ()
+	public function isStatic()
 	{
 		return ($this->modifiers & ReflectionMethod::IS_STATIC) !== 0;
 	}
@@ -1197,65 +1279,93 @@ class f_AOP_ReflectionParameter
 	 * @var Boolean
 	 */
 	public $isArray = false;
-
+	
 	function __construct($name)
 	{
 		$this->name = $name;
 	}
-
-	public function allowsNull ()
+	
+	public function allowsNull()
 	{
-
+	
 	}
-
+	
 	function getClass()
 	{
 		return $this->class;
 	}
-
-	public function getDefaultValue ()
+	
+	public function getDefaultValue()
 	{
 		return $this->defaultValue;
 	}
-	public function getName ()
+	public function getName()
 	{
 		return $this->name;
 	}
-	public function getPosition ()
+	public function getPosition()
 	{
 		return $this->position;
 	}
-	public function isArray ()
+	public function isArray()
 	{
 		return $this->isArray;
 	}
-	public function isDefaultValueAvailable ()
+	public function isDefaultValueAvailable()
 	{
 		return $this->defaultValue !== null;
 	}
-	public function isOptional ()
+	public function isOptional()
 	{
 		return $this->defaultValue !== null;
 	}
-	public function isPassedByReference (  )
+	public function isPassedByReference()
 	{
-
+	
 	}
-	public function __toString (  )
+	public function __toString()
 	{
 		$str = "";
 		if ($this->class !== null)
 		{
-			$str .= $this->class." ";
+			$str .= $this->class . " ";
 		}
 		if ($this->isArray)
 		{
 			$str .= "array ";
 		}
-		$str .= '$'.$this->name;
+		$str .= '$' . $this->name;
 		if ($this->defaultValue !== null)
 		{
-			$str .= " = ".$this->defaultValue;
+			$str .= " = " . $this->defaultValue;
+		}
+		return $str;
+	}
+}
+
+class f_AOP_ReflectionProperty
+{
+	private $modifiers = 0;
+	public $name;
+	private $defaultValue;
+	
+	public function addModifier($modifier)
+	{
+		$this->modifiers += $modifier;
+	}
+	
+	public function setDefaultValue($defaultValue)
+	{
+		$this->defaultValue = $defaultValue;
+	}
+	
+	public function __toString()
+	{
+		$str = join(" ", Reflection::getModifierNames($this->modifiers))
+		 .' $' . $this->name;
+		if ($this->defaultValue !== null)
+		{
+			$str .= " = ".var_export($this->defaultValue, true);
 		}
 		return $str;
 	}

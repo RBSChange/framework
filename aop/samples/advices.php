@@ -176,3 +176,34 @@ class f_aop_samples_BeforeProcessCriterions
 		}
 	}
 }
+
+class f_aop_samples_AddMethodAdvice
+{
+	private static $someNewProperty = "this is a new";
+	private static $someNewProperty2 = null;
+	private static $someNewProperty3 = false;
+	private static $someNewProperty4 = 23;
+	private static $someNewProperty5 = array("toto", "tutu");
+	
+	static function someNewMethod($arg)
+	{
+		 echo self::$someNewProperty." : ".$arg."\n";
+	}
+}
+
+class f_aop_samples_AddMethod2Advice
+{	
+	private $myprop = "propvalue";
+	function someNewMethod2($arg)
+	{
+		 echo "New Method2: ".$arg." ".$this->myprop." \n";
+	}
+}
+
+class f_aop_samples_MyPage extends website_persistentdocument_page
+{
+	public function newMethod()
+	{
+		echo "My new Method\n";
+	}
+}
