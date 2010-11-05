@@ -125,7 +125,6 @@ Where options in:
 				if (isset($options["no-auto-changes"]))
 				{
 					$this->warnMessage("You must run manually manage:
-- AOP state
 - webapp cache");
 				}
 				else
@@ -134,17 +133,6 @@ Where options in:
 					
 					CacheService::getInstance()->clearAllWebappCache();
 					$this->okMessage("webapp cache cleared");
-					
-					if ($current["defines"]["AG_DEVELOPMENT_MODE"] == "true")
-					{
-						ClassResolver::getInstance()->restoreAutoloadFromAOPBackup();
-						$this->okMessage("Autoload restored from aop-backup");
-					}
-					else
-					{
-						ClassResolver::getInstance()->compileAOP();
-						$this->okMessage("AOP compiled");
-					}
 				}	
 			}
 		}

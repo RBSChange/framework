@@ -58,14 +58,7 @@ class commands_UpdateAutoload extends commands_AbstractChangeCommand
 			}
 		}
 		
-		if (Framework::inDevelopmentMode())
-		{
-			f_util_FileUtils::cleanDir(f_util_FileUtils::buildCachePath("aop"));
-		}
-		else
-		{
-			$this->getParent()->executeCommand("compile-aop");
-		}
+		$this->getParent()->executeCommand("compile-aop");
 		
 		if ($this->hasError())
 		{
