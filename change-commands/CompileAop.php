@@ -32,12 +32,6 @@ class commands_CompileAop extends commands_AbstractChangeCommand
 		$this->message("== Compile AOP ==");
 		
 		$this->loadFramework();
-		if (Framework::inDevelopmentMode())
-		{
-			f_util_FileUtils::rmdir(f_util_FileUtils::buildCachePath("aop"));
-			$this->warnMessage("You are in developpement mode => clean cache/aop/ directory.\nIf you are in production, please change your configuration to set AG_DEVELOPMENT_MODE to false (then re-execute change compile-aop) !\n");
-			return;
-		}
 		ClassResolver::getInstance()->compileAOP();
 		
 		$this->quitOk("AOP compiled");

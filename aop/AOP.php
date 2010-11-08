@@ -173,7 +173,7 @@ class f_AOP
 	 */
 	function replaceClass($className, $replacerClassName)
 	{
-		//echo "Replacer $className => $replacerClassName\n";
+		// echo "Replacer $className => $replacerClassName\n";
 		// you can only replace a class with a subclass of it
 
 		// check parent-child relationship
@@ -213,6 +213,7 @@ class f_AOP
 		
 		list(, $class) = $this->getMethodCode($className, null);
 		list($replacerCode, $replacer) = $this->getMethodCode($replacerClassName, null);
+		
 		
 		if (!isset($this->alteredCount[$className]))
 		{
@@ -455,20 +456,24 @@ class f_AOP
 						{
 							$originalClassName = $childNode->getAttribute("pointcut");
 							$adviceClassName = $childNode->getAttribute("class");
-							$adviceMethod = $childNode->getAttribute("methods");
-							$propertieNamesStr = $childNode->hasAttribute("properties") ? $childNode->getAttribute("properties") : null;
-							$method = $this->getMethodCode($originalClassName, $adviceMethod, true, false);
-							if ($method === null)
+							$adviceMethods = explode(",", $childNode->getAttribute("methods"));
+							foreach ($adviceMethods as $adviceMethod)
 							{
-								if (!isset($alterations[$originalClassName]))
+								$adviceMethod = trim($adviceMethod);
+								$propertieNamesStr = $childNode->hasAttribute("properties") ? $childNode->getAttribute("properties") : null;
+								$method = $this->getMethodCode($originalClassName, $adviceMethod, true, false);
+								if ($method === null)
 								{
-									$alterations[$originalClassName] = array();
+									if (!isset($alterations[$originalClassName]))
+									{
+										$alterations[$originalClassName] = array();
+									}
+									$alterations[$originalClassName][] = array("", "applyAddMethodsAdvice", $originalClassName, $adviceClassName, $adviceMethod, $propertieNamesStr);
 								}
-								$alterations[$originalClassName][] = array("", "applyAddMethodsAdvice", $originalClassName, $adviceClassName, $adviceMethod, $propertieNamesStr);
-							}
-							else
-							{
-								throw new Exception("Method $adviceMethod already exists on $originalClassName");
+								else
+								{
+									throw new Exception("Method $adviceMethod already exists on $originalClassName");
+								}
 							}
 						}
 						elseif ($tagName === "pointcut")
@@ -483,7 +488,7 @@ class f_AOP
 				}
 				
 				// Add class replacements at the end
-				if (f_util_ArrayUtils::isNotEmpty($replacements))
+				if ($replacements !== null && count($replacements) > 0)
 				{
 					foreach ($replacements as $className => $classAlterations)
 					{
@@ -504,6 +509,7 @@ class f_AOP
 			else
 			{
 				$this->alterations = array();
+				$this->alterationsDefTime = 0;
 			}
 		}
 	}
@@ -516,7 +522,7 @@ class f_AOP
 			$propertieNames = explode(",", $propertieNamesStr);
 			foreach ($propertieNames as $propertyName)
 			{
-				$adviceProperties[] = $this->getProperty($adviceClassName, $propertyName);
+				$adviceProperties[] = $this->getProperty($adviceClassName, trim($propertyName));
 			}
 		}
 		$method = $this->getMethodCode($originalClassName, $adviceMethod, true, false);
