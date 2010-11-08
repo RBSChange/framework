@@ -214,11 +214,11 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 	{
 		$type = null;
 		$matches = array();
-		if (isset($this->attributes['type']) && preg_match('#modules_[a-z]+/[a-z]+#', $this->attributes['type']) > 0)
+		if (isset($this->attributes['type']) && preg_match('#modules_[a-z0-9]+/[a-z0-9]+#', $this->attributes['type']) > 0)
 		{
 			$type = $this->attributes['type'];
 		}
-		else if (preg_match('#([a-z]+)_([A-Z][a-z]+)ScriptDocumentElement#', get_class($this), $matches))
+		else if (preg_match('#([a-z0-9]+)_([A-Z][a-z0-9]+)ScriptDocumentElement#', get_class($this), $matches))
 		{
 			$type = 'modules_'.$matches[1].'/'.f_util_StringUtils::strtolower($matches[2]);
 		}

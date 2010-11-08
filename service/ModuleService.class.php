@@ -9,6 +9,8 @@ class ModuleService extends BaseService
 	const SETTING_PREFERENCES_DOCUMENT_ID = 'preferences_document_id';
 	const SETTING_PREFERENCES_DOCUMENT_TYPE = 'preferences';
 	
+	const NAME_PATTERN = '[a-z][a-z0-9]*';
+	
 	private $actionStack;
 	
 	/**

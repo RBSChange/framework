@@ -131,7 +131,7 @@ class f_util_System
 	 */
 	public static function execChangeConsoleCommand($commandName, $arguments = array())
 	{
-		return self::exec("change.php $commandName " . implode(" ", $arguments)); 
+		return self::exec("framework/bin/change.php $commandName " . implode(" ", $arguments)); 
 	}
 	
 	/**

@@ -511,7 +511,7 @@ class c_Changescript
 		return $command;
 	}
 
-	private static $commandPattern = '/^([a-zA-Z_]+)\.php$/';
+	private static $commandPattern = '/^([a-zA-Z0-9_]+)\.php$/';
 
 	private function _getCommands($commandDirs, $sectionName)
 	{

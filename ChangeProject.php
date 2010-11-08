@@ -43,23 +43,14 @@ class ChangeProject
 	}
 
 	/**
-	 * // TODO : make private when no more necessary
+	 * @deprecated use f_util_System::execChangeCommand
 	 * @param String $task
 	 * @param String[] $args
 	 * @return String[] the output of the command
 	 */
 	function executeTask($task, $args = array())
 	{
-		$cmd = "change.php $task ".join(" ", $args);
-		echo "$cmd...";
-		$output = array();
-		exec($cmd, $output, $retVal);
-		if ("0" != $retVal)
-		{
-			throw new Exception("Could not execute $cmd (exit code $retVal):\n".join("", $output));
-		}
-		echo " done\n";
-		return $output;
+		return f_util_System::execChangeCommand($task, $args)
 	}
 
 	/**
