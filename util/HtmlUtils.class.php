@@ -394,9 +394,9 @@ abstract class f_util_HtmlUtils
         }
         $html .= ' />';
         
-        if ($wantZoom && $document && f_util_ClassUtils::methodExists($document, 'getInfo'))
+        if ($wantZoom && $document && f_util_ClassUtils::methodExists($document, 'getCommonInfo'))
         {
-			$docInfo = $document->getInfo();        	
+			$docInfo = $document->getCommonInfo();        	
         	$askedWidth = self::min(array($format['width'], $format['max-width']));
 			$askedHeight = self::min(array($format['height'], $format['max-height']));
 			// TODO: externalize the percentage of tolerance: configuration / preferences
@@ -568,10 +568,16 @@ abstract class f_util_HtmlUtils
      */   
     private function buildImageSrc($document, &$attributes)
     {
-    	if (f_util_ClassUtils::methodExists($document, 'getInfo'))
+    	$lang = RequestContext::getInstance()->getLang();
+    	$urlLang = $lang;
+    	$infos = null; 
+  
+    	if ($document instanceof media_persistentdocument_file)
     	{
-    		$infos = $document->getInfo();
+    		$urlLang = ($document->getFilename()) ?  $lang : $document->getLang();
+    		$infos = $document->getInfoForLang($urlLang);
     	}
+    	
         if (isset($attributes['format']) && !empty($attributes['format']))
         {
             list($stylesheet, $formatName) = explode('/', $attributes['format']);
@@ -633,8 +639,6 @@ abstract class f_util_HtmlUtils
         	$attributes['width'] = $computedDimensions['width'];
         	$attributes['height'] = $computedDimensions['height'];
         }
-        
-        $urlLang = ($document->getFilename()) ?  RequestContext::getInstance()->getLang() : $document->getLang();
         return array(LinkHelper::getDocumentUrl($document, $urlLang, $format), $format);
     }
 }
