@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<i18n baseKey="f.validation.validator.integer" lcid="fr_FR">
+  <key id="message">la valeur du champ ″{field}″ doit être un nombre entier.</key>
+</i18n>

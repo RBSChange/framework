@@ -1,11 +1,9 @@
-CREATE TABLE IF NOT EXISTS f_locale (
-  id char(255) NOT NULL,
-  lang char(2) NOT NULL,
-  content TEXT /* CHARACTER SET utf8 COLLATE utf8_general_ci */ NULL DEFAULT NULL,
-  originalcontent TEXT /* CHARACTER SET utf8 COLLATE utf8_general_ci */ NULL DEFAULT NULL,
-  package varchar(255),
-  overridden int,
-  overridable int,
-  useredited INT( 11 ) NULL, 
-  PRIMARY KEY (id, lang)
-) TYPE=MyISAM CHARACTER SET utf8 COLLATE utf8_bin;
+CREATE TABLE `f_locale` (
+ `lang` char(5) COLLATE utf8_bin NOT NULL,
+ `id` varchar(100) COLLATE utf8_bin NOT NULL,
+ `key_path` varchar(100) COLLATE utf8_bin NOT NULL,
+ `content` text COLLATE utf8_bin,
+ `useredited` tinyint(1) NOT NULL default '0',
+ `format` ENUM('TEXT', 'HTML') NOT NULL DEFAULT 'TEXT',
+ PRIMARY KEY (`key_path`,`lang`,`id`)
+) TYPE=InnoDB CHARACTER SET utf8 COLLATE utf8_bin;

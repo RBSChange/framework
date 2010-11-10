@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<i18n baseKey="f.validation.validator.url.message" lcid="fr_FR">
+  <key id="reversed">le champ ″{field}″ ne doit pas contenir une URL valide.</key>
+</i18n>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<i18n baseKey="f.validation.validator.range.message" lcid="fr_FR">
+  <key id="reversed">le champ ″{field}″ ne doit pas avoir une valeur comprise entre {min} et {max}.</key>
+</i18n>

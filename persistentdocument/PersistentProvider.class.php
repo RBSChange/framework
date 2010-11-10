@@ -3206,263 +3206,179 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 
+	
 	/**
 	 * Return a translated text or null
-	 *
-	 * @param string $key
-	 * @param string $lang
-	 * @return string
+	 * @param string $lcid
+	 * @param string $id
+	 * @param string $keyPath
+	 * @return array[$content, $format]
 	 */
-	public function translate($key, $lang)
+	public function translate($lcid, $id, $keyPath)
 	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("PersistentProvider::translate($key, $lang)");
-		}
-
 		$stmt = $this->prepareStatement($this->getTranslateQuery());
-		$stmt->bindValue(':id', $key, PersistentProviderConst::PARAM_STR);
-		$stmt->bindValue(':lang', $lang, PersistentProviderConst::PARAM_STR);
+		$stmt->bindValue(':lang', $lcid, PersistentProviderConst::PARAM_STR);
+		$stmt->bindValue(':id', $id, PersistentProviderConst::PARAM_STR);
+		$stmt->bindValue(':key_path', $keyPath, PersistentProviderConst::PARAM_STR);
 		$this->executeStatement($stmt);
 		$results = $stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC);
 		if (count($results) > 0)
 		{
 			$content = $results[0]['content'];
-			if (empty($content) && Framework::isDebugEnabled())
-			{
-				Framework::debug('TRANSLATE KEY : UNTRANSLATED :' . $key . ':' . $lang);
-			}
-			return $content;
+			if ($content == NULL) {$content = '';}
+			return array($content, $results[0]['format']);
 		}
-		else if (Framework::isDebugEnabled())
-		{
-			Framework::debug('TRANSLATE KEY : UNKNOWN :' . $key . ':' . $lang);
-		}
-		return null;
+		return array(null, null);
 	}
-
+	
 	/**
-	 * @return String
+	 * @return 'SELECT `content`, `format` FROM `f_locale` WHERE `lang` = :lang AND `id` = :id AND `key_path` = :key_path'
 	 */
 	protected abstract function getTranslateQuery();
 
 	/**
-	 * @return String
-	 */
-	protected abstract function getCheckTranslateKeyQuery();
-
-	/**
 	 * Clear the translation table or a part of that
 	 *
-	 * @param string $package Example: modules_users
+	 * @param string $package Example: m.users
 	 */
 	public function clearTranslationCache($package = null)
 	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("PersistentProvider::clearTranslationCache()");
-		}
-
 		$stmt = $this->prepareStatement($this->clearTranslationCacheQuery($package));
 		$this->executeStatement($stmt);
 	}
 
 	/**
-	 * @return String
+	 * @return DELETE FROM `f_locale` WHERE `useredited` != 1 [ AND `key_path` LIKE '$package.%'"]
 	 */
 	protected abstract function clearTranslationCacheQuery($package = null);
 
+
 	/**
-	 * Remove given key from translation table
-	 *
-	 * @param string $key Example: modules.users.bo.general.module-name
+	 * @param string $lcid
+	 * @param string $id
+	 * @param string $keyPath
+	 * @param string $content
+	 * @param string $useredited
+	 * @param string $format [TEXT] | HTML
+	 * @param boolean $forceUpdate
 	 */
-	public function clearTranslationKey($key)
+	public function addTranslate($lcid, $id, $keyPath, $content, $useredited, $format = 'TEXT', $forceUpdate = false)
 	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("PersistentProvider::clearTranslationKey($key)");
-		}
-
-		$stmt = $this->prepareStatement($this->clearTranslationKeyQuery());
-		$stmt->bindValue(':key', strtolower(trim($key)), PersistentProviderConst::PARAM_STR);
-
+		$stmt = $this->prepareStatement($this->addTranslateSelectQuery());
+		$stmt->bindValue(':lang', $lcid, PersistentProviderConst::PARAM_STR);
+		$stmt->bindValue(':id', $id, PersistentProviderConst::PARAM_STR);
+		$stmt->bindValue(':key_path', $keyPath, PersistentProviderConst::PARAM_STR);
 		$this->executeStatement($stmt);
-	}
-
-	/**
-	 * @return String
-	 */
-	protected abstract function clearTranslationKeyQuery();
-
-	/**
-	 * Remove given key from translation table for the given lang
-	 *
-	 * @param string $key Example: modules.users.bo.general.module-name
-	 * @param String $lang Example: fr
-	 */
-	public function clearTranslationKeyForLang($key, $lang)
-	{
-		if (Framework::isDebugEnabled())
+		$results = $stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC);
+		if (count($results))
 		{
-			Framework::debug("PersistentProvider::clearTranslationKeyForLang($key)");
-		}
-
-		$stmt = $this->prepareStatement($this->clearTranslationKeyForLangQuery());
-		$stmt->bindValue(':key', strtolower(trim($key)), PersistentProviderConst::PARAM_STR);
-		$stmt->bindValue(':lang', strtolower(trim($lang)), PersistentProviderConst::PARAM_STR);
-
-		$this->executeStatement($stmt);
-	}
-
-	/**
-	 * @return String
-	 */
-	protected abstract function clearTranslationKeyForLangQuery();
-
-	public function addTranslate($id, $lang, $content, $package, $overridden, $overridable, $useredited)
-	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("PersistentProvider::addTranslate($id, $lang, $content, $package, $overridden, $overridable, $useredited)");
-		}
-
-		$locale = $this->getLocaleByKey($id);
-		if (isset($locale[$lang]))
-		{
-			$data = $locale[$lang];
-			$stmt = $this->prepareStatement($this->updateTranslateQuery());
-			if ($useredited)
+			if ($forceUpdate || $useredited == 1 || $results[0]['useredited'] != 1)
 			{
-				if ($data['useredited'])
-				{
-					$currentContent = $content;
-					$originalContent = $data['originalcontent'];
-				}
-				else
-				{
-					$currentContent = $content;
-					$originalContent = $data['content'];
-				}
+				$stmt = $this->prepareStatement($this->updateTranslateQuery());
+				$stmt->bindValue(':content', $content, PersistentProviderConst::PARAM_LOB);
 				$stmt->bindValue(':useredited', $useredited, PersistentProviderConst::PARAM_INT);
-			}
-			else
-			{
-				if ($data['useredited'])
-				{
-					$currentContent = $data['content'];
-					$originalContent = $content;
-				}
-				else
-				{
-					$currentContent = $content;
-					$originalContent = null;
-				}
-				$stmt->bindValue(':useredited', $data['useredited'], PersistentProviderConst::PARAM_INT);
+				$stmt->bindValue(':format', $format, PersistentProviderConst::PARAM_STR);
+				$stmt->bindValue(':lang', $lcid, PersistentProviderConst::PARAM_STR);
+				$stmt->bindValue(':id', $id, PersistentProviderConst::PARAM_STR);
+				$stmt->bindValue(':key_path', $keyPath, PersistentProviderConst::PARAM_STR);
+				$this->executeStatement($stmt);
 			}
 		}
 		else
 		{
 			$stmt = $this->prepareStatement($this->addTranslateQuery());
-			$currentContent = $content;
-			$originalContent = null;
+			$stmt->bindValue(':lang', $lcid, PersistentProviderConst::PARAM_STR);
+			$stmt->bindValue(':id', $id, PersistentProviderConst::PARAM_STR);
+			$stmt->bindValue(':key_path', $keyPath, PersistentProviderConst::PARAM_STR);
+			$stmt->bindValue(':content', $content, PersistentProviderConst::PARAM_LOB);
 			$stmt->bindValue(':useredited', $useredited, PersistentProviderConst::PARAM_INT);
-		}
-		$stmt->bindValue(':content', $currentContent, PersistentProviderConst::PARAM_LOB);
-		$stmt->bindValue(':originalcontent', $originalContent, PersistentProviderConst::PARAM_LOB);
-		$stmt->bindValue(':package', $package, PersistentProviderConst::PARAM_STR);
-		$stmt->bindValue(':overridden', $overridden, PersistentProviderConst::PARAM_INT);
-		$stmt->bindValue(':overridable', $overridable, PersistentProviderConst::PARAM_INT);
-		$stmt->bindValue(':id', $id, PersistentProviderConst::PARAM_STR);
-		$stmt->bindValue(':lang', $lang, PersistentProviderConst::PARAM_STR);
-
-		$this->executeStatement($stmt);
-	}
-
-	public function checkTranslateKey($id)
-	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("PersistentProvider::checkTranslateKey($id)");
-		}
-
-		$stmt = $this->prepareStatement($this->getCheckTranslateKeyQuery());
-		$stmt->bindValue(':id', strtolower(trim($id)), PersistentProviderConst::PARAM_STR);
-		$this->executeStatement($stmt);
-		$results = $stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC);
-		if (count($results) > 0)
-		{
-			return $results[0]['package'];;
-		}
-		else
-		{
-			return false;
+			$stmt->bindValue(':format', $format, PersistentProviderConst::PARAM_STR);
+			$this->executeStatement($stmt);
 		}
 	}
-
+	
 	/**
-	 * @return String
+	 * @return SELECT `useredited` FROM `f_locale` WHERE `lang` = :lang AND `id` = :id  AND `key_path` = :key_path
+	 */
+	protected abstract function addTranslateSelectQuery();
+	
+	/**
+	 * @return INSERT INTO `f_locale` (`lang`, `id`, `key_path`, `content`, `useredited`, `format`) VALUES (:lang, :id, :key_path, :content, :useredited, :format)
 	 */
 	protected abstract  function addTranslateQuery();
 
 	/**
-	 * @return String
+	 * @return UPDATE `f_locale` SET `content` = :content, `useredited` = :useredited, `format` = :format WHERE `lang` = :lang AND `id` = :id  AND `key_path` = :key_path
 	 */
 	protected abstract function updateTranslateQuery();
 
-	/**
-	 * @param String $key ex: modules.customer.frontoffice
-	 * @return Array<lang, Array>
-	 */
-	public function getLocaleByKey($key)
-	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("PersistentProvider::getLocaleByKeyAndLang('$key')");
-		}
-
-		$stmt = $this->prepareStatement($this->getLocalesByPathQuery());
-		$stmt->bindValue(':path', $key, PersistentProviderConst::PARAM_STR);
-		$this->executeStatement($stmt);
-		$results = $stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC);
-		$locale = array();
-		foreach ($results as $result)
-		{
-			$locale[$result['lang']] = array('content' => $result['content'], 'originalcontent' => $result['originalcontent'], 'overridable' => $result['overridable'], 'useredited' => $result['useredited']);
-		}
-		return $locale;
-	}
-
-	/**
-	 * @param String $path ex: modules.customer.frontoffice
-	 * @return Array<String, Array<lang, Array>>
-	 */
-	public function getLocalesByPath($path)
-	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("PersistentProvider::getLocalesByPath('$path')");
-		}
-
-		$stmt = $this->prepareStatement($this->getLocalesByPathQuery());
-		$stmt->bindValue(':path', $path.'%', PersistentProviderConst::PARAM_STR);
-		$this->executeStatement($stmt);
-		$results = $stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC);
-		$locales = array();
-		foreach ($results as $result)
-		{
-			$locales[$result['id']][$result['lang']] = array('content' => $result['content'], 'originalcontent' => $result['originalcontent'], 'overridable' => $result['overridable'], 'useredited' => $result['useredited']);
-		}
-		return $locales;
-	}
-
-	/**
-	 * SELECT id, lang, content, originalcontent, overridable, useredited FROM f_locale WHERE id LIKE :path
-	 * @return String
-	 */
-	protected abstract function getLocalesByPathQuery();
-
 	
+	/**
+	 * @return array
+	 */
+	public function getPackageNames()
+	{
+		$stmt = $this->prepareStatement($this->getPackageNamesQuery());
+		$this->executeStatement($stmt);
+		$results = $stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC);
+		$paths = array();
+		foreach ($results as $result)
+		{
+			$paths[$result['key_path']] = $result['nbkeys'];
+		}
+		return $paths;
+		
+	}
+	
+	/**
+	 * @return SELECT COUNT(*) AS `nbkeys`, `key_path` FROM `f_locale` GROUP BY `key_path` ORDER BY `key_path`
+	 */
+	protected abstract function getPackageNamesQuery();
+	
+	/**
+	 * @param string $keyPath
+	 * @return array['id' => string, 'lang' => string, 'content' => string, 'useredited' => integer, 'format' => string]
+	 */
+	public function getPackageData($keyPath)
+	{
+		$stmt = $this->prepareStatement($this->getPackageDataQuery());
+		$stmt->bindValue(':key_path', $keyPath, PersistentProviderConst::PARAM_STR);
+		$this->executeStatement($stmt);
+		$results = $stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC);
+		return $results;
+	}
+		
+	/**
+	 * @return SELECT `id`,`lang`,`content`,`useredited`,`format` FROM `f_locale` WHERE `key_path` = :key_path
+	 */
+	protected abstract function getPackageDataQuery();
+	
+	/**
+	 * @param string $keyPath
+	 * @param string $id
+	 * @param string $lcid
+	 */
+	public function deleteI18nKey($keyPath, $id = null, $lcid = null)
+	{
+		$stmt = $this->prepareStatement($this->deleteI18nKeyQuery($id, $lcid));
+		$stmt->bindValue(':key_path', $keyPath, PersistentProviderConst::PARAM_STR);		
+		if ($id !== null)
+		{
+			$stmt->bindValue(':id', $id, PersistentProviderConst::PARAM_STR);
+			if ($lcid !== null)
+			{
+				$stmt->bindValue(':lang', $lcid, PersistentProviderConst::PARAM_STR);
+			}
+		}
+		$this->executeStatement($stmt);
+		return $stmt->rowCount();
+	}
+	
+	/**
+	 * @return DELETE FROM `f_locale` WHERE `key_path` = :key_path AND `id` = :id AND `lang` = :lang
+	 */
+	protected abstract function deleteI18nKeyQuery($id, $lcid);	
+			
 	/**
 	 * @return String
 	 * @example SELECT from_url	FROM f_url_rules 

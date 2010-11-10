@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<i18n baseKey="f.exception.errors" lcid="en_GB">
+  <key id="bad-argument">argument '{argument}' must be of type '{type}'.</key>
+  <key id="file-not-found">file '{file}' not found.</key>
+  <key id="pear-exception">pear error {message} ({code}, {mode})\n {user_info}</key>
+  <key id="recursivity-exception">recursivity. {message}</key>
+  <key id="translation-key-not-found">translation key '{key}' not found.</key>
+  <key id="template-not-found-exception">template '{filePath}' not found for module '{moduleName}'.</key>
+  <key id="object-not-found">document ID {id} not found.</key>
+  <key id="attached-child">attached child.</key>
+  <key id="invalid-empty-module-name">Invalid empty module name</key>
+  <key id="preferences-document-not-found">Preferences document not found.</key>
+  <key id="unavailable-module">module '{moduleName}' unavailable.</key>
+  <key id="no-valid-user-found-for-this-workitem">No valid user found.</key>
+  <key id="no-active-workflow-for-task">No active workflow</key>
+</i18n>

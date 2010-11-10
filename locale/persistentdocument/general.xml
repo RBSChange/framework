@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<localization>
-	<entity id="no-tag">
-		<locale lang="fr">aucun tag</locale>
-		<locale lang="en">no tag</locale>
-	</entity>
-</localization>

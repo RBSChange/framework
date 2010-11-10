@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<i18n baseKey="f.persistentdocument.status" lcid="en_GB">
+  <key id="publicated">published</key>
+  <key id="active">active</key>
+  <key id="deactivated">deactivated</key>
+  <key id="draft">draft</key>
+  <key id="correction">correction</key>
+  <key id="deprecated">deprecated</key>
+  <key id="filed">filed</key>
+  <key id="workflow">workflow</key>
+</i18n>

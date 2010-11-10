@@ -23,22 +23,33 @@ class f_Locale
 		// empty
 	}
 	
+	/**
+	 * @deprecated
+	 */
 	public static function getPrefixes()
 	{
 		return self::$prefixes;	
 	}
 	
-
+	/**
+	 * @deprecated
+	 */
 	public static function isLocaleKey($key)
 	{
 		return (preg_match('/^' . self::LOCALE_KEY_REGEXP . '$/', $key) == true);
 	}
 
+	/**
+	 * @deprecated use LocaleService::getInstance()->transBO()
+	 */
 	public static function translateUI($key, $substitution = null)
 	{
 		return self::translate($key, $substitution, RequestContext::getInstance()->getUILang());
 	}
 
+	/**
+	 * @deprecated use LocaleService::getInstance()->transFO()
+	 */
 	public static function translate($key, $substitution = null, $lang = null, $makeDefaultTranslation = true)
 	{
 		if (!self::isLocaleKey($key))
@@ -56,9 +67,7 @@ class f_Locale
 		{
 			$keyModifier = self::getKeyModifier($key);
 			$cleanKey = strtolower(self::getCleanKey($key));
-
-			$provider = f_persistentdocument_PersistentProvider::getInstance();
-			$content = $provider->translate($cleanKey, $lang);
+			$content = LocaleService::getInstance()->getFullKeyContent($lang, $cleanKey);
 			if ($content !== null)
 			{
 				$keyModifier = $keyModifier & (self::MODIFIER_UCFIRST + self::MODIFIER_UCALL);
@@ -88,7 +97,7 @@ class f_Locale
 
 				if ($modifiedKey  !== $cleanKey)
 				{
-					$content = $provider->translate($modifiedKey, $lang);
+					$content = LocaleService::getInstance()->getFullKeyContent($lang, $modifiedKey);
 				}
 
 				if ($content !== null)

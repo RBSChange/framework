@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<i18n baseKey="f.validation.validator.password.message" lcid="fr_FR">
+  <key id="reversed">le champ ″{field}″ ne doit pas être un mot de passe valide.</key>
+  <key id="high">le champ ″{field}″ n'est pas un mot de passe valide : il doit contenir au moins 6 caractères dont des lettres (majuscules et minuscules) et des chiffres.</key>
+  <key id="medium">le champ ″{field}″ n'est pas un mot de passe valide : il doit contenir au moins 6 caractères dont des lettres et des chiffres.</key>
+  <key id="low">le champ ″{field}″ n'est pas un mot de passe valide : il doit contenir au moins 6 caractères.</key>
+</i18n>

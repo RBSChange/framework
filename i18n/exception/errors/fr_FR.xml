@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<i18n baseKey="f.exception.errors" lcid="fr_FR">
+  <key id="bad-argument">l'argument '{argument}' doit être de type '{type}'.</key>
+  <key id="file-not-found">fichier '{file}' introuvable.</key>
+  <key id="pear-exception">erreur pear {message} ({code}, {mode})\n {user_info}</key>
+  <key id="recursivity-exception">récursivité. {message}</key>
+  <key id="translation-key-not-found">clé de traduction '{key}' introuvable.</key>
+  <key id="template-not-found-exception">template '{filePath}' introuvable pour le module '{moduleName}'.</key>
+  <key id="object-not-found">document ID {id} introuvable.</key>
+  <key id="attached-child">attached child.</key>
+  <key id="invalid-empty-module-name">Invalid empty module name.</key>
+  <key id="preferences-document-not-found">Preferences document not found.</key>
+  <key id="unavailable-module">le module '{moduleName}' est indisponible.</key>
+  <key id="no-valid-user-found-for-this-workitem">Impossible de trouver un valideur.</key>
+  <key id="no-active-workflow-for-task">Il n'existe pas de workflow valide pour la tâche '{task}'</key>
+</i18n>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<i18n baseKey="f.validation.validator.float" lcid="de_DE">
+  <key id="message">der Wert des Feldes ″{field}″ muss eine Dezimalzahl sein.</key>
+  <key id="regexp">^([\\-+]?)(\\d{0,8})?[\\.,]?(\\d{0,8})?$</key>
+  <key id="decimalseperator">,</key>
+</i18n>

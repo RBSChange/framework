@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<i18n baseKey="f.validation.validator.nullable.message" lcid="en_GB">
+  <key id="reversed">the field ″{field}″ must be null.</key>
+</i18n>

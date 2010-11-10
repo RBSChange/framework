@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<localization>
-  <entity id="correction">
-    <locale lang="fr">correction</locale>
-    <locale lang="en">correction</locale>
-    <locale lang="de">Korrigierung</locale>
-  </entity>
-</localization>
