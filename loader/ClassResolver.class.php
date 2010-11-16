@@ -205,8 +205,6 @@ class ClassResolver implements ResourceResolver
 	public function initialize()
 	{
 		$ini = $this->getPathsToAnalyse();
-		
-		var_export($ini);
 		// we automatically add our php classes
 		require_once (FRAMEWORK_HOME . '/util/Finder.class.php');
 		$ext = '.php';
@@ -215,11 +213,7 @@ class ClassResolver implements ResourceResolver
 		foreach ($ini as $entry)
 		{
 			// directory mapping
-			$path = $entry['path'];
-			
-			$path = $this->replaceConstants($path);
-			echo "Analysing " . $entry['path'] . " -> $path ...\n";
-				
+			$path = $this->replaceConstants($entry['path']);
 			$finder = f_util_Finder::type('file')->ignore_version_control()->name('*' . $ext);
 			$finder->follow_link();
 			
@@ -241,19 +235,12 @@ class ClassResolver implements ResourceResolver
 				$finder->prune($entry['exclude'])->discard($entry['exclude']);
 			}
 			
-			$sourcePath = $path;
-			
 			$matches = $this->glob($path);
 			if ($matches)
 			{
-				var_export($matches);
 				$files = $finder->in($matches);
-			}
-			else
-			{
-				$files = array();
-			}
-			$this->constructClassList($files);
+				$this->constructClassList($files);
+			}			
 		}
 	}
 	
@@ -412,16 +399,68 @@ class ClassResolver implements ResourceResolver
 		return $this->constructClassList(array($filePath), $override);
 	}
 	
+	public function appendRealDir($dirPath)
+	{
+		foreach (f_util_FileUtils::find("*.php", $dirPath) as $filePath)
+		{
+			$this->appendFile($filePath, true);
+		}		
+	}
+	
 	/**
 	 * @param String $dirPath
 	 * @param Boolean $override
 	 */
 	public function appendDir($dirPath, $override = false)
 	{
-		foreach (f_util_FileUtils::find("*.php", $dirPath) as $filePath)
+		$ini = $this->getPathsToAnalyse();
+		// we automatically add our php classes
+		require_once (FRAMEWORK_HOME . '/util/Finder.class.php');
+		$ext = '.php';		
+		// let's do our fancy work
+		foreach ($ini as $entry)
 		{
-			//echo __METHOD__." $filePath\n";
-			$this->appendFile($filePath, $override);
+			// directory mapping
+			$path = $this->replaceConstants($entry['path']);
+			$finder = f_util_Finder::type('file')->ignore_version_control()->name('*' . $ext);
+			$finder->follow_link();
+			
+			// recursive mapping?
+			$recursive = ((isset($entry['recursive'])) ? $entry['recursive'] : false);
+			
+			if (!$recursive)
+			{
+				$finder->maxdepth(0);
+			}
+			
+			// exclude files or directories?
+			if (isset($entry['exclude']))
+			{
+				if (! is_array($entry['exclude']))
+				{
+					$entry['exclude'] = explode(',', $entry['exclude']);
+				}
+				$finder->prune($entry['exclude'])->discard($entry['exclude']);
+			}
+			
+			$matches = $this->glob($path);
+			if ($matches)
+			{
+				foreach ($matches as $path) 
+				{
+					if (strpos($path, $dirPath) === 0)
+					{
+						$files = $finder->in(array($path));
+						$this->constructClassList($files);
+					}
+					else if (strpos($dirPath, $path) === 0 && $recursive)
+					{
+						$files = $finder->in(array($dirPath));
+						$this->constructClassList($files);	
+						return;			
+					}
+				}
+			}
 		}
 	}
 	

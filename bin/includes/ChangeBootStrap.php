@@ -329,7 +329,7 @@ class c_ChangeBootStrap
 			unlink($autoloadedFlag);
 		}
 		
-		$analyzer->appendDir($componentPath, true);
+		$analyzer->appendRealDir($componentPath);
 		$this->autoloaded[$componentPath] = true;
 		touch($autoloadedFlag);
 	}

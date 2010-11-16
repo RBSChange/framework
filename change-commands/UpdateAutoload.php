@@ -41,8 +41,8 @@ class commands_UpdateAutoload extends commands_AbstractChangeCommand
 		{
 			foreach ($params as $param)
 			{
-				$path = realpath($param);
-				if ($path === false)
+				$path = f_util_FileUtils::buildWebeditPath($param);
+				if (!file_exists($path))
 				{
 					$this->errorMessage("Could not resolve $param as file, ignoring");
 					continue;
