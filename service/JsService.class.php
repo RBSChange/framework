@@ -271,8 +271,15 @@ class JsService extends BaseService
 					$deps[] = $depNode->getAttribute("name");
 				}
 			}
-				
-			$declaredDependencies[$scriptName] = $deps;
+
+			if (!isset($declaredDependencies[$scriptName]))
+			{
+				$declaredDependencies[$scriptName] = $deps;
+			}
+			else
+			{
+				$declaredDependencies[$scriptName] = array_merge($declaredDependencies[$scriptName], $deps);
+			}
 		}
 		echo "OK\n";
 	}

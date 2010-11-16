@@ -69,7 +69,7 @@ class f_web_PageLink extends f_web_HttpLink
 	 * @param String|array $value
 	 * @return f_web_PageLink
 	 */
-	public function setQueryParametre($key, $value)
+	public function setQueryParameter($key, $value)
 	{
 		if ($value === null)
 		{
@@ -84,7 +84,6 @@ class f_web_PageLink extends f_web_HttpLink
 		}
 		return $this;
 	}
-	
     
     /**
 	 * @return String
@@ -110,5 +109,15 @@ class f_web_PageLink extends f_web_HttpLink
 	    }    
 	    return $this->buildUrl($this->scheme, $this->host, $path, $this->queryParameters, 
 	        $this->fragment, $this->argSeparator);
+	}
+	
+	// Deprecated
+	
+	/**
+	 * @deprecated (will be removed in 4.0) use setQueryParameter
+	 */
+	public function setQueryParametre($key, $value)
+	{
+		return $this->setQueryParameter($key, $value);
 	}
 }

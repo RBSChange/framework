@@ -55,10 +55,8 @@ class FileLoader implements ResourceLoader
 	 */
 	public function setPackageName($packageName)
 	{
-
 		$this->resolver->setPackageName($packageName);
 		return $this;
-
 	}
 
 	/**

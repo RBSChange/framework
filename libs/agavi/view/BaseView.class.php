@@ -9,6 +9,10 @@ abstract class f_view_BaseView extends View
 
 	private $attributes = array();
 	private $mimeContentType = null;
+	
+	/**
+	 * @return TemplateObject
+	 */
 	private $engine = null;
 
 	private $forceModuleName = null;
@@ -44,7 +48,7 @@ abstract class f_view_BaseView extends View
 		{
 			$moduleName = $this->forceModuleName;
 		}
-		$templateLoader = Loader::getInstance('template')->setMimeContentType($mimeType);
+		$templateLoader = TemplateLoader::getInstance('template')->setMimeContentType($mimeType);
 		$templateLoader->setDirectory('templates');
 		try
 		{
@@ -56,17 +60,12 @@ abstract class f_view_BaseView extends View
 		}
 	}
 
+	/**
+	 * @return TemplateObject
+	 */
 	public function &getEngine()
 	{
 		return $this->engine;
-	}
-
-	/**
-	 * @deprecated Use setTemplateName
-	 */
-	public function setTemplate($template)
-	{
-		parent::setTemplate($template);
 	}
 
 	public function clearAttributes()
@@ -152,7 +151,6 @@ abstract class f_view_BaseView extends View
 
 		if ($request->getParameter('signedView') == 1)
 		{
-			$this->getEngine()->setSigned(true);
 			$this->getContext()->getRequest()->setParameter('signedView', 0);
 		}
 
@@ -248,5 +246,15 @@ abstract class f_view_BaseView extends View
 	protected final function forceModuleName($moduleName)
 	{
 		$this->forceModuleName = $moduleName;
+	}
+	
+	// Deprecated
+	
+	/**
+	 * @deprecated (will be removed in 4.0) Use setTemplateName
+	 */
+	public function setTemplate($template)
+	{
+		parent::setTemplate($template);
 	}
 }

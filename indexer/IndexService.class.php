@@ -474,28 +474,7 @@ class indexer_IndexService extends BaseService
 		}
 		return $searchResults;
 	}
-	
-	/**
-	 * Get the array of declared synonyms in solr's schema.xml file.
-	 * @deprecated 
-	 * @return Array
-	 */
-	public function getSynonymsLists()
-	{
-		return array();
-	}
-	
-	/**
-	 * Update the synonyms list $synonymsList with the content $content
-	 * @deprecated
-	 * @param String $synonymsList
-	 * @param String $content
-	 */
-	public function updateSynonymsList($synonymsList, $content)
-	{
-		return;
-	}
-	
+		
 	/**
 	 * Set the solr autocommit mode 
 	 *
@@ -608,16 +587,6 @@ class indexer_IndexService extends BaseService
 			}
 		}
 		return count($ids);
-	}
-	
-	/**
-	 * @deprecated use isModelNameIndexable
-	 * @param f_persistentdocument_PersistentDocumentModel $model
-	 * @return Boolean
-	 */
-	public function isModelIndexable($model)
-	{
-		return $this->isModelNameIndexable($model->getName());
 	}
 	
 	/**
@@ -1034,23 +1003,6 @@ class indexer_IndexService extends BaseService
 	}
 	
 	/**
-	 * @deprecated
-	 */
-	public function scheduleReindexing()
-	{
-		$taskService = task_PlannedtaskService::getInstance();
-		if (f_util_ArrayUtils::isEmpty($taskService->getRunnableBySystemtaskclassname('f_tasks_ReindexDocumentsTask')))
-		{
-			$runDate = date_Calendar::getInstance()->add(date_Calendar::MINUTE, 720);
-			$reindexDocumentTask = $taskService->getNewDocumentInstance();
-			$reindexDocumentTask->setSystemtaskclassname('f_tasks_ReindexDocumentsTask');
-			$reindexDocumentTask->setUniqueExecutiondate($runDate);
-			$reindexDocumentTask->setLabel(__METHOD__);
-			$reindexDocumentTask->save();
-		}
-	}
-	
-	/**
 	 * Returns the array of document models that should be reindexed for the frontoffice when the role $roleName was 
 	 * attributed or removed to some user/group. Default implementation returns an empty array if the role is a 
 	 * backoffice role and all frontoffice documents if it is a frontoffice role.
@@ -1132,5 +1084,48 @@ class indexer_IndexService extends BaseService
 			return $parent->getId();
 		}
 		return null;
+	}
+	
+	// Deprecated
+	
+	/**
+	 * @deprecated (will be removed in 4.0) 
+	 */
+	public function getSynonymsLists()
+	{
+		return array();
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0)
+	 */
+	public function updateSynonymsList($synonymsList, $content)
+	{
+		return;
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0) use isModelNameIndexable
+	 */
+	public function isModelIndexable($model)
+	{
+		return $this->isModelNameIndexable($model->getName());
+	}
+		
+	/**
+	 * @deprecated (will be removed in 4.0)
+	 */
+	public function scheduleReindexing()
+	{
+		$taskService = task_PlannedtaskService::getInstance();
+		if (f_util_ArrayUtils::isEmpty($taskService->getRunnableBySystemtaskclassname('f_tasks_ReindexDocumentsTask')))
+		{
+			$runDate = date_Calendar::getInstance()->add(date_Calendar::MINUTE, 720);
+			$reindexDocumentTask = $taskService->getNewDocumentInstance();
+			$reindexDocumentTask->setSystemtaskclassname('f_tasks_ReindexDocumentsTask');
+			$reindexDocumentTask->setUniqueExecutiondate($runDate);
+			$reindexDocumentTask->setLabel(__METHOD__);
+			$reindexDocumentTask->save();
+		}
 	}
 }

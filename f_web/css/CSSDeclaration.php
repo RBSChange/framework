@@ -1,5 +1,4 @@
 <?php
-
 class f_web_CSSDeclaration
 {
 	/**
@@ -31,7 +30,6 @@ class f_web_CSSDeclaration
 	 * @var String
 	 */
 	private $propertyValue;
-	
 
 	/**
 	 * @return String
@@ -223,7 +221,7 @@ class f_web_CSSDeclaration
 				if (preg_match('/url\(binding:(.*)\)/', $value, $matches))
 				{
 					$infos = explode('#', $matches[1]);	    	    
-				    $link = LinkHelper::getUIChromeActionLink('uixul', 'GetBinding')->setQueryParametre('binding', $infos[0]);
+				    $link = LinkHelper::getUIChromeActionLink('uixul', 'GetBinding')->setQueryParameter('binding', $infos[0]);
 					if (isset($infos[1]))
 				    {
 				        $link->setFragment($infos[1]);
