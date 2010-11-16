@@ -248,7 +248,13 @@ class StyleService extends BaseService
 				sort($allStyleNames, SORT_STRING);
 				foreach (array_chunk($allStyleNames, 3) as $styleNames) 
 				{
-					$styleNames[] = $mediaType . '.css';
+					$styleSheetName = $mediaType;
+					if ($skin !== null)
+					{
+						$styleSheetName.= "-".$skin->getIdentifier();
+					}
+					$styleSheetName .= ".css";
+					$styleNames[] = $styleSheetName;
 					$names = implode(',', $styleNames);
 					$websiteId = website_WebsiteModuleService::getInstance()->getDefaultWebsite()->getId();	
 					if ($websiteId <= 0) {$websiteId = 0;}			
