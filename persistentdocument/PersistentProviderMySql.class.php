@@ -1185,6 +1185,14 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		{
 			return "SELECT COUNT(*) AS `nbkeys`, `key_path` FROM `f_locale` GROUP BY `key_path` ORDER BY `key_path`";
 		}
+
+		/**
+		 * @return string
+		 */
+		protected function getUserEditedPackageNamesQuery()
+		{
+			return "SELECT COUNT(*) AS `nbkeys`, `key_path` FROM `f_locale` WHERE `useredited` = 1 GROUP BY `key_path` ORDER BY `key_path`";
+		}
 		
 		/**
 		 * @return string

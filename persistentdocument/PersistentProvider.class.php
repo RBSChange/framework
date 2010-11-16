@@ -3258,7 +3258,7 @@ abstract class f_persistentdocument_PersistentProvider
 	 * @param string $id
 	 * @param string $keyPath
 	 * @param string $content
-	 * @param string $useredited
+	 * @param integer $useredited
 	 * @param string $format [TEXT] | HTML
 	 * @param boolean $forceUpdate
 	 */
@@ -3329,11 +3329,33 @@ abstract class f_persistentdocument_PersistentProvider
 		return $paths;
 		
 	}
-	
+
 	/**
 	 * @return SELECT COUNT(*) AS `nbkeys`, `key_path` FROM `f_locale` GROUP BY `key_path` ORDER BY `key_path`
 	 */
 	protected abstract function getPackageNamesQuery();
+	
+	
+	/**
+	 * @return array
+	 */
+	public function getUserEditedPackageNames()
+	{
+		$stmt = $this->prepareStatement($this->getUserEditedPackageNamesQuery());
+		$this->executeStatement($stmt);
+		$results = $stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC);
+		$paths = array();
+		foreach ($results as $result)
+		{
+			$paths[$result['key_path']] = $result['nbkeys'];
+		}
+		return $paths;
+	}
+	
+	/**
+	 * @return SELECT COUNT(*) AS `nbkeys`, `key_path` FROM `f_locale` WHERE `useredited` = 1 GROUP BY `key_path` ORDER BY `key_path`
+	 */
+	protected abstract function getUserEditedPackageNamesQuery();
 	
 	/**
 	 * @param string $keyPath

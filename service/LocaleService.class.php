@@ -56,6 +56,107 @@ class LocaleService extends BaseService
 		return $this->LCID_BY_LANG[$langCode];
 	}
 	
+	
+	public function importOverride($name = null)
+	{
+		if ($name === null || $name === 'framework')
+		{
+			$i18nPath = f_util_FileUtils::buildOverridePath('framework', 'i18n');
+			if (is_dir($i18nPath))
+			{
+				$this->importOverrideDir($i18nPath, 'f');
+			}
+			
+			if ($name === 'framework')
+			{
+				return true;
+			}
+		}
+		if ($name === null)
+		{
+			$pathPattern = f_util_FileUtils::buildOverridePath('themes', '*', 'i18n');
+			$paths = glob($pathPattern, GLOB_ONLYDIR);
+			if (is_array($paths))
+			{
+				foreach ($paths as $i18nPath)
+				{
+					$name = basename(dirname($path));
+					$basekey = 't.' . $name;
+					$this->importOverrideDir($i18nPath, $basekey);
+				}	
+			}
+
+			$pathPattern = f_util_FileUtils::buildOverridePath('modules', '*', 'i18n');
+			$paths = glob($pathPattern, GLOB_ONLYDIR);
+			if (is_array($paths))
+			{
+				foreach ($paths as $i18nPath)
+				{
+					$name = basename(dirname($i18nPath));
+					$basekey = 'm.' . $name;
+					$this->importOverrideDir($i18nPath, $basekey);
+				}
+			}
+		}
+		else
+		{
+			$parts = explode('/', $name);
+			if (count($parts) != 2)
+			{
+				return false;
+			}
+			if ($parts[0] === 'modules')
+			{
+				$basekey = 'm.' . $parts[1];
+			}
+			else if ($parts[0] === 'themes')
+			{
+				$basekey = 't.' . $parts[1];
+			}
+			else
+			{
+				return false;
+			}
+			$i18nPath = f_util_FileUtils::buildOverridePath($parts[0], $parts[1], 'i18n');
+			if (is_dir($i18nPath))
+			{
+				$this->importOverrideDir($i18nPath, $basekey);
+			}
+		}
+		return true;
+	}
+	
+	private function importOverrideDir($dir, $baseKey)
+	{
+		foreach (scandir($dir) as $file)
+		{
+			if ($file[0] == ".")
+			{
+				continue;
+			}
+			$absFile = $dir . DIRECTORY_SEPARATOR . $file;
+			if (is_dir($absFile))
+			{
+				$this->importOverrideDir($absFile, $baseKey . '.' . $file);
+			}
+			elseif (f_util_StringUtils::endsWith($file, '.xml'))
+			{
+				$entities = array();
+				//$entities[$lcid][$id] = array($content, $format);
+				$this->processFile($absFile, $entities, false);
+				if (count($entities))
+				{
+					echo "Import $baseKey\n";
+					$this->updatePackage($baseKey, $entities);
+				}
+				echo "Remove file $absFile\n";
+				unlink($absFile);
+			}
+		}	
+		f_util_FileUtils::rmdir($dir);	
+	}
+	
+	
 	/**
 	 * @param string $name [null] | framework | modules_NAME | themes_NAME
 	 * @param boolean $removeLocalFolder
@@ -178,7 +279,11 @@ class LocaleService extends BaseService
 			return true;
 		}
 		
-		$parts = explode('_', $name);
+		$parts = explode('/', $name);
+		if (count($parts) != 2)
+		{
+			return false;
+		}
 		if ($parts[0] === 'modules')
 		{
 			$basekey = 'm.' . $parts[1];
@@ -704,8 +809,9 @@ class LocaleService extends BaseService
 	 * Read a file and extract informations of localization
 	 * @param string $file
 	 * @param array $entities
+	 * @param boolean $processInclude
 	 */
-	private function processFile($file, &$entities)
+	private function processFile($file, &$entities, $processInclude = true)
 	{
 		$lcid = basename($file, '.xml');
 		$dom = f_util_DOMUtils::fromPath($file);
@@ -713,7 +819,7 @@ class LocaleService extends BaseService
 		{
 			if ($node->nodeType == XML_ELEMENT_NODE)
 			{
-				if ($node->nodeName == 'include')
+				if ($node->nodeName == 'include' && $processInclude)
 				{
 					$id = $node->getAttribute('id');
 					$subPath = $this->getI18nFilePath($id, $lcid);
@@ -751,6 +857,14 @@ class LocaleService extends BaseService
 	public function getPackageNames()
 	{
 		return $this->getPersistentProvider()->getPackageNames();
+	}
+
+	/**
+	 * @return array [baseKey => nbLocales]
+	 */
+	public function getUserEditedPackageNames()
+	{
+		return $this->getPersistentProvider()->getUserEditedPackageNames();
 	}
 	
 	/**
@@ -830,6 +944,39 @@ class LocaleService extends BaseService
 				$provider->addTranslate($lcid, $id, $keyPath, $content, 0, $format, false);
 			}
 		}
+	}
+	
+	/**
+	 * 
+	 * @param string $lcid exemple fr_FR
+	 * @param string $id
+	 * @param string $keyPath
+	 * @param string $content
+	 * @param string $format TEXT | HTML
+	 */
+	public function updateUserEditedKey($lcid, $id, $keyPath, $content, $format)
+	{
+		$this->updateKey($lcid, $id, $keyPath, $content, $format, true);
+	}
+	
+	public function deleteUserEditedKey($lcid, $id, $keyPath)
+	{
+		$provider = $this->getPersistentProvider();
+		$provider->deleteI18nKey($keyPath, $id, $lcid);
+	}
+	
+	/**
+	 * @param string $lcid exemple fr_FR
+	 * @param string $id
+	 * @param string $keyPath
+	 * @param string $content
+	 * @param string $format TEXT | HTML
+	 * @param boolean $userEdited
+	 */
+	public function updateKey($lcid, $id, $keyPath, $content, $format, $userEdited = false)
+	{
+		$provider = $this->getPersistentProvider();
+		$provider->addTranslate($lcid, $id, $keyPath, $content, $userEdited ? 1 : 0, $format, true);
 	}
 	
 	/**
