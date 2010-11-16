@@ -7,39 +7,37 @@ class ComponentTypeObject
 {
 	const MODULE    = "modules";
 	const FRAMEWORK = "framework";
-
-
+	
 	/**
-	 * TODO : make private
 	 * @var String
-	 * @deprecated use getter instead
+	 * @deprecated (will become private in 4.0) use getter instead
 	 */
 	public $package;
+	
 	/**
-	 * TODO : make private
 	 * @var String
-	 * @deprecated use getter instead
+	 * @deprecated (will become private in 4.0) use getter instead
 	 */
 	public $packageType;
+	
 	/**
-	 * TODO : make private
 	 * @var String
-	 * @deprecated use getter instead
+	 * @deprecated (will become private in 4.0) use getter instead
 	 */
 	public $packageName;
+	
 	/**
-	 * TODO : make private
 	 * @var String
-	 * @deprecated use getter instead
+	 * @deprecated (will become private in 4.0) use getter instead
 	 */
 	public $componentType;
+	
 	/**
-	 * TODO : make private
 	 * @var String
-	 * @deprecated use getter instead
+	 * @deprecated (will become private in 4.0) use getter instead
 	 */
 	public $fullComponentType;
-
+	
 	private function __construct($component)
 	{
 		if ( is_numeric($component) )
@@ -86,7 +84,6 @@ class ComponentTypeObject
 	{
 		return new ComponentTypeObject($componentType);
 	}
-
 
 	/**
      * @return String

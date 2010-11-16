@@ -25,25 +25,7 @@ class cboot_ClassDirAnalyzer extends ClassResolver
 		}
 		return self::$instance;
 	}
-	
-	protected function __construct()
-	{
-		$this->cacheDir = WEBEDIT_HOME . '/cache/autoload';
-		if (!is_dir($this->cacheDir))
-		{
-			$this->initialize();
-		}
-	}
-	
-	/**
-	 * Launch this to create the cache of class
-	 */
-	public function initialize()
-	{
-		$this->appendDir(WEBEDIT_HOME . '/framework');
-	}
-	
-	
+		
 	/**
 	 * @param string $className
 	 * @return boolean

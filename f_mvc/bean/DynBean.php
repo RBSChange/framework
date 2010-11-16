@@ -443,16 +443,6 @@ class f_mvc_DynBeanModel implements f_mvc_BeanModel
 	{
 		return $this->properties[$propertyName];
 	}
-
-	/**
-	 * @param string $propertyName
-	 * @return boolean
-	 * @deprecated 
-	 */
-	function hasProperty($propertyName)
-	{
-		return $this->hasBeanProperty($propertyName);
-	}
 	
 	/**
 	 * @param string $propertyName
@@ -517,5 +507,15 @@ class f_mvc_DynBeanModel implements f_mvc_BeanModel
 			throw new Exception("This ".__CLASS__." instance is readonly");
 		}
 		$this->properties[$property->getName()] = $property;
+	}
+
+	// Deprecated
+	
+	/**
+	 * @deprecated (will be removed in 4.0) use hasBeanProperty
+	 */
+	function hasProperty($propertyName)
+	{
+		return $this->hasBeanProperty($propertyName);
 	}
 }

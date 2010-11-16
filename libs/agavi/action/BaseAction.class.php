@@ -503,15 +503,6 @@ abstract class f_action_BaseAction extends Action
 	}
 
 	/**
-	 * @deprecated override isDocumentAction
-	 * @return Boolean
-	 */
-	protected function suffixSecureActionByDocument()
-	{
-		return false;
-	}
-
-	/**
 	 * Tell the permission system this action is a document action ie. the permission
 	 * depends on the document the action acts on.
 	 * @return Boolean by default false
@@ -564,5 +555,13 @@ abstract class f_action_BaseAction extends Action
 		return $this->getModuleName();
 	}
 	
-
+	// Deprecated
+	
+	/**
+	 * @deprecated (will be removed in 4.0) override isDocumentAction
+	 */
+	protected function suffixSecureActionByDocument()
+	{
+		return false;
+	}
 }

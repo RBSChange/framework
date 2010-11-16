@@ -225,11 +225,11 @@ class StyleService extends BaseService
 			{
 				$chromeActionLink = LinkHelper::getUIChromeActionLink('uixul', 'GetUICSS')
 					->setArgSeparator(f_web_HttpLink::ESCAPE_SEPARATOR)
-					->setQueryParametre('stylename', $styleName);
+					->setQueryParameter('stylename', $styleName);
 					
 				if ($skin !== null)
 				{
-					$chromeActionLink->setQueryParametre('skinId', $skin->getIdentifier());
+					$chromeActionLink->setQueryParameter('skinId', $skin->getIdentifier());
 				}
 				$href = $chromeActionLink->getUrl();
 				$style[] = '<?xml-stylesheet href="'.$href.'" type="text/css"?>';
