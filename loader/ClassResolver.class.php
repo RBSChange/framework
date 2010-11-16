@@ -12,25 +12,25 @@ class ClassResolver implements ResourceResolver
 	 * @var f_AOP
 	 */
 	protected $aop;
-
+	
 	private $keys;
 	private $reps;
-
+	
 	protected function __construct()
 	{
-		require_once(FRAMEWORK_HOME . '/util/FileUtils.class.php');
-		require_once(FRAMEWORK_HOME . '/util/StringUtils.class.php');
+		require_once (FRAMEWORK_HOME . '/util/FileUtils.class.php');
+		require_once (FRAMEWORK_HOME . '/util/StringUtils.class.php');
 		
-		$this->keys = array('%AG_LIB_DIR%', '%AG_MODULE_DIR%', '%FRAMEWORK_HOME%', '%PROJECT_OVERRIDE%', '%WEBEDIT_HOME%', '%PROFILE%');
-		$this->reps = array(AG_LIB_DIR, AG_MODULE_DIR, FRAMEWORK_HOME, PROJECT_OVERRIDE, WEBEDIT_HOME, PROFILE);
+		$this->keys = array('%FRAMEWORK_HOME%', '%WEBEDIT_HOME%', '%PROFILE%');
+		$this->reps = array(FRAMEWORK_HOME, WEBEDIT_HOME, PROFILE);
 		
 		$this->cacheDir = WEBEDIT_HOME . '/cache/autoload';
-		if (!is_dir($this->cacheDir))
+		if (! is_dir($this->cacheDir))
 		{
 			$this->initialize();
 		}
 	}
-
+	
 	/**
 	 * Return the current ClassResolver
 	 *
@@ -38,7 +38,7 @@ class ClassResolver implements ResourceResolver
 	 */
 	public static function getInstance()
 	{
-		if (is_null(self::$instance) )
+		if (is_null(self::$instance))
 		{
 			if (AG_DEVELOPMENT_MODE)
 			{
@@ -51,7 +51,7 @@ class ClassResolver implements ResourceResolver
 		}
 		return self::$instance;
 	}
-
+	
 	/**
 	 * @return f_AOP
 	 */
@@ -59,12 +59,12 @@ class ClassResolver implements ResourceResolver
 	{
 		if ($this->aop === null)
 		{
-			require_once(FRAMEWORK_HOME . '/aop/AOP.php');
+			require_once (FRAMEWORK_HOME . '/aop/AOP.php');
 			$this->aop = new f_AOP();
 		}
 		return $this->aop;
 	}
-
+	
 	protected function loadInjection()
 	{
 		// read config and get document injections
@@ -74,18 +74,20 @@ class ClassResolver implements ResourceResolver
 			foreach ($injections["document"] as $injectedDoc => $replacerDoc)
 			{
 				//echo "AOP: replace document $injectedDoc => $replacerDoc\n";
-				list($injectedModule, $injectedDoc) = explode("/", $injectedDoc);
-				list($replacerModule, $replacerDoc) = explode("/", $replacerDoc);
-
-				$this->aop->addReplaceClassAlteration($injectedModule."_persistentdocument_".$injectedDoc,
-				$replacerModule."_persistentdocument_".$replacerDoc);
-
-				$this->aop->addReplaceClassAlteration($injectedModule."_".ucfirst($injectedDoc)."Service",
-				$replacerModule."_".ucfirst($replacerDoc)."Service");
+				list ($injectedModule, $injectedDoc) = explode("/", $injectedDoc);
+				list ($replacerModule, $replacerDoc) = explode("/", $replacerDoc);
+				
+				$this->aop->addReplaceClassAlteration(
+						$injectedModule . "_persistentdocument_" . $injectedDoc, 
+						$replacerModule . "_persistentdocument_" . $replacerDoc);
+				
+				$this->aop->addReplaceClassAlteration(
+						$injectedModule . "_" . ucfirst($injectedDoc) . "Service", 
+						$replacerModule . "_" . ucfirst($replacerDoc) . "Service");
 			}
 		}
 	}
-
+	
 	/**
 	 * Return the path of the researched resource
 	 *
@@ -95,14 +97,16 @@ class ClassResolver implements ResourceResolver
 	public function getPath($className)
 	{
 		$this->validateClassName($className);
-		return $this->cacheDir.DIRECTORY_SEPARATOR.str_replace('_', DIRECTORY_SEPARATOR, $className).DIRECTORY_SEPARATOR."to_include";
+		return $this->cacheDir . DIRECTORY_SEPARATOR . str_replace('_', DIRECTORY_SEPARATOR, 
+				$className) . DIRECTORY_SEPARATOR . "to_include";
 	}
 	
 	function getAOPPath($className)
-    {
-        return f_util_FileUtils::buildChangeCachePath("aop", str_replace("_", DIRECTORY_SEPARATOR, $className), "to_include");
-    }
-
+	{
+		return f_util_FileUtils::buildChangeCachePath("aop", 
+				str_replace("_", DIRECTORY_SEPARATOR, $className), "to_include");
+	}
+	
 	public function compileAOP()
 	{
 		$this->restoreAutoload();
@@ -113,23 +117,23 @@ class ClassResolver implements ResourceResolver
 		{
 			$className = $classAlterations[0][2];
 			$path = $this->getCachePath($className, $this->cacheDir);
-			if (!file_exists($path))
+			if (! file_exists($path))
 			{
-				throw new Exception("Could not find $className in ".$this->cacheDir);
+				throw new Exception("Could not find $className in " . $this->cacheDir);
 			}
 			$newFileContent = $aop->applyAlterations($classAlterations);
 			$backupPath = $this->getCachePath($className, $backupDir);
-
+			
 			f_util_FileUtils::mkdir(dirname($backupPath));
-			if (!rename($path, $backupPath))
+			if (! rename($path, $backupPath))
 			{
-				throw new Exception("Could not move ".$path." to ".$backupPath);
+				throw new Exception("Could not move " . $path . " to " . $backupPath);
 			}
 			clearstatcache();
 			f_util_FileUtils::write($path, $newFileContent);
 		}
 	}
-
+	
 	private function restoreAutoload()
 	{
 		$backupDir = f_util_FileUtils::buildChangeCachePath("aop-backup");
@@ -144,7 +148,7 @@ class ClassResolver implements ResourceResolver
 				}
 				elseif ($info->isFile())
 				{
-					throw new Exception($file." is not a symlink ?! Corrupted autoload ?");
+					throw new Exception($file . " is not a symlink ?! Corrupted autoload ?");
 				}
 				elseif ($info->isDir())
 				{
@@ -165,113 +169,97 @@ class ClassResolver implements ResourceResolver
 	
 	protected function validateClassName($className)
 	{
-		if (!preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $className))
+		if (! preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $className))
 		{
 			die("Invalid class name");
 		}
 	}
-
+	
 	protected function getCachePath($className, $baseDir)
 	{
 		$this->validateClassName($className);
-		return $baseDir.DIRECTORY_SEPARATOR.str_replace('_', DIRECTORY_SEPARATOR, $className).DIRECTORY_SEPARATOR."to_include";
+		return $baseDir . DIRECTORY_SEPARATOR . str_replace('_', DIRECTORY_SEPARATOR, $className) . DIRECTORY_SEPARATOR . "to_include";
 	}
-
+	
+	protected function getPathsToAnalyse()
+	{
+		return array(
+				array('path' => '%FRAMEWORK_HOME%/', 'recursive' => 'true', 
+						'exclude' => array(0 => 'deprecated', 1 => 'doc', 2 => 'module', 3 => 'webapp')), 
+				array('path' => '%WEBEDIT_HOME%/libs/', 'recursive' => 'true'), 
+				array('path' => '%WEBEDIT_HOME%/build/%PROFILE%/', 'recursive' => 'true'), 
+				array('path' => '%WEBEDIT_HOME%/modules/*/actions'), 
+				array('path' => '%WEBEDIT_HOME%/modules/*/change-commands', 'recursive' => 'true'), 
+				array('path' => '%WEBEDIT_HOME%/modules/*/changedev-commands', 'recursive' => 'true'), 
+				array('path' => '%WEBEDIT_HOME%/modules/*/lib/', 'recursive' => 'true'), 
+				array('path' => '%WEBEDIT_HOME%/modules/*/views/'), 
+				array('path' => '%WEBEDIT_HOME%/modules/*/persistentdocument/', 'recursive' => 'true'), 
+				array('path' => '%WEBEDIT_HOME%/override/modules/*/actions'), 
+				array('path' => '%WEBEDIT_HOME%/override/modules/*/lib/', 'recursive' => 'true'), 
+				array('path' => '%WEBEDIT_HOME%/override/modules/*/views/'));
+	}
+	
 	/**
 	 * Launch this to create the cache of class
 	 */
 	public function initialize()
 	{
-		$modulesList = $this->getListOfModulesDependencies();
-
-		$ini = Framework::getConfiguration('autoload');
-
+		$ini = $this->getPathsToAnalyse();
+		
+		var_export($ini);
 		// we automatically add our php classes
-		require_once(FRAMEWORK_HOME .'/util/Finder.class.php');
-				
+		require_once (FRAMEWORK_HOME . '/util/Finder.class.php');
+		$ext = '.php';
+		
 		// let's do our fancy work
 		foreach ($ini as $entry)
 		{
+			// directory mapping
+			$path = $entry['path'];
 			
-			// file mapping or directory mapping?
-			if (isset($entry['path']))
-			{
-				// directory mapping
-				$ext  = isset($entry['ext']) ? $entry['ext'] : '.php';
-				$path = $entry['path'];
-
-				$path = $this->replaceConstants($path);				
-
-				$finder = f_util_Finder::type('file')->ignore_version_control()->name('*'.$ext);
-				$finder->follow_link();
-
-				// recursive mapping?
-				$recursive = ((isset($entry['recursive'])) ? $entry['recursive'] : false);
+			$path = $this->replaceConstants($path);
+			echo "Analysing " . $entry['path'] . " -> $path ...\n";
 				
-				if (!$recursive)
+			$finder = f_util_Finder::type('file')->ignore_version_control()->name('*' . $ext);
+			$finder->follow_link();
+			
+			// recursive mapping?
+			$recursive = ((isset($entry['recursive'])) ? $entry['recursive'] : false);
+			
+			if (!$recursive)
+			{
+				$finder->maxdepth(0);
+			}
+			
+			// exclude files or directories?
+			if (isset($entry['exclude']))
+			{
+				if (! is_array($entry['exclude']))
 				{
-					$finder->maxdepth(0);
+					$entry['exclude'] = explode(',', $entry['exclude']);
 				}
-
-				// exclude files or directories?
-				if (isset($entry['exclude']))
-				{
-					if ( ! is_array($entry['exclude']))
-					{
-						$entry['exclude'] = explode(',', $entry['exclude']);
-					}
-					$finder->prune($entry['exclude'])->discard($entry['exclude']);
-				}
-
-				$sourcePath = $path;
-
-				if( strpos($sourcePath, '%MODULE_NAME%') )
-				{
-					foreach ($modulesList as $module)
-					{
-						$path = str_replace('%MODULE_NAME%', $module, $sourcePath);
-						$matches = $this->glob($path);
-						if ($matches)
-						{
-							$files = $finder->in($matches);
-						}
-						else
-						{
-							$files = array();
-						}
-						$this->constructClassList($files);
-					}
-				}
-				else
-				{
-					$matches = $this->glob($path);
-					if ($matches)
-					{
-						$files = $finder->in($matches);
-					}
-					else
-					{
-						$files = array();
-					}
-					$this->constructClassList($files);
-				}
-
+				$finder->prune($entry['exclude'])->discard($entry['exclude']);
+			}
+			
+			$sourcePath = $path;
+			
+			$matches = $this->glob($path);
+			if ($matches)
+			{
+				var_export($matches);
+				$files = $finder->in($matches);
 			}
 			else
 			{
-				// file mapping
-				foreach ($entry as $class => $path)
-				{
-					$path = $this->replaceConstants($path);
-					$this->appendToAutoloadFile($class, $path);
-				}
+				$files = array();
 			}
+			$this->constructClassList($files);
 		}
 	}
-
+	
 	private function glob($path)
 	{
-		if (strpos($path,  '*') !== false  && basename($path) !== '*')
+		if (strpos($path, '*') !== false && basename($path) !== '*')
 		{
 			$result = glob($path);
 			return (is_array($result) && count($result) > 0) ? $result : false;
@@ -282,7 +270,7 @@ class ClassResolver implements ResourceResolver
 		{
 			foreach (new DirectoryIterator($cleanPath) as $fileInfo)
 			{
-				if (!$fileInfo->isDot())
+				if (! $fileInfo->isDot())
 				{
 					$result[] = realpath($fileInfo->getPathname());
 				}
@@ -301,17 +289,17 @@ class ClassResolver implements ResourceResolver
 	{
 		$classNames = array();
 		$path = WEBEDIT_HOME . '/cache/autoload';
-		$pathLength = strlen($path)+1;
-
+		$pathLength = strlen($path) + 1;
+		
 		if ($basePattern !== null)
 		{
 			$patternDirs = explode("_", $basePattern);
-
-			$lastPatternPart = $patternDirs[count($patternDirs)-1];
-			unset($patternDirs[count($patternDirs)-1]);
+			
+			$lastPatternPart = $patternDirs[count($patternDirs) - 1];
+			unset($patternDirs[count($patternDirs) - 1]);
 			if (count($patternDirs) > 0)
 			{
-				$path .= "/".join("/", $patternDirs);
+				$path .= "/" . join("/", $patternDirs);
 			}
 		}
 		else
@@ -320,11 +308,13 @@ class ClassResolver implements ResourceResolver
 		}
 		if ($lastPatternPart != '')
 		{
-			foreach (glob($path."/".$lastPatternPart."*", GLOB_MARK|GLOB_ONLYDIR|GLOB_NOSORT) as $subPath)
+			foreach (glob($path . "/" . $lastPatternPart . "*", 
+					GLOB_MARK | GLOB_ONLYDIR | GLOB_NOSORT) as $subPath)
 			{
 				foreach (f_util_FileUtils::find("to_include", $subPath) as $toIncludePath)
 				{
-					$classNames[] = substr(str_replace("/", "_", dirname($toIncludePath)), $pathLength);
+					$classNames[] = substr(str_replace("/", "_", dirname($toIncludePath)), 
+							$pathLength);
 				}
 			}
 		}
@@ -337,7 +327,7 @@ class ClassResolver implements ResourceResolver
 		}
 		return $classNames;
 	}
-
+	
 	/**
 	 * Update the autoload cache
 	 */
@@ -349,10 +339,10 @@ class ClassResolver implements ResourceResolver
 		{
 			f_util_FileUtils::rmdir($this->cacheDir);
 			$this->initialize();
-			rename($oldCacheDir, $oldCacheDir.'.old');
+			rename($oldCacheDir, $oldCacheDir . '.old');
 			rename($this->cacheDir, $oldCacheDir);
-			f_util_FileUtils::rmdir($oldCacheDir.'.old');
-
+			f_util_FileUtils::rmdir($oldCacheDir . '.old');
+		
 		}
 		catch (Exception $e)
 		{
@@ -360,7 +350,7 @@ class ClassResolver implements ResourceResolver
 		}
 		$this->cacheDir = $oldCacheDir;
 	}
-
+	
 	/**
 	 * @deprecated
 	 */
@@ -382,7 +372,7 @@ class ClassResolver implements ResourceResolver
 		}
 		return null;
 	}
-
+	
 	/**
 	 * @param String $class full class name
 	 * @param String $filePath the file defining the class
@@ -392,7 +382,7 @@ class ClassResolver implements ResourceResolver
 	public function appendToAutoloadFile($class, $filePath, $override = false)
 	{
 		$cacheFile = $this->getCachePath($class, $this->cacheDir);
-		if (!file_exists($cacheFile))
+		if (! file_exists($cacheFile))
 		{
 			if (is_link($cacheFile))
 			{
@@ -408,8 +398,7 @@ class ClassResolver implements ResourceResolver
 		}
 		return $cacheFile;
 	}
-
-
+	
 	/**
 	 * Returns an array containing all the defined and autoloaded classes.
 	 *
@@ -419,7 +408,7 @@ class ClassResolver implements ResourceResolver
 	{
 		throw new Exception("ClassResolver->getDefinedClasses() is not implemented ; please do it");
 	}
-
+	
 	/**
 	 * @param String $filePath
 	 * @param Boolean $override
@@ -429,7 +418,7 @@ class ClassResolver implements ResourceResolver
 	{
 		return $this->constructClassList(array($filePath), $override);
 	}
-
+	
 	/**
 	 * @param String $dirPath
 	 * @param Boolean $override
@@ -442,7 +431,7 @@ class ClassResolver implements ResourceResolver
 			$this->appendFile($filePath, $override);
 		}
 	}
-
+	
 	/**
 	 * @param array $files
 	 * @param Boolean $override
@@ -458,9 +447,10 @@ class ClassResolver implements ResourceResolver
 			{
 				if ($token[0] == T_CLASS || $token[0] == T_INTERFACE)
 				{
-					$className = $tokenArray[$index+2][1];
+					$className = $tokenArray[$index + 2][1];
 					$definedClasses[] = $className;
-					$cachePaths[$className] = $this->appendToAutoloadFile($className, $file, $override);
+					$cachePaths[$className] = $this->appendToAutoloadFile($className, $file, 
+							$override);
 				}
 			}
 			
@@ -468,30 +458,11 @@ class ClassResolver implements ResourceResolver
 			{
 				$definedSer = serialize($definedClasses);
 				foreach ($cachePaths as $className => $cachePath)
-	            {
-	            	f_util_FileUtils::write($cachePath.".classes", $definedSer);
-	            }
+				{
+					f_util_FileUtils::write($cachePath . ".classes", $definedSer);
+				}
 			}
 		}
-	}
-
-	private function getListOfModulesDependencies()
-	{
-		$list = array();
-		if (!is_dir(AG_MODULE_DIR))
-		{
-			return $list;
-		}
-		foreach (scandir(AG_MODULE_DIR) as $name)
-		{
-			if($name != '.' && $name != '..')
-			{
-				$list[] = $name;
-			}
-		}
-
-		return $list;
-
 	}
 
 	private function replaceConstants($value)
@@ -500,8 +471,8 @@ class ClassResolver implements ResourceResolver
 	}
 }
 
-class ClassResolverDevMode extends ClassResolver 
-{	
+class ClassResolverDevMode extends ClassResolver
+{
 	public function getPath($className)
 	{
 		$path = $this->getRessourcePath($className);
@@ -513,13 +484,13 @@ class ClassResolverDevMode extends ClassResolver
 				$className = $matches[1];
 				$path = $this->getRessourcePath($className);
 			}
-
+			
 			if ($path === null)
 			{
 				throw new Exception("Could not find $className");
 			}
 		}
-
+		
 		$this->checkAOPTime($className, $path);
 		return $path;
 	}
@@ -541,14 +512,14 @@ class ClassResolverDevMode extends ClassResolver
 	private function checkAOPTime($className, $path)
 	{
 		$aop = $this->getAOP();
-		if (!$aop->hasAlterations())
+		if (! $aop->hasAlterations())
 		{
 			return;
 		}
 		
-		if (file_exists($path.".classes"))
+		if (file_exists($path . ".classes"))
 		{
-			$classes = unserialize(f_util_FileUtils::read($path.".classes"));
+			$classes = unserialize(f_util_FileUtils::read($path . ".classes"));
 		}
 		else
 		{
@@ -564,7 +535,7 @@ class ClassResolverDevMode extends ClassResolver
 				$alterations = array_merge($alterations, $otherAlterations);
 			}
 		}
-
+		
 		if (count($alterations) == 0)
 		{
 			return;
@@ -595,27 +566,27 @@ class ClassResolverDevMode extends ClassResolver
 		{
 			switch ($alteration[1])
 			{
-				case "renameParentClass":
+				case "renameParentClass" :
 					$alterationSources = array($alteration[2]);
 					break;
-				case "replaceClass":
-				case "applyAddMethodsAdvice":
+				case "replaceClass" :
+				case "applyAddMethodsAdvice" :
 					$alterationSources = array($alteration[2], $alteration[3]);
 					break;
-				default:
+				default :
 					$alterationSources = array($alteration[0]);
 			}
-
+			
 			foreach ($alterationSources as $source)
 			{
-				$aopBackupFile = $backupDir."/".str_replace("_", "/", $source)."/to_include";
+				$aopBackupFile = $backupDir . "/" . str_replace("_", "/", $source) . "/to_include";
 				if (file_exists($aopBackupFile))
 				{
 					$sourcePath = $aopBackupFile;
 				}
 				else
 				{
-					$sourcePath = $this->getCachePath($source, $this->cacheDir);	
+					$sourcePath = $this->getCachePath($source, $this->cacheDir);
 				}
 				$alteratorMTime = filemtime(realpath($sourcePath));
 				if ($alteratorMTime > $maxMTime)

@@ -206,8 +206,7 @@ class f_util_Finder
    */
   public function ignore_version_control()
   {
-    $ignores = array('.svn', 'CVS', '_darcs', '.arch-params', '.monotone', '.bzr');
-
+    $ignores = array('.svn', '.git', 'CVS', '_darcs', '.arch-params', '.monotone', '.bzr');
     return $this->discard($ignores)->prune($ignores);
   }
 
@@ -229,11 +228,11 @@ class f_util_Finder
     {
       if (is_array($args[$i]) && !method_exists($args[$i][0], $args[$i][1]))
       {
-        throw new sfException("method {$args[$i][1]} does not exist for object {$args[$i][0]}");
+        throw new Exception("method {$args[$i][1]} does not exist for object {$args[$i][0]}");
       }
       else if (!is_array($args[$i]) && !function_exists($args[$i]))
       {
-        throw new sfException("function {$args[$i]} does not exist");
+        throw new Exception("function {$args[$i]} does not exist");
       }
 
       $this->execs[] = $args[$i];
@@ -651,7 +650,7 @@ class sfNumberCompare
   {
     if (!preg_match('{^([<>]=?)?(.*?)([kmg]i?)?$}i', $this->test, $matches))
     {
-      throw new sfException('don\'t understand "'.$this->test.'" as a test');
+      throw new Exception('don\'t understand "'.$this->test.'" as a test');
     }
 
     $target = array_key_exists(2, $matches) ? $matches[2] : '';
