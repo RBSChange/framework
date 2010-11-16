@@ -174,7 +174,7 @@ class TagService extends BaseService
 	 */
 	public function isFunctionalTag($tag)
 	{
-		return preg_match('/^functional_[a-z]+_[a-z]+\-[a-z]+$/', $tag) ? true : false;
+		return preg_match('/^functional_[a-z0-9]+_[a-z0-9]+\-[a-z0-9]+$/', $tag) ? true : false;
 	}
 
 	/**
@@ -185,7 +185,7 @@ class TagService extends BaseService
 	 */
 	private function getFunctionalTagInfo($tag, &$moduleName = null, &$documentName = null, &$functionName = null)
 	{
-		if (preg_match('/^functional_([a-z]+)_([a-z]+)\-([a-z]+)$/', $tag, $matches))
+		if (preg_match('/^functional_([a-z0-9]+)_([a-z0-9]+)\-([a-z0-9]+)$/', $tag, $matches))
 		{
 			$moduleName = $matches[1];
 			$documentName = $matches[2];
@@ -201,7 +201,7 @@ class TagService extends BaseService
 	 */
 	public function isContextualTag($tag)
 	{
-		return preg_match('/^contextual_[a-z]+_[a-z]+_[a-z0-9\-_]+$/', $tag) ? true : false;
+		return preg_match('/^contextual_[a-z0-9]+_[a-z0-9]+_[a-z0-9\-_]+$/', $tag) ? true : false;
 	}
 
 	/**
@@ -632,7 +632,7 @@ class TagService extends BaseService
 
 	public function isDetailPageTag($tag, &$moduleName = null, &$documentName = null)
 	{
-		if (preg_match('/^contextual_[a-z]+_[a-z]+_modules_([a-z]+)_page\-detail$/', $tag, $matches))
+		if (preg_match('/^contextual_[a-z0-9]+_[a-z0-9]+_modules_([a-z0-9]+)_page\-detail$/', $tag, $matches))
 		{
 			$moduleName = $matches[1];
 			$documentName = null;
@@ -652,7 +652,7 @@ class TagService extends BaseService
 
 	public function isListPageTag($tag, &$moduleName = null, &$documentName = null)
 	{
-		if (preg_match('/^contextual_[a-z]+_[a-z]+_modules_([a-z]+)_page\-list$/', $tag, $matches))
+		if (preg_match('/^contextual_[a-z0-9]+_[a-z0-9]+_modules_([a-z0-9]+)_page\-list$/', $tag, $matches))
 		{
 			$moduleName = $matches[1];
 			$documentName = null;

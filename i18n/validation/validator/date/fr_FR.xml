@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<i18n baseKey="f.validation.validator.date" lcid="fr_FR">
+  <key id="message">le champ ″{field}″ doit contenir une date valide (format: {format}).</key>
+  <key id="d">jj</key>
+  <key id="m">mm</key>
+  <key id="y">aaaa</key>
+  <key id="h">hh</key>
+  <key id="i">mn</key>
+  <key id="s">ss</key>
+</i18n>

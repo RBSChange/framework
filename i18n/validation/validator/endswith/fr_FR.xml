@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<i18n baseKey="f.validation.validator.endswith" lcid="fr_FR">
+  <key id="message">le champ ″{field}″ doit se terminer par ″{param}″.</key>
+</i18n>

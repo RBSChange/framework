@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<i18n baseKey="f.validation.validator.float.message" lcid="en_GB">
+  <key id="reversed">the value of field ″{field}″ must not be an decimal number.</key>
+</i18n>

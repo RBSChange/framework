@@ -215,7 +215,6 @@ class builder_ModuleGenerator
 		$servicesPath = $libPath . 'services' . DIRECTORY_SEPARATOR;
 		$configPath = $pathBase . 'config' . DIRECTORY_SEPARATOR ;
 		$templatePath = $pathBase . 'templates' . DIRECTORY_SEPARATOR ;
-		$localePath = $pathBase . 'locale' . DIRECTORY_SEPARATOR;
 		$editorPath = $pathBase . 'forms' . DIRECTORY_SEPARATOR . 'editor' . DIRECTORY_SEPARATOR;
 		
 		// Generate configuration files
@@ -226,13 +225,8 @@ class builder_ModuleGenerator
 		f_util_FileUtils::write($configPath . 'rights.xml', $this->generateFile('config_rights.xml'));
 		f_util_FileUtils::write($configPath . 'perspective.xml', $this->generateFile('config_perspective.xml'));
 		
-		// Generate localisation files
-		f_util_FileUtils::write($localePath . DIRECTORY_SEPARATOR . 'bo' . DIRECTORY_SEPARATOR . 'actions.xml', 
-			$this->generateFile('locale_actions.xml'));
-		f_util_FileUtils::write($localePath . DIRECTORY_SEPARATOR . 'document' . DIRECTORY_SEPARATOR .'permission.xml', 
-			$this->generateFile('locale_permission.xml'));		
-		f_util_FileUtils::write($localePath . DIRECTORY_SEPARATOR . 'frontoffice.xml', $this->generateFile('locale_frontoffice.xml'));
-		
+			
+		// Generate localisation files		
 		$this->generateGeneralLocales();
 									
 		$crs = ClassResolver::getInstance();
@@ -285,32 +279,29 @@ class builder_ModuleGenerator
 		return $this;
 	}
 
-	public function generateGeneralLocales($locales = null)
+	public function generateGeneralLocales()
 	{
-		if (is_null($locales) || !is_array($locales))
-		{
-			$locales['name']['fr'] = $this->name;
-			$locales['name']['en'] = $this->name;
-			$locales['tree_name']['fr'] = $this->name;
-			$locales['tree_name']['en'] = $this->name;
-		}
-
-		// Instance a new object generator based on smarty
-		$generator = new builder_Generator('locales');
-
-		// Assign all necessary variable
-		$generator->assign_by_ref('name', $locales['name']['fr']);
-		$generator->assign_by_ref('name_en', $locales['name']['en']);
-		$generator->assign_by_ref('tree_name', $locales['tree_name']['fr']);
-		$generator->assign_by_ref('tree_name_en', $locales['tree_name']['en']);
-		$generator->assign_by_ref('date', $this->date);
-		$generator->assign_by_ref('author', $this->author);
-		$generator->assign('useTopic', $this->useTopic);
-		$generator->assign('useFolder', !$this->useTopic);
-
-		// Execute template and return result
-		$content = $generator->fetch('generalLocalizationTemplate.tpl');
-		f_util_FileUtils::write(AG_MODULE_DIR . DIRECTORY_SEPARATOR . $this->name . DIRECTORY_SEPARATOR . 'locale' . DIRECTORY_SEPARATOR . 'bo' . DIRECTORY_SEPARATOR . 'general.xml', $content);
+		$ls = LocaleService::getInstance();
+		$ids = array('module-name' => $this->name, 'system-folder-name' => $this->name);
+		
+		$keysInfos = array();
+		$keysInfos[$ls->getLCID('fr')] = $ids;
+		$keysInfos[$ls->getLCID('en')] = $ids;
+		$keysInfos[$ls->getLCID('de')] = $ids;
+		$baseKey = 'm.' . $this->name . 'bo.general';
+		$ls->updatePackage($baseKey, $keysInfos, false, true);
+		
+		$keysInfos[$ls->getLCID('fr')] = array('create_' => 'créer');
+		$keysInfos[$ls->getLCID('en')] = array('create_' => 'create');
+		$keysInfos[$ls->getLCID('de')] = array('create_' => 'neu');
+		$baseKey = 'm.' . $this->name . '.bo.actions';
+		$ls->updatePackage($baseKey, $keysInfos, false, true);
+		
+		$keysInfos[$ls->getLCID('fr')] = array();
+		$keysInfos[$ls->getLCID('en')] = array();
+		$keysInfos[$ls->getLCID('de')] = array();
+		$baseKey = 'm.' . $this->name . '.document.permission';
+		$ls->updatePackage($baseKey, $keysInfos, false, true, 'm.generic.document.permission');			
 	}
 
 	/**

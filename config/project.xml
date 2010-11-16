@@ -136,6 +136,12 @@
 			<!-- What is the value of https-request-marker for https queries -->
 			<entry name="https-request-marker-value">on</entry>
 		</general>
+		
+		<i18n>
+			<entry name="en">en_GB</entry>
+			<entry name="us">en_US</entry>
+			<entry name="ar">ar_KW</entry>
+		</i18n>
 		<charts>
 			<!--  This can be google directly or eastwood for instance -->
 			<entry name="googleChartProvider">http://chart.apis.google.com/chart</entry>

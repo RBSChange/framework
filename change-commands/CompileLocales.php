@@ -35,12 +35,12 @@ class commands_CompileLocales extends commands_AbstractChangeCommand
 		{
 			$components[] = "framework";
 		}
-		foreach (glob("modules/*/locale", GLOB_ONLYDIR) as $path)
+		foreach (glob("modules/*/i18n", GLOB_ONLYDIR) as $path)
 		{
 			$module = dirname($path);
 			$components[] = basename($module);
 		}
-		foreach (glob("themes/*/locale", GLOB_ONLYDIR) as $path)
+		foreach (glob("themes/*/i18n", GLOB_ONLYDIR) as $path)
 		{
 			$module = dirname($path);
 			$components[] = "themes/" . basename($module);
@@ -76,20 +76,18 @@ class commands_CompileLocales extends commands_AbstractChangeCommand
 			}
 			else if (strpos($componentName, 'themes/') === 0)
 			{
-				$ls->regenerateLocalesForTheme(str_replace('/', '_', $componentName));
+				$ls->regenerateLocalesForTheme(str_replace('themes/', '', $componentName));
 			}
 			else
 			{
-				$package = "modules_".$componentName;
-				$ms = ModuleService::getInstance();
-				if ( in_array($package, $ms->getModules()) )
+				if (is_dir(f_util_FileUtils::buildWebeditPath('modules', $componentName, 'i18n')))
 				{
-					$ls->regenerateLocalesForModule($package);
+					$ls->regenerateLocalesForModule($componentName);
 					$this->message("$componentName module locales compiled");
 				}
 				else
 				{
-					$this->errorMessage("Module $componentName does not exist.");
+					$this->errorMessage("Module $componentName does not exist or has no locale.");
 				}
 			}
 		}

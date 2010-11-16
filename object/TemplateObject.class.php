@@ -19,10 +19,11 @@ class TemplateObject
 		$this->fileName = $fileName;
 		$this->template = new PHPTAL($fileName);
 		$this->lang = RequestContext::getInstance()->getLang();
-
-		if (Framework::isDebugEnabled())
+		$registry = PHPTAL_TalesRegistry::getInstance();
+		if (!$registry->isRegistered('trans'))
 		{
-			Framework::debug(__METHOD__ ."($this->lang,$this->fileName");
+			$registry->registerPrefix('trans', array('f_TalesI18n', 'trans'));
+			$registry->registerPrefix('transui', array('f_TalesI18n', 'transui'));
 		}
 	}
 
@@ -168,5 +169,71 @@ class LocaleTranslator implements PHPTAL_TranslationService
 	function translate($key)
 	{
 		return f_Locale::translate($key, null, $this->lang);
+	}
+}
+
+class f_TalesI18n implements PHPTAL_Tales
+{
+	/**
+	 * trans: modifier.
+	 *
+	 * Returns the code required to localize a key
+	 * <?php echo phptal_escape(RETURN_VALUE, ENT_QUOTES, 'UTF-8');?>
+	 */
+	static public function trans($src, $nothrow)
+	{
+		return self::translate($src, RequestContext::getInstance()->getLang());
+	}
+		
+	/**
+	 * transui: modifier.
+	 *
+	 * Returns the code required to localize a key
+	 * <?php echo phptal_escape(RETURN_VALUE, ENT_QUOTES, 'UTF-8');?>
+	 */
+	static public function transui($src, $nothrow)
+	{
+		return self::translate($src, RequestContext::getInstance()->getUILang());
+	}
+
+	/**
+	 * Returns the code required to localize a key
+	 * <?php echo phptal_escape(RETURN_VALUE, ENT_QUOTES, 'UTF-8');?>
+	 */
+	static private function translate($src, $lang)
+	{
+		list($key, $formatters, $replacements) = LocaleService::getInstance()->parseTransString($src);
+		
+		$formattersStr = array();
+		$addHTMLFormatter = true;
+		foreach ($formatters as $formatter) 
+		{
+			if ($formatter === 'html' || $formatter === 'js' || $formatter === 'attr' || $formatter === 'raw')
+			{
+				$addHTMLFormatter = false;
+			}
+			$formattersStr[] = var_export($formatter , true);
+		}
+		if ($addHTMLFormatter) {$formatter = 'html'; $formattersStr[] = var_export($formatter , true);}
+		
+		$replacementsStr = array();
+		foreach ($replacements as $name => $value) 
+		{
+			$l = strlen($value);
+			if ($l > 0 && !is_numeric($value) && $value[0] != '\'')
+			{
+				$replacementsStr[] = var_export($name , true). ' => ' . phptal_tales($value);
+			}
+			else if ($l > 1 && $value[0] == '\'' && $value[$l-1] == '\'')
+			{
+				$value = htmlspecialchars_decode(substr($value, 1, $l - 2));
+				$replacementsStr[] = var_export($name , true). ' => ' . var_export($value , true);
+			}
+			else
+			{
+				$replacementsStr[] = var_export($name , true). ' => ' . var_export($value , true);
+			}
+		}
+		return "LocaleService::getInstance()->formatKey('$lang', '$key', array(".implode(', ', $formattersStr)."), array(".implode(', ', $replacementsStr)."))";
 	}
 }

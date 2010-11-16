@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<i18n baseKey="f.validation.validator.min.message" lcid="fr_FR">
+  <key id="reversed">le champ ″{field}″ ne doit pas avoir une valeur minimale de {param}.</key>
+</i18n>

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<localization>
-  <entity id="error">
-    <locale lang="fr">La création du PDF a échoué, veuillez réessayer plus tard.</locale>
-    <locale lang="en">PDF creation has failed, please try again later.</locale>
-    <locale lang="de">PDF-Erstellung fiel aus, bitte probieren Sie noch mal später.</locale>
-  </entity>
-</localization>

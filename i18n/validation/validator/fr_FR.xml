@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<i18n baseKey="f.validation.validator" lcid="fr_FR">
+  <key id="invalidvalue">la valeur ″{value}″ n'est pas valide pour le champ ″{field}″.</key>
+  <key id="persisentdocumentarray">le champ ″{field}″ n'est pas valide : count=″{count}″ min-occurs=″{minOccurs}″, max-occurs=″{maxOccurs}″</key>
+</i18n>

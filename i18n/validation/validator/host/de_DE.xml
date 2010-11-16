@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<i18n baseKey="f.validation.validator.host" lcid="de_DE">
+  <key id="message">das Feld ″{field}″ muss eine gültige Hostname sein.</key>
+</i18n>

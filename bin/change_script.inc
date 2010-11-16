@@ -9,6 +9,7 @@ $clearKey = array_search('--clear', $argv);
 if ($clearKey !== false)
 {
 	unset($argv[$clearKey]);
+	$argv = array_values($argv);
 	$bootStrap->cleanDependenciesCache();
 }
 
@@ -38,7 +39,7 @@ if (is_dir($path))
 	foreach (new DirectoryIterator($path) as $fileInfo)
 	{
 		if (!$fileInfo->isDot() && $fileInfo->isDir())
-		{
+		{	
 			$moduleName = basename($fileInfo->getPathname());
 			$modulePath =  (isset($computedDeps['module'][$moduleName])) ? $computedDeps['module'][$moduleName]['path'] : realpath($fileInfo->getPathname());
 			$cmdPath = $modulePath."/".$script->getName()."-commands";

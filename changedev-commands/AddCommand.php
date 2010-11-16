@@ -70,7 +70,7 @@ class commands_AddCommand extends commands_AbstractChangedevCommand
 		{
 			$commandFolder = f_util_FileUtils::buildWebeditPath('framework', 'change' . $type . '-commands');
 			$commandFile = $commandFolder . DIRECTORY_SEPARATOR . $commandName . '.php';
-			$class = 'command_' . $commandName;
+			$class = 'commands_' . $commandName;
 		}
 		else if (!ModuleService::getInstance()->moduleExists($componentName))
 		{
@@ -80,7 +80,7 @@ class commands_AddCommand extends commands_AbstractChangedevCommand
 		{
 			$commandFolder = f_util_FileUtils::buildWebeditPath('modules', $componentName, 'change' . $type . '-commands');
 			$commandFile = $commandFolder . DIRECTORY_SEPARATOR . $componentName . '_' . $commandName . '.php';
-			$class = 'command_' . $componentName . '_' . $commandName;
+			$class = 'commands_' . $componentName . '_' . $commandName;
 		}
 		
 		if (file_exists($commandFile))
@@ -101,8 +101,7 @@ class commands_AddCommand extends commands_AbstractChangedevCommand
 		
 		f_util_FileUtils::write($commandFile, $result);
 		ClassResolver::getInstance()->appendToAutoloadFile($class, realpath($commandFile));
-		ChangeProject::getInstance()->executeTask('--refresh-cli-autoload');
-		
+			
 		return $this->quitOk("Command $commandName successfully created!\nPlease now edit $commandFile.php");
 	}
 	

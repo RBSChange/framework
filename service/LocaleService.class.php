@@ -1,14 +1,18 @@
 <?php
 class LocaleService extends BaseService
 {
-
+	private $LCID_BY_LANG = null;
+	
+	private $ignoreTransform;
+	
+	protected $transformers;
+	
 	/**
 	 * The singleton instance
 	 * @var LocaleService
 	 */
 	private static $instance = null;
-
-
+	
 	/**
 	 * @return LocaleService
 	 */
@@ -20,124 +24,712 @@ class LocaleService extends BaseService
 		}
 		return self::$instance;
 	}
+	
+	protected function __construct()
+	{
+		$this->ignoreTransform = array('TEXT' => 'raw', 'HTML', 'text');
+		$this->transformers = array('lab' => 'transformLab', 'uc' => 'transformUc', 'ucf' => 'transformUcf', 'lc' => 'transformLc', 
+			'js' => 'transformJs', 'html' => 'transformHtml', 'text' => 'transformText', 'attr' => 'transformAttr');
+	}
+	
+	/**
+	 * @param string $langCode
+	 * @return string
+	 */
+	public function getLCID($langCode)
+	{
+		if ($this->LCID_BY_LANG === null)
+		{
+			$this->LCID_BY_LANG = Framework::getConfiguration('i18n');
+		}
+		if (! isset($this->LCID_BY_LANG[$langCode]))
+		{
+			if (strlen($langCode) === 2)
+			{
+				$this->LCID_BY_LANG[$langCode] = strtolower($langCode) . '_' . strtoupper($langCode);
+			}
+			else
+			{
+				$this->LCID_BY_LANG[$langCode] = strtolower($langCode);
+			}
+		}
+		return $this->LCID_BY_LANG[$langCode];
+	}
+	
+	
+	public function importOverride($name = null)
+	{
+		if ($name === null || $name === 'framework')
+		{
+			$i18nPath = f_util_FileUtils::buildOverridePath('framework', 'i18n');
+			if (is_dir($i18nPath))
+			{
+				$this->importOverrideDir($i18nPath, 'f');
+			}
+			
+			if ($name === 'framework')
+			{
+				return true;
+			}
+		}
+		if ($name === null)
+		{
+			$pathPattern = f_util_FileUtils::buildOverridePath('themes', '*', 'i18n');
+			$paths = glob($pathPattern, GLOB_ONLYDIR);
+			if (is_array($paths))
+			{
+				foreach ($paths as $i18nPath)
+				{
+					$name = basename(dirname($path));
+					$basekey = 't.' . $name;
+					$this->importOverrideDir($i18nPath, $basekey);
+				}	
+			}
 
+			$pathPattern = f_util_FileUtils::buildOverridePath('modules', '*', 'i18n');
+			$paths = glob($pathPattern, GLOB_ONLYDIR);
+			if (is_array($paths))
+			{
+				foreach ($paths as $i18nPath)
+				{
+					$name = basename(dirname($i18nPath));
+					$basekey = 'm.' . $name;
+					$this->importOverrideDir($i18nPath, $basekey);
+				}
+			}
+		}
+		else
+		{
+			$parts = explode('/', $name);
+			if (count($parts) != 2)
+			{
+				return false;
+			}
+			if ($parts[0] === 'modules')
+			{
+				$basekey = 'm.' . $parts[1];
+			}
+			else if ($parts[0] === 'themes')
+			{
+				$basekey = 't.' . $parts[1];
+			}
+			else
+			{
+				return false;
+			}
+			$i18nPath = f_util_FileUtils::buildOverridePath($parts[0], $parts[1], 'i18n');
+			if (is_dir($i18nPath))
+			{
+				$this->importOverrideDir($i18nPath, $basekey);
+			}
+		}
+		return true;
+	}
+	
+	private function importOverrideDir($dir, $baseKey)
+	{
+		foreach (scandir($dir) as $file)
+		{
+			if ($file[0] == ".")
+			{
+				continue;
+			}
+			$absFile = $dir . DIRECTORY_SEPARATOR . $file;
+			if (is_dir($absFile))
+			{
+				$this->importOverrideDir($absFile, $baseKey . '.' . $file);
+			}
+			elseif (f_util_StringUtils::endsWith($file, '.xml'))
+			{
+				$entities = array();
+				//$entities[$lcid][$id] = array($content, $format);
+				$this->processFile($absFile, $entities, false);
+				if (count($entities))
+				{
+					echo "Import $baseKey\n";
+					$this->updatePackage($baseKey, $entities);
+				}
+				echo "Remove file $absFile\n";
+				unlink($absFile);
+			}
+		}	
+		f_util_FileUtils::rmdir($dir);	
+	}
+	
+	
+	/**
+	 * @param string $name [null] | framework | modules_NAME | themes_NAME
+	 * @param boolean $removeLocalFolder
+	 * @param boolean $overrideI18Folder
+	 * @return boolean
+	 */
+	public function convertLocales($name = null, $removeLocalFolder = false, $overrideI18Folder = false)
+	{
+		if ($name === null || $name === 'framework')
+		{
+			$path = f_util_FileUtils::buildWebeditPath('framework', 'locale');
+			if (is_dir($path))
+			{
+				echo "Convert framework...\n";
+				$i18nPath = f_util_FileUtils::buildWebeditPath('framework', 'i18n');
+				if ($overrideI18Folder && is_dir($i18nPath))
+				{
+					f_util_FileUtils::rmdir($i18nPath);
+				}
+				$this->convertDir('f', $path, false);
+				if ($removeLocalFolder)
+				{
+					f_util_FileUtils::rmdir($path);
+				}
+			}
+			
+			$path = f_util_FileUtils::buildOverridePath('framework', 'locale');
+			if (is_dir($path))
+			{
+				echo "Convert framework override...\n";
+				$i18nPath = f_util_FileUtils::buildOverridePath('framework', 'i18n');
+				if ($overrideI18Folder && is_dir($i18nPath))
+				{
+					f_util_FileUtils::rmdir($i18nPath);
+				}
+				$this->convertDir('f', $path, true);
+				if ($removeLocalFolder)
+				{
+					f_util_FileUtils::rmdir($path);
+				}
+			}
+			
+			if ($name === 'framework')
+			{
+				return true;
+			}
+		}
+		
+		if ($name === null)
+		{
+			//Themes locales conversion
+			$pathPattern = f_util_FileUtils::buildWebeditPath('themes', '*', 'locale');
+			foreach (glob($pathPattern, GLOB_ONLYDIR) as $path)
+			{
+				$name = basename(dirname($path));
+				echo "Convert theme $name ...\n";
+				$i18nPath = f_util_FileUtils::buildWebeditPath('themes', $name, 'i18n');
+				if ($overrideI18Folder && is_dir($i18nPath))
+				{
+					f_util_FileUtils::rmdir($i18nPath);
+				}
+				$this->convertDir('t.' . $name, $path, false);
+				if ($removeLocalFolder)
+				{
+					f_util_FileUtils::rmdir($path);
+				}
+			}
+			
+			$pathPattern = f_util_FileUtils::buildOverridePath('themes', '*', 'locale');
+			foreach (glob($pathPattern, GLOB_ONLYDIR) as $path)
+			{
+				$name = basename(dirname($path));
+				echo "Convert theme $name override...\n";
+				$i18nPath = f_util_FileUtils::buildOverridePath('themes', $name, 'i18n');
+				if ($overrideI18Folder && is_dir($i18nPath))
+				{
+					f_util_FileUtils::rmdir($i18nPath);
+				}
+				$this->convertDir('t.' . $name, $path, true);
+				if ($removeLocalFolder)
+				{
+					f_util_FileUtils::rmdir($path);
+				}
+			}
+			
+			//Modules locales conversion
+			$pathPattern = f_util_FileUtils::buildWebeditPath('modules', '*', 'locale');
+			foreach (glob($pathPattern, GLOB_ONLYDIR) as $path)
+			{
+				$name = basename(dirname($path));
+				echo "Convert module $name ...\n";
+				$i18nPath = f_util_FileUtils::buildWebeditPath('modules', $name, 'i18n');
+				if ($overrideI18Folder && is_dir($i18nPath))
+				{
+					f_util_FileUtils::rmdir($i18nPath);
+				}
+				$this->convertDir('m.' . $name, $path, false);
+				if ($removeLocalFolder)
+				{
+					f_util_FileUtils::rmdir($path);
+				}
+			}
+			
+			$pathPattern = f_util_FileUtils::buildOverridePath('modules', '*', 'locale');
+			foreach (glob($pathPattern, GLOB_ONLYDIR) as $path)
+			{
+				$name = basename(dirname($path));
+				echo "Convert module $name override...\n";
+				$i18nPath = f_util_FileUtils::buildOverridePath('modules', $name, 'i18n');
+				if ($overrideI18Folder && is_dir($i18nPath))
+				{
+					f_util_FileUtils::rmdir($i18nPath);
+				}
+				$this->convertDir('m.' . $name, $path, true);
+				if ($removeLocalFolder)
+				{
+					f_util_FileUtils::rmdir($path);
+				}
+			}
+			return true;
+		}
+		
+		$parts = explode('/', $name);
+		if (count($parts) != 2)
+		{
+			return false;
+		}
+		if ($parts[0] === 'modules')
+		{
+			$basekey = 'm.' . $parts[1];
+		}
+		else if ($parts[0] === 'themes')
+		{
+			$basekey = 't.' . $parts[1];
+		}
+		else
+		{
+			return false;
+		}
+		
+		$path = f_util_FileUtils::buildWebeditPath($parts[0], $parts[1], 'locale');
+		if (is_dir($path))
+		{
+			$i18nPath = f_util_FileUtils::buildWebeditPath($parts[0], $parts[1], 'i18n');
+			if ($overrideI18Folder && is_dir($i18nPath))
+			{
+				f_util_FileUtils::rmdir($i18nPath);
+			}
+			$this->convertDir($basekey, $path, false);
+			if ($removeLocalFolder)
+			{
+				f_util_FileUtils::rmdir($path);
+			}
+		}
+		
+		$path = f_util_FileUtils::buildOverridePath($parts[0], $parts[1], 'locale');
+		if (is_dir($path))
+		{
+			$i18nPath = f_util_FileUtils::buildOverridePath($parts[0], $parts[1], 'i18n');
+			if ($overrideI18Folder && is_dir($i18nPath))
+			{
+				f_util_FileUtils::rmdir($i18nPath);
+			}
+			$this->convertDir($basekey, $path, true);
+			if ($removeLocalFolder)
+			{
+				f_util_FileUtils::rmdir($path);
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * @param string $baseKey
+	 * @param array $keysInfos [lcid => [id => [text, format]]
+	 * @param boolean $override
+	 * @param boolean $addOnly
+	 * @param string $includes
+	 */
+	public function updatePackage($baseKey, $keysInfos, $override = false, $addOnly = false, $includes = '')
+	{
+		if (is_array($keysInfos))
+		{
+			foreach ($keysInfos as $lcid => $values)
+			{
+				if (strlen($lcid) === 5)
+				{
+					$this->updateI18nFile($baseKey, $lcid, $values, $includes, $override, $addOnly);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Parse recursively directory and launch the genration of localization for all locale XML file
+	 *
+	 * @param string $package
+	 * @param string $dir
+	 * @param boolean $override
+	 */
+	private function convertDir($package, $dir, $override)
+	{
+		$dirs = array();
+		foreach (scandir($dir) as $file)
+		{
+			if ($file[0] == ".")
+			{
+				continue;
+			}
+			$absFile = $dir . DIRECTORY_SEPARATOR . $file;
+			if (is_dir($absFile))
+			{
+				$dirs[$package . '.' . $file] = $absFile;
+			}
+			elseif (f_util_StringUtils::endsWith($file, '.xml'))
+			{
+				$entities = array();
+				$includes = '';
+				$this->readOldFile($absFile, $entities, $includes);
+				$baseKey = $package . '.' . basename($absFile, '.xml');
+				$keys = $this->convertEntities($entities, $baseKey);
+				foreach ($keys as $lcid => $data)
+				{
+					foreach ($data as $baseKey => $values)
+					{
+						$this->updateI18nFile($baseKey, $lcid, $values, $includes, $override, false);
+					}
+				}
+			}
+		}
+		foreach ($dirs as $package => $dir)
+		{
+			$this->convertDir($package, $dir, $override);
+		}
+	}
+	
+	private function readOldFile($file, &$entities, &$extend)
+	{
+		// Load the XMl file
+		$dom = f_util_DOMUtils::fromPath($file);
+		if ($dom->documentElement->hasAttribute("extend"))
+		{
+			$parentInfo = explode(".", $dom->documentElement->getAttribute("extend"));
+			if ($parentInfo[0] == "framework")
+			{
+				$parentInfo[0] = 'f';
+				$extend = implode('.', $parentInfo);
+			}
+			elseif ($parentInfo[0] == "modules")
+			{
+				$parentInfo[0] = "m";
+				$extend = implode('.', $parentInfo);
+			}
+			elseif ($parentInfo[0] == "themes")
+			{
+				$parentInfo[0] = "t";
+				$extend = implode('.', $parentInfo);
+			}
+		}
+		
+		foreach ($dom->find("entity") as $entity)
+		{
+			$entityId = strtolower($entity->getAttribute('id'));
+			if (! array_key_exists($entityId, $entities))
+			{
+				$entities[$entityId] = array();
+				foreach ($dom->find("locale", $entity) as $locale)
+				{
+					$lang = strtolower($locale->getAttribute('lang'));
+					if (! array_key_exists($lang, $entities[$entityId]))
+					{
+						$entities[$entityId][$lang] = array();
+						$content = str_replace('"', '″', $locale->textContent);
+						$entities[$entityId][$lang]['value'] = $content;
+					}
+				}
+			}
+		}
+	}
+	
+	private function convertEntities($entities, $baseKey)
+	{
+		$keys = array();
+		foreach ($entities as $subKey => $langsInfos)
+		{
+			$id = strtolower($baseKey . '.' . $subKey);
+			foreach ($langsInfos as $lang => $data)
+			{
+				$key = $this->getKeyId($id);
+				$path = $this->getBaseKey($id);
+				$keys[$this->getLCID($lang)][$path][$key] = $data['value'];
+			}
+		}
+		return $keys;
+	}
+	
+	private function getBaseKey($key)
+	{
+		return substr($key, 0, strrpos($key, '.'));
+	}
+	
+	private function getKeyId($key)
+	{
+		return end(explode('.', $key));
+	}
+	
+	private function getI18nFilePath($baseKey, $lcid, $override = false)
+	{
+		$parts = explode('.', $baseKey);
+		$parts[] = $lcid . '.xml';
+		switch ($parts[0])
+		{
+			case 'f' :
+			case 'framework' :
+				$parts[0] = '/framework/i18n';
+				break;
+			case 'm' :
+			case 'modules' :
+				$parts[0] = '/modules';
+				$parts[1] .= '/i18n';
+				break;
+			case 't' :
+			case 'themes' :
+				$parts[0] = '/themes';
+				$parts[1] .= '/i18n';
+				break;
+		}
+		if ($override)
+		{
+			return PROJECT_OVERRIDE . implode('/', $parts);
+		}
+		
+		return WEBEDIT_HOME . implode('/', $parts);
+	}
+	
+	/**
+	 * @param string $baseKey
+	 * @param string $lcid
+	 * @param array $values
+	 * @param string $include
+	 * @param boolean $override
+	 * @param boolean $addOnly
+	 */
+	private function updateI18nFile($baseKey, $lcid, $values, $includes, $override, $addOnly)
+	{
+		$path = $this->getI18nFilePath($baseKey, $lcid, $override);
+		
+		if (is_readable($path))
+		{
+			$i18nDoc = f_util_DOMUtils::fromPath($path);
+		}
+		else
+		{
+			$i18nDoc = f_util_DOMUtils::fromString('<?xml version="1.0" encoding="utf-8"?><i18n/>');
+		}
+		$i18nNode = $i18nDoc->documentElement;
+		$i18nNode->setAttribute('baseKey', $baseKey);
+		$i18nNode->setAttribute('lcid', $lcid);
+		if ($includes !== '')
+		{
+			foreach (explode(',', $includes) as $include)
+			{
+				$include = trim($include);
+				if ($include == '')
+				{
+					continue;
+				}
+				
+				$includeNode = $i18nDoc->findUnique('include[@id="' . $include . '"]', $i18nNode);
+				if ($includeNode === null)
+				{
+					$includeNode = $i18nDoc->createElement('include');
+					$includeNode->setAttribute('id', $includes);
+					if ($i18nNode->firstChild)
+					{
+						$i18nNode->insertBefore($includeNode, $i18nNode->firstChild);
+					}
+					else
+					{
+						$i18nNode->appendChild($includeNode);
+					}
+				}
+			}
+		}
+		
+		foreach ($values as $id => $value)
+		{
+			$keyNode = $i18nDoc->findUnique('key[@id="' . $id . '"]', $i18nNode);
+			if ($keyNode !== null)
+			{
+				if ($addOnly)
+				{
+					continue;
+				}
+				$newNode = $i18nDoc->createElement('key');
+				$i18nNode->replaceChild($newNode, $keyNode);
+			}
+			else
+			{
+				$newNode = $i18nNode->appendChild($i18nDoc->createElement('key'));
+			}
+			$newNode->setAttribute('id', $id);
+			if (is_array($value))
+			{
+				list($content, $format) = $value;
+				if ($format != 'text')
+				{
+					$newNode->setAttribute('format', $format);
+				}
+				$newNode->appendChild($i18nDoc->createTextNode($content));
+			}
+			else
+			{
+				$newNode->appendChild($i18nDoc->createTextNode($value));
+			}
+		}
+		f_util_DOMUtils::save($i18nDoc, $path);
+	}
+	
 	/**
 	 * Regenerate all locales of application
 	 */
 	public function regenerateLocales()
 	{
-		// Clear locale table
-		$provider = f_persistentdocument_PersistentProvider::getInstance();
-		$provider->clearTranslationCache();
-
-
-		$this->processModules();
-		$this->processFramework();
-		$this->processThemes();		
+		try
+		{
+			$this->getTransactionManager()->beginTransaction();
+			
+			$this->getPersistentProvider()->clearTranslationCache();
+			$this->processModules();
+			$this->processFramework();
+			$this->processThemes();
+				
+			$this->getTransactionManager()->commit();
+		}
+		catch (Exception $e)
+		{
+			$this->getTransactionManager()->rollBack($e);
+			throw $e;
+		}
 	}
-
+	
 	/**
 	 * Regenerate locale for a module and save in databases
 	 *
-	 * @param string $moduleName Example: modules_users
+	 * @param string $moduleName Example: users
 	 */
 	public function regenerateLocalesForModule($moduleName)
 	{
-		// Clear the corresponding entries in databases
-		$provider = f_persistentdocument_PersistentProvider::getInstance();
-		$provider->clearTranslationCache($moduleName);
-
-		// Processing module : $moduleName
-		$this->processModule($moduleName);
+		try
+		{
+			$this->getTransactionManager()->beginTransaction();
+			$this->getPersistentProvider()->clearTranslationCache('m.' . $moduleName);		
+			// Processing module : $moduleName
+			$this->processModule($moduleName);
+			$this->getTransactionManager()->commit();
+		}
+		catch (Exception $e)
+		{
+			$this->getTransactionManager()->rollBack($e);
+			throw $e;
+		}
 	}
-
+	
 	/**
 	 * Regenerate locale for a theme and save in databases
 	 *
-	 * @param string $themeName Example: themes_webfactory
+	 * @param string $themeName Example: webfactory
 	 */
 	public function regenerateLocalesForTheme($themeName)
 	{
-		// Clear the corresponding entries in databases
-		$provider = f_persistentdocument_PersistentProvider::getInstance();
-		$provider->clearTranslationCache($themeName);
-
-		$this->processTheme($themeName);
+		try
+		{
+			$this->getTransactionManager()->beginTransaction();
+			$this->getPersistentProvider()->clearTranslationCache('t.' . $themeName);
+			$this->processTheme($themeName);
+			$this->getTransactionManager()->commit();
+		}
+		catch (Exception $e)
+		{
+			$this->getTransactionManager()->rollBack($e);
+			throw $e;
+		}
 	}
 	
-
 	/**
 	 * Regenerate locale for the framework and save in databases
 	 */
 	public function regenerateLocalesForFramework()
 	{
-		// Clear the corresponding entries in databases
-		$provider = f_persistentdocument_PersistentProvider::getInstance();
-		$provider->clearTranslationCache('framework');
-
-		// Processing framework :
-		$this->processFramework();
+		try
+		{
+			$this->getTransactionManager()->beginTransaction();
+			$this->getPersistentProvider()->clearTranslationCache('f');
+			$this->processFramework();
+			$this->getTransactionManager()->commit();
+		}
+		catch (Exception $e)
+		{
+			$this->getTransactionManager()->rollBack($e);
+			throw $e;
+		}
 	}
-
+	
 	/**
 	 * Insert locale keys for all modules
 	 */
 	private function processModules()
 	{
-		$modulesArray = ModuleService::getInstance()->getModules();
-		foreach ($modulesArray as $moduleName)
+		$paths = glob(WEBEDIT_HOME . "/modules/*/i18n", GLOB_ONLYDIR);
+		if (! is_array($paths))
 		{
+			return;
+		}
+		foreach ($paths as $path)
+		{
+			$moduleName = basename(dirname($path));
 			$this->processModule($moduleName);
 		}
 	}
 	
 	private function processThemes()
 	{
-		foreach (glob("themes/*", GLOB_ONLYDIR) as $theme)
+		$paths = glob(WEBEDIT_HOME . "/themes/*/i18n", GLOB_ONLYDIR);
+		foreach ($paths as $path)
 		{
-			$themeName = "themes_" . basename($theme);
+			$themeName = basename(dirname($path));
 			$this->processTheme($themeName);
 		}
-	}	
+	}
 	
 	/**
 	 * Compile locale for a module
-	 *
-	 * @param string $moduleName Example: modules_users
+	 * @param string $moduleName Example: users
 	 */
 	private function processModule($moduleName)
 	{
-		$availablePaths = FileResolver::getInstance()->setPackageName($moduleName)->setDirectory('locale')->getPaths('');
+		$availablePaths = FileResolver::getInstance()->setPackageName('modules_' . $moduleName)->setDirectory(
+				'i18n')->getPaths('');
+		if ($availablePaths === null)
+		{
+			return;
+		}
+		
 		$availablePaths = array_reverse($availablePaths);
-
 		// For all path found for the locale of module insert all localization keys
 		foreach ($availablePaths as $path)
 		{
-			$this->processDir($moduleName, $path);
+			$this->processDir('m.' . $moduleName, $path);
 		}
 	}
 	
 	/**
 	 * Compile locale for a theme
-	 *
-	 * @param string $themeName Example: themes_webfactory
+	 * @param string $themeName Example: webfactory
 	 */
 	private function processTheme($themeName)
 	{
-		$availablePaths = FileResolver::getInstance()->setPackageName($themeName)->setDirectory('locale')->getPaths('');
+		$availablePaths = FileResolver::getInstance()->setPackageName('themes_' . $themeName)->setDirectory(
+				'i18n')->getPaths('');
 		if ($availablePaths === null)
 		{
 			return;
 		}
 		$availablePaths = array_reverse($availablePaths);
-
+		
 		// For all path found for the locale of module insert all localization keys
 		foreach ($availablePaths as $path)
 		{
-			$this->processDir($themeName, $path);
-		}		
+			$this->processDir('t.' . $themeName, $path);
+		}
 	}
-
+	
 	/**
 	 * Generate the framework localization
 	 *
@@ -146,48 +738,44 @@ class LocaleService extends BaseService
 	 */
 	private function processFramework()
 	{
-		$availablePaths = array(FRAMEWORK_HOME . DIRECTORY_SEPARATOR."locale".DIRECTORY_SEPARATOR);
-		foreach ($availablePaths as $path)
+		
+		try
 		{
-			$this->processDir("/framework", $path);
-		}
-	}
-
-	/**
-	 * This method receive an array '$entities' that contain localized information and insert it in databases.
-	 *
-	 * @param string $packageKey
-	 * @param array $entities
-	 */
-	private function processDatabase($packageKey, $entities)
-	{
-		$provider = f_persistentdocument_PersistentProvider::getInstance();
-		$langList = null;
-		if (!Framework::inDevelopmentMode())
-		{
-			$langList = RequestContext::getInstance()->getSupportedLanguages();
-		}
-		// Add all entities in databases
-		foreach ($entities as $entity => $langs)
-		{
-			foreach ($langs as $lang => $infos)
+			$this->getTransactionManager()->beginTransaction();
+			
+			$availablePaths = array(f_util_FileUtils::buildFrameworkPath('i18n'), 
+					f_util_FileUtils::buildOverridePath('framework', 'i18n'));
+			foreach ($availablePaths as $path)
 			{
-				if ($langList === null || in_array($lang, $langList))
+				if (is_dir($path))
 				{
-					$provider->addTranslate($packageKey . '.' . $entity, $lang, $infos['value'], $packageKey, '0', $infos['overridable'], $infos['useredited']);
+					$this->processDir("f", $path);
 				}
 			}
+			
+			$this->getTransactionManager()->commit();
 		}
+		catch (Exception $e)
+		{
+			$this->getTransactionManager()->rollBack($e);
+			throw $e;
+		}
+	
 	}
-
+	
 	/**
 	 * Parse recursively directory and launch the genration of localization for all locale XML file
 	 *
-	 * @param string $package
+	 * @param string $baseKey
 	 * @param string $dir
 	 */
-	private function processDir($package, $dir)
+	private function processDir($baseKey, $dir)
 	{
+		if (substr($dir, - 1) === DIRECTORY_SEPARATOR)
+		{
+			$dir = substr($dir, 0, strlen($dir) - 1);
+		}
+		
 		if (is_dir($dir))
 		{
 			$dirs = array();
@@ -200,126 +788,414 @@ class LocaleService extends BaseService
 				$absFile = $dir . DIRECTORY_SEPARATOR . $file;
 				if (is_dir($absFile))
 				{
-					$dirs[$package.'.'.$file] = $absFile;
+					$dirs[$baseKey . '.' . $file] = $absFile;
 				}
 				elseif (f_util_StringUtils::endsWith($file, '.xml'))
 				{
-					$entities = null;
-					$this->processFile($package, $absFile, $entities);
+					$entities = array();
+					$this->processFile($absFile, $entities);
+					$this->processDatabase($baseKey, $entities);
 				}
 			}
-
-			foreach ($dirs as $package => $dir)
+			
+			foreach ($dirs as $baseKey => $dir)
 			{
-				$this->processDir($package, $dir);
+				$this->processDir($baseKey, $dir);
 			}
 		}
 	}
-
+	
 	/**
 	 * Read a file and extract informations of localization
-	 *
-	 * @param string $package
 	 * @param string $file
+	 * @param array $entities
+	 * @param boolean $processInclude
 	 */
-	private function processFile($package, $file, &$entities)
+	private function processFile($file, &$entities, $processInclude = true)
 	{
-		if (strpos($package, '/') !== false)
-		{
-			$packageKey = strtolower(substr(str_replace('/', '.', $package), 1) . '.' . basename($file, '.xml'));
-		}
-		else
-		{
-			$packageKey = strtolower(str_replace('_', '.', $package) . '.' . basename($file, '.xml'));
-		}
-
-		// Load the XMl file
+		$lcid = basename($file, '.xml');
 		$dom = f_util_DOMUtils::fromPath($file);
-
-		if ($entities === null)
+		foreach ($dom->documentElement->childNodes as $node)
 		{
-			$entities = array();
-		}
-		
-		// For all entity defined
-		foreach ($dom->find("entity") as $entity)
-		{
-			$entityId = strtolower($entity->getAttribute('id'));
-
-			// If the key not already defined add it in array
-			if ( ! array_key_exists($entityId, $entities) )
+			if ($node->nodeType == XML_ELEMENT_NODE)
 			{
-				$entities[$entityId] = array();
-
-				// For all lang defined in entity create an array
-				foreach ($dom->find("locale", $entity) as $locale)
+				if ($node->nodeName == 'include' && $processInclude)
 				{
-					$lang = strtolower($locale->getAttribute('lang'));
-
-					if ( ! array_key_exists($lang, $entities[$entityId]) )
+					$id = $node->getAttribute('id');
+					$subPath = $this->getI18nFilePath($id, $lcid);
+					$ok = false;
+					if (file_exists($subPath))
 					{
-						$entities[$entityId][$lang] = array();
-						// The line below replaces quotes by an equivalent UTF-8 character (that's why it looks like it's not doing anything)
-						$content = str_replace('"', '″', $locale->textContent);
-						$entities[$entityId][$lang]['value'] = $content;
-
-						// Test if locale can be overridable
-						if ($locale->hasAttribute('overridable')
-						&& ($locale->getAttribute('overridable') == 'false'))
-						{
-							$entities[$entityId][$lang]['overridable'] = 0;
-						}
-						else
-						{
-							$entities[$entityId][$lang]['overridable'] = 1;
-						}
-
-						// Test if locale has been "user edited" (from BO) :
-						if ($locale->hasAttribute('useredited')
-						&& ($locale->getAttribute('useredited') == 'true'))
-						{
-							$entities[$entityId][$lang]['useredited'] = 1;
-						}
-						else
-						{
-							$entities[$entityId][$lang]['useredited'] = 0;
-						}
+						$ok = true;
+						$this->processFile($subPath, $entities);
 					}
+					$subPath = $this->getI18nFilePath($id, $lcid, true);
+					if (file_exists($subPath))
+					{
+						$ok = true;
+						$this->processFile($subPath, $entities);
+					}
+					if (! $ok && Framework::isWarnEnabled())
+					{
+						Framework::warn("Include ($id) not found in file $file");
+					}
+				}
+				else if ($node->nodeName == 'key')
+				{
+					$id = $node->getAttribute('id');
+					$content = $node->textContent;
+					$format = $node->getAttribute('format') === 'html' ? 'HTML' : 'TEXT';
+					$entities[$lcid][$id] = array($content, $format);
 				}
 			}
 		}
-		
-		if ($dom->documentElement->hasAttribute("extend"))
+	}
+	
+	/**
+	 * @return array [baseKey => nbLocales]
+	 */
+	public function getPackageNames()
+	{
+		return $this->getPersistentProvider()->getPackageNames();
+	}
+
+	/**
+	 * @return array [baseKey => nbLocales]
+	 */
+	public function getUserEditedPackageNames()
+	{
+		return $this->getPersistentProvider()->getUserEditedPackageNames();
+	}
+	
+	/**
+	 * 
+	 * @param string $keyPath
+	 * @return array[id => [lcid => ['content' => string, 'useredited' => integer, 'format' => string]]]
+	 */
+	public function getPackageContent($keyPath)
+	{
+		$result = $this->getPersistentProvider()->getPackageData($keyPath);
+		$contents = array();
+		foreach ($result as $row)
 		{
-			//$parentFile = WEBEDIT_HOME."/".str_replace(".", "/", );
-			$parentInfo = explode(".", $dom->documentElement->getAttribute("extend"));
-			if ($parentInfo[0] == "framework")
+			$contents[$row['id']][$row['lang']] = array('content' => $row['content'], 
+					'useredited' => $row['useredited'] == "1", 'format' => $row['format']);
+		}
+		return $contents;
+	}
+
+	/**
+	 * @param string $keyPath
+	 * @return array[id => [lcid => ['content' => string, 'useredited' => integer, 'format' => string]]]
+	 */
+	public function getPackageContentFromFile($keyPath)
+	{
+		$entities = array();
+		foreach (RequestContext::getInstance()->getSupportedLanguages() as $lang) 
+		{
+			$lcid = $this->getLCID($lang);
+			$filePath = $this->getI18nFilePath($keyPath, $lcid);
+			if (file_exists($filePath))
 			{
-				unset($parentInfo[0]);
-				$baseDir = "framework";
+				$this->processFile($filePath, $entities);
 			}
-			elseif ($parentInfo[0] == "modules")
+			$filePath = $this->getI18nFilePath($keyPath, $lcid, true);
+			if (file_exists($filePath))
 			{
-				unset($parentInfo[0]);
-				$baseDir = "modules/".$parentInfo[1];
-				unset($parentInfo[1]);
+				$this->processFile($filePath, $entities);
 			}
-			$parentFile = $baseDir."/locale/".join("/", $parentInfo).".xml";
-			if (file_exists(f_util_FileUtils::buildOverridePath($parentFile)))
+		}
+		$results  = array();
+		if (count($entities))
+		{
+			foreach ($entities as $lcid => $infos) 
 			{
-				$this->processFile($package, f_util_FileUtils::buildOverridePath($parentFile), $entities);
+				foreach ($infos as $id => $entityInfos)
+				{
+					list($content, $format) = $entityInfos;
+					$results[$id][$lcid] = array('content' => $content, 'useredited' => false, 'format' => $format);
+				}
 			}
-			if (file_exists(f_util_FileUtils::buildWebeditPath($parentFile)))
+		}
+		return $results;
+	}
+	
+	/**
+	 * @param string $keyPath
+	 * @param array $entities
+	 */
+	private function processDatabase($keyPath, $entities)
+	{
+		$provider = $this->getPersistentProvider();
+		$lcids = array();
+		foreach (RequestContext::getInstance()->getSupportedLanguages() as $lang)
+		{
+			$lcids[$this->getLCID($lang)] = $lang;
+		}
+		foreach ($entities as $lcid => $infos)
+		{
+			if (! isset($lcids[$lcid]))
 			{
-				$this->processFile($package, f_util_FileUtils::buildWebeditPath($parentFile), $entities);
+				continue;
+			}
+			foreach ($infos as $id => $entityInfos)
+			{
+				list($content, $format) = $entityInfos;
+				$provider->addTranslate($lcid, $id, $keyPath, $content, 0, $format, false);
+			}
+		}
+	}
+	
+	/**
+	 * 
+	 * @param string $lcid exemple fr_FR
+	 * @param string $id
+	 * @param string $keyPath
+	 * @param string $content
+	 * @param string $format TEXT | HTML
+	 */
+	public function updateUserEditedKey($lcid, $id, $keyPath, $content, $format)
+	{
+		$this->updateKey($lcid, $id, $keyPath, $content, $format, true);
+	}
+	
+	public function deleteUserEditedKey($lcid, $id, $keyPath)
+	{
+		$provider = $this->getPersistentProvider();
+		$provider->deleteI18nKey($keyPath, $id, $lcid);
+	}
+	
+	/**
+	 * @param string $lcid exemple fr_FR
+	 * @param string $id
+	 * @param string $keyPath
+	 * @param string $content
+	 * @param string $format TEXT | HTML
+	 * @param boolean $userEdited
+	 */
+	public function updateKey($lcid, $id, $keyPath, $content, $format, $userEdited = false)
+	{
+		$provider = $this->getPersistentProvider();
+		$provider->addTranslate($lcid, $id, $keyPath, $content, $userEdited ? 1 : 0, $format, true);
+	}
+	
+	/**
+	 * @param string $cleanKey
+	 * @return array(keyPath, id) || array(false, false);
+	 */
+	public function explodeKey($cleanKey)
+	{
+		$parts = explode('.', strtolower($cleanKey));
+		$id = end($parts);
+		$keyPathParts = array_slice($parts, 0, - 1);
+		switch ($keyPathParts[0])
+		{
+			case 'f' :
+			case 'm' :
+			case 't' :
+				break;
+			case 'framework' :
+				$keyPathParts[0] = 'f';
+				break;
+			case 'modules' :
+				$keyPathParts[0] = 'm';
+				break;
+			case 'themes' :
+				$keyPathParts[0] = 't';
+				break;
+			default :
+				return array(false, false);
+		}
+		return array(implode('.', $keyPathParts), $id);
+	}
+	
+	/**
+	 * @param string $lang
+	 * @param string $cleanKey
+	 * @return string | null
+	 */
+	public function getFullKeyContent($lang, $cleanKey)
+	{
+		list ($keyPath, $id) = $this->explodeKey($cleanKey);
+		if ($keyPath !== false)
+		{
+			$lcid = $this->getLCID($lang);
+			list($content, ) = f_persistentdocument_PersistentProvider::getInstance()->translate($lcid, $id, $keyPath);
+			
+			if ($content === null)
+			{
+				Framework::info("No translation for $keyPath, $id, $lcid");
+			}
+			return $content;
+		}
+		
+		Framework::warn("Invalid Key $cleanKey");
+		return null;
+	}
+	
+	/**
+	 * @example transFO('f.boolean.true')
+	 * @param string $cleanKey
+	 * @param array $formatters value in array lab, lc, uc, ucf, js, html, attr
+	 * @param array $replacements
+	 * @return string | $cleanKey
+	 */
+	public function transFO($cleanKey, $formatters = array(), $replacements = array())
+	{
+		return $this->formatKey(RequestContext::getInstance()->getLang(), $cleanKey, $formatters, 
+				$replacements);
+	}
+	
+	/**
+	 * @example transBO('f.boolean.true')
+	 * @param string $cleanKey
+	 * @param array $formatters value in array lab, lc, uc, ucf, js, html, attr
+	 * @param array $replacements
+	 * @return string | $cleanKey
+	 */
+	public function transBO($cleanKey, $formatters = array(), $replacements = array())
+	{
+		return $this->formatKey(RequestContext::getInstance()->getUILang(), $cleanKey, $formatters, 
+				$replacements);
+	}
+	
+	/**
+	 * @example formatKey('fr', 'f.boolean.true')
+	 * @param string $lang
+	 * @param string $cleanKey
+	 * @param array $formatters value in array lab, lc, uc, ucf, js, attr, raw, text, html
+	 * @param array $replacements
+	 */
+	public function formatKey($lang, $cleanKey, $formatters = array(), $replacements = array())
+	{
+		list ($keyPath, $id) = $this->explodeKey($cleanKey);
+		if ($keyPath === false)
+		{
+			return $cleanKey;
+		}
+		$lcid = $this->getLCID($lang);
+		list($content, $format) = f_persistentdocument_PersistentProvider::getInstance()->translate($lcid, $id, $keyPath);
+		if ($content === null)
+		{
+			return $cleanKey;
+		}
+		
+		if (count($replacements))
+		{
+			$search = array();
+			$replace = array();
+			foreach ($replacements as $key => $value)
+			{
+				$search[] = '{' . $key . '}';
+				$replace[] = $value;
+			}
+			$content = str_replace($search, $replace, $content);
+		}
+		
+		if (count($formatters))
+		{
+			foreach ($formatters as $formatter)
+			{
+				if ($formatter === 'raw' || $formatter === $this->ignoreTransform[$format]) 
+				{
+					continue;
+				}	
+				if (isset($this->transformers[$formatter]))
+				{
+					$content = $this->{$this->transformers[$formatter]}($content, $lang);
+				}
+				else 
+				{
+					Framework::warn(__METHOD__ . ' Invalid formatter '. $formatter);
+				}
+			}
+		}
+		return $content;
+	}
+		
+	public function transformLab($text, $lang)
+	{
+		return $text . ($lang == 'fr' ? ' :' : ':');
+	}
+	
+	public function transformUc($text, $lang)
+	{
+		return f_util_StringUtils::strtoupper($text);
+	}
+	
+	public function transformUcf($text, $lang)
+	{
+		return f_util_StringUtils::ucfirst($text);
+	}
+	
+	public function transformLc($text, $lang)
+	{
+		return f_util_StringUtils::strtolower($text);
+	}
+	
+	public function transformJs($text, $lang)
+	{
+		return str_replace(array("\\", "\t", "\n", "\"", "'"), 
+				array("\\\\", "\\t", "\\n", "\\\"", "\\'"), $text);
+	}
+	
+	public function transformHtml($text, $lang)
+	{
+		return nl2br(htmlspecialchars($text, ENT_COMPAT, 'UTF-8'));
+	}
+	
+	public function transformText($text, $lang)
+	{
+		return f_util_StringUtils::htmlToText($text);
+	}
+	
+	public function transformAttr($text, $lang)
+	{
+		return htmlspecialchars(str_replace(array("\t", "\n"), array("&#09;", "&#10;"), $text), 
+				ENT_COMPAT, 'UTF-8');
+	}
+	
+	/**
+	 * @param string $transString
+	 * @return array[$key, $formatters, $replacements]
+	 */
+	public function parseTransString($transString)
+	{
+		$formatters = array();
+		$replacements = array();
+		$key = null;
+		$parts = explode(',' , $transString);
+		$key = strtolower(trim($parts[0]));		
+		$count = count($parts);
+		for ($i = 1; $i < $count; $i++)
+		{
+			$data = trim($parts[$i]);
+			if (strlen($data) == 0) {continue;}
+			if (strpos($data, '='))
+			{
+				$subParts = explode('=' , $data);
+				if (count($subParts) == 2)
+				{
+					list($name, $value) = $subParts;
+					$name = trim($name);
+					$value = trim($value);
+					$l = strlen($value);
+					if ($l === 0)
+					{
+						$replacements[$name] = '';
+					}
+					else
+					{
+						$replacements[$name] = $value;
+					}
+				}
 			}
 			else
 			{
-				throw new Exception("Unknown locale parent '".$dom->documentElement->getAttribute("extend")."' in $file");
+				$data = strtolower($data);
+				$formatters[] = $data;
 			}
 		}
-
-		// Send the array to the processDatabase to insert into databases
-		$this->processDatabase($packageKey, $entities);
+		return array($key, $formatters, $replacements);
 	}
 }

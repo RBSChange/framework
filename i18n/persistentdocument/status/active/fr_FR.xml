@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<i18n baseKey="f.persistentdocument.status.active" lcid="fr_FR">
+  <key id="enddate">le document n'est plus publiable</key>
+  <key id="startedate">le document n'est pas encore publiable</key>
+</i18n>

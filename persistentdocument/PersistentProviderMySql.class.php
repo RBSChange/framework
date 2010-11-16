@@ -846,15 +846,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 			return 'DELETE FROM f_tags WHERE tag = :tag';
 		}
 
-		protected function getTranslateQuery()
-		{
-			return 'SELECT content FROM f_locale WHERE id = :id AND lang = :lang';
-		}
 
-		protected function getCheckTranslateKeyQuery()
-		{
-			return 'SELECT package FROM f_locale WHERE id = :id';
-		}
 
 		/**
 		 * URL REWRITING f_url_rules
@@ -1137,62 +1129,92 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 			return 'TRUNCATE TABLE f_cache';
 		}
 
+		// f_locale 
+		
 		/**
-		 * @return String
+		 * @return string
+		 */
+		protected function getTranslateQuery()
+		{
+			return 'SELECT `content`, `format` FROM `f_locale` WHERE `lang` = :lang AND `id` = :id AND `key_path` = :key_path';
+		}
+		
+		/**
+		 * @return string
+		 */		
+		protected function addTranslateSelectQuery()
+		{
+			return 'SELECT `useredited` FROM `f_locale` WHERE `lang` = :lang AND `id` = :id  AND `key_path` = :key_path';
+		}
+
+		/**
+		 * @return string
 		 */
 		protected function addTranslateQuery()
 		{
-			return 'INSERT INTO `f_locale` (`content`, `originalcontent`, `package`, `overridden`, `overridable`, `useredited`, `id`, `lang`) VALUES (:content, :originalcontent, :package, :overridden, :overridable, :useredited, :id, :lang)';
+			return 'INSERT INTO `f_locale` (`lang`, `id`, `key_path`, `content`, `useredited`, `format`) VALUES (:lang, :id, :key_path, :content, :useredited, :format)';
 		}
 
 		/**
-		 * @return String
+		 * @return string
 		 */
 		protected function updateTranslateQuery()
 		{
-			return 'UPDATE `f_locale` SET `content` = :content, `originalcontent` = :originalcontent, `package` = :package, `overridden` = :overridden, `overridable` = :overridable, `useredited` = :useredited WHERE `id` = :id AND `lang` = :lang';
+			return 'UPDATE `f_locale` SET `content` = :content, `useredited` = :useredited, `format` = :format WHERE `lang` = :lang AND `id` = :id  AND `key_path` = :key_path';
 		}
 
 		/**
-		 *
-		 * @return String
-		 */
-		protected function getLocalesByPathQuery()
-		{
-			return 'SELECT `id`, `lang`, `content`, `originalcontent`, `overridable`, `useredited` FROM `f_locale` WHERE `id` LIKE :path';
-		}
-
-
-		/**
-		 * @return String
+		 * @return string
 		 */
 		protected function clearTranslationCacheQuery($package = null)
 		{
-			if ( is_null($package) )
+			if ($package === null)
 			{
 				return 'DELETE FROM `f_locale` WHERE `useredited` != 1';
 			}
 			else
 			{
-				$package = str_replace('_', '.', $package);
-				return "DELETE FROM `f_locale` WHERE `useredited` != 1 AND CONVERT(`id` USING utf8) LIKE '" . $package . ".%'";
+				return "DELETE FROM `f_locale` WHERE `useredited` != 1 AND `key_path` LIKE '" . $package . ".%'";
 			}
 		}
-
+		
 		/**
-		 * @return String
+		 * @return string
 		 */
-		protected function clearTranslationKeyQuery()
+		protected function getPackageNamesQuery()
 		{
-			return 'DELETE FROM `f_locale` WHERE `id` = :key';
+			return "SELECT COUNT(*) AS `nbkeys`, `key_path` FROM `f_locale` GROUP BY `key_path` ORDER BY `key_path`";
 		}
 
 		/**
-		 * @return String
+		 * @return string
 		 */
-		protected function clearTranslationKeyForLangQuery()
+		protected function getUserEditedPackageNamesQuery()
 		{
-			return 'DELETE FROM `f_locale` WHERE `id` = :key AND `lang` = :lang';
+			return "SELECT COUNT(*) AS `nbkeys`, `key_path` FROM `f_locale` WHERE `useredited` = 1 GROUP BY `key_path` ORDER BY `key_path`";
+		}
+		
+		/**
+		 * @return string
+		 */
+		protected function getPackageDataQuery()
+		{
+			return "SELECT `id`,`lang`,`content`,`useredited`,`format` FROM `f_locale` WHERE `key_path` = :key_path";
+		}
+		
+		
+		protected function deleteI18nKeyQuery($id, $lcid)
+		{
+			$query = "DELETE FROM `f_locale` WHERE `key_path` = :key_path";
+			if ($id !== null)
+			{
+				$query .= " AND `id` = :id";
+				if ($lcid !== null)
+				{
+					$query .= " AND `lang` = :lang";
+				}
+			}
+			return $query;
 		}
 
 		/**
