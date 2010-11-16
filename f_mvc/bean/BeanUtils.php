@@ -212,17 +212,6 @@ class BeanUtils
 		}
 		return $invalidProperties;
 	}
-
-	/**
-	 * @param String|Object $beanClassNameOrObject
-	 * @param String $propertyName
-	 * @return BeanPropertyInfo
-	 * @deprecated use getBeanPropertyInfo
-	 */
-	static function getBeanProperyInfo($beanClassNameOrObject, $propertyName)
-	{
-		return self::getBeanPropertyInfo($beanClassNameOrObject, $propertyName);
-	}
 	
 	/**
 	 * @param String|Object $beanClassNameOrObject
@@ -322,7 +311,7 @@ class BeanUtils
 	 */
 	static function getBeanPropertyValidationRules($beanClassName, $propertyName)
 	{
-		return self::getBeanProperyInfo($beanClassName, $propertyName)->getValidationRules();
+		return self::getBeanPropertyInfo($beanClassName, $propertyName)->getValidationRules();
 	}
 
 	/**
@@ -395,7 +384,7 @@ class BeanUtils
 			{
 				continue;
 			}
-			$rule = self::getBeanProperyInfo($beanInstance, $propertyName)->getValidationRules();
+			$rule = self::getBeanPropertyInfo($beanInstance, $propertyName)->getValidationRules();
 			if (!f_util_StringUtils::isEmpty($rule))
 			{
 				$rules[] = $suffix.$rule;
@@ -596,5 +585,15 @@ class BeanUtils
 			}
 		}
 		return null;
+	}
+
+	// Deprecated
+	
+	/**
+	 * @deprecated (will be removed in 4.0) use getBeanPropertyInfo
+	 */
+	static function getBeanProperyInfo($beanClassNameOrObject, $propertyName)
+	{
+		return self::getBeanPropertyInfo($beanClassNameOrObject, $propertyName);
 	}
 }

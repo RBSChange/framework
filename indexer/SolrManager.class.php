@@ -432,25 +432,6 @@ class indexer_SolrManager
 	}
 	
 	/**
-	 * @deprecated 
-	 * @return Array
-	 */
-	public function getSynonymsLists()
-	{
-		return array();
-	}
-	
-	/**
-	 * @deprecated 
-	 * @param String $name
-	 * @param String $content
-	 */
-	public function updateSynonymsList($name, $content)
-	{
-		return;
-	}
-	
-	/**
 	 * Clear the solr index
 	 */
 	public function clearIndexQuery()
@@ -518,13 +499,6 @@ class indexer_SolrManager
 			$this->xmlWriterAdd = null;
 			$this->sendUpdate($string);
 		}
-		
-		/*if ($this->xmlWriterDelete != null)
-		{
-			$string = $this->xmlWriterDelete->outputMemory(true);
-			$this->xmlWriterDelete = null;
-			$this->sendUpdate($string);
-		}*/
 		$this->sendCommit();
 	}
 	
@@ -753,5 +727,23 @@ class indexer_SolrManager
 	{
 		$this->setTask(self::UPDATE_TASK);
 		$this->sendXMLData('<delete><query>' . urldecode($query->toSolrString()) . '</query></delete>');
+	}
+	
+	// Deprecated
+	
+	/**
+	 * @deprecated (will be removed in 4.0)
+	 */
+	public function getSynonymsLists()
+	{
+		return array();
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0)
+	 */
+	public function updateSynonymsList($name, $content)
+	{
+		return;
 	}
 }

@@ -33,23 +33,13 @@ class BeanAggregateModel implements f_mvc_BeanModel
 			$this->loadBeanProperties();
 		}
 		
-		if (!$this->hasProperty($propertyName))
+		if (!$this->hasBeanProperty($propertyName))
 		{
 			throw new Exception("Unknown property $propertyName");
 		}
 		return $this->beanPropertiesInfos[$propertyName];
 	}
-	
-	/**
-	 * @param string $propertyName
-	 * @return boolean
-	 * @deprecated 
-	 */
-	function hasProperty($propertyName)
-	{
-		return $this->hasBeanProperty($propertyName);
-	}
-	
+		
 	/**
 	 * @param string $propertyName
 	 * @return boolean
@@ -101,5 +91,15 @@ class BeanAggregateModel implements f_mvc_BeanModel
 				$this->beanPropertiesInfos[$modelName.ucfirst($propName)] =  new BeanAggregatePropertyInfo($modelName, $beanPropertiesInfos);
 			}
 		}		
+	}
+	
+	// Deprecated
+	
+	/**
+	 * @deprecated (will be removed in 4.0)
+	 */
+	function hasProperty($propertyName)
+	{
+		return $this->hasBeanProperty($propertyName);
 	}
 }

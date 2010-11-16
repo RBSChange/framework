@@ -350,14 +350,7 @@ class ClassResolver implements ResourceResolver
 		}
 		$this->cacheDir = $oldCacheDir;
 	}
-	
-	/**
-	 * @deprecated
-	 */
-	public function loadCacheFile()
-	{
-		// nothing
-	}
+
 	
 	/**
 	 * @param String $resource
@@ -596,5 +589,15 @@ class ClassResolverDevMode extends ClassResolver
 			}
 		}
 		return $maxMTime;
+	}
+	
+	// Deprecated
+	
+	/**
+	 * @deprecated
+	 */
+	public function loadCacheFile()
+	{
+		// nothing
 	}
 }

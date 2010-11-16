@@ -91,7 +91,6 @@ class CacheService extends BaseService
 
 	public function clearSimpleCache()
 	{
-		//f_SimpleCache::clear();
 		f_DataCacheService::getInstance()->clearAll();
 	}
 	

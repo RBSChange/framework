@@ -149,9 +149,9 @@ class generator_PersistentModel
 									}
 								}
 							}
-							catch(ClassException $e)
+							catch (ClassException $e)
 							{
-								if ( $e->getClassError()!="document-type-does-not-exists")
+								if ($e->getClassError() != "document-type-does-not-exists")
 								{
 									closedir($dh);
 									throw $e;

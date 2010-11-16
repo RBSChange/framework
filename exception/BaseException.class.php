@@ -10,12 +10,18 @@ class BaseException extends Exception
 		$this->key = $key;
 		parent::__construct($message);
 	}
-
+	
+	/**
+	 * @return string
+	 */
 	public final function getKey()
 	{
 		return $this->key;
 	}
 	
+	/**
+	 * @param string $key
+	 */
 	public final function setKey($key)
 	{
 		$this->key = $key;
@@ -49,71 +55,6 @@ class BaseException extends Exception
 		}
 		return $this->getMessage();
 	}
-		
-	/**
-	 * @deprecated 
-	 */
-	public function shutdown() { }
-	
-	/**
-	 * @deprecated
-	 * @return string
-	 */
-	function getClassName()
-	{
-		$trace = $this->getTrace();
-		if (isset($trace[0]["class"]))
-		{
-			return $trace[0]["class"];
-		}
-		return 'N/A';
-	}
-	
-	/**
-	 * @deprecated 
-	 * @param string $errorCode
-	 * @return boolean
-	 */
-	function isErrorCode($errorCode)
-	{
-		return $errorCode == $this->getMessage();
-	}
-	
-	/**
-	 * @deprecated 
-	 * @return string
-	 */
-	function getClassError()
-	{
-		return $this->getMessage();
-	}
-
-	/**
-	 * @deprecated 
-	 * @return string
-	 */
-	function getId()
-	{
-		return $this->getMessage();
-	}
-	
-	/**
-	 * @deprecated 
-	 * @param string $localeFilePath
-	 */
-	public function setLocaleFilePath($localeFilePath)
-	{
-		
-	}
-	
-	/**
-	 * @deprecated 
-	 * @param string $className
-	 */	
-	public function setLocaleFilePathFromClassName($className)
-	{
-		
-	}
 	
 	/**
 	 * @param string[html | xml] $format
@@ -133,5 +74,65 @@ class BaseException extends Exception
 			default:
 				echo $this->__toString();
 		}
+	}
+	
+	// Deprecated
+		
+	/**
+	 * @deprecated (will be removed in 4.0)
+	 */
+	public function shutdown() { }
+	
+	/**
+	 * @deprecated (will be removed in 4.0)
+	 */
+	function getClassName()
+	{
+		$trace = $this->getTrace();
+		if (isset($trace[0]["class"]))
+		{
+			return $trace[0]["class"];
+		}
+		return 'N/A';
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0)
+	 */
+	function isErrorCode($errorCode)
+	{
+		return $errorCode == $this->getMessage();
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0)
+	 */
+	function getClassError()
+	{
+		return $this->getMessage();
+	}
+
+	/**
+	 * @deprecated (will be removed in 4.0)
+	 */
+	function getId()
+	{
+		return $this->getMessage();
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0)
+	 */
+	public function setLocaleFilePath($localeFilePath)
+	{
+		
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0)
+	 */	
+	public function setLocaleFilePathFromClassName($className)
+	{
+		
 	}
 }

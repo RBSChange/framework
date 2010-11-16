@@ -127,8 +127,10 @@ class TemplateObject
 		return $header;
 	}
 	
+	// Deprecated
+	
 	/**
-	 * @deprecated 
+	 * @deprecated (will be removed in 4.0) 
 	 */
 	public function setSigned($signed)
 	{
