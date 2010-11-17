@@ -50,9 +50,9 @@ abstract class indexer_QueryBase
 		$this->filter = $query;
 		return $this;
 	}
-
+	
 	/**
-	 * @param String|indexer_Facet $fieldName
+	 * @param String|indexer_Facet $fieldNameOrFacetObject
 	 */
 	public function addFacet($fieldNameOrFacetObject)
 	{
@@ -64,7 +64,7 @@ abstract class indexer_QueryBase
 		{
 			$facet = $fieldNameOrFacetObject;
 		}
-		$this->facets[] = $facet;
+		$this->facets[$facet->field] = $facet;
 	}
 	
 	public function addStringFacet($fieldName)
@@ -111,6 +111,14 @@ abstract class indexer_QueryBase
 	public function getFacets()
 	{
 		return $this->facets;
+	}
+	
+	/**
+	 * @param indexer_Facet[] $facets
+	 */
+	public function setFacets($facets)
+	{
+		$this->facets = $facets;
 	}
 
 	/**
