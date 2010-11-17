@@ -106,20 +106,20 @@ class indexer_SearchResult
 	{
 		if (f_util_StringUtils::beginsWith($method, "getHighlighted"))
 		{
-			$propName = f_util_StringUtils::lowerCaseFirstLetter(substr($method, 14));
+			$propName = f_util_StringUtils::lcfirst(substr($method, 14));
 			return $this->getHighlightedProperty($propName);
 		}
 		elseif (f_util_StringUtils::beginsWith($method, "get"))
 		{
 			if (f_util_StringUtils::endsWith($method, 'Date'))
 			{
-				return indexer_Field::solrDateToDate($this->getProperty(f_util_StringUtils::lowerCaseFirstLetter(substr($method, 3, -4))));
+				return indexer_Field::solrDateToDate($this->getProperty(f_util_StringUtils::lcfirst(substr($method, 3, -4))));
 			}
-			return $this->getProperty(f_util_StringUtils::lowerCaseFirstLetter(substr($method, 3)));
+			return $this->getProperty(f_util_StringUtils::lcfirst(substr($method, 3)));
 		}
 		elseif (f_util_StringUtils::beginsWith($method, "has"))
 		{
-			$propName = f_util_StringUtils::lowerCaseFirstLetter(substr($method, 3));
+			$propName = f_util_StringUtils::lcfirst(substr($method, 3));
 			return $this->hasProperty($propName);
 		}
 		throw new Exception('Unimplemented Method: ' . $method);

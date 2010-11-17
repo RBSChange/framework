@@ -1,4 +1,7 @@
 <?php
+/**
+ * @deprecated (will be removed in 4.0)
+ */
 class f_Locale
 {
 	private static $cache = array();
@@ -24,7 +27,7 @@ class f_Locale
 	}
 	
 	/**
-	 * @deprecated
+	 * @deprecated (will be removed in 4.0)
 	 */
 	public static function getPrefixes()
 	{
@@ -32,7 +35,7 @@ class f_Locale
 	}
 	
 	/**
-	 * @deprecated
+	 * @deprecated (will be removed in 4.0)
 	 */
 	public static function isLocaleKey($key)
 	{
@@ -40,7 +43,7 @@ class f_Locale
 	}
 
 	/**
-	 * @deprecated use LocaleService::getInstance()->transBO()
+	 * @deprecated (will be removed in 4.0) use LocaleService::getInstance()->transBO()
 	 */
 	public static function translateUI($key, $substitution = null)
 	{
@@ -48,7 +51,7 @@ class f_Locale
 	}
 
 	/**
-	 * @deprecated use LocaleService::getInstance()->transFO()
+	 * @deprecated (will be removed in 4.0) use LocaleService::getInstance()->transFO()
 	 */
 	public static function translate($key, $substitution = null, $lang = null, $makeDefaultTranslation = true)
 	{

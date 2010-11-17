@@ -976,8 +976,10 @@ class generator_PersistentProperty
 			{
 				return generator_PersistentModel::BASE_CLASS_NAME;
 			}
-			$res = Framework::parseComponentType($this->getType());
-			return "" .$res["package_name"] . "_persistentdocument_" . $res["component"];
+			
+			list ($package, $docName) = explode('/', $this->getType());
+			list (, $packageName) = explode('_', $package);
+			return "" . $packageName . "_persistentdocument_" . $docName;
 		}
 		else
 		{

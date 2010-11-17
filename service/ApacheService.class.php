@@ -39,15 +39,6 @@ class ApacheService extends BaseService
 	}
 	
 	/**
-	 * @return Void
-	 * @deprecated 
-	 */
-	public function createApacheDirectory()
-	{
-		//TODO moved in ApplyWebappPolicy
-	}
-	
-	/**
 	 * @return String
 	 */
 	public function getGroup()
@@ -263,5 +254,15 @@ class ApacheService extends BaseService
 			}
 		}
 		return $contents;
+	}
+	
+	// Deprecated
+	
+	/**
+	 * @deprecated (will be removed in 4.0) with no replacement
+	 */
+	public function createApacheDirectory()
+	{
+		// moved in ApplyWebappPolicy
 	}
 }

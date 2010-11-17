@@ -622,7 +622,7 @@ class ClassResolverDevMode extends ClassResolver
 	// Deprecated
 	
 	/**
-	 * @deprecated
+	 * @deprecated (will be removed in 4.0)
 	 */
 	public function loadCacheFile()
 	{

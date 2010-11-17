@@ -258,24 +258,12 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @param boolean $useTreeNodeCache
-	 * @deprecated
-	 * @return f_persistentdocument_PersistentProvider
-	 */
-	public function setTreeNodeCache($useTreeNodeCache)
-	{
-		//TODO Deplacement du cache de node
-		return $this;
-	}
-
-	/**
 	 * @param PDO $driver
 	 */
 	public function setDriver($driver)
 	{
 		$this->m_driver = $driver;
 	}
-
 
 	/**
 	 * @return PDO
@@ -437,7 +425,7 @@ abstract class f_persistentdocument_PersistentProvider
 			}
 			elseif ($fetchMode === QueryConstants::FETCH_MODE_DIRECT)
 			{
-				$isInternationalized = $query->getDocumentModel()->isInternationalized();
+				$isLocalized = $query->getDocumentModel()->isLocalized();
 				foreach ($rows as $row)
 				{
 					$document = null;
@@ -445,7 +433,7 @@ abstract class f_persistentdocument_PersistentProvider
 					if (!$this->isInCache($documentId))
 					{
 						$document = $this->getDocumentInstanceWithModelName($documentId, $row['document_model'], $row['treeid'], $row, true);
-						if ($isInternationalized )
+						if ($isLocalized)
 						{
 							$this->buildI18nDocument($document, $document->getLang(), $row);
 						}
@@ -770,7 +758,7 @@ abstract class f_persistentdocument_PersistentProvider
 				// TODO: not *, especially if a lang is requested
 				$sql = "select * from ".$model->getTableName()." inner join f_document using(document_id)";
 				$where = array($model->getTableName().".document_id = :document_id");
-				if ($lang !== null && $model->isInternationalized())
+				if ($lang !== null && $model->isLocalized())
 				{
 					$sql .= " inner join ".$model->getTableName() . $this->getI18nSuffix()." using(document_id)";
 					$where[] = "lang_i18n = :lang";
@@ -1241,7 +1229,7 @@ abstract class f_persistentdocument_PersistentProvider
 			}
 		}
 
-		if ($documentModel->isInternationalized())
+		if ($documentModel->isLocalized())
 		{
 			//Utilisé pour initialiser l'entrée du cache
 			$lang = $properties["lang"];
@@ -1272,7 +1260,7 @@ abstract class f_persistentdocument_PersistentProvider
 
 
 		$documentModel = $persistentDocument->getPersistentModel();
-		if ($documentModel->isInternationalized())
+		if ($documentModel->isLocalized())
 		{
 			// Foreach i18documents that were loaded, do an update
 			if (isset($this->m_i18nDocumentInstances[$documentId]))
@@ -1493,7 +1481,7 @@ abstract class f_persistentdocument_PersistentProvider
 		$documentModel = $persistentDocument->getPersistentModel();
 
 		$deleteDocumentInstance = true;
-		if ($documentModel->isInternationalized())
+		if ($documentModel->isLocalized())
 		{
 			if (!$persistentDocument->isContextLangAvailable())
 			{
@@ -1710,7 +1698,7 @@ abstract class f_persistentdocument_PersistentProvider
 		$properties['id'] = $documentId;
 		$properties['model'] = $persistentDocument->getDocumentModelName();
 
-		if ($documentModel->isInternationalized())
+		if ($documentModel->isLocalized())
 		{
 			$this->m_i18nDocumentInstances[$documentId] = array();
 			if (array_key_exists($tmpId, $this->m_i18nDocumentInstances))
@@ -2913,45 +2901,6 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * Sets the exclusive tag $tag to document with ID $documentId.
-	 * @internal use by TagService
-	 * @deprecated unused by TagSevice
-	 * @param integer $documentId
-	 * @param string $tag
-	 *
-	 * @throws Exception on database error
-	 */
-	public function setExclusiveTag($documentId, $tag)
-	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("PersistentProvider::setExclusiveTag($documentId, $tag)");
-		}
-
-		// Begin new transaction...
-		$tm = f_persistentdocument_TransactionManager::getInstance();
-		try
-		{
-			$tm->beginTransaction();
-
-			$stmt = $this->prepareStatement($this->getRemoveExclusiveTagQuery());
-			$stmt->bindValue(':tag', $tag, PersistentProviderConst::PARAM_STR);
-			$this->executeStatement($stmt);
-
-			$stmt = $this->prepareStatement($this->getAddTagQuery());
-			$stmt->bindValue(':id', $documentId, PersistentProviderConst::PARAM_INT);
-			$stmt->bindValue(':tag', $tag, PersistentProviderConst::PARAM_STR);
-
-			$this->executeStatement($stmt);
-			$tm->commit();
-		}
-		catch (Exception $e)
-		{
-			$tm->rollBack($e);
-		}
-	}
-
-	/**
 	 * @param array<String> $tags
 	 * @return String
 	 */
@@ -3183,19 +3132,13 @@ abstract class f_persistentdocument_PersistentProvider
 
 	/**
 	 * @return String
-	 * @deprecated
-	 */
-	protected abstract function clearFrameworkCacheDeletePatternQuery();
-
-	/**
-	 * @return String
 	 */
 	protected abstract function clearFrameworkCacheDeleteQuery();
+	
 	/**
 	 * @return String
 	 */
 	protected abstract function clearFrameworkCacheTruncateQuery();
-
 
 	/**
 	 * @return void
@@ -3204,8 +3147,6 @@ abstract class f_persistentdocument_PersistentProvider
 	{
 		$this->clearCaches();
 	}
-
-
 	
 	/**
 	 * Return a translated text or null
@@ -3251,7 +3192,6 @@ abstract class f_persistentdocument_PersistentProvider
 	 * @return DELETE FROM `f_locale` WHERE `useredited` != 1 [ AND `key_path` LIKE '$package.%'"]
 	 */
 	protected abstract function clearTranslationCacheQuery($package = null);
-
 
 	/**
 	 * @param string $lcid
@@ -3311,7 +3251,6 @@ abstract class f_persistentdocument_PersistentProvider
 	 * @return UPDATE `f_locale` SET `content` = :content, `useredited` = :useredited, `format` = :format WHERE `lang` = :lang AND `id` = :id  AND `key_path` = :key_path
 	 */
 	protected abstract function updateTranslateQuery();
-
 	
 	/**
 	 * @return array
@@ -3334,8 +3273,7 @@ abstract class f_persistentdocument_PersistentProvider
 	 * @return SELECT COUNT(*) AS `nbkeys`, `key_path` FROM `f_locale` GROUP BY `key_path` ORDER BY `key_path`
 	 */
 	protected abstract function getPackageNamesQuery();
-	
-	
+		
 	/**
 	 * @return array
 	 */
@@ -3880,7 +3818,7 @@ abstract class f_persistentdocument_PersistentProvider
 		if ($this->useDocumentCache)
 		{
 			$this->m_documentInstances[$documentId] = $document;
-			if ($document->getPersistentModel()->isInternationalized() && $document->getRawI18nVoObject() !== null)
+			if ($document->getPersistentModel()->isLocalized() && $document->getRawI18nVoObject() !== null)
 			{
 				$this->m_i18nDocumentInstances[$documentId][$document->getLang()] = $document->getRawI18nVoObject();
 			}
@@ -4282,6 +4220,55 @@ abstract class f_persistentdocument_PersistentProvider
 		$stmt->closeCursor();
 		return $result;
 	}
+	
+	// Deprecated
+	
+	/**
+	 * @deprecated (will be removed in 4.0)
+	 */
+	public function setTreeNodeCache($useTreeNodeCache)
+	{
+		//TODO Deplacement du cache de node
+		return $this;
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0) unused by TagSevice
+	 */
+	public function setExclusiveTag($documentId, $tag)
+	{
+		if (Framework::isDebugEnabled())
+		{
+			Framework::debug("PersistentProvider::setExclusiveTag($documentId, $tag)");
+		}
+
+		// Begin new transaction...
+		$tm = f_persistentdocument_TransactionManager::getInstance();
+		try
+		{
+			$tm->beginTransaction();
+
+			$stmt = $this->prepareStatement($this->getRemoveExclusiveTagQuery());
+			$stmt->bindValue(':tag', $tag, PersistentProviderConst::PARAM_STR);
+			$this->executeStatement($stmt);
+
+			$stmt = $this->prepareStatement($this->getAddTagQuery());
+			$stmt->bindValue(':id', $documentId, PersistentProviderConst::PARAM_INT);
+			$stmt->bindValue(':tag', $tag, PersistentProviderConst::PARAM_STR);
+
+			$this->executeStatement($stmt);
+			$tm->commit();
+		}
+		catch (Exception $e)
+		{
+			$tm->rollBack($e);
+		}
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0)
+	 */
+	protected abstract function clearFrameworkCacheDeletePatternQuery();
 }
 
 class f_DatabaseException extends Exception

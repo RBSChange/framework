@@ -83,13 +83,14 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	 */
 	public static function getInstanceFromDocumentModelName($documentModelName)
 	{
-		$res  = Framework::parseComponentType($documentModelName);
-		if ($res['package_type']!="modules")
+		list ($package, $docName) = explode('/', $documentModelName);
+		list ($packageType, $packageName) = explode('_', $package);
+		if ($packageType != 'modules')
 		{
 			throw new FrameworkException("type_must_be_a_module");
 		}
 
-		return  self::getInstance($res['package_name'], $res['component']);
+		return  self::getInstance($packageName, $docName);
 	}
 	
 	/**
@@ -179,13 +180,14 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	 */
 	public static function exists($documentModelName)
 	{
-		$res  = Framework::parseComponentType($documentModelName);
-		if ($res['package_type']!="modules")
+		list ($package, $docName) = explode('/', $documentModelName);
+		list ($packageType, $packageName) = explode('_', $package);
+		if ($packageType != 'modules')
 		{
 			throw new FrameworkException("type_must_be_a_module");
 		}
-
-		return f_util_ClassUtils::classExists(self::getClassNameFromDocument($res['package_name'], $res['component']));
+		
+		return f_util_ClassUtils::classExists(self::getClassNameFromDocument($packageName, $docName));
 	}
 
 	private static function getClassNameFromDocument($moduleName, $documentName)
@@ -762,16 +764,6 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 
 	/**
-	 * @deprecated with no replacement
-	 * @return f_persistentdocument_PersistentDocumentModel
-	 */
-	public function getInjectionModel()
-	{
-		return  ($this->m_sourceInjectionModel === null) ? null : $this;
-	}
-
-
-	/**
 	 * @return f_persistentdocument_PersistentDocumentModel
 	 */
 	public function getSourceInjectionModel()
@@ -937,10 +929,19 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	{
 		return $this->getName();
 	}
+
+	// Deprecated
 	
 	/**
-	 * @deprecated use isLocalized()
-	 * @return Boolean
+	 * @deprecated (will be removed in 4.0) with no replacement
+	 */
+	public function getInjectionModel()
+	{
+		return  ($this->m_sourceInjectionModel === null) ? null : $this;
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0) use isLocalized()
 	 */
 	public final function isInternationalized()
 	{
@@ -948,8 +949,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 
 	/**
-	 * @deprecated For compatibility only
-	 * @return String
+	 * @deprecated (will be removed in 4.0) with no replacement
 	 */
 	public final function getComponentClassName()
 	{
@@ -957,8 +957,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 	
 	/**
-	 * @deprecated For compatibility only
-	 * @return String
+	 * @deprecated (will be removed in 4.0) with no replacement
 	 */
 	public final function getClassName()
 	{
@@ -966,8 +965,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 
 	/**
-	 * @deprecated For compatibility only
-	 * @return array<mixed>
+	 * @deprecated (will be removed in 4.0) with no replacement
 	 */
 	public final function getSynchronize()
 	{

@@ -189,20 +189,6 @@ class StyleService extends BaseService
 	}
 	
 	/**
-	 * Clear CSS cache files
-	 *
-	 * @param boolean $all
-	 * @return StyleService
-	 * @deprecated use CacheService::clearCssCache()
-	 */
-	public function clearCssCache($all = true)
-	{
-	    CacheService::getInstance()->clearCssCache();
-	    return $this;
-	}
-
-	
-	/**
 	 * Executes (renders) the requires styles.
 	 *
 	 * @param string $mimeContentType Mimi content type to use
@@ -449,27 +435,6 @@ class StyleService extends BaseService
 		return website_WebsiteModuleService::getInstance()->getCurrentWebsite()->getId();
 	}
 	
-	
-	/** DEPRECATED FUNCTION **/
-	
-	/**
-	 * Get binding (new binding method for better performances)
-	 * @deprecated use uixul_lib_BindingObject::getUrl($binding)
-	 */
-	public function getBinding($binding)
-	{
-		try
-		{
-			$bindingUrl = uixul_lib_BindingObject::getUrl($binding);
-		}
-		catch (AutoloadException $e)
-		{
-		    Framework::exception($e);
-		}
-
-		return $bindingUrl;
-	}
-
 	/**
 	 * Convert CSS stylesheet to XML stylesheet.
 	 * @param string $css
@@ -535,5 +500,33 @@ class StyleService extends BaseService
 			}
 		}
 		return $formats;
+	}
+	
+	// Deprecated
+	
+	/**
+	 * @deprecated (will be removed in 4.0) use CacheService::clearCssCache()
+	 */
+	public function clearCssCache($all = true)
+	{
+	    CacheService::getInstance()->clearCssCache();
+	    return $this;
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0) use uixul_lib_BindingObject::getUrl($binding)
+	 */
+	public function getBinding($binding)
+	{
+		try
+		{
+			$bindingUrl = uixul_lib_BindingObject::getUrl($binding);
+		}
+		catch (AutoloadException $e)
+		{
+		    Framework::exception($e);
+		}
+
+		return $bindingUrl;
 	}
 }

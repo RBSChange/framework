@@ -205,48 +205,6 @@ class Framework
 	}
 
 	/**
-	 * @deprecated 1.1 - 26 avr. 2006
-	 * @see ComponentTypeObject
-	 */
-	public final static function parseComponentType($componentType,$whatwewant=null,$noException=false)
-	{
-		$matches = array();
-		if (preg_match('#^(.*)/([\w_\-]+)$#', $componentType, $matches))
-		{
-			$res = array();
-			$res['component'] = $matches[2];
-			$res['package']   = $matches[1];
-			$tt = explode("_", $res['package']);
-
-			if ($tt[0] == "framework")
-			{
-				$res['package_type'] = "framework";
-				$res['package_name'] = "framework";
-			}
-			else
-			{
-				$res['package_type'] = $tt[0];
-				$res['package_name'] = $tt[1];
-			}
-
-			if ($whatwewant===null)
-			{
-				return $res;
-			}
-			else
-			{
-				return $res[$whatwewant];
-			}
-		}
-
-		if ($noException) return null;
-
-		$e = new ClassException("invalid-component-type");
-		$e->setAttribute('componentType', $componentType);
-		throw $e;
-	}
-
-	/**
 	 * @example
 	 * Framework::startBench(); // begin bench process
 	 * $brands = $this->getBrandsList();
@@ -530,6 +488,49 @@ class Framework
 	public static function getCompanyName()
 	{
 		return AG_WEBAPP_NAME;
+	}
+	
+	// Deprecated
+
+	/**
+	 * @deprecated (will be removed in 4.0)
+	 */
+	public final static function parseComponentType($componentType,$whatwewant=null,$noException=false)
+	{
+		$matches = array();
+		if (preg_match('#^(.*)/([\w_\-]+)$#', $componentType, $matches))
+		{
+			$res = array();
+			$res['component'] = $matches[2];
+			$res['package']   = $matches[1];
+			$tt = explode("_", $res['package']);
+
+			if ($tt[0] == "framework")
+			{
+				$res['package_type'] = "framework";
+				$res['package_name'] = "framework";
+			}
+			else
+			{
+				$res['package_type'] = $tt[0];
+				$res['package_name'] = $tt[1];
+			}
+
+			if ($whatwewant===null)
+			{
+				return $res;
+			}
+			else
+			{
+				return $res[$whatwewant];
+			}
+		}
+
+		if ($noException) return null;
+
+		$e = new ClassException("invalid-component-type");
+		$e->setAttribute('componentType', $componentType);
+		throw $e;
 	}
 }
 

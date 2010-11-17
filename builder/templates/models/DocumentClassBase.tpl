@@ -459,7 +459,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	 */
 	public function get<{$property->getPhpName()}>AsHtml()
 	{
-		return f_util_StringUtils::parseHtml($this->get<{$property->getPhpName()}>());
+		return f_util_HtmlUtils::renderHtmlFragment($this->get<{$property->getPhpName()}>());
 	}
 <{/if}>
 <{if $property->getType() == 'LongString' || $property->getType() == 'String'}>
@@ -932,7 +932,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	 */
 	public function get<{$property->getPhpName()}>AsHtml()
 	{
-		return f_util_StringUtils::parseHtml($this->get<{$property->getPhpName()}>());
+		return f_util_HtmlUtils::renderHtmlFragment($this->get<{$property->getPhpName()}>());
 	}
 <{/if}>
 <{if $property->getType() == 'LongString' || $property->getType() == 'String'}>
