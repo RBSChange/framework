@@ -78,7 +78,7 @@ class DocumentHelper
 	 */
 	public static function getTreeNodeOf($document)
 	{
-		return f_persistentdocument_PersistentTreeNode::getInstanceByDocument($document);
+		return TreeService::getInstance()->getInstanceByDocument($document);
 	}
 	
 	/**
@@ -525,9 +525,10 @@ class DocumentHelper
 		return implode(',', array_keys($models));
 	}
 	
+	// Deprecated
 	
 	/**
-	 * @deprecated Use equals() instead.
+	 * @deprecated (will be removed in 4.0) Use equals() instead.
 	 */
 	public static function isEquals($a, $b)
 	{
@@ -535,7 +536,7 @@ class DocumentHelper
 	}
 	
 	/**
-	 * @deprecated
+	 * @deprecated (will be removed in 4.0)
 	 */
 	public static function getPublicationstatusLocaleKey($document)
 	{

@@ -83,21 +83,6 @@ class ModuleService extends BaseService
 	}
 	
 	/**
-	 * Returns the "required" tags for the given module $moduleName.
-	 *
-	 * @param string $moduleName The module name.
-	 * @param boolean $onlyMissingTags If true, returns only the missing
-	 *        required tags (ie. the tags that have not been affected)
-	 *
-	 * @return array Associative array.
-	 * @deprecated with no replacement.
-	 */
-	public function getRequiredTags($moduleName, $onlyMissingTags = false)
-	{
-		return array();
-	}
-	
-	/**
 	 * Returns the module absolute paths.
 	 *
 	 * @param string $moduleName The module name.
@@ -276,20 +261,7 @@ class ModuleService extends BaseService
 		}
 		return null;
 	}
-	
-	
-	/**
-	 * Return the list of version of modules
-	 *
-	 * @return array
-	 *
-	 * @deprecated Use getPackageVersionList() instead.
-	 */
-	public final function getModuleVersionList()
-	{
-		return $this->getPackageVersionList();
-	}
-	
+
 	/**
 	 * Return the list of version of packages.
 	 *
@@ -319,18 +291,6 @@ class ModuleService extends BaseService
 		$packageVersion['Framework'] = FRAMEWORK_VERSION;
 		$packageVersion = array_reverse($packageVersion);
 		return $packageVersion;
-	}
-	
-	/**
-	 * Returns the defined documents in the module $moduleName.
-	 *
-	 * @param string $moduleName The module name.
-	 * @deprecated use getDefinedDocumentNames($moduleName)
-	 * @return array<string> The names of the defined documents, in an array.
-	 */
-	public function getDefinedDocuments($moduleName)
-	{
-		return $this->getDefinedDocumentNames($moduleName);
 	}
 	
 	/**
@@ -544,33 +504,6 @@ class ModuleService extends BaseService
 		}
 		
 		return $systemNodeId;
-	}
-	
-
-	/**
-	 * Returns the preferences document ID of the specified module.
-	 *
-	 * @param string $moduleName The name of the module.
-	 *
-	 * @return integer The preferences document ID.
-	 *
-	 * @deprecated use getPreferencesDocument($moduleName)
-	 */
-	public static function getPreferencesDocumentId($moduleName)
-	{
-		if (empty($moduleName))
-		{
-			throw new BaseException('invalid-empty-module-name', 'framework.exception.errors.Invalid-empty-module-name');
-		}
-		
-		$preferencesDocument = self::getPreferencesDocument($moduleName);
-		
-		if (is_null($preferencesDocument))
-		{
-			throw new BaseException('preferences-document-not-found', 'framework.exception.errors.Preferences-document-not-found');
-		}
-		
-		return $preferencesDocument->getId();
 	}
 	
 	/**
@@ -872,5 +805,51 @@ class c_Module
 	function getRootFolderId()
 	{
 		return ModuleService::getInstance()->getRootFolderId($this->name);
+	}
+	
+	// Deprecarted
+	
+	/**
+	 * @deprecated (will be removed in 4.0) with no replacement.
+	 */
+	public function getRequiredTags($moduleName, $onlyMissingTags = false)
+	{
+		return array();
+	}
+		
+	/**
+	 * @deprecated (will be removed in 4.0) Use getPackageVersionList() instead.
+	 */
+	public final function getModuleVersionList()
+	{
+		return $this->getPackageVersionList();
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0) use getDefinedDocumentNames($moduleName)
+	 */
+	public function getDefinedDocuments($moduleName)
+	{
+		return $this->getDefinedDocumentNames($moduleName);
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0) use getPreferencesDocument($moduleName)
+	 */
+	public static function getPreferencesDocumentId($moduleName)
+	{
+		if (empty($moduleName))
+		{
+			throw new BaseException('invalid-empty-module-name', 'framework.exception.errors.Invalid-empty-module-name');
+		}
+		
+		$preferencesDocument = self::getPreferencesDocument($moduleName);
+		
+		if (is_null($preferencesDocument))
+		{
+			throw new BaseException('preferences-document-not-found', 'framework.exception.errors.Preferences-document-not-found');
+		}
+		
+		return $preferencesDocument->getId();
 	}
 }

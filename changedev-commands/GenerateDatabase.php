@@ -138,7 +138,7 @@ class commands_GenerateDatabase extends commands_AbstractChangeCommand
 				$filePath = $dir . DIRECTORY_SEPARATOR. $fileName;
 				if (!is_dir($filePath))
 				{
-					$extension = f_util_StringUtils::getFileExtension($fileName, true, 2);
+					$extension = f_util_FileUtils::getFileExtension($fileName, true, 2);
 					if ($extension == $allowedExtension)
 					{
 						$scripts[$fileName] = $filePath;

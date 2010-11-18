@@ -642,7 +642,7 @@ class f_persistentdocument_DocumentService extends BaseService
 	protected final function checkDeleteDocument($persistentDocument)
 	{
 		$documentModel = $persistentDocument->getPersistentModel();
-		if ($documentModel->isInternationalized())
+		if ($documentModel->isLocalized())
 		{
 			if (!$persistentDocument->isContextLangAvailable())
 			{
@@ -892,20 +892,6 @@ class f_persistentdocument_DocumentService extends BaseService
 	}
 
 	/**
-	 * Add the tag $tag to the given $document.
-	 * @deprecated use TagService->addTag
-	 * @param f_persistentdocument_PersistentDocument $document The document on which to add the tag.
-	 * @param string $tag The tag to add.
-	 *
-	 * @throws InvalidTagException
-	 * @throws IllegalArgumentException
-	 */
-	public function addTag($document, $tag)
-	{
-		$this->getTagService()->addTag($document, $tag);
-	}
-
-	/**
 	 * Sets the exclusive tag $tag on the given $document.
 	 *
 	 * @param f_persistentdocument_PersistentDocument $document The document on which to set the exclusive tag.
@@ -945,91 +931,6 @@ class f_persistentdocument_DocumentService extends BaseService
 	public function setFunctionalTag($document, $tag)
 	{
 		$this->getTagService()->setFunctionalTag($document, $tag);
-	}
-
-	/**
-	 * Removes the tag $tag from the given $documentId.
-	 * @deprecated use TagService->removeTag
-	 *
-	 * @param f_persistentdocument_PersistentDocument $document The document from which to remove the tag.
-	 * @param string $tag The tag to remove.
-	 *
-	 * @throws InvalidTagException
-	 * @throws IllegalArgumentException
-	 */
-	public function removeTag($document, $tag)
-	{
-		$this->getTagService()->removeTag($document, $tag);
-	}
-
-	/**
-	 * @deprecated use TagService#regenerateTags
-	 */
-	public function regenerateTags()
-	{
-		$this->getTagService()->regenerateTags();
-	}
-
-	/**
-	 * Returns the unique Document that has the given exclusive $tag.
-	 * @deprecated use TagService#getDocumentByExclusiveTag
-	 *
-	 * @param string $tag The exclusive tag.
-	 * @return f_persistentdocument_PersistentDocument
-	 *
-	 * @throws InvalidExclusiveTagException
-	 * @throws TagException
-	 */
-	public function getDocumentByExclusiveTag($tag)
-	{
-		return $this->getTagService()->getDocumentByExclusiveTag($tag);
-	}
-
-
-	/**
-	 * Returns the unique Document that has the given contextual $tag.
-	 * @deprecated use TagService#getDocumentByContextualTag
-	 *
-	 * @param string $tag The exclusive tag.
-	 * @param f_persistentdocument_PersistentDocument Parent contextual document
-	 * @return f_persistentdocument_PersistentDocument
-	 *
-	 * @throws InvalidContextualTagException If tag name is not valid
-	 * @throws TagException If not or more one document founded
-	 */
-	public function getDocumentByContextualTag($tag, $contextDocument)
-	{
-		return $this->getTagService()->getDocumentByContextualTag($tag, $contextDocument);
-	}
-
-	/**
-	 * Returns the unique sibling Document that has the given $tag.
-	 * @deprecated use TagService#getDocumentBySiblingTag
-	 *
-	 * @param String $tag
-	 * @param f_persistentdocument_PersistentDocument $siblingDocument
-	 * @return f_persistentdocument_PersistentDocument
-	 *
-	 * @throws InvalidTagException If tag name is not valid
-	 * @throws TagException If not or more one document founded
-	 */
-	public function getDocumentBySiblingTag($tag, $siblingDocument)
-	{
-		return $this->getTagService()->getDocumentBySiblingTag($tag, $siblingDocument);
-	}
-
-	/**
-	 * Returns the Documents that have the given $tag.
-	 * @deprecated use TagService#getDocumentsByTag
-	 *
-	 * @param string $tag The tag.
-	 * @return array<f_persistentdocument_PersistentDocument>
-	 *
-	 * @throws InvalidTagException
-	 */
-	public final function getDocumentsByTag($tag)
-	{
-		return $this->getTagService()->getDocumentsByTag($tag);
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -1427,7 +1328,7 @@ class f_persistentdocument_DocumentService extends BaseService
 	public function getFirstChildOf($document)
 	{
 		$childDoc = null;
-		$treeNode = f_persistentdocument_PersistentTreeNode::getInstanceByDocument($document);
+		$treeNode = TreeService::getInstance()->getInstanceByDocument($document);
 		$child = $treeNode->getChildAt(0);
 		if ( ! is_null($child) )
 		{
@@ -1593,25 +1494,20 @@ class f_persistentdocument_DocumentService extends BaseService
 	 * utiliser $document->getPublicationstatus() pour retrouver le nouveau status du document.
 	 * @param f_persistentdocument_PersistentDocument $document
 	 * @param String $oldPublicationStatus
-	 * @deprecated in favor to publicationStatusChanged
-	 * @return void
-	 */
-	protected function onPublicationStatusChanged($document, $oldPublicationStatus)
-	{
-
-	}
-
-	/**
-	 * Methode à surcharger pour effectuer des post traitement apres le changement de status du document
-	 * utiliser $document->getPublicationstatus() pour retrouver le nouveau status du document.
-	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param String $oldPublicationStatus
 	 * @param array $params
 	 * @return void
 	 */
 	protected function publicationStatusChanged($document, $oldPublicationStatus, $params)
 	{
+		// TODO: remove when onPublicationStatusChanged will be removed.
 		$this->onPublicationStatusChanged($document, $oldPublicationStatus);
+	}
+
+	/**
+	 * @deprecated (will be removed in 4.0) in favor to publicationStatusChanged
+	 */
+	protected function onPublicationStatusChanged($document, $oldPublicationStatus)
+	{
 	}
 
 	/**
@@ -1974,17 +1870,6 @@ class f_persistentdocument_DocumentService extends BaseService
 		}
 	}
 
-
-	/**
-	 * @param f_persistentdocument_PersistentDocument $document
-	 * @return boolean true if the document is published, false if it is not.
-	 * @deprecated use $document->isPublished() instead
-	 */
-	public function isPublicated($document)
-	{
-		return $document->isPublished();
-	}
-
 	/**
 	 * Désactive le document
 	 *
@@ -2264,7 +2149,7 @@ class f_persistentdocument_DocumentService extends BaseService
 				$modifiedProperties = $document->getModifiedPropertyNames();
 				$document->setModifiedPropertyNames();
 			}
-			if ($document->getPersistentModel()->isInternationalized())
+			if ($document->getPersistentModel()->isLocalized())
 			{
 				//echo "Is internationalized";
 				$lang = RequestContext::getInstance()->getLang();
@@ -2782,7 +2667,7 @@ class f_persistentdocument_DocumentService extends BaseService
 				'revision' => $document->getDocumentversion(),				
 				'usecorrection' => $model->useCorrection(),
 				'useworkflow' => $model->hasWorkflow(),
-				'uselocalization' => $model->isInternationalized(),
+				'uselocalization' => $model->isLocalized(),
 				'usecontextlang' => $usecontextlang,
 				'permissions' => $this->getPermissions($document, $forModuleName),			
 			);
@@ -2829,7 +2714,7 @@ class f_persistentdocument_DocumentService extends BaseService
 
 			if ($allowedSections === null || isset($allowedSections['localization']))
 			{
-				if ($model->isInternationalized())
+				if ($model->isLocalized())
 				{
 					if (isset($data['infos']['correctionofid']))
 					{
@@ -2890,5 +2775,71 @@ class f_persistentdocument_DocumentService extends BaseService
 		}
 
 		return $data;
+	}
+	
+	// Deprecated
+
+	/**
+	 * @deprecated (will be removed in 4.0) use TagService->addTag
+	 */
+	public function addTag($document, $tag)
+	{
+		$this->getTagService()->addTag($document, $tag);
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0) use TagService::removeTag
+	 */
+	public function removeTag($document, $tag)
+	{
+		$this->getTagService()->removeTag($document, $tag);
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0) use TagService::regenerateTags
+	 */
+	public function regenerateTags()
+	{
+		$this->getTagService()->regenerateTags();
+	}
+
+	/**
+	 * @deprecated (will be removed in 4.0) use TagService::getDocumentByExclusiveTag
+	 */
+	public function getDocumentByExclusiveTag($tag)
+	{
+		return $this->getTagService()->getDocumentByExclusiveTag($tag);
+	}
+
+	/**
+	 * @deprecated (will be removed in 4.0) use TagService::getDocumentByContextualTag
+	 */
+	public function getDocumentByContextualTag($tag, $contextDocument)
+	{
+		return $this->getTagService()->getDocumentByContextualTag($tag, $contextDocument);
+	}
+
+	/**
+	 * @deprecated (will be removed in 4.0) use TagService::getDocumentBySiblingTag
+	 */
+	public function getDocumentBySiblingTag($tag, $siblingDocument)
+	{
+		return $this->getTagService()->getDocumentBySiblingTag($tag, $siblingDocument);
+	}
+
+	/**
+	 * @deprecated (will be removed in 4.0) use TagService::getDocumentsByTag
+	 */
+	public final function getDocumentsByTag($tag)
+	{
+		return $this->getTagService()->getDocumentsByTag($tag);
+	}
+
+	/**
+	 * @deprecated (will be removed in 4.0) use $document->isPublished() instead
+	 */
+	public function isPublicated($document)
+	{
+		return $document->isPublished();
 	}
 }

@@ -148,7 +148,7 @@ class builder_DocumentGenerator
 
 		echo "Generating $filePath\n";
 		// Generate moduleName_DocumentNameService.class.php and save it in /modules/moduleName/lib/services/moduleName_DocumentNameService.class.php
-		f_util_FileUtils::saveFile($filePath, $this->generateFile('serviceModel', 'documents'), false);
+		f_util_FileUtils::write($filePath, $this->generateFile('serviceModel', 'documents'));
 
 		// Add the class path in autoload file. It's necessary to call without regenerate cache_autoload.php
 		$class = $this->module . '_' . ucfirst($this->name) . 'Service';
@@ -293,7 +293,7 @@ class builder_DocumentGenerator
 				$fileContent .= "\n".$this->modelObject->generatePhpI18nClass();
 			}
 		}
-		f_util_FileUtils::saveFile($filePath, $fileContent, true);	
+		f_util_FileUtils::write($filePath, $fileContent, f_util_FileUtils::OVERRIDE);	
 			
 		$classResolver = ClassResolver::getInstance();
 		// Add the classes to autoload file. It's necessary to call without regenerate cache_autoload.php

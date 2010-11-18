@@ -112,7 +112,7 @@ class generator_PersistentModel
 			self::$m_models = &$models;
 			$hasModelParam = true;
 		}
-		foreach (array_keys(ModuleService::getInstance()->getModuleVersionList()) as $packageName)
+		foreach (array_keys(ModuleService::getInstance()->getPackageVersionList()) as $packageName)
 		{
 			$dirs = FileResolver::getInstance()->setPackageName($packageName)->getPaths("persistentdocument");
 			if (is_null($dirs))

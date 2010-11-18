@@ -43,21 +43,20 @@ class ChangeProject
 	}
 
 	/**
-	 * @deprecated use f_util_System::execChangeCommand
-	 * @param String $task
-	 * @param String[] $args
-	 * @return String[] the output of the command
-	 */
-	function executeTask($task, $args = array())
-	{
-		return f_util_System::execChangeCommand($task, $args)
-	}
-
-	/**
 	 * @return String
 	 */
 	function getProfile()
 	{
 		return trim(file_get_contents(WEBEDIT_HOME."/profile"));
+	}
+
+	// Deprecated
+	
+	/**
+	 * @deprecated (will be removed in 4.0) use f_util_System::execChangeCommand
+	 */
+	function executeTask($task, $args = array())
+	{
+		return f_util_System::execChangeCommand($task, $args)
 	}
 }

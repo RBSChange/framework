@@ -2,16 +2,6 @@
 abstract class f_util_DOMUtils
 {
 	/**
-	 * @deprecated use fromPath
-	 * @param String $path
-	 * @return f_util_DOMDocument
-	 */
-	static function getDocument($path)
-	{
-		return self::fromPath($path);
-	}
-
-	/**
 	 * @param String $path
 	 * @return f_util_DOMDocument
 	 */
@@ -80,6 +70,16 @@ abstract class f_util_DOMUtils
 	static function save($document, $path)
 	{
 		f_util_FileUtils::writeAndCreateContainer($path, $document->saveXML(), f_util_FileUtils::OVERRIDE);
+	}
+	
+	// Deprecated
+	
+	/**
+	 * @deprecated (will be removed in 4.0) use fromPath
+	 */
+	static function getDocument($path)
+	{
+		return self::fromPath($path);
 	}
 }
 

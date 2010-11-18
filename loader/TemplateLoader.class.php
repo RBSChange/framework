@@ -104,7 +104,7 @@ class TemplateLoader extends FileLoader implements ResourceLoader
 	{
 		$lang = RequestContext::getInstance()->getLang();
 
-		$precompiledFilePath = f_util_FileUtils::buildAbsolutePath(PHPTAL_PHP_CODE_DESTINATION, $lang, $this->getPackageName(), basename($filePath).'_'.md5($filePath).f_util_StringUtils::getFileExtension($filePath, true));
+		$precompiledFilePath = f_util_FileUtils::buildAbsolutePath(PHPTAL_PHP_CODE_DESTINATION, $lang, $this->getPackageName(), basename($filePath).'_'.md5($filePath).f_util_FileUtils::getFileExtension($filePath, true));
 
 		if (!file_exists($precompiledFilePath) || filectime($precompiledFilePath) < filectime($filePath))
 		{
