@@ -12,7 +12,7 @@ class indexer_Facet
 	/**
 	 * @see http://wiki.apache.org/solr/SimpleFacetParameters
 	 */
-	public $field, $prefix, $sort = true, $limit = 100, $offet = 0, $mincount = 0, $missing = false, $method = self::METHOD_FC, $enum_cache_minDf = 0;
+	public $field, $prefix, $sort = true, $limit = 100, $offet = 0, $mincount = 0, $missing = false, $method = self::METHOD_FC, $enum_cache_minDf = 0, $key, $ex;
 
 	function __construct($field, $prefix = null)
 	{
@@ -43,9 +43,19 @@ class indexer_Facet
 	
 	function toSolrString()
 	{
+		$localParams = array();
+		if ($this->ex !== null)
+		{
+			$localParams[] = "ex=".$this->ex;
+		}
+		if ($this->key !== null)
+		{
+			$localParams[] = " key=".$this->key;
+		} 
+		$solrStrPrefix = (count($localParams) > 0) ? "{!".join(" ", $localParams)."}" : "";
 		if ($this->ranges === null)
 		{
-			$solrStr = "&facet.field=".$this->field;
+			$solrStr = "&facet.field=".$solrStrPrefix.$this->field;
 			if (f_util_StringUtils::isNotEmpty($this->prefix))
 			{
 				$solrStr .= "&f.".$this->field.".facet.prefix=".urlencode($this->prefix);	
@@ -58,7 +68,7 @@ class indexer_Facet
 			$solrStr = "";
 			foreach ($this->ranges as $range)
 			{
-				$solrStr .= "&facet.query=".$this->field.":[".$range[0]."%20TO%20".$range[1]."]";
+				$solrStr .= "&facet.query=".$solrStrPrefix.$this->field.":[".$range[0]."%20TO%20".$range[1]."]";
 			}
 		}
 		return $solrStr;

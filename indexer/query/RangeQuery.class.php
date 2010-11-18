@@ -21,6 +21,11 @@ class indexer_RangeQuery extends indexer_QueryBase implements indexer_Query
 	
 	private $sepStart = "[";
 	private $sepEnd = "]";
+	
+	/**
+	 * @var Boolean
+	 */
+	private $prohibited = false;
 
 	/**
 	 * Construct a range, including min and max. Use <code>setExclusive()</code> to exclude min and max
@@ -86,13 +91,27 @@ class indexer_RangeQuery extends indexer_QueryBase implements indexer_Query
 		$this->sepEnd = "}";
 		return $this;
 	}
+	
+	/**
+	 * @param Boolean $bool
+	 */
+	public function setIsProhibited($bool = true)
+	{
+		$this->prohibited = $bool;
+	}
 
 	/**
 	 * @return String
 	 */
 	public function toSolrString()
 	{
-		return $this->field . ":".$this->sepStart . $this->wildCardIfNull($this->min) . '%20TO%20' . $this->wildCardIfNull($this->max) . $this->sepEnd;
+		$solrString = "";
+		if ($this->prohibited)
+		{
+			$solrString .= "-";
+		}
+		$solrString .= $this->field . ":".$this->sepStart . $this->wildCardIfNull($this->min) . '%20TO%20' . $this->wildCardIfNull($this->max) . $this->sepEnd;
+		return $solrString;
 	}
 
 	/**
@@ -103,7 +122,6 @@ class indexer_RangeQuery extends indexer_QueryBase implements indexer_Query
 	 */
 	private function wildCardIfNull($val)
 	{
-		return is_null($val) ? "*" : strval($val);
+		return $val === null ? "*" : strval($val);
 	}
 }
-
