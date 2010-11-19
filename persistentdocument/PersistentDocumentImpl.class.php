@@ -65,6 +65,7 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 	 * @var array<String,String|String[]>
 	 */
 	private $m_metas;
+	
 	/**
 	 * @var Boolean
 	 */
@@ -1202,8 +1203,7 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 	public final function buildTreeAttributes($moduleName, $treeType, &$nodeAttributes)
 	{
 		$this->addTreeAttributes($moduleName, $treeType, $nodeAttributes);
-		$builder = f_tree_parser_AttributesBuilderFactory::getAttributesBuilderInstance($moduleName, $treeType);
-		$builder->build($this, $nodeAttributes);
+		return $nodeAttributes;
 	}
 
 	/**
@@ -1397,12 +1397,11 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 			}
 		}
 	}
-	
-	
-	//DEPRECATED FUNCTIONS
+		
+	// Deprecated
 	
 	/**
-	 * @deprecated use isPublished()
+	 * @deprecated (will be removed in 4.0) use isPublished()
 	 */
 	public final function isPublicated()
 	{
@@ -1410,20 +1409,15 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 	}
 	
 	/**
-	 * @deprecated use getPersistentModel()
+	 * @deprecated (will be removed in 4.0) use getPersistentModel()
 	 */
 	function getDocumentModel()
 	{
-		if (Framework::isWarnEnabled())
-		{
-			Framework::warn("Deprecated call PersistentDocument::getDocumentModel()");
-			Framework::warn(f_util_ProcessUtils::getBackTrace());
-		}
 		return $this->getPersistentModel();
 	}
 	
 	/**
-	 * @deprecated use getModifiedPropertyNames
+	 * @deprecated (will be removed in 4.0) use getModifiedPropertyNames
 	 */
 	public function getModifiedProperties()
 	{

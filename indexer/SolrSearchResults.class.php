@@ -102,6 +102,10 @@ class indexer_SolrSearchResults extends ArrayObject implements indexer_SearchRes
 					if (preg_match('/^(.*):(\[.*\])$/', $facetIntElem->getAttribute("name"), $matches))
 					{
 						$fieldName = $matches[1];
+						if ($fieldName[0] == "{")
+						{
+							$fieldName = substr($fieldName, strpos($fieldName, '}')+1);
+						}
 						$range = $matches[2];
 						if (!isset($rangeFacets[$fieldName]))
 						{

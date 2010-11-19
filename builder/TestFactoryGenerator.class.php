@@ -42,7 +42,7 @@ class builder_TestFactoryGenerator
 
 	public static function generateTestFactoryBaseFiles()
 	{
-		foreach (array_keys(ModuleService::getInstance()->getModuleVersionList()) as $packageName)
+		foreach (array_keys(ModuleService::getInstance()->getPackageVersionList()) as $packageName)
 		{
 			$moduleName = substr($packageName, 8);
 			$testFactoryGenerator = new builder_TestFactoryGenerator($moduleName);
@@ -139,7 +139,7 @@ class builder_TestFactoryGenerator
 
 		$filePath = $buildPathTests . 'TestFactoryBase.class.php';
 		// Generate TestFactoryBase and save it in /modules/moduleName/tests/TestFactoryBase.class.php
-		f_util_FileUtils::saveFile($filePath, $this->generateTestFactoryBaseClass(), true);
+		f_util_FileUtils::write($filePath, $this->generateTestFactoryBaseClass(), f_util_FileUtils::OVERRIDE);
 		// Add the class path in autoload file. It's necessary to call without regenerate cache_autoload.php
 		$classResolver->appendToAutoloadFile($this->module .'_TestFactoryBase', $filePath);
 	}
@@ -177,7 +177,7 @@ class builder_TestFactoryGenerator
 		$classResolver = ClassResolver::getInstance();
 
 		// Generate TestFactory and save it in /modules/moduleName/tests/TestFactory.class.php
-		f_util_FileUtils::saveFile($filePath, $this->generateTestFactoryClass(), false);
+		f_util_FileUtils::write($filePath, $this->generateTestFactoryClass());
 		// Add the class path in autoload file. It's necessary to call without regenerate cache_autoload.php
 		$classResolver->appendToAutoloadFile($this->module .'_TestFactory', $filePath);
 	}

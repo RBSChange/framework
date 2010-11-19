@@ -395,18 +395,7 @@ class f_persistentdocument_PersistentDocumentArray extends ArrayObject
 	}
 
 	/**
-	 * @deprecated use DocumentArray->isModified
-	 * @param array<Integer> $oldRelation
-	 * @return Boolean
-	 */
-	public function checkModified($oldRelation)
-	{
-		return $this->isModified();
-	}
-
-	/**
 	 * @internal used by PersistentProvider only
-	 *
 	 * @param array<array<'document_id' => id>> $documentIds
 	 */
 	public function loadDocumentIds($documentIds)
@@ -453,7 +442,6 @@ class f_persistentdocument_PersistentDocumentArray extends ArrayObject
 
 	/**
 	 * @internal used by PersistentDocument only
-	 *
 	 * @param Integer $documentId
 	 */
 	public function loadDocumentId($documentId)
@@ -485,5 +473,15 @@ class f_persistentdocument_PersistentDocumentArray extends ArrayObject
 		}
 
 		return array();
+	}
+		
+	// Deprecated
+	
+	/**
+	 * @deprecated (will be removed in 4.0) use DocumentArray->isModified
+	 */
+	public function checkModified($oldRelation)
+	{
+		return $this->isModified();
 	}
 }

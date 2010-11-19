@@ -1,7 +1,6 @@
 <?php
 class tree_DefaultTreeNode implements tree_TreeNode
 {
-	
 	protected $childNodes = array();
 	protected $parentNode = null;
 
@@ -128,10 +127,8 @@ class tree_DefaultTreeNode implements tree_TreeNode
 		$treeNode->index      = count($this->childNodes);
 		$this->childNodes[]   = $treeNode;
 	}
-	
-	
-	///////////////////////////////// OPTIONS //////////////////////////////////
-
+		
+	// Attributes
 
 	protected $attributes = array();
 	
@@ -145,21 +142,11 @@ class tree_DefaultTreeNode implements tree_TreeNode
 	{
 		return $this->attributes[$name] = $value;
 	}
-	/**
-	 * @deprecated 1.1 - 2006-05-18
-	 * @see setAttribute
-	 */
-	public final function setOption($name, $value)
-	{
-		return $this->setAttribute($name, $value);
-	}
-
 	
 	/**
 	 * Gets a named attribute from the node.
 	 * 
 	 * @param string $name Name of the attribute.
-	 * 
 	 * @return The attribute value.
 	 */
 	public final function getAttribute($name)
@@ -168,14 +155,6 @@ class tree_DefaultTreeNode implements tree_TreeNode
 			return $this->attributes[$name];
 		}
 		return null;
-	}
-	/**
-	 * @deprecated 1.1 - 2006-05-18
-	 * @see getAttribute
-	 */
-	public final function getOption($name)
-	{
-		return $this->getAttribute($name);
 	}
 	
 	/**
@@ -189,16 +168,7 @@ class tree_DefaultTreeNode implements tree_TreeNode
 			return true;
 		}
 		return false;
-	}
-	/**
-	 * @deprecated 1.1 - 2006-05-18
-	 * @see hasAttribute
-	 */
-	public final function hasOption($name)
-	{
-		return $this->hasAttribute($name);
-	}
-	
+	}	
 
 	/**
 	 * Returns all the attributes defined for this node.
@@ -209,5 +179,4 @@ class tree_DefaultTreeNode implements tree_TreeNode
 	{
 		return $this->attributes;
 	}
-	
 }

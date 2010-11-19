@@ -65,21 +65,6 @@ class f_util_StringUtils
    	}
 
 	/**
-	 * @param String $value
-	 * @param String $toEncoding
-	 * @return String
-	 * @deprecated use convertEncoding()
-	 */
-	public static function utf8Decode($value, $toEncoding = 'ISO-8859-1')
-	{
-		if (mb_detect_encoding(" $value ", 'UTF-8, ISO-8859-1') == 'UTF-8')
-		{
-    		$value = utf8_decode($value);
-    	}
-    	return $value;
-	}
-
-	/**
 	 * @param String $haystack
 	 * @param String $needle
 	 * @param Boolean $caseSensitive self::CASE_INSENSITIVE or self::CASE_SENSITIVE
@@ -164,25 +149,6 @@ class f_util_StringUtils
 			$resStr .= $parts[$i];
 		}
 		return $resStr;
-	}
-
-	/**
-	 * @param String $str
-	 * @return String
-	 *
-	 * @deprecated Use self::lcfirst() instead.
-	 */
-	public static function lowerCaseFirstLetter($str)
-	{
-		return self::lcfirst($str);
-	}
-
-	/**
-	 * @deprecated
-	 */
-	final static function getFileExtension($filename, $includeDot = false, $nb_ext = 1)
-	{
-		return f_util_FileUtils::getFileExtension($filename, $includeDot, $nb_ext);
 	}
 
 	/**
@@ -347,68 +313,19 @@ class f_util_StringUtils
 		return true;
 	}
 
-	/**
-	 * @param Array $array
-	 * @param String $prep
-	 * @return String
-	 *
-	 * @deprecated Use var_export($var, true) instead.
-	 */
-	 public static function parray($array , $prep='')
-	 {
-		$ret = "";
-		$prep = "$prep|";
-
-		if (is_array($array))
-		{
-			while(list($key,$val) = each($array))
-			{
-				$type = gettype($val);
-
-				if(is_array($val))
-				{
-					$line = "-+ $key ($type)\n";
-					$line .= self::parray($val,"$prep ");
-				}
-				else
-				{
-					$line = "-> $key = \"$val\" ($type)\n";
-				}
-				$ret .= $prep.$line;
-			}
-		}
-		else
-			$ret = $array;
-		return $ret;
-	}
-
-	/**
-	 * The aim of this function is to return the var_dump value
-	 * under the string form, it's very usefull for debugging
-	 *
-	 * @param mixed in_varToDump Variable to dump
-	 * @return string var_dump under string form
-	 *
-	 * @deprecated Use var_export($varToDump, true);
-	 */
-	 public static function var_dump_desc($in_varToDump = null)
-	 {
-		return var_export($in_varToDump, true);
-	 }
-
 	 /**
-	 * The aim of this function is to return an associative array
-	 * from a given "associative" string :
-	 *
-	 *  "name1: value1; name2: value2;" --> array(
-	 *                                         0 => "name1: value1; name2: value2;"
-	 *                                         "name1" => "value1",
-	 *                                         "name2" => "value2"
-	 *                                      )
-	 *
-	 * @param mixed in_varToDump Variable to dump
-	 * @return string var_ump under string form
-	 */
+	  * The aim of this function is to return an associative array
+	  * from a given "associative" string :
+	  *
+	  *  "name1: value1; name2: value2;" --> array(
+	  *                                         0 => "name1: value1; name2: value2;"
+	  *                                         "name1" => "value1",
+	  *                                         "name2" => "value2"
+	  *                                      )
+	  *
+	  * @param mixed in_varToDump Variable to dump
+	  * @return string var_ump under string form
+	  */
 	 public static function parse_assoc_string($in_assoc_string = '')
 	 {
 	    if (!trim($in_assoc_string))
@@ -843,24 +760,6 @@ class f_util_StringUtils
         return $html;
 	}
     
-    /**
-     * Parse HTML content (coming from a RichText block, for example) in order to produce a valid content.
-     *
-     * Default parsing process :
-     *  - Complete internal URLs.
-     *  - Check images availability (and try to generate the missing ones).
-     *  - Report broken links and resources.
-     *
-     * @param string $string The original HTML content.
-     * @return string Parsed (and checked) content.
-     * @deprecated use f_util_HtmlUtils::renderHtmlFragment
-     */
-    public static function parseHtml($string)
-    {
-        return f_util_HtmlUtils::renderHtmlFragment($string);
-    }
-
-
     public static function mergeAttributes($current, $new)
     {
         $current = explode(";", $current);
@@ -945,29 +844,6 @@ class f_util_StringUtils
     		$string = $new_prefix . mb_substr($string, $len);
     	}
     	return ($string);
-    }
-
-    /**
-     * This function take a string and uppercase the letter of the $nbLetter.
-     * @param : $string : The string we want to upper the first letter.
-     * @param : $nbLetter : Optionnal, the number of letter we want to upper. By default, only the first letter
-     * is uppercased.
-     * @param : $forceLower : Optionnal, if set to true, force the rest of the string to be lowercase. False by default.
-     *
-     * @deprecated Uh, uh... amazing method. Sometimes mb_*, sometimes not... Please, do not use it!
-     */
-    public static function prefixUpper($string, $nbLetter=1, $forceLower=false) {
-    	$len = mb_strlen($string);
-    	$upper = mb_strtoupper(substr($string, 0, $nbLetter));
-    	if ($nbLetter >= $len) {
-    		return ($upper);
-    	} else {
-    		if ($forceLower == true)
-	    		$lower = mb_strtolower(mb_substr($string, $nbLetter, strlen($string)));
-    		else
-	    		$lower = mb_substr($string, $nbLetter, strlen($string));
-    	}
-    	return ($upper . $lower);
     }
 
 	/**
@@ -1154,5 +1030,99 @@ class f_util_StringUtils
     public static function JSONDecode($string)
     {
     	return JsonService::getInstance()->decode($string);
+    }
+
+    // Deprecated
+    
+	/**
+	 * @deprecated (will be removed in 4.0) use convertEncoding()
+	 */
+	public static function utf8Decode($value, $toEncoding = 'ISO-8859-1')
+	{
+		if (mb_detect_encoding(" $value ", 'UTF-8, ISO-8859-1') == 'UTF-8')
+		{
+    		$value = utf8_decode($value);
+    	}
+    	return $value;
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0) Use self::lcfirst() instead.
+	 */
+	public static function lowerCaseFirstLetter($str)
+	{
+		return self::lcfirst($str);
+	}
+
+	/**
+	 * @deprecated (will be removed in 4.0)
+	 */
+	final static function getFileExtension($filename, $includeDot = false, $nb_ext = 1)
+	{
+		return f_util_FileUtils::getFileExtension($filename, $includeDot, $nb_ext);
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0) Use var_export($var, true) instead.
+	 */
+	 public static function parray($array , $prep='')
+	 {
+		$ret = "";
+		$prep = "$prep|";
+
+		if (is_array($array))
+		{
+			while(list($key,$val) = each($array))
+			{
+				$type = gettype($val);
+
+				if(is_array($val))
+				{
+					$line = "-+ $key ($type)\n";
+					$line .= self::parray($val,"$prep ");
+				}
+				else
+				{
+					$line = "-> $key = \"$val\" ($type)\n";
+				}
+				$ret .= $prep.$line;
+			}
+		}
+		else
+			$ret = $array;
+		return $ret;
+	}
+
+	/**
+	 * @deprecated (will be removed in 4.0) Use var_export($varToDump, true);
+	 */
+	 public static function var_dump_desc($in_varToDump = null)
+	 {
+		return var_export($in_varToDump, true);
+	 }
+	
+    /**
+     * @deprecated (will be removed in 4.0) use f_util_HtmlUtils::renderHtmlFragment
+     */
+    public static function parseHtml($string)
+    {
+        return f_util_HtmlUtils::renderHtmlFragment($string);
+    }
+    
+    /**
+     * @deprecated (will be removed in 4.0) Uh, uh... amazing method. Sometimes mb_*, sometimes not... Please, do not use it!
+     */
+    public static function prefixUpper($string, $nbLetter = 1, $forceLower=false) {
+    	$len = mb_strlen($string);
+    	$upper = mb_strtoupper(substr($string, 0, $nbLetter));
+    	if ($nbLetter >= $len) {
+    		return ($upper);
+    	} else {
+    		if ($forceLower == true)
+	    		$lower = mb_strtolower(mb_substr($string, $nbLetter, strlen($string)));
+    		else
+	    		$lower = mb_substr($string, $nbLetter, strlen($string));
+    	}
+    	return ($upper . $lower);
     }
 }

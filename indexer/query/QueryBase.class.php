@@ -7,6 +7,10 @@ abstract class indexer_QueryBase
 	private $sortArray;
 	private $showScore = true;
 	private $filter = null;
+	/**
+	 * @var indexer_QueryBase[]
+	 */
+	private $filters = array();
 	private $offset = 0;
 	private $rows = 10;
 	private $limitToFields = array();
@@ -52,7 +56,17 @@ abstract class indexer_QueryBase
 	}
 	
 	/**
+	 * @param indexer_QueryBase $query 
+	 * @param String $tag A filter query can be tagged ; Cf. http://wiki.apache.org/solr/SimpleFacetParameters#Tagging_and_excluding_Filters
+	 */
+	public function addFilterQuery($query, $tag = null)
+	{
+		$this->filters[] = array($query, $tag);
+	}
+	
+	/**
 	 * @param String|indexer_Facet $fieldNameOrFacetObject
+	 * @return indexer_Facet
 	 */
 	public function addFacet($fieldNameOrFacetObject)
 	{
@@ -65,36 +79,75 @@ abstract class indexer_QueryBase
 			$facet = $fieldNameOrFacetObject;
 		}
 		$this->facets[$facet->field] = $facet;
+		return $facet;
 	}
 	
+	/**
+	 * @param String $fieldName
+	 * @return indexer_Facet
+	 */
 	public function addStringFacet($fieldName)
 	{
-		$this->addFacet($fieldName.indexer_Field::STRING);
+		return $this->addFacet(indexer_Field::getStringFieldName($fieldName));
 	}
 	
+	/**
+	 * @param String $fieldName
+	 * @return indexer_Facet
+	 */
 	public function addVolatileStringFacet($fieldName)
 	{
-		$this->addFacet($fieldName.indexer_Field::STRING_VOLATILE);
+		return $this->addFacet(indexer_Field::getVolatileStringFieldName($fieldName));
 	}
 	
+	/**
+	 * @param String $fieldName
+	 * @return indexer_Facet
+	 */
 	public function addIntegerFacet($fieldName)
 	{
-		$this->addFacet($fieldName.indexer_Field::INTEGER);
+		return $this->addFacet(indexer_Field::getIntegerFieldName($fieldName));
 	}
 	
-	public function addVolatileIntegerFacet($fieldName)
+	/**
+	 * @param String $fieldName
+	 * @param Boolean $multiple
+	 * @return indexer_Facet
+	 */
+	public function addVolatileIntegerFacet($fieldName, $multiple = false)
 	{
-		$this->addFacet($fieldName.indexer_Field::INTEGER_VOLATILE);
+		if ($multiple)
+		{
+			return $this->addFacet(indexer_Field::getVolatileIntegerMultiFieldName($fieldName));
+		}
+		return $this->addFacet(indexer_Field::getVolatileIntegerFieldName($fieldName));		
 	}
 	
+	/**
+	 * @param String $fieldName
+	 * @return indexer_Facet
+	 */
+	public function addVolatileIntegerMultiFacet($fieldName)
+	{
+		return $this->addVolatileIntegerFacet($fieldName, true);
+	}
+	
+	/**
+	 * @param String $fieldName
+	 * @return indexer_Facet
+	 */
 	public function addFloatFacet($fieldName)
 	{
-		$this->addFacet($fieldName.indexer_Field::FLOAT);
+		return $this->addFacet(indexer_Field::getFloatFieldName($fieldName));
 	}
 	
+	/**
+	 * @param String $fieldName
+	 * @return indexer_Facet
+	 */
 	public function addVolatileFloatFacet($fieldName)
 	{
-		$this->addFacet($fieldName.indexer_Field::FLOAT_VOLATILE);
+		return $this->addFacet(indexer_Field::getVolatileFloatFieldName($fieldName));
 	}
 
 	/**
@@ -146,7 +199,14 @@ abstract class indexer_QueryBase
 		}
 		return null;
 	}
-
+	
+	/**
+	 * @return array {indexer_QueryBase[], String}[]
+	 */
+	public function getOtherFilterQueries()
+	{
+		return $this->filters;
+	}
 
 	/**
 	 * Get the OR'ed query that will filter results on all document a user has the right to view
@@ -236,8 +296,7 @@ abstract class indexer_QueryBase
 	{
 		return $this->lang;
 	}
-
-
+	
 	public function setBoost($value)
 	{
 		if (!is_numeric($value) || $value < 0)

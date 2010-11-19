@@ -35,16 +35,9 @@ interface f_persistentdocument_PersistentDocument
 	const STATUS_WORKFLOW = 'WORKFLOW';
 
 	/**
-	 *
 	 * @return f_persistentdocument_PersistentDocumentModel instance
 	 */
 	function getPersistentModel();
-
-	/**
-	 * @deprecated use getPersistentModel()
-	 * @return f_persistentdocument_PersistentDocumentModel instance
-	 */
-	function getDocumentModel();
 	
 	/**
 	 * get Document Properties from PersistentProvider
@@ -69,20 +62,11 @@ interface f_persistentdocument_PersistentDocument
 	function getDocumentModelName();
 
 	/**
-	 * get Database Table name where Document is stored
-	 * @return string
-	 * @deprecated Use DocumentModel->getTableName()
-	 *
-	 */
-	function getDatabaseTableName();
-
-	/**
 	 * get Document Persistent State
 	 * @see PERSISTENTSTATE_NEW, PERSISTENTSTATE_INITIALIZE, PERSISTENTSTATE_LOADED, PERSISTENTSTATE_MODIFIED,PERSISTENTSTATE_DELETED
 	 */
 	function getDocumentPersistentState();
-	
-	
+		
 	/**
 	 * set providerId
 	 * @param string $providerId
@@ -184,7 +168,6 @@ interface f_persistentdocument_PersistentDocument
 	 */
 	function setLabel($label);
 	
-
 	/**
 	 * validate document and return boolean result
 	 * @return boolean
@@ -259,12 +242,6 @@ interface f_persistentdocument_PersistentDocument
 	function isDeleted();
 
 	/**
-	 * @deprecated use isPublished()
-	 * @return boolean
-	 */
-	function isPublicated();
-
-	/**
 	 * @return boolean
 	 */
 	function isPublished();
@@ -286,7 +263,6 @@ interface f_persistentdocument_PersistentDocument
 	 */
 	function buildTreeAttributes($moduleName, $treeType, &$nodeAttributes);
 
-
 	/**
 	 * Retourne un nouveau document du meme type et y duplique la valeur de toutes les propriété pour
 	 * la langue en cours.
@@ -294,15 +270,6 @@ interface f_persistentdocument_PersistentDocument
 	 * @return f_persistentdocument_PersistentDocument new document, not identified (save must be called if you want to have a persisted copy of the original document)
 	 */
 	function duplicate($recursive = false);
-
-	/**
-	 * Copie toutes les valeurs des propriétés dans le document pour la langue en cours.
-	 * @deprecated use copyPropertiesTo instead
-	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param Boolean $copyToVo
-	 * @return f_persistentdocument_PersistentDocument $document, updated
-	 */
-	function copyTo($document, $copyToVo = true);
 
 	/**
 	 * Copie toutes les valeurs des propriétés dans le document pour la langue en cours.
@@ -390,4 +357,26 @@ interface f_persistentdocument_PersistentDocument
 	 * @return Boolean if value was founded
 	 */
 	public function hasMetaValue($name, $value);
+	
+	// Deprecated
+	
+	/**
+	 * @deprecated (will be removed in 4.0) use isPublished()
+	 */
+	function isPublicated();
+			
+	/**
+	 * @deprecated (will be removed in 4.0) use getPersistentModel()
+	 */
+	function getDocumentModel();
+	
+	/**
+	 * @deprecated (will be removed in 4.0) Use DocumentModel->getTableName()
+	 */
+	function getDatabaseTableName();
+	
+	/**
+	 * @deprecated (will be removed in 4.0) use copyPropertiesTo instead
+	 */
+	function copyTo($document, $copyToVo = true);
 }

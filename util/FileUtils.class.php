@@ -279,19 +279,7 @@ abstract class f_util_FileUtils
 		array_unshift($args, WEBEDIT_HOME);
 		return self::buildAbsolutePathFromArray($args);
 	}
-
-	/**
-	 * @deprecated
-	 * @return String
-	 */
-	public static function buildWebappPath()
-	{
-		$args = func_get_args();
-		Framework::warn(__METHOD__);
-		array_unshift($args, PROJECT_OVERRIDE);
-		return self::buildAbsolutePathFromArray($args);
-	}
-	
+		
 	/**
 	 * @example FileUtils::buildOverridePath('toto') returns PROJECT_OVERRIDE.DIRECTORY_SEPARATOR.'toto'
 	 * @return String
@@ -590,31 +578,6 @@ abstract class f_util_FileUtils
 				}
 				closedir($dh);
 			}
-		}
-	}
-
-	/**
-	 * Save a content in a file. Default erase file.
-	 * If $overwrite === false the file cannot saved
-	 *
-	 * @param string $path Path to write the file.
-	 * @param string $content
-	 * @param boolean $overwrite Specify if you can over write the file. By default you can.
-	 *
-	 * @throws IllegalArgumentException If $path or $content not sended.
-	 * @throws IOException
-	 * @deprecated use write, replace $override = true with FileUtils::OVERRIDE
-	 * @return boolean Return true if the file are written else return false
-	 */
-	static public function saveFile($path, $content, $override = true)
-	{
-		if ($override)
-		{
-			return self::write($path, $content, self::OVERRIDE);
-		}
-		else
-		{
-			return self::write($path, $content);
 		}
 	}
 	
@@ -1119,6 +1082,34 @@ abstract class f_util_FileUtils
 					}
 				}
 			}
+		}
+	}
+	
+	// Deprecated
+	
+	/**
+	 * @deprecated (will be removed in 4.0)
+	 */
+	public static function buildWebappPath()
+	{
+		$args = func_get_args();
+		Framework::warn(__METHOD__);
+		array_unshift($args, PROJECT_OVERRIDE);
+		return self::buildAbsolutePathFromArray($args);
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0) use write, replace $override = true with FileUtils::OVERRIDE
+	 */
+	static public function saveFile($path, $content, $override = true)
+	{
+		if ($override)
+		{
+			return self::write($path, $content, self::OVERRIDE);
+		}
+		else
+		{
+			return self::write($path, $content);
 		}
 	}
 }

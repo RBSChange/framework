@@ -497,13 +497,10 @@ class f_persistentdocument_PersistentTreeNode implements tree_TreeNode
 		return f_persistentdocument_DocumentService::getInstance();
 	}
 	
-	/////////////////////////////////////////////////////////////////////
-	// DEPRECATED FUNCTION
-	/////////////////////////////////////////////////////////////////////
+	// Deprecated
 	
-
 	/**
-	 * @deprecated use TreeService::getInstance()->getInstanceByDocument
+	 * @deprecated (will be removed in 4.0) use TreeService::getInstance()->getInstanceByDocument
 	 */
 	public static function getInstanceByDocument($document)
 	{
@@ -516,7 +513,7 @@ class f_persistentdocument_PersistentTreeNode implements tree_TreeNode
 	}
 	
 	/**
-	 * @deprecated use TreeService::getInstance()->getInstanceByDocumentId
+	 * @deprecated (will be removed in 4.0) use TreeService::getInstance()->getInstanceByDocumentId
 	 */
 	public static function getInstanceByDocumentId($documentId)
 	{
@@ -529,7 +526,7 @@ class f_persistentdocument_PersistentTreeNode implements tree_TreeNode
 	}
 	
 	/**
-	 * @deprecated use TreeService::getInstance()->loadDescendants
+	 * @deprecated (will be removed in 4.0) use TreeService::getInstance()->loadDescendants
 	 */
 	public function getDescendents($level = -1)
 	{
@@ -543,7 +540,7 @@ class f_persistentdocument_PersistentTreeNode implements tree_TreeNode
 	}
 	
 	/**
-	 * @deprecated use TreeService::getInstance()->loadDescendants
+	 * @deprecated (will be removed in 4.0) use TreeService::getInstance()->loadDescendants
 	 */
 	public function getDescendentsByModelNames($level = -1, $modelNames = null)
 	{
@@ -556,7 +553,7 @@ class f_persistentdocument_PersistentTreeNode implements tree_TreeNode
 	}
 	
 	/**
-	 * @deprecated use TreeService::getInstance()->newLastChildForNode
+	 * @deprecated (will be removed in 4.0) use TreeService::getInstance()->newLastChildForNode
 	 */
 	public function newLastChild($document)
 	{
@@ -569,7 +566,7 @@ class f_persistentdocument_PersistentTreeNode implements tree_TreeNode
 	}
 	
 	/**
-	 * @deprecated use TreeService::getInstance()->newLastChildForNode
+	 * @deprecated (will be removed in 4.0) use TreeService::getInstance()->newLastChildForNode
 	 */
 	public function deleteNode($node)
 	{
@@ -582,10 +579,7 @@ class f_persistentdocument_PersistentTreeNode implements tree_TreeNode
 	}
 	
 	/**
-	 * @deprecated use TreeService::getInstance()->newLastChildForNode
-	 * @param f_persistentdocument_PersistentTreeNode $parentNode
-	 * @param f_persistentdocument_PersistentDocument $document
-	 * @return f_persistentdocument_PersistentTreeNode
+	 * @deprecated (will be removed in 4.0) use TreeService::getInstance()->newLastChildForNode
 	 */
 	public static function addNewChild($parentNode, $document)
 	{

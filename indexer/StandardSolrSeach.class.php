@@ -108,6 +108,20 @@ class indexer_StandardSolrSearch
 				$queryString .= "&fq=".indexer_QueryHelper::langRestrictionInstance($lang)->toSolrString();
 			}
 		}
+		
+		// Other filter queries
+		foreach ($this->query->getOtherFilterQueries() as $filterQueryInfo)
+		{
+			$filterQuery = $filterQueryInfo[0];
+			$tag = $filterQueryInfo[1];
+			$queryString .= "&fq=";
+			if ($tag !== null)
+			{
+				$queryString .= "{!tag=".$tag."}";
+			}
+			$queryString .= $filterQuery->toSolrString();
+		}
+		
 		//higlighting
 		if ($this->query->getHighlighting() === true)
 		{

@@ -260,14 +260,14 @@ class indexer_IndexedDocument
 	 * Set the field name $name to value $int and treat it as a multivalued integer (non stored)
 	 *
 	 * @param String $name
-	 * @param mixed $int
+	 * @param Integer|Integer[] $int
 	 * @param Boolean $multivalued
 	 */
 	public function setVolatileIntegerField($name, $int, $multivalued = false)
 	{
 		if (!is_null($int))
 		{
-			if($multivalued)
+			if ($multivalued)
 			{
 				$type = indexer_Field::INDEXED | indexer_Field::MULTIVALUED;
 				$suffix = (indexer_SolrManager::hasVolatileDynamicFields()) ? indexer_Field::INTEGER_MULTI_VOLATILE : indexer_Field::INTEGER_MULTI;
