@@ -64,6 +64,7 @@ class commands_CompileLocales extends commands_AbstractChangeCommand
 		{
 			$ls->regenerateLocales();
 			$this->getParent()->executeCommand('clear-webapp-cache');
+			$this->getParent()->executeCommand('clear-template-cache');
 			return $this->quitOk('All locales compiled successfully.');
 		}
 
