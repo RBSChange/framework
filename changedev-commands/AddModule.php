@@ -69,7 +69,7 @@ class commands_AddModule extends commands_AbstractChangedevCommand
 		$moduleGenerator->generateAllFile();
 
 		// Generate locale for new module
-		LocaleService::getInstance()->regenerateLocalesForModule('modules_' . $moduleName);
+		LocaleService::getInstance()->regenerateLocalesForModule($moduleName);
 
 		$this->changecmd("clear-webapp-cache");
 		$this->changecmd("compile-config");

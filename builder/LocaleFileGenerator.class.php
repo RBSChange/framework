@@ -84,11 +84,12 @@ class builder_LocaleFileGenerator
 			
 			foreach ($this->model->getPropertiesNames() as $propertyName)
 			{
-				if (in_array($propertyName, $hiddenProperties)) {continue;}		
+				$keyId = strtolower($propertyName);
+				if (in_array($keyId, $hiddenProperties)) {continue;}		
 				if (($parentModel === null || !$parentModel->hasProperty($propertyName)))
 				{
-					$properties[$propertyName] = "[TO TRANSLATE] $propertyName";
-					$properties[$propertyName . '-help'] = "[TO TRANSLATE] $propertyName-help";
+					$properties[$keyId] = "[TO TRANSLATE] $propertyName";
+					$properties[$keyId . '-help'] = "[TO TRANSLATE] $propertyName-help";
 				}
 			}
 		}
@@ -96,8 +97,9 @@ class builder_LocaleFileGenerator
 		{
 			foreach ($this->propNames as $propertyName)
 			{
-				$properties[$propertyName] = "[TO TRANSLATE] $propertyName";
-				$properties[$propertyName . '-help'] = "[TO TRANSLATE] $propertyName-help";
+				$keyId = strtolower($propertyName);
+				$properties[$keyId] = "[TO TRANSLATE] $propertyName";
+				$properties[$keyId . '-help'] = "[TO TRANSLATE] $propertyName-help";
 			}
 		}
 		

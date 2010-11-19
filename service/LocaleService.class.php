@@ -519,7 +519,7 @@ class LocaleService extends BaseService
 		{
 			foreach (explode(',', $includes) as $include)
 			{
-				$include = trim($include);
+				$include = strtolower(trim($include));
 				if ($include == '')
 				{
 					continue;
@@ -544,6 +544,7 @@ class LocaleService extends BaseService
 		
 		foreach ($values as $id => $value)
 		{
+			$id = strtolower($id);
 			$keyNode = $i18nDoc->findUnique('key[@id="' . $id . '"]', $i18nNode);
 			if ($keyNode !== null)
 			{
@@ -926,6 +927,8 @@ class LocaleService extends BaseService
 	 */
 	private function processDatabase($keyPath, $entities)
 	{
+		$keyPath = strtolower($keyPath);
+		
 		$provider = $this->getPersistentProvider();
 		$lcids = array();
 		foreach (RequestContext::getInstance()->getSupportedLanguages() as $lang)
@@ -941,7 +944,7 @@ class LocaleService extends BaseService
 			foreach ($infos as $id => $entityInfos)
 			{
 				list($content, $format) = $entityInfos;
-				$provider->addTranslate($lcid, $id, $keyPath, $content, 0, $format, false);
+				$provider->addTranslate($lcid, strtolower($id), $keyPath, $content, 0, $format, false);
 			}
 		}
 	}

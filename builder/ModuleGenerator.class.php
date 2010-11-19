@@ -288,7 +288,7 @@ class builder_ModuleGenerator
 		$keysInfos[$ls->getLCID('fr')] = $ids;
 		$keysInfos[$ls->getLCID('en')] = $ids;
 		$keysInfos[$ls->getLCID('de')] = $ids;
-		$baseKey = 'm.' . $this->name . 'bo.general';
+		$baseKey = 'm.' . $this->name . '.bo.general';
 		$ls->updatePackage($baseKey, $keysInfos, false, true);
 		
 		$keysInfos[$ls->getLCID('fr')] = array('create_' => 'créer');
