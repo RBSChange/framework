@@ -168,29 +168,32 @@ class import_ScriptBaseElement
 		$computedAttributes = array();
 		foreach ($attributes as $key => $value)
 		{
-			$data = explode('-', $key);
-			if (isset($data[1]))
+			$pos = strrpos($key, '-');
+			if ($pos > 0)
 			{
-				if ($data[1] == 'refid')
+				$subkey = substr($key, 0, $pos);
+				$ext = substr($key, $pos + 1);
+				switch ($ext)
 				{
-					$key = $data[0];
-					$value = $this->script->getElementById($value, "import_ScriptObjectElement")->getObject();
-				}
-				else if ($data[1] == 'refids')
-				{
-					$key = $data[0];
-					$values = explode(',', $value);
-					$value = array();
-					foreach ($values as $oneValue)
-					{
-						$value[] = $this->script->getElementById($oneValue, "import_ScriptObjectElement")->getObject();
-					}
-				}
-				else if ($data[1] == 'attr')
-				{
-					$key = $data[0];
-					$attrname = $value ? $value : $key;
-					$value = $this->getAncestorAttribute($attrname);
+					case 'refid':
+						$key = $subkey;
+						$value = $this->script->getElementById($value, "import_ScriptObjectElement")->getObject();
+						break;
+						
+					case 'refids':
+						$key = $subkey;
+						$values = explode(',', $value);
+						$value = array();
+						foreach ($values as $oneValue)
+						{
+							$value[] = $this->script->getElementById($oneValue, "import_ScriptObjectElement")->getObject();
+						}
+						break;
+						
+					case 'attr':
+						$key = $subkey;
+						$attrname = $value ? $value : $key;
+						$value = $this->getAncestorAttribute($attrname);
 				}
 			}
 			$computedAttributes[$key] = $value;
