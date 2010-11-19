@@ -97,10 +97,13 @@ class builder_LocaleFileGenerator
 				$parentModel = null;
 			}
 			$addOtherLocales['document-name'] = $this->model->getDocumentName();
+			$hiddenProperties = array("author", "authorid", "creationdate", "modificationdate", "label",
+				"publicationstatus", "startpublicationdate", "endpublicationdate",
+				"metas", "lang", "modelversion", "documentversion", "metastring", "s18s");
 			foreach ($this->model->getPropertiesNames() as $propertyName)
 			{
-				$formProp = $this->model->getFormProperty($propertyName);
-				if ($formProp && !$formProp->isHidden() && ($parentModel === null || !$parentModel->hasProperty($propertyName)))
+				if (in_array($propertyName, $hiddenProperties)) {continue;}
+				if ($parentModel === null || !$parentModel->hasProperty($propertyName))
 				{
 					$properties[$propertyName] = "[TO TRANSLATE] $propertyName";
 					$properties[$propertyName . '-help'] = "[TO TRANSLATE] $propertyName-help";
