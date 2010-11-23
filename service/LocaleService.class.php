@@ -27,7 +27,7 @@ class LocaleService extends BaseService
 	
 	protected function __construct()
 	{
-		$this->ignoreTransform = array('TEXT' => 'raw', 'HTML', 'text');
+		$this->ignoreTransform = array('TEXT' => 'raw', 'HTML' => 'html');
 		$this->transformers = array('lab' => 'transformLab', 'uc' => 'transformUc', 'ucf' => 'transformUcf', 'lc' => 'transformLc', 
 			'js' => 'transformJs', 'html' => 'transformHtml', 'text' => 'transformText', 'attr' => 'transformAttr');
 	}
