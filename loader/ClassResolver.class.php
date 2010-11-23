@@ -141,6 +141,11 @@ class ClassResolver implements ResourceResolver
 		{
 			foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($backupDir, RecursiveDirectoryIterator::KEY_AS_PATHNAME), RecursiveIteratorIterator::CHILD_FIRST) as $file => $info)
 			{
+				$fileName = $info->getFilename();
+				if ($fileName === '.' || $fileName === '..')
+				{
+					continue;
+				}
 				if ($info->isLink())
 				{
 					$originalPath = str_replace($backupDir, $this->cacheDir, $file);
