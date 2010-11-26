@@ -327,6 +327,21 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 //	}
 
 	/**
+	 * Filter the parameters used to generate the document url.
+	 *
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param string $lang
+	 * @param array $parameters may be an empty array
+	 */
+//	public function filterDocumentUrlParams($document, $lang, $parameters)
+//	{
+<{if $model->hasParentModel()}>
+//		$parameters = parent::filterDocumentUrlParams($document, $lang, $parameters)
+<{/if}>
+//		return $parameters;
+//	}
+
+	/**
 	 * @param <{$module}>_persistentdocument_<{$name}> $document
 	 * @return integer | null
 	 */

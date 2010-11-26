@@ -37,19 +37,16 @@ class f_persistentdocument_DocumentService extends BaseService
 		}
 		return self::$instance;
 	}
-	
-	
+		
 	/**
 	 * @var f_persistentdocument_PersistentProvider
 	 */
 	protected $pp = null;
 
-
 	/**
 	 * @var f_persistentdocument_TransactionManager
 	 */
 	protected $tm = null;
-
 
 	protected function __construct()
 	{
@@ -2593,7 +2590,20 @@ class f_persistentdocument_DocumentService extends BaseService
 			return TagService::getInstance()->getDetailPageForDocument($document);
 		}
 		return null;
-	}	
+	}
+	
+	/**
+	 * Filter the parameters used to generate the document url.
+	 * 
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param string $lang
+	 * @param array $parameters may be an empty array
+	 */
+	public function filterDocumentUrlParams($document, $lang, $parameters)
+	{
+		// Nothing to do by default.
+		return $parameters;
+	}
 	
 	/**
 	 * @param Order $order
