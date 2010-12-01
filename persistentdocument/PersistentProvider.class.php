@@ -3496,11 +3496,6 @@ abstract class f_persistentdocument_PersistentProvider
 	 */
 	public function compileACL($acl)
 	{
-		if (!$acl->isPublished())
-		{
-			return;
-		}
-		
 		$accessorId = $acl->getAccessorId();
 		$nodeId = $acl->getDocumentId();
 		$role = $acl->getRole();
