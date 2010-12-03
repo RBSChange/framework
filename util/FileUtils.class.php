@@ -193,7 +193,7 @@ abstract class f_util_FileUtils
 
 	/**
 	 * create dynamically a directory (and sub-directories) on filesystem
-	 * @param $directoryPath the directory to create
+	 * @param string $directoryPath the directory to create
 	 * @throws IOException
 	 */
 	static public function mkdir($directoryPath)
@@ -206,11 +206,15 @@ abstract class f_util_FileUtils
 			}
 			throw new IOException("$directoryPath already exists and is not a folder");
 		}
+		
 		if (!@mkdir($directoryPath, 0777, true))
 		{
-			throw new IOException("Could not create $directoryPath");
+			clearstatcache();
+			if (!is_dir($directoryPath))
+			{
+				throw new IOException("Could not create $directoryPath");
+			}
 		}
-		// TODO intsimoa : temporary backward compatibility
 		return true;
 	}
 
