@@ -31,9 +31,11 @@ abstract class BaseService
 	 * returns an instance of the service or a subclass indicated in injection config section
 	 * <pre>
 	 * <project>
+	 * 	<config>
 	 *   <injection>
 	 *	   <entry name="$selfClassName">anextensionmodule_aSubClassOfSelfClassName</entry>
 	 *   </injection>
+	 *  </config>
 	 * </project>
 	 * </pre>
 	 * @param String $selfClassName 
