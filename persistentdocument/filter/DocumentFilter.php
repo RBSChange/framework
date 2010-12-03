@@ -208,7 +208,7 @@ abstract class f_persistentdocument_DocumentFilterImpl implements f_persistentdo
 			case 'le':
 				return $testVal <= $val;
 			case 'lt':
-				return $testVal <= $val;
+				return $testVal < $val;
 			case 'ne':
 				return $testVal != $val;
 			case 'like':
