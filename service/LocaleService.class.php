@@ -28,8 +28,10 @@ class LocaleService extends BaseService
 	protected function __construct()
 	{
 		$this->ignoreTransform = array('TEXT' => 'raw', 'HTML' => 'html');
-		$this->transformers = array('lab' => 'transformLab', 'uc' => 'transformUc', 'ucf' => 'transformUcf', 'lc' => 'transformLc', 
-			'js' => 'transformJs', 'html' => 'transformHtml', 'text' => 'transformText', 'attr' => 'transformAttr');
+		$this->transformers = array(
+			'lab' => 'transformLab', 'uc' => 'transformUc', 'ucf' => 'transformUcf', 'lc' => 'transformLc', 
+			'js' => 'transformJs', 'html' => 'transformHtml', 'text' => 'transformText', 
+			'attr' => 'transformAttr', 'space' => 'transformSpace', 'etc' => 'transformEtc');
 	}
 	
 	/**
@@ -1156,6 +1158,16 @@ class LocaleService extends BaseService
 	{
 		return htmlspecialchars(str_replace(array("\t", "\n"), array("&#09;", "&#10;"), $text), 
 				ENT_COMPAT, 'UTF-8');
+	}
+	
+	public function transformSpace($text, $lang)
+	{
+		return ' ' . $text . ' ';
+	}
+	
+	public function transformEtc($text, $lang)
+	{
+		return $text . '...';
 	}
 	
 	/**
