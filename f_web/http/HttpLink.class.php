@@ -62,6 +62,10 @@ abstract class f_web_HttpLink implements f_web_Link
 		}
 		$url[] = $parts['host'];
 		
+		if (isset($parts['port']) && $parts['port'] != '80' && $parts['port'] != '443')
+		{
+			$url[] = ':' . $parts['port'];
+		}		
 		if (isset($parts['path']))
 		{
 			$url[] = $parts['path'][0] == '/' ? $parts['path'] : '/' . $parts['path'];
