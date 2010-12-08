@@ -98,7 +98,21 @@ class f_util_System
 		list($name, $secret) = explode('#', file_get_contents(WEBEDIT_HOME . '/build/config/oauth/script/token.txt'));	
 		$token = new f_web_oauth_Token($name, $secret);
 		
-		if ($baseUrl === null) {$baseUrl = 'http://'.Framework::getUIDefaultHost();}	
+		if ($baseUrl === null) 
+		{
+			if (isset($_SERVER['REMOTE_ADDR']) && isset($_SERVER['HTTP_HOST']))
+			{	
+				$baseUrl = "http://".$_SERVER['HTTP_HOST'];
+				if (strpos($_SERVER['HTTP_HOST'], ':') === false && isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] != '80')
+                {
+					$baseUrl .= ':' . $_SERVER['SERVER_PORT'];
+				}
+			}
+			else 
+			{
+				$baseUrl = 'http://'.Framework::getUIDefaultHost();
+			}
+		}
 		
 		$request = new f_web_oauth_Request($baseUrl .'/changescriptexec.php', $consumer, f_web_oauth_Request::METHOD_POST);
 		$request->setParameter('phpscript', $relativeScriptPath);
