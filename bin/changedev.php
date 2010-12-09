@@ -1,7 +1,6 @@
 #!/usr/bin/env php
 <?php
 define("WEBEDIT_HOME", getcwd());
-define("CHANGE_DEV_MODE", getenv("CHANGE_DEV_MODE") == "true");
 
 $profile = @file_get_contents(WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'profile');
 if ($profile === false || empty($profile))
@@ -20,6 +19,5 @@ $bootStrap = new c_ChangeBootStrap(WEBEDIT_HOME);
 $bootStrap->setAutoloadPath(WEBEDIT_HOME."/cache/autoload");
 
 $argv = array_slice($_SERVER['argv'], 1);
-$script = new c_Changescript(__FILE__, FRAMEWORK_HOME, 'changedev');
-$ghostChangeScripts = array("change");
+$script = new c_Changescript(__FILE__, FRAMEWORK_HOME, 'change');
 require("change_script.inc");

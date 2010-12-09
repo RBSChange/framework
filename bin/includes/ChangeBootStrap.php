@@ -240,6 +240,7 @@ class c_ChangeBootStrap
 		$computedComponents["PEAR_WRITEABLE"] = $this->pearInfos['writeable'];
 		$computedComponents["LOCAL_REPOSITORY"] = $localRepo;
 		$computedComponents["WWW_GROUP"] = $this->getProperties()->getProperty("WWW_GROUP");
+		$computedComponents["DEVELOPMENT_MODE"] = $this->getProperties()->getProperty("DEVELOPMENT_MODE") == true;
 		$proxy = $this->getProxy();
 		if ($proxy !== null)
 		{

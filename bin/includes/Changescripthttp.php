@@ -20,10 +20,7 @@ class c_Changescripthttp extends c_Changescript
 		$this->message("Commands list:");
 		foreach ($this->getCommands() as $sectionLabel => $sectionCommands)
 		{
-			if ($sectionLabel == "_ghost_")
-			{
-				continue;
-			}
+			if ($sectionLabel == "_hidden_") {continue;}
 			if ($sectionLabel != "Default" && f_util_ArrayUtils::isNotEmpty($sectionCommands))
 			{
 				$this->message("== $sectionLabel ==");
@@ -123,10 +120,7 @@ class c_Changescripthttp extends c_Changescript
 		$response->loadXML('<cmds />');
 		foreach ($this->getCommands() as $sectionLabel => $sectionCommands)
 		{
-			if ($sectionLabel == "_ghost_")
-			{
-				continue;
-			}
+			if ($sectionLabel == "_hidden_") {continue;}
 			foreach ($sectionCommands as $commandName => $command)
 			{
 				$elem = $response->documentElement->appendChild($response->createElement('cmd'));

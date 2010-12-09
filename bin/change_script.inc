@@ -16,21 +16,18 @@ if ($clearKey !== false)
 $script->setBootStrap($bootStrap);
 $script->setEnvVar('computedDeps', $bootStrap->getComputedDependencies());
 
-$cmdPath  = FRAMEWORK_HOME . '/'.$script->getName()."-commands";
+$addDevCmds = $bootStrap->getProperties()->getProperty('DEVELOPMENT_MODE') == true;
+if ($addDevCmds && !defined('CHANGE_DEV_MODE')) {define('CHANGE_DEV_MODE', true);}
+
+$cmdPath  = FRAMEWORK_HOME . '/change-commands';
 $bootStrap->appendToAutoload($cmdPath);
 $script->addCommandDir($cmdPath);
 
-if (is_array($ghostChangeScripts))
+if ($addDevCmds)
 {
-	foreach ($ghostChangeScripts as $ghostName)
-	{
-		$ghostPath = FRAMEWORK_HOME.'/'.$ghostName."-commands";
-		if (is_dir($ghostPath))
-		{
-			$bootStrap->appendToAutoload($ghostPath);
-			$script->addGhostCommandDir($ghostPath);
-		}
-	}
+	$devPath = FRAMEWORK_HOME.'/changedev-commands';
+	$bootStrap->appendToAutoload($devPath);
+	$script->addGhostCommandDir($devPath);
 }
 
 $path = WEBEDIT_HOME."/modules";
@@ -42,23 +39,20 @@ if (is_dir($path))
 		{	
 			$moduleName = basename($fileInfo->getPathname());
 			$modulePath =  (isset($computedDeps['module'][$moduleName])) ? $computedDeps['module'][$moduleName]['path'] : realpath($fileInfo->getPathname());
-			$cmdPath = $modulePath."/".$script->getName()."-commands";
+			$cmdPath = $modulePath.'/change-commands';
 			if (is_dir($cmdPath))
 			{
 				$bootStrap->appendToAutoload($cmdPath);
 				$script->addCommandDir($cmdPath, "$moduleName|Module $moduleName commands");
 			}
 	
-			if (is_array($ghostChangeScripts))
+			if ($addDevCmds)
 			{
-				foreach ($ghostChangeScripts as $ghostName)
+				$devPath = $modulePath.'/changedev-commands';
+				if (is_dir($devPath))
 				{
-					$ghostPath = $modulePath.'/'.$ghostName."-commands";
-					if (is_dir($ghostPath))
-					{
-						$bootStrap->appendToAutoload($ghostPath);
-						$script->addGhostCommandDir($ghostPath, "$moduleName|Module $moduleName commands");
-					}
+					$bootStrap->appendToAutoload($devPath);
+					$script->addGhostCommandDir($devPath, "$moduleName|Module $moduleName commands");
 				}
 			}
 		}

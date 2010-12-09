@@ -148,10 +148,7 @@ class c_Changescript
 	{
 		foreach ($this->getCommands() as $sectionLabel => $sectionCommands)
 		{
-			if ($sectionLabel == "_ghost_")
-			{
-				continue;
-			}
+			if ($sectionLabel == "_hidden_") {continue;}
 			foreach (array_keys($sectionCommands) as $commandName)
 			{
 				echo $commandName." ";
@@ -379,11 +376,9 @@ class c_Changescript
 		echo "Usage: ".basename($this->scriptName)." <commandName> [-h]\n";
 		echo " where <commandName> in: \n";
 		foreach ($this->getCommands() as $sectionLabel => $sectionCommands)
-		{
-			if ($sectionLabel == "_ghost_")
-			{
-				continue;
-			}
+		{	
+			if ($sectionLabel == "_hidden_") {continue;}
+								
 			if ($sectionLabel != "Default" && f_util_ArrayUtils::isNotEmpty($sectionCommands))
 			{
 				echo "\n== $sectionLabel ==\n";
@@ -574,7 +569,7 @@ class c_Changescript
 			}
 		}
 		ksort($commands);
-		$this->commands["_ghost_"] = array_merge($ghostCommands, $this->commands["_ghost_"]);
+		$this->commands["_hidden_"] = array_merge($ghostCommands, $this->commands["_hidden_"]);
 		return array($commands, $aliases, $sectionLabel);
 	}
 
@@ -586,9 +581,8 @@ class c_Changescript
 		if ($this->commands === null)
 		{
 			$this->commands = array();
-			$this->commands["_ghost_"] = array();
-			$this->aliases["_ghost_"] = array();
-
+			$this->commands["_hidden_"] = array();
+			
 			foreach ($this->commandSections as $sectionName => $commandDirs)
 			{
 				list($commands, $aliases, $sectionLabel) = $this->_getCommands($commandDirs, $sectionName);
@@ -600,8 +594,9 @@ class c_Changescript
 			foreach ($this->ghostCommandSections as $sectionName => $commandDirs)
 			{
 				list($commands, $aliases, $sectionLabel) = $this->_getCommands($commandDirs, $sectionName);
-				$this->commands["_ghost_"] = array_merge($commands, $this->commands["_ghost_"]);
-				$this->aliases["_ghost_"]= array_merge($aliases, $this->aliases["_ghost_"]);
+				$sectionLabel = ($sectionLabel === "Default")? "Developper" : "Developper $sectionLabel";
+				$this->commands[$sectionLabel] = $commands;
+				$this->aliases[$sectionLabel]= $aliases;
 			}
 		}
 		return $this->commands;

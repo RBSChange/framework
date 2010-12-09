@@ -162,6 +162,12 @@ class config_ProjectParser
 						unset($moduleContantsForProfile[$key]);
 					}
 				}
+				
+				if (isset($computedDeps["DEVELOPMENT_MODE"]) && $computedDeps["DEVELOPMENT_MODE"])
+				{
+					$this->addConstant($globalConstantsForProfile, "AG_DEVELOPMENT_MODE", "true");
+				}
+				
 
 				// -- Config list.
 				// project.<profile>.xml file.
