@@ -147,7 +147,21 @@ class f_mvc_DynBeanModel implements f_mvc_BeanModel
 		{
 			throw new Exception("Object param can not be null. Use getNewInstance() instead.");
 		}
-		$key = get_class($object);
+		if (is_object($object))
+		{
+			if ($object instanceof ReflectionClass)
+			{
+				$key = $object->getName();	
+			}
+			else
+			{
+				$key = get_class($object);
+			}
+		}
+		elseif (is_string($object))
+		{
+			$key = $object;
+		}
 		if (isset(self::$models[$key]))
 		{
 			return self::$models[$key];
@@ -159,6 +173,7 @@ class f_mvc_DynBeanModel implements f_mvc_BeanModel
 	}
 
 	/**
+	 * @param mixed $object the object instance, ReflectionClass instance or class name
 	 * @return f_mvc_DynBeanModel
 	 */
 	static function getNewInstance($object = null)
@@ -167,7 +182,7 @@ class f_mvc_DynBeanModel implements f_mvc_BeanModel
 	}
 
 	/**
-	 * @param $object
+	 * @param Object|String $object
 	 * @return f_mvc_DynBeanModel
 	 */
 	protected function __construct($object = null, $canUpdate = true)
@@ -177,7 +192,14 @@ class f_mvc_DynBeanModel implements f_mvc_BeanModel
 			return;
 		}
 
-		$class = new ReflectionClass($object);
+		if ($object instanceof ReflectionClass)
+		{
+			$class = $object;
+		}
+		else
+		{
+			$class = new ReflectionClass($object);
+		}
 		
 		$this->beanConstraints = f_util_ClassUtils::getMetaValue("constraints", $class);
 		$properties = array();
@@ -292,10 +314,6 @@ class f_mvc_DynBeanModel implements f_mvc_BeanModel
 				if ($paramClass !== null)
 				{
 					$propertyInfo = $this->addClassProperty($propName, $paramClass, $localePrefix);
-					if ($isArray)
-					{
-						$propertyInfo->setCardinality(-1);
-					}
 				}
 				elseif ($paramType !== null)
 				{
@@ -321,6 +339,10 @@ class f_mvc_DynBeanModel implements f_mvc_BeanModel
 
 				if ($propertyInfo !== null)
 				{
+					if ($isArray)
+					{
+						$propertyInfo->setCardinality(-1);
+					}
 					$propertyInfo->setIsPublic($isPublic);
 					if ($setter !== null)
 					{
