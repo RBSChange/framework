@@ -7,6 +7,7 @@ class ClassResolver implements ResourceResolver
 	 */
 	private static $instance = null;
 	protected $cacheDir = null;
+	protected $aopBackupDir = null;
 	
 	/**
 	 * @var f_AOP
@@ -25,6 +26,8 @@ class ClassResolver implements ResourceResolver
 		$this->reps = array(FRAMEWORK_HOME, WEBEDIT_HOME, PROFILE);
 		
 		$this->cacheDir = WEBEDIT_HOME . '/cache/autoload';
+		$this->aopBackupDir = WEBEDIT_HOME . '/cache/aop-backup';
+		
 		if (! is_dir($this->cacheDir))
 		{
 			$this->initialize();
@@ -103,8 +106,7 @@ class ClassResolver implements ResourceResolver
 	
 	function getAOPPath($className)
 	{
-		return f_util_FileUtils::buildChangeCachePath("aop", 
-				str_replace("_", DIRECTORY_SEPARATOR, $className), "to_include");
+		return WEBEDIT_HOME . '/cache/aop/' . $className. ".class.php";
 	}
 	
 	public function compileAOP()
@@ -112,7 +114,6 @@ class ClassResolver implements ResourceResolver
 		$this->restoreAutoload();
 		$aop = $this->getAOP();
 		$this->loadInjection();
-		$backupDir = f_util_FileUtils::buildCachePath("aop-backup");
 		foreach ($aop->getAlterations() as $classAlterations)
 		{
 			$className = $classAlterations[0][2];
@@ -122,7 +123,7 @@ class ClassResolver implements ResourceResolver
 				throw new Exception("Could not find $className in " . $this->cacheDir);
 			}
 			$newFileContent = $aop->applyAlterations($classAlterations);
-			$backupPath = $this->getCachePath($className, $backupDir);
+			$backupPath = $this->getCachePath($className, $this->aopBackupDir);
 			
 			f_util_FileUtils::mkdir(dirname($backupPath));
 			if (! rename($path, $backupPath))
@@ -136,10 +137,9 @@ class ClassResolver implements ResourceResolver
 	
 	private function restoreAutoload()
 	{
-		$backupDir = f_util_FileUtils::buildChangeCachePath("aop-backup");
-		if (is_dir($backupDir))
+		if (is_dir($this->aopBackupDir))
 		{
-			foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($backupDir, RecursiveDirectoryIterator::KEY_AS_PATHNAME), RecursiveIteratorIterator::CHILD_FIRST) as $file => $info)
+			foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->aopBackupDir, RecursiveDirectoryIterator::KEY_AS_PATHNAME), RecursiveIteratorIterator::CHILD_FIRST) as $file => $info)
 			{
 				$fileName = $info->getFilename();
 				if ($fileName === '.' || $fileName === '..')
@@ -148,7 +148,7 @@ class ClassResolver implements ResourceResolver
 				}
 				if ($info->isLink())
 				{
-					$originalPath = str_replace($backupDir, $this->cacheDir, $file);
+					$originalPath = str_replace($this->aopBackupDir, $this->cacheDir, $file);
 					rename($file, $originalPath);
 				}
 				elseif ($info->isFile())
@@ -598,7 +598,6 @@ class ClassResolverDevMode extends ClassResolver
 	private function getMaxModifiedTime($aop, $alterations)
 	{
 		$maxMTime = $aop->getAlterationsDefTime();
-		$backupDir = f_util_FileUtils::buildCachePath("aop-backup");
 		foreach ($alterations as $alteration)
 		{
 			switch ($alteration[1])
@@ -616,7 +615,7 @@ class ClassResolverDevMode extends ClassResolver
 			
 			foreach ($alterationSources as $source)
 			{
-				$aopBackupFile = $backupDir . "/" . str_replace("_", "/", $source) . "/to_include";
+				$aopBackupFile = $this->aopBackupDir . "/" . str_replace("_", "/", $source) . "/to_include";
 				if (file_exists($aopBackupFile))
 				{
 					$sourcePath = $aopBackupFile;
