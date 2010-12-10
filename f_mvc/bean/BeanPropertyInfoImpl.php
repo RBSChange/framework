@@ -306,19 +306,6 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	 */
 	public function getConverter()
 	{
-		if ($this->hasList() && $this->getType() === BeanPropertyType::DOCUMENT)
-		{
-			$list = $this->getList();
-			if ($list instanceof list_persistentdocument_valuededitablelist)
-			{
-				return null;
-			}
-			if ($list instanceof list_persistentdocument_editablelist)
-			{
-				return new bean_EditableListConverter($list);
-			}
-		}
-
 		switch ($this->getType())
 		{
 			case BeanPropertyType::DATETIME:
