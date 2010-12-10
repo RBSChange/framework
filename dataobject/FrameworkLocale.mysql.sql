@@ -1,4 +1,4 @@
-CREATE TABLE `f_locale` (
+CREATE TABLE IF NOT EXISTS `f_locale` (
  `lang` char(5) COLLATE utf8_bin NOT NULL,
  `id` varchar(100) COLLATE utf8_bin NOT NULL,
  `key_path` varchar(100) COLLATE utf8_bin NOT NULL,
