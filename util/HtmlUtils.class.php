@@ -563,10 +563,32 @@ abstract class f_util_HtmlUtils
      */   
     private function buildImageSrc($document, &$attributes)
     {
-    	if (f_util_ClassUtils::methodExists($document, 'getInfo'))
-    	{
-    		$infos = $document->getInfo();
-    	}
+    	$lang = (isset($attributes["lang"]) ? $attributes["lang"] : RequestContext::getInstance()->getLang());
+        if (!$document->isLangAvailable($lang) || $document->getFilenameForLang($lang) === null)
+        {
+                $urlLang = $document->getLang();
+        }
+        else
+        {
+                $urlLang = $lang;
+        }
+
+        if (f_util_ClassUtils::methodExists($document, 'getInfo'))
+        {
+                $rc = RequestContext::getInstance();
+                try
+                {
+	                $rc->beginI18nWork($urlLang);
+	                $infos = $document->getInfo();
+	                $rc->endI18nWork();	
+                }
+                catch (Exception $e)
+                {
+                	$rc->endI18nWork($e);
+                }
+                
+        }
+    	
         if (isset($attributes['format']) && !empty($attributes['format']))
         {
             list($stylesheet, $formatName) = explode('/', $attributes['format']);
@@ -629,12 +651,6 @@ abstract class f_util_HtmlUtils
         	$attributes['height'] = $computedDimensions['height'];
         }
 	
-	$lang = (isset($attributes["lang"]) ? $attributes["lang"] : RequestContext::getInstance()->getLang());
-	if (!$document->isLangAvailable($lang) || $document->getFilenameForLang($lang) === null)
-	{
-		$lang = $document->getLang();
-	}
-
-	return array(LinkHelper::getDocumentUrl($document, $lang, $format), $format);
+		return array(LinkHelper::getDocumentUrl($document, $urlLang, $format), $format);
     }
 }
