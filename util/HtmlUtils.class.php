@@ -628,7 +628,13 @@ abstract class f_util_HtmlUtils
         	$attributes['width'] = $computedDimensions['width'];
         	$attributes['height'] = $computedDimensions['height'];
         }
-        
-        return array(LinkHelper::getDocumentUrl($document, RequestContext::getInstance()->getLang(), $format), $format);
+	
+	$lang = (isset($attributes["lang"]) ? $attributes["lang"] : RequestContext::getInstance()->getLang());
+	if (!$document->isLangAvailable($lang) || $document->getFilenameForLang($lang) === null)
+	{
+		$lang = $document->getLang();
+	}
+
+	return array(LinkHelper::getDocumentUrl($document, $lang, $format), $format);
     }
 }
