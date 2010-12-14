@@ -168,8 +168,6 @@ class builder_ModuleGenerator
 		f_util_FileUtils::mkdir($pathBase . 'forms' . DIRECTORY_SEPARATOR . 'editor' . DIRECTORY_SEPARATOR . 'rootfolder');
 		f_util_FileUtils::mkdir($pathBase . 'lib' . DIRECTORY_SEPARATOR . 'blocks');
 		f_util_FileUtils::mkdir($pathBase . 'lib' . DIRECTORY_SEPARATOR . 'services');
-		f_util_FileUtils::mkdir($pathBase . 'locale' . DIRECTORY_SEPARATOR . 'bo');
-		f_util_FileUtils::mkdir($pathBase . 'locale' . DIRECTORY_SEPARATOR . 'document');
 		f_util_FileUtils::mkdir($pathBase . 'persistentdocument' . DIRECTORY_SEPARATOR . 'import');
 		f_util_FileUtils::mkdir($pathBase . 'setup');
 		f_util_FileUtils::mkdir($pathBase . 'style');
