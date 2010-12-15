@@ -1210,9 +1210,10 @@ class f_persistentdocument_criteria_QueryIntersection
 	/**
 	 * @param Integer $offset
 	 * @param Integer $count
+	 * @param string $orderByIds [null] | 'ASC' | 'DESC'
 	 * @return f_persistentdocument_PersistentDocument[]
 	 */
-	function findAtOffset($offset, $count, &$totalCount = null)
+	function findAtOffset($offset, $count, &$totalCount = null, $orderByIds = null)
 	{
 		$ids = $this->findIds();
 		$totalCount = count($ids);
@@ -1221,7 +1222,17 @@ class f_persistentdocument_criteria_QueryIntersection
 			return array();
 		}
 		$pp = $this->getProvider();
-		return $pp->find($pp->createQuery($this->getDocumentModel()->getName())->add(Restrictions::in("id", array_slice($ids, $offset, $count))));
+		$q = $pp->createQuery($this->getDocumentModel()->getName())->add(Restrictions::in("id", array_slice($ids, $offset, $count)));
+		if ($orderByIds === 'ASC')
+		{
+			$q->addOrder(Order::asc('id'));
+		} 
+		else if ($orderByIds === 'DESC')
+		{
+			$q->addOrder(Order::desc('id'));
+		}
+		
+		return $pp->find($q);
 	}
 }
 
@@ -1336,9 +1347,10 @@ class f_persistentdocument_criteria_QueryUnion
 	/**
 	 * @param Integer $offset
 	 * @param Integer $count
+	 * @param string $orderByIds [null] | 'ASC' | 'DESC'
 	 * @return f_persistentdocument_PersistentDocument[]
 	 */
-	function findAtOffset($offset, $count, &$totalCount = null)
+	function findAtOffset($offset, $count, &$totalCount = null, $orderByIds = null)
 	{
 		$ids = $this->findIds();
 		$totalCount = count($ids);
@@ -1347,6 +1359,15 @@ class f_persistentdocument_criteria_QueryUnion
 			return array();
 		}
 		$pp = $this->getProvider();
-		return $pp->find($pp->createQuery($this->getDocumentModel()->getName())->add(Restrictions::in("id", array_slice($ids, $offset, $count))));
+		$q = $pp->createQuery($this->getDocumentModel()->getName())->add(Restrictions::in("id", array_slice($ids, $offset, $count)));
+		if ($orderByIds === 'ASC')
+		{
+			$q->addOrder(Order::asc('id'));
+		} 
+		else if ($orderByIds === 'DESC')
+		{
+			$q->addOrder(Order::desc('id'));
+		}
+		return $pp->find($q);
 	}
 }
