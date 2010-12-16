@@ -78,7 +78,7 @@ class builder_LocaleFileGenerator
 				$includes = 'm.generic.document.document';
 			}
 			
-			$hiddenProperties = array("author", "authorid", "creationdate", "modificationdate", "label",
+			$hiddenProperties = array("author", "authorid", "creationdate", "modificationdate",
 				"publicationstatus", "startpublicationdate", "endpublicationdate",
 				"metas", "lang", "modelversion", "documentversion", "metastring", "s18s");
 			
