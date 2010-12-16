@@ -745,7 +745,7 @@ abstract class f_persistentdocument_PersistentProvider
 				if ($cached !== null)
 				{
 					$this->putInCache($id, $cached);
-					return $cached;
+					return  $this->checkModelCompatibility($cached, $modelName);
 				}
 			}
 			if ($modelName === null)
@@ -782,7 +782,7 @@ abstract class f_persistentdocument_PersistentProvider
 			}
 			if ($modelName === null)
 			{
-				return $this->getDocumentInstanceWithModelName($documentId, $result['document_model'], $result['treeid'], $result, true);
+				return $this->checkModelCompatibility($this->getDocumentInstanceWithModelName($documentId, $result['document_model'], $result['treeid'], $result, true), $modelName);
 			}
 			$document = $this->getDocumentInstanceWithModelName($documentId, $result['document_model'], $result['treeid'], $result, true);
 			if ($lang !== null && $result['document_lang'] != $lang)
@@ -795,12 +795,18 @@ abstract class f_persistentdocument_PersistentProvider
 				$this->getCacheService()->set($documentId, $document);
 			}
 
-			return $document;
+			return $this->checkModelCompatibility($document, $modelName);;
 		}
 		$document = $this->getFromCache($documentId);
+		return $this->checkModelCompatibility($document, $modelName);
+	}
+	
+	private function checkModelCompatibility($document, $modelName)
+	{
 		if ($modelName !== null && !$document->getPersistentModel()->isModelCompatible($modelName))
 		{
-			throw new Exception("document[@id = ".$documentId."] is not a ".$modelName);
+			
+			throw new Exception('document ' . $document->getId() . ' is a ' . $document->getDocumentModelName() . ' but not a ' . $modelName);
 		}
 		return $document;
 	}
