@@ -97,7 +97,7 @@ class builder_LocaleFileGenerator
 				$parentModel = null;
 			}
 			$addOtherLocales['document-name'] = $this->model->getDocumentName();
-			$hiddenProperties = array("author", "authorid", "creationdate", "modificationdate", "label",
+			$hiddenProperties = array("author", "authorid", "creationdate", "modificationdate", 
 				"publicationstatus", "startpublicationdate", "endpublicationdate",
 				"metas", "lang", "modelversion", "documentversion", "metastring", "s18s");
 			foreach ($this->model->getPropertiesNames() as $propertyName)
