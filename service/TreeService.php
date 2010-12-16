@@ -237,16 +237,7 @@ class TreeService extends BaseService
 			$this->getPersistentProvider()->deleteEmptyNode($treeNode);
 			if ($this->useTreeNodeCache)
 			{
-				$parent = $this->getTreeNodeFromCache($treeNode->getParentId());
-				if ($parent !== null && $parent->hasLoadedChildren())
-				{
-					$this->clearTreeNodeCache($treeNode->getId());
-					$parent->removeChild($treeNode);
-				}
-				else 
-				{
-					$this->clearTreeNodeCacheByParentId($treeNode->getParentId());
-				}
+				$this->clearTreeNodeCache();
 			}
 			$tm->commit();
 		}
@@ -289,16 +280,7 @@ class TreeService extends BaseService
 			$ids = $this->getPersistentProvider()->deleteNodeRecursively($treeNode);
 			if ($this->useTreeNodeCache)
 			{
-				foreach ($ids as $id) {unset($this->persistentTreeNodes[$id]);}
-				$parent = $this->getTreeNodeFromCache($treeNode->getParentId());
-				if ($parent !== null && $parent->hasLoadedChildren())
-				{
-					$parent->removeChild($treeNode);
-				}
-				else 
-				{
-					$this->clearTreeNodeCacheByParentId($treeNode->getParentId());
-				}
+				$this->clearTreeNodeCache();
 			}	
 			$tm->commit();
 		}
@@ -383,11 +365,7 @@ class TreeService extends BaseService
 			$this->getPersistentProvider()->insertChildNodeAtOrder($parentNode, $childNode);
 			if ($this->useTreeNodeCache)
 			{
-				if (!$parentNode->hasLoadedChildren())
-				{
-					$this->clearTreeNodeCacheByParentId($parentNode->getId());
-				}	
-				$this->putTreeNodeInCache($childNode);
+				$this->clearTreeNodeCache();
 			}
 			$tm->commit();			
 		}
