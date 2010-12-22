@@ -216,7 +216,17 @@ class f_TalesI18n implements PHPTAL_Tales
 			}
 			$formattersStr[] = var_export($formatter , true);
 		}
-		if ($addHTMLFormatter) {$formatter = 'html'; $formattersStr[] = var_export($formatter , true);}
+		if ($addHTMLFormatter) 
+		{
+			$formatter = 'html'; 
+			$formatters[] = $formatter;
+			$formattersStr[] = var_export($formatter , true);	
+		}
+		
+		if (count($replacements) === 0)
+		{
+			return var_export(LocaleService::getInstance()->formatKey($lang, $key, $formatters), true);
+		}
 		
 		$replacementsStr = array();
 		foreach ($replacements as $name => $value) 

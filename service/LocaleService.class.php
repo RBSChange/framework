@@ -1039,6 +1039,20 @@ class LocaleService extends BaseService
 	}
 	
 	/**
+	 * @param string $oldKey
+	 * @return string | false
+	 */
+	public function cleanOldKey($oldKey)
+	{
+		$l = strlen($oldKey);
+		if ($l > 2 && $oldKey[0] === '&' & $oldKey[$l-1] === ';')
+		{
+			return str_replace(array('&modules.', '&framework.', '&themes.', ';', '&'), array('m.', 'f.', 't.', '', ''), $oldKey);
+		}
+		return false;
+	}
+	
+	/**
 	 * @example transFO('f.boolean.true')
 	 * @param string $cleanKey
 	 * @param array $formatters value in array lab, lc, uc, ucf, js, html, attr
