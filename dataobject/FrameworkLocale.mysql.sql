@@ -6,4 +6,4 @@ CREATE TABLE IF NOT EXISTS `f_locale` (
  `useredited` tinyint(1) NOT NULL default '0',
  `format` ENUM('TEXT', 'HTML') NOT NULL DEFAULT 'TEXT',
  PRIMARY KEY (`key_path`,`lang`,`id`)
-) TYPE=InnoDB CHARACTER SET utf8 COLLATE utf8_bin;
+) ENGINE=InnoDB CHARACTER SET utf8 COLLATE utf8_bin;

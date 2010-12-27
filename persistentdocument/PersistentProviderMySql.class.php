@@ -689,7 +689,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
         . ' PRIMARY KEY (`document_id`),'
         . ' UNIQUE KEY `tree_node` (`parent_id`, `node_order`),'
         . ' UNIQUE KEY `descendant` (`node_level`,`node_order`,`node_path`)'
-        . ' ) TYPE=InnoDB CHARACTER SET latin1 COLLATE latin1_general_ci';
+        . ' ) ENGINE=InnoDB CHARACTER SET latin1 COLLATE latin1_general_ci';
 	}
 		
 	protected function getNodeInfoQuery($treeId)
