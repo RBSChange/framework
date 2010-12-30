@@ -3,4 +3,4 @@ CREATE TABLE IF NOT EXISTS `f_simplecache_registration` (
   `cache_id` varchar(255) NOT NULL,
    KEY `pattern` (`pattern`),
    KEY `cache_id` (`cache_id`)
-) TYPE=InnoDB CHARACTER SET utf8 COLLATE utf8_bin;
+) ENGINE=InnoDB CHARACTER SET utf8 COLLATE utf8_bin;
