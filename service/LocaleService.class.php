@@ -146,7 +146,8 @@ class LocaleService extends BaseService
 	 */
 	private function processFramework()
 	{
-		$availablePaths = array(FRAMEWORK_HOME . DIRECTORY_SEPARATOR."locale".DIRECTORY_SEPARATOR);
+		$availablePaths = array(f_util_FileUtils::buildFrameworkPath('locale'), 
+					f_util_FileUtils::buildOverridePath('framework', 'locale'));
 		foreach ($availablePaths as $path)
 		{
 			$this->processDir("/framework", $path);
