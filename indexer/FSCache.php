@@ -28,21 +28,7 @@ class indexer_FSCache implements indexer_Cache
 	
 	private function getPath($queryId)
 	{
-		$queryRelPath = "";
-		$queryIdLen = strlen($queryId);
-		$maxSplit = min(array($queryIdLen, 10));
-		for ($i = 0; $i < $maxSplit; $i++)
-		{
-			if ($i != 0 && $i % 2 == 0)
-			{
-				$queryRelPath .= "/";
-			}
-			$queryRelPath .= $queryId[$i];
-		}
-		if ($maxSplit < $queryIdLen)
-		{
-			$queryRelPath .= "/".substr($queryId, $maxSplit);
-		}
+		$queryRelPath = $queryId[0]."/".$queryId[1]."/".$queryId[2]."/".$queryId;
 		return f_util_FileUtils::buildCachePath($this->dir, $queryRelPath);
 	}
 	
