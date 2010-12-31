@@ -1,13 +1,75 @@
 <?php
-/**
- * @package framework.libs.agavi.view
- */
+abstract class View
+{
+	
+	const ALERT = 'Alert';
+	const ERROR = 'Error';
+	const INPUT = 'Input';
+	const NONE = null;
+	const SUCCESS = 'Success';
+	
+	const RENDER_CLIENT = 2;
+	const RENDER_NONE = 1;
+	const RENDER_VAR = 4;
+	
+	private $context;
+	
+	abstract function clearAttributes();
+	
+	abstract function execute();
+	
+	abstract function getAttribute($name);
+	
+	abstract function getAttributeNames();
+	
+	public final function getContext()
+	{
+		return $this->context;
+	}
+		
+	public function initialize($context)
+	{
+		$this->context = $context;
+		$module = $context->getModuleName();
+		return true;
+	}
+	
+	abstract function removeAttribute($name);
+	
+	abstract function setAttribute($name, $value);
+	
+	abstract function setAttributeByRef($name, &$value);
+	
+	abstract function setAttributes($values);
+	
+	abstract function setAttributesByRef(&$values);
+	
+	abstract function getEngine();
+	
+	abstract function render();
+	
+	
+	// Deprecated
+	private $template;
+	
+	public function setTemplate($template)
+	{
+		$this->template = $template;
+	}
+	
+	public function getTemplate()
+	{
+		return $this->template;
+	}
+}
+
 abstract class f_view_BaseView extends View
 {
 	const STATUS_OK    = 'OK';
 	const STATUS_ERROR = 'ERROR';
 
 	private $attributes = array();
+	
 	private $mimeContentType = null;
 	
 	/**
@@ -42,7 +104,7 @@ abstract class f_view_BaseView extends View
 	{
 		if (is_null($this->forceModuleName))
 		{
-			$moduleName = $this->getContext()->getRequest()->getParameter(AG_MODULE_ACCESSOR);
+			$moduleName = $this->getContext()->getRequest()->getParameter('module');
 		}
 		else
 		{
@@ -63,7 +125,7 @@ abstract class f_view_BaseView extends View
 	/**
 	 * @return TemplateObject
 	 */
-	public function &getEngine()
+	public function getEngine()
 	{
 		return $this->engine;
 	}
@@ -78,22 +140,22 @@ abstract class f_view_BaseView extends View
 		return array_key_exists($name, $this->attributes);
 	}
 
-	public function &getAttribute($name)
+	public function getAttribute($name)
 	{
 		if ($this->hasAttribute($name))
 		{
 			return $this->attributes[$name];
 		}
-		return $this->nullref;
+		return null;
 	}
 
-	public function &removeAttribute($name)
+	public function removeAttribute($name)
 	{
 		if ($this->hasAttribute($name))
 		{
 			unset($this->attributes[$name]);
 		}
-		return $this->nullref;
+		return null;
 	}
 
 	public function setAttribute($name, $value)
@@ -116,7 +178,7 @@ abstract class f_view_BaseView extends View
 
 	public function setAttributeByRef($name, &$value)
 	{
-		$this->setAttribute($name, $value);
+		$this->attributes[$name] = $value;
 	}
 
 	public function setAttributesByRef(&$attributes)
@@ -127,36 +189,14 @@ abstract class f_view_BaseView extends View
 		}
 	}
 
-	/**
-     * Render the presentation.
-     *
-     * When the controller render mode is View::RENDER_CLIENT, this method will
-     * render the presentation directly to the client and null will be returned.
-     *
-     * @return string A string representing the rendered presentation, if
-     *                the controller render mode is View::RENDER_VAR, otherwise
-     *                null.
-     * TODO intbonjf 2007-01-26: clean this!
-     */
-	public function &render ()
+	public function render ()
 	{
 		$request = $this->getContext()->getRequest();
-
-		// intbonjf - 2006-03-29 :
-		// module and action are now automatically passed to the template.
-		$this->setAttribute(AG_MODULE_ACCESSOR, $request->getParameter(AG_MODULE_ACCESSOR));
-		$this->setAttribute(AG_ACTION_ACCESSOR, $request->getParameter(AG_ACTION_ACCESSOR));
-
+		$this->setAttribute('module', $request->getParameter('module'));
+		$this->setAttribute('action', $request->getParameter('action'));
 		$this->getEngine()->importAttributes($this->attributes);
-
-		if ($request->getParameter('signedView') == 1)
-		{
-			$this->getContext()->getRequest()->setParameter('signedView', 0);
-		}
-
 		echo $this->getEngine()->execute();
-
-		return $this->nullref;
+		return null;
 	}
 
 	/**
@@ -181,7 +221,7 @@ abstract class f_view_BaseView extends View
 		$moduleName = $request->getParameter(K::WEBEDIT_MODULE_ACCESSOR);
 		if (empty($moduleName))
 		{
-			$moduleName = $request->getParameter(AG_MODULE_ACCESSOR);
+			$moduleName = $request->getParameter('module');
 		}
 		return $moduleName;
 	}

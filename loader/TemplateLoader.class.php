@@ -47,7 +47,6 @@ class TemplateLoader extends FileLoader implements ResourceLoader
 	 */
 	public function load($filename)
 	{
-		//$this->resolver->addCurrentWebsiteToPotentialDirectories();
 		$currentPageId = website_WebsiteModuleService::getInstance()->getCurrentPageId();
 		if ($currentPageId)
 		{
@@ -59,14 +58,14 @@ class TemplateLoader extends FileLoader implements ResourceLoader
 			$overrideThemeDir = f_util_FileUtils::buildOverridePath('themes', $theme);
 			$this->resolver->addPotentialDirectory($overrideThemeDir);
 		}
-		
-				
 		$path = $this->resolver->getPath($filename);
 		if ($path === null)
 		{
 			throw new TemplateNotFoundException($this->getDirectory()."/".$filename, $this->getPackageName());
 		}
-		$template = new TemplateObject($this->templateLocalize($path), $this->resolver->getMimeContentType());
+		$localizedPath = $this->templateLocalize($path);
+		$template = new TemplateObject($localizedPath, $this->resolver->getMimeContentType());
+
 		if (Framework::inDevelopmentMode() && $this->resolver->getMimeContentType() === K::HTML)
 		{
 			$template->setOriginalPath($path); 

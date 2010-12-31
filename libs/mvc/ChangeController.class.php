@@ -1,7 +1,4 @@
 <?php
-/**
- * @package framework.libs.agavi.controller
- */
 class controller_ChangeController extends HttpController
 {
 	/**
@@ -63,10 +60,6 @@ class controller_ChangeController extends HttpController
 	 */
 	private function doForward($moduleName, $actionName)
 	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("[" . get_class($this) . "]: Forward to $moduleName/$actionName.");
-		}
 		$this->_forward($moduleName, $actionName);
 		parent::forward($moduleName, $actionName);
 	}
@@ -96,5 +89,23 @@ class controller_ChangeController extends HttpController
 	protected function generateRedirectUrl($urlParams)
 	{
 	    return LinkHelper::getParametrizedLink($urlParams)->getUrl();	    
+	}
+}
+
+class controller_XulController extends controller_ChangeController 
+{
+    
+	protected function setRequestContextMode()
+	{
+	    RequestContext::getInstance()->setMode(RequestContext::BACKOFFICE_MODE);
+	    $this->getContext()->getUser()->setUserNamespace(FrameworkSecurityUser::BACKEND_NAMESPACE);
+	}
+	
+	/**
+	 * @param array $urlParams
+	 */
+	protected function generateRedirectUrl($urlParams)
+	{
+	    return LinkHelper::getUIParametrizedLink($urlParams)->getUrl();	    
 	}
 }

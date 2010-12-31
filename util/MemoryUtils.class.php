@@ -67,7 +67,7 @@ abstract class f_util_MemoryUtils
 
     public static function logLimit()
     {
-	    if (AG_USE_DEBUG) Framework::log("memory_limit ".f_util_StringUtils::return_bytes(ini_get('memory_limit')).",memory_consumption ,".memory_get_usage()." , max execution time ".ini_get('max_execution_time')." currentTime ".time(),Logger::DEBUG,'benchmark');
+	    Framework::debug("memory_limit ".f_util_StringUtils::return_bytes(ini_get('memory_limit')).",memory_consumption ,".memory_get_usage()." , max execution time ".ini_get('max_execution_time')." currentTime ".time());
     }
 
 }

@@ -94,14 +94,14 @@ class config_ProjectParser
 		
 		// -- Modules informations.
 		$packagesVersion = $this->compilePackageVersion();
-		list($moduleContants, $moduleXmlFiles) = $this->compileModulesConfig();
+		list($moduleContants, $moduleXmlFiles, $packagesVersion) = $this->compileModulesConfig($packagesVersion);
 		
 		// Injections
 		$docInjections = $this->searchForDocInjections();
 
 		foreach ($fileList as $profilFile)
 		{
-			if (!is_dir($configDir . DIRECTORY_SEPARATOR . $profilFile) && preg_match('/^project.+\.xml$/', $profilFile) && $profilFile != "project.xml")
+			if (!is_dir($configDir . DIRECTORY_SEPARATOR . $profilFile) && $profilFile == "project.".$currentProfile.".xml")
 			{
 				$profileName = substr(basename($profilFile), 8, -4);
 				// Create array for manage configuration.
@@ -415,78 +415,98 @@ class config_ProjectParser
 	private function compilePackageVersion()
 	{
 		$packagesVersion = array();
-
-		$moduleDir = WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'modules';
-		if (!is_dir($moduleDir))
+		$files = glob(WEBEDIT_HOME . '/modules/*/change.xml');
+		if (!is_array($files) || count($files) == 0)
 		{
 			return $packagesVersion;
 		}
-		$moduleList = scandir($moduleDir);
-		foreach ($moduleList as $moduleName)
+		foreach ($files as $changeXmlFile)
 		{
-			if ($moduleName[0] === '.')
+			$doc = new DOMDocument('1.0', 'utf-8');
+			$doc->load($changeXmlFile);
+			if ($doc->documentElement)
 			{
+				$name = null; $version =null;
+				foreach ($doc->documentElement->childNodes as $node) 
+				{
+					if ($node->nodeName == 'name')
+					{
+						$name = trim($node->textContent);
+					}
+					elseif ($node->nodeName == 'version')
+					{
+						$version = trim($node->textContent);
+					}
+				}
+				if ($name && $version)
+				{
+					$packagesVersion['modules_' . $name] = $version;
+				}
 				continue;
 			}
-
-			$changeXmlFile = implode(DIRECTORY_SEPARATOR, array($moduleDir, $moduleName, 'change.xml'));
-			if (file_exists($changeXmlFile))
-			{
-				$changeSimpleXml = simplexml_load_file($changeXmlFile);
-				if ($changeSimpleXml->name && $changeSimpleXml->version)
-				{
-					$packagesVersion['modules_' . strval($changeSimpleXml->name)] = strval($changeSimpleXml->version);
-				}
-				else
-				{
-					$packagesVersion['modules_' . $moduleName] = null;
-					echo ('WARNING: There is no version or name defined in ' . $changeXmlFile . "\n");
-				}
-			}
-			else
-			{
-				$packagesVersion['modules_' . $moduleName] = null;
-				echo ('WARNING: There is no change.xml file for module ' . $moduleName . "\n");
-			}
+			$packagesVersion['modules_' . basename(dirname($changeXmlFile))] = null;			
 		}
-
 		return $packagesVersion;
 	}
 
 	/**
 	 * @return Array
 	 */
-	private function compileModulesConfig()
+	private function compileModulesConfig($modulestates)
 	{
 		$constants = array();
-		$moduleXmlFiles = array();
-
-		foreach (new DirectoryIterator(WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'modules') as $fileInfo)
+		$moduleXmlFiles = array();		
+		$files = glob(WEBEDIT_HOME . '/modules/*/config/module.xml');
+		if (is_array($files) || count($files) > 0)
 		{
-			if (!$fileInfo->isDot() && $fileInfo->isDir())
+			foreach ($files as $moduleXmlFile)
 			{
-				$modulePath = $fileInfo->getPathname();
-				$moduleName = basename($modulePath);
+				if (!is_readable($moduleXmlFile)) {continue;}
 				$ini = array();
-				$moduleXmlFile = implode(DIRECTORY_SEPARATOR, array($modulePath , 'config', 'module.xml'));
-				if (is_readable($moduleXmlFile))
+				$moduleName = basename(dirname(dirname($moduleXmlFile)));
+				$ini = $this->parseModuleXmlConfig($moduleXmlFile, $ini);
+				$moduleXmlFiles[$moduleName] = simplexml_load_file($moduleXmlFile);
+				$moduleXmlOverrideFile = implode(DIRECTORY_SEPARATOR, array(WEBEDIT_HOME, 'override', 'modules', $moduleName, 'config', 'module.xml'));
+				if (is_readable($moduleXmlOverrideFile))
 				{
-					$ini = $this->parseModuleXmlConfig($moduleXmlFile, $ini);
-					$moduleXmlFiles[$moduleName] = simplexml_load_file($moduleXmlFile);
+					$ini = $this->parseModuleXmlConfig($moduleXmlOverrideFile, $ini);
+					$moduleXmlFiles[$moduleName] = simplexml_load_file($moduleXmlOverrideFile);
 				}
-				$moduleXmlWebAppFile = implode(DIRECTORY_SEPARATOR, array(WEBEDIT_HOME, 'override', 'modules', $moduleName, 'config', 'module.xml'));
-				if (is_readable($moduleXmlWebAppFile))
+				if (isset($ini['module']))
 				{
-					$ini = $this->parseModuleXmlConfig($moduleXmlWebAppFile, $ini);
-					$moduleXmlFiles[$moduleName] = simplexml_load_file($moduleXmlWebAppFile);
-				}
-				if (count($ini) > 0)
-				{
-					$this->buildPhpModuleConfig($ini, $moduleName, $constants);
+					$pname = 'modules_'.$moduleName;
+					$version = isset($modulestates[$pname]) ? $modulestates[$pname] : null;
+					$modulestates[$pname] = array('ENABLED' => true, 'VISIBLE' => true, 'CATEGORY' => null, 'ICON' => 'package', 'USETOPIC' => false, 'VERSION' => $version);
+					$upperModulename = strtoupper($moduleName);
+					foreach ($ini['module'] as $key => $value)
+					{
+						switch ($key) {
+							case 'ENABLED':
+							case 'VISIBLE':
+							case 'CATEGORY':
+							case 'ICON':
+							case 'USETOPIC':
+								if ($value === 'true')
+								{
+									$value = true;
+								}
+								else if ($value === 'false')
+								{
+									$value = false;
+								}
+								$modulestates[$pname][$key] = $value;
+								break;
+							default:
+								$value = $this->literalize($value);
+								$constantName = 'MOD_' . $upperModulename . '_' . $key;
+								$constants[$constantName] = 'define(\''.$constantName.'\', '.$value.');';
+							break;
+						}
+					}
 				}
 			}
 		}
-		return array($constants, $moduleXmlFiles);
+		return array($constants, $moduleXmlFiles, $modulestates);
 	}
 	
 	private function searchForDocInjections()
@@ -515,36 +535,23 @@ class config_ProjectParser
 
 	private function parseModuleXmlConfig($configFilepath, $ini)
 	{
-		$xml = simplexml_load_file($configFilepath);
-
-		foreach ($xml as $tagName => $value)
+		$doc = new DOMDocument('1.0', 'utf-8');
+		$doc->load($configFilepath);
+		if ($doc->documentElement)
 		{
-			if (!isset($ini[$tagName]))
+			foreach ($doc->documentElement->childNodes as $node)
 			{
-				$ini[$tagName] = array();
-			}
-			foreach ($value as $k => $v)
-			{
-				$ini[$tagName][strtoupper($k)] = strval($v);
+				if ($node->nodeType !== XML_ELEMENT_NODE) {continue;}
+				$tagName = $node->nodeName;
+				if (!isset($ini[$tagName])) {$ini[$tagName] = array();}
+				foreach ($node->childNodes as $item)
+				{
+					if ($item->nodeType !== XML_ELEMENT_NODE) {continue;}
+					$ini[$tagName][strtoupper($item->nodeName)] = trim($item->textContent);
+				}
 			}
 		}
 		return $ini;
-	}
-
-	/**
-	 * @param Array $ini
-	 * @param String $moduleName
-	 * @param Array<String, String> $constants
-	 */
-	private function buildPhpModuleConfig($ini, $moduleName, &$constants)
-	{
-		$upperModulename = strtoupper($moduleName);
-		foreach ($ini['module'] as $key => $value)
-		{
-			$value = $this->literalize($value);
-			$constantName = 'MOD_' . $upperModulename . '_' . $key;
-			$constants[$constantName] = 'define(\''.$constantName.'\', '.$value.');';
-		}
 	}
 
 	private function literalize($value)
