@@ -5,6 +5,53 @@
  */
 class config_ProjectParser
 {
+	private function loadXmlConfigFile($xmlPath, &$configArray)
+	{
+		if (is_readable($xmlPath))
+		{
+			$dom = new DOMDocument('1.0', 'utf-8');
+			$dom->load($xmlPath);
+			if ($dom->documentElement)
+			{
+				foreach ($dom->documentElement->childNodes as $node) 
+				{
+					if ($node->nodeType !== XML_ELEMENT_NODE) {continue;}
+					$this->populateConfigArray($node, $configArray);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * @param DOMElement $xmlElement
+	 * @param array $configArray
+	 */
+	private function populateConfigArray($xmlElement, &$configArray)
+	{
+		$tagName = $xmlElement->hasAttribute('name') ? $xmlElement->getAttribute('name') : $xmlElement->nodeName;		
+		foreach ($xmlElement->childNodes as $node) 
+		{
+			if ($node->nodeType !== XML_ELEMENT_NODE) {continue;}
+			if (!isset($configArray[$tagName])) {$configArray[$tagName] = array();}
+			$this->populateConfigArray($node, $configArray[$tagName]);
+		}
+		
+		if (!isset($configArray[$tagName]) || is_string($configArray[$tagName]) || count($configArray[$tagName]) == 0)
+		{
+			$configArray[$tagName] = trim($xmlElement->textContent);
+			/*
+			if ($configArray[$tagName] === 'true')
+			{
+				$configArray[$tagName] = true;
+			} 
+			elseif ($configArray[$tagName] === 'false')
+			{
+				$configArray[$tagName] = false;
+			}
+			*/
+		}
+	}
+	
 	/**
 	 * Merge specific config file of project with defulat config file and save config file in cache/config
 	 * @return array old and current configuration
@@ -50,210 +97,140 @@ class config_ProjectParser
 
 		// Config Dir for over write.
 		$fileList = scandir($configDir);
-
-		// Load Xml file of default configuration file.
-		$defaultXmlFile = simplexml_load_file(WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'framework' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'project.xml');
-		$projectXmlPath = WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'project.xml';
-		if (file_exists($projectXmlPath))
-		{
-			$projectXmlFile = simplexml_load_file($projectXmlPath);
-		}
-		else
-		{
-			$projectXmlFile = null;
-		}
-
+		
+		$configArray = array();
+		$this->loadXmlConfigFile(WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'framework' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'project.xml', $configArray);
+		$this->loadXmlConfigFile(WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'project.xml', $configArray);
+		
+		
+		
 		// -- Global constants.
-		$globalConstants = array();
 		if (isset($computedDeps["PEAR_DIR"]))
 		{
-			$this->addConstant($globalConstants, "PEAR_DIR", $computedDeps["PEAR_DIR"]);
+			$this->addConstant($configArray['defines'], "PEAR_DIR", $computedDeps["PEAR_DIR"]);
 		}
 		if (isset($computedDeps["LOCAL_REPOSITORY"]))
 		{
-			$this->addConstant($globalConstants, "LOCAL_REPOSITORY", $computedDeps["LOCAL_REPOSITORY"]);
+			$this->addConstant($configArray['defines'], "LOCAL_REPOSITORY", $computedDeps["LOCAL_REPOSITORY"]);
 		}
 		if (isset($computedDeps["WWW_GROUP"]))
 		{
-			$this->addConstant($globalConstants, "WWW_GROUP", $computedDeps["WWW_GROUP"]);
+			$this->addConstant($configArray['defines'], "WWW_GROUP", $computedDeps["WWW_GROUP"]);
 		}
 		if (isset($computedDeps["OUTGOING_HTTP_PROXY_HOST"]))
 		{
-			$this->addConstant($globalConstants, "OUTGOING_HTTP_PROXY_HOST", $computedDeps["OUTGOING_HTTP_PROXY_HOST"]);
-			$this->addConstant($globalConstants, "OUTGOING_HTTP_PROXY_PORT", $computedDeps["OUTGOING_HTTP_PROXY_PORT"]);
+			$this->addConstant($configArray['defines'], "OUTGOING_HTTP_PROXY_HOST", $computedDeps["OUTGOING_HTTP_PROXY_HOST"]);
+			$this->addConstant($configArray['defines'], "OUTGOING_HTTP_PROXY_PORT", $computedDeps["OUTGOING_HTTP_PROXY_PORT"]);
 		}
 	
-		// Framework default.
-		$this->constructDefineList($defaultXmlFile->defines, $globalConstants);
 
-		// project.xml file.
-		if ($projectXmlFile !== null)
-		{
-			$this->constructDefineList($projectXmlFile->defines, $globalConstants);
-		}
-		
 		// -- Modules informations.
-		$packagesVersion = $this->compilePackageVersion();
-		list($moduleContants, $moduleXmlFiles, $packagesVersion) = $this->compileModulesConfig($packagesVersion);
-		
+		$configArray['packageversion'] = $this->compilePackageVersion();
+		$this->compileModulesConfig($configArray);
+		$configArray['config']['packageversion'] = $configArray['packageversion'];
+		unset($configArray['packageversion']);
+								
 		// Injections
 		$docInjections = $this->searchForDocInjections();
-
-		foreach ($fileList as $profilFile)
+		if (count($docInjections) > 0)
 		{
-			if (!is_dir($configDir . DIRECTORY_SEPARATOR . $profilFile) && $profilFile == "project.".$currentProfile.".xml")
+			if (!isset($configArray['config']['injection']))
 			{
-				$profileName = substr(basename($profilFile), 8, -4);
-				// Create array for manage configuration.
-				$configList = array('packageversion' => $packagesVersion);
-
-				// Load xml file.
-				$xmlFile = simplexml_load_file($configDir . DIRECTORY_SEPARATOR . $profilFile);
-
-				// -- Global constants.
-				// project.<profile>.xml file.
-				$globalConstantsForProfile = $globalConstants;
-				$this->constructDefineList($xmlFile->defines, $globalConstantsForProfile);
-				
-				if (!isset($globalConstantsForProfile["TMP_PATH"]))
-				{
-					if (function_exists('sys_get_temp_dir'))
-					{
-						$TMP_PATH = sys_get_temp_dir();
-					}
-					else
-					{
-						$tmpfile = @tempnam(null, 'loc_');
-						if ($tmpfile)
-						{
-							$TMP_PATH = dirname($tmpfile);
-							@unlink($tmpfile);
-						}
-						else  if (DIRECTORY_SEPARATOR === '\\')
-						{
-							if (isset($_ENV['TMP']))
-							{
-								$TMP_PATH = $_ENV['TMP'];
-							} 
-							else if (isset($_ENV['TEMP']))
-							{
-								$TMP_PATH = $_ENV['TEMP'];
-							}
-							else 
-							{
-								throw new Exception('Please define TMP_PATH in project.xml config file');
-							}
-						}
-						else
-						{
-							$TMP_PATH ='/tmp';
-						}
-					}
-					$globalConstantsForProfile["TMP_PATH"] = 'define(\'TMP_PATH\', '. var_export($TMP_PATH, true).');';
-				}
-
-				// Remove module constants already set in global ones.
-				$moduleContantsForProfile = $moduleContants;
-				foreach (array_keys($globalConstantsForProfile) as $key)
-				{
-					if (isset($moduleContantsForProfile[$key]))
-					{
-						echo "unset module constant $key\n";
-						unset($moduleContantsForProfile[$key]);
-					}
-				}
-				
-				if (isset($computedDeps["DEVELOPMENT_MODE"]) && $computedDeps["DEVELOPMENT_MODE"])
-				{
-					$this->addConstant($globalConstantsForProfile, "AG_DEVELOPMENT_MODE", "true");
-				}
-				
-
-				// -- Config list.
-				// project.<profile>.xml file.
-				$this->constructConfigList($xmlFile->config, $configList);
-
-				// project.xml file.
-				if ($projectXmlFile !== null)
-				{
-					$this->constructConfigList($projectXmlFile->config, $configList);
-				}
-				
-				if (count($docInjections) > 0)
-				{
-					if (!isset($configList['injection']))
-					{
-						$configList['injection'] = array();
-					}
-					if (!isset($configList['injection']['document']))
-					{
-						$configList['injection']['document'] = array();
-					}
-					foreach ($docInjections as $replaced => $injection)
-					{
-						$configList['injection']['document'][$replaced] = $injection;
-					}
-				}
-
-				// module.xml files.
-				foreach ($moduleXmlFiles as $module => $moduleXmlFile)
-				{
-					if ($moduleXmlFile->project)
-					{
-						if (!isset($configList['modules']))
-						{
-							$configList['modules'] = array();
-						}
-						if (!isset($configList['modules'][$module]))
-						{
-							$configList['modules'][$module] = array();
-						}
-						$this->constructConfigList($moduleXmlFile->project, $configList['modules'][$module]);
-					}
-					if ($moduleXmlFile->projectconfig)
-					{
-						$this->constructConfigList($moduleXmlFile->projectconfig, $configList);
-					}
-				}
-
-				// Framework default.
-				$this->constructConfigList($defaultXmlFile->config, $configList);
-
-				// Browsers generic project.
-				if ($projectXmlFile !== null)
-				{
-					$this->constructBrowsersList($projectXmlFile->browsers, $configList);
-				}
-
-				// Browsers Default.
-				$this->constructBrowsersList($defaultXmlFile->browsers, $configList);
-
-				// Write in file
-				$content = "<?php // File auto generated by ProjectParser.";
-				$content .= "\n // GLOBAL DEFINE PART // \n";
-				$content .= implode("\n", $globalConstantsForProfile);
-				$content .= "\n // MODULES DEFINE PART // \n";
-				$content .= implode("\n", $moduleContantsForProfile);
-				$content .= "\n // Framework::\$config PART // \n";
-				$content .= "Framework::\$config = " . var_export($configList, true) . ';';
-				
-				if ($oldConfig !== null && $profileName == $currentProfile)
-				{
-					$currentDefines = array();
-					foreach (array_merge($globalConstantsForProfile, $moduleContantsForProfile) as $defineLine)
-					{
-						$matches = null;
-						if (preg_match('/^define\(\'(.*)\', (.*)\);$/', $defineLine, $matches))
-						{
-							$currentDefines[$matches[1]] = $matches[2];
-						}
-					}
-					$currentConfig = array("config" => $configList, "defines" => $currentDefines);
-				}
-				
-				$this->writeFile($cacheConfigDir . DIRECTORY_SEPARATOR . $profilFile . '.php', $content);
+				$configArray['config']['injection'] = array();
 			}
+			if (!isset($configArray['config']['injection']['document']))
+			{
+				$configArray['config']['injection']['document'] = array();
+			}
+			$configArray['config']['injection']['document'] = $docInjections;
+		}		
+		
+		$profilFile = $configDir . DIRECTORY_SEPARATOR . "project.".$currentProfile.".xml";
+		if (is_readable($profilFile))
+		{
+			$this->loadXmlConfigFile($profilFile, $configArray);
 		}
+		else
+		{
+			die($profilFile);
+		}
+		
+		if (!isset($configArray['defines']['TMP_PATH']))
+		{
+			if (function_exists('sys_get_temp_dir'))
+			{
+				$TMP_PATH = sys_get_temp_dir();
+			}
+			else
+			{
+				$tmpfile = @tempnam(null, 'loc_');
+				if ($tmpfile)
+				{
+					$TMP_PATH = dirname($tmpfile);
+					@unlink($tmpfile);
+				}
+				else  if (DIRECTORY_SEPARATOR === '\\')
+				{
+					if (isset($_ENV['TMP']))
+					{
+						$TMP_PATH = $_ENV['TMP'];
+					} 
+					else if (isset($_ENV['TEMP']))
+					{
+						$TMP_PATH = $_ENV['TEMP'];
+					}
+					else 
+					{
+						throw new Exception('Please define TMP_PATH in project.xml config file');
+					}
+				}
+				else
+				{
+					$TMP_PATH ='/tmp';
+				}
+			}
+			$configArray['defines']['TMP_PATH'] = $TMP_PATH;					
+		}
+	
+		if (isset($computedDeps["DEVELOPMENT_MODE"]) && $computedDeps["DEVELOPMENT_MODE"])
+		{
+			$configArray['defines']['AG_DEVELOPMENT_MODE'] = true;
+		}
+		
+		$this->constructBrowsersList($configArray);
+				
+		$defineLines = array();
+		foreach ($configArray['defines'] as $constName => $value) 
+		{
+			$defineLines[] = $this->buildDefine($constName, $value);
+		}		
+		unset($configArray['defines']);
+		
+		
+		// Write in file
+		$content = "<?php // File auto generated by ProjectParser.";
+		$content .= "\n // DEFINE PART // \n";
+		$content .= implode("\n", $defineLines);
+		
+		$content .= "\n // Framework::\$config PART // \n";
+		$content .= "Framework::\$config = " . var_export($configArray['config'], true) . ';';
+		
+		if ($oldConfig !== null)
+		{
+			$currentDefines = array();
+			foreach ($defineLines as $defineLine)
+			{
+				$matches = null;
+				if (preg_match('/^define\(\'(.*)\', (.*)\);$/', $defineLine, $matches))
+				{
+					$currentDefines[$matches[1]] = $matches[2];
+				}
+			}
+			$currentConfig = array("config" => $configArray['config'], "defines" => $currentDefines);
+		}
+		
+		$this->writeFile($cacheConfigDir."/project.".$currentProfile.".xml.php", $content);
+
 		return ($oldConfig !== null) ? array("old" => array("defines" => $oldDefines, "config" => $oldConfig), "current" => $currentConfig) : null;
 	}
 
@@ -271,141 +248,64 @@ class config_ProjectParser
 		{
 			throw new Exception("Could not write file $path");
 		}
-	}
-
-	/**
-	 * Make an array with all define string to write in file
-	 *
-	 * @param SimpleXmlElement $simpleXmlList
-	 * @param Array $globalConstants
-	 */
-	private function constructDefineList($simpleXmlList, &$globalConstants)
-	{
-		// Here are some defines we can find in the file we are parsing:
-		//
-		// With a single quote:
-		//   <define name="AG_WEBAPP_NAME">Fred's Change</define>
-		// With constants inside:
-		//   <define name="WEBAPP_HOME">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'webapp'</define>
-		// With version number:
-		//   <define name="FRAMEWORK_VERSION">2.0.1</define>
-		// With a boolean value:
-		//   <define name="AG_DEVELOPMENT_MODE">false</define>
-		foreach ($simpleXmlList->define as $define)
-		{
-			$name = (string) $define['name'];
-			$value = trim((string) $define);
-			
-			$this->addConstant($globalConstants, $name, $value);
-		}
-	}
+	}	
 	
 	private function addConstant(&$globalConstants, $name, $value)
 	{
-		// All numeric and boolean values are taken as is, without adding any quote arround.
-			if (!is_numeric($value) && $value != "true" && $value != "false")
-			{
-				$quoteCount = substr_count($value, "'");
-				// For strings, I quote the ones that contain an odd number of single quotes.
-				// This generally means that the developper really wanted to use a single quote.
-				// For example:
-				// <define name="AG_WEBAPP_NAME">Fred's Change</define>
-				if ($quoteCount == 0 || ($quoteCount & 1))
-				{
-					$value = var_export($value, true);
-				}
-			}
-			$globalConstants[$name] = 'define(\'' . $name . '\', ' . $value . ');';
+		$globalConstants[$name] = $value;
 	}
-
+	
 	/**
-	 * Make and array of configuration
-	 *
-	 * @param SimpleXmlElement $simpleXml
-	 * @param array $array
+	 * @param string $name
+	 * @param string $value
+	 * @return string
 	 */
-	private function constructConfigList($simpleXml, &$array)
+	private function buildDefine($name, $value)
 	{
-		foreach ($simpleXml->children() as $name => $children)
+		if ($value === true || $value === 'true')
 		{
-			if ($name != 'entry')
+			return 'define(\'' . $name . '\', true);';
+		}
+		else if ($value === false || $value === 'false')
+		{
+			return 'define(\'' . $name . '\', false);';
+		}
+		else if (!is_numeric($value))
+		{
+			$quoteCount = substr_count($value, "'");
+			// For strings, I quote the ones that contain an odd number of single quotes.
+			// This generally means that the developper really wanted to use a single quote.
+			// For example:
+			// <define name="AG_WEBAPP_NAME">Fred's Change</define>
+			if ($quoteCount == 0 || ($quoteCount & 1))
 			{
-				if (!isset($array[$name]))
-				{
-					$array[$name] = array();
-				}
-				// Call recursively
-				$this->constructConfigList($children, $array[$name]);
-			}
-			else
-			{
-				// Construct a final array with properties
-				foreach ($simpleXml->entry as $entry)
-				{
-					$nameEntry = (string) $entry['name'];
-					$valueEntry = trim((string) $entry);
-
-					if (!isset($array[$nameEntry]))
-					{
-						if (strpos($valueEntry, ';'))
-						{
-							$valueEntry = explode(';', $valueEntry);
-						}
-
-						$array[$nameEntry] = $valueEntry;
-					}
-				}
-				break;
+				$value = var_export($value, true);
 			}
 		}
+		return 'define(\'' . $name . '\', ' . $value . ');';
 	}
 
 	/**
-	 * @param SimpleXmlElement $simpleXml
 	 * @param array $array
 	 */
-	private function constructBrowsersList($simpleXml, &$array)
+	private function constructBrowsersList(&$array)
 	{
 		if (!isset($array['browsers']))
 		{
-			$array['browsers'] = array('frontoffice' => array(), 'backoffice' => array());
+			$array['config']['browsers'] = array('frontoffice' => array(), 'backoffice' => array());
 		}
-
-		foreach ($simpleXml->children() as $access => $children)
+		else
 		{
-			if ($access == 'frontoffice')
+			if (!isset($array['browsers']['frontoffice']))
 			{
-				$this->constructBrowsersAccessList($children, $array['browsers']['frontoffice']);
+				$array['browsers']['frontoffice'] = array();
 			}
-			else if ($access == 'backoffice')
+			if (!isset($array['browsers']['backoffice']))
 			{
-				$this->constructBrowsersAccessList($children, $array['browsers']['backoffice']);
+				$array['browsers']['backoffice'] = array();
 			}
-		}
-	}
-
-	/**
-	 * @param SimpleXmlElement $simpleXml
-	 * @param array $array
-	 */
-	private function constructBrowsersAccessList($simpleXml, &$array)
-	{
-		if ($simpleXml === null)
-		{
-			return;
-		}
-
-		foreach ($simpleXml->browser as $browser)
-		{
-			$browserName = (string) $browser['name'];
-			$versions = array();
-
-			foreach ($browser->version as $version)
-			{
-				$versions[] = trim((string) $version);
-			}
-
-			$array[$browserName] = $versions;
+			$array['config']['browsers'] = $array['browsers'];
+			unset($array['browsers']);
 		}
 	}
 
@@ -450,9 +350,9 @@ class config_ProjectParser
 	}
 
 	/**
-	 * @return Array
+	 * @param array $configArray
 	 */
-	private function compileModulesConfig($modulestates)
+	private function compileModulesConfig(&$configArray)
 	{
 		$constants = array();
 		$moduleXmlFiles = array();		
@@ -462,25 +362,28 @@ class config_ProjectParser
 			foreach ($files as $moduleXmlFile)
 			{
 				if (!is_readable($moduleXmlFile)) {continue;}
-				$ini = array();
+				$moduleConfig = array();
+				$this->loadXmlConfigFile($moduleXmlFile, $moduleConfig);
 				$moduleName = basename(dirname(dirname($moduleXmlFile)));
-				$ini = $this->parseModuleXmlConfig($moduleXmlFile, $ini);
-				$moduleXmlFiles[$moduleName] = simplexml_load_file($moduleXmlFile);
+				
+				
 				$moduleXmlOverrideFile = implode(DIRECTORY_SEPARATOR, array(WEBEDIT_HOME, 'override', 'modules', $moduleName, 'config', 'module.xml'));
 				if (is_readable($moduleXmlOverrideFile))
 				{
-					$ini = $this->parseModuleXmlConfig($moduleXmlOverrideFile, $ini);
-					$moduleXmlFiles[$moduleName] = simplexml_load_file($moduleXmlOverrideFile);
+					$this->loadXmlConfigFile($moduleXmlOverrideFile, $moduleConfig);
 				}
-				if (isset($ini['module']))
+				
+				if (isset($moduleConfig['module']))
 				{
 					$pname = 'modules_'.$moduleName;
-					$version = isset($modulestates[$pname]) ? $modulestates[$pname] : null;
-					$modulestates[$pname] = array('ENABLED' => true, 'VISIBLE' => true, 'CATEGORY' => null, 'ICON' => 'package', 'USETOPIC' => false, 'VERSION' => $version);
-					$upperModulename = strtoupper($moduleName);
-					foreach ($ini['module'] as $key => $value)
+					$version = isset($configArray['packageversion'][$pname]) ? $configArray['packageversion'][$pname] : null;
+					$configArray['packageversion'][$pname] = array('ENABLED' => true, 'VISIBLE' => true, 'CATEGORY' => null, 'ICON' => 'package', 'USETOPIC' => false, 'VERSION' => $version);
+					
+					foreach ($moduleConfig['module'] as $key => $value)
 					{
-						switch ($key) {
+						$key = strtoupper($key);
+						switch ($key) 
+						{
 							case 'ENABLED':
 							case 'VISIBLE':
 							case 'CATEGORY':
@@ -494,19 +397,37 @@ class config_ProjectParser
 								{
 									$value = false;
 								}
-								$modulestates[$pname][$key] = $value;
+								$configArray['packageversion'][$pname][$key] = $value;
 								break;
-							default:
-								$value = $this->literalize($value);
-								$constantName = 'MOD_' . $upperModulename . '_' . $key;
-								$constants[$constantName] = 'define(\''.$constantName.'\', '.$value.');';
+							default:	
+								$constantName = 'MOD_' . strtoupper($moduleName) . '_' . $key;
+								$configArray['defines'][$constantName] = $value;
 							break;
 						}
 					}
 				}
+				if (isset($moduleConfig['project']))
+				{
+					if (!isset($configArray['config']['modules'][$moduleName]))
+					{
+						$configArray['config']['modules'][$moduleName] = array();
+					}
+					$configArray['config']['modules'][$moduleName] = array_merge_recursive($configArray['config']['modules'][$moduleName], $moduleConfig['project']);
+				}
+				
+				if (isset($moduleConfig['modules']))
+				{
+					foreach ($moduleConfig['modules'] as $moduleName => $data) 
+					{
+						if (!isset($configArray['config']['modules'][$moduleName]))
+						{
+							$configArray['config']['modules'][$moduleName] = array();
+						}
+						$configArray['config']['modules'][$moduleName] = array_merge_recursive($configArray['config']['modules'][$moduleName], $data);
+					}
+				}
 			}
 		}
-		return array($constants, $moduleXmlFiles, $modulestates);
 	}
 	
 	private function searchForDocInjections()
@@ -531,52 +452,5 @@ class config_ProjectParser
 			}
 		}
 		return $injections;
-	}
-
-	private function parseModuleXmlConfig($configFilepath, $ini)
-	{
-		$doc = new DOMDocument('1.0', 'utf-8');
-		$doc->load($configFilepath);
-		if ($doc->documentElement)
-		{
-			foreach ($doc->documentElement->childNodes as $node)
-			{
-				if ($node->nodeType !== XML_ELEMENT_NODE) {continue;}
-				$tagName = $node->nodeName;
-				if (!isset($ini[$tagName])) {$ini[$tagName] = array();}
-				foreach ($node->childNodes as $item)
-				{
-					if ($item->nodeType !== XML_ELEMENT_NODE) {continue;}
-					$ini[$tagName][strtoupper($item->nodeName)] = trim($item->textContent);
-				}
-			}
-		}
-		return $ini;
-	}
-
-	private function literalize($value)
-	{
-		if ($value == null)
-		{
-			return 'null';
-		}
-
-		// lowercase our value for comparison
-		$value = trim($value);
-		$lvalue = strtolower($value);
-
-		if ($lvalue == 'on' || $lvalue == 'yes' || $lvalue == 'true')
-		{
-			return 'true';
-		}
-		else if ($lvalue == 'off' || $lvalue == 'no' || $lvalue == 'false')
-		{
-			return 'false';
-		}
-		else if (!is_numeric($value))
-		{
-			return "'" . $value . "'";
-		}
-		return $value;
 	}
 }
