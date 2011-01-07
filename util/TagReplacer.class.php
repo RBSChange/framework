@@ -107,7 +107,7 @@ class f_util_TagReplacer {
 	{
 		$matches = null;
 		$prefixes = f_Locale::getPrefixes();
-		if (preg_match_all('/&(?:amp;){0,1}('.join('|', $prefixes).')\.([a-zA-Z_-]+\.[a-zA-Z0-9_.-]*);/', $content, $matches))
+		if (preg_match_all('/&(?:amp;){0,1}('.join('|', $prefixes).')\.([a-zA-Z0-9_.-]+);/', $content, $matches))
 		{
 			$nb = count($matches[0]);
 			if ($nb > 0)

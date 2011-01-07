@@ -243,14 +243,15 @@ class builder_SecurityGenerator
 			f_util_FileUtils::writeAndCreateContainer($filePath, $this->generateFile('RightsService' , 'permissions' , $module), f_util_FileUtils::OVERRIDE );
 			ClassResolver::getInstance()->appendToAutoloadFile('roles_'.$className, $filePath);
 
-			$buildForm = f_util_FileUtils::buildChangeBuildPath('modules', $module->name, 'forms');
-			
-			$filePath = f_util_FileUtils::buildPath($buildForm, "permission_layout.all.all.xul");
-			f_util_FileUtils::writeAndCreateContainer($filePath, $this->generateFile('PermissionForm', 'permissions' , $module), f_util_FileUtils::OVERRIDE );
-			
-			$implFile = f_util_FileUtils::buildFrameworkPath('builder', 'templates', 'permissions', 'permission_impl.js');
-			$filePath = f_util_FileUtils::buildPath($buildForm, 'permission_impl.js');			
-			copy($implFile, $filePath);
+			if (!uixul_ModuleBindingService::getInstance()->hasConfigFile($moduleName))
+			{
+				$buildForm = f_util_FileUtils::buildChangeBuildPath('modules', $module->name, 'forms');
+				$filePath = f_util_FileUtils::buildPath($buildForm, "permission_layout.all.all.xul");
+				f_util_FileUtils::writeAndCreateContainer($filePath, $this->generateFile('PermissionForm', 'permissions' , $module), f_util_FileUtils::OVERRIDE );
+				$implFile = f_util_FileUtils::buildFrameworkPath('builder', 'templates', 'permissions', 'permission_impl.js');
+				$filePath = f_util_FileUtils::buildPath($buildForm, 'permission_impl.js');			
+				copy($implFile, $filePath);
+			}
 		}
 	}
 

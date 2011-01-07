@@ -234,12 +234,5 @@
 				<version>2.6</version>
 			</versions>
 		</dependency>
-		<dependency>
-			<name>lib/agavi</name>
-			<versions>
-				<version>0.9</version>
-			</versions>
-		</dependency>
-
 	</dependencies>
 </change>

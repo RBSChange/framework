@@ -186,17 +186,13 @@ class builder_ModuleGenerator
 	
 	private function addConfiguration()
 	{
-		$baseConst = 'MOD_' . $this->name . '_';
-		if (!defined($baseConst.'VERSION'))
-		{
-			define($baseConst.'ENABLED', true);
-			define($baseConst.'NAME', $this->name);
-			define($baseConst.'VERSION', $this->version);
-			define($baseConst.'VISIBLE', true);
-			define($baseConst.'ICON', $this->icon);
-			Framework::addPackageConfiguration('modules_' . $this->name, $this->version);
-			ModuleService::clearInstance();
-		}		
+		$info = array('ENABLED' => true, 'VISIBLE' => true, 
+					  'CATEGORY' => $this->category, 'ICON' => $this->icon, 
+					  'USETOPIC' => ($this->useTopic == true), 
+					  'VERSION' => $this->version);
+		Framework::addPackageConfiguration('modules_' . $this->name, $info);
+		ModuleService::clearInstance();
+	
 	}
 
 	/**

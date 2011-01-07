@@ -14,6 +14,9 @@ class indexer_Facet
 	 */
 	public $field, $prefix, $sort = true, $limit = 100, $offet = 0, $mincount = 0, $missing = false, $method = self::METHOD_FC, $enum_cache_minDf = 0, $key, $ex;
 
+	
+	public $accumulable = false;
+	
 	function __construct($field, $prefix = null)
 	{
 		$this->field = $field;
@@ -39,6 +42,34 @@ class indexer_Facet
 			$max = "*";
 		}
 		$this->ranges[] = array($min, $max);
+	}
+	
+	function getPrecision()
+	{
+		return 0.01;
+	}
+	
+	function isAccumulable()
+	{
+		return $this->accumulable;
+	}
+	
+	/**
+	 * @param string $rangeTxt
+	 * @return indexer_Facet
+	 */
+	function addStringRange($rangeTxt)
+	{
+		$mic = $rangeTxt[0];
+		$mac = $rangeTxt[strlen($rangeTxt) - 1];
+		if (($mic === '[' || $mic === ']') and ($mac === '[' || $mac === ']') && strpos($rangeTxt, ','))
+		{
+			list($min, $max) = explode(',', str_replace(array(']', '[', ' '), '', $rangeTxt));
+			if ($max !== '*' && $mac === '[') {$max = intval($max) - $this->getPrecision();}
+			if ($min !== '*' && $mic === ']') {$min = intval($min) + $this->getPrecision();}
+			$this->addRange($min, $max);
+		}
+		return $this;	
 	}
 	
 	function toSolrString()
@@ -105,6 +136,11 @@ class indexer_IntegerFacet extends indexer_Facet
 	{
 		parent::__construct($field.indexer_Field::INTEGER);
 	}
+	
+	function getPrecision()
+	{
+		return 1;
+	}
 }
 
 class indexer_VolatileIntegerFacet extends indexer_Facet
@@ -112,5 +148,34 @@ class indexer_VolatileIntegerFacet extends indexer_Facet
 	function __construct($field)
 	{
 		parent::__construct($field.indexer_Field::INTEGER_VOLATILE);
+	}
+	
+	function getPrecision()
+	{
+		return 1;
+	}
+}
+class indexer_VolatileMultiIntegerFacet extends indexer_Facet
+{
+	function __construct($field)
+	{
+		parent::__construct($field.indexer_Field::INTEGER_MULTI_VOLATILE);
+	}
+	
+	function getPrecision()
+	{
+		return 1;
+	}
+}
+class indexer_MultiIntegerFacet extends indexer_Facet
+{
+	function __construct($field)
+	{
+		parent::__construct($field.indexer_Field::INTEGER_MULTI);
+	}
+	
+	function getPrecision()
+	{
+		return 1;
 	}
 }

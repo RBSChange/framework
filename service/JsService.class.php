@@ -588,9 +588,9 @@ class JsService extends BaseService
 	 */
 	static public function getScriptInit($context = null)
 	{
-		if (is_null($context))
+		if (null === $context)
 		{
-			$context = HttpController::getGlobalContext();
+			$context = Controller::getInstance()->getContext();
 		}
 
 		$attributes = array();

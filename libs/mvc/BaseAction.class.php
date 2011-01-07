@@ -40,7 +40,7 @@ abstract class f_action_BaseAction extends Action
 		$this->m_moduleName = $request->getParameter(K::WEBEDIT_MODULE_ACCESSOR, null);
 		if (is_null($this->m_moduleName))
 		{
-			$this->m_moduleName = $request->getParameter(AG_MODULE_ACCESSOR);
+			$this->m_moduleName = $request->getParameter('module');
 		}
 
 		$classParts = explode('_', get_class($this));

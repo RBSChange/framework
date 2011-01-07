@@ -118,9 +118,10 @@ class ModuleService extends BaseService
 	 */
 	public function getModule($shortModuleName)
 	{
-		if (!$this->moduleExists("modules_" . $shortModuleName))
+		$modules = $this->getModulesObj();
+		if (isset($modules[$shortModuleName]))
 		{
-			throw new UnavailableModuleException($shortModuleName);
+			return $modules[$shortModuleName];
 		}
 		return new c_Module($shortModuleName);
 	}
@@ -215,11 +216,12 @@ class ModuleService extends BaseService
 	{
 		if ($this->modules === null)
 		{
+			$this->initializeIfNeeded();
 			$modules = array();
-			foreach ($this->getModules() as $fullModuleName)
+			foreach ($this->packages as $fullModuleName => $infos)
 			{
 				$shortName = substr($fullModuleName, 8);
-				$modules[$shortName] = new c_Module($shortName);
+				$modules[$shortName] = new c_Module($shortName, $infos);
 			}
 			$this->modules = $modules;
 		}
@@ -662,8 +664,8 @@ class ModuleService extends BaseService
 		{
 			$modules['users'] = true;
 		}
-		$useTopicConstName = 'MOD_' . strtoupper($moduleName) . '_USETOPIC';
-		if (defined($useTopicConstName) && constant($useTopicConstName) == true)
+		$cModule = $this->getModule($moduleName);
+		if ($cModule->isTopicBased())
 		{
 			$modules['website'] = true;
 		}
@@ -678,9 +680,19 @@ class c_Module
 	 */
 	private $name;
 	
-	function __construct($name)
+	/**
+	 * @var array
+	 */
+	private $infos;
+	
+	/**
+	 * @param string $name
+	 * @param array $infos
+	 */
+	function __construct($name, $infos = array())
 	{
 		$this->name = $name;
+		$this->infos = $infos;
 	}
 	
 	/**
@@ -733,6 +745,7 @@ class c_Module
 		return "modules_" . $this->name;
 	}
 	
+	
 	/**
 	 * @return String
 	 */
@@ -740,14 +753,22 @@ class c_Module
 	{
 		return realpath(AG_MODULE_DIR . "/" . $this->name);
 	}
+
+	/**
+	 * @return Boolean
+	 */
+	function isEnabled()
+	{
+		return isset($this->infos['ENABLED']) ? $this->infos['ENABLED'] : false;
+	}
+	
 	
 	/**
 	 * @return Boolean
 	 */
 	function isVisible()
 	{
-		$visibilityConstantName = 'MOD_' . strtoupper($this->name) . '_VISIBLE';
-		return defined($visibilityConstantName) && (constant($visibilityConstantName) === true);
+		return isset($this->infos['VISIBLE']) ? $this->infos['VISIBLE'] : false;
 	}
 	
 	/**
@@ -755,8 +776,15 @@ class c_Module
 	 */
 	function isTopicBased()
 	{
-		$visibilityConstantName = 'MOD_' . strtoupper($this->name) . '_USETOPIC';
-		return defined($visibilityConstantName) && (constant($visibilityConstantName) === true);
+		return isset($this->infos['USETOPIC']) ? $this->infos['USETOPIC'] : false;
+	}
+	
+	/**
+	 * @return Boolean
+	 */
+	function isFolderBased()
+	{
+		return !$this->isTopicBased();
 	}
 	
 	/**
@@ -770,20 +798,12 @@ class c_Module
 	}
 	
 	/**
-	 * @return Boolean
-	 */
-	function isFolderBased()
-	{
-		return !$this->isTopicBased();
-	}
-	
-	/**
 	 * @return String
 	 *
 	 */
 	function getVersion()
 	{
-		return ModuleService::getInstance()->getModuleVersion('modules_' . $this->name);
+		return isset($this->infos['VERSION']) ? $this->infos['VERSION'] : null;
 	}
 	
 	/**
@@ -791,12 +811,15 @@ class c_Module
 	 */
 	function getIconName()
 	{
-		$iconConstantName = 'MOD_' . strtoupper($this->name) . '_ICON';
-		if (!defined($iconConstantName))
-		{
-			return null;
-		}
-		return constant($iconConstantName);
+		return isset($this->infos['ICON']) ? $this->infos['ICON'] : 'package';
+	}
+	
+	/**
+	 * @return String
+	 */
+	function getCategory()
+	{
+		return isset($this->infos['CATEGORY']) ? $this->infos['CATEGORY'] : 'modules';
 	}
 	
 	/**

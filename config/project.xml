@@ -27,12 +27,7 @@
 		<define name="WEB_CACHE_DIR">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'www'</define>
 		<define name="CHANGE_CACHE_PDF">DIRECTORY_SEPARATOR . 'pdf' . DIRECTORY_SEPARATOR . 'tmp'</define>
 
-		<define name="AG_APP_DIR">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'agavi' . DIRECTORY_SEPARATOR</define>
-
-		<define name="AG_WEBAPP_CONTEXT"></define>
 		<define name="AG_DEVELOPMENT_MODE">false</define>
-		
-		<define name="MODE_DEBUG">0</define>
 		
 		<define name="PHPTAL_PHP_CODE_DESTINATION">AG_CACHE_DIR . DIRECTORY_SEPARATOR . 'template/'</define>
 
@@ -45,34 +40,10 @@
 		<define name="AG_LOGIN_MODULE">users</define>
 		<define name="AG_LOGIN_ACTION">Login</define>
 
-		<define name="AG_MODULE_DISABLED_MODULE">website</define>
-		<define name="AG_MODULE_DISABLED_ACTION">Unavailable</define>
-
-		<define name="AG_SECURE_MODULE">users</define>
-		<define name="AG_SECURE_ACTION">Login</define>
-
-		<define name="AG_UNAVAILABLE_MODULE">website</define>
-		<define name="AG_UNAVAILABLE_ACTION">Unavailable</define>
-		<define name="AG_AVAILABLE">true</define>
-
-		<define name="AG_ACTION_ACCESSOR">action</define>
-		<define name="AG_MODULE_ACCESSOR">module</define>
-
 		<define name="AG_CONTENT_TYPE">html</define>
-		<define name="AG_PATH_INFO_ARRAY">SERVER</define>
-		<define name="AG_PATH_INFO_KEY">PATH_INFO</define>
 
-		<define name="AG_URL_FORMAT">GET</define>
-
-		<define name="AG_USE_DATABASE">false</define>
-
-		<define name="AG_USE_LOGGING">true</define>
 		<define name="AG_LOGGING_LEVEL">WARN</define>
-		<define name="AG_USE_DEBUG">true</define>
-
-		<define name="AG_OVERWRITE_WEBAPP_DOCUMENT_MODEL">false</define>
-
-		<define name="AG_USE_SECURITY">true</define>
+		
 		<define name="AG_USER_NAMESPACE">rbs/webedit4</define>
 		<define name="AG_WEBAPP_NAME">WebappName</define>
 
@@ -97,34 +68,15 @@
 		
 		<define name="SECURE_SESSION_BY_IP">false</define>
 		
-		<define name="MODE_DEBUG">0</define>
-		
 		<define name="CHANGE4_CACHE_SERVICE_CLASS">f_persistentdocument_DatabaseCacheService</define>
 		<define name="TRACKER_MODE">mysql</define>
 		<define name="DISABLE_DATACACHE">false</define>
+		
+		<!-- DEPRECATED -->
+		<define name="AG_ACTION_ACCESSOR">action</define>
+		<define name="AG_MODULE_ACCESSOR">module</define>
 	</defines>
-	<!--
-		  Config section :
-		  <config>
-			<name1>
-			  <name2>
-				<entry name="name3">value3</entry>
-				<entry name="name4">value4</entry>
-			  </name2>
-			  <entry name="name5">value5</entry>
-			  ...
-		  <=>
-		  <?php
-		  Framework::$config =
-			array(
-			  'name1' =>
-				array(
-				  'name2' =>
-					array('name3' => 'value3'),
-					array('name4' => 'value4')
-				  'name5' => 'value5'))
-				  ...
-		  -->
+
 	<config>
 		<!-- GENERAL -->
 		<general>
@@ -147,7 +99,8 @@
 			<entry name="googleChartProvider">http://chart.apis.google.com/chart</entry>
 		</charts>
 		
-		<!-- <mongoDB>
+		<!-- 
+		<mongoDB>
       		<authentication>
 				<entry name="username"></entry>
 				<entry name="password"></entry>
@@ -182,7 +135,8 @@
         		<entry name="host">localhost</entry>
         		<entry name="port">11211</entry>
       		</server>
-    	</memcache> -->
+    	</memcache> 
+    	-->
 
 		<injection>
 			<entry name="f_DataCacheService">f_DataCacheFileService</entry>
@@ -218,19 +172,6 @@
 				<entry name="default">webapp</entry>
 				<entry name="read-only">read-only</entry>
 			</connections>
-			<!--
-				Use this to declare a mysql connection named 'webapp' :
-				<webapp>
-					<entry name="class">PDODatabase</entry>
-					<entry name="user">userName</entry>
-					<entry name="password">password</entry>
-					<entry name="database">databaseName</entry>
-					<entry name="host">fullyQualifiedHostnameOrIP</entry>
-					<entry name="protocol">mysql</entry>
-					<entry name="port">3306</entry>
-					<entry name="log_level">0</entry>
-				</webapp>
-				-->
 			<webapp>
 				<entry name="class">PDODatabase</entry>
 				<entry name="user">DatabaseUserAdmin</entry>
@@ -238,7 +179,7 @@
 				<entry name="database">DatabaseName</entry>
 				<entry name="host">localhost</entry>
 				<entry name="protocol">mysql</entry>
-				<!--entry name="port"></entry-->
+				<!--entry name="port">3306</entry-->
 				<entry name="log_level">0</entry>
 			</webapp>
 			<read-only>
@@ -248,7 +189,7 @@
 				<entry name="database">DatabaseName</entry>
 				<entry name="host">localhost</entry>
 				<entry name="protocol">mysql</entry>
-				<!--entry name="port"></entry-->
+				<!--entry name="port">3306</entry-->
 				<entry name="log_level">0</entry>
 			</read-only>
 		</databases>
