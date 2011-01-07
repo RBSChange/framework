@@ -22,8 +22,8 @@ class ClassResolver implements ResourceResolver
 		require_once (FRAMEWORK_HOME . '/util/FileUtils.class.php');
 		require_once (FRAMEWORK_HOME . '/util/StringUtils.class.php');
 		
-		$this->keys = array('%FRAMEWORK_HOME%', '%WEBEDIT_HOME%', '%PROFILE%');
-		$this->reps = array(FRAMEWORK_HOME, WEBEDIT_HOME, PROFILE);
+		$this->keys = array('%FRAMEWORK_HOME%', '%WEBEDIT_HOME%', '%PROFILE%', '%PEAR_DIR%');
+		$this->reps = array(FRAMEWORK_HOME, WEBEDIT_HOME, PROFILE, PEAR_DIR);
 		
 		$this->cacheDir = WEBEDIT_HOME . '/cache/autoload';
 		$this->aopBackupDir = WEBEDIT_HOME . '/cache/aop-backup';
@@ -189,9 +189,11 @@ class ClassResolver implements ResourceResolver
 	protected function getPathsToAnalyse()
 	{
 		return array(
+				array('path' => '%PEAR_DIR%/', 'recursive' => 'true'),
 				array('path' => '%FRAMEWORK_HOME%/', 'recursive' => 'true', 
-						'exclude' => array(0 => 'deprecated', 1 => 'doc', 2 => 'module', 3 => 'webapp')), 
-				array('path' => '%WEBEDIT_HOME%/libs/', 'recursive' => 'true'), 
+						'exclude' => array('deprecated', 'doc', 'module', 'webapp')), 
+				array('path' => '%WEBEDIT_HOME%/libs/', 'recursive' => 'true',
+					'exclude' => array('fckeditor', 'icons', 'pearlibs')),
 				array('path' => '%WEBEDIT_HOME%/build/%PROFILE%/', 'recursive' => 'true'), 
 				array('path' => '%WEBEDIT_HOME%/modules/*/actions'), 
 				array('path' => '%WEBEDIT_HOME%/modules/*/change-commands', 'recursive' => 'true'), 
