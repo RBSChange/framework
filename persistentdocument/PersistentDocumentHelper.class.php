@@ -422,7 +422,14 @@ class DocumentHelper
 		}
 	    return $properties;
     }
-   
+    
+    /**
+     * @return String[] properties that are handled by system and normally not edited by user
+     */
+    public static function getSystemPropertyNames()
+    {
+    	return array("author", "authorid", "creationdate", "modificationdate", "modelversion", "documentversion", "metastring", "publicationstatus", "si18n");
+    }
 
 	/**
 	 * Check if type property is document
