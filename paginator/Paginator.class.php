@@ -70,6 +70,8 @@ class paginator_Paginator extends ArrayObject
 	private $currentItemIndex = 0;
 	private $templateFileName = 'Website-Default-Paginator';
 	private $templateModuleName = 'website';
+	
+	private $pageIndexParamName = self::PAGEINDEX_PARAMETER_NAME;
 	/**
 	 * Index of the current page of paginator
 	 * @var integer
@@ -132,6 +134,22 @@ class paginator_Paginator extends ArrayObject
 				parent::__construct($itemsArray);
 			}
 		}
+	}
+	
+	/**
+	 * @param String $pageIndexParameterName
+	 */
+	public function setPageIndexParameterName($pageIndexParameterName)
+	{
+		$this->pageIndexParamName = $pageIndexParameterName;
+	}
+	
+	/**
+	 * @return String
+	 */
+	public function getPageIndexParameterName()
+	{
+		return $this->pageIndexParamName;
 	}
 
 	/**
@@ -226,6 +244,15 @@ class paginator_Paginator extends ArrayObject
 	{
 		return $this->getPageCount() > 1;
 	}
+	
+	private $anchor;
+	/**
+	 * @param String $anchor the anchor to add to each paginator URL
+	 */
+	public function setAnchor($anchor)
+	{
+		$this->anchor = $anchor;
+	}
 
 	private function buildItems()
 	{
@@ -274,9 +301,8 @@ class paginator_Paginator extends ArrayObject
 			$this->currentUrl  = paginator_Url::getInstanceFromCurrentUrl();
 			$this->currentUrl->setQueryParameter($key, $this->extraParameters);
 		}
-		$this->currentUrl->setQueryParameter($key .'[' .  self::PAGEINDEX_PARAMETER_NAME . ']', $pageIndex);
-		return $this->currentUrl->getStringRepresentation();
-
+		$this->currentUrl->setQueryParameter($key .'[' .  $this->pageIndexParamName . ']', $pageIndex);
+		return $this->currentUrl->getStringRepresentation() . (($this->anchor) ? '#'.$this->anchor : '');
 	}
 
 	/**
