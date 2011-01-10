@@ -22,8 +22,8 @@ class ClassResolver implements ResourceResolver
 		require_once (FRAMEWORK_HOME . '/util/FileUtils.class.php');
 		require_once (FRAMEWORK_HOME . '/util/StringUtils.class.php');
 		
-		$this->keys = array('%FRAMEWORK_HOME%', '%WEBEDIT_HOME%', '%PROFILE%', '%PEAR_DIR%');
-		$this->reps = array(FRAMEWORK_HOME, WEBEDIT_HOME, PROFILE, PEAR_DIR);
+		$this->keys = array('%FRAMEWORK_HOME%', '%WEBEDIT_HOME%', '%PROFILE%');
+		$this->reps = array(FRAMEWORK_HOME, WEBEDIT_HOME, PROFILE);
 		
 		$this->cacheDir = WEBEDIT_HOME . '/cache/autoload';
 		$this->aopBackupDir = WEBEDIT_HOME . '/cache/aop-backup';
@@ -188,8 +188,8 @@ class ClassResolver implements ResourceResolver
 	
 	protected function getPathsToAnalyse()
 	{
-		return array(
-				array('path' => '%PEAR_DIR%/', 'recursive' => 'true'),
+		 
+		$result = array(
 				array('path' => '%FRAMEWORK_HOME%/', 'recursive' => 'true', 
 						'exclude' => array('deprecated', 'doc', 'module', 'webapp')), 
 				array('path' => '%WEBEDIT_HOME%/libs/', 'recursive' => 'true',
@@ -204,6 +204,12 @@ class ClassResolver implements ResourceResolver
 				array('path' => '%WEBEDIT_HOME%/override/modules/*/actions'), 
 				array('path' => '%WEBEDIT_HOME%/override/modules/*/lib/', 'recursive' => 'true'), 
 				array('path' => '%WEBEDIT_HOME%/override/modules/*/views/'));
+				
+		if (defined('PEAR_DIR'))
+		{
+			array_unshift($result, array('path' => PEAR_DIR . '/', 'recursive' => 'true'));
+		}
+		return $result;
 	}
 	
 	/**
