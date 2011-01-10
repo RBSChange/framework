@@ -213,7 +213,7 @@ abstract class Controller
 		{
 			return self::$instance;
 		}
-		throw new Exception('A Controller implementation instance has not been created');
+		return self::newInstance("controller_ChangeController");
 	}
 	
 
@@ -245,15 +245,16 @@ abstract class Controller
 		{
 			if (null === self::$instance)
 			{
-				$object = new $class();
-				if (! ($object instanceof Controller))
+				$controllerClassName = Framework::getConfiguration('mvc/classes/'.$class);
+				$controller = new $controllerClassName();
+				if (! ($controller instanceof Controller))
 				{
 					$error = 'Class "%s" is not of the type Controller';
-					$error = sprintf($error, $class);	
+					$error = sprintf($error, $controllerClassName);	
 					throw new Exception($error);
 				}
 				
-				self::$instance = $object;	
+				self::$instance = $controller;	
 				return self::$instance;
 			}
 			else

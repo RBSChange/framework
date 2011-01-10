@@ -210,6 +210,17 @@
 		<nodes>
 			<!--  <entry name="node1">http://localhost</entry> -->
 		</nodes>
+		
+		<mvc>
+			<classes>
+				<entry name="controller_ChangeController">controller_ChangeController</entry>
+				<entry name="controller_XulController">controller_XulController</entry>
+				<entry name="ChangeSessionStorage">ChangeSessionStorage</entry>	
+				<entry name="ChangeRequest">ChangeRequest</entry>	
+				<entry name="FrameworkSecurityUser">FrameworkSecurityUser</entry>	
+			</classes>	
+		</mvc>
+		
 	</config>
 	
 	<!-- Web browsers compatibility -->

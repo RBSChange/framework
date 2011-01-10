@@ -68,9 +68,10 @@ class Context
 			self::$instance->controller 			= $controller;
 			self::$instance->actionStack			= new ActionStack();
 
-			self::$instance->request =  new ChangeRequest();
-			self::$instance->storage = new ChangeSessionStorage();
-			self::$instance->user = new FrameworkSecurityUser();
+			$classes = Framework::getConfiguration('mvc/classes');
+			self::$instance->request = new $classes['ChangeRequest'];
+			self::$instance->storage = new $classes['ChangeSessionStorage'];
+			self::$instance->user = new $classes['FrameworkSecurityUser'];
 			
 			self::$instance->request->initialize(self::$instance, null);
 			self::$instance->storage->initialize(self::$instance, null);
