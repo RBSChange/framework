@@ -26,6 +26,42 @@ class DocumentHelper
 
 		return false;
 	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument[] $a
+	 * @param f_persistentdocument_PersistentDocument[] $b
+	 */
+	public static function documentArrayEquals($a, $b)
+	{
+		if ($a === $b) {return true;}
+		if ($a instanceof f_persistentdocument_PersistentDocumentArray)
+		{
+			$a = $a->getArrayCopy();
+		}
+		elseif (!is_array($a)) 
+		{
+			return false;
+		}
+		
+		if ($b instanceof f_persistentdocument_PersistentDocumentArray)
+		{
+			$b = $b->getArrayCopy();
+		}		
+		elseif (!is_array($b)) 
+		{
+			return false;
+		}
+		
+		if (count($a) === count($b))
+		{
+			for ($i = 0; $i < count($a); $i++) 
+			{
+				if (!self::equals($a[i], $b[i])) {return false;}
+			}
+			return true;
+		}
+		return false;
+	}
 
 	/**
 	 * Returns the document instance with ID $id.
