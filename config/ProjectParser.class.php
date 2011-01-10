@@ -197,7 +197,10 @@ class config_ProjectParser
 			$configArray['defines']['AG_DEVELOPMENT_MODE'] = true;
 		}
 		
-		$this->constructBrowsersList($configArray);
+		if (!isset($configArray['config']['browsers']['frontoffice']) || !is_array($configArray['config']['browsers']['frontoffice']))
+		{
+			$configArray['config']['browsers']['frontoffice'] = array();
+		}
 				
 		$defineLines = array();
 		foreach ($configArray['defines'] as $constName => $value) 
@@ -283,30 +286,6 @@ class config_ProjectParser
 			}
 		}
 		return 'define(\'' . $name . '\', ' . $value . ');';
-	}
-
-	/**
-	 * @param array $array
-	 */
-	private function constructBrowsersList(&$array)
-	{
-		if (!isset($array['browsers']))
-		{
-			$array['config']['browsers'] = array('frontoffice' => array(), 'backoffice' => array());
-		}
-		else
-		{
-			if (!isset($array['browsers']['frontoffice']))
-			{
-				$array['browsers']['frontoffice'] = array();
-			}
-			if (!isset($array['browsers']['backoffice']))
-			{
-				$array['browsers']['backoffice'] = array();
-			}
-			$array['config']['browsers'] = $array['browsers'];
-			unset($array['browsers']);
-		}
 	}
 
 	/**

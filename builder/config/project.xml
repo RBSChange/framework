@@ -34,17 +34,16 @@
 	     		-->
 	     	</media>
 	     </modules> 
+	     <!-- Web browsers compatibility -->
+	     <browsers>
+	     	<frontoffice>
+	    	<!-- 
+	    		<browser name="ie">
+	    			<version name="0">7.0</version>
+	    			<version name="1">8.0</version>
+	    		</browser>	
+	    	 -->
+	    	</frontoffice>
+	     </browsers>    
 	</config>
-	
-    <!-- Web browsers compatibility -->
-    <browsers>
-    	<frontoffice>
-    	<!-- 
-    		<browser name="ie">
-    			<version>7.0</version>
-    			<version>8.0</version>
-    		</browser>	
-    	 -->
-    	</frontoffice>
-    </browsers>    
 </project>
