@@ -50,15 +50,16 @@ class import_ScriptReader extends BaseService
 	/**
 	 * @param String $moduleName ex : website
 	 * @param String $scriptName ex : defaultsite.xml
+	 * @param array $attributes
 	 */
-	public function executeModuleScript($moduleName, $scriptName)
+	public function executeModuleScript($moduleName, $scriptName, $attributes = array())
 	{
 		$path = FileResolver::getInstance()->setPackageName('modules_' . $moduleName)->setDirectory('setup')->getPath($scriptName);
 		if ($path === null)
 		{
 			throw new Exception("Could not find any script named $scriptName for module $moduleName");
 		}
-		$this->execute($path);
+		$this->execute($path, $attributes);
 	}
 
 	/**
