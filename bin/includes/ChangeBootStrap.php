@@ -1312,10 +1312,33 @@ class c_ChangeBootStrap
 			if ($pearInfo['writeable'])
 			{
 				$incPath = $pearInfo['include_path'];
-				f_util_FileUtils::cp($localPath, $pearInfo['include_path'], f_util_FileUtils::OVERRIDE + f_util_FileUtils::APPEND);
-			}	
+				$projectPath = $incPath .'/'. basename($localPath);
+				
+				f_util_FileUtils::cp($localPath, $incPath, f_util_FileUtils::OVERRIDE + f_util_FileUtils::APPEND);
+				
+				$analyzer = cboot_ClassDirAnalyzer::getInstance();
+				foreach (scandir($localPath) as $newPearFile)
+				{
+					if ($newPearFile == "." || $newPearFile == "..")
+					{
+						continue;
+					}
+					
+					$toAutoload = $incPath.'/'.$newPearFile;
+					if (is_file($toAutoload))
+					{
+						$analyzer->appendFile($toAutoload);
+					}
+					else if (is_dir($toAutoload))
+					{
+						$analyzer->appendRealDir($toAutoload);
+					}
+				}
+				return true;
+			}
+			return false;
 		}
-		$this->appendToAutoload($projectPath);		
+		$this->appendToAutoload($projectPath);
 		return true;
 	}
 	
