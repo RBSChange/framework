@@ -239,7 +239,10 @@ class f_AOP
 		$this->alteredCount[$className]++;
 		$aopPath = ClassResolver::getInstance()->getAOPPath($replacedClassName);
 		f_util_FileUtils::writeAndCreateContainer($aopPath, $newCode, f_util_FileUtils::OVERRIDE);
-		ClassResolver::getInstance()->appendToAutoloadFile($replacedClassName, $aopPath);
+		foreach ($this->getDeclaredClasses($aopPath) as $declaredClassName)
+		{
+			ClassResolver::getInstance()->appendToAutoloadFile($declaredClassName, $aopPath, true);
+		}
 
 		ob_start();
 		echo "<?php\n";
@@ -268,6 +271,31 @@ class f_AOP
 
 		// end echos
 		return $newReplacerCode;
+	}
+
+	/**
+	 * @param String $path
+	 */
+	protected function getDeclaredClasses($path)
+	{
+		if (isset($this->alteredFiles[$path]))
+		{
+			$tokens = token_get_all(join("\n", $this->alteredFiles[$path]));
+		}
+		else
+		{
+			$tokens = token_get_all(f_util_FileUtils::read($path));
+		}
+		$classNames = array();
+		foreach ($tokens as $index => $token)
+		{
+			if ($token[0] == T_CLASS || $token[0] == T_INTERFACE)
+			{
+				$classNames[] = $tokens[$index + 2][1];
+			}
+		}
+		
+		return $classNames;
 	}
 
 
