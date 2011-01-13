@@ -100,7 +100,6 @@ class config_ProjectParser
 		
 		$configArray = array();
 		$this->loadXmlConfigFile(WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'framework' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'project.xml', $configArray);
-		$this->loadXmlConfigFile(WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'project.xml', $configArray);
 		
 		
 		
@@ -145,6 +144,7 @@ class config_ProjectParser
 			$configArray['config']['injection']['document'] = $docInjections;
 		}		
 		
+		$this->loadXmlConfigFile(WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'project.xml', $configArray);
 		$profilFile = $configDir . DIRECTORY_SEPARATOR . "project.".$currentProfile.".xml";
 		if (is_readable($profilFile))
 		{
