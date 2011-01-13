@@ -4142,7 +4142,7 @@ abstract class f_persistentdocument_PersistentProvider
 		}
 		else
 		{
-			$sql .= " ORDER BY uac.entry_date " . $sortDirection;
+			$sql .= " ORDER BY uac.entry_id " . $sortDirection;
 		}
 		return $sql . " LIMIT " . intval($rowIndex) .", " . intval($rowCount);
 	}
