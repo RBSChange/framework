@@ -42,8 +42,15 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 					unset($this->attributes[$key]);
 				}
 			}
-
-			if (isset($this->attributes['byDocumentId']))
+			
+			if (isset($this->attributes['byRefid']))
+			{
+				$docElem = $this->script->getDocumentElementById($this->attributes['byRefid']);
+				$document = $docElem->getPersistentDocument();
+				$model = $document->getPersistentModel();
+				unset($this->attributes['byRefid']);
+			}
+			else if (isset($this->attributes['byDocumentId']))
 			{
 				$document = DocumentHelper::getDocumentInstance($this->attributes['byDocumentId']);
 				$model = $document->getPersistentModel();
