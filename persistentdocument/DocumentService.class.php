@@ -1838,8 +1838,9 @@ class f_persistentdocument_DocumentService extends BaseService
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
 	 * @param string $statusInfo
+	 * @param array $substitutions
 	 */
-	protected final function setActivePublicationStatusInfo($document, $statusInfo)
+	protected final function setActivePublicationStatusInfo($document, $statusInfo, $substitutions = null)
 	{
 		$metaName = 'ActPubStatInf'.RequestContext::getInstance()->getLang();
 		if ($document->hasMeta($metaName))
@@ -1853,6 +1854,30 @@ class f_persistentdocument_DocumentService extends BaseService
 		{
 			$document->setMeta($metaName, $statusInfo);
 		}
+		
+		$metaSubstName = 'ActPubStatInfSubst'.RequestContext::getInstance()->getLang();
+		if ($statusInfo !== null)
+		{
+			$subst = f_util_ArrayUtils::isNotEmpty($substitutions) ? serialize($substitutions) : null;
+			if ($document->hasMeta($metaSubstName))
+			{
+				if ($document->getMeta($metaSubstName) !== $subst)
+				{
+					$document->setMeta($metaSubstName, $subst);
+				}
+			}
+			else if ($subst !== null)
+			{
+				$document->setMeta($metaSubstName, $subst);
+			}
+		}
+		else
+		{
+			if ($document->hasMeta($metaSubstName))
+			{
+				$document->setMeta($metaSubstName, null);
+			}
+		}
 	}
 	
 	/**
@@ -1865,6 +1890,27 @@ class f_persistentdocument_DocumentService extends BaseService
 		{
 			$document->setMeta($metaName, null);
 		}
+		
+		$metaSubstName = 'ActPubStatInfSubst'.RequestContext::getInstance()->getLang();
+		if ($document->hasMeta($metaSubstName))
+		{
+			$document->setMeta($metaSubstName, null);
+		}
+	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param string $lang
+	 * @return string
+	 */
+	public final function getUIActivePublicationStatusInfo($document, $lang)
+	{
+		$substitutions = null;
+		if ($document->hasMeta('ActPubStatInfSubst'.$lang))
+		{
+			$substitutions = unserialize($document->getMeta('ActPubStatInfSubst'.$lang));
+		}
+		return f_Locale::translateUI($document->getMeta('ActPubStatInf'.$lang), $substitutions);
 	}
 
 	/**
@@ -1899,10 +1945,12 @@ class f_persistentdocument_DocumentService extends BaseService
 			$this->tm->beginTransaction();
 
 			$this->unpublishDocument($document, array("cause" => "deactivate"));
-
 			$document->setPublicationstatus('DEACTIVATED');
+			$this->removeActivePublicationStatusInfo($document);
 			$this->pp->updateDocument($document);
+			$this->saveMeta($document);
 			$eventName = 'persistentDocumentDeactivated';
+			
 			$this->tm->commit();
 		}
 		catch (Exception $e)
@@ -1948,10 +1996,10 @@ class f_persistentdocument_DocumentService extends BaseService
 			$this->tm->beginTransaction();
 
 			$this->unpublishDocument($document, array("cause" => "file"));
-
-
 			$document->setPublicationstatus('FILED');
+			$this->removeActivePublicationStatusInfo($document);
 			$this->pp->updateDocument($document);
+			$this->saveMeta($document);
 			$eventName = 'persistentDocumentFiled';
 
 			$this->tm->commit();
@@ -2001,10 +2049,10 @@ class f_persistentdocument_DocumentService extends BaseService
 			$this->tm->beginTransaction();
 
 			$this->unpublishDocument($document, array("cause" => "putInTrash"));
-
-
 			$document->setPublicationstatus('TRASH');
+			$this->removeActivePublicationStatusInfo($document);
 			$this->pp->updateDocument($document);
+			$this->saveMeta($document);
 			$eventName = 'persistentDocumentInTrash';
 
 			$this->tm->commit();
@@ -2718,7 +2766,7 @@ class f_persistentdocument_DocumentService extends BaseService
 				}
 				else if ($status === 'ACTIVE' && $document->hasMeta('ActPubStatInf'.$lang))
 				{
-					$data['publication']['status'] .= ' (' . f_Locale::translateUI($document->getMeta('ActPubStatInf'.$lang)) . ')';
+					$data['publication']['status'] .= ' (' . $this->getUIActivePublicationStatusInfo($document, $lang) . ')';
 				}
 			}
 
