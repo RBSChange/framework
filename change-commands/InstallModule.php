@@ -120,7 +120,7 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 			return $this->quitError("Unable to link '$moduleName' in project");
 		}
 		
-		if (!$bootStrap->updateProjectDependencies(c_ChangeBootStrap::$DEP_MODULE, $moduleName, $moduleVersion, $hotFix))
+		if (!isset($computedDeps['module'][$moduleName]) && !$bootStrap->updateProjectDependencies(c_ChangeBootStrap::$DEP_MODULE, $moduleName, $moduleVersion, $hotFix))
 		{
 			return $this->quitError("Unable to update file project dependencies change.xml");
 		}
