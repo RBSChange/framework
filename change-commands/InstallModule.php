@@ -95,7 +95,7 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 		}
 		
 		$computedDeps = $this->getComputedDeps();
-		if (isset($computedDeps['module'][$moduleName]))
+		if (ModuleService::getInstance()->isInstalled($moduleName) && isset($computedDeps['module'][$moduleName]))
 		{
 			$installedVersion = $computedDeps['module'][$moduleName]['version'];
 			$this->message("$moduleName module is already installed in version ".$installedVersion);
@@ -130,11 +130,14 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 		
 		$this->changecmd("compile-all");
 		$this->changecmd("generate-database");
+		$this->changecmd("import-init-data", array($moduleName));		
+		$this->changecmd("init-patch-db", array("modules_$moduleName"));
 		
 		$updatedComputedDebs = $this->getComputedDeps();
 		foreach ($updatedComputedDebs['module'] as $mN => $ignore) 
 		{
-			if (!isset($computedDeps['module'][$mN]))
+			// Import-init-data for all the other modules automatically installed with $moduleName
+			if (!isset($computedDeps['module'][$mN]) && $mN !== $moduleName)
 			{
 				$this->changecmd("import-init-data", array($mN));
 				$this->changecmd("init-patch-db", array("modules_".$mN));

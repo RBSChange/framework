@@ -153,7 +153,7 @@ class ModuleService extends BaseService
 	 */
 	public function isInstalled($moduleName)
 	{
-		return $this->moduleExists($moduleName);
+		return $this->moduleExists($moduleName) && $this->getImportInitDataDate($moduleName) !== null;
 	}
 	
 	/**
@@ -444,6 +444,17 @@ class ModuleService extends BaseService
 		
 		$this->rootNodeIds[$moduleName] = $rootNodeId;
 		return $rootNodeId;
+	}
+	
+	/**
+	 * 
+	 * @param String $moduleName the module name (eg : youpi)
+	 * @return String or null the package's import-init-data date
+	 */
+	public function getImportInitDataDate($moduleName)
+	{
+		$pp = f_persistentdocument_PersistentProvider::getInstance();
+		return $pp->getSettingValue('modules_' . $moduleName, 'init-data');
 	}
 	
 
