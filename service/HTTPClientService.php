@@ -137,29 +137,24 @@ class HTTPClient
 		{
 			$this->setOption(CURLOPT_PROXY, $this->proxyHost.':'.$this->proxyPort, $ch);
 		}
+		$this->setOption(CURLOPT_FOLLOWLOCATION, 1, $ch);
+		$tmpCookiePath = f_util_FileUtils::getTmpFile();
+		$this->setOption(CURLOPT_COOKIEJAR, $tmpCookiePath, $ch);
+		$this->setOption(CURLOPT_COOKIEFILE, $tmpCookiePath, $ch);
 		$this->setOption(CURLOPT_TIMEOUT, 300, $ch);
 		$this->setOption(CURLOPT_CONNECTTIMEOUT, 5, $ch);
-		if (curl_setopt($ch, CURLOPT_FILE, $fp) === false)
-		{
-			fclose($fp);
-			throw new Exception("Could not set curl option for download");
-		}
+		$this->setOption(CURLOPT_FILE, $fp, $ch);
 
 		// FIXME anything to do with data ?
 		$data = curl_exec($ch);
-		$errno = curl_errno($this->curlResource);
+		f_util_FileUtils::unlink($tmpCookiePath);
+		$errno = curl_errno($ch);
+		curl_close($ch);
+		fclose($fp);
 		if ($errno)
 		{
 			throw new Exception("Error curlerrno: ".$errno);
-		}
-		$contentLength = curl_getinfo($ch, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
-		curl_close($ch);
-		fclose($fp);
-		$dlLen = filesize($tmpPath);
-		if ($dlLen == 0 || ($contentLength !== null && $contentLength != $dlLen))
-		{
-			throw new Exception("Partial download: ($dlLen/$contentLength)");
-		}
+		}		
 		if (!rename($tmpPath, $path))
 		{
 			throw new Exception("Could not create $path");
