@@ -139,10 +139,10 @@ class HTTPClient
 		}
 		$this->setOption(CURLOPT_TIMEOUT, 300, $ch);
 		$this->setOption(CURLOPT_CONNECTTIMEOUT, 5, $ch);
-		if (curl_setopt($ch, CURLOPT_FILE, $fp) === false)
+		$this->setOption(CURLOPT_FILE, $fp, $ch);
+		if ($this->followRedirects)
 		{
-			fclose($fp);
-			throw new Exception("Could not set curl option for download");
+			$this->setOption(CURLOPT_FOLLOWLOCATION, true, $ch);
 		}
 
 		// FIXME anything to do with data ?
