@@ -169,11 +169,19 @@ class ChangeSessionStorage extends SessionStorage
 			} 
 			else if ($md5 !== $currentKey)
 			{
+				if (Framework::isInfoEnabled())
+				{
+					Framework::info(__METHOD__ . ' CLEAN AND REGENERATE SESSIONID');
+				}
 				session_regenerate_id();
 				$_SESSION = array();
 			}
 			else if ($this->read('SecurePort') !== $_SERVER["SERVER_PORT"])
 			{
+				if (Framework::isInfoEnabled())
+				{
+					Framework::info(__METHOD__ . ' REGENERATE SESSIONID');
+				}
 				session_regenerate_id();
 				$this->write('SecurePort', $_SERVER["SERVER_PORT"]);	
 			}
