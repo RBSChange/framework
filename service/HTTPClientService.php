@@ -144,6 +144,10 @@ class HTTPClient
 		$this->setOption(CURLOPT_TIMEOUT, 300, $ch);
 		$this->setOption(CURLOPT_CONNECTTIMEOUT, 5, $ch);
 		$this->setOption(CURLOPT_FILE, $fp, $ch);
+		if ($this->followRedirects)
+		{
+			$this->setOption(CURLOPT_FOLLOWLOCATION, true, $ch);
+		}
 
 		// FIXME anything to do with data ?
 		$data = curl_exec($ch);
