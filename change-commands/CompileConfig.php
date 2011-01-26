@@ -101,7 +101,9 @@ Where options in:
 				}
 				else
 				{
-					$this->getParent()->executeCommand("generate-database");	
+					$parent = $this->getParent();
+					$parent->executeCommand("generate-database");
+					$parent->executeCommand("compile-editors-config"); 	
 				}
 			}
 			if ($old["defines"]["CHANGE_USE_CORRECTION"] != $current["defines"]["CHANGE_USE_CORRECTION"]
