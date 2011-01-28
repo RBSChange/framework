@@ -43,7 +43,7 @@ class commands_<{$module}>_<{$name}> extends commands_AbstractChange<{$type}>Com
 //		
 //		// Generate options in $components.		
 //		
-//		return array_diff($components, $params);
+//		return $components;
 //	}
 	
 	/**
