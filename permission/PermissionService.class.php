@@ -993,6 +993,10 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 					$userQuery->add(Restrictions::eq('documentId', $defPoint));
 					$groupQuery->add(Restrictions::eq('documentId', $defPoint));
 				}
+				else
+				{
+					return $result;
+				}
 			}
 
 			$userAcls = $this->pp->find($userQuery);
