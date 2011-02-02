@@ -14,7 +14,7 @@ class indexer_BooleanQuery extends indexer_QueryBase implements indexer_Query
 	 */
 	private $type = null;
 
-	private function __construct($type)
+	protected function __construct($type)
 	{
 		$this->type = $type;
 	}

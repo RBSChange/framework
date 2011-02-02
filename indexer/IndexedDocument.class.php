@@ -15,14 +15,16 @@ final class indexer_Field
 	
 	// Dynamic (and stored) fields
 	const STRING = '_idx_str';
+	const STRING_MULTI = '_idx_mul_str';
 	const DATE = '_idx_dt';
 	const INTEGER = '_idx_int';
 	const INTEGER_MULTI = '_idx_mul_int';
 	const FLOAT = '_idx_float';
 	
 	// Dynamic (non stored) fields.
-	// WARN: this only works with schema >= 3.0.3
+	// WARN: this only works with schema >= 3.5
 	const STRING_VOLATILE = '_vol_str';
+	const STRING_MULTI_VOLATILE = '_vol_mul_str';
 	const DATE_VOLATILE = '_vol_dt';
 	const INTEGER_VOLATILE = '_vol_int';
 	const INTEGER_MULTI_VOLATILE = '_vol_mul_int';
@@ -69,6 +71,14 @@ final class indexer_Field
 	/**
 	 * @return String
 	 */
+	static function getStringMultiFieldName($baseName)
+	{
+		return $baseName . self::STRING_MULTI;
+	}
+	
+	/**
+	 * @return String
+	 */
 	static function getVolatileStringFieldName($baseName)
 	{
 		if (indexer_SolrManager::hasVolatileDynamicFields())
@@ -76,6 +86,18 @@ final class indexer_Field
 			return $baseName . self::STRING_VOLATILE;
 		}
 		return $baseName . self::STRING;
+	}
+	
+	/**
+	 * @return String
+	 */
+	static function getVolatileStringMultiFieldName($baseName)
+	{
+		if (indexer_SolrManager::hasVolatileDynamicFields())
+		{
+			return $baseName . self::STRING_MULTI_VOLATILE;
+		}
+		return $baseName . self::STRING_MULTI;
 	}
 	
 	/**
@@ -145,7 +167,7 @@ final class indexer_Field
 	static function getSimpleFieldName($fieldName)
 	{
 		$matches = null;
-		if (preg_match('/^(.*)_(idx|vol)_(str|float|int|mul_int|dt)$/', $fieldName, $matches))
+		if (preg_match('/^(.*)_(idx|vol)_(str|mul_str|float|int|mul_int|dt)$/', $fieldName, $matches))
 		{
 			return $matches[1];
 		}
@@ -164,11 +186,21 @@ class indexer_IndexedDocument
 	 * @param String $name
 	 * @param String $value
 	 */
-	public function setStringField($name, $value)
+	public function setStringField($name, $value, $multi = false)
 	{
 		if (!is_null($value))
 		{
-			$this->fields[$name . indexer_Field::STRING] = array('value' => $value, 'type' => indexer_Field::INDEXED | indexer_Field::STORED);
+			if ($multi)
+			{
+				$type = indexer_Field::INDEXED | indexer_Field::MULTIVALUED | indexer_Field::STORED;
+				$suffix = indexer_Field::STRING_MULTI;
+			}
+			else 
+			{
+				$type = indexer_Field::INDEXED | indexer_Field::STORED;
+				$suffix = indexer_Field::STRING;
+			}
+			$this->fields[$name . $suffix] = array('value' => $value, 'type' => $type);
 		}
 	}
 	
@@ -178,12 +210,21 @@ class indexer_IndexedDocument
 	 * @param String $name
 	 * @param String $value
 	 */
-	public function setVolatileStringField($name, $value)
+	public function setVolatileStringField($name, $value, $multi = false)
 	{
 		if (!is_null($value))
 		{
-			$suffix = (indexer_SolrManager::hasVolatileDynamicFields()) ? indexer_Field::STRING_VOLATILE : indexer_Field::STRING;
-			$this->fields[$name . $suffix] = array('value' => $value, 'type' => indexer_Field::INDEXED);
+			if($multi)
+			{
+				$type = indexer_Field::INDEXED | indexer_Field::MULTIVALUED | indexer_Field::STORED;
+				$suffix = (indexer_SolrManager::hasVolatileDynamicFields()) ? indexer_Field::STRING_MULTI_VOLATILE : indexer_Field::STRING_MULTI;
+			}
+			else 
+			{
+				$type = indexer_Field::INDEXED | indexer_Field::STORED;
+				$suffix = (indexer_SolrManager::hasVolatileDynamicFields()) ? indexer_Field::STRING_VOLATILE : indexer_Field::STRING;
+			}
+			$this->fields[$name . $suffix] = array('value' => $value, 'type' => $type);
 		}
 	}
 	

@@ -114,6 +114,14 @@ class indexer_VolatileStringFacet extends indexer_Facet
 	}
 }
 
+class indexer_VolatileMultiStringFacet extends indexer_Facet
+{
+	function __construct($field)
+	{
+		parent::__construct($field.indexer_Field::STRING_MULTI_VOLATILE);
+	}
+}
+
 class indexer_FloatFacet extends indexer_Facet
 {
 	function __construct($field)

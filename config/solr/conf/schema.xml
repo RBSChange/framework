@@ -306,6 +306,7 @@
 
 		<!-- Some non-localized dynamic fields -->
 		<dynamicField name="*_idx_str" type="string" indexed="true" stored="true" omitNorms="true" />
+		<dynamicField name="*_idx_mul_str" type="string" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
 		<dynamicField name="*_idx_float" type="sfloat" indexed="true" stored="true" />
 		<dynamicField name="*_idx_int" type="sint" indexed="true" stored="true" />
 		<dynamicField name="*_idx_mul_int" type="sint" indexed="true" stored="false" multiValued="true" />
@@ -313,6 +314,7 @@
 		
 		<!-- Some non-localized dynamic non stored fields -->
 		<dynamicField name="*_vol_str" type="string" indexed="true" stored="false" omitNorms="true" />
+		<dynamicField name="*_vol_mul_str" type="string" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
 		<dynamicField name="*_vol_float" type="sfloat" indexed="true" stored="false" />
 		<dynamicField name="*_vol_int" type="sint" indexed="true" stored="false" />
 		<dynamicField name="*_vol_mul_int" type="sint" indexed="true" stored="false" multiValued="true" />
