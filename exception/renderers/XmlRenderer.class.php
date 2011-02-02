@@ -30,11 +30,22 @@ class exception_XmlRenderer extends exception_Renderer
 					continue;
 				}
 				
-				// grab the class name from the file
-				// (this only works with properly named classes)
-				$tClass = Toolkit::extractClassName($traceData[$i]['file']);
+
 				
 				$tFile = $traceData[$i]['file'];
+				
+				$filename = basename($tFile);
+				$pattern = '/(.*?)\.(class|interface)\.php/i';
+				$match = null;
+				if (preg_match($pattern, $filename, $match))
+				{
+					$tClass = $match[1];
+				}
+				else
+				{
+					$tClass = null;
+				}
+  
 				$tFunction = $traceData[$i]['function'];
 				$tLine = $traceData[$i]['line'];
 				

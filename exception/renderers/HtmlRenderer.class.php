@@ -34,9 +34,17 @@ class exception_HtmlRenderer extends exception_Renderer
 				    continue;
 				}
 
-				// grab the class name from the file
-				// (this only works with properly named classes)
-				$tClass = Toolkit::extractClassName($traceData[$i]['file']);
+				$filename = basename($tFile);
+				$pattern = '/(.*?)\.(class|interface)\.php/i';
+				$match = null;
+				if (preg_match($pattern, $filename, $match))
+				{
+					$tClass = $match[1];
+				}
+				else
+				{
+					$tClass = null;
+				}
 
 				$tFile      = $traceData[$i]['file'];
 				$tFunction  = $traceData[$i]['function'];
