@@ -1129,23 +1129,41 @@ class TagService extends BaseService
 	 * @param f_persistentdocument_PersistentDocument $document
 	 * @return website_persistentdocument_page or null
 	 */
+	/**
+	 * Returns the detail page for the given $document.
+	 *
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @return website_persistentdocument_page or null
+	 */
 	public function getDetailPageForDocument($document)
 	{
-		if (!ModuleService::getInstance()->isInstalled('modules_website'))
-		{
-			return null;
-		}
-		
 		$model = $document->getPersistentModel();
+		$detailPage = $this->getDetailPageByModel($model, $document);
+		if ($detailPage)
+		{
+			return $detailPage;
+		}
+		foreach ($model->getAncestorModelNames() as $modelName)
+		{
+			$model = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($modelName);
+			$detailPage = $this->getDetailPageByModel($model, $document);
+			if ($detailPage)
+			{
+				return $detailPage;
+			}
+		}
+		return null;
+	}
+	/**
+	 * @param moduleName
+	 * @param documentName
+	 * @param document
+	 */
+	private function getDetailPageByModel($model, $document)
+	{
 		$moduleName = $model->getModuleName();
 		$documentName = $model->getDocumentName();
 						
-		if ($model->isInjectedModel())
-		{
-			$documentName = $model->getOriginalDocumentName();
-			$moduleName = $model->getOriginalModuleName();
-		}
-
 		$tags = $this->getAvailableTags();
 		$tag = 'functional_' . $moduleName . '_' . $documentName .'-detail';
 		
@@ -1178,7 +1196,6 @@ class TagService extends BaseService
 		{
 			return $this->getContextualDocument($tag, $website);	
 		}
-		
 		return null;
 	}
 
