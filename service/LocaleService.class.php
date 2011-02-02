@@ -1079,6 +1079,31 @@ class LocaleService extends BaseService
 	}
 	
 	/**
+	 * @param string $text
+	 * @return string
+	 */
+	public function translateText($text)
+	{
+		if (f_util_StringUtils::isEmpty($text)) {return $text;}
+		if (preg_match_all('/\$\{(trans|transui):([^}]*)\}/', $text, $matches, PREG_SET_ORDER))
+		{
+			$search = array();
+			$replace = array();
+			$rc = RequestContext::getInstance();
+			foreach ($matches as $infos) 
+			{
+				$search[] = $infos[0];
+				$lang = ($infos[1] === 'transui') ? $rc->getUILang() : $rc->getLang();
+				list($key, $formatters, $replacements) = $this->parseTransString($infos[2]);
+				$replace[] = $this->formatKey($lang, $key, $formatters, $replacements);
+			}
+			$text = str_replace($search, $replace, $text);
+		}
+		return $text;
+	}
+	
+	
+	/**
 	 * @example formatKey('fr', 'f.boolean.true')
 	 * @param string $lang
 	 * @param string $cleanKey

@@ -131,28 +131,7 @@ class f_util_TagReplacer {
 				$content = str_replace($toreplace, $replacements, $content);
 			}
 		}
-		if (preg_match_all('/\$\{(trans|transui):([^}]*)\}/', $content, $matches, PREG_SET_ORDER))
-		{
-			$ls = LocaleService::getInstance();
-			$search = array();
-			$replace = array();
-			foreach ($matches as $infos) 
-			{
-				$search[] = $infos[0];
-				if ($infos[1] === 'transui')
-				{
-					 $lang = RequestContext::getInstance()->getUILang();
-				}
-				else
-				{
-					 $lang = RequestContext::getInstance()->getLang();
-				}
-				list($key, $formatters, $replacements) = $ls->parseTransString($infos[2]);
-				$replace[] = $ls->formatKey($lang, $key, $formatters, $replacements);
-			}
-			$content = str_replace($search, $replace, $content);
-		}
-		return $content;
+		return LocaleService::getInstance()->translateText($content);
 	}
 
 	protected function getTranslation($label)
