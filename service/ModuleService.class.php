@@ -453,8 +453,12 @@ class ModuleService extends BaseService
 	 */
 	public function getImportInitDataDate($moduleName)
 	{
+		if (substr($moduleName, 0, 8) !== 'modules_')
+		{
+			$moduleName = 'modules_' . $moduleName;
+		}
 		$pp = f_persistentdocument_PersistentProvider::getInstance();
-		return $pp->getSettingValue('modules_' . $moduleName, 'init-data');
+		return $pp->getSettingValue($moduleName, 'init-data');
 	}
 	
 
