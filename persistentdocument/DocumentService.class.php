@@ -2835,8 +2835,31 @@ class f_persistentdocument_DocumentService extends BaseService
 		return $data;
 	}
 	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param string $moduleName
+	 * @param string $treeType
+	 * @param array<string, string> $nodeAttributes
+	 */
+	public function addTreeAttributes($document, $moduleName, $treeType, &$nodeAttributes)
+	{
+		$document->addTreeAttributesCompatibility($moduleName, $treeType, $nodeAttributes);
+	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param String[] $propertiesName
+	 * @param Array $datas
+	 */
+	public function addFormProperties($document, $propertiesName, &$datas)
+	{
+		if (f_util_ClassUtils::methodExists($document, 'addFormProperties'))
+		{
+			$document->addFormProperties($propertiesName, $datas);
+		}
+	}
+	
 	// Deprecated
-
 	/**
 	 * @deprecated (will be removed in 4.0) use TagService->addTag
 	 */

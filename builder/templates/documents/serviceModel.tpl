@@ -384,4 +384,24 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 //	{
 //		return array('module' => '<{$module}>', 'template' => '<{$moduleUCFirst}>-Inc-<{$nameUCFirst}>ResultDetail');
 //	}
+
+	/**
+	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param string $moduleName
+	 * @param string $treeType
+	 * @param array<string, string> $nodeAttributes
+	 */
+//	public function addTreeAttributes($document, $moduleName, $treeType, &$nodeAttributes)
+//	{
+//	}
+	
+	/**
+	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param String[] $propertiesName
+	 * @param Array $datas
+	 */
+//	public function addFormProperties($document, $propertiesName, &$datas)
+//	{
+//	}
+		
 }

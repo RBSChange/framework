@@ -1195,26 +1195,6 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 		return 'PUBLICATED' == $this->getPublicationstatus();
 	}
 
-	/**
-	 * @param string $moduleName
-	 * @param string $treeType
-	 * @param array<string, string>
-	 */
-	public final function buildTreeAttributes($moduleName, $treeType, &$nodeAttributes)
-	{
-		$this->addTreeAttributes($moduleName, $treeType, $nodeAttributes);
-		return $nodeAttributes;
-	}
-
-	/**
-	 * @param string $moduleName
-	 * @param string $treeType
-	 * @param array<string, string> $nodeAttributes
-	 */
-	protected function addTreeAttributes($moduleName, $treeType, &$nodeAttributes)
-	{
-		// empty
-	}
 
 	// Metadata management
 
@@ -1422,5 +1402,16 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 	public function getModifiedProperties()
 	{
 		return $this->getModifiedPropertyNames();
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0) use <YourDocumentService>::addTreeAttributes
+	 */
+	public function addTreeAttributesCompatibility($moduleName, $treeType, &$nodeAttributes)
+	{
+		if (f_util_ClassUtils::methodExists($this, 'addTreeAttributes'))
+		{
+			$this->addTreeAttributes($moduleName, $treeType, $nodeAttributes);
+		}
 	}
 }

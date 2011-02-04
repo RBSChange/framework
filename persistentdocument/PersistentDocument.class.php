@@ -257,13 +257,6 @@ interface f_persistentdocument_PersistentDocument
 	public function isCorrection();
 
 	/**
-	 * @param string $moduleName
-	 * @param string $treeType
-	 * @param array<string, string>
-	 */
-	function buildTreeAttributes($moduleName, $treeType, &$nodeAttributes);
-
-	/**
 	 * Retourne un nouveau document du meme type et y duplique la valeur de toutes les propriété pour
 	 * la langue en cours.
 	 * @param Boolean $recursive

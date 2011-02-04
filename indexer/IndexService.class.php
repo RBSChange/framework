@@ -969,7 +969,7 @@ class indexer_IndexService extends BaseService
 		if (!($document instanceof generic_persistentdocument_folder))
 		{
 			$attributes['block'] = str_replace('/', '_', $model->getName());
-			$document->buildTreeAttributes($model->getModuleName(), 'wmultilist', $attributes);
+			$document->getDocumentService()->addTreeAttributes($document, $model->getModuleName(), 'wmultilist', $attributes);
 		}
 		return $attributes;
 	}
