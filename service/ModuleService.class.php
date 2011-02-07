@@ -257,9 +257,9 @@ class ModuleService extends BaseService
 		{
 			$moduleName = 'modules_' . $moduleName;
 		}
-		if (isset($this->packages[$moduleName]))
+		if (isset($this->packages[$moduleName]) && isset($this->packages[$moduleName]["VERSION"]))
 		{
-			return $this->packages[$moduleName];
+			return $this->packages[$moduleName]["VERSION"];
 		}
 		return null;
 	}
