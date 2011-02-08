@@ -31,7 +31,7 @@ class LocaleService extends BaseService
 		$this->transformers = array(
 			'lab' => 'transformLab', 'uc' => 'transformUc', 'ucf' => 'transformUcf', 'lc' => 'transformLc', 
 			'js' => 'transformJs', 'html' => 'transformHtml', 'text' => 'transformText', 
-			'attr' => 'transformAttr', 'space' => 'transformSpace', 'etc' => 'transformEtc');
+			'attr' => 'transformAttr', 'space' => 'transformSpace', 'etc' => 'transformEtc', 'ucw' => 'transformUcw');
 	}
 	
 	/**
@@ -1170,6 +1170,11 @@ class LocaleService extends BaseService
 	public function transformUcf($text, $lang)
 	{
 		return f_util_StringUtils::ucfirst($text);
+	}
+	
+	public function transformUcw($text, $lang)
+	{
+		return mb_convert_case($text, MB_CASE_TITLE, "UTF-8"); 
 	}
 	
 	public function transformLc($text, $lang)
