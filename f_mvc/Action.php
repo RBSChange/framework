@@ -185,6 +185,7 @@ abstract class f_mvc_Action
 	 */
 	public function redirectToUrl($url)
 	{
+		f_web_http_Header::setStatus(302);
 		header("Location: $url");
 	}
 
