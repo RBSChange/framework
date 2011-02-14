@@ -137,7 +137,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 			{
 				foreach ($documentModel->getChildrenNames() as $childName)
 				{
-					$modelNames = "'".$childName."'";	
+					$modelNames[] = "'".$childName."'";	
 				}
 			}
 			
@@ -164,7 +164,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 				$newRelationId = $this->getRelationId($newProperty->getName());
 				$sql .= ", relation_id = $newRelationId";
 			}
-			$sql .= " WHERE document_model_id1 IN (".join(",", $modelNames).") AND relation_name = '$oldPropertyName'";
+			$sql .= " WHERE document_model_id1 IN (".implode(",", $modelNames).") AND relation_name = '$oldPropertyName'";
 			$sqls[] = $sql;
 		}
 		foreach ($sqls as $sql)
