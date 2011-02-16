@@ -55,22 +55,6 @@ abstract class commands_AbstractChangeCommand extends c_ChangescriptCommand
 				}
 			}
 			require_once(realpath(WEBEDIT_HOME."/framework/Framework.php"));
-			Framework::info(__METHOD__);
-			try
-			{
-				if (class_exists("Controller"))
-				{
-					$controller = Controller::getInstance();
-				}
-			}
-			catch (Exception $e)
-			{
-				$controller = Controller::newInstance("controller_ChangeController");
-			}
-		}
-		else
-		{
-			Framework::info(__METHOD__ . ' Already loaded');
 		}
 	}
 
