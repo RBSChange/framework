@@ -118,7 +118,7 @@ class f_AOP
 	
 	function renameParentClass($className, $newParentClassName)
 	{
-		list($tokens,) = $this->getTokens($className);
+		list($tokens, ) = $this->getTokens($className);
 		$tokenCount = count($tokens);
 		foreach ($tokens as $index => $token)
 		{
@@ -175,6 +175,7 @@ class f_AOP
 	{
 		// echo "Replacer $className => $replacerClassName\n";
 		// you can only replace a class with a subclass of it
+		
 
 		// check parent-child relationship
 		$parentName = $this->getParentName($replacerClassName, false);
@@ -214,7 +215,6 @@ class f_AOP
 		list(, $class) = $this->getMethodCode($className, null);
 		list($replacerCode, $replacer) = $this->getMethodCode($replacerClassName, null);
 		
-		
 		if (!isset($this->alteredCount[$className]))
 		{
 			$this->alteredCount[$className] = 0;
@@ -225,12 +225,13 @@ class f_AOP
 		$newCode = $this->renameClass($className, $replacedClassName);
 		$this->alteredCount[$className] ++;
 		$aopPath = ClassResolver::getInstance()->getAOPPath($replacedClassName);
+		//clearstatcache();
 		f_util_FileUtils::writeAndCreateContainer($aopPath, $newCode, f_util_FileUtils::OVERRIDE);
 		foreach ($this->getDeclaredClasses($aopPath) as $declaredClassName)
 		{
 			ClassResolver::getInstance()->appendToAutoloadFile($declaredClassName, $aopPath, true);
 		}
-
+		
 		ob_start();
 		echo "<?php\n";
 		echo $this->getMethodModifiers($class);
@@ -259,7 +260,7 @@ class f_AOP
 		// end echos
 		return $newReplacerCode;
 	}
-
+	
 	/**
 	 * @param String $path
 	 */
@@ -284,7 +285,7 @@ class f_AOP
 		
 		return $classNames;
 	}
-
+	
 	/**
 	 * @param String $className
 	 * @return array<String, String[]>
@@ -553,8 +554,7 @@ class f_AOP
 				$adviceProperties[] = $this->getProperty($adviceClassName, trim($propertyName));
 			}
 		}
-		$method = $this->getMethodCode($originalClassName, $adviceMethod, true, false);
-		if ($method === null)
+		if ($this->getMethodCode($originalClassName, $adviceMethod, true, false) === null)
 		{
 			$adviceMethodInfo = $this->getMethodCode($adviceClassName, $adviceMethod);
 			
@@ -703,6 +703,7 @@ class f_AOP
 	}
 	
 	// private methods
+	
 
 	/**
 	 * @param String $fileName
@@ -875,13 +876,21 @@ class f_AOP
 					}
 					$i --;
 				}
-				$classIndexStart = $i+1;
+				
+				if ($withDeclaration)
+				{
+					$classIndexStart = $i + 1;
+				}
 				
 				$i = $index + 3;
 				while ($tokens[$i] != "{")
 				{
 					$i ++;
+				}
 				
+				if (!$withDeclaration)
+				{
+					$classIndexStart = $i + 1;
 				}
 				
 				$classBracketLevel = $bracketLevel;
@@ -1030,7 +1039,11 @@ class f_AOP
 							if ($inClass && $bracketLevel == $classBracketLevel)
 							{
 								$inClass = false;
-								$classIndexEnd = $index+1;
+								$classIndexEnd = $index + 1;
+								if (!$withDeclaration)
+								{
+									$classIndexEnd --;
+								}
 								$class->endLine = $line;
 							}
 						}
@@ -1042,10 +1055,7 @@ class f_AOP
 		if ($methodName === null)
 		{
 			$code = $this->tokensToString(array_slice($tokens, $classIndexStart, $classIndexEnd - $classIndexStart));
-			if ($withDeclaration) return array($code, $class);
-			$startIndex = strpos($code, "{");
-			$endIndex = strrpos($code, "}");
-			return array(trim(substr($code, $startIndex + 1, $endIndex - $startIndex - 1)), $class);
+			return array($code, $class);
 		}
 		
 		if (!isset($method))
@@ -1061,10 +1071,7 @@ class f_AOP
 		}
 		
 		$code = $this->tokensToString(array_slice($tokens, $methodIndexStart, $methodIndexEnd - $methodIndexStart));
-		if ($withDeclaration) return array($code, $method);
-		$startIndex = strpos($code, "{");
-		$endIndex = strrpos($code, "}");
-		return array(trim(substr($code, $startIndex + 1, $endIndex - $startIndex - 1)), $method);
+		return array($code, $method);
 	}
 	
 	/**
@@ -1095,10 +1102,10 @@ class f_AOP
 		
 		$value = null;
 		if ($property->isStatic())
-		{	
+		{
 			$p->addModifier(ReflectionProperty::IS_STATIC);
 			// Objet parameter is documented as optionnal but this call generates a PHP error ...
-			$value = @$property->getValue(); 
+			$value = @$property->getValue();
 		}
 		else
 		{
@@ -1395,11 +1402,10 @@ class f_AOP_ReflectionProperty
 	
 	public function __toString()
 	{
-		$str = join(" ", Reflection::getModifierNames($this->modifiers))
-		 .' $' . $this->name;
+		$str = join(" ", Reflection::getModifierNames($this->modifiers)) . ' $' . $this->name;
 		if ($this->defaultValue !== null)
 		{
-			$str .= " = ".var_export($this->defaultValue, true);
+			$str .= " = " . var_export($this->defaultValue, true);
 		}
 		return $str;
 	}
