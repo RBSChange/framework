@@ -137,6 +137,16 @@ class indexer_StandardSolrSearch
 				$queryString .= $facet->toSolrString();
 			}
 		}
+		
+		// stats
+		if ($this->query->hasStats())
+		{
+			$queryString .= "&stats=true";
+			foreach ($this->query->getStats() as $fieldName)
+			{
+				$queryString .= "&stats.field=".$fieldName;
+			}
+		}
 		return trim($queryString);
 	}
 	
@@ -197,4 +207,11 @@ class indexer_StandardSolrSearch
 		$this->clientId = $clientId;
 	}
 
+	/**
+	 * @return indexer_Query
+	 */
+	public function getQuery()
+	{
+		return $this->query;
+	}
 }

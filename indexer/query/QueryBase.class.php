@@ -175,6 +175,39 @@ abstract class indexer_QueryBase
 	}
 
 	/**
+	 * @var String[]
+	 */
+	private $stats = null;
+	
+	/**
+	 * @param String $fieldName
+	 */
+	public function addStatsOnField($fieldName)
+	{
+		if ($this->stats === null)
+		{
+			$this->stats = array();
+		}
+		$this->stats[] = $fieldName;
+	}
+	
+	/**
+	 * @return String[]
+	 */
+	public function getStats()
+	{
+		return $this->stats;
+	}
+	
+	/**
+	 * @return Boolean
+	 */
+	public function hasStats()
+	{
+		return f_util_ArrayUtils::isNotEmpty($this->stats);
+	}
+
+	/**
 	 * @return indexer_Query
 	 */
 	public function getFilterQuery()

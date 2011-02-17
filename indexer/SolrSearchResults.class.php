@@ -16,12 +16,21 @@ class indexer_SolrSearchResults extends ArrayObject implements indexer_SearchRes
 	 * @var indexer_FacetResult[]
 	 */
 	private $facetResults;
+	
+	/**
+	 * @var array
+	 */
+	private $statResults;
 	/**
 	 * @var String
 	 */
 	private $suggestion;
 
-	public function __construct($data = null)
+	/**
+	 * @param String $data
+	 * @param indexer_StandardSolrSearch $solrSearch
+	 */
+	public function __construct($data = null, $solrSearch = null)
 	{
 		$dom = f_util_DOMUtils::fromString($data);
 		$resultElem = $dom->findUnique("result[@name = 'response']");
@@ -124,6 +133,18 @@ class indexer_SolrSearchResults extends ArrayObject implements indexer_SearchRes
 					$facetResults[$facetResult->getSimpleFieldName()] = $facetResult;
 				}
 			}
+			
+			if ($solrSearch !== null)
+			{
+				$facetResultsOrdered = array();
+				foreach ($solrSearch->getQuery()->getFacets() as $facet)
+				{
+					$simpleFieldName = indexer_Field::getSimpleFieldName($facet->field);
+					$facetResultsOrdered[$simpleFieldName] = $facetResults[$simpleFieldName];	
+				}
+				
+				$facetResults = $facetResultsOrdered;
+			}
 		}
 		
 		$this->facetResults = $facetResults;
@@ -157,7 +178,53 @@ class indexer_SolrSearchResults extends ArrayObject implements indexer_SearchRes
 				$idx++;
 			}
 		}
+		
+		// Stats
+		$statResults = array();
+		$statsElem = $dom->findUnique("lst[@name='stats']");
+		if ($statsElem !== null)
+		{
+			foreach ($dom->find("lst[@name='stats_fields']/lst", $statsElem) as $statElem)
+			{
+				$fieldName = indexer_Field::getSimpleFieldName($statElem->getAttribute("name"));
+				$stat = array();
+				foreach ($statElem->childNodes as $statChild)
+				{
+					if ($statChild->nodeType != XML_ELEMENT_NODE)
+					{
+						continue;
+					}
+					$stat[$statChild->getAttribute("name")] = $statChild->nodeValue;
+				}
+				$statResults[$fieldName] = $stat;
+			}
+		}
+		$this->statResults = $statResults;
+		
 		parent::__construct($this->results);
+	}
+	
+	/**
+	 * @return array fieldName as key, fieldStat as value
+	 */
+	public function getStatResults()
+	{
+		return $this->statResults;
+	}
+	
+	/**
+	 * @param String $fieldName
+	 * @return array
+	 * @see http://wiki.apache.org/solr/StatsComponent
+	 */
+	public function getStatResult($fieldName)
+	{
+		$fieldName = indexer_Field::getSimpleFieldName($fieldName);
+		if (isset($this->statResults[$fieldName]))
+		{
+			return $this->statResults[$fieldName];
+		}
+		return null;
 	}
 
 	public function getTotalHitsCount()
