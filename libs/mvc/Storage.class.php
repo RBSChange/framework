@@ -110,6 +110,8 @@ abstract class Storage
 
 class SessionStorage extends Storage
 {
+	private $started = false;
+	
 	public function initialize ($context, $parameters = null)
 	{
 		parent::initialize($context, $parameters);
@@ -118,13 +120,14 @@ class SessionStorage extends Storage
 		if ($this->getParameter('auto_start', true))
 		{
 			session_start();
+			$this->started = true;
 		}
 	}
 
 	public function &read($key)
 	{
 		$retval = null;
-		if (isset($_SESSION[$key]))
+		if ($this->started && isset($_SESSION[$key]))
 		{
 			$retval = &$_SESSION[$key];
 		}
@@ -134,7 +137,7 @@ class SessionStorage extends Storage
 	public function remove($key)
 	{
 		$retval = null;
-		if (isset($_SESSION[$key]))
+		if ($this->started && isset($_SESSION[$key]))
 		{
 			$retval = $_SESSION[$key];
 			unset($_SESSION[$key]);
@@ -148,7 +151,10 @@ class SessionStorage extends Storage
 
 	public function write($key, &$data)
 	{
-		$_SESSION[$key] = &$data;
+		if ($this->started)
+		{
+			$_SESSION[$key] = &$data;
+		}
 	}
 }
 
@@ -169,21 +175,17 @@ class ChangeSessionStorage extends SessionStorage
 			} 
 			else if ($md5 !== $currentKey)
 			{
-				if (Framework::isInfoEnabled())
-				{
-					Framework::info(__METHOD__ . ' CLEAN AND REGENERATE SESSIONID');
-				}
+				$oldSessionId = session_id();
 				session_regenerate_id();
 				$_SESSION = array();
+				$this->sessionIdChanged($oldSessionId);
 			}
 			else if ($this->read('SecurePort') !== $_SERVER["SERVER_PORT"])
 			{
-				if (Framework::isInfoEnabled())
-				{
-					Framework::info(__METHOD__ . ' REGENERATE SESSIONID');
-				}
+				$oldSessionId = session_id();
 				session_regenerate_id();
-				$this->write('SecurePort', $_SERVER["SERVER_PORT"]);	
+				$this->write('SecurePort', $_SERVER["SERVER_PORT"]);
+				$this->sessionIdChanged($oldSessionId);	
 			}
 		}
 		else
@@ -196,7 +198,7 @@ class ChangeSessionStorage extends SessionStorage
 	/**
 	 * @return string
 	 */
-	private function getSecureKey()
+	protected function getSecureKey()
 	{
 		$string = 'CHANGE ' . (isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'LOCAL') ;
 		if (defined('SECURE_SESSION_BY_IP') &&  SECURE_SESSION_BY_IP)
@@ -204,5 +206,13 @@ class ChangeSessionStorage extends SessionStorage
 			$string .= $_SERVER['REMOTE_ADDR'];
 		}
 		return md5($string);
+	}
+	
+	protected function sessionIdChanged($oldSessionId)
+	{
+		if (Framework::isInfoEnabled())
+		{
+			Framework::info(__METHOD__ . ' ' . $oldSessionId . ' -> ' . session_id());
+		}		
 	}
 }
