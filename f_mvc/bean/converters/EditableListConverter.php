@@ -18,11 +18,16 @@ class bean_EditableListConverter implements BeanValueConverter
 	 */
 	public function convertFromBeanToRequestValue($value)
 	{
-		if ($value instanceof f_persistentdocument_PersistentDocument)
+		if ($value instanceof list_persistentdocument_valueditem)
+		{
+			return $value->getValue();
+		}
+		if ($value instanceof list_persistentdocument_item)
 		{
 			return $value->getId();
 		}
-		return $value;
+		
+		return null;
 	}
 	
 	/**
@@ -33,11 +38,20 @@ class bean_EditableListConverter implements BeanValueConverter
 	 */
 	public function convertFromRequestToBeanValue($value)
 	{
-		if (is_numeric($value))
+		if ($this->editableList instanceof list_persistentdocument_valuededitablelist)
 		{
-			return DocumentHelper::getDocumentInstance($value);
+			return list_ValueditemService::getInstance()->createQuery()
+				->add(Restrictions::eq("valuededitablelist", $this->editableList))
+				->add(Restrictions::eq("value", $value))->findUnique();
 		}
-		return $value;
+		if ($this->editableList instanceof list_persistentdocument_editablelist)
+		{
+			return list_ItemService::getInstance()->createQuery()
+				->add(Restrictions::eq("editablelist", $this->editableList))
+				->add(Restrictions::eq("id", $value))->findUnique();
+		}
+		
+		return null;
 	}
 	
 	/**
