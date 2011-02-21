@@ -72,11 +72,13 @@ class f_util_StringUtils
 	 */
 	public static function endsWith($haystack, $needle, $caseSensitive = self::CASE_INSENSITIVE)
 	{
+		$len = mb_strlen($needle, "UTF-8");
 		if ($caseSensitive === self::CASE_SENSITIVE)
 		{
-			return substr($haystack, -strlen($needle)) == $needle;
+			return mb_substr($haystack, -$len, $len, "UTF-8") == $needle;
 		}
-		return strcasecmp(substr($haystack, -strlen($needle)), $needle) === 0;
+		return mb_strtolower(mb_substr($haystack, -$len, $len, "UTF-8"), "UTF-8")
+			=== mb_strtolower($needle, "UTF-8");
 	}
 
 	/**
@@ -89,9 +91,10 @@ class f_util_StringUtils
 	{
 		if ($caseSensitive === self::CASE_SENSITIVE)
 		{
-			return substr($haystack, 0, strlen($needle)) == $needle;
+			return mb_substr($haystack, 0, mb_strlen($needle, "UTF-8"), "UTF-8") == $needle;
 		}
-		return strcasecmp(substr($haystack, 0, strlen($needle)), $needle) === 0;
+		return mb_strtolower(mb_substr($haystack, 0, mb_strlen($needle, "UTF-8"), "UTF-8"), "UTF-8")
+			=== mb_strtolower($needle, "UTF-8");
 	}
 	
 	/**
@@ -101,7 +104,7 @@ class f_util_StringUtils
 	 */
 	public static function contains($str, $needle)
 	{
-		return strpos($str, $needle) !== false;
+		return mb_strpos($str, $needle, 0, "UTF-8") !== false;
 	}
 
 	/**
@@ -114,7 +117,7 @@ class f_util_StringUtils
 	{
 		$t = 0;
 		$tokens = array('');
-		for ($i=0; $i<strlen($str); $i++)
+		for ($i=0; $i<mb_strlen($str, "UTF-8"); $i++)
 		{
 			$c = $str{$i};
 			if ($i > 0)
@@ -126,7 +129,7 @@ class f_util_StringUtils
 			}
 			$tokens[$t] .= $c;
 		}
-		return strtolower(join('_', $tokens));
+		return mb_strtolower(join('_', $tokens), "UTF-8");
 	}
 
 	/**
@@ -215,11 +218,12 @@ class f_util_StringUtils
      */
 	 public static function transcodeString($in_toTranscode = null)
 	 {
+	 	mb_internal_encoding("UTF-8");
 		$l_result = "";
 
-		if ($in_toTranscode != null && strlen($in_toTranscode) > 0)
+		if ($in_toTranscode != null && mb_strlen($in_toTranscode) > 0)
 		{
-			if (strpos($in_toTranscode, "%u") === false)
+			if (mb_strpos($in_toTranscode, "%u") === false)
 				$l_result = $in_toTranscode;
 			else
 			{
@@ -228,16 +232,16 @@ class f_util_StringUtils
 
 				for ($i = 0; $i < $l_nbElementsInArray; $i++)
 				{
-					$l_value = substr($l_separatedChars[$i], 0, 4);
+					$l_value = mb_substr($l_separatedChars[$i], 0, 4);
 
 					if (self::is_hexa($l_value))
 					{
-						if (strlen($l_separatedChars[$i]) > 4)
+						if (mb_strlen($l_separatedChars[$i]) > 4)
 						{
 							$l_result .= "&#x";
 							$l_result .= $l_value;
 							$l_result .= ";";
-							$l_result .= substr($l_separatedChars[$i], 4);
+							$l_result .= mb_substr($l_separatedChars[$i], 4);
 						}
 						else
 							$l_result .= "&#x".$l_separatedChars[$i].";";
@@ -248,7 +252,7 @@ class f_util_StringUtils
 			}
 		}
 
-		if (strlen($l_result) == 0)
+		if (mb_strlen($l_result) == 0)
 			$l_result = $in_toTranscode;
 
 		return $l_result;
@@ -548,7 +552,7 @@ class f_util_StringUtils
 	 */
     public static function strtolower($string)
     {
-        return self::handleAccent($string, self::TO_LOWER_CASE);
+        return mb_strtolower($string, "UTF-8");
     }
 
 	/**
@@ -559,7 +563,7 @@ class f_util_StringUtils
 	 */
     public static function strtoupper($string)
     {
-        return self::handleAccent($string, self::TO_UPPER_CASE);
+        return mb_strtoupper($string, "UTF-8");
     }
 
 	/**
@@ -662,19 +666,9 @@ class f_util_StringUtils
             	}
 				return str_replace(self::$from_accents, self::$to_accents, $string);
             case self::TO_LOWER_CASE:
-            	if (is_null(self::$lower))
-            	{
-					self::$lower = array('à', 'â', 'ä', 'á', 'ã', 'å', 'æ', 'ç', 'è', 'ê', 'ë', 'é', 'ð', 'ì', 'î', 'ï', 'í', 'ñ', 'ò', 'ô', 'ö', 'ó', 'õ', 'ø', 'œ', 'ù', 'û', 'ü', 'ú', 'ý', 'ÿ');
-					self::$upper = array('À', 'Â', 'Ä', 'Á', 'Ã', 'Å', 'Æ', 'Ç', 'È', 'Ê', 'Ë', 'É', 'Ð', 'Ì', 'Î', 'Ï', 'Í', 'Ñ', 'Ò', 'Ô', 'Ö', 'Ó', 'Õ', 'Ø', 'Œ', 'Ù', 'Û', 'Ü', 'Ú', 'Ý', 'Ÿ');
-                }
-                 return strtolower(str_replace(self::$upper, self::$lower, $string));
+                return mb_strtolower($string, "UTF-8");
             case self::TO_UPPER_CASE:
-            	if (is_null(self::$lower))
-            	{
-					self::$lower = array('à', 'â', 'ä', 'á', 'ã', 'å', 'æ', 'ç', 'è', 'ê', 'ë', 'é', 'ð', 'ì', 'î', 'ï', 'í', 'ñ', 'ò', 'ô', 'ö', 'ó', 'õ', 'ø', 'œ', 'ù', 'û', 'ü', 'ú', 'ý', 'ÿ');
-					self::$upper = array('À', 'Â', 'Ä', 'Á', 'Ã', 'Å', 'Æ', 'Ç', 'È', 'Ê', 'Ë', 'É', 'Ð', 'Ì', 'Î', 'Ï', 'Í', 'Ñ', 'Ò', 'Ô', 'Ö', 'Ó', 'Õ', 'Ø', 'Œ', 'Ù', 'Û', 'Ü', 'Ú', 'Ý', 'Ÿ');
-                }
-                return strtoupper(str_replace(self::$lower, self::$upper, $string));
+            	return mb_strtoupper($string, "UTF-8");
             default :
             	throw new Exception("Unkown handleAccent action $action");
         }
