@@ -779,8 +779,6 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 	/**
 	 * Finds the first "upstream" permission definition point or null if no permissions are defined on the tree.
 	 * 
-	 * FIXME: Is it possible to replace this method by getDefinitionPointForPackage.
-	 * 
 	 * @param Integer $nodeId
 	 * @return Integer
 	 */

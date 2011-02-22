@@ -63,6 +63,15 @@ class indexer_SearchResult
 	}
 	
 	/**
+	 * @return Integer
+	 */
+	public function getDocumentId()
+	{
+		list($id, ) = explode('/', $this->getId());
+		return intval($id);
+	}
+	
+	/**
 	 * @return solrsearch_GaugeObject
 	 */	
 	public function getGauge()

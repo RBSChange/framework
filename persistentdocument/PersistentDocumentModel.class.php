@@ -160,7 +160,6 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 		$className = self::getClassNameFromDocument($moduleName, $documentName);
 		if ( ! f_util_ClassUtils::classExistsNoLoad($className) )
 		{
-			// TODO see ServiceLoader->load()
 			if ($moduleName != 'generic' && $documentName == 'folder')
 			{
 				Framework::info('Using generic folder');

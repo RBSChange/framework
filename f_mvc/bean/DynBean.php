@@ -482,7 +482,6 @@ class f_mvc_DynBeanModel implements f_mvc_BeanModel
 	 */
 	function getBeanName()
 	{
-		// FIXME: strange f_mvc_BeanModel interface...
 		return null;
 	}
 	
