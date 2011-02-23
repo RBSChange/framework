@@ -287,7 +287,6 @@ abstract class Controller
 	{	
 		$this->user->shutdown();
 		$this->storage->shutdown();	
-		session_write_close();	
 		$this->request->shutdown();	
 	}
 }

@@ -178,7 +178,6 @@ class FrameworkSecurityUser extends SecurityUser
 	const FRONTEND_NAMESPACE = 'frontend';
 	
 	const AUTH_NAMESPACE = 'org/agavi/user/BasicSecurityUser/authenticated';
-	const CREDENTIAL_NAMESPACE = 'org/agavi/user/BasicSecurityUser/credentials';
 	
 	/**
 	 * @var straing
@@ -190,11 +189,7 @@ class FrameworkSecurityUser extends SecurityUser
 	 */
 	private $authenticated;
 	
-	/**
-	 * @var array
-	 */
-	private $credentials;
-	
+
 	
 	public function initialize($context, $parameters = null)
 	{	
@@ -203,22 +198,18 @@ class FrameworkSecurityUser extends SecurityUser
 		
 		$storage = $this->getContext()->getStorage();
 		$this->authenticated = $storage->read(self::AUTH_NAMESPACE);
-		$this->credentials = $storage->read(self::CREDENTIAL_NAMESPACE);
-		
+
 		if ($this->authenticated == null)
 		{
 			$this->authenticated = array();
-			$this->credentials = array();
+			$storage->write(self::AUTH_NAMESPACE, $this->authenticated);
 		}
 	}
 	
 	public function shutdown()
 	{		
 		$storage = $this->getContext()->getStorage();
-
 		$storage->write(self::AUTH_NAMESPACE, $this->authenticated);
-		$storage->write(self::CREDENTIAL_NAMESPACE, $this->credentials);
-
 		parent::shutdown();
 	}
 	

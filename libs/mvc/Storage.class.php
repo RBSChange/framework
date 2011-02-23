@@ -147,6 +147,11 @@ class SessionStorage extends Storage
 
 	public function shutdown ()
 	{
+		if ($this->started)
+		{
+			$this->started = false;
+			session_write_close();
+		}
 	}
 
 	public function write($key, &$data)
