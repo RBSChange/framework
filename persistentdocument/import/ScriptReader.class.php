@@ -68,13 +68,14 @@ class import_ScriptReader extends BaseService
 	 * @param attay $attributes
 	 */
 	public function execute($fileName, $attributes = array())
-	{
-		$this->initialize();
+	{		
+		$scriptInstance = self::getServiceClassInstance(get_class());
+		$scriptInstance->initialize();
 		if (is_array($attributes))
 		{
-			$this->attributes = $attributes;
+			$scriptInstance->attributes = $attributes;
 		}
-		$this->executeInternal($fileName);		
+		$scriptInstance->executeInternal($fileName);		
 	}
 
 	/**
