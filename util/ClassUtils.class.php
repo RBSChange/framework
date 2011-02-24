@@ -132,10 +132,21 @@ abstract class f_util_ClassUtils
 	public static function newInstance($className)
 	{
 		$classObj = new ReflectionClass($className);
-		$args = func_get_args();
-		return $classObj->newInstanceArgs(array_slice($args, 1));
+        $args = array_slice(func_get_args(), 1);
+        if (empty($args))
+        {
+        	return $classObj->newInstance();
+		}
+		return $classObj->newInstanceArgs($args);
 	}
 	
+	/**
+	 * @param String $className
+	 * @param String $expectedClassName
+	 * @example newInstance($className, "mymodule_SomeClass", $arg1, $arg2, $arg3 ...)
+	 * @throws Exception if the $className is not compatible with $expectedClassName
+	 * @return mixed
+	 */
 	public static function newInstanceSandbox($className, $expectedClassName)
 	{
 		$classObj = new ReflectionClass($className);
