@@ -159,7 +159,6 @@ class commands_Indexer extends commands_AbstractChangeCommand
 		
 		foreach ($modelsName as $modelName) 
 		{
-			$modeParam = array($mode);
 			$documentIndex = 0;
 			$progres = true;
 			while ($progres) 
