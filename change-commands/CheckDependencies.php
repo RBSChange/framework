@@ -19,7 +19,7 @@ class commands_CheckDependencies extends commands_AbstractChangeCommand
 	 */
 	function getOptions()
 	{
-		return array('verbose');
+		return array('verbose', 'xml');
 	}
 	
 	/**
@@ -37,6 +37,11 @@ class commands_CheckDependencies extends commands_AbstractChangeCommand
 	 */
 	function _execute($params, $options)
 	{
+		if (isset ($options['xml']))
+		{
+			echo $this->executeXml($params);
+			return;
+		}
 		$this->message("== Check project dependencies ==");
 		$bootstrap = $this->getParent()->getBootStrap();
 		
@@ -94,5 +99,33 @@ class commands_CheckDependencies extends commands_AbstractChangeCommand
 		}
 		
 		return $this->quitOk('Project Checked successfully.');
+	}
+
+	function executeXml($params)
+	{
+		$domDoc = new DOMDocument("1.0", "UTF-8");
+		$domDoc->loadXml('<dependencies></dependencies>');
+		// <dependency type="module" name="website" version="3.5.0" hotfix="1" />
+		$bootstrap = $this->getParent()->getBootStrap();
+
+		
+		$dependencies = $bootstrap->loadDependencies();
+
+		foreach ($dependencies as $debType => $debs)
+		{
+			foreach ($debs as $debName => $infos)
+			{
+				$depNode = $domDoc->documentElement->appendChild($domDoc->createElement('dependency'));
+				$depNode->setAttribute('type', $debType);
+				$depNode->setAttribute('name', $debName);
+				$depNode->setAttribute('version', $infos['version']);
+				if (count($infos['hotfix']))
+				{
+					$depNode->setAttribute('hotfix', max($infos['hotfix']));
+				}
+			}
+		}
+
+		return $domDoc->saveXML();
 	}
 }
