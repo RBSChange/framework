@@ -201,7 +201,7 @@ class f_persistentdocument_DocumentFilterService extends BaseService
 	 * @param array $errorInfos
 	 * @return boolean
 	 */
-	public function checkValueFromJson($json, $value, &$errorInfos = array())
+	public function checkValueFromJson($json, $value, &$errorInfos = array(), $contexDoc = null)
 	{
 		$errorInfos["containsOr"] = false;
 		$errorInfos["errorMessages"] = array();
@@ -225,6 +225,8 @@ class f_persistentdocument_DocumentFilterService extends BaseService
 					$subFilterValue = false;
 					foreach ($filter as $subFilter)
 					{
+						/* @var $subFilter f_persistentdocument_DocumentFilter */
+						$subFilter->setEvaluationContextDocument($contexDoc);
 						if ($subFilter->checkValue($value))
 						{
 							$subFilterValue = true;
@@ -242,6 +244,7 @@ class f_persistentdocument_DocumentFilterService extends BaseService
 				}
 				else
 				{
+					$filter->setEvaluationContextDocument($contexDoc);
 					if (!$filter->checkValue($value))
 					{
 						if ($filter->hasErrorMessage())

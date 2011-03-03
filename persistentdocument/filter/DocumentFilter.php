@@ -57,6 +57,19 @@ interface f_persistentdocument_DocumentFilter
 	 * @return string[]
 	 */
 	public function getErrorMessages();
+
+	/**
+	 * The document having the query field the filter belongs to if it exists
+	 *
+	 * @return f_persistentDocumentImpl or null
+	 */
+	public function getEvaluationContextDocument();
+
+	/**
+	 * The document having the query field the filter belongs to if it exists
+	 * @param f_persistentDocumentImpl $document
+	 */
+	public function setEvaluationContextDocument($document);
 }
 
 /**
@@ -296,4 +309,17 @@ abstract class f_persistentdocument_DocumentFilterImpl implements f_persistentdo
 	{
 		$this->errorMessages[] = $message;
 	}
+
+	private $contextDocument;
+
+	public function getEvaluationContextDocument()
+	{
+		return $this->contextDocument;
+	}
+
+	public function setEvaluationContextDocument($document)
+	{
+		$this->contextDocument = $document;
+	}
+
 }
