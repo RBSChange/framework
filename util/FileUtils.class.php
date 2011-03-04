@@ -664,44 +664,19 @@ abstract class f_util_FileUtils
 	 */
 	private static function ftpWrite($path, $content, $options)
 	{
-		// Extract parameters.
-		preg_match('#ftp://([^\:@/]+)(\:([^\:@/]+))?@([^\:@/]+)(\:([0-9]+))?/(.+)#', $path, $matches);
-		$username = $matches[1];
-		$password = $matches[3];
-		$host = $matches[4];
-		$port = $matches[6];
-		$remotePath = $matches[7];
-
-		// Open FTP connection.
-		$connectionId = ftp_connect($host, $port);
-		if (!$connectionId)
-		{
-			throw new IOException('Could not connect to '.$host.':'.$port);
-		}
-		$login_result = ftp_login($connectionId, $username, $password);
-		if (!$login_result)
-		{
-			ftp_close($connectionId);
-			throw new IOException('Could not log in with user '.$username);
-		}
-
-		// Activate passive mode.
-		ftp_pasv($connectionId, true);
-
-		// Send file.
 		$temporaryFile = self::getTmpFile('temp-');
-		file_put_contents($temporaryFile, $content);
-		$result = ftp_put($connectionId, $remotePath, $temporaryFile, FTP_ASCII);
+		self::fileWrite($temporaryFile, $content, 0);
+		try
+		{
+			f_FTPClientService::getInstance()->put($temporaryFile, $path);
+		}
+		catch (Exception $e)
+		{
+			unlink($temporaryFile);
+			throw $e;
+		}
 		unlink($temporaryFile);
 
-		// Close FTP connection.
-		ftp_close($connectionId);
-
-		// If the file was not correctly put, throw exception.
-		if (!$result)
-		{
-			throw new IOException('Could not write data to '.$path);
-		}
 		return true;
 	}
 
