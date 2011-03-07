@@ -565,11 +565,16 @@ class LocaleService extends BaseService
 			if (is_array($value))
 			{
 				list($content, $format) = $value;
+				$format = strtolower($format);
 				if ($format != 'text')
 				{
 					$newNode->setAttribute('format', $format);
+					$newNode->appendChild($i18nDoc->createCDATASection($content));
 				}
-				$newNode->appendChild($i18nDoc->createTextNode($content));
+				else 
+				{
+					$newNode->appendChild($i18nDoc->createTextNode($content));
+				}
 			}
 			else
 			{
