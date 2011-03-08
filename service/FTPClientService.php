@@ -42,8 +42,8 @@ class f_FTPClientService extends BaseService
 		{
 			throw new Exception("Invalid format for fullRemotePath");
 		}
-		$username = $matches[1];
-		$password = $matches[3];
+		$username = urldecode($matches[1]);
+		$password = urldecode($matches[3]);
 		$host = $matches[4];
 		$port = $matches[6];
 		$remotePath = $matches[7];
