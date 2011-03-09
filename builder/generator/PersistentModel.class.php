@@ -652,6 +652,15 @@ class generator_PersistentModel
 	}
 	
 	/**
+	 * @return Boolean
+	 */
+	public function isParentModelBackofficeIndexable()
+	{
+		$parentModel = $this->getParentModel();
+		return $parentModel !== null && $parentModel->isBackofficeIndexable();
+	}
+	
+	/**
 	 * @return generator_PersistentModel
 	 */
 	public function getParentModelOrInjected()
