@@ -1445,7 +1445,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		$ds = $this->getDocumentService();
 		$fullTextEntries = array();
 <{foreach from=$model->getProperties() item=property}>
-<{if $property->isBackofficeFullTextProperty() && $property->isBackofficeIndexable()}>
+<{if $property->isBackofficeFullTextProperty() && $property->isBackofficeIndexable() && !$property->isOverride()}>
 <{if $property->getType() == 'String' || $property->getType() == 'LongString'}>
 		$fullTextEntries[] = $this->get<{$property->getPhpName()}>();				
 <{else if $property->getType() == 'XHTMLFragment'}>
@@ -1453,6 +1453,18 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 <{/if}>
 <{/if}>
 <{/foreach}>
+<{if $model->hasParentModel() && $model->isParentModelBackofficeIndexable()}>
+		$indexedDoc = parent::getBackofficeIndexedDocument();
+		$parentText = $indexedDoc->getText();
+		if ($parentText != "")
+		{
+			$indexedDoc->setText($parentText.K::CRLF.implode(K::CRLF, $fullTextEntries));	
+		}
+		else
+		{
+			$indexedDoc->setText(implode(K::CRLF, $fullTextEntries));
+		}
+<{else}>
 		$indexedDoc = new indexer_BackofficeIndexedDocument();
 		$indexedDoc->setId($this->getId());
 		$indexedDoc->setDocumentModel($this->getDocumentModelName());
@@ -1482,10 +1494,12 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		$indexedDoc->setLang($this->getLang());
 <{/if}>
 		$indexedDoc->setText(implode(K::CRLF, $fullTextEntries)); 
+		
+<{/if}>
+		
 		return $indexedDoc;
 <{else}>
 		return null;
 <{/if}>
 	}
-
 }
