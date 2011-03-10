@@ -205,7 +205,7 @@ class ChangeSessionStorage extends SessionStorage
 	 */
 	protected function getSecureKey()
 	{
-		$string = 'CHANGE ' . (isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'LOCAL') ;
+		$string = 'CHANGEKEY';
 		if (defined('SECURE_SESSION_BY_IP') &&  SECURE_SESSION_BY_IP)
 		{
 			$string .= $_SERVER['REMOTE_ADDR'];
