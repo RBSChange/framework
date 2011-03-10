@@ -3,6 +3,7 @@ class paginator_PaginatorItem
 {
 	private $label;
 	private $url;
+	
 	/**
 	 * @var Boolean
 	 */
@@ -51,7 +52,6 @@ class paginator_PaginatorItem
 		$this->url = $value;
 		return $this;
 	}
-
 }
 
 class paginator_Paginator extends ArrayObject
@@ -127,7 +127,7 @@ class paginator_Paginator extends ArrayObject
 			}
 			if ($itemCount > $nbItemPerPage)
 			{
-				parent::__construct( array_slice($itemsArray, ($pageIndex - 1) * $nbItemPerPage, $nbItemPerPage ) );
+				parent::__construct(array_slice($itemsArray, ($pageIndex - 1) * $nbItemPerPage, $nbItemPerPage));
 			}	
 			else
 			{
@@ -157,7 +157,7 @@ class paginator_Paginator extends ArrayObject
 	 */
 	public function setItemCount($itemCount)
 	{
-		$this->setPageCount( (int)ceil( $itemCount / $this->nbItemPerPage ) );
+		$this->setPageCount((int)ceil($itemCount / $this->nbItemPerPage));
 	}
 
 	/**
@@ -301,7 +301,14 @@ class paginator_Paginator extends ArrayObject
 			$this->currentUrl  = paginator_Url::getInstanceFromCurrentUrl();
 			$this->currentUrl->setQueryParameter($key, $this->extraParameters);
 		}
-		$this->currentUrl->setQueryParameter($key .'[' .  $this->pageIndexParamName . ']', $pageIndex);
+		if ($pageIndex > 1)
+		{
+			$this->currentUrl->setQueryParameter($key.'['.$this->pageIndexParamName.']', $pageIndex);
+		}
+		else 
+		{
+			$this->currentUrl->removeQueryParameter($key.'['.$this->pageIndexParamName.']');
+		}
 		return $this->currentUrl->getStringRepresentation() . (($this->anchor) ? '#'.$this->anchor : '');
 	}
 
@@ -312,7 +319,7 @@ class paginator_Paginator extends ArrayObject
 	 */
 	public function getLocalizedPageCount()
 	{
-		return f_Locale::translate('&modules.website.paginator.Detail;', array('currentPage' => $this->getCurrentPageNumber(), 'pageCount' => $this->getPageCount(), 'listName' => $this->getListName()));
+		return LocaleService::getInstance()->transFO('m.website.paginator.detail', array('ucf'), array('currentPage' => $this->getCurrentPageNumber(), 'pageCount' => $this->getPageCount(), 'listName' => $this->getListName()));
 	}
 
 	public function getFirstPageItem()
@@ -415,14 +422,11 @@ class paginator_Paginator extends ArrayObject
 			$this->buildItems();
 		}
 	}
-
 }
 
 /**
  * Small url class utility
- *
  */
-
 class paginator_Url
 {
 	/**
