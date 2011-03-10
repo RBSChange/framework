@@ -1185,12 +1185,12 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 		try
 		{
 			$tm->beginTransaction();
-			$acls = $pp->createQuery('modules_generic/userAcl')->find();
+			$acls = $pp->createQuery('modules_generic/userAcl')->add(Restrictions::published())->find();
 			foreach ($acls as $acl)
 			{
 				$pp->compileACL($acl);
 			}
-			$acls = $pp->createQuery('modules_generic/groupAcl')->find();
+			$acls = $pp->createQuery('modules_generic/groupAcl')->add(Restrictions::published())->find();
 			foreach ($acls as $acl)
 			{
 				$pp->compileACL($acl);
