@@ -119,7 +119,7 @@ class builder_LocaleFileGenerator
 		$ls = LocaleService::getInstance();
 		$baseKey = 'm.' . $this->model->getModuleName() . '.bo.actions';
 		$keysInfos = array();
-		$id  = "create-" .$this->model->getDocumentName();
+		$id  = "create" .$this->model->getDocumentName();
 		$createLocales = array("fr" => "créer", "en" => "create", "de" => "neu");
 		foreach ($createLocales as $lang => $text) 
 		{
