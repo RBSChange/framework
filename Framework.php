@@ -294,7 +294,11 @@ class Framework
 	public static function getBaseUrl()
 	{
 		$webSite = website_WebsiteModuleService::getInstance()->getCurrentWebsite();
-		return $webSite->getProtocol() . '://'. $webSite->getDomain();
+		if ($webSite->isContextLangAvailable())
+		{
+			return $webSite->getProtocol() . '://'. $webSite->getDomain();	
+		}
+		return $webSite->getProtocol() . '://'. $webSite->getDomainForLang(RequestContext::getInstance()->getLang());
 	}
 
 	/**
