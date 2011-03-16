@@ -12,10 +12,10 @@ if (defined('DISABLE_CHANGECRON_EXECUTION') && constant('DISABLE_CHANGECRON_EXEC
 	exit(0);
 }
 
-if (Framework::isInfoEnabled())
-{
-	Framework::info($_SERVER['SERVER_NAME'] ." ".  $_SERVER['SERVER_PORT'] . " " .$_SERVER['REQUEST_URI']);
-}
+//if (Framework::isInfoEnabled())
+//{
+//	Framework::info($_SERVER['SERVER_NAME'] ." ".  $_SERVER['SERVER_PORT'] . " " .$_SERVER['REQUEST_URI']);
+//}
 RequestContext::getInstance()->setMode(RequestContext::BACKOFFICE_MODE);
 
 
