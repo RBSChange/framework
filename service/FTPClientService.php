@@ -63,6 +63,7 @@ class f_FTPClient
 	private $username;
 	private $password;
 	private $logged = false;
+	private $currentDir;
 	
 	/**
 	 * @param String $host
@@ -119,18 +120,82 @@ class f_FTPClient
 	 */
 	public function put($localPath, $remotePath)
 	{
-		if (!$this->logged)
-		{
-			throw new Exception("You must first login");
-		}
-		$result = ftp_put($this->connectionId, $remotePath, $localPath, FTP_BINARY);
-		if (!$result)
+		$this->checkLogged();
+		if (!ftp_put($this->connectionId, $remotePath, $localPath, FTP_BINARY))
 		{
 			throw new IOException("Could not write $localPath to ".$remotePath." (".$this->username."@".$this->host.":".$this->port.")");
 		}
 	}
 	
+	/**
+	 * @param String $folder
+	 * @return String[]
+	 */
+	public function ls($folder = ".")
+	{
+		$this->checkLogged();
+		return ftp_nlist($this->connectionId, $folder);
+	}
+	
+	/**
+	 * @param String $folder
+	 */
+	public function chdir($folder) 
+	{
+		$this->checkLogged();
+		if (!ftp_chdir($this->connectionId, $folder))
+		{
+			throw new Exception("Could not chdir to $folder");
+		}
+		$this->currentDir = null;
+	}
+	
+	/**
+	 * @return String
+	 */
+	public function getwd()
+	{
+		$this->checkLogged();
+		if ($this->currentDir === null)
+		{
+			$pwd = ftp_pwd($this->connectionId); 
+			if ($pwd === false)
+			{
+				throw new Exception("Could not get working directory"); 
+			}
+			$this->currentDir = $pwd;
+		}
+		return $this->currentDir;
+	}
+	
+	/**
+	 * @param String $remotePath
+	 * @param String $localPath
+	 */
+	public function get($remotePath, $localPath)
+	{
+		$this->checkLogged();
+		$fp = fopen($localPath, 'w');
+		if ($fp === false)
+		{
+			throw new Exception("Could not open $localPath for writing");
+		}
+		if (ftp_fget($this->connectionId, $fp, $remotePath, FTP_BINARY) === false)
+		{
+			throw new Exception("Could not get $remotePath");
+		}
+		fclose($fp);
+	}
+	
 	// protected content
+	
+	protected function checkLogged()
+	{
+		if (!$this->logged)
+		{
+			throw new Exception("You must first login");
+		}
+	}
 
 	protected function connect()
 	{
