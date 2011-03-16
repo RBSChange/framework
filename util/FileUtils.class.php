@@ -500,14 +500,40 @@ abstract class f_util_FileUtils
 	 * This method create a temporary file and returns it's path.
 	 * You can prefix the name of the temporary file
 	 * @param string $prefix
+	 * @param boolean $deleteOnExit
 	 * @return string
 	 */
-	static public function getTmpFile($prefix = null)
+	static public function getTmpFile($prefix = null, $deleteOnExit = false)
 	{
 		$prefix = (f_util_StringUtils::isEmpty($prefix)) ? 'change_' : $prefix;
 		$filePath = tempnam(TMP_PATH, $prefix);
+		if ($deleteOnExit)
+		{
+			self::registerTmpFileCleaner();
+			self::$tmpFilesToDelete[] = $filePath;
+		}
 		return $filePath;
 	}
+	
+	static protected function registerTmpFileCleaner()
+	{
+		if (!self::$tmpFilesCleanerRegistered)
+		{
+			register_shutdown_function(array("f_util_FileUtils", "cleanTmpFiles"));
+			self::$tmpFilesCleanerRegistered = true;
+		}
+	}
+	
+	static public function cleanTmpFiles()
+	{
+		foreach (self::$tmpFilesToDelete as $tmpFile)
+		{
+			@unlink($tmpFile);
+		}
+	}
+	
+	private static $tmpFilesToDelete = array();
+	private static $tmpFilesCleanerRegistered = false;
 
 	/**
 	 * This method returns a boolean value if delete succeed or not.
