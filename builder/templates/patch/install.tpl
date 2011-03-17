@@ -25,20 +25,4 @@ class <{$moduleName}>_patch_<{$patchNumber}> extends patch_BasePatch
 	{
 		// Implement your patch here.
 	}
-
-	/**
-	 * @return String
-	 */
-	protected final function getModuleName()
-	{
-		return '<{$moduleName}>';
-	}
-
-	/**
-	 * @return String
-	 */
-	protected final function getNumber()
-	{
-		return '<{$patchNumber}>';
-	}
 }
