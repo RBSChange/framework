@@ -223,20 +223,38 @@ abstract class patch_BasePatch
 	}
 
 	/**
+	 * @var string[]
+	 */
+	private $parts;	
+	
+	/**
 	 * Returns the name of the module the patch belongs to.
-	 *
+	 * 
 	 * @return String
 	 */
-	abstract protected function getModuleName();
+	protected function getModuleName()
+	{
+		if ($this->parts === null)
+		{
+			$this->parts = explode('_', get_class($this));
+		}
+		return $this->parts[0];
+	}
 
 	/**
 	 * Returns the number of the current patch.
 	 *
 	 * @example 0006
-	 *
 	 * @return String
 	 */
-	abstract protected function getNumber();
+	protected function getNumber()
+	{
+		if ($this->parts === null)
+		{
+			$this->parts = explode('_', get_class($this));
+		}
+		return $this->parts[2];
+	}
 	
 	/**
 	 * @return boolean
@@ -263,7 +281,7 @@ abstract class patch_BasePatch
 		$date = date('r');
 		// TODO: this works only for modules patches, not for framework and webapp ones...
 		$version = ModuleService::getInstance()->getModuleVersion('modules_' . $module);
-		$patchNumber = self::searchNextPatchNumber($module);
+		$patchNumber = self::searchNextPatchNumber($module, $version);
 		return self::createPatch($module, $patchNumber, $date, $author, $version);
 	}
 	
@@ -309,18 +327,26 @@ abstract class patch_BasePatch
 	 * @param String $module
 	 * @return String
 	 */
-	private static function searchNextPatchNumber($module)
+	private static function searchNextPatchNumber($module, $version)
 	{
 		$nextVersion = null;
 
 		// Get the patch directory path.
 		$patchPath = f_util_FileUtils::buildRelativePath(self::getPackagePath($module), 'patch');
 
-		// Check if directory Exist
-		if (!is_dir($patchPath) )
+		// Check if directory Exist.
+		if (!is_dir($patchPath))
 		{
 			f_util_FileUtils::mkdir($patchPath);
-			$nextVersion = '0000';
+			$versionParts = explode('.', $version);
+			if (count($versionParts) >= 2)
+			{
+				$nextVersion = '0' . $versionParts[0] . $versionParts[1] . '0' ;
+			}
+			else
+			{
+				$nextVersion = '0000';
+			}
 		}
 		else
 		{
@@ -328,7 +354,7 @@ abstract class patch_BasePatch
 			$lastPatchNumber = 0;
 			foreach ($patchDirs as $patchDir)
 			{
-				if ($patchDir === 'lastpatch' )
+				if ($patchDir === 'lastpatch')
 				{
 					$lastPatchNumber = intval(file_get_contents(f_util_FileUtils::buildPath($patchPath, $patchDir)));
 				}
@@ -368,7 +394,6 @@ abstract class patch_BasePatch
 		}
 		return $packagePath;
 	}
-	
 	
 	/**
 	 * @param string $relativeScriptPath to WEBEDIT_HOME

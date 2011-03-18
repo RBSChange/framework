@@ -72,7 +72,7 @@ abstract class f_util_CSVUtils
 			}
 			$csv[] = join($options->separator, $line);
 		}
-		return utf8_decode(join($options->crlf, $csv));
+		return utf8_decode(join($options->crlf, $csv)).$options->crlf;
 	}
 }
 
