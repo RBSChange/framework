@@ -1,8 +1,8 @@
 <?php
 abstract class f_util_HtmlUtils
 {
-	const REGEXLINKTAG = "/<a\s+(.*?)>(.*?)<\/a>/i";
-	const REGEXIMAGETAG = "/<img\s+(.*?)>/i";
+	const REGEXLINKTAG = '/<a\s+(.*?)>(.*?)<\/a>/i';
+	const REGEXIMAGETAG = '/<img\s+(.*?)>/i';
 	
 	/**
 	 * @param String $string
@@ -44,7 +44,7 @@ abstract class f_util_HtmlUtils
     public static function renderHtmlFragment($input)
     {   
         $out = preg_replace_callback(self::REGEXIMAGETAG, array(__CLASS__ , 'parseImageTag'), $input);
-        $out = preg_replace_callback(self::REGEXLINKTAG, array(__CLASS__ , 'parseLinkTag'), $out);
+        $out = preg_replace_callback('/<a\s+([^>]*?)([^\/])>(.*?)<\/a>/i', array(__CLASS__ , 'parseLinkTag'), $out);
         
     	if (self::$htmlFilters === null)
 		{
@@ -55,7 +55,7 @@ abstract class f_util_HtmlUtils
 	        $out = preg_replace_callback($params['regexp'],  explode("::", $params["method"]), $out);
 		}
         return $out;
-    }  
+    }
     
     /**
      * @param String $string
@@ -154,8 +154,8 @@ abstract class f_util_HtmlUtils
      */
     public static function parseLinkTag ($matches)
     {
-        $attributes = self::parseAttributes(trim($matches[1]));
-        $content = $matches[2];
+        $attributes = self::parseAttributes(trim($matches[1].$matches[2]));
+        $content = $matches[3];
         
         $classes = isset($attributes['class']) ? explode(' ', $attributes['class']) : array();
   
@@ -327,7 +327,7 @@ abstract class f_util_HtmlUtils
         $link = '<a';
         foreach ($attributes as $name => $value)
         {
-            $link .= ' ' . $name . '="' . $value . '"';
+            $link .= ' ' . self::buildAttribute($name, $value);
         }
         return $link . '>' . $content . '</a>';
     }
