@@ -247,7 +247,7 @@ class Framework
 		{
 			return $webSite->getProtocol() . '://'. $webSite->getDomain();	
 		}
-		return $webSite->getProtocol() . '://'. $webSite->getDomainForLang(RequestContext::getInstance()->getLang());
+		return $webSite->getProtocol() . '://'. $webSite->getVoDomain();
 	}
 
 	/**
