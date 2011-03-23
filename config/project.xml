@@ -369,9 +369,9 @@
 			</frontoffice>
 			-->	
 		<backoffice>
-			<browser name="firefox">
-				<version>3.6.8</version>
-				<version>3.6.12</version>
+			<browser name="firefox">		
+				<version>3.6.16</version>
+				<version>4.0</version>
 			</browser>
 		</backoffice>
 	</browsers>
