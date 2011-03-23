@@ -234,9 +234,8 @@
 				-->	
 			<backoffice>
 				<browser name="firefox">
-					<version name="0">3.6.8</version>
-					<version name="1">3.6.12</version>
-					<version name="2">3.6.13</version>
+					<version name="0">3.6.16</version>
+					<version name="1">4.0</version>
 				</browser>
 			</backoffice>
 		</browsers>
