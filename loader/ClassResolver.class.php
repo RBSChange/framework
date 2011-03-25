@@ -143,6 +143,7 @@ class ClassResolver implements ResourceResolver
 		// than $className, classes that are altered.
 		// autoload build process generates serialized infos about files
 		$definedClassesPath = $path.".classes.ser";
+		$askedClassAlterations = null;
 		if (file_exists($definedClassesPath))
 		{
 			$definedClasses = unserialize(f_util_FileUtils::read($definedClassesPath));
@@ -151,6 +152,10 @@ class ClassResolver implements ResourceResolver
 				$otherAlterations = $aop->getAlterationsByClassName($definedClass);
 				if ($otherAlterations !== null)
 				{
+					if ($definedClass === $className)
+					{
+						$askedClassAlterations = $otherAlterations;
+					}
 					$alterations = array_merge($alterations, $otherAlterations);
 				}
 			}
@@ -166,6 +171,10 @@ class ClassResolver implements ResourceResolver
 					$otherAlterations = $aop->getAlterationsByClassName($otherClassName);
 					if ($otherAlterations !== null)
 					{
+						if ($otherClassName === $className)
+						{
+							$askedClassAlterations = $otherAlterations;
+						}
 						$alterations = array_merge($alterations, $otherAlterations);
 					}
 				}
@@ -177,8 +186,22 @@ class ClassResolver implements ResourceResolver
 			//echo "Has no alteration $className\n";
 			return $path;
 		}
-
-		$aopPath = $this->getAOPPath($className);
+		
+		if ($askedClassAlterations === null)
+		{
+			foreach ($alterations as $alteration)
+			{
+				if ($alteration[1] == "replaceClass")
+				{
+					$aopPath = $this->getAOPPath($alteration[2]);
+				}
+			}
+		}
+		else
+		{
+			$aopPath = $this->getAOPPath($className);	
+		}
+		
 		if ($justGivePath)
 		{
 			return $aopPath;
