@@ -145,7 +145,9 @@ class f_util_System
 	 */
 	public static function execChangeConsoleCommand($commandName, $arguments = array())
 	{
-		return self::exec("framework/bin/change.php $commandName " . implode(" ", $arguments)); 
+		$phpCliPath = (defined('PHP_CLI_PATH')) ? PHP_CLI_PATH : '';
+		if (!empty($phpCliPath)) {$phpCliPath .= ' ';}
+		return self::exec($phpCliPath . "framework/bin/change.php $commandName " . implode(" ", $arguments)); 
 	}
 	
 	/**

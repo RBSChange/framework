@@ -197,6 +197,8 @@ class config_ProjectParser
 			$configArray['defines']['AG_DEVELOPMENT_MODE'] = true;
 		}
 		
+		$configArray['defines']['PHP_CLI_PATH'] = (isset($computedDeps["PHP_CLI_PATH"])) ?  $computedDeps["PHP_CLI_PATH"] : '';
+		
 		if (!isset($configArray['config']['browsers']['frontoffice']) || !is_array($configArray['config']['browsers']['frontoffice']))
 		{
 			$configArray['config']['browsers']['frontoffice'] = array();

@@ -241,6 +241,8 @@ class c_ChangeBootStrap
 		$computedComponents["LOCAL_REPOSITORY"] = $localRepo;
 		$computedComponents["WWW_GROUP"] = $this->getProperties()->getProperty("WWW_GROUP");
 		$computedComponents["DEVELOPMENT_MODE"] = $this->getProperties()->getProperty("DEVELOPMENT_MODE") == true;
+		$computedComponents["PHP_CLI_PATH"] = $this->getProperties()->getProperty("PHP_CLI_PATH") . "";
+		
 		$proxy = $this->getProxy();
 		if ($proxy !== null)
 		{
