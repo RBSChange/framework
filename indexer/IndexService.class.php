@@ -868,6 +868,7 @@ class indexer_IndexService extends BaseService
 			else 
 			{
 				$parentId = $parent->getId();
+				$this->setAncestors($parent, $indexedDocument);
 			}
 			$indexedDocument->addDocumentAncestor($parentId);
 		}
