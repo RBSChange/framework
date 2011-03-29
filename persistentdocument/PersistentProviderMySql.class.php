@@ -379,13 +379,10 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 			Framework::debug('executeSQLScript :' .$script);
 		}
 		$result = $this->getDriver()->exec($script);
-		if (Framework::isDebugEnabled())
+		$errcode = $this->errorCode();
+		if ($errcode == '00000')
 		{
-			$errcode = $this->errorCode();
-			if ($errcode != '00000')
-			{
-				Framework::error('executeSQLScript' . $this->errorInfo());
-			}
+			$result = 0;
 		}
 		if ($result === false)
 		{
@@ -2511,7 +2508,7 @@ class MysqlStatment
 		self::$time['countexec']++;
 		$start = microtime(true);
 
-		if (!$this->stmt->execute($parameters))
+		if (!$this->stmt->execute($parameters) && $this->stmt->errorCode() != '00000')
 		{
 			self::$time['err']++;
 			if (Framework::isDebugEnabled())
