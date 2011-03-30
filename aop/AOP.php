@@ -46,9 +46,9 @@ class f_AOP
 	 * @param String $exceptionToCatch
 	 * @return String
 	 */
-	function applyAfterThrowingAdvice($className, $methodName, $adviceName, $adviceMethodName, $exceptionToCatch = "Exception", $parameters = null)
+	function applyAfterThrowingAdvice($className, $methodName, $adviceName, $adviceMethodName, $parameters = null, $exceptionToCatch = "Exception")
 	{
-		//echo __METHOD__." $exceptionToCatch\n";
+		//echo __METHOD__." ".var_export($exceptionToCatch, true)."\n";
 		$params = array("exceptionToCatch" => $exceptionToCatch);
 		if ($parameters !== null)
 		{
@@ -403,10 +403,6 @@ class f_AOP
 							}
 							list($pointcutClass, $pointcutMethod) = explode("::", $pointcut);
 							$alteration = array($adviceClass, $aopMethod, $pointcutClass, $pointcutMethod, $adviceClass, $adviceMethod);
-							if ($tagName === "after-throwing" && $childNode->hasAttribute("exception"))
-							{
-								$alteration[] = $childNode->getAttribute("exception");
-							}
 							
 							if ($childNode->hasAttribute("parameters"))
 							{
@@ -424,6 +420,15 @@ class f_AOP
 									$parameters[$paramName] = $paramValue;
 								}
 								$alteration[] = $parameters;
+							}
+							else
+							{
+								$alteration[] = null;
+							}
+							
+							if ($tagName === "after-throwing" && $childNode->hasAttribute("exception"))
+							{
+								$alteration[] = $childNode->getAttribute("exception");
 							}
 							
 							if (!isset($alterations[$pointcutClass]))
