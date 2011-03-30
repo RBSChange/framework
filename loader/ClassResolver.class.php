@@ -176,6 +176,10 @@ class ClassResolver implements ResourceResolver
 	{
 		if (! preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $className))
 		{
+			if (Framework::inDevelopmentMode())
+			{
+				die("Invalid class name ".var_export($className, true));
+			}
 			die("Invalid class name");
 		}
 	}
@@ -618,7 +622,7 @@ class ClassResolverDevMode extends ClassResolver
 					$alterationSources = array($alteration[2], $alteration[3]);
 					break;
 				default :
-					$alterationSources = array($alteration[0]);
+					$alterationSources = array($alteration[0], $alteration[2]);
 			}
 			
 			foreach ($alterationSources as $source)
