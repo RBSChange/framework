@@ -83,7 +83,7 @@ function reloadCron($token, $baseURL, $sleepOnPing)
 	}
 	else
 	{
-		$pingURl  = $baseURL .'/changecron.php?&t=' . time();
+		$pingURl  = $baseURL .'/changecron.php?t=' . time();
 	}
 
 	task_PlannedTaskRunner::pingChangeCronURL($pingURl);
