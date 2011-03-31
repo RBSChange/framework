@@ -12,10 +12,8 @@ if (defined('DISABLE_CHANGECRON_EXECUTION') && constant('DISABLE_CHANGECRON_EXEC
 	exit(0);
 }
 
-//if (Framework::isInfoEnabled())
-//{
-//	Framework::info($_SERVER['SERVER_NAME'] ." ".  $_SERVER['SERVER_PORT'] . " " .$_SERVER['REQUEST_URI']);
-//}
+Framework::info($_SERVER['SERVER_NAME'] ." ".  $_SERVER['SERVER_PORT'] . " " .$_SERVER['REQUEST_URI']);
+
 RequestContext::getInstance()->setMode(RequestContext::BACKOFFICE_MODE);
 
 
@@ -81,11 +79,11 @@ function reloadCron($token, $baseURL, $sleepOnPing)
 	
 	if ($token)
 	{
-		$pingURl  = $baseURL .'/changecron.php?token=' . urlencode($token);
+		$pingURl  = $baseURL .'/changecron.php?token=' . urlencode($token) . '&t=' . time();
 	}
 	else
 	{
-		$pingURl  = $baseURL .'/changecron.php';
+		$pingURl  = $baseURL .'/changecron.php?&t=' . time();
 	}
 
 	task_PlannedTaskRunner::pingChangeCronURL($pingURl);
