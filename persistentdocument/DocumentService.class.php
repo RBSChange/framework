@@ -2702,6 +2702,31 @@ class f_persistentdocument_DocumentService extends BaseService
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
 	 * @param string $forModuleName
+	 * @return array
+	 */
+	public function getDocumentEditorInfos($document, $forModuleName)
+	{
+		$model = $document->getPersistentModel();
+		$contextlang = RequestContext::getInstance()->getLang();
+		$usecontextlang = $document->isLangAvailable($contextlang);
+		$infos = array('id' => $document->getId(),
+				'model' => $model->getOriginalModelName(),
+				'contextlang' => $contextlang,
+				'vo' => $document->getLang(),
+				'label' => $model->isLocalized() ? $document->getVoLabel() :  $document->getLabel(),
+				'revision' => $document->getDocumentversion(),				
+				'usecorrection' => $model->useCorrection(),
+				'useworkflow' => $model->hasWorkflow(),
+				'uselocalization' => $model->isLocalized(),
+				'usecontextlang' => $document->isLangAvailable($contextlang),
+				'permissions' => $this->getPermissions($document, $forModuleName)
+		);
+		return $infos;
+	}
+
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param string $forModuleName
 	 * @param array $allowedSections
 	 * @return array
 	 */
@@ -2712,29 +2737,10 @@ class f_persistentdocument_DocumentService extends BaseService
 		$rc = RequestContext::getInstance();
 		$contextlang = $rc->getLang();
 		$usecontextlang = $document->isLangAvailable($contextlang);
-		$lang = $usecontextlang ? $contextlang : $document->getLang();
-			
+		$lang = $usecontextlang ? $contextlang : $document->getLang();	
 		try
 		{
 			$rc->beginI18nWork($lang);
-
-			$data['infos'] = array(
-				'id' => $document->getId(),
-				'model' => $model->getOriginalModelName(),
-				'vo' => $document->getLang(),
-				'revision' => $document->getDocumentversion(),				
-				'usecorrection' => $model->useCorrection(),
-				'useworkflow' => $model->hasWorkflow(),
-				'uselocalization' => $model->isLocalized(),
-				'usecontextlang' => $usecontextlang,
-				'permissions' => $this->getPermissions($document, $forModuleName),			
-			);
-
-			if ($model->useCorrection() && $document->getCorrectionofid())
-			{
-				$data['infos']['correctionofid'] = $document->getCorrectionofid();
-			}
-
 			if ($allowedSections === null || isset($allowedSections['properties']))
 			{
 				$data['properties'] = array(
