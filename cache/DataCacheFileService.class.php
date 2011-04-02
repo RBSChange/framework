@@ -308,7 +308,8 @@ class f_DataCacheFileService extends f_DataCacheService
 		$cachePath = $item->getCachePath();
 		if ($cachePath === null)
 		{
-			$cachePath = f_util_FileUtils::buildCachePath('simplecache', $item->getNamespace(), $item->getKeyParameters());
+			$keyParameters = $item->getKeyParameters();
+			$cachePath = f_util_FileUtils::buildCachePath('simplecache', $item->getNamespace(), $keyParameters[0], $keyParameters[1], $keyParameters[2], $keyParameters);
 			$item->setCachePath($cachePath);
 		}
 		if ($subCache === null)
