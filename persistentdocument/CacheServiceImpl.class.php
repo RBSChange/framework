@@ -151,10 +151,6 @@ class f_persistentdocument_MemcachedExtCacheService extends f_persistentdocument
 				{
 					foreach (array_keys($this->deleteTransactionKeys) as $key)
 					{
-						if (isset($this->updateTransactionKeys[$key]))
-						{
-							unset($this->updateTransactionKeys[$key]);
-						}
 						$memcache->delete($key);
 					}
 				}
@@ -165,7 +161,10 @@ class f_persistentdocument_MemcachedExtCacheService extends f_persistentdocument
 			}
 			foreach ($this->updateTransactionKeys as $key => $object)
 			{
-				$this->memcache->set($key, $object, 3600);
+				if (!isset($this->deleteTransactionKeys[$key]))
+				{
+					$this->memcache->set($key, $object, 3600);
+				}
 			}
 			$this->deleteTransactionKeys = null;
 			$this->updateTransactionKeys = null;
@@ -259,7 +258,7 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 		{
 			if ($object === null)
 			{
-				return $this->memcache->delete($key);
+				return $this->memcache->delete($key, 0);
 			}
 			else
 			{
@@ -312,7 +311,7 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 		{
 			return $this->memcache->flush();
 		}
-		return $this->memcache->delete($pattern);
+		return $this->memcache->delete($pattern, 0);
 	}
 
 	// private methods
@@ -335,11 +334,7 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 				{
 					foreach (array_keys($this->deleteTransactionKeys) as $key)
 					{
-						if (isset($this->updateTransactionKeys[$key]))
-						{
-							unset($this->updateTransactionKeys[$key]);
-						}
-						$memcache->delete($key);
+						$memcache->delete($key, 0);
 					}
 				}
 				catch (Exception $e)
@@ -349,7 +344,10 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 			}
 			foreach ($this->updateTransactionKeys as $key => $object)
 			{
-				$this->memcache->set($key, $object, null, 3600);
+				if (!isset($this->deleteTransactionKeys[$key]))
+				{
+					$this->memcache->set($key, $object, null, 3600);
+				}
 			}
 			$this->deleteTransactionKeys = null;
 			$this->updateTransactionKeys = null;
