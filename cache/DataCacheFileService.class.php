@@ -274,7 +274,26 @@ class f_DataCacheFileService extends f_DataCacheService
 				{
 					continue;
 				}
-				@touch($baseById.DIRECTORY_SEPARATOR.$dir.DIRECTORY_SEPARATOR.self::INVALID_CACHE_ENTRY);
+				$this->putInvalidCacheFlagRecursive($baseById.DIRECTORY_SEPARATOR.$dir);
+			}
+		}
+	}
+	
+	protected function putInvalidCacheFlagRecursive($dir)
+	{
+		foreach (scandir($dir) as $subDir)
+		{
+			if ($subDir == '.' || $subDir == '..')
+			{
+				continue;
+			}
+			if (!is_numeric($subDir) && strlen($subDir) > 1)
+			{
+				@touch($dir.DIRECTORY_SEPARATOR.$subDir.DIRECTORY_SEPARATOR.self::INVALID_CACHE_ENTRY);
+			}
+			else
+			{
+				$this->putInvalidCacheFlagRecursive($dir.DIRECTORY_SEPARATOR.$subDir);
 			}
 		}
 	}
@@ -289,10 +308,9 @@ class f_DataCacheFileService extends f_DataCacheService
 			$dirHandler = opendir($dir);
 			while ($fileName = readdir($dirHandler))
 			{
-				if ($fileName != '.' && $fileName != '..' && !file_exists($dir . DIRECTORY_SEPARATOR . $fileName . DIRECTORY_SEPARATOR . self::INVALID_CACHE_ENTRY))
+				if ($fileName != '.' && $fileName != '..')
 				{
-					// we ignore errors because the file can disapear
-					@touch($dir . DIRECTORY_SEPARATOR . $fileName . DIRECTORY_SEPARATOR . self::INVALID_CACHE_ENTRY);
+					$this->putInvalidCacheFlagRecursive($dir.DIRECTORY_SEPARATOR.$fileName);
 				}
 			}
 			closedir($dirHandler);
@@ -379,11 +397,15 @@ class f_DataCacheFileService extends f_DataCacheService
 		}
 		$baseById = $this->registrationFolder.DIRECTORY_SEPARATOR.'byDocId';
 		
+		$keyParams = $item->getKeyParameters();
 		foreach ($item->getPatterns() as $spec)
 		{
 			if (is_numeric($spec))
 			{
-				$byIdRegister = $baseById.DIRECTORY_SEPARATOR.implode(DIRECTORY_SEPARATOR, str_split($spec, 3)).DIRECTORY_SEPARATOR.$item->getNamespace().'_'.$item->getKeyParameters();
+				$byIdRegister = $baseById.DIRECTORY_SEPARATOR.
+					implode(DIRECTORY_SEPARATOR, str_split($spec, 3)).DIRECTORY_SEPARATOR.
+					$keyParams[0].DIRECTORY_SEPARATOR.$keyParams[1].DIRECTORY_SEPARATOR.$keyParams[2].
+					DIRECTORY_SEPARATOR.$item->getNamespace().'_'.$keyParams;
 				if (!file_exists($byIdRegister))
 				{
 					f_util_FileUtils::mkdir(dirname($byIdRegister));
