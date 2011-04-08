@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<i18n baseKey="f.unit" lcid="fr_FR">
+	<key id="year">année</key>
+	<key id="years">années</key>
+	<key id="week">semaine</key>
+	<key id="weeks">semaines</key>
+	<key id="month">mois</key>
+	<key id="months">mois</key>
+	<key id="day">jour</key>
+	<key id="days">jours</key>
+	<key id="hour">heure</key>
+	<key id="hours">heures</key>
+	<key id="minute">minute</key>
+	<key id="minutes">minutes</key>
+	<key id="second">seconde</key>
+	<key id="seconds">secondes</key>
+</i18n>
