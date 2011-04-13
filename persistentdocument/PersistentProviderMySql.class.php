@@ -380,12 +380,13 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 		$result = $this->getDriver()->exec($script);
 		$errcode = $this->errorCode();
-		if ($errcode == '00000')
-		{
-			$result = 0;
-		}
 		if ($result === false)
 		{
+			if ($errcode == '00000')
+			{
+				return 0;
+			}
+			
 			$e = new BaseException("Unable to execute SQL: ".$this->errorCode().": ".$this->errorInfo()."\n".$script, "framework.persistentprovider.mysql.sql-error", $this->getErrorParameters());
 			$e->setAttribute("sql", $script);
 			throw $e;
