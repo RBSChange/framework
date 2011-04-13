@@ -359,6 +359,9 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	public function set<{$property->getPhpName()}>($<{$property->getName()}>)
 	{
 		$this->checkLoaded();
+<{if $property->getName() == "s18s"}>
+	$this->m_s18sArray = null;
+<{/if}>
 		if ($this->set<{$property->getPhpName()}>Internal($<{$property->getName()}>))
 		{
 			$this->propertyUpdated('<{$property->getName()}>');

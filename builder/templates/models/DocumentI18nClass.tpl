@@ -221,6 +221,9 @@ class <{$model->getDocumentClassName()}>I18n implements f_persistentdocument_I18
 	 */
 	public final function set<{$property->getPhpName()}>($<{$property->getName()}>)
 	{
+<{if $property->getName() == "s18s"}>
+	$this->m_s18sArray = null;
+<{/if}>
 <{if $property->getType() == "DateTime"}>
 		if ($<{$property->getName()}> instanceof date_Calendar)
 		{
