@@ -566,7 +566,7 @@ class f_persistentdocument_PersistentTreeNode implements tree_TreeNode
 	}
 	
 	/**
-	 * @deprecated (will be removed in 4.0) use TreeService::getInstance()->newLastChildForNode
+	 * @deprecated (will be removed in 4.0) use TreeService::getInstance()->deleteNode
 	 */
 	public function deleteNode($node)
 	{
