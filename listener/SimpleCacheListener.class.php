@@ -91,9 +91,9 @@ class listener_SimpleCacheListener
 	 * @param f_persistentdocument_DocumentService $sender
 	 * @param array $params
 	 */
-	public function onPersistentDocumentUnPublished ($sender, $params)
+	public function onPersistentDocumentUnpublished ($sender, $params)
 	{
-		if (Framework::isDebugEnabled()) Framework::debug("[". __CLASS__ . "]: onPersistentDocumentUnPublished");
+		if (Framework::isDebugEnabled()) Framework::debug("[". __CLASS__ . "]: onPersistentDocumentUnpublished");
 		$document = $params['document'];
 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
 		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
