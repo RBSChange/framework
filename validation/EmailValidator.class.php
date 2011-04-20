@@ -26,7 +26,7 @@ class validation_EmailValidator extends validation_ValidatorImpl implements vali
 		if ($this->getParameter() == true)
 		{
 			$value = $field->getValue();
-			if (!is_string($value) || !preg_match(self::EMAIL_REGEXP, $value))
+			if ($value !== null && (!is_string($value) || ($value !== "" && !preg_match(self::EMAIL_REGEXP, $value))))
 			{
 				$this->reject($field->getName(), $errors);
 			}
