@@ -387,7 +387,7 @@ class config_ProjectParser
 						}
 					}
 				}
-				if (isset($moduleConfig['project']))
+				if (isset($moduleConfig['project']) && is_array($moduleConfig['project']))
 				{
 					if (!isset($configArray['config']['modules'][$moduleName]))
 					{
