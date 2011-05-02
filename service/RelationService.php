@@ -65,4 +65,26 @@ class RelationService extends BaseService
 		}
 		return self::$relations[$propertyName];
 	}
+	
+	/**
+	 * @param Integer $docId
+	 * @param String $relationName
+	 * @param String $documentModel
+	 * @return f_persistentdocument_PersistentRelation[] the relations that documentId has
+	 */
+	public function getRelations($documentId, $relationName = null, $documentModel = null)
+	{
+		return $this->getPersistentProvider()->getChildRelationByMasterDocumentId($documentId, $relationName, $documentModel);
+	}
+	
+	/**
+	 * @param Integer $docId
+	 * @param String $relationName
+	 * @param String $documentModel
+	 * @return f_persistentdocument_PersistentRelation[] the relations that use documentId
+	 */
+	public function getUsageRelations($documentId, $relationName = null, $documentModel = null)
+	{
+		return $this->getPersistentProvider()->getChildRelationBySlaveDocumentId($documentId, $relationName, $documentModel);
+	}
 }
