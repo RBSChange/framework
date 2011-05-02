@@ -1479,6 +1479,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		$indexedDoc->setStringField('author', $this->getAuthor());
 		$indexedDoc->setStringField('publicationstatus', $this->getPublicationstatus());
 		$indexedDoc->setStringField('module', $this->getPersistentModel()->getOriginalModuleName());
+		$indexedDoc->setStringField('editmodule', uixul_DocumentEditorService::getInstance()->getEditModuleName($this));
 		$indexedDoc->setStringField('documentpath', $ds->getPathOf($this));
 		$indexedDoc->setStringField('volang', $this->getLang());
 		$indexedDoc->setIntegerField('documentversion', $this->getDocumentversion());

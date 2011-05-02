@@ -52,8 +52,6 @@ class generator_PersistentModel
 
 	private $publishOnDayChange;
 
-	private $editModule;
-
 	/**
 	 * @var generator_Workflow
 	 */
@@ -799,14 +797,6 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return String or null
-	 */
-	public function getEditModule()
-	{
-		return ($this->editModule === "") ? null : $this->editModule;
-	}
-
-	/**
 	 * @param String[] $models
 	 * @return String[]
 	 */
@@ -1049,11 +1039,6 @@ class generator_PersistentModel
 			$this->publishOnDayChange = $baseDocument->publishOnDayChange;
 		}
 
-		if ($this->editModule === null)
-		{
-			$this->editModule = $this->moduleName;
-		}
-
 		/**
 		 * Check localisation
 		 */
@@ -1127,10 +1112,6 @@ class generator_PersistentModel
 
 		$this->tableName = $parentModel->tableName;
 		$this->localized = $parentModel->localized;
-		if ($this->editModule === null)
-		{
-			$this->editModule = $parentModel->editModule;
-		}
 
 		if ($this->useCorrection)
 		{
@@ -2186,9 +2167,6 @@ class generator_PersistentModel
 					break;
 				case "publish-on-day-change":
 					$this->publishOnDayChange = self::getBoolean($value);
-					break;
-				case "edit-module":
-					$this->editModule = $value;
 					break;
 				case "xsi:schemaLocation":
 					// just ignore it

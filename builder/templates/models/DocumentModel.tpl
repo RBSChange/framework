@@ -255,12 +255,4 @@ class <{$model->getFinalDocumentClassName()}>model extends f_persistentdocument_
 	{
 		return <{$model->getFinalServiceClassName()}>::getInstance();
 	}
-	
-	/**
-	 * @return String or null
-	 */
-	public function getEditModule()
-	{
-		return <{$model->escapeString($model->getEditModule())}>;
-	}
 }

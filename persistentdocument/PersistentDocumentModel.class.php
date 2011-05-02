@@ -917,11 +917,6 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	abstract public function getDocumentService();
 	
 	/**
-	 * @return String or null
-	 */
-	abstract public function getEditModule();
-
-	/**
 	 * @return String
 	 */
 	public function __toString()
