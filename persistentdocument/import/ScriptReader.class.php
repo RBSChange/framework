@@ -29,6 +29,7 @@ class import_ScriptReader extends BaseService
 		$this->registerElementClass('execute', 'import_ScriptExecuteElement');
 		$this->registerElementClass('attribute', 'import_ScriptAttributeElement');
 		$this->registerElementClass('i18n', 'import_ScriptI18nElement');
+		$this->registerElementClass('debug', 'import_ScriptDebugElement');
 	}
 
 	/**
