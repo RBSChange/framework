@@ -35,6 +35,6 @@ class bean_DocumentConverter implements BeanValueConverter
 	 */
 	public function isValidRequestValue($value)
 	{
-		return is_numeric($value) || $value instanceof f_persistentdocument_PersistentDocument;
+		return $value === null || is_numeric($value) || $value instanceof f_persistentdocument_PersistentDocument;
 	}
 }
