@@ -568,6 +568,57 @@ class DocumentHelper
 		return implode(',', array_keys($models));
 	}
 	
+	/**
+	 * @example "[modules_generic/folder],!modules_generic/rootfolder"
+	 * @example "modules_generic/folder,modules_generic/systemfolder"
+	 * @param string $modelList
+	 * @return string[]
+	 */
+	public static function expandModelList($modelList)
+	{
+		$models = array();	
+		foreach (explode(',', $modelList) as $modelItem)
+		{
+			$modelItem = trim($modelItem);
+			if (strlen($modelItem) > 0 && $modelItem[0] == '[')
+			{
+				$modelName = str_replace(array('[', ']'), '', $modelItem);
+				try 
+				{
+					$model = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($modelName);
+					$models[$modelName] = true;
+					$children = $model->getChildrenNames();
+					if (is_array($children))
+					{
+						foreach ($children as $childModelName)
+						{
+							$models[$childModelName] = true;
+						}
+					}
+					continue;
+				}
+				catch (Exception $e)
+				{
+					Framework::fatal($e->getMessage());
+				}
+			}
+			else if (strlen($modelItem) > 0 && $modelItem[0] == '!')
+			{
+				$unsetType = substr($modelItem, 1);
+				if (isset($models[$unsetType]))
+				{
+					unset($models[$unsetType]);
+				}
+				continue;
+			} 
+			else if (strlen($modelItem) > 0)
+			{
+				$models[$modelItem] = true;
+			}
+		}
+		return array_keys($models);
+	}	
+	
 	// Deprecated
 	
 	/**
