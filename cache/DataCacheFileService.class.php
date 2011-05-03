@@ -204,7 +204,7 @@ class f_DataCacheFileService extends f_DataCacheService
 				Framework::debug("Clear all");
 			}
 			$dirHandler = opendir($cachePath);
-			while ($fileName = readdir($dirHandler))
+			while (($fileName = readdir($dirHandler)) !== false)
 			{
 				if ($fileName != '.' && $fileName != '..' && $fileName != 'registration' && $fileName != 'old')
 				{
@@ -306,7 +306,7 @@ class f_DataCacheFileService extends f_DataCacheService
 		foreach ($dirsToClear as $dir)
 		{
 			$dirHandler = opendir($dir);
-			while ($fileName = readdir($dirHandler))
+			while (($fileName = readdir($dirHandler)) !== false)
 			{
 				if ($fileName != '.' && $fileName != '..')
 				{
