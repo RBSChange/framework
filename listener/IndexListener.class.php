@@ -28,13 +28,9 @@ class f_listener_IndexListener
 	public function onPersistentDocumentPublished($sender, $params)
 	{
 		$document = $params['document'];
-		if ($document->getPersistentModel()->isIndexable())
+		if (($document instanceof f_persistentdocument_PersistentDocument) && 
+			$document->getPersistentModel()->isIndexable())
 		{
-			$document = $params['document'];
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug("[" . __CLASS__ . "]: Indexing Published IndexableDocument (id =" . $document->getId() . ")");
-			}
 			$this->getIndexService()->update($document);
 		}
 	}
@@ -42,29 +38,10 @@ class f_listener_IndexListener
 	public function onPersistentDocumentUpdated($sender, $params)
 	{
 		$document = $params['document'];
-		if ($document->getPersistentModel()->isIndexable())
+		if (($document instanceof f_persistentdocument_PersistentDocument) && 
+			$document->getPersistentModel()->isIndexable())
 		{
-			$rc = RequestContext::getInstance();
-			foreach ($document->getI18nInfo()->getLangs() as $lang)
-			{
-				try
-				{
-					$rc->beginI18nWork($lang);
-					if ($document->isPublished())
-					{
-						if (Framework::isDebugEnabled())
-						{
-							Framework::debug("[" . __CLASS__ . "]: Indexing Modified IndexableDocument (id =" . $document->getId() . ")");
-						}
-						$this->getIndexService()->update($document);
-					}
-					$rc->endI18nWork();
-				}
-				catch (Exception $e)
-				{
-					$rc->endI18nWork($e);
-				}
-			}
+			$this->getIndexService()->update($document);
 		}
 	}
 	
@@ -75,14 +52,13 @@ class f_listener_IndexListener
 	public function onPersistentDocumentUnpublished($sender, $params)
 	{
 		$document = $params['document'];
-		if ($document->getPersistentModel()->isIndexable())
+		if (($document instanceof f_persistentdocument_PersistentDocument) && 
+			$document->getPersistentModel()->isIndexable())
 		{
-			if (array_key_exists('oldPublicationStatus', $params))
+			if (array_key_exists('oldPublicationStatus', $params) &&
+				'PUBLICATED' == $params['oldPublicationStatus'])
 			{
-				if ('PUBLICATED' == $params['oldPublicationStatus'])
-				{
-					$this->getIndexService()->delete($document);
-				}
+				$this->getIndexService()->delete($document);
 			}
 		}
 	}

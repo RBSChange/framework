@@ -1,10 +1,7 @@
 <?php
 $controller = Controller::newInstance("controller_ChangeController");
-
 $tm = f_persistentdocument_TransactionManager::getInstance();
 $rc = RequestContext::getInstance();
-$is = indexer_IndexService::getInstance();
-$is->setAutocommit(false);
 try
 {
 	$tm->beginTransaction();
@@ -30,5 +27,4 @@ catch (Exception $e)
 {
 	$tm->rollBack($e);
 }
-$is->commit();
 echo 'OK';

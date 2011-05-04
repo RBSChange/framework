@@ -12,6 +12,11 @@ class indexer_IndexService extends BaseService
 	const INDEXER_MODE_BACKOFFICE = 0;
 	const INDEXER_MODE_FRONTOFFICE = 1;
 	
+	const TO_INDEX = 'TO_INDEX';
+	const TO_DELETE = 'TO_DELETE';
+	const INDEXED = 'INDEXED';
+	const DELETED = 'DELETED';
+	
 	/**
 	 * @var indexer_IndexingService
 	 */
@@ -23,9 +28,9 @@ class indexer_IndexService extends BaseService
 	private $manager = null;
 	
 	/**
-	 * @var array<int>
+	 * @var integer
 	 */
-	private $indexerModeSwitches = array();
+	private $indexerMode = null;
 	
 	/**
 	 * @var array
@@ -56,22 +61,16 @@ class indexer_IndexService extends BaseService
 				$newInstance->manager = new indexer_FakeSolrManager();
 			}
 			self::$instance = $newInstance;
-			
-			register_shutdown_function(array('indexer_IndexService','shutdownCommit'));
 		}
 		return self::$instance;
 	}
 	
 	/**
-	 * @return Int
+	 * @return integer
 	 */
 	public function getIndexerMode()
 	{
-		if (f_util_ArrayUtils::isEmpty($this->indexerModeSwitches))
-		{
-			return self::INDEXER_MODE_FRONTOFFICE;
-		}
-		return f_util_ArrayUtils::lastElement($this->indexerModeSwitches);
+		return $this->indexerMode;
 	}
 	
 	public function loadModelsInfos()
@@ -108,6 +107,40 @@ class indexer_IndexService extends BaseService
 		return $this->modelsInfos['fo'];
 	}	
 	
+	private $indexDocuments;
+	private $indexBackofficeDocuments;
+	
+	public function beginIndexTransaction()
+	{
+		$this->indexDocuments = array();
+		$this->indexBackofficeDocuments = array();
+	}
+	
+	public function commitIndex()
+	{
+		if (is_array($this->indexDocuments))
+		{
+			$pp = $this->getPersistentProvider();
+			foreach ($this->indexDocuments as $id => $status) 
+			{
+				$pp->setIndexingDocumentStatus($id, self::INDEXER_MODE_FRONTOFFICE, $status);
+			}
+			
+			foreach ($this->indexBackofficeDocuments as $id => $status) 
+			{
+				$pp->setIndexingDocumentStatus($id, self::INDEXER_MODE_BACKOFFICE, $status);
+			}
+			$this->indexDocuments = null;
+			$this->indexBackofficeDocuments = null;
+		}
+	}
+	
+	public function rollBackIndex()
+	{
+		$this->indexDocuments = null;
+		$this->indexBackofficeDocuments = null;
+	}
+	
 	/**
 	 * @throws IllegalArgumentException
 	 * @param f_persistentdocument_PersistentDocument $document
@@ -117,7 +150,7 @@ class indexer_IndexService extends BaseService
 		try
 		{
 			$this->beginFrontIndexerMode();
-			$this->addDocument($document);
+			$this->toIndexStatus($document);
 			$this->endIndexerMode();
 		}
 		catch (Exception $e)
@@ -135,7 +168,7 @@ class indexer_IndexService extends BaseService
 		try
 		{
 			$this->beginBackIndexerMode();
-			$this->addDocument($document);
+			$this->toIndexStatus($document);
 			$this->endIndexerMode();
 		}
 		catch (Exception $e)
@@ -153,7 +186,7 @@ class indexer_IndexService extends BaseService
 		try
 		{
 			$this->beginFrontIndexerMode();
-			$this->updateDocument($document);
+			$this->toIndexStatus($document);
 			$this->endIndexerMode();
 		}
 		catch (Exception $e)
@@ -171,7 +204,7 @@ class indexer_IndexService extends BaseService
 		try
 		{
 			$this->beginBackIndexerMode();
-			$this->updateDocument($document);
+			$this->toIndexStatus($document);
 			$this->endIndexerMode();
 		}
 		catch (Exception $e)
@@ -189,7 +222,7 @@ class indexer_IndexService extends BaseService
 		try
 		{
 			$this->beginFrontIndexerMode();
-			$this->deleteDocument($document);
+			$this->toDeleteStatus($document);
 			$this->endIndexerMode();
 		}
 		catch (Exception $e)
@@ -207,7 +240,7 @@ class indexer_IndexService extends BaseService
 		try
 		{
 			$this->beginBackIndexerMode();
-			$this->deleteDocument($document);
+			$this->toDeleteStatus($document);
 			$this->endIndexerMode();
 		}
 		catch (Exception $e)
@@ -231,6 +264,17 @@ class indexer_IndexService extends BaseService
 			{
 				$this->endIndexerMode($e);
 			}
+					
+			try 
+			{
+				$this->getTransactionManager()->beginTransaction();
+				$this->getPersistentProvider()->clearIndexingDocumentStatus(self::INDEXER_MODE_BACKOFFICE);
+				$this->getTransactionManager()->commit();				
+			} 
+			catch (Exception $e) 
+			{
+				$this->getTransactionManager()->rollBack($e);
+			}
 		}
 	}
 	
@@ -248,6 +292,17 @@ class indexer_IndexService extends BaseService
 			catch (Exception $e)
 			{
 				$this->endIndexerMode($e);
+			}
+
+			try 
+			{
+				$this->getTransactionManager()->beginTransaction();
+				$this->getPersistentProvider()->clearIndexingDocumentStatus(self::INDEXER_MODE_FRONTOFFICE);
+				$this->getTransactionManager()->commit();				
+			} 
+			catch (Exception $e) 
+			{
+				$this->getTransactionManager()->rollBack($e);
 			}
 		}
 	}
@@ -474,52 +529,7 @@ class indexer_IndexService extends BaseService
 		}
 		return $searchResults;
 	}
-	
-	/**
-	 * Get the array of declared synonyms in solr's schema.xml file.
-	 * @deprecated 
-	 * @return Array
-	 */
-	public function getSynonymsLists()
-	{
-		return array();
-	}
-	
-	/**
-	 * Update the synonyms list $synonymsList with the content $content
-	 * @deprecated
-	 * @param String $synonymsList
-	 * @param String $content
-	 */
-	public function updateSynonymsList($synonymsList, $content)
-	{
-		return;
-	}
-	
-	/**
-	 * Set the solr autocommit mode 
-	 *
-	 * @param Boolean $bool
-	 */
-	public function setAutoCommit($bool)
-	{
-		if (!is_null($this->manager) && is_bool($bool))
-		{
-			$this->manager->setAutoCommit($bool);
-		}
-	}
-	
-	/**
-	 * Send a commit
-	 */
-	public function commit()
-	{
-		if (!is_null($this->manager))
-		{
-			$this->manager->sendCommit();
-		}
-	}
-	
+		
 	/**
 	 * @return String
 	 */
@@ -532,9 +542,51 @@ class indexer_IndexService extends BaseService
 		return $this->getBaseClientId();
 	}
 	
+	/**
+	 * @param string $documentModelName
+	 * @param integer $documentIndex
+	 * @param integer $chunkSize
+	 * @return integer
+	 */
+	public function reIndexModelName($documentModelName, $documentIndex, $chunkSize)
+	{
+		$modes = array();
+		if (in_array($documentModelName, $this->getBackOfficeModelsName()))
+		{
+			$modes[] = self::INDEXER_MODE_BACKOFFICE;
+		}
+		if (in_array($documentModelName, $this->getFrontOfficeModelsName()))
+		{
+			$modes[] = self::INDEXER_MODE_FRONTOFFICE;
+		}
+		if (count($modes) == 0) {return 0;}
+		$query = $this->getIndexableDocumentsByModelNameQuery($documentModelName)
+				->setProjection(Projections::property('id', 'id'))
+				->setFirstResult($documentIndex)
+				->setMaxResults($chunkSize)
+				->addOrder(Order::asc('document_id'));
+		$ids = $query->findColumn('id');
+		$this->getTransactionManager()->beginTransaction();
+		
+		foreach ($modes as $indexingMode) 
+		{
+			foreach ($ids as $id) 
+			{
+				$this->getPersistentProvider()->setIndexingDocumentStatus($id, $indexingMode, self::TO_INDEX);
+			}
+		}
+		$this->getTransactionManager()->commit();
+		return count($ids);	
+	}
+	
 	public function indexDocumentChunk($mode, $modelName, $documentIndex, $chunkSize)
 	{
-		$backIndexing = ($mode == 'back');
+		if ($this->manager === null)
+		{
+			Framework::error(__METHOD__ . ' Can not index documents please check your config.');
+			return 'ERROR';
+		}
+		$this->beginIndexerMode(($mode == 'back') ? self::INDEXER_MODE_BACKOFFICE : self::INDEXER_MODE_FRONTOFFICE);		
 		$persistentDocumentModel = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($modelName);
 		if ($persistentDocumentModel->getName() != $modelName)
 		{
@@ -542,15 +594,17 @@ class indexer_IndexService extends BaseService
 			return 0;
 		}
 		
-		if ($backIndexing && ! $persistentDocumentModel->isBackofficeIndexable())
+		if (!$this->isModelNameIndexable($modelName))
 		{
-			Framework::warn(__METHOD__ . " model " . $modelName . " is not backoffice indexable");
+			if ($this->getIndexerMode() === self::INDEXER_MODE_BACKOFFICE)
+			{
+				Framework::warn(__METHOD__ . " model " . $modelName . " is not backoffice indexable");
+			}
+			else
+			{
+				Framework::warn(__METHOD__ . " model " . $modelName . " is not frontoffice indexable");
+			}
 			return 'ERROR';
-		}
-		if (!$backIndexing && ! $persistentDocumentModel->isIndexable())
-		{
-			Framework::warn(__METHOD__ . " model " . $modelName . " is not frontoffice indexable");
-			continue;
 		}		
 		
 		$query = $this->getIndexableDocumentsByModelNameQuery($modelName)
@@ -559,47 +613,34 @@ class indexer_IndexService extends BaseService
 				->setMaxResults($chunkSize)
 				->addOrder(Order::asc('document_id'));
 		$ids = $query->findColumn('id');
-		$rc = RequestContext::getInstance();		
+		$rc = RequestContext::getInstance();	
+
+		$this->getTransactionManager()->beginTransaction();
 		foreach ($ids as $documentId)
 		{
 			try
 			{
-				$document = DocumentHelper::getDocumentInstance($documentId);
-				foreach ($document->getI18nInfo()->getLangs() as $lang)
+				list($oldStatus, $lastUpdate) = $this->getPersistentProvider()->getIndexingDocumentStatus($documentId, $this->getIndexerMode());
+				$result = $this->indexDocumentId($documentId);
+				if ($result === self::INDEXED)
 				{
-					try
+					if ($oldStatus !== $result)
 					{
-						$rc->beginI18nWork($lang);	
-						if (!$document->isContextLangAvailable())
-						{
-							continue;
-						}
-						if ($backIndexing)
-						{
-							if ($document->getPublicationstatus() !== "DEPRECATED")
-							{
-								if (Framework::isInfoEnabled())
-								{
-									Framework::info("Index BO ($lang) " . $document->__toString());
-								}
-								$this->addBackoffice($document);
-							}
-						}
-						else if ($document->isPublished())
-						{
-							if (Framework::isInfoEnabled())
-							{
-								Framework::info("Index FO ($lang) " . $document->__toString());
-							}
-							$this->add($document);
-						}
-						$rc->endI18nWork();
-					}
-					catch (Exception $e)
-					{
-						$rc->endI18nWork($e);
+						$this->getPersistentProvider()->setIndexingDocumentStatus($documentId, $this->getIndexerMode(), $result);
 					}
 				}
+				elseif ($result === self::DELETED)
+				{
+					if ($oldStatus !== null)
+					{
+						$this->getPersistentProvider()->deleteIndexingDocumentStatus($documentId, $this->getIndexerMode());
+					}
+				}
+				elseif ($oldStatus !== self::TO_INDEX)
+				{
+					$this->getPersistentProvider()->setIndexingDocumentStatus($documentId, $this->getIndexerMode(), self::TO_INDEX);
+				}
+				
 			}
 			catch (Exception $e)
 			{
@@ -607,18 +648,108 @@ class indexer_IndexService extends BaseService
 				echo $e->getMessage();
 			}
 		}
+		
+		$this->getTransactionManager()->commit();
+		$this->manager->commit();
+		
+		$this->endIndexerMode();
 		return count($ids);
 	}
 	
-	/**
-	 * @deprecated use isModelNameIndexable
-	 * @param f_persistentdocument_PersistentDocumentModel $model
-	 * @return Boolean
-	 */
-	public function isModelIndexable($model)
+	public function backgroundIndex($indexingMode, $maxDocumentId, $chunkSize = 100)
 	{
-		return $this->isModelNameIndexable($model->getName());
-	}
+		if ($this->manager === null)
+		{
+			Framework::error(__METHOD__ . ' Can not index documents please check your config.');
+			return 'ERROR';
+		}
+		$documentIds = $this->getPersistentProvider()->getIndexingDocuments($indexingMode, $maxDocumentId, $chunkSize);
+		if (count($documentIds) === 0)
+		{
+			return -1;
+		}		
+		try 
+		{
+			$this->getTransactionManager()->beginTransaction();
+			$this->beginIndexerMode($indexingMode);
+			foreach ($documentIds as $documentId) 
+			{
+				$result = $this->indexDocumentId($documentId);
+				if ($result === self::INDEXED)
+				{
+					$this->getPersistentProvider()->setIndexingDocumentStatus($documentId, $indexingMode, $result);
+				}
+				elseif ($result === self::DELETED)
+				{
+					$this->getPersistentProvider()->deleteIndexingDocumentStatus($documentId, $indexingMode);
+				}
+			}
+			$this->endIndexerMode();
+			$this->getTransactionManager()->commit();
+			$this->manager->commit();
+		}
+		catch (Exception $e)
+		{
+			$this->getTransactionManager()->rollBack($e);
+		}
+		
+		if (count($documentIds) < $chunkSize)
+		{
+			return -1;
+		}
+		return min($documentIds) - 1;
+	}	
+	
+	protected function indexDocumentId($documentId)
+	{
+		$rc = RequestContext::getInstance();
+		$projectLangs = $rc->getSupportedLanguages();
+		$documentModelName = $this->getPersistentProvider()->getDocumentModelName($documentId);
+		if ($documentModelName === false || !$this->isModelNameIndexable($documentModelName))
+		{
+			foreach ($projectLangs as $lang) 
+			{
+				$this->manager->delete($documentId .'/' .$lang);
+			}
+			return self::DELETED;
+		}
+		$result = false;
+		$document = DocumentHelper::getDocumentInstance($documentId, $documentModelName);
+		$documentModel = $document->getPersistentModel();
+		try 
+		{
+			if ($documentModel->isLocalized())
+			{
+				foreach ($projectLangs as $lang)
+				{
+					$rc->setLang($lang);
+					if ($document->isContextLangAvailable())
+					{
+						$res = $this->updateRealDocument($document);
+					}
+					else
+					{
+						$this->manager->delete($documentId .'/' .$lang);
+						$res = self::DELETED;
+					}
+					if ($result === false || $result === self::DELETED)
+					{
+						$result = $res;
+					}
+				}
+			}
+			else
+			{
+				$rc->setLang($document->getLang());
+				$result = $this->updateRealDocument($document);
+			}
+		} 
+		catch (Exception $e)
+		{
+			Framework::exception($e);
+		}
+		return $result;
+	}	
 	
 	/**
 	 * @param string $modelName
@@ -678,25 +809,24 @@ class indexer_IndexService extends BaseService
 	}
 	
 	/**
-	 * @param Int $mode
+	 * @param integer $indexerMode
 	 */
-	protected function beginIndexerMode($mode)
+	protected function beginIndexerMode($indexerMode)
 	{
-		if ($mode != self::INDEXER_MODE_BACKOFFICE && $mode != self::INDEXER_MODE_FRONTOFFICE)
+		if ($indexerMode != self::INDEXER_MODE_BACKOFFICE && $indexerMode != self::INDEXER_MODE_FRONTOFFICE)
 		{
-			throw new IllegalArgumentException('$mode has to be either self::INDEXER_MODE_BACKOFFICE or self::INDEXER_MODE_FRONTOFFICE');
+			throw new IllegalArgumentException('$indexerMode has to be either self::INDEXER_MODE_BACKOFFICE or self::INDEXER_MODE_FRONTOFFICE');
 		}
-		$this->indexerModeSwitches[] = $mode;
+		$this->indexerMode = $indexerMode;
 	}
 	
 	/**
+	 * @param Exception $e
+	 * @throws Exception
 	 */
 	protected function endIndexerMode($e = null)
 	{
-		if (f_util_ArrayUtils::isNotEmpty($this->indexerModeSwitches))
-		{
-			array_pop($this->indexerModeSwitches);
-		}
+		$this->indexerMode = self::INDEXER_MODE_FRONTOFFICE;
 		if (null !== $e)
 		{
 			throw $e;
@@ -736,44 +866,77 @@ class indexer_IndexService extends BaseService
 		return $document->getPersistentModel()->isIndexable();
 	}
 	
-
-	/**
-	 * @param f_persistentdocument_PersistentDocument $document
-	 */
-	private function addDocument($document)
+	private function toIndexStatus($document)
 	{
+		$documentId = $document->getId();
 		if (!$this->isIndexingOperationPossible($document))
 		{
-			Framework::warn(__METHOD__ . ' Can not index document ' . $document->getId() . ', please check your config and document model.');
+			Framework::warn(__METHOD__ . ' Can not index document ' . $documentId . ', please check your config and document model.');
 			return;
 		}
 		
-		if ($this->getIndexerMode() == self::BACKOFFICE_SUFFIX)
+		if (is_array($this->indexDocuments))
 		{
-			$indexedDocument = $this->buildBackIndexedDocument($document);
+			if ($this->getIndexerMode() == self::BACKOFFICE_SUFFIX)
+			{
+				if (!isset($this->indexBackofficeDocuments[$documentId]))
+				{
+					$this->indexBackofficeDocuments[$documentId] = self::TO_INDEX;
+				}			
+			}
+			else
+			{
+				if (!isset($this->indexDocuments[$documentId]))
+				{
+					$this->indexDocuments[$documentId] = self::TO_INDEX;
+				}
+			}
 		}
 		else
 		{
-			$indexedDocument = $this->buildFrontIndexedDocument($document);
+			$this->getTransactionManager()->beginTransaction();
+			$mode = ($this->getIndexerMode() == self::BACKOFFICE_SUFFIX) ? self::INDEXER_MODE_BACKOFFICE :  self::INDEXER_MODE_FRONTOFFICE;
+			$this->getPersistentProvider()->setIndexingDocumentStatus($documentId, $mode, self::TO_INDEX);
+			$this->getTransactionManager()->commit();
 		}
-		
-		if ($indexedDocument instanceof indexer_IndexedDocument)
-		{
-			$this->manager->add($indexedDocument);
-		}
-	}
+	}	
 	
-	/**
-	 * @param f_persistentdocument_PersistentDocument $document
-	 */
-	private function updateDocument($document)
+	private function toDeleteStatus($document)
 	{
+		$documentId = $document->getId();
 		if (!$this->isIndexingOperationPossible($document))
 		{
-			Framework::warn(__METHOD__ . ' Can not update document ' . $document->getId() . ', please check your config and document model.');
+			Framework::warn(__METHOD__ . ' Can not index document ' . $documentId . ', please check your config and document model.');
 			return;
 		}
 		
+		if (is_array($this->indexDocuments))
+		{
+			if ($this->getIndexerMode() == self::BACKOFFICE_SUFFIX)
+			{
+				$this->indexBackofficeDocuments[$documentId] = self::TO_DELETE;
+				
+			}
+			else
+			{
+				$this->indexDocuments[$documentId] = self::TO_DELETE;
+			}
+		}
+		else
+		{
+			$this->getTransactionManager()->beginTransaction();
+			$mode = ($this->getIndexerMode() == self::BACKOFFICE_SUFFIX) ? self::INDEXER_MODE_BACKOFFICE :  self::INDEXER_MODE_FRONTOFFICE;
+			$this->getPersistentProvider()->setIndexingDocumentStatus($documentId, $mode, self::TO_DELETE);
+			$this->getTransactionManager()->commit();
+		}
+	}	
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @return string
+	 */
+	private function updateRealDocument($document)
+	{
 		if ($this->getIndexerMode() == self::INDEXER_MODE_BACKOFFICE)
 		{
 			$indexedDocument = $this->buildBackIndexedDocument($document);
@@ -783,37 +946,18 @@ class indexer_IndexService extends BaseService
 			$indexedDocument = $this->buildFrontIndexedDocument($document);
 		}
 		
+		$key = $document->getId() .'/' .RequestContext::getInstance()->getLang();
 		if ($indexedDocument instanceof indexer_IndexedDocument)
 		{
 			$this->manager->add($indexedDocument);
+			return self::INDEXED;
 		}
 		else
 		{
-			$id = $document->getId();
-			foreach ($document->getI18nInfo()->getLangs() as $lang)
-			{
-				$this->manager->delete($id .'/' .$lang);
-			}
+			$this->manager->delete($key);
+			return self::DELETED;
 		}
-	}
-	
-	/**
-	 * @param f_persistentdocument_PersistentDocument $document
-	 */
-	private function deleteDocument($document)
-	{
-		if (!$this->isIndexingOperationPossible($document))
-		{
-			Framework::warn(__METHOD__ . ' Can not delete document ' . $document->getId() . ' from index, please check your config and document model.');
-			return;
-		}
-		
-		$id = $document->getId();
-		foreach ($document->getI18nInfo()->getLangs() as $lang)
-		{
-			$this->manager->delete($id .'/' .$lang);
-		}
-	}
+	}	
 		
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
@@ -1033,24 +1177,7 @@ class indexer_IndexService extends BaseService
 		$reindexDocumentTask->setUniqueExecutiondate($runDate);
 		$reindexDocumentTask->save();
 	}
-	
-	/**
-	 * @deprecated
-	 */
-	public function scheduleReindexing()
-	{
-		$taskService = task_PlannedtaskService::getInstance();
-		if (f_util_ArrayUtils::isEmpty($taskService->getRunnableBySystemtaskclassname('f_tasks_ReindexDocumentsTask')))
-		{
-			$runDate = date_Calendar::getInstance()->add(date_Calendar::MINUTE, 720);
-			$reindexDocumentTask = $taskService->getNewDocumentInstance();
-			$reindexDocumentTask->setSystemtaskclassname('f_tasks_ReindexDocumentsTask');
-			$reindexDocumentTask->setUniqueExecutiondate($runDate);
-			$reindexDocumentTask->setLabel(__METHOD__);
-			$reindexDocumentTask->save();
-		}
-	}
-	
+		
 	/**
 	 * Returns the array of document models that should be reindexed for the frontoffice when the role $roleName was 
 	 * attributed or removed to some user/group. Default implementation returns an empty array if the role is a 
@@ -1095,33 +1222,7 @@ class indexer_IndexService extends BaseService
 		}
 		return $result;
 	}
-	
-	public static function shutdownCommit()
-	{
-		umask(0002);
-		self::getInstance()->shutdown();
-	}
-	
-	/**
-	 * @return Boolean
-	 */
-	public function isDirty()
-	{
-		if ($this->manager !== null)
-		{
-			return $this->manager->isDirty();
-		}
-		return false;
-	}
-	
-	private function shutdown()
-	{
-		if ($this->manager)
-		{
-			$this->manager->commit();
-		}
-	}
-	
+		
 	/**
 	 * @return f_persistentdocument_PersistentDocumentImpl
 	 */
@@ -1133,5 +1234,60 @@ class indexer_IndexService extends BaseService
 			return $parent->getId();
 		}
 		return null;
+	}
+	
+	// DEPRECATED
+	
+	/**
+	 * @deprecated (will be removed in 4.0) 
+	 */
+	public function getSynonymsLists()
+	{
+		return array();
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0)
+	 */
+	public function updateSynonymsList($synonymsList, $content)
+	{
+		return;
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0) use isModelNameIndexable
+	 */
+	public function isModelIndexable($model)
+	{
+		return $this->isModelNameIndexable($model->getName());
+	}
+		
+	/**
+	 * @deprecated (will be removed in 4.0)
+	 */
+	public function scheduleReindexing()
+	{
+		$taskService = task_PlannedtaskService::getInstance();
+		if (f_util_ArrayUtils::isEmpty($taskService->getRunnableBySystemtaskclassname('f_tasks_ReindexDocumentsTask')))
+		{
+			$runDate = date_Calendar::getInstance()->add(date_Calendar::MINUTE, 720);
+			$reindexDocumentTask = $taskService->getNewDocumentInstance();
+			$reindexDocumentTask->setSystemtaskclassname('f_tasks_ReindexDocumentsTask');
+			$reindexDocumentTask->setUniqueExecutiondate($runDate);
+			$reindexDocumentTask->setLabel(__METHOD__);
+			$reindexDocumentTask->save();
+		}
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function isDirty()
+	{
+		if ($this->manager !== null)
+		{
+			return $this->manager->isDirty();
+		}
+		return false;
 	}
 }
