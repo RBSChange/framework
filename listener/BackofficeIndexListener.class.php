@@ -4,74 +4,30 @@
  */
 class f_listener_BackofficeIndexListener
 {
-	/**
-	 * @param f_persistentdocument_DocumentService $sender
-	 * @param array $params
-	 */
+
 	public function onPersistentDocumentPublished($sender, $params)
 	{
-		$document = $params['document'];
-		if ($document->getPersistentModel()->isBackofficeIndexable())
-		{
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug("[" . __CLASS__ . "]: Re-Indexing Backoffice IndexableDocument (id =" . $document->getId() . ")");
-			}
-			$this->update($document);
-		}
+		$this->update($params['document']);
 	}
 	
 	public function onPersistentDocumentUpdated($sender, $params)
 	{
-		$document = $params['document'];
-		if ($document->getPersistentModel()->isBackofficeIndexable())
-		{
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug("[" . __CLASS__ . "]: Indexing Modified Backoffice IndexableDocument (id =" . $document->getId() . ")");
-			}
-			$this->add($document);
-		}
-	
+		$this->add($params['document']);
 	}
 	
 	public function onPersistentDocumentCreated($sender, $params)
 	{
-		$document = $params['document'];
-		if ($document->getPersistentModel()->isBackofficeIndexable())
-		{
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug("[" . __CLASS__ . "]: Indexing New Backoffice IndexableDocument (id =" . $document->getId() . ")");
-			}
-			$this->add($document);
-		}
+		$this->add($params['document']);
 	}
 	
 	public function onPersistentDocumentDeleted($sender, $params)
 	{
-		$document = $params['document'];
-		if ($document->getPersistentModel()->isBackofficeIndexable())
-		{
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug("[" . __CLASS__ . "]: De-Indexing deleted Backoffice IndexableDocument (id =" . $document->getId() . ")");
-			}
-			$this->delete($document);
-		}
+		$this->delete($params['document']);
 	}
 	
-	/**
-	 * @param f_persistentdocument_DocumentService $sender
-	 * @param array $params
-	 */
 	public function onPersistentDocumentUnpublished($sender, $params)
 	{
-		$document = $params['document'];
-		if ($document->getPersistentModel()->isBackofficeIndexable())
-		{
-			$this->update($document);
-		}
+		$this->update($params['document']);
 	}
 	
 	public function onPersistentDocumentActivated($sender, $params)
@@ -84,18 +40,39 @@ class f_listener_BackofficeIndexListener
 		}
 	}
 	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 */
 	private function update($document)
 	{
-		indexer_IndexService::getInstance()->updateBackoffice($document);
+		if (($document instanceof f_persistentdocument_PersistentDocument) && 
+			$document->getPersistentModel()->isBackofficeIndexable())
+			{
+				indexer_IndexService::getInstance()->updateBackoffice($document);
+			}
 	}
-	
+
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 */
 	private function add($document)
 	{
-		indexer_IndexService::getInstance()->addBackoffice($document);
+		if (($document instanceof f_persistentdocument_PersistentDocument) && 
+		$document->getPersistentModel()->isBackofficeIndexable())
+		{
+			indexer_IndexService::getInstance()->addBackoffice($document);
+		}
 	}
 	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 */	
 	private function delete($document)
 	{
-		indexer_IndexService::getInstance()->deleteBackoffice($document);	
+		if (($document instanceof f_persistentdocument_PersistentDocument) && 
+		$document->getPersistentModel()->isBackofficeIndexable())
+		{
+			indexer_IndexService::getInstance()->deleteBackoffice($document);
+		}
 	}	
 }
