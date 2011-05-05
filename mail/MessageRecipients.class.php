@@ -9,21 +9,41 @@ class mail_MessageRecipients
 	 */
 	private $to = null;
 
-
 	/**
 	 * @var array
 	 */
 	private $cc = null;
-
 
 	/**
 	 * @var array
 	 */
 	private $bcc = null;
 
-
 	/**
 	 * @param mixed $to Coma-separated list of email addresses or array of email addresses.
+	 * @param mixed $cc Coma-separated list of email addresses or array of email addresses.
+	 * @param mixed $bcc Coma-separated list of email addresses or array of email addresses.
+	 * @throws IllegalArgumentException
+	 */
+	public function __construct($to = null, $cc = null, $bcc = null)
+	{
+		if ($to !== null)
+		{
+			$this->setTo($to);
+		}
+		if ($cc !== null)
+		{
+			$this->setCC($cc);
+		}
+		if ($bcc !== null)
+		{
+			$this->setBCC($bcc);
+		}
+	}
+	
+	/**
+	 * @param mixed $to Coma-separated list of email addresses or array of email addresses.
+	 * @throws IllegalArgumentException
 	 */
 	public function setTo($to)
 	{
@@ -31,10 +51,8 @@ class mail_MessageRecipients
 		return $this;
 	}
 
-
 	/**
 	 * @param mixed $cc Coma-separated list of email addresses or array of email addresses.
-	 *
 	 * @throws IllegalArgumentException
 	 */
 	public function setCC($cc)
@@ -43,10 +61,8 @@ class mail_MessageRecipients
 		return $this;
 	}
 
-
 	/**
 	 * @param mixed $bcc Coma-separated list of email addresses or array of email addresses.
-	 *
 	 * @throws IllegalArgumentException
 	 */
 	public function setBCC($bcc)
@@ -54,7 +70,6 @@ class mail_MessageRecipients
 		$this->bcc = $this->fixValue($bcc);
 		return $this;
 	}
-
 
 	/**
 	 * @return Array<String>
@@ -64,7 +79,6 @@ class mail_MessageRecipients
 		return $this->to;
 	}
 
-
 	/**
 	 * @return Array<String>
 	 */
@@ -72,7 +86,6 @@ class mail_MessageRecipients
 	{
 		return $this->cc;
 	}
-
 
 	/**
 	 * @return Array<String>
@@ -82,39 +95,34 @@ class mail_MessageRecipients
 		return $this->bcc;
 	}
 
-
 	/**
 	 * @return boolean
 	 */
 	public function hasTo()
 	{
-		return ! is_null($this->getTo());
+		return $this->getTo() !== null;
 	}
-
 
 	/**
 	 * @return boolean
 	 */
 	public function hasCC()
 	{
-		return ! is_null($this->getCC());
+		return $this->getCC() !== null;
 	}
-
 
 	/**
 	 * @return boolean
 	 */
 	public function hasBCC()
 	{
-		return ! is_null($this->getBCC());
+		return $this->getBCC() !== null;
 	}
-
 
 	/**
 	 * Fixes $value so that it is an array of string.
 	 *
 	 * @param mixed $value String or array.
-	 *
 	 * @throws IllegalArgumentException
 	 */
 	private function fixValue($value)
