@@ -54,7 +54,8 @@ class f_listener_IndexListener
 		if (($document instanceof f_persistentdocument_PersistentDocument) && 
 			$document->getPersistentModel()->isIndexable())
 		{
-			if ('PUBLICATED' == $params['oldPublicationStatus'])
+			if (array_key_exists('oldPublicationStatus', $params) &&
+				'PUBLICATED' == $params['oldPublicationStatus'])
 			{
 				$this->getIndexService()->delete($document);
 			}
