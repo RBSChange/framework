@@ -120,6 +120,11 @@ class indexer_IndexService extends BaseService
 	{
 		if (is_array($this->indexDocuments))
 		{
+			if (Framework::isInfoEnabled())
+			{
+				Framework::info(__METHOD__ . ' IFO: ' . count($this->indexDocuments). ', IBO: '. count($this->indexBackofficeDocuments));
+			}
+			
 			$pp = $this->getPersistentProvider();
 			foreach ($this->indexDocuments as $id => $status) 
 			{
@@ -578,9 +583,85 @@ class indexer_IndexService extends BaseService
 		$this->getTransactionManager()->commit();
 		return count($ids);	
 	}
-	
-	public function indexDocumentChunk($mode, $modelName, $documentIndex, $chunkSize)
+
+	/**
+	 * @param string $mode
+	 * @param string $modelName
+	 * @param integer $documentIndex
+	 * @param integer $chunkSize
+	 * @return integer || 'ERROR'
+	 */
+	protected function indexDocumentChunkDelayed($mode, $modelName, $documentIndex, $chunkSize)
 	{
+		$this->beginIndexerMode(($mode == 'back') ? self::INDEXER_MODE_BACKOFFICE : self::INDEXER_MODE_FRONTOFFICE);		
+		$persistentDocumentModel = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($modelName);
+		if ($persistentDocumentModel->getName() != $modelName)
+		{
+			//Injected document not indexed
+			return 0;
+		}
+		
+		if (!$this->isModelNameIndexable($modelName))
+		{
+			if ($this->getIndexerMode() === self::INDEXER_MODE_BACKOFFICE)
+			{
+				Framework::warn(__METHOD__ . " model " . $modelName . " is not backoffice indexable");
+			}
+			else
+			{
+				Framework::warn(__METHOD__ . " model " . $modelName . " is not frontoffice indexable");
+			}
+			return 'ERROR';
+		}
+		
+		$query = $this->getIndexableDocumentsByModelNameQuery($modelName)
+				->setProjection(Projections::property('id', 'id'))
+				->setFirstResult($documentIndex)
+				->setMaxResults($chunkSize)
+				->addOrder(Order::asc('document_id'));
+				
+		$ids = $query->findColumn('id');
+		
+		try 
+		{
+			$this->getTransactionManager()->beginTransaction();
+			foreach ($ids as $documentId)
+			{
+				try 
+				{
+					$document = DocumentHelper::getDocumentInstance($documentId);
+					$this->toIndexStatus($document);
+				}
+				catch (Exception $ed)
+				{
+					Framework::exception($ed);
+				}
+			}
+			$this->getTransactionManager()->commit();				
+		} 
+		catch (Exception $e) 
+		{
+			Framework::exception($e);
+		}	
+		$this->endIndexerMode();
+		return count($ids);
+	}
+	
+	/**
+	 * @param string $mode
+	 * @param string $modelName
+	 * @param integer $documentIndex
+	 * @param integer $chunkSize
+	 * @param boolean $delayed
+	 * @return integer || 'ERROR'
+	 */
+	public function indexDocumentChunk($mode, $modelName, $documentIndex, $chunkSize, $delayed = false)
+	{
+		if ($delayed)
+		{
+			return $this->indexDocumentChunkDelayed($mode, $modelName, $documentIndex, $chunkSize);
+		}
+		
 		if ($this->manager === null)
 		{
 			Framework::error(__METHOD__ . ' Can not index documents please check your config.');
@@ -613,8 +694,6 @@ class indexer_IndexService extends BaseService
 				->setMaxResults($chunkSize)
 				->addOrder(Order::asc('document_id'));
 		$ids = $query->findColumn('id');
-		$rc = RequestContext::getInstance();	
-
 		$this->getTransactionManager()->beginTransaction();
 		foreach ($ids as $documentId)
 		{
@@ -645,7 +724,6 @@ class indexer_IndexService extends BaseService
 			catch (Exception $e)
 			{
 				Framework::exception($e);
-				echo $e->getMessage();
 			}
 		}
 		
@@ -855,10 +933,6 @@ class indexer_IndexService extends BaseService
 	 */
 	private function isIndexingOperationPossible($document)
 	{
-		if ($this->manager === null)
-		{
-			return false;
-		}
 		if ($this->getIndexerMode() == self::INDEXER_MODE_BACKOFFICE)
 		{
 			return $document->getPersistentModel()->isBackofficeIndexable();

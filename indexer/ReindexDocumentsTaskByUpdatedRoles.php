@@ -29,7 +29,7 @@ class f_tasks_ReindexDocumentsByUpdatedRolesTask extends task_SimpleSystemTask
 		$totalDocumentCount = 0;
 		$scriptPath = 'framework/indexer/chunkDocumentIndexer.php';
 		$indexerLogPath = f_util_FileUtils::buildLogPath('indexer.log');
-		$chunkSize = 100;
+		$chunkSize = 500;
 				
 		error_log("\n". gmdate('Y-m-d H:i:s')."\t".__METHOD__ . "\t START", 3, $indexerLogPath);
 		foreach ($modelsName as $modelName) 
@@ -40,7 +40,7 @@ class f_tasks_ReindexDocumentsByUpdatedRolesTask extends task_SimpleSystemTask
 			error_log("\n". gmdate('Y-m-d H:i:s')."\t Processing $modelName", 3, $indexerLogPath);
 			while ($progres) 
 			{
-				$output = f_util_System::execHTTPScript($scriptPath, array($mode, $modelName, $documentIndex, $chunkSize));
+				$output = f_util_System::execHTTPScript($scriptPath, array($mode, $modelName, $documentIndex, $chunkSize, 1));
 				if (!is_numeric($output))
 				{
 					$progres = false;
