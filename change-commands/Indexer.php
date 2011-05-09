@@ -182,7 +182,7 @@ class commands_Indexer extends commands_AbstractChangeCommand
 			$progres = true;
 			while ($progres) 
 			{
-				$output = f_util_System::execHTTPScript($scriptPath, array($mode, $modelName, $documentIndex, $chunkSize));
+				$output = f_util_System::execHTTPScript($scriptPath, array($mode, $modelName, $documentIndex, $chunkSize, 0));
 				if (!is_numeric($output))
 				{
 					$progres = false;
