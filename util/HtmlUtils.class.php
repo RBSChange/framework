@@ -270,7 +270,11 @@ abstract class f_util_HtmlUtils
             	else if (!preg_match('/^(#|\.|\/|http:\/\/|https:\/\/|ftp:\/\/|mailto:|javascript:)/', $attributes['href']))
                 {
                    $attributes['href'] = Framework::getBaseUrl() . '/' . $attributes['href'];
-        		}                
+        		}  
+        		else
+        		{
+        			$attributes['href'] = html_entity_decode($attributes['href'], ENT_NOQUOTES, "UTF-8");
+        		}              
             }
             else
             {
