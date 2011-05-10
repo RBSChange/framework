@@ -1117,18 +1117,17 @@ class TagService extends BaseService
 		$tags = $xml->getElementsByTagName('tag');
 		foreach ($tags as $tag)
 		{
-			$this->tagsInfo[$tag->textContent] = array('tag' => $tag->textContent, 'package'  => $package, 'component_type' => $componentType,
-			'icon' => $tag->getAttribute('icon'), 'label' => $tag->getAttribute('label'));
+			$this->tagsInfo[$tag->textContent] = array(
+				'tag' => $tag->textContent,
+				'package' => $package,
+				'component_type' => $componentType,
+				'icon' => $tag->getAttribute('icon'),
+				'label' => $tag->getAttribute('label'),
+				'labeli18n' => $tag->getAttribute('labeli18n')
+			);
 		}
 	}
 
-
-	/**
-	 * Returns the detail page for the given $document.
-	 *
-	 * @param f_persistentdocument_PersistentDocument $document
-	 * @return website_persistentdocument_page or null
-	 */
 	/**
 	 * Returns the detail page for the given $document.
 	 *
@@ -1154,6 +1153,7 @@ class TagService extends BaseService
 		}
 		return null;
 	}
+	
 	/**
 	 * @param moduleName
 	 * @param documentName
@@ -1198,7 +1198,6 @@ class TagService extends BaseService
 		}
 		return null;
 	}
-
 	
 	/**
 	 * Returns the list page for the given $document.
