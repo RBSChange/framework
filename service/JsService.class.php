@@ -237,7 +237,7 @@ class JsService extends BaseService
 		return implode(K::CRLF, $script);
 	}
 
-	private function readJsDependenciesFile($path, &$declaredDependencies, &$noReplacementScripts)
+	private function readJsDependenciesFile($path, &$declaredDependencies, &$noReplacementScripts, &$localizedScripts)
 	{
 		echo "Reading $path... ";
 		$doc = new DOMDocument();
@@ -249,11 +249,14 @@ class JsService extends BaseService
 		$appLogLevel = AG_LOGGING_LEVEL;
 		foreach ($xpath->query("script") as $scriptNode)
 		{
-				
 			$scriptName = $scriptNode->getAttribute("name");
 			if ($scriptNode->getAttribute("noreplacement") === "true")
 			{
 				$noReplacementScripts[$scriptName] = true;
+			}
+			if (f_util_StringUtils::contains($scriptName, '${LANG}'))
+			{
+				$localizedScripts[$scriptName] = true;
 			}
 			$deps = array();
 			foreach ($xpath->query("dependencies/dependency", $scriptNode) as $depNode)
@@ -298,11 +301,12 @@ class JsService extends BaseService
 		$fileResolver = FileResolver::getInstance();
 		$declaredDependencies = array();
 		$noReplacementScripts = array();
+		$localizedScripts = array();
 
 		$frameworkJsFilePath = f_util_FileUtils::buildFrameworkPath('config/jsDependencies.xml');
 		if (file_exists($frameworkJsFilePath))
 		{
-			$this->readJsDependenciesFile($frameworkJsFilePath, $declaredDependencies, $noReplacementScripts);
+			$this->readJsDependenciesFile($frameworkJsFilePath, $declaredDependencies, $noReplacementScripts, $localizedScripts);
 		}
 
 		foreach ($moduleService->getModules() as $packageName)
@@ -313,7 +317,7 @@ class JsService extends BaseService
 			{
 				continue;
 			}
-			$this->readJsDependenciesFile($jsDepsFilePath, $declaredDependencies, $noReplacementScripts);
+			$this->readJsDependenciesFile($jsDepsFilePath, $declaredDependencies, $noReplacementScripts, $localizedScripts);
 		}
 
 		foreach ($declaredDependencies as $scriptName => $deps)
@@ -343,7 +347,7 @@ class JsService extends BaseService
 			$orderedScriptDeps[$script] = $declaredDependencies[$script];
 		}
 		$jsDepsPath = f_util_FileUtils::buildChangeBuildPath('jsDependencies.php');
-		f_util_FileUtils::writeAndCreateContainer($jsDepsPath, '<?php $orderedScripts = unserialize(' . var_export(serialize($orderedScriptDeps), true) . '); $noReplacementScripts = unserialize(' . var_export(serialize($noReplacementScripts), true) . '); ', f_util_FileUtils::OVERRIDE);
+		f_util_FileUtils::writeAndCreateContainer($jsDepsPath, '<?php $orderedScripts = unserialize(' . var_export(serialize($orderedScriptDeps), true) . '); $noReplacementScripts = unserialize(' . var_export(serialize($noReplacementScripts), true) . '); $localizedScripts = unserialize('.var_export(serialize($localizedScripts), true).');', f_util_FileUtils::OVERRIDE);
 	}
 
 	/**
@@ -354,8 +358,15 @@ class JsService extends BaseService
 	
 	/**
 	 * Initialized by loadOrderedScripts
+	 * @var array<String, Boolean>
 	 */
 	private static $noReplacementScripts;
+	
+	/**
+	 * Initialized by loadOrderedScripts
+	 * @var array<String, Boolean>
+	 */
+	private static $localizedScripts;
 
 	/**
 	 * Load ordered scripts (by dependencies).
@@ -373,6 +384,7 @@ class JsService extends BaseService
 			include_once ($jsDepsPath);
 			self::$orderedScripts = $orderedScripts;
 			self::$noReplacementScripts = $noReplacementScripts;
+			self::$localizedScripts = $localizedScripts;
 		}
 	}
 
@@ -517,7 +529,13 @@ class JsService extends BaseService
 		{
 			return $fileLocation;
 		}
-
+		
+		if (isset(self::$localizedScripts[$script]))
+		{
+			$rc = RequestContext::getInstance();
+			$script = str_replace('${LANG}', $rc->getLang(), $script);
+		}
+		
 		// Case #2 - a module-based JS file matches the requirement :
 		$match = null;
 		if (preg_match('/^modules\.(\w+)\.(.*)/i', $script, $match))

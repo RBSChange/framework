@@ -4,13 +4,13 @@ if (defined("SOLR_INDEXER_DISABLE_DOCUMENTCACHE") && SOLR_INDEXER_DISABLE_DOCUME
 	f_persistentdocument_PersistentProvider::getInstance()->setDocumentCache(false);
 }
 $arguments = $_POST['argv'];
-if (count($arguments) != 4)
+if (count($arguments) != 5)
 {
 	Framework::error(__FILE__ . " invalid arguments " . var_export($arguments, true));
 	echo 'ERROR';
 }
 else
 {
-	list($mode, $modelName, $documentIndex, $chunkSize) = $arguments;
-	echo indexer_IndexService::getInstance()->indexDocumentChunk($mode, $modelName, $documentIndex, $chunkSize);
+	list($mode, $modelName, $documentIndex, $chunkSize, $delayed) = $arguments;
+	echo indexer_IndexService::getInstance()->indexDocumentChunk($mode, $modelName, $documentIndex, $chunkSize, $delayed);
 }
