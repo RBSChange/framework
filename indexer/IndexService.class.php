@@ -1209,17 +1209,17 @@ class indexer_IndexService extends BaseService
 			if ($hasHtmlLink === false || $hasBlock === false)
 			{
 				$attributes = $this->getBackofficeAttributes($document);
+				if ($hasHtmlLink === false && isset($attributes['htmllink']))
+				{
+					$backofficeIndexDocument->setStringField('htmllink', $attributes['htmllink']);
+				}
+				
+				if ($hasBlock === false && isset($attributes['block']))
+				{
+					$backofficeIndexDocument->setStringField('block', $attributes['block']);
+				}
 			}
 			
-			if ($hasHtmlLink === false)
-			{
-				$backofficeIndexDocument->setStringField('htmllink', $attributes['htmllink']);
-			}
-			
-			if ($hasBlock === false)
-			{
-				$backofficeIndexDocument->setStringField('block', $attributes['block']);
-			}
 			return $backofficeIndexDocument;
 		}
 		return null;
@@ -1264,12 +1264,21 @@ class indexer_IndexService extends BaseService
 			$label = $document->getLabel();
 		}
 		$lang = RequestContext::getInstance()->getLang();
-		$escapedLabel = htmlspecialchars(f_Locale::translateUI($label), ENT_NOQUOTES, 'UTF-8');
+		$labelKey = LocaleService::getInstance()->cleanOldKey($label);
+		$escapedLabel = htmlspecialchars($labelKey !== false ? LocaleService::getInstance()->transBO($labelKey) :$label , ENT_NOQUOTES, 'UTF-8');
+		
 		$attributes['htmllink'] = '<a class="link" href="#" rel="cmpref:' . $document->getId() . '" lang="' . $lang . '">' . $escapedLabel . '</a>';
 		if (!($document instanceof generic_persistentdocument_folder))
 		{
-			$attributes['block'] = str_replace('/', '_', $model->getName());
 			$document->getDocumentService()->addTreeAttributes($document, $model->getModuleName(), 'wmultilist', $attributes);
+			if (!isset($attributes['block']))
+			{
+				$models = block_BlockService::getInstance()->getBlocksDocumentModelToInsert();
+				if (isset($models[$document->getDocumentModelName()]))
+				{
+					$attributes['block'] = f_util_ArrayUtils::firstElement($models[$document->getDocumentModelName()]);
+				}
+			}
 		}
 		return $attributes;
 	}
