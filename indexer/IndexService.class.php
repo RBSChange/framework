@@ -120,20 +120,23 @@ class indexer_IndexService extends BaseService
 	{
 		if (is_array($this->indexDocuments))
 		{
-			if (Framework::isInfoEnabled())
+			if (count($this->indexDocuments) || count($this->indexBackofficeDocuments))
 			{
-				Framework::info(__METHOD__ . ' IFO: ' . count($this->indexDocuments). ', IBO: '. count($this->indexBackofficeDocuments));
-			}
-			
-			$pp = $this->getPersistentProvider();
-			foreach ($this->indexDocuments as $id => $status) 
-			{
-				$pp->setIndexingDocumentStatus($id, self::INDEXER_MODE_FRONTOFFICE, $status);
-			}
-			
-			foreach ($this->indexBackofficeDocuments as $id => $status) 
-			{
-				$pp->setIndexingDocumentStatus($id, self::INDEXER_MODE_BACKOFFICE, $status);
+				if (Framework::isInfoEnabled())
+				{
+					Framework::info(__METHOD__ . ' IFO: ' . count($this->indexDocuments). ', IBO: '. count($this->indexBackofficeDocuments));
+				}
+				
+				$pp = $this->getPersistentProvider();
+				foreach ($this->indexDocuments as $id => $status) 
+				{
+					$pp->setIndexingDocumentStatus($id, self::INDEXER_MODE_FRONTOFFICE, $status);
+				}
+				
+				foreach ($this->indexBackofficeDocuments as $id => $status) 
+				{
+					$pp->setIndexingDocumentStatus($id, self::INDEXER_MODE_BACKOFFICE, $status);
+				}
 			}
 			$this->indexDocuments = null;
 			$this->indexBackofficeDocuments = null;
@@ -898,7 +901,8 @@ class indexer_IndexService extends BaseService
 		$ps = f_permission_PermissionService::getInstance();
 		$model = $document->getPersistentModel();
 		$fields = $indexedDocument->getFields();
-		$module = $fields['module' . indexer_Field::STRING]['value'];
+		$module = $fields['editmodule' . indexer_Field::STRING]['value'];
+		if (empty($module)) {$module = $fields['module' . indexer_Field::STRING]['value'];}
 		$packageName = 'modules_' . $module;
 		
 		$roleService = f_permission_PermissionService::getRoleServiceByModuleName($module);		
@@ -909,7 +913,7 @@ class indexer_IndexService extends BaseService
 		}
 		
 		$definitionPointId = $ps->getDefinitionPointForPackage($document->getId(), $packageName);
-		$permissionName = $packageName . '.Update.' . $model->getOriginalDocumentName();
+		$permissionName = $packageName . '.Update.' . $model->getDocumentName();
 		return $ps->getAccessorIdsForPermissionAndDocumentId($permissionName, $definitionPointId);
 	}
 
@@ -1018,6 +1022,10 @@ class indexer_IndexService extends BaseService
 		{
 			$this->getTransactionManager()->beginTransaction();
 			$mode = ($this->getIndexerMode() == self::BACKOFFICE_SUFFIX) ? self::INDEXER_MODE_BACKOFFICE :  self::INDEXER_MODE_FRONTOFFICE;
+			if (Framework::isInfoEnabled())
+			{
+				Framework::info(__METHOD__ . ' ' . ($mode == 0 ? 'IBO' : 'IFO') . ' -> ' . $documentId);
+			}
 			$this->getPersistentProvider()->setIndexingDocumentStatus($documentId, $mode, self::TO_INDEX);
 			$this->getTransactionManager()->commit();
 		}
