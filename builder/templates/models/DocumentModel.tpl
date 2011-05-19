@@ -124,6 +124,14 @@ class <{$model->getFinalDocumentClassName()}>model extends f_persistentdocument_
 
 	/**
 	 * @return String
+	 */
+	public final function getLabelKey()
+	{
+		return 'm.<{$model->getFinalModuleName()}>.document.<{$model->getFinalDocumentName()}>.document-name';
+	}
+
+	/**
+	 * @return String
 	 * @example generic
 	 */
 	public final function getModuleName()

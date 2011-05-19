@@ -242,6 +242,11 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	/**
 	 * @return String
 	 */
+	abstract public function getLabelKey();
+
+	/**
+	 * @return String
+	 */
 	abstract public function getName();
 
 	/**
