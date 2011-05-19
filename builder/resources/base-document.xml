@@ -6,8 +6,7 @@
 	icon="iconname"
 	linked-to-root-module="true | [false]"
 	use-correction="true | [false]"
-	table-name="tablename"	
-	table-name-oci="tablename"
+	table-name="tablename"
 	extend="[modules_generic/Document]"
 	has-url="[true] | false"
 	indexable="true | [false]"	
@@ -17,7 +16,7 @@
 <document xmlns="http://www.rbs.fr/schema/change-document/1.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.rbs.fr/schema/change-document/1.0 http://www.rbschange.fr/static/schema/change-document/1.0.xsd"
-	model-version="1.0">
+	model-version="3.5" has-url="false">
 	<properties>
 		<!--
 			* Balise <add />
@@ -25,8 +24,7 @@
 			* Attributs autorisés :
 			
 			name="propertyName"
-			type="String | Boolean | Integer | Double | DateTime | LongString | XHTMLFragment | modules_xxxxx/yyyyy"
-			primary-key="true | [false]"
+			type="String | Boolean | Integer | Double | DateTime | LongString | Lob | XHTMLFragment | modules_xxxxx/yyyyy"
 			cascade-delete="true | [false]"
 			min-occurs="[0]..n"
 			max-occurs="[1]..n | -1"
