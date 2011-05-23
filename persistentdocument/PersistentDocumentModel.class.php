@@ -242,7 +242,10 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	/**
 	 * @return String
 	 */
-	abstract public function getLabelKey();
+	public function getLabelKey()
+        {
+           return strtolower(str_replace(array('&modules.', ';'), array('m.', ''), $this->getLabel()));
+        }
 
 	/**
 	 * @return String
