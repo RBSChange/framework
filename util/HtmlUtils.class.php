@@ -322,7 +322,7 @@ abstract class f_util_HtmlUtils
     	return str_replace(self::$htmlEntities, self::$xmlEntities, $string);
     }
     
-    private static function buildLink ($attributes, $content)
+    public static function buildLink ($attributes, $content)
     {
         $link = '<a';
         foreach ($attributes as $name => $value)
@@ -451,28 +451,7 @@ abstract class f_util_HtmlUtils
         {
             $rq->beginI18nWork($lang);
            	$document = DocumentHelper::getDocumentInstance($documentId);
-            
-            if ($document instanceof media_persistentdocument_media && $document->getMediatype() == MediaHelper::TYPE_FLASH)
-            {
-                $link = self::renderFlashTag($document, $attributes);
-            } 
-            else if ($document instanceof media_persistentdocument_media && $document->getMediatype() == MediaHelper::TYPE_IMAGE)
-            {
-            	$attributes['href'] = media_MediaService::getInstance()->generateUrl($document, $lang);	
-                $link = self::buildLink($attributes, $content);
-            }
-            else if ($document instanceof media_persistentdocument_file)
-            {
-            	$attributes['href'] = media_FileService::getInstance()->generateDownloadUrl($document, $lang);
-            	$document->addDownloadAttributes($attributes);       	
-                $link = self::buildLink($attributes, $content);
-            }
-            else
-            {
-                $attributes['href'] = LinkHelper::getDocumentUrl($document, $lang);
-                $link = self::buildLink($attributes, $content);
-            }
-            
+			$link = $document->getDocumentService()->getXhtmlFragment($document, $attributes, $content, $lang);
             $rq->endI18nWork();
         } 
         catch (Exception $e)
@@ -503,7 +482,7 @@ abstract class f_util_HtmlUtils
             {
                 if ($document->getMediatype() == MediaHelper::TYPE_FLASH)
                 {
-                    $image = self::renderFlashTag($document, $attributes);
+					$image = $document->getDocumentService()->getAsXhtml($document, $attributes, null, $lang);
                 }
                 else
                 {
@@ -537,31 +516,8 @@ abstract class f_util_HtmlUtils
         }
         return $image;
     }
-    
+        
     /**
-     * @param media_persistentdocument_media $document
-     * @param Array $attributes
-     * @return String
-     */
-    private function renderFlashTag($document, $attributes)
-    {
-        $attributes['id'] = 'media-' . $document->getId();
-        $attributes['url'] = LinkHelper::getDocumentUrl($document);
-        $attributes = array_merge($attributes, MediaHelper::getImageSize(media_MediaService::getInstance()->getOriginalPath($document)));        
-        unset($attributes['src']);
-        $attributes['alt'] = $document->getTitle();
-        if ($document->getDescription())
-        {
-            $attributes['description'] = $document->getDescriptionAsHtml();
-        }
-        
-        $templateComponent = TemplateLoader::getInstance()->setpackagename('modules_media')->setMimeContentType(K::HTML)->load('Media-Block-Flash-Success');
-        $templateComponent->setAttribute('medias', array($attributes));
-        $content = $templateComponent->execute();
-        return $content;
-    }
-        
-     /**
      * @param media_persistentdocument_media $document
      * @param Array $attributes
      * @return String
