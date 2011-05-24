@@ -2865,7 +2865,22 @@ class f_persistentdocument_DocumentService extends BaseService
 		}
 	}
 	
+	/**
+	 * @see f_util_HtmlUtils::renderDocumentLink
+	 * @param media_persistentdocument_media $document
+	 * @param array $attributes
+	 * @param string $content
+	 * @param string $lang
+	 * @return string
+	 */
+	public function getXhtmlFragment($document, $attributes, $content, $lang)
+	{
+		$attributes['href'] = LinkHelper::getDocumentUrl($document, $lang);
+		return f_util_HtmlUtils::buildLink($attributes, $content);
+	}
+	
 	// Deprecated
+	
 	/**
 	 * @deprecated (will be removed in 4.0) use TagService->addTag
 	 */
