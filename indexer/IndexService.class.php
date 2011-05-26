@@ -1296,26 +1296,40 @@ class indexer_IndexService extends BaseService
 	 */
 	public function scheduleReindexingByUpdatedRoles($updatedRoles)
 	{
-		$taskService = task_PlannedtaskService::getInstance();
-		$plannedTasks = $taskService->getRunnableBySystemtaskclassname('f_tasks_ReindexDocumentsByUpdatedRolesTask');
-		if (f_util_ArrayUtils::isNotEmpty($plannedTasks))
+		try 
 		{
-			$reindexDocumentTask = f_util_ArrayUtils::firstElement($plannedTasks);
-			$parameters = unserialize($reindexDocumentTask->getParameters());
-			$roles = $parameters['updatedRoles'];
-		}
-		else 
+			$this->getTransactionManager()->beginTransaction();
+			
+			$taskService = task_PlannedtaskService::getInstance();
+			$plannedTasks = $taskService->getRunnableBySystemtaskclassname('f_tasks_ReindexDocumentsByUpdatedRolesTask');
+			if (f_util_ArrayUtils::isNotEmpty($plannedTasks))
+			{
+				$reindexDocumentTask = f_util_ArrayUtils::firstElement($plannedTasks);
+				$parameters = unserialize($reindexDocumentTask->getParameters());
+				$roles = $parameters['updatedRoles'];
+			}
+			else 
+			{
+				$reindexDocumentTask = $taskService->getNewDocumentInstance();
+				$reindexDocumentTask->setSystemtaskclassname('f_tasks_ReindexDocumentsByUpdatedRolesTask');
+				$reindexDocumentTask->setLabel(__METHOD__);
+				$roles = array();
+			}
+			
+			$roles = array_unique(array_merge($roles, $updatedRoles));
+			$runDate = date_Calendar::getInstance()->add(date_Calendar::MINUTE, 20);
+			$reindexDocumentTask->setParameters(serialize(array('updatedRoles' => $roles)));
+			$reindexDocumentTask->setUniqueExecutiondate($runDate);	
+			$reindexDocumentTask->save();
+					
+			$this->getTransactionManager()->commit();
+		} 
+		catch (Exception $e) 
 		{
-			$reindexDocumentTask = $taskService->getNewDocumentInstance();
-			$reindexDocumentTask->setSystemtaskclassname('f_tasks_ReindexDocumentsByUpdatedRolesTask');
-			$reindexDocumentTask->setLabel(__METHOD__);
-			$roles = array();
+			$this->getTransactionManager()->rollBack($e);
 		}
-		$roles = array_unique(array_merge($roles, $updatedRoles));
-		$runDate = date_Calendar::getInstance()->add(date_Calendar::MINUTE, 20);
-		$reindexDocumentTask->setParameters(serialize(array('updatedRoles' => $roles)));
-		$reindexDocumentTask->setUniqueExecutiondate($runDate);
-		$reindexDocumentTask->save();
+		
+		
 	}
 	
 	/**
@@ -1415,8 +1429,8 @@ class indexer_IndexService extends BaseService
 			$runDate = date_Calendar::getInstance()->add(date_Calendar::MINUTE, 720);
 			$reindexDocumentTask = $taskService->getNewDocumentInstance();
 			$reindexDocumentTask->setSystemtaskclassname('f_tasks_ReindexDocumentsTask');
-			$reindexDocumentTask->setUniqueExecutiondate($runDate);
 			$reindexDocumentTask->setLabel(__METHOD__);
+			$reindexDocumentTask->setUniqueExecutiondate($runDate);
 			$reindexDocumentTask->save();
 		}
 	}

@@ -503,13 +503,31 @@ class ChangeRequest extends WebRequest
     public function getModuleParameter($moduleName, $paramName)
     {
         $moduleParams = $this->getModuleParameters($moduleName);
-        if ( isset($moduleParams[$paramName]) )
+        if ($moduleParams !== null && isset($moduleParams[$paramName]))
         {
             return $moduleParams[$paramName];
         }
         return null;
     }
 
+   /**
+     * set a module parameter.
+     * @param string $moduleName The module name.
+     * @param string $paramName The parameter name.
+     * @param mixed $paramValue
+     */
+    public function setModuleParameter($moduleName, $paramName, $paramValue)
+    {
+        if (!isset($this->parameters[$moduleName."Param"]))
+        {
+        	$this->parameters[$moduleName."Param"] = array($paramName => $paramValue);
+        }
+        else
+        {
+        	$this->parameters[$moduleName."Param"][$paramName] = $paramValue;
+        }
+    }
+    
     /**
      * Indicates whether the request has the given module parameter or not.
      *
@@ -520,10 +538,9 @@ class ChangeRequest extends WebRequest
     public function hasModuleParameter($moduleName, $paramName)
     {
         $moduleParams = $this->getModuleParameters($moduleName);
-        return isset($moduleParams[$paramName]);
+        return $moduleParams !== null &&  isset($moduleParams[$paramName]);
     }
-
-
+    
     /**
      * Retrieve all the parameters defined for the given module.
      * @param string $moduleName The module name.

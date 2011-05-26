@@ -315,30 +315,16 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 //	}
 
 	/**
-	 * Returns the URL of the document if has no URL Rewriting rule.
-	 *
+	 * @param website_UrlRewritingService $urlRewritingService
 	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param website_persistentdocument_website $website
 	 * @param string $lang
 	 * @param array $parameters
-	 * @return string
+	 * @return f_web_Link | null
 	 */
-//	public function generateUrl($document, $lang, $parameters)
+//	public function getWebLink($urlRewritingService, $document, $website, $lang, $parameters)
 //	{
-//	}
-
-	/**
-	 * Filter the parameters used to generate the document url.
-	 *
-	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param string $lang
-	 * @param array $parameters may be an empty array
-	 */
-//	public function filterDocumentUrlParams($document, $lang, $parameters)
-//	{
-<{if $model->hasParentModel()}>
-//		$parameters = parent::filterDocumentUrlParams($document, $lang, $parameters)
-<{/if}>
-//		return $parameters;
+//		return null;
 //	}
 
 	/**

@@ -10,6 +10,20 @@ class f_web_ParametrizedLink extends f_web_HttpLink
     private $fragment;
     private $argSeparator;
     
+    private static $NULLLINK;
+    
+    /**
+     * @return f_web_ParametrizedLink
+     */
+    public static function getNullLink()
+    {
+    	if (self::$NULLLINK === null)
+    	{
+    		self::$NULLLINK = new self(null, null, null);
+    	}
+    	return self::$NULLLINK;
+    }
+    
     public function __construct($protocol, $domaine, $path = self::SITE_PATH)
     {
         $this->scheme = $protocol;
@@ -89,9 +103,18 @@ class f_web_ParametrizedLink extends f_web_HttpLink
 	 */
 	public function getUrl()
 	{
+		if ($this->path === null) {return null;}
 	    return $this->buildUrl($this->scheme, $this->host, $this->path, $this->getQueryParametres()
 	            , $this->fragment, $this->argSeparator);
 	}
+	
+	/**
+	 * @return String
+	 */
+	public function getPath()
+	{
+		return $this->path;
+	}	
 
 	/**
 	 * @param String $url

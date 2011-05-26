@@ -996,6 +996,8 @@ class LocaleService extends BaseService
 	public function explodeKey($cleanKey)
 	{
 		$parts = explode('.', strtolower($cleanKey));
+		if (count($parts) < 3) {return array(false, false);}
+		
 		$id = end($parts);
 		$keyPathParts = array_slice($parts, 0, - 1);
 		switch ($keyPathParts[0])

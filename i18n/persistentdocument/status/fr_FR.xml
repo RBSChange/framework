@@ -8,4 +8,7 @@
   <key id="deprecated">version déprèciée</key>
   <key id="filed">archivé</key>
   <key id="workflow">workflow</key>
+  <key id="trash">corbeille</key>
+  
+  <key id="label">Statut de publication</key>
 </i18n>

@@ -37,4 +37,12 @@ class f_web_ResourceLink extends f_web_HttpLink
 		}
 	    return $this->buildUrl($this->scheme, $this->host, $this->path);
 	}
+	
+	/**
+	 * @return String
+	 */
+	public function getPath()
+	{
+		return $this->path;
+	}	
 }

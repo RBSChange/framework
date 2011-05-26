@@ -71,19 +71,37 @@ class MassMailer
 		@rename($this->getOutboxPathForSource($source), $this->getTrashPathForSource($source));
 	}
 	
-	
-	public function batchSend()
+	/**
+	 * @param task_persistentdocument_plannedtask $plannedTask
+	 */
+	public function batchSend($plannedTask = null)
 	{
+		$errors = array();
 		$pathsToProcess = $this->getMessagesToSend();
 		$scriptRelativePath = 'framework/bin/massMailerSend.php';
 		foreach (array_chunk($pathsToProcess, 500) as $messagePathArray)
 		{
+			if ($plannedTask instanceof task_persistentdocument_plannedtask)
+			{
+				$plannedTask->ping();
+			}
 			$result = f_util_System::execHTTPScript($scriptRelativePath, $messagePathArray);
 			// Log fatal errors...
-			if ($result != '1')
+			if ($result != 'OK')
 			{
-				Framework::error(__METHOD__ . ' ' . $scriptRelativePath . ' an error occured: "' . $result . '"');
+				if ($plannedTask instanceof task_persistentdocument_plannedtask)
+				{
+					$errors[] = $result;
+				}
+				else
+				{
+					Framework::error(__METHOD__ . ' ' . $scriptRelativePath . ' an error occured: "' . $result . '"');
+				}
 			}
+		}
+		if (count($errors))
+		{
+			throw new Exception(implode("\n", $errors));
 		}
 	}
 	
@@ -93,6 +111,7 @@ class MassMailer
 	 */
 	public function sendMessagePaths($messagePaths)
 	{
+		$error = false;
 		foreach ($messagePaths as $mailMessagePath)
 		{
 			try
@@ -117,9 +136,12 @@ class MassMailer
 			}
 			catch (Exception $e)
 			{
+				$error = true;
 				Framework::exception($e);
+				echo $e->getMessage() , "\n";
 			}
 		}
+		if (!$error) {echo 'OK';}
 	}
 		
 	protected function getMessagesToSend()
@@ -144,32 +166,24 @@ class MassMailer
 	
 	protected function successLog($sender, $receiver, $sourceId = null, $action = null)
 	{
-		if ($action === null)
+		if (Framework::isInfoEnabled())
 		{
-			$action = "not-specified";
+			if ($action === null) {$action = "not-specified";}
+			if ($sourceId === null) {$sourceId = "not-specified";}
+			$messageString = "MassMailer\t" . $action . "\t" . $sender . "\t" . $receiver . "\t" . $sourceId;
+			Framework::info($messageString);
 		}
-		
-		if ($sourceId === null)
-		{
-			$sourceId = "not-specified";
-		}
-		$messageString = date_Calendar::now()->toString() . "\t" . $action . "\t" . $sender . "\t" . $receiver . "\t" . $sourceId;
-		LoggerManager::getLogger('mailerSuccess')->log(new Message($messageString));
 	}
 	
 	protected function errorLog($sender, $receiver, $sourceId = null, $action = null)
 	{
-		if ($action === null)
+		if (Framework::isErrorEnabled())
 		{
-			$action = "not-specified";
+			if ($action === null) {$action = "not-specified";}
+			if ($sourceId === null) {$sourceId = "not-specified";}
+			$messageString =  "MassMailer\t" . $action . "\t" . $sender . "\t" . $receiver . "\t" . $sourceId;
+			Framework::error($messageString);
 		}
-		
-		if ($sourceId === null)
-		{
-			$sourceId = "not-specified";
-		}
-		$messageString = date_Calendar::now()->toString() . "\t" . $action . "\t" . $sender . "\t" . $receiver . "\t" . $sourceId;
-		LoggerManager::getLogger('mailerError')->log(new Message($messageString));
 	}
 	
 	/**

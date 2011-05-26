@@ -2544,58 +2544,6 @@ class f_persistentdocument_DocumentService extends BaseService
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param String $lang
-	 * @return string | null
-	 */
-	public final function getUrlRewriting($document, $lang)
-	{
-		$metaKey = "urlRewritingInfo_".$lang;
-		if (!$document->hasMeta($metaKey))
-		{
-			return null;
-		}
-		return $document->getMeta($metaKey);
-	}
-
-	/**
-	 * Set "direct" url rewriting for a given document
-	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param String $lang
-	 * @param String $url if null, remove url rewriting
-	 */
-	public final function setUrlRewriting($document, $lang, $url)
-	{
-		$ok = false;
-		try
-		{
-			$this->tm->beginTransaction();
-			$oldUrl = $this->getUrlRewriting($document, $lang);
-			
-			if ($oldUrl != $url)
-			{
-				$document->setMeta("urlRewritingInfo_".$lang, $url);
-				$document->saveMeta();
-				$ok = true;
-			}
-			$this->tm->commit();
-		}
-		catch (Exception $e)
-		{
-			$ok = false;
-			$this->tm->rollBack($e);
-		}
-
-		if ($ok)
-		{
-			// FIXME: shouldn't we dispatch some 'persistentDocumentUrlRewrited' event ?
-			f_event_EventManager::dispatchEvent('persistentDocumentUpdated', $this,
-			array("document" => $document, "modifiedPropertyNames" => array(),
-				"oldPropertyValues" => array(), "oldUrl" => $oldUrl, "newUrl" => $url));	
-		}
-	}
-
-	/**
-	 * @param f_persistentdocument_PersistentDocument $document
 	 * @return integer | null
 	 */
 	public function getWebsiteId($document)
@@ -2631,7 +2579,6 @@ class f_persistentdocument_DocumentService extends BaseService
 	{
 		//Check for original document;
 		$document = DocumentHelper::getByCorrection($document);
-		
 		$model = $document->getPersistentModel();
 		if ($model->hasURL() && $document->isPublished())
 		{
@@ -2641,17 +2588,43 @@ class f_persistentdocument_DocumentService extends BaseService
 	}
 	
 	/**
-	 * Filter the parameters used to generate the document url.
-	 * 
+	 * @param website_UrlRewritingService $urlRewritingService
 	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param website_persistentdocument_website $website
 	 * @param string $lang
-	 * @param array $parameters may be an empty array
+	 * @param array $parameters
+	 * @return f_web_Link | null
 	 */
-	public function filterDocumentUrlParams($document, $lang, $parameters)
+	public function getWebLink($urlRewritingService, $document, $website, $lang, $parameters)
 	{
-		// Nothing to do by default.
-		return $parameters;
+		/**
+		 * Compatibility check
+		 */
+		if (f_util_ClassUtils::methodExists($this, 'generateUrl'))
+		{
+			$url = $this->generateUrl($document, $lang, $parameters);
+			if ($url)
+			{
+				return LinkHelper::buildLinkFromUrl($url);
+			}
+		}
+		return null;
 	}
+	
+	/**
+	 * @param website_UrlRewritingService $urlRewritingService
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param website_persistentdocument_website $website
+	 * @param string $lang
+	 * @param array $parameters
+	 * @return string || null
+	 */
+	public function generateRewritePath($urlRewritingService, $document, $website, $lang, $parameters)
+	{
+		return $urlRewritingService->getDocumentRulePath($document, $website, $lang, $parameters);
+	}
+	
+
 	
 	/**
 	 * @param Order $order
@@ -2943,5 +2916,31 @@ class f_persistentdocument_DocumentService extends BaseService
 	public function isPublicated($document)
 	{
 		return $document->isPublished();
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0) with no remplacement
+	 */
+	public final function setUrlRewriting($document, $lang, $url)
+	{
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0) use website_UrlRewritingService::getCustomPath
+	 */
+	public final function getUrlRewriting($document, $lang)
+	{
+		$websiteId = $this->getWebsiteId($document);
+		$website = ($websiteId === null) ? website_WebsiteModuleService::getInstance()->getCurrentWebsite() : DocumentHelper::getDocumentInstance($websiteId);
+		return website_UrlRewritingService::getInstance()->getCustomPath($document, $website, $lang);
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0)
+	 */
+	public function filterDocumentUrlParams($document, $lang, $parameters)
+	{
+		// Nothing to do by default.
+		return $parameters;
 	}
 }

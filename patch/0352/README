@@ -1,0 +1,3 @@
+Version: 3.5.0
+
+Ajout des champs modulename et actionname à f_url_rules

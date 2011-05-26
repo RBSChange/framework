@@ -37,6 +37,7 @@ class generator_PersistentModel
 	private $icon;
 	private $linkedToRootModule;
 	private $hasUrl;
+	private $useRewriteUrl;
 	private $indexable;
 	private $backofficeIndexable;
 	private $modelVersion;
@@ -259,19 +260,35 @@ class generator_PersistentModel
 		$indexableDocumentInfos = array('fo' => array(), 'bo' => array());
 		foreach (self::loadModels() as $model)
 		{	
-			$moduleName = strtoupper($model->getModuleName());
-			$documentName = strtoupper($model->getDocumentName());
-			if ($model->hasURL() &&  $model->isIndexable() 
-					&& !defined('MOD_'. $moduleName .'_'.$documentName .'_DISABLE_INDEXATION'))
+			if ($model instanceof generator_PersistentModel)
 			{
-				$indexableDocumentInfos['fo'][] = $model->getName();
-			}
-			
-			if ($model->isBackofficeIndexable() && 
-				(!defined('MOD_'. $moduleName .'_'.$documentName .'_DISABLE_BACKOFFICE_INDEXATION') 
-					|| !constant('MOD_'. $moduleName .'_'.$documentName .'_DISABLE_BACKOFFICE_INDEXATION')))
-			{
-				$indexableDocumentInfos['bo'][] = $model->getName();
+				if ($model->injected()) {continue;}
+				
+				if ($model->inject())
+				{
+					$moduleName = strtoupper($model->getParentModel()->getModuleName());
+					$documentName = strtoupper($model->getParentModel()->getDocumentName());
+					$modelName = $model->getParentModelName();
+				}
+				else
+				{
+					$moduleName = strtoupper($model->getModuleName());
+					$documentName = strtoupper($model->getDocumentName());
+					$modelName = $model->getName();
+				}
+				
+				if ($model->hasURL() &&  $model->isIndexable() 
+						&& !defined('MOD_'. $moduleName .'_'.$documentName .'_DISABLE_INDEXATION'))
+				{
+					$indexableDocumentInfos['fo'][] = $modelName;
+				}
+				
+				if ($model->isBackofficeIndexable() && 
+					(!defined('MOD_'. $moduleName .'_'.$documentName .'_DISABLE_BACKOFFICE_INDEXATION') 
+						|| !constant('MOD_'. $moduleName .'_'.$documentName .'_DISABLE_BACKOFFICE_INDEXATION')))
+				{
+					$indexableDocumentInfos['bo'][] = $modelName;
+				}
 			}
 		}
 		$compiledFilePath = f_util_FileUtils::buildChangeBuildPath('indexableDocumentInfos.ser');
@@ -280,12 +297,22 @@ class generator_PersistentModel
 	
 	public static function buildAllowedDocumentInfos()
 	{
-		$allowedDocumentInfos = array ('hasUrl' => array());
+		$allowedDocumentInfos = array ('hasUrl' => array(), 'useRewriteUrl' => array());
 		foreach (self::loadModels() as $model)
 		{	
-			if ($model->hasURL())
+			if ($model instanceof generator_PersistentModel)
 			{
-				$allowedDocumentInfos['hasUrl'][] = $model->getName();
+				if ($model->injected()) {continue;}
+				
+				if ($model->hasURL())
+				{
+					$modelName = ($model->inject()) ? $model->getParentModelName() : $model->getName();
+					$allowedDocumentInfos['hasUrl'][] = $modelName;
+					if ($model->useRewriteURL())
+					{
+						$allowedDocumentInfos['useRewriteUrl'][] = $modelName;
+					}
+				}
 			}
 		}
 		$compiledFilePath = f_util_FileUtils::buildChangeBuildPath('allowedDocumentInfos.ser');
@@ -1000,7 +1027,7 @@ class generator_PersistentModel
 		}
 
 		$this->statuses = $baseDocument->statuses;
-		if (is_null($this->defaultStatus))
+		if ($this->defaultStatus === null)
 		{
 			$this->defaultStatus = $baseDocument->defaultStatus;
 		}
@@ -1010,9 +1037,14 @@ class generator_PersistentModel
 			$this->backofficeIndexable = $baseDocument->backofficeIndexable;
 		}
 
-		if (is_null($this->hasUrl))
+		if ($this->hasUrl === null)
 		{
 			$this->hasUrl = $baseDocument->hasUrl;
+		}
+		
+		if ($this->useRewriteUrl === null)
+		{
+			$this->useRewriteUrl = $baseDocument->useRewriteUrl;
 		}
 		
 		if ($this->hasWorkflow())
@@ -1020,7 +1052,7 @@ class generator_PersistentModel
 			$this->useCorrection = true;
 		}
 
-		if (is_null($this->useCorrection))
+		if ($this->useCorrection === null)
 		{
 			$this->useCorrection = $baseDocument->useCorrection;
 		}
@@ -1034,7 +1066,7 @@ class generator_PersistentModel
 			$this->addProperty($property);
 		}
 
-		if (is_null($this->publishOnDayChange))
+		if ($this->publishOnDayChange === null)
 		{
 			$this->publishOnDayChange = $baseDocument->publishOnDayChange;
 		}
@@ -1210,7 +1242,7 @@ class generator_PersistentModel
 	 */
 	public function hasURL()
 	{
-		if (is_null($this->hasUrl) && $this->hasParentModel())
+		if ($this->hasUrl === null && $this->hasParentModel())
 		{
 			return $this->getParentModel()->hasURL();
 		}
@@ -1219,6 +1251,21 @@ class generator_PersistentModel
 			return $this->hasUrl;
 		}
 	}
+	
+	/**
+	 * @return Boolean
+	 */
+	public function useRewriteURL()
+	{
+		if ($this->useRewriteUrl === null && $this->hasParentModel())
+		{
+			return $this->getParentModel()->useRewriteURL();
+		}
+		else
+		{
+			return $this->useRewriteUrl;
+		}
+	}	
 	
 	/**
 	 * @return Boolean
@@ -2143,6 +2190,9 @@ class generator_PersistentModel
 					break;
 				case "has-url":
 					$this->hasUrl = self::getBoolean($value);
+					break;	
+				case "use-rewrite-url":
+					$this->useRewriteUrl = self::getBoolean($value);
 					break;					
 				case "indexable":
 					$this->indexable = self::getBoolean($value);

@@ -1454,7 +1454,6 @@ abstract class f_persistentdocument_PersistentProvider
 		$stmt->bindValue(':lang', $i18nDocument->getLang(), PersistentProviderConst::PARAM_STR);
 		$this->executeStatement($stmt);
 		$this->m_i18nDocumentInstances[$i18nDocument->getId()][$i18nDocument->getLang()] = null;
-		$this->removeUrlRewriting($i18nDocument->getId(), $i18nDocument->getLang());
 	}
 	/**
 	 * @param String $tableName
@@ -1533,8 +1532,9 @@ abstract class f_persistentdocument_PersistentProvider
 				$stmt->bindValue(':relation_id1', $documentId, PersistentProviderConst::PARAM_INT);
 				$this->executeStatement($stmt);
 				
-				$this->removeUrlRewriting($documentId, $lang);
+				
 			}
+			$this->clearUrlRewriting($documentId);
 
 			$persistentDocument->setDocumentPersistentState(f_persistentdocument_PersistentDocument::PERSISTENTSTATE_DELETED);
 
@@ -3347,29 +3347,130 @@ abstract class f_persistentdocument_PersistentProvider
 	 * @return DELETE FROM `f_locale` WHERE `key_path` = :key_path AND `id` = :id AND `lang` = :lang
 	 */
 	protected abstract function deleteI18nKeyQuery($id, $lcid);	
-			
+
+	
+
 	/**
-	 * @return String
-	 * @example SELECT from_url	FROM f_url_rules 
-	 * 			WHERE document_id = :id AND document_lang = :lang AND to_url IS NULL
+	 * @param integer $documentId
+	 * @return array<<nb_rules, website_id, website_lang>>
+	 */
+	public function getUrlRewritingDocumentWebsiteInfo($documentId)
+	{
+		$sql = "SELECT count(rule_id) AS nb_rules, website_id, website_lang FROM f_url_rules WHERE document_id = :document_id GROUP BY website_id, website_lang";
+		$stmt = $this->prepareStatement($sql);
+		$stmt->bindValue(':document_id', $documentId, PersistentProviderConst::PARAM_INT);
+		$this->executeStatement($stmt);
+		return $stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC);
+	}
+	
+	/**
+	 * @param integer $documentId
+	 * @param string $lang
+	 * @param integer $websiteId
+	 * @return array<<rule_id, origine, modulename, actionname, document_id, website_lang, website_id, from_url, to_url, redirect_type>>
+	 */
+	public function getUrlRewritingDocument($documentId, $lang, $websiteId)
+	{
+		$sql = "SELECT rule_id, origine, modulename, actionname, document_id, website_lang, website_id, from_url, to_url, redirect_type 
+			FROM f_url_rules WHERE document_id = :document_id AND website_lang = :website_lang AND website_id = :website_id";
+		$stmt = $this->prepareStatement($sql);
+		
+		$stmt->bindValue(':document_id', $documentId, PersistentProviderConst::PARAM_INT);
+		$stmt->bindValue(':website_lang', $lang, PersistentProviderConst::PARAM_STR);
+		$stmt->bindValue(':website_id', $websiteId, PersistentProviderConst::PARAM_INT);
+		$this->executeStatement($stmt);
+		return $stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC);
+	}
+
+	/**
+	 * @param integer $documentId
+	 * @param string $lang
+	 * @param integer $websiteId
+	 */
+	public function deleteUrlRewritingDocument($documentId, $lang, $websiteId)
+	{
+		$sql = "DELETE FROM f_url_rules WHERE document_id = :document_id AND website_lang = :website_lang AND website_id = :website_id";
+		$stmt = $this->prepareStatement($sql);
+		$stmt->bindValue(':document_id', $documentId, PersistentProviderConst::PARAM_INT);
+		$stmt->bindValue(':website_lang', $lang, PersistentProviderConst::PARAM_STR);
+		$stmt->bindValue(':website_id', $websiteId, PersistentProviderConst::PARAM_INT);
+		$this->executeStatement($stmt);
+		return $stmt->rowCount();
+	}
+	
+	/**
+	 * @param string $moduleName
+	 * @param string $actionName
+	 * @return array<<nb_rules, website_id, website_lang>>
+	 */
+	public function getUrlRewritingActionWebsiteInfo($moduleName, $actionName)
+	{
+		$sql = "SELECT count(rule_id) AS nb_rules, website_id, website_lang FROM f_url_rules WHERE modulename = :modulename AND actionname = :actionname GROUP BY website_id, website_lang";
+		$stmt = $this->prepareStatement($sql);
+		$stmt->bindValue(':modulename', $moduleName, PersistentProviderConst::PARAM_STR);
+		$stmt->bindValue(':actionname', $actionName, PersistentProviderConst::PARAM_STR);
+		$this->executeStatement($stmt);
+		return $stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC);
+	}
+	
+
+	/**
+	 * @param string $moduleName
+	 * @param string $actionName
+	 * @param string $lang
+	 * @param integer $websiteId
+	 * @return array<<rule_id, origine, modulename, actionname, document_id, website_lang, website_id, from_url, to_url, redirect_type>>
+	 */
+	public function getUrlRewritingAction($moduleName, $actionName, $lang, $websiteId)
+	{
+		$sql = "SELECT rule_id, origine, modulename, actionname, document_id, website_lang, website_id, from_url, to_url, redirect_type 
+			FROM f_url_rules WHERE modulename = :modulename AND actionname = :actionname AND website_lang = :website_lang AND website_id = :website_id";
+		$stmt = $this->prepareStatement($sql);
+		
+		$stmt->bindValue(':modulename', $moduleName, PersistentProviderConst::PARAM_STR);
+		$stmt->bindValue(':actionname', $actionName, PersistentProviderConst::PARAM_STR);
+		$stmt->bindValue(':website_lang', $lang, PersistentProviderConst::PARAM_STR);
+		$stmt->bindValue(':website_id', $websiteId, PersistentProviderConst::PARAM_INT);
+		$this->executeStatement($stmt);
+		return $stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC);
+	}
+	
+	/**
+	 * @param string $moduleName
+	 * @param string $actionName
+	 * @param string $lang
+	 * @param integer $websiteId
+	 */
+	public function deleteUrlRewritingAction($moduleName, $actionName, $lang, $websiteId)
+	{
+		$sql = "DELETE FROM f_url_rules WHERE modulename = :modulename AND actionname = :actionname AND website_lang = :website_lang AND website_id = :website_id";
+		$stmt = $this->prepareStatement($sql);
+		$stmt->bindValue(':modulename', $moduleName, PersistentProviderConst::PARAM_STR);
+		$stmt->bindValue(':actionname', $actionName, PersistentProviderConst::PARAM_STR);
+		$stmt->bindValue(':website_lang', $lang, PersistentProviderConst::PARAM_STR);
+		$stmt->bindValue(':website_id', $websiteId, PersistentProviderConst::PARAM_INT);
+		$this->executeStatement($stmt);
+		return $stmt->rowCount();
+		
+	}	
+	/**
+	 * @return string
 	 */
 	protected abstract function getUrlRewritingQuery();
 	
 	/**
-	 * @param Integer $documentId
-	 * @param String $lang
-	 * @return string
+	 * @param integer $documentId
+	 * @param string $lang
+	 * @param integer $websiteId
+	 * @return string from_url
 	 */
-	public function getUrlRewriting($documentId, $lang)
-	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug(__METHOD__ ."($documentId, $lang)");
-		}
-		
+	public function getUrlRewriting($documentId, $lang, $websiteId = 0, $actionName = 'ViewDetail')
+	{		
 		$stmt = $this->prepareStatement($this->getUrlRewritingQuery());
 		$stmt->bindValue(':id', $documentId, PersistentProviderConst::PARAM_INT);
 		$stmt->bindValue(':lang', $lang, PersistentProviderConst::PARAM_STR);
+		$stmt->bindValue(':website_id', $websiteId, PersistentProviderConst::PARAM_INT);
+		$stmt->bindValue(':actionname', $actionName, PersistentProviderConst::PARAM_STR);
 		$this->executeStatement($stmt);
 		$results = $stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC);
 		if (count($results) > 0)
@@ -3381,36 +3482,25 @@ abstract class f_persistentdocument_PersistentProvider
 
 	/**
 	 * @return String
-	 * @example SELECT rule_id, document_id, document_lang, website_id, from_url, to_url, redirect_type 
-	 * 			FROM f_url_rules 
-	 * 			WHERE document_id = :id AND document_lang = :lang
 	 */
 	protected abstract function getUrlRewritingInfoQuery();
 	
 	/**
 	 * @param integer $documentId
 	 * @param string $lang
-	 * @return array<array<rule_id, document_id, document_lang, website_id, from_url, to_url, redirect_type>>
+	 * @return array<array<rule_id, origine, document_id, website_lang, website_id, from_url, to_url, redirect_type, modulename, actionname>>
 	 */
 	public function getUrlRewritingInfo($documentId, $lang)
 	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug(__METHOD__ ."($documentId, $lang)");
-		}
-
 		$stmt = $this->prepareStatement($this->getUrlRewritingInfoQuery());
 		$stmt->bindValue(':id', $documentId, PersistentProviderConst::PARAM_INT);
 		$stmt->bindValue(':lang', $lang, PersistentProviderConst::PARAM_STR);
-
 		$this->executeStatement($stmt);
 		return $stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC);
 	}
-
+	
 	/**
 	 * @return String
-	 * @example INSERT INTO f_url_rules (document_id, document_lang, website_id, from_url, to_url, redirect_type) 
-	 * 	VALUES (:document_id, :document_lang, :website_id, :from_url, :to_url, :redirect_type)
 	 */
 	protected abstract function setUrlRewritingQuery();
 	
@@ -3418,70 +3508,83 @@ abstract class f_persistentdocument_PersistentProvider
 	 * @param integer $documentId
 	 * @param string $lang
 	 * @param integer $websiteId
-	 * @param string $url
-	 * @param boolean $moved
+	 * @param string $fromURL
+	 * @param string $toURL
+	 * @param integer $redirectType
+	 * @param string $moduleName
+	 * @param string $actionName
+	 * @param integer $origine
 	 */
-	public function setUrlRewriting($documentId, $lang, $websiteId, $fromURL, $toURL, $redirectType)
+	public function setUrlRewriting($documentId, $lang, $websiteId, $fromURL, $toURL, $redirectType, $moduleName, $actionName, $origine = 0)
 	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug(__METHOD__ ."($documentId, $lang, $websiteId, $fromURL, $toURL, $redirectType)");
-		}
-			
 		$stmt = $this->prepareStatement($this->setUrlRewritingQuery());
 		$stmt->bindValue(':document_id', $documentId, PersistentProviderConst::PARAM_INT);
-		$stmt->bindValue(':document_lang', $lang, PersistentProviderConst::PARAM_STR);
+		$stmt->bindValue(':website_lang', $lang, PersistentProviderConst::PARAM_STR);
 		$stmt->bindValue(':website_id', $websiteId, PersistentProviderConst::PARAM_INT);
 		$stmt->bindValue(':from_url', $fromURL, PersistentProviderConst::PARAM_STR);
 		$stmt->bindValue(':to_url', $toURL, PersistentProviderConst::PARAM_STR);
 		$stmt->bindValue(':redirect_type', $redirectType, PersistentProviderConst::PARAM_INT);
+		$stmt->bindValue(':modulename', $moduleName, PersistentProviderConst::PARAM_STR);
+		$stmt->bindValue(':actionname', $actionName, PersistentProviderConst::PARAM_STR);
+		$stmt->bindValue(':origine', $origine, PersistentProviderConst::PARAM_INT);
 		$this->executeStatement($stmt);
 	}
 
 	/**
 	 * @return String
-	 * @example DELETE FROM f_url_rules WWHERE document_id = :id AND document_lang = :lang
 	 */
-	protected abstract function removeUrlRewritingQuery();
+	protected abstract function clearUrlRewritingQuery();
 	
 	/**
 	 * @param integer $documentId
-	 * @param string $lang
-	 * @param string $url
-	 * @param boolean $moved
+	 * @return integer count deleted rules
 	 */
-	public function removeUrlRewriting($documentId, $lang)
+	public function clearUrlRewriting($documentId)
 	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug(__METHOD__ . "($documentId, $lang)");
-		}
-
-		$stmt = $this->prepareStatement($this->removeUrlRewritingQuery());
-		$stmt->bindValue(':id', $documentId, PersistentProviderConst::PARAM_INT);
-		$stmt->bindValue(':lang', $lang, PersistentProviderConst::PARAM_STR);
+		$stmt = $this->prepareStatement($this->clearUrlRewritingQuery());
+		$stmt->bindValue(':document_id', $documentId, PersistentProviderConst::PARAM_INT);
 		$this->executeStatement($stmt);
+		return $stmt->rowCount();
+	}
+	
+	/**
+	 * @return string
+	 */
+	protected abstract function getUrlRewritingInfoByUrlQuery();
+	
+	/**
+	 * @param string $url
+	 * @param integer $websiteId
+	 * @param string $lang
+	 * @return array<rule_id, origine, modulename, actionname, document_id, website_lang, website_id, to_url, redirect_type>
+	 */
+	public function getUrlRewritingInfoByUrl($url, $websiteId, $lang)
+	{
+		$stmt = $this->prepareStatement($this->getUrlRewritingInfoByUrlQuery());
+		$stmt->bindValue(':url', $url, PersistentProviderConst::PARAM_STR);
+		$stmt->bindValue(':website_id', $websiteId, PersistentProviderConst::PARAM_INT);
+		$stmt->bindValue(':website_lang', $lang, PersistentProviderConst::PARAM_STR);
+		$this->executeStatement($stmt);
+		$results = $stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC);
+		if (count($results) > 0)
+		{
+			return $results[0];
+		}
+		return null;
 	}
 
 	/**
 	 * @return String
-	 * @example SELECT rule_id, document_id, document_lang, website_id, to_url, redirect_type FROM f_url_rules 
-	 * 			WHERE from_url = :url AND (website_id = 0 OR website_id = :website_id)
 	 */
 	protected abstract function getPageForUrlQuery();
 
 	/**
 	 * @param string $url
 	 * @param integer $websiteId
-	 * @return array<rule_id, document_id, document_lang, website_id, to_url, redirect_type>
+	 * @return array<rule_id, document_id, website_lang, website_id, to_url, redirect_type>
 	 */
 	public function getPageForUrl($url, $websiteId = 0)
 	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("PersistentProvider::getPageForUrl($url, $websiteId)");
-		}
-
 		$stmt = $this->prepareStatement($this->getPageForUrlQuery());
 		$stmt->bindValue(':url', $url, PersistentProviderConst::PARAM_STR);
 		$stmt->bindValue(':website_id', $websiteId, PersistentProviderConst::PARAM_INT);

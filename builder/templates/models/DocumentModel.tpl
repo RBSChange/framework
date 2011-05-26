@@ -183,6 +183,14 @@ class <{$model->getFinalDocumentClassName()}>model extends f_persistentdocument_
 	/**
 	 * @return Boolean
 	 */
+	public final function useRewriteURL()
+	{
+		return <{$model->escapeBoolean($model->useRewriteURL())}> &&  <{$model->escapeBoolean($model->hasURL())}>;
+	}
+	
+	/**
+	 * @return Boolean
+	 */
 	public final function isIndexable()
 	{
 		return <{$model->escapeBoolean($model->hasURL())}> && <{$model->escapeBoolean($model->isIndexable())}> &&

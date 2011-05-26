@@ -37,19 +37,9 @@ abstract class f_action_BaseAction extends Action
 
 		//Calculate Module name
 		$request = $context->getRequest();
-		$this->m_moduleName = $request->getParameter(K::WEBEDIT_MODULE_ACCESSOR, null);
-		if (is_null($this->m_moduleName))
-		{
-			$this->m_moduleName = $request->getParameter('module');
-		}
+		$this->m_moduleName =  f_util_ArrayUtils::lastElement($request->getAttribute(K::EFFECTIVE_MODULE_NAME));
 
 		$classParts = explode('_', get_class($this));
-		if (is_null($this->m_moduleName) && count($classParts) == 2)
-		{
-			$this->m_moduleName = $classParts[0];
-
-		}
-
 		//Caluclate Action name xxxxx_[name]Action
 		$className = end($classParts);
 		$this->m_actionName = substr($className, 0 , strlen($className) - 6);
@@ -412,19 +402,22 @@ abstract class f_action_BaseAction extends Action
 		return true;
 	}
 
+	/**
+	 * @return boolean
+	 */
 	private function checkPermissions()
 	{
 		if (Framework::isDebugEnabled())
 		{
 			Framework::debug(__METHOD__);
 		}
-		$effectiveModuleName = $this->getEffectiveModuleName();
-		$roleService = f_permission_PermissionService::getRoleServiceByModuleName($effectiveModuleName);
+		$moduleName = $this->getModuleName();
+		$roleService = f_permission_PermissionService::getRoleServiceByModuleName($moduleName);
 		if ($roleService !== null)
 		{
 			if (Framework::isDebugEnabled())
 			{
-				Framework::debug(__METHOD__ . " Security Enabled for module " . $effectiveModuleName);
+				Framework::debug(__METHOD__ . " Security Enabled for module " . $moduleName);
 			}
 
 			$permissionService = f_permission_PermissionService::getInstance();
@@ -451,7 +444,7 @@ abstract class f_action_BaseAction extends Action
 
 			if (count($nodeIds) == 0)
 			{
-				$defaultNodeId = ModuleService::getInstance()->getRootFolderId($effectiveModuleName);
+				$defaultNodeId = ModuleService::getInstance()->getRootFolderId($moduleName);
 				$nodeIds[] = $defaultNodeId;
 				if (Framework::isDebugEnabled())
 				{
@@ -490,7 +483,7 @@ abstract class f_action_BaseAction extends Action
 	 */
 	protected function getSecureActionName($documentId)
 	{
-		$secureAction = "modules_" . $this->getEffectiveModuleName() . "." . $this->getActionName();
+		$secureAction = "modules_" . $this->getModuleName() . "." . $this->getActionName();
 		if ($this->isDocumentAction())
 		{
 			$secureAction .= '.' . DocumentHelper::getDocumentInstance($documentId)->getPersistentModel()->getDocumentName();
@@ -540,19 +533,6 @@ abstract class f_action_BaseAction extends Action
 	{
 		$this->setException($request, $e, $popupAlert);
 		return self::getErrorView();
-	}
-	
-	/**
-	 * @return String
-	 */
-	private function getEffectiveModuleName()
-	{
-		$request = Controller::getInstance()->getContext()->getRequest();
-		if ($request->hasAttribute(K::EFFECTIVE_MODULE_NAME))
-		{
-			return f_util_ArrayUtils::lastElement($request->getAttribute(K::EFFECTIVE_MODULE_NAME));
-		}
-		return $this->getModuleName();
 	}
 	
 	// Deprecated

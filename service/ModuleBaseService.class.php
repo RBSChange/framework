@@ -102,7 +102,6 @@ class ModuleBaseService extends BaseService
 		if (count($documents) > 0)
 		{
 			$rootFolderId = ModuleService::getInstance()->getRootFolderId($moduleName);
-			
 			$ancestorsIds = DocumentHelper::getIdArrayFromDocumentArray($documents);
 			$startIndex = 1;
 			if ($documents[0]->getId() != $rootFolderId)
@@ -123,5 +122,19 @@ class ModuleBaseService extends BaseService
 		
 		$result[] = $document->getId();
 		return $result;
+	}
+	
+	/**
+	 * @param website_UrlRewritingService $wsurs
+	 * @param string $moduleName
+	 * @param string $actionName
+	 * @param website_persistentdocument_website $website
+	 * @param string $lang
+	 * @param array $parameters
+	 * @return string or null
+	 */
+	public function generateActionRewritePath($wsurs, $moduleName, $actionName, $website, $lang, &$parameters)
+	{
+		return $wsurs->getActionRulePath($moduleName, $actionName, $website, $lang, $parameters);
 	}
 }

@@ -762,48 +762,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 		return isset($this->m_preservedPropertiesNames[$name]);
 	}
 
-	/**
-	 * @return Boolean
-	 */
-	public function isInjectedModel()
-	{
-		return ($this->m_sourceInjectionModel !== null);
-	}
 
-	/**
-	 * @return f_persistentdocument_PersistentDocumentModel
-	 */
-	public function getSourceInjectionModel()
-	{
-		return $this->m_sourceInjectionModel;
-	}
-
-	/**
-	 * Returns the name of the original model that has been injected.
-	 * @return String
-	 */
-	public function getOriginalModelName()
-	{
-		return $this->isInjectedModel() ? $this->getSourceInjectionModel()->getName() : $this->getName();
-	}
-	
-	/**
-	 * Returns the name of the original module that has been injected.
-	 * @return String
-	 */
-	public function getOriginalModuleName()
-	{
-		return $this->isInjectedModel() ? $this->getSourceInjectionModel()->getModuleName() : $this->getModuleName();
-	}
-	
-	/**
-	 * Returns the name of the original document that has been injected.
-	 * @return String
-	 */
-	public function getOriginalDocumentName()
-	{
-		return $this->isInjectedModel() ? $this->getSourceInjectionModel()->getDocumentName() : $this->getDocumentName();
-	}
 
 	/**
 	 * @see f_mvc_BeanModel::getBeanName()
@@ -972,5 +931,45 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	public final function getSynchronize()
 	{
 		return array();
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0) with no replacement
+	 */
+	public function isInjectedModel()
+	{
+		return ($this->m_sourceInjectionModel !== null);
+	}
+
+	/**
+	 * @deprecated (will be removed in 4.0) with no replacement
+	 */
+	public function getSourceInjectionModel()
+	{
+		return $this->m_sourceInjectionModel;
+	}
+
+	/**
+	 * @deprecated (will be removed in 4.0) with no replacement
+	 */
+	public function getOriginalModelName()
+	{
+		return $this->isInjectedModel() ? $this->getSourceInjectionModel()->getName() : $this->getName();
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0) with no replacement
+	 */
+	public function getOriginalModuleName()
+	{
+		return $this->isInjectedModel() ? $this->getSourceInjectionModel()->getModuleName() : $this->getModuleName();
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0) with no replacement
+	 */
+	public function getOriginalDocumentName()
+	{
+		return $this->isInjectedModel() ? $this->getSourceInjectionModel()->getDocumentName() : $this->getDocumentName();
 	}
 }

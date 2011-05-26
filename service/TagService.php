@@ -1136,33 +1136,28 @@ class TagService extends BaseService
 	 */
 	public function getDetailPageForDocument($document)
 	{
-		$model = $document->getPersistentModel();
-		$detailPage = $this->getDetailPageByModel($model, $document);
+		$detailPage = $this->getDetailPageByModel($document->getDocumentModelName(), $document);
 		if ($detailPage)
 		{
 			return $detailPage;
 		}
-		foreach ($model->getAncestorModelNames() as $modelName)
+		foreach ($document->getPersistentModel()->getAncestorModelNames() as $modelName)
 		{
-			$model = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($modelName);
-			$detailPage = $this->getDetailPageByModel($model, $document);
-			if ($detailPage)
-			{
-				return $detailPage;
-			}
+			$detailPage = $this->getDetailPageByModel($modelName, $document);
+			if ($detailPage) {return $detailPage;}
 		}
 		return null;
 	}
 	
 	/**
-	 * @param moduleName
-	 * @param documentName
+	 * @param $modelName
 	 * @param document
 	 */
-	private function getDetailPageByModel($model, $document)
+	private function getDetailPageByModel($modelName, $document)
 	{
-		$moduleName = $model->getModuleName();
-		$documentName = $model->getDocumentName();
+		$parts = f_persistentdocument_PersistentDocumentModel::getModelInfo($modelName);
+		$moduleName = $parts['module'];
+		$documentName = $parts['document'];
 						
 		$tags = $this->getAvailableTags();
 		$tag = 'functional_' . $moduleName . '_' . $documentName .'-detail';
@@ -1177,13 +1172,19 @@ class TagService extends BaseService
 		}
 		
 		$websiteId = $document->getDocumentService()->getWebsiteId($document);
-		if (!$websiteId)
+		if ($websiteId)
 		{
-			Framework::warn(__METHOD__ . ' ' .$document->__toString() . ' has no WebsiteId');
-			return null;
+			$website = DocumentHelper::getDocumentInstance($websiteId, 'modules_website/website');
 		}
-		
-		$website = DocumentHelper::getDocumentInstance($websiteId, 'modules_website/website');
+		else
+		{
+			$website = website_WebsiteModuleService::getInstance()->getCurrentWebsite();
+			if ($website->isNew())
+			{
+				Framework::warn(__METHOD__ . ' ' .$document->__toString() . ' has no WebsiteId');
+				return null;
+			}
+		}
 		
 		$tag = 'contextual_website_website_modules_' . $moduleName . '_'.$documentName;
 		if (in_array($tag, $tags))
@@ -1237,12 +1238,19 @@ class TagService extends BaseService
 		}
 
 		$websiteId = $document->getDocumentService()->getWebsiteId($document);
-		if (!$websiteId)
+		if ($websiteId)
 		{
-			Framework::warn(__METHOD__ . ' ' .$document->__toString() . ' has no WebsiteId');
-			return null;
+			$website = DocumentHelper::getDocumentInstance($websiteId, 'modules_website/website');
 		}
-		$website = DocumentHelper::getDocumentInstance($websiteId, 'modules_website/website');
+		else
+		{
+			$website = website_WebsiteModuleService::getInstance()->getCurrentWebsite();
+			if ($website->isNew())
+			{
+				Framework::warn(__METHOD__ . ' ' .$document->__toString() . ' has no WebsiteId');
+				return null;
+			}
+		}
 		
 		$tag = 'contextual_website_website_modules_' . $moduleName . '_page-list';
 		if (in_array($tag, $tags))

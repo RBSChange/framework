@@ -848,32 +848,36 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 
 		/**
 		 * URL REWRITING f_url_rules
-		 * rule_id, document_id, document_lang, website_id, from_url, to_url, redirect_type
+		 * rule_id, origine, modulename, actionname, document_id, website_lang, website_id, from_url, to_url, redirect_type
 		 */
-		
 		protected function getUrlRewritingQuery()
 		{
-			return 'SELECT from_url	FROM f_url_rules WHERE document_id = :id AND document_lang = :lang AND to_url IS NULL';
+			return 'SELECT from_url	FROM f_url_rules WHERE document_id = :id AND website_lang = :lang AND website_id = :website_id AND actionname = :actionname AND redirect_type = 200';
 		}
 		
 		protected function getUrlRewritingInfoQuery()
 		{
-			return 'SELECT rule_id, document_id, document_lang, website_id, from_url, to_url, redirect_type FROM f_url_rules WHERE document_id = :id AND document_lang = :lang';
+			return 'SELECT rule_id, origine, modulename, actionname, document_id, website_lang, website_id, from_url, to_url, redirect_type FROM f_url_rules WHERE document_id = :id AND website_lang = :lang';
 		}
-
+		
 		protected function setUrlRewritingQuery()
 		{
-			return 'INSERT INTO f_url_rules (document_id, document_lang, website_id, from_url, to_url, redirect_type) VALUES (:document_id, :document_lang, :website_id, :from_url, :to_url, :redirect_type)';
+			return 'INSERT INTO f_url_rules (document_id, website_lang, website_id, from_url, to_url, redirect_type, modulename, actionname, origine) VALUES (:document_id, :website_lang, :website_id, :from_url, :to_url, :redirect_type, :modulename, :actionname, :origine)';
 		}
 
-		protected function removeUrlRewritingQuery()
+		protected function clearUrlRewritingQuery()
 		{
-			return 'DELETE FROM f_url_rules WHERE document_id = :id AND document_lang = :lang';
+			return 'DELETE FROM f_url_rules WHERE document_id = :document_id';
+		}		
+		
+		protected function getUrlRewritingInfoByUrlQuery()
+		{
+			return "SELECT `rule_id`, `origine`, `modulename`, `actionname`, `document_id`, `website_lang`, `website_id`, `to_url`, `redirect_type` FROM `f_url_rules` WHERE from_url = :url AND website_id = :website_id AND `website_lang` = :website_lang";
 		}
 
 		protected function getPageForUrlQuery()
 		{
-			return 'SELECT rule_id, document_id, document_lang, website_id, to_url, redirect_type FROM f_url_rules WHERE from_url = :url AND (website_id = 0 OR website_id = :website_id)';
+			return 'SELECT rule_id, document_id, website_lang, website_id, to_url, redirect_type FROM f_url_rules WHERE from_url = :url AND (website_id = 0 OR website_id = :website_id)';
 		}
 
 		/**

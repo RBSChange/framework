@@ -111,6 +111,14 @@ class f_web_PageLink extends f_web_HttpLink
 	        $this->fragment, $this->argSeparator);
 	}
 	
+	/**
+	 * @return String
+	 */
+	public function getPath()
+	{
+		return $this->path;
+	}	
+	
 	// Deprecated
 	
 	/**
