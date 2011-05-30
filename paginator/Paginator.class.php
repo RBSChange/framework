@@ -90,8 +90,6 @@ class paginator_Paginator extends ArrayObject
 	 */
 	private $moduleName = null;
 
-	private $currentUrl = null;
-
 	private $extraParameters = array();
 	/**
 	 * @var Integer
@@ -293,23 +291,44 @@ class paginator_Paginator extends ArrayObject
 		}
 	}
 
+	/**
+	 * @var f_web_ParametrizedLink
+	 */
+	private $currentUrl;
+	
 	private function getUrlForPage($pageIndex)
 	{
 		$key = $this->getModuleName().'Param';
-		if (is_null($this->currentUrl))
+		if ($this->currentUrl === null)
 		{
-			$this->currentUrl  = paginator_Url::getInstanceFromCurrentUrl();
-			$this->currentUrl->setQueryParameter($key, $this->extraParameters);
+			$rq = RequestContext::getInstance();
+			if ($rq->getAjaxMode())
+			{
+				$requestUri = $rq->getAjaxFromURI();
+			}
+			else
+			{
+				$requestUri = $rq->getPathURI();
+			}
+			$parts = explode('?', $requestUri);
+			$this->currentUrl = new f_web_ParametrizedLink($rq->getProtocol(), $_SERVER['SERVER_NAME'], $parts[0]);
+			if (isset($parts[1]) && $parts[1] != '')
+			{
+				parse_str($parts[1], $queryParameters);
+				$this->currentUrl->setQueryParameters($queryParameters);
+			}
+			
+			if (is_array($this->extraParameters) && count($this->extraParameters))
+			{
+				foreach ($this->extraParameters as $name => $value) 
+				{
+					$this->currentUrl->setQueryParameter($name, $value);
+				}
+			}
 		}
-		if ($pageIndex > 1)
-		{
-			$this->currentUrl->setQueryParameter($key.'['.$this->pageIndexParamName.']', $pageIndex);
-		}
-		else 
-		{
-			$this->currentUrl->removeQueryParameter($key.'['.$this->pageIndexParamName.']');
-		}
-		return $this->currentUrl->getStringRepresentation() . (($this->anchor) ? '#'.$this->anchor : '');
+		$this->currentUrl->setQueryParameter($key, array($this->pageIndexParamName => $pageIndex > 1 ? $pageIndex : null));
+		$this->currentUrl->setFragment($this->anchor);
+		return $this->currentUrl->getUrl();
 	}
 
 	/**

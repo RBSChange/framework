@@ -2934,13 +2934,4 @@ class f_persistentdocument_DocumentService extends BaseService
 		$website = ($websiteId === null) ? website_WebsiteModuleService::getInstance()->getCurrentWebsite() : DocumentHelper::getDocumentInstance($websiteId);
 		return website_UrlRewritingService::getInstance()->getCustomPath($document, $website, $lang);
 	}
-	
-	/**
-	 * @deprecated (will be removed in 4.0)
-	 */
-	public function filterDocumentUrlParams($document, $lang, $parameters)
-	{
-		// Nothing to do by default.
-		return $parameters;
-	}
 }

@@ -91,6 +91,10 @@ class f_web_ParametrizedLink extends f_web_HttpLink
 				unset($this->queryParameters[$key]);
 			}
 		}
+		else if (is_array($value) && isset($this->queryParameters[$key]) && is_array($this->queryParameters[$key]))
+		{
+			$this->queryParameters[$key] = array_merge($this->queryParameters[$key], $value);
+		}
 		else
 		{
 			$this->queryParameters[$key] = $value;

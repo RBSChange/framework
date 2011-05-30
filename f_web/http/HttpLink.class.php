@@ -27,8 +27,10 @@ abstract class f_web_HttpLink implements f_web_Link
 
 		if (count($queryParameters) > 0)
 		{
+			self::sortQueryParamerters($queryParameters);
 		    if ($argSeparator === null) {$argSeparator = self::STANDARD_SEPARATOR;}
-			$url['query'] = http_build_query($queryParameters, '', $argSeparator);
+			$query = http_build_query($queryParameters, '', $argSeparator);
+			if (!empty($query)) {$url['query'] = $query;}
 		}
 		return  self::http_build_url($url);	    
 	}
@@ -79,5 +81,14 @@ abstract class f_web_HttpLink implements f_web_Link
 			$url[] = '#' . $parts['fragment'];
 		}
 		return implode('', $url);	
+	}
+	
+	public static function sortQueryParamerters(&$queryParamerters)
+	{
+		if (is_array($queryParamerters))
+		{
+			ksort($queryParamerters);
+			foreach ($queryParamerters as &$subSet) {if (is_array($subSet)) {ksort($subSet);}}
+		}
 	}
 }
