@@ -593,7 +593,20 @@ class f_persistentdocument_DocumentService extends BaseService
 						{
 							$doc->{'set'.ucfirst($relation->getName())}(null);
 						}
-						$doc->save();					
+						
+						switch ($doc->getPublicationstatus()) 
+						{
+							case f_persistentdocument_PersistentDocument::STATUS_TRASH :
+							case f_persistentdocument_PersistentDocument::STATUS_FILED :
+							case f_persistentdocument_PersistentDocument::STATUS_DEPRECATED :
+								// We can break these documents structure
+								$this->pp->updateDocument($doc);
+								break;
+							default :
+								$doc->save();
+								break;
+						}
+											
 						$rc->endI18nWork();
 					}
 					catch (Exception $e)
