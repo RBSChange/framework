@@ -406,9 +406,41 @@ abstract class date_Calendar
     {
     	return $this->toString();
     }
-
+    
     /**
-     * @return date_Date
+     * @return string
+     */
+	public function toFormattedDate()
+	{
+		return date_Formatter::toDefaultDate($this);
+	}
+	
+    /**
+     * @return string
+     */	
+	public function toFormattedDateBO()
+	{
+		return date_Formatter::toDefaultDateBO($this);
+	}
+	
+    /**
+     * @return string
+     */	
+	public function toFormattedDateTime()
+	{
+		return date_Formatter::toDefaultDateTime($this);
+	}
+		
+    /**
+     * @return string
+     */	
+	public function toFormattedDateTimeBO()
+	{
+		return date_Formatter::toDefaultDateTimeBO($this);
+	}
+	
+    /**
+     * @deprecated
      */
     public function getTime()
     {

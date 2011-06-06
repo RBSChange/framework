@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<i18n baseKey="f.date.date.suffix" lcid="fr_FR">
+  <key id="st">er</key>
+  <key id="nst"></key>
+  <key id="nd"></key>
+  <key id="nnd"></key>
+  <key id="rd"></key>
+  <key id="nrd"></key>
+  <key id="th"></key>
+</i18n>

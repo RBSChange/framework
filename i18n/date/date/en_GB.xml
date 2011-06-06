@@ -57,4 +57,6 @@
   <key id="default-date-format">Y-m-d</key>
   <key id="default-date-format-for-jquery-datepicker">yyyy-mm-dd</key>
   <key id="default-datetime-format">Y-m-d g:i a</key>
+  <key id="am">am</key>
+  <key id="pm">pm</key>
 </i18n>

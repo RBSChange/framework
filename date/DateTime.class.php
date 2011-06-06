@@ -750,3 +750,11 @@ class date_DateTime
     	return $this->calendar->equals($dateTime->calendar);
     }
 }
+
+/**
+ * @deprecated use date_Calendar
+ */
+class date_Date extends date_DateTime
+{
+	
+}

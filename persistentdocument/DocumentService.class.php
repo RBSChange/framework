@@ -577,7 +577,6 @@ class f_persistentdocument_DocumentService extends BaseService
 					try 
 					{
 						$rc->beginI18nWork($doc->getLang());
-												
 						if ($doc->getPersistentModel()->isArrayProperty($relation->getName()))
 						{
 							$index = $doc->{'getIndexof'.ucfirst($relation->getName())}($document);
@@ -589,8 +588,7 @@ class f_persistentdocument_DocumentService extends BaseService
 						else
 						{
 							$doc->{'set'.ucfirst($relation->getName())}(null);
-						}
-						$doc->save();					
+						}				
 						$rc->endI18nWork();
 					}
 					catch (Exception $e)
