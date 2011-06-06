@@ -98,6 +98,11 @@ class TemplateResolver extends FileResolver implements ResourceResolver
 		{
 			$path = parent::getPath($this->getFullFileName($templateName, false, false));
 		}
+		
+		if (NULL === $path)
+		{
+			$path = parent::getPath($templateName . '.' . $this->mimeContentType);
+		}
 
 		return $path;
 
