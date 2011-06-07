@@ -84,9 +84,8 @@ class DocumentHelper
 	/**
 	 * Returns an array of IDs from an array of PersistentDocuments.
 	 *
-	 * @param array<f_persistentdocument_PersistentDocument> $documents
-	 *
-	 * @return array<integer>
+	 * @param f_persistentdocument_PersistentDocument[] $documents
+	 * @return integer[]
 	 */
 	public static function getIdArrayFromDocumentArray($documents)
 	{
@@ -94,13 +93,32 @@ class DocumentHelper
 		{
 			$documents = $documents->getArrayCopy();
 		}
-		if ( is_array($documents) )
+		if (is_array($documents))
 		{
 			return array_map(array('DocumentHelper', 'getId'), $documents);
 		}
 		return array();
 	}
 	
+	/**
+	 * Returns an array of PersistentDocuments from an array of IDs.
+	 *
+	 * @param integer[] $documentIds
+	 * @return f_persistentdocument_PersistentDocument[]
+	 */
+	public static function getDocumentArrayFromIdArray($documentIds)
+	{
+		if (f_util_ArrayUtils::isNotEmpty($documentIds))
+		{
+			return array_map(array('DocumentHelper', 'getDocumentInstance'), $documentIds);
+		}
+		return array();
+	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @return integer
+	 */
 	public static function getId($document)
 	{
 		return $document->getId();
