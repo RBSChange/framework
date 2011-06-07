@@ -51,7 +51,7 @@ class BaseException extends Exception
 		$key = $this->key; 
 		if (!empty($key))
 		{
-			return f_Locale::translateUI('&' . $key . ';', $this->attributes);
+			return LocaleService::getInstance()->transBO($key, array(), $this->attributes);
 		}
 		return $this->getMessage();
 	}
