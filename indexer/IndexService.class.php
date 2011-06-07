@@ -929,10 +929,6 @@ class indexer_IndexService extends BaseService
 		{
 			$userIds = f_permission_PermissionService::getInstance()->getAccessorIdsForRoleByDocumentId('modules_website.AuthenticatedFrontUser', $page->getId());
 		}
-		if (count($userIds) == 0)
-		{
-			$userIds[] = indexer_IndexService::PUBLIC_DOCUMENT_ACCESSOR_ID;
-		}
 		return $userIds;
 	}
 	
@@ -1093,11 +1089,11 @@ class indexer_IndexService extends BaseService
 				
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @return indexer_IndexedDocument
+	 * @return indexer_IndexedDocument or null
 	 */
 	private function buildFrontIndexedDocument($document)
 	{
-		if (!$document->isPublished())
+		if (!($document instanceof indexer_IndexableDocument) || !$document->isPublished())
 		{
 			return null;
 		}
@@ -1105,31 +1101,30 @@ class indexer_IndexService extends BaseService
 		$indexedDocument = $document->getIndexedDocument();
 		if ($indexedDocument instanceof indexer_IndexedDocument)
 		{
+			
+			$websiteIds = $document->getDocumentService()->getWebsiteIds($document);
+			if (is_array($websiteIds) && count($websiteIds) === 0)
+			{
+				return null;
+			}
+			
+			$indexedDocument->setWebsiteIds($websiteIds);
 			if (!$indexedDocument->hasDocumentAccessors())
 			{
-				$indexedDocument->setDocumentAccessors($this->getFrontendAccessorIds($document));
-			}
-			$this->setAncestors($document, $indexedDocument);
-			
-			// set the parent website if it is not set
-			if (!$indexedDocument->hasParentWebsiteId())
-			{
-				$websiteId = intval($document->getDocumentService()->getWebsiteId($document));
-				$indexedDocument->setParentWebsiteId($websiteId);
-				if ($websiteId > 0)
+				$userIds = array(0);
+				if (is_array($websiteIds))
 				{
-					$parent = $document->getDocumentService()->getParentOf($document);
-					if ($parent instanceof website_persistentdocument_topic)
+					foreach (DocumentHelper::getDocumentArrayFromIdArray($websiteIds) as $website) 
 					{
-						$indexedDocument->setParentTopicId($parent->getId());
+						website_WebsiteModuleService::getInstance()->setCurrentWebsite($website);
+						$userIds = array_merge($this->getFrontendAccessorIds($document), $userIds);
 					}
-					else
-					{
-						$indexedDocument->setParentTopicId(0);
-					}
+					$userIds = array_unique($userIds);
 				}
+				$indexedDocument->setDocumentAccessors($userIds);
 			}
-			$indexedDocument->setDateField('sortable_date', date_GregorianCalendar::getInstance($document->getModificationdate()));
+			$indexedDocument->setDateField('sortable_date', date_Calendar::getInstance($document->getModificationdate()));
+			$fields = $indexedDocument->getFields();
 			return $indexedDocument;
 		}
 		return null;

@@ -64,9 +64,10 @@ class indexer_QueryHelper
 	
 	public static function websiteIdRestrictionInstance($int)
 	{
-		$result = self::orInstance();
-		$result->add(self::integerFieldInstance(indexer_Field::PARENT_WEBSITE, $int));
-		$result->add(self::integerFieldInstance(indexer_Field::PARENT_WEBSITE, 0));
+		$fieldName = indexer_Field::getVolatileIntegerMultiFieldName('websiteIds');
+		$result = self::orInstance();		
+		$result->add(new indexer_TermQuery($fieldName,  $int));
+		$result->add(new indexer_TermQuery($fieldName, 0));
 		return $result;
 	}
 

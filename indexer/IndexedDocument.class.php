@@ -253,7 +253,9 @@ class indexer_IndexedDocument
 	{
 		if (!is_null($date))
 		{
-			$this->fields[$name . indexer_Field::DATE] = array('value' => date_DateFormat::format($date, indexer_Field::SOLR_DATE_FORMAT), 'type' => indexer_Field::INDEXED | indexer_Field::STORED);
+			$this->fields[$name . indexer_Field::DATE] = array('value' => 
+				date_Formatter::format($date ,indexer_Field::SOLR_DATE_FORMAT), 
+				'type' => indexer_Field::INDEXED | indexer_Field::STORED);
 		}
 	}
 	
@@ -268,7 +270,7 @@ class indexer_IndexedDocument
 		if (!is_null($date))
 		{
 			$suffix = (indexer_SolrManager::hasVolatileDynamicFields()) ? indexer_Field::DATE_VOLATILE : indexer_Field::DATE;
-			$this->fields[$name . $suffix] = array('value' => date_DateFormat::format($date, indexer_Field::SOLR_DATE_FORMAT), 'type' => indexer_Field::INDEXED);
+			$this->fields[$name . $suffix] = array('value' => date_Formatter::format($date, indexer_Field::SOLR_DATE_FORMAT), 'type' => indexer_Field::INDEXED);
 		}
 	}
 	
@@ -319,34 +321,6 @@ class indexer_IndexedDocument
 				$suffix = (indexer_SolrManager::hasVolatileDynamicFields()) ? indexer_Field::INTEGER_VOLATILE : indexer_Field::INTEGER;
 			}
 			$this->fields[$name . $suffix] = array('value' => $int, 'type' => $type);
-		}
-	}
-	
-	/**
-	 * Set the parent website to value $int
-	 *
-	 * @param String $name
-	 * @param Integer $int
-	 */
-	public function setParentWebsiteId($int)
-	{
-		if (!is_null($int))
-		{
-			$this->fields[indexer_Field::PARENT_WEBSITE . indexer_Field::INTEGER] = array('value' => $int, 'type' => indexer_Field::INDEXED | indexer_Field::STORED | indexer_Field::TOKENIZED);
-		}
-	}
-	
-	/**
-	 * Set the parent topic to value $int
-	 *
-	 * @param String $name
-	 * @param Integer $int
-	 */
-	public function setParentTopicId($int)
-	{
-		if ($int !== null)
-		{
-			$this->fields[indexer_Field::PARENT_TOPIC . indexer_Field::INTEGER] = array('value' => $int, 'type' => indexer_Field::INDEXED | indexer_Field::STORED | indexer_Field::TOKENIZED);
 		}
 	}
 	
@@ -588,8 +562,18 @@ class indexer_IndexedDocument
 	}
 	
 	/**
-	 * Is the parent website set?
-	 *
+	 * @param integer[] $websiteIds
+	 */
+	public function setWebsiteIds($websiteIds)
+	{
+		if ($websiteIds === null) {$websiteIds = array(0);}
+		$fieldName = indexer_Field::getVolatileIntegerMultiFieldName('websiteIds');
+		$this->fields[$fieldName]['value'] = $websiteIds;
+		$this->fields[$fieldName]['type'] = indexer_Field::INDEXED;
+	}
+	
+	/**
+	 * @deprecated
 	 * @return Boolean
 	 */
 	public function hasParentWebsiteId()
@@ -598,13 +582,38 @@ class indexer_IndexedDocument
 	}
 	
 	/**
-	 * Is the parent topic set?
-	 *
+	 * @deprecated
 	 * @return Boolean
 	 */
 	public function hasParentTopicId()
 	{
 		return isset($this->fields[indexer_Field::PARENT_TOPIC . indexer_Field::INTEGER]);
+	}
+	
+	/**
+	 * @deprecated
+	 * @param String $name
+	 * @param Integer $int
+	 */
+	public function setParentWebsiteId($int)
+	{
+		if (!is_null($int))
+		{
+			$this->fields[indexer_Field::PARENT_WEBSITE . indexer_Field::INTEGER] = array('value' => $int, 'type' => indexer_Field::INDEXED | indexer_Field::STORED | indexer_Field::TOKENIZED);
+		}
+	}
+	
+	/**
+	 * @deprecated
+	 * @param String $name
+	 * @param Integer $int
+	 */
+	public function setParentTopicId($int)
+	{
+		if ($int !== null)
+		{
+			$this->fields[indexer_Field::PARENT_TOPIC . indexer_Field::INTEGER] = array('value' => $int, 'type' => indexer_Field::INDEXED | indexer_Field::STORED | indexer_Field::TOKENIZED);
+		}
 	}
 }
 
