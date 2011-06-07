@@ -2571,6 +2571,20 @@ class f_persistentdocument_DocumentService extends BaseService
 	
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
+	 * @return integer[] | null
+	 */
+	public function getWebsiteIds($document)
+	{
+		$websiteId = $this->getWebsiteId($document);
+		if ($websiteId !== null)
+		{
+			return array($websiteId);
+		}
+		return null;
+	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
 	 * @return website_persistentdocument_page or null
 	 */
 	public function getDisplayPage($document)

@@ -333,9 +333,16 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 	 */
 //	public function getWebsiteId($document)
 //	{
-<{if $model->hasParentModel()}>
 //		return parent::getWebsiteId($document);
-<{/if}>
+//	}
+
+	/**
+	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @return integer[] | null
+	 */
+//	public function getWebsiteIds($document)
+//	{
+//		return parent::getWebsiteIds($document);
 //	}
 
 	/**
@@ -344,9 +351,7 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 	 */
 //	public function getDisplayPage($document)
 //	{
-<{if $model->hasParentModel()}>
 //		return parent::getDisplayPage($document);
-<{/if}>
 //	}
 
 	/**
