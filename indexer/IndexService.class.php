@@ -120,20 +120,23 @@ class indexer_IndexService extends BaseService
 	{
 		if (is_array($this->indexDocuments))
 		{
-			if (Framework::isInfoEnabled())
+			if (count($this->indexDocuments) || count($this->indexBackofficeDocuments))
 			{
-				Framework::info(__METHOD__ . ' IFO: ' . count($this->indexDocuments). ', IBO: '. count($this->indexBackofficeDocuments));
-			}
-			
-			$pp = $this->getPersistentProvider();
-			foreach ($this->indexDocuments as $id => $status) 
-			{
-				$pp->setIndexingDocumentStatus($id, self::INDEXER_MODE_FRONTOFFICE, $status);
-			}
-			
-			foreach ($this->indexBackofficeDocuments as $id => $status) 
-			{
-				$pp->setIndexingDocumentStatus($id, self::INDEXER_MODE_BACKOFFICE, $status);
+				if (Framework::isInfoEnabled())
+				{
+					Framework::info(__METHOD__ . ' IFO: ' . count($this->indexDocuments). ', IBO: '. count($this->indexBackofficeDocuments));
+				}
+				
+				$pp = $this->getPersistentProvider();
+				foreach ($this->indexDocuments as $id => $status) 
+				{
+					$pp->setIndexingDocumentStatus($id, self::INDEXER_MODE_FRONTOFFICE, $status);
+				}
+				
+				foreach ($this->indexBackofficeDocuments as $id => $status) 
+				{
+					$pp->setIndexingDocumentStatus($id, self::INDEXER_MODE_BACKOFFICE, $status);
+				}
 			}
 			$this->indexDocuments = null;
 			$this->indexBackofficeDocuments = null;
