@@ -588,7 +588,8 @@ class f_persistentdocument_DocumentService extends BaseService
 						else
 						{
 							$doc->{'set'.ucfirst($relation->getName())}(null);
-						}				
+						}
+						$doc->save();				
 						$rc->endI18nWork();
 					}
 					catch (Exception $e)
