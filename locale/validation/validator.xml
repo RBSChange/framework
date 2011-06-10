@@ -43,7 +43,7 @@
   <entity id="Email.message">
     <locale lang="fr">le champ "{field}" doit contenir une adresse e-mail valide.</locale>
     <locale lang="en">the field "{field}" must be a valid e-mail address.</locale>
-    <locale lang="de">das Feld "{field}" soll ein gültiges Datum sein (format: {format})</locale>
+    <locale lang="de">Das Feld "{field}" soll eine kültige E-Mail-Adresse sein.</locale>
   </entity>
   <entity id="Email.message.reversed">
     <locale lang="fr">le champ "{field}" ne doit pas contenir une adresse e-mail valide.</locale>
