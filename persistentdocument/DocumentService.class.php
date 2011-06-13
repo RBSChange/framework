@@ -2732,8 +2732,7 @@ class f_persistentdocument_DocumentService extends BaseService
 				$data['properties'] = array(
 				'label' => $document->getLabel(), 
 				'author' => $document->getAuthor(),
-				'creationdate' => $document->getUICreationdate(),
-				);
+				'creationdate' => date_Formatter::toDefaultDateTimeBO($document->getUICreationdate()));
 			}
 
 			if ($allowedSections === null || isset($allowedSections['publication']))
@@ -2753,7 +2752,7 @@ class f_persistentdocument_DocumentService extends BaseService
 					->add(Restrictions::published())->find();
 					if (count($info) > 0)
 					{
-						$data['publication']['workflow'] = date_Converter::convertDateToLocal($info[0]['creationdate']) . " : " .$info[0]['label'];
+						$data['publication']['workflow'] = date_Formatter::toDefaultDateTimeBO(date_Converter::convertDateToLocal($info[0]['creationdate'])) . " : " .$info[0]['label'];
 					}
 				}
 				else if ($status === 'ACTIVE' && $document->hasMeta('ActPubStatInf'.$lang))
@@ -2785,8 +2784,7 @@ class f_persistentdocument_DocumentService extends BaseService
 			if ($allowedSections === null || isset($allowedSections['history']))
 			{
 				$data['history'] = array(
-				'modificationdate' => $document->getUIModificationdate(),
-				);
+				'modificationdate' => date_Formatter::toDefaultDateTimeBO($document->getUIModificationdate()));
 			}
 	
 			if (($allowedSections === null && $model->hasURL()) || isset($allowedSections['urlrewriting']))
