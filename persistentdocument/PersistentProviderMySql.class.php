@@ -879,8 +879,13 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 
 		protected function getPageForUrlQuery()
-		{
+		{	
 			return 'SELECT rule_id, document_id, document_lang, website_id, to_url, redirect_type FROM f_url_rules WHERE from_url = :url AND (website_id = 0 OR website_id = :website_id)';
+		}
+		
+		protected function getPageForUrlQueryWithLang()
+		{
+			return 'SELECT rule_id, document_id, document_lang, website_id, to_url, redirect_type FROM f_url_rules WHERE from_url = :url AND (website_id = 0 OR website_id = :website_id) AND document_lang = :lang';
 		}
 
 		/**

@@ -7,5 +7,5 @@ CREATE TABLE IF NOT EXISTS `f_url_rules` (
   `to_url` varchar(255) DEFAULT NULL,
   `redirect_type` int(11) NOT NULL DEFAULT '200',
   PRIMARY KEY  (`rule_id`),
-  UNIQUE (`website_id`, `from_url`)
+  UNIQUE url (`website_id`, `from_url`, `document_lang`)
 ) TYPE=InnoDB CHARACTER SET utf8 COLLATE utf8_bin;

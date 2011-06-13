@@ -1,6 +1,10 @@
 Version: 3.0.4 (Importé de 3.5.0)
 
-Ajout de la table f_indexing
+== Ajout de la table f_indexing ==
 
 Pour initialiser la table, utiliser la commande:
 change.php indexer import
+
+== Fix #35684 ==
+
+"Url rewriting avec une libellé de document identique dans plusieurs langues"

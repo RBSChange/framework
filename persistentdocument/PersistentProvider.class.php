@@ -3591,16 +3591,26 @@ abstract class f_persistentdocument_PersistentProvider
 	/**
 	 * @param string $url
 	 * @param integer $websiteId
+	 * @param string $lang
 	 * @return array<rule_id, document_id, document_lang, website_id, to_url, redirect_type>
 	 */
-	public function getPageForUrl($url, $websiteId = 0)
+	public function getPageForUrl($url, $websiteId = 0, $lang = null)
 	{
 		if (Framework::isDebugEnabled())
 		{
 			Framework::debug("PersistentProvider::getPageForUrl($url, $websiteId)");
 		}
 
-		$stmt = $this->prepareStatement($this->getPageForUrlQuery());
+		if ($lang === null)
+		{
+			$stmt = $this->prepareStatement($this->getPageForUrlQuery());	
+		}
+		else
+		{
+			$stmt = $this->prepareStatement($this->getPageForUrlQueryWithLang());
+			$stmt->bindValue(':lang', RequestContext::getInstance()->getLang(), PersistentProviderConst::PARAM_STR);
+		}
+		
 		$stmt->bindValue(':url', $url, PersistentProviderConst::PARAM_STR);
 		$stmt->bindValue(':website_id', $websiteId, PersistentProviderConst::PARAM_INT);
 		$this->executeStatement($stmt);
