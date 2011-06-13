@@ -2783,7 +2783,7 @@ class f_persistentdocument_DocumentService extends BaseService
 		$contextlang = $rc->getLang();
 		$usecontextlang = $document->isLangAvailable($contextlang);
 		$lang = $usecontextlang ? $contextlang : $document->getLang();
-			
+		$uiLang = $rc->getUILang();	
 		try
 		{
 			$rc->beginI18nWork($lang);
@@ -2810,7 +2810,7 @@ class f_persistentdocument_DocumentService extends BaseService
 				$data['properties'] = array(
 				'label' => $document->getLabel(), 
 				'author' => $document->getAuthor(),
-				'creationdate' => $document->getUICreationdate(),
+				'creationdate' => date_DateFormat::format($document->getUICreationdate(), null, $uiLang)
 				);
 			}
 
@@ -2842,7 +2842,7 @@ class f_persistentdocument_DocumentService extends BaseService
 
 			if ($allowedSections === null || isset($allowedSections['localization']))
 			{
-				if ($model->isInternationalized())
+				if ($model->isLocalized())
 				{
 					if (isset($data['infos']['correctionofid']))
 					{
@@ -2863,7 +2863,7 @@ class f_persistentdocument_DocumentService extends BaseService
 			if ($allowedSections === null || isset($allowedSections['history']))
 			{
 				$data['history'] = array(
-				'modificationdate' => $document->getUIModificationdate(),
+				'modificationdate' => date_DateFormat::format($document->getUIModificationdate(), null, $uiLang)
 				);
 			}
 	
