@@ -108,14 +108,6 @@ abstract class date_Calendar
 	 */
 	public static function getInstanceFromFormat($dateString, $format, $impl = 'Gregorian')
 	{
-		$formatTokens = preg_split('/[\.\/\- :]/', $format);
-		$dateTokens = preg_split('/[\.\/\- :]/', $dateString);
-		// Date tokens length shouldn't be less than format tokens length
-		if (count($formatTokens) > count($dateTokens))
-		{
-			throw new InvalidDateException($dateString);
-		}
-
 		// Set default values
 		$year   = date('Y');
 		$month  = date('m');
@@ -123,35 +115,49 @@ abstract class date_Calendar
 		$hour   = date('00');
 		$minute = date('00');
 		$second = date('00');
-
-		// Parse tokens and retreive date information (year, month, day, hour, minute, second)
-		foreach ($formatTokens as $i => $token)
+		
+		$fLen = strlen($format);
+		$start = 0;
+		for ($i = 0; $i < $fLen; $i++)
 		{
-			switch ($token)
+			switch ($format[$i])
 			{
 				case 'y' :
 				case 'Y' :
-					$year = str_pad($dateTokens[$i], 4, '0', STR_PAD_LEFT);
+					$year = mb_substr($dateString, $start, 4);
+					$start += 4;
 					break;
 				case 'm' :
-					$month = str_pad($dateTokens[$i], 2, '0', STR_PAD_LEFT);
+					$month = mb_substr($dateString, $start, 2);
+					$start += 2;
 					break;
 				case 'd' :
-					$day = str_pad($dateTokens[$i], 2, '0', STR_PAD_LEFT);
+					$day = mb_substr($dateString, $start, 2);
+					$start += 2;
 					break;
 				case 'h' :
 				case 'H' :
-					$hour = str_pad($dateTokens[$i], 2, '0', STR_PAD_LEFT);
+					$hour = mb_substr($dateString, $start, 2);
+					$start += 2;
 					break;
 				case 'i' :
-					$minute = str_pad($dateTokens[$i], 2, '0', STR_PAD_LEFT);
+					$minute = mb_substr($dateString, $start, 2);
+					$start += 2;
 					break;
 				case 's' :
-					$second = str_pad($dateTokens[$i], 2, '0', STR_PAD_LEFT);
+					$second = mb_substr($dateString, $start, 2);
+					$start += 2;
 					break;
+				default:
+					$start++;
 			}
 		}
-
+		
+		if ($start != mb_strlen($dateString))
+		{
+			throw new InvalidDateException($dateString." $start $fLen");
+		}
+		
 		return self::getInstance("$year-$month-$day $hour:$minute:$second", $impl);
 	}
 
