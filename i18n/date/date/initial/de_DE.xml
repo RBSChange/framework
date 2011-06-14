@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<i18n baseKey="f.date.date.abbr" lcid="de_DE">
+	<key id="monday">M</key>
+	<key id="tuesday">D</key>
+	<key id="wednesday">M</key>
+	<key id="thursday">D</key>
+	<key id="friday">F</key>
+	<key id="saturday">S</key>
+	<key id="sunday">S</key>
+</i18n>
