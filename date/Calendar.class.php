@@ -94,20 +94,34 @@ abstract class date_Calendar
 	/**
 	 * Returns a date_Calendar instance initialized from a given $dateString
 	 * that is in the given $format.
-	 * $format is a string that may contain: Y, y, m, d, D, i, s.
 	 *
 	 * @param String $dateString
-	 * @param String $format
+	 * @param String $format a string that contains Y, y, m, d, D, h, H, i, s and uses '.', '/', '-', ' ', ':' for separator. If no separator is used, it acts like getInstanceFromPhpFormat 
 	 * @param String $impl
 	 *
 	 * @return date_Calendar
 	 *
-	 * @example date_Calendar::getInstanceFromFormat('10/12/1979', 'd/m/Y')
+	 * @example date_Calendar::getInstanceFromFormat('01/07/1979', 'd/m/Y')
+	 * @example date_Calendar::getInstanceFromFormat('1/7/1979', 'd/m/Y')
 	 *
 	 * @throws InvalidDateException
 	 */
 	public static function getInstanceFromFormat($dateString, $format, $impl = 'Gregorian')
 	{
+		$formatTokens = preg_split('/[\.\/\- :]/', $format);
+		$dateTokens = preg_split('/[\.\/\- :]/', $dateString);
+		
+		// Date tokens length shouldn't be less than format tokens length
+		if (count($formatTokens) > count($dateTokens))
+		{
+			throw new InvalidDateException($dateString);
+		}
+		
+		if (count($formatTokens) == 1)
+		{
+			return self::getInstanceFromPhpFormat($dateString, $format, $impl);
+		}
+
 		// Set default values
 		$year   = date('Y');
 		$month  = date('m');
@@ -115,17 +129,87 @@ abstract class date_Calendar
 		$hour   = date('00');
 		$minute = date('00');
 		$second = date('00');
+
+		// Parse tokens and retreive date information (year, month, day, hour, minute, second)
+		foreach ($formatTokens as $i => $token)
+		{
+			switch ($token)
+			{
+				case 'y' :
+				case 'Y' :
+					$year = str_pad($dateTokens[$i], 4, '0', STR_PAD_LEFT);
+					break;
+				case 'm' :
+					$month = str_pad($dateTokens[$i], 2, '0', STR_PAD_LEFT);
+					break;
+				case 'd' :
+					$day = str_pad($dateTokens[$i], 2, '0', STR_PAD_LEFT);
+					break;
+				case 'h' :
+				case 'H' :
+					$hour = str_pad($dateTokens[$i], 2, '0', STR_PAD_LEFT);
+					break;
+				case 'i' :
+					$minute = str_pad($dateTokens[$i], 2, '0', STR_PAD_LEFT);
+					break;
+				case 's' :
+					$second = str_pad($dateTokens[$i], 2, '0', STR_PAD_LEFT);
+					break;
+			}
+		}
+
+		return self::getInstance("$year-$month-$day $hour:$minute:$second", $impl);
+	}
+	
+	/**
+	 * Returns a date_Calendar instance initialized from a given $dateString
+	 * that is in the given $format.
+	 *
+	 * @param String $dateString
+	 * @param String $format a PHP date() function format. Only 'Y', 'y', 'm', 'd', 'D', 'H', 'h', 'i', 's' and 'a' are supported
+	 * @link http://php.net/manual/en/function.date.php
+	 * @param String $impl
+	 *
+	 * @return date_Calendar
+	 *
+	 * @example date_Calendar::getInstanceFromPhpFormat('01/12/1979', 'd/m/Y')
+	 * @example date_Calendar::getInstanceFromPhpFormat('01121979', 'dmY')
+	 * @example date_Calendar::getInstanceFromPhpFormat('01/1279 05:17:13 pm', 'd/my h:i:s a')
+	 *
+	 * @throws InvalidDateException
+	 */
+	public static function getInstanceFromPhpFormat($dateString, $format, $impl = 'Gregorian')
+	{
+		$year   = null;
+		$month  = null;
+		$day    = null;
+		$hour   = null;
+		$minute = null;
+		$second = null;
+		$am = null;
+		$useShortHour = false;
 		
-		$fLen = strlen($format);
+		$fLen = mb_strlen($format);
 		$start = 0;
 		for ($i = 0; $i < $fLen; $i++)
 		{
 			switch ($format[$i])
 			{
-				case 'y' :
 				case 'Y' :
 					$year = mb_substr($dateString, $start, 4);
 					$start += 4;
+					break;
+				case 'y' :
+					$year = mb_substr($dateString, $start, 2);
+					if ($year <= 69)
+					{
+						$year += 2000;
+					}
+					else
+					{
+						$year += 1900;
+					}
+					$start += 2;
 					break;
 				case 'm' :
 					$month = mb_substr($dateString, $start, 2);
@@ -135,7 +219,8 @@ abstract class date_Calendar
 					$day = mb_substr($dateString, $start, 2);
 					$start += 2;
 					break;
-				case 'h' :
+				case 'h':
+					$useShortHour = true;
 				case 'H' :
 					$hour = mb_substr($dateString, $start, 2);
 					$start += 2;
@@ -148,14 +233,55 @@ abstract class date_Calendar
 					$second = mb_substr($dateString, $start, 2);
 					$start += 2;
 					break;
+				case 'a':
+				case 'A':
+					$am = mb_strtolower(mb_substr($dateString, $start, 2), "UTF-8") == "am";
+					$start += 2;
+					break;
 				default:
 					$start++;
 			}
 		}
 		
+		if ($year === null)
+		{
+			$year = date('Y');
+		}
+		if ($month === null)
+		{
+			$month = date('m');
+		}
+		if ($day === null)
+		{
+			$day = date('d');
+		}
+		if ($hour === null)
+		{
+			$hour = '00';
+		}
+		else if ($useShortHour)
+		{
+			if ($am === null)
+			{
+				throw new InvalidDateException($dateString);
+			}
+			if (!$am)
+			{
+				$hour += 12;
+			}
+		}
+		if ($minute === null)
+		{
+			$minute = '00';
+		}
+		if ($second === null)
+		{
+			$second = '00';
+		}
+		
 		if ($start != mb_strlen($dateString))
 		{
-			throw new InvalidDateException($dateString." $start $fLen");
+			throw new InvalidDateException($dateString);
 		}
 		
 		return self::getInstance("$year-$month-$day $hour:$minute:$second", $impl);
