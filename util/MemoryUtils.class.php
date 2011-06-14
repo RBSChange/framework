@@ -44,6 +44,11 @@ abstract class f_util_MemoryUtils
 
     public static function getLoad($asPercentage = false)
     {
+    	$limit = self::getLimit();
+    	if ($limit == -1)
+    	{
+    		return -1;
+    	}
 	$load = self::getUsage() / self::getLimit();
 	if ($asPercentage)
 	{
@@ -54,7 +59,12 @@ abstract class f_util_MemoryUtils
 
     public static function hasExceeded($threshold, $asPercentage = false)
     {
-	return (self::getLoad($asPercentage) > $threshold);
+    	$load = self::getLoad($asPercentage);
+    	if ($load == -1)
+    	{
+    		return false;
+    	}
+	return $load > $threshold;
     }
 
     public static function seeGlobalMemoryConsumption()
