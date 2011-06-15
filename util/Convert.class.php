@@ -68,6 +68,7 @@ abstract class f_util_Convert
 		}
 		if (is_numeric($value))
 		{
+			$value = preg_replace('/^0*/', '', $value);
 			$intVal = intval($value);
 			if (is_string($value) && strval($intVal) === $value)
 			{
