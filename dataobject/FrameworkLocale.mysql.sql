@@ -8,4 +8,4 @@ CREATE TABLE IF NOT EXISTS f_locale (
   overridable int,
   useredited INT( 11 ) NULL, 
   PRIMARY KEY (id, lang)
-) TYPE=MyISAM CHARACTER SET utf8 COLLATE utf8_bin;
+) ENGINE=MyISAM CHARACTER SET utf8 COLLATE utf8_bin;

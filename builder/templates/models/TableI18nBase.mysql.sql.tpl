@@ -5,4 +5,4 @@ CREATE TABLE IF NOT EXISTS `<{$model->getTableName()}>_i18n` (
 	<{$property->generateSql('mysql', true)}>,
 <{/foreach}>
 PRIMARY KEY  (`document_id`, `lang_i18n`)
-) TYPE=InnoDB CHARACTER SET utf8 COLLATE utf8_bin;
+) ENGINE=InnoDB CHARACTER SET utf8 COLLATE utf8_bin;

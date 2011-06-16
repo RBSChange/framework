@@ -5,4 +5,4 @@ CREATE TABLE IF NOT EXISTS `f_data_cache` (
 `ttl` INT(11) ,
 `is_valid` tinyint(1) NOT NULL DEFAULT '0' ,
 PRIMARY KEY ( `cache_key` )
-) TYPE=MyISAM CHARACTER SET utf8 COLLATE utf8_bin;
+) ENGINE=MyISAM CHARACTER SET utf8 COLLATE utf8_bin;
