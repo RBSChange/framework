@@ -28,6 +28,16 @@ class indexer_IndexService extends BaseService
 	private $manager = null;
 	
 	/**
+	 * @var indexer_SolrManager
+	 */
+	private $managerBO = null;
+	
+	/**
+	 * @var indexer_SolrManager
+	 */
+	private $managerFO = null;
+	
+	/**
 	 * @var integer
 	 */
 	private $indexerMode = null;
@@ -55,10 +65,26 @@ class indexer_IndexService extends BaseService
 					$solrURL .= '/';
 				}
 				$newInstance->manager = new indexer_SolrManager($solrURL);
+				$newInstance->managerFO = $newInstance->manager;
+				if (defined('SOLR_INDEXER_BO_URL'))
+				{
+					$solrBOURL = SOLR_INDEXER_BO_URL;
+					if (!f_util_StringUtils::endsWith($solrBOURL, '/'))
+					{
+						$solrBOURL .= '/';
+					}
+					$newInstance->managerBO = new indexer_SolrManager($solrBOURL);
+				}
+				else
+				{
+					$newInstance->managerBO = $newInstance->manager;
+				}
 			}
 			else
 			{
 				$newInstance->manager = new indexer_FakeSolrManager();
+				$newInstance->managerBO = $newInstance->manager;
+				$newInstance->managerFO = $newInstance->manager;
 			}
 			self::$instance = $newInstance;
 		}
@@ -156,7 +182,11 @@ class indexer_IndexService extends BaseService
 	{
 		if (!is_null($this->manager) && is_bool($bool))
 		{
-			$this->manager->setAutoCommit($bool);
+			$this->managerFO->setAutoCommit($bool);
+			if ($this->managerBO !== $this->managerFO)
+			{
+				$this->managerBO->setAutoCommit($bool);
+			}
 		}
 	}
 	
@@ -286,9 +316,6 @@ class indexer_IndexService extends BaseService
 				$this->beginBackIndexerMode();
 				$this->manager->clearIndexQuery();
 				$this->manager->commit();
-				
-
-				
 				$this->endIndexerMode();
 			}
 			catch (Exception $e)
@@ -350,13 +377,16 @@ class indexer_IndexService extends BaseService
 		{
 			try
 			{
-				$this->beginBackIndexerMode();
-				$this->manager->optimizeIndexQuery();
-				$this->endIndexerMode();
-				
 				$this->beginFrontIndexerMode();
 				$this->manager->optimizeIndexQuery();
 				$this->endIndexerMode();
+				
+				if ($this->managerBO !== $this->managerFO)
+				{
+					$this->beginBackIndexerMode();
+					$this->manager->optimizeIndexQuery();
+					$this->endIndexerMode();
+				}
 			}
 			catch (Exception $e)
 			{
@@ -773,8 +803,8 @@ class indexer_IndexService extends BaseService
 			}
 		}
 		
-		$this->getTransactionManager()->commit();
 		$this->manager->commit();
+		$this->getTransactionManager()->commit();
 		
 		$this->endIndexerMode();
 		return count($ids);
@@ -808,9 +838,8 @@ class indexer_IndexService extends BaseService
 					$this->getPersistentProvider()->deleteIndexingDocumentStatus($documentId, $indexingMode);
 				}
 			}
-			$this->endIndexerMode();
-			$this->getTransactionManager()->commit();
 			$this->manager->commit();
+			$this->getTransactionManager()->commit();
 		}
 		catch (Exception $e)
 		{
@@ -942,6 +971,8 @@ class indexer_IndexService extends BaseService
 			throw new IllegalArgumentException('$indexerMode has to be either self::INDEXER_MODE_BACKOFFICE or self::INDEXER_MODE_FRONTOFFICE');
 		}
 		$this->indexerMode = $indexerMode;
+		
+		$this->manager = ($indexerMode == self::INDEXER_MODE_FRONTOFFICE) ? $this->managerFO : $this->managerBO;
 	}
 	
 	/**
@@ -952,6 +983,7 @@ class indexer_IndexService extends BaseService
 	protected function endIndexerMode($e = null)
 	{
 		$this->indexerMode = self::INDEXER_MODE_FRONTOFFICE;
+		$this->manager = $this->managerFO;
 		if (null !== $e)
 		{
 			throw $e;
@@ -997,7 +1029,7 @@ class indexer_IndexService extends BaseService
 			return;
 		}
 		
-		if (is_array($this->indexDocuments))
+		if (is_array($this->indexDocuments)) // If already in transaction
 		{
 			if ($this->getIndexerMode() == self::BACKOFFICE_SUFFIX)
 			{
