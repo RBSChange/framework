@@ -612,21 +612,33 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 	public function createCriteria($relationName, $documentModelName = null)
 	{
 		$c = new f_persistentdocument_criteria_QueryImpl();
-		if (is_null($this->model))
+		$subModel = null;
+		if ($this->model === null)
 		{
 			throw new Exception('Can not create criteria without model assigned (see setDocumentModelName())');
 		}
 		$property = $this->model->getProperty($relationName);
-		if (is_null($property))
+		if ($property === null)
 		{
 			$property = $this->model->getInverseProperty($relationName);
 			$c->inverseQuery = true;
-			if (is_null($property))
+			
+		}
+		
+		if ($property === null && $documentModelName !== null)
+		{
+			$subModel = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($documentModelName);
+			$property = $subModel->getProperty($relationName);
+			if ($property !== null && !$this->model->isModelCompatible($property->getType()))
 			{
-				throw new Exception('Can not create criteria on unknown property '.$relationName);
+				throw new Exception($documentModelName . ' Is not compatible with '. $property->getType() . ' for property ' . $relationName);	
 			}
 		}
 		
+		if ($property === null)
+		{
+			throw new Exception('Can not create criteria on unknown property '.$relationName);
+		}
 		if (!$property->isDocument())
 		{
 			throw new Exception('Can not create criteria on scalare property '.$relationName);
@@ -636,13 +648,10 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 		{
 			$documentModelName = $property->getType();
 		}
-		else
-		{
-			if (!f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($documentModelName)
+		else if ($subModel === null && !f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($documentModelName)
 				->isModelCompatible($property->getType()))
-			{
-				throw new Exception($documentModelName . ' Is not compatible with '. $property->getType() . ' for property ' . $relationName);	
-			}
+		{
+			throw new Exception($documentModelName . ' Is not compatible with '. $property->getType() . ' for property ' . $relationName);	
 		}
 		$c->setDocumentModelName($documentModelName);
 		$c->setParentQuery($this);
