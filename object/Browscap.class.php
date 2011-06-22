@@ -260,8 +260,8 @@ class Browscap
 		$user_agents_keys 	= array_flip($this->_userAgents);
 		$properties_keys	= array_flip($this->_properties);
 
-		$search				= array('\*', '\?');
-    	$replace			= array('.*', '.');
+		$search				= array('\*', '\?', '\|');
+    	$replace			= array('.*', '.', '|');
 
 		foreach ($this->_userAgents as $user_agent) {
 			$pattern = preg_quote($user_agent, self::REGEX_DELIMITER);

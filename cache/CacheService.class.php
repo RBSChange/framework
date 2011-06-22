@@ -86,6 +86,7 @@ class CacheService extends BaseService
 		$this->clearJavascriptCache();
 		$this->clearMediaformatCache();
 		$this->clearFrontofficeScriptsCache();
+		$this->clearBrowscapCache();
 		$this->incrementWebappCacheVersion();
 	}
 
@@ -106,6 +107,13 @@ class CacheService extends BaseService
 		}
 		$this->clearTemplateCache();
 		$this->clearSimpleCache();
+	}
+	
+	
+	public function clearBrowscapCache()
+	{
+		$browscap = new Browscap(AG_CACHE_DIR);
+		$browscap->updateCache();
 	}
 	
 	/**
