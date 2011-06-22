@@ -378,6 +378,46 @@ class c_ChangeBootStrap
 		return $this->remoteRepositories;
 	}
 	
+	private $instanceProjectKey = null;
+	
+	/**
+	 * @return string
+	 */
+	public function getInstanceProjectKey()
+	{
+		if ($this->instanceProjectKey === null)
+		{
+			$license = $this->getProperties()->getProperty("PROJECT_LICENSE");
+			if (empty($license)) {$license = "OS";}
+			$version = '-'; $profile = '-'; $pId = '-';  $fqdn='-';
+			$versionPath = $this->wd . '/framework/change.xml';
+			if (is_readable($versionPath))
+			{
+				$changeXMLDoc = f_util_DOMUtils::fromPath($versionPath);
+				$changeXMLDoc->registerNamespace("cc", "http://www.rbs.fr/schema/change-component/1.0");
+				$node = $changeXMLDoc->findUnique("cc:version");
+				$version = $node ? $node->textContent : '-';
+			}
+			
+			$profilePath = $this->wd . '/profile';
+			if (is_readable($profilePath))
+			{
+				$profile = trim(file_get_contents($profilePath));
+				$configPath = $this->wd . '/config/project.'. $profile .'.xml';
+				if (is_readable($configPath))
+				{
+					$changeXMLDoc = f_util_DOMUtils::fromPath($configPath);
+					$pIdNode = $changeXMLDoc->findUnique('defines/define[@name="PROJECT_ID"]');
+					$pId = $pIdNode ? $pIdNode->textContent : '-';
+					$fqdnNode = $changeXMLDoc->findUnique('config/general/entry[@name="server-fqdn"]');
+					$fqdn = $fqdnNode ? $fqdnNode->textContent : '-';
+				}
+			}
+			$this->instanceProjectKey = 'Change/' . $version . ';License/' . $license. ';Profile/' . $profile . ';PId/' . $pId. ';FQDN/'. $fqdn;
+		}
+		return $this->instanceProjectKey;
+	}
+	
 	/**
 	 * @param String $path
 	 * @return String
@@ -897,7 +937,7 @@ class c_ChangeBootStrap
 		{
 			return "curl_init error for url $url.";
 		}
-		curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 5.1; pl; rv:1.9) Gecko/2008052906 Firefox/3.0');
+		curl_setopt($ch, CURLOPT_USERAGENT, $this->getInstanceProjectKey());
 		curl_setopt($ch, CURLOPT_AUTOREFERER, true);
 		curl_setopt($ch, CURLOPT_COOKIEFILE, '');
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
