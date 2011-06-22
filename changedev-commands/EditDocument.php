@@ -208,8 +208,11 @@ class commands_EditDocument extends commands_AbstractChangedevCommand
 			$archivePath = $archiveDir."/$documentName-$revision.xml";
 			f_util_FileUtils::cp($path, $archivePath);
 		}
+		else
+		{
+			$archivePath = null;
+		}
 		f_util_DOMUtils::save($doc, $path);
-
 		return $archivePath;
 	}
 
@@ -527,6 +530,10 @@ $compileSchema");
 		{
 			$this->getParent()->executeCommand("compile-db-schema");
 			$compileSchema = '$this->execChangeCommand(\'compile-db-schema\');' . "\n";
+		}
+		else
+		{
+			$compileSchema = '';
 		}
 		
 		$newPath = "modules/$moduleName/persistentdocument/$documentName.xml";
