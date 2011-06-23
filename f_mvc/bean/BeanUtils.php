@@ -441,13 +441,15 @@ class BeanUtils
 	private static function getDirectProperty($bean, $name, ReflectionClass $class = null)
 	{
 		$model = self::getBeanModel($bean);
-		if (!$model->hasBeanProperty($name))
+		if ($model->hasBeanProperty($name))
 		{
-			throw new Exception("no property $name in bean!");
+			$beanPropertyInfo = $model->getBeanPropertyInfo($name);
+			$getterName = $beanPropertyInfo->getGetterName();
 		}
-
-		$beanPropertyInfo = $model->getBeanPropertyInfo($name);
-		$getterName = $beanPropertyInfo->getGetterName();
+		else
+		{
+			$getterName = 'get' . ucfirst($name);
+		}
 
 		$target = null;
 		if ($class === null)
@@ -510,27 +512,30 @@ class BeanUtils
 	private static function setDirectProperty($bean, $name, $value, ReflectionClass $class = null)
 	{
 		$model = self::getBeanModel($bean);
-		if (!$model->hasBeanProperty($name))
+		if ($model->hasBeanProperty($name))
 		{
-			return true;
+			$beanPropertyInfo = $model->getBeanPropertyInfo($name);
+			$converter = $beanPropertyInfo->getConverter();
+			if ($converter !== null)
+			{
+				if (is_string($value) && f_util_StringUtils::isEmpty($value))
+				{
+					$value = ($beanPropertyInfo->getMaxOccurs() != 1) ? array() : null;
+				}
+				elseif ($converter->isValidRequestValue($value))
+				{
+					$value = $converter->convertFromRequestToBeanValue($value);
+				}
+				else
+				{
+					return false;
+				}
+			}
+			$setterName = $beanPropertyInfo->getSetterName();
 		}
-
-		$beanPropertyInfo = $model->getBeanPropertyInfo($name);
-		$converter = $beanPropertyInfo->getConverter();
-		if ($converter !== null)
+		else
 		{
-			if (is_string($value) && f_util_StringUtils::isEmpty($value))
-			{
-				$value = ($beanPropertyInfo->getMaxOccurs() != 1) ? array() : null;
-			}
-			elseif ($converter->isValidRequestValue($value))
-			{
-				$value = $converter->convertFromRequestToBeanValue($value);
-			}
-			else
-			{
-				return false;
-			}
+			$setterName = 'set' . ucfirst($name);
 		}
 
 		if ($bean instanceof f_mvc_DynBean)
@@ -542,7 +547,6 @@ class BeanUtils
 			$setterTarget = $bean;
 		}
 
-		$setterName = $beanPropertyInfo->getSetterName();
 		if ($setterName === null)
 		{
 			$setterTarget->{$name} = $value;

@@ -16,7 +16,7 @@ class commands_<{$module}>_<{$name}> extends commands_AbstractChange<{$type}>Com
 	 * @return String
 	 * @example "<moduleName> <name>"
 	 */
-	function getUsage()
+	public function getUsage()
 	{
 		return "<describe usage here>";
 	}
@@ -25,7 +25,7 @@ class commands_<{$module}>_<{$name}> extends commands_AbstractChange<{$type}>Com
 	 * @return String
 	 * @example "initialize a document"
 	 */
-	function getDescription()
+	public function getDescription()
 	{
 		return "<describe your command here>";
 	}
@@ -37,7 +37,7 @@ class commands_<{$module}>_<{$name}> extends commands_AbstractChange<{$type}>Com
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
 	 * @return String[] or null
 	 */
-//	function getParameters($completeParamCount, $params, $options, $current)
+//	public function getParameters($completeParamCount, $params, $options, $current)
 //	{
 //		$components = array();
 //		
@@ -58,7 +58,7 @@ class commands_<{$module}>_<{$name}> extends commands_AbstractChange<{$type}>Com
 	/**
 	 * @return String[]
 	 */
-//	function getOptions()
+//	public function getOptions()
 //	{
 //	}
 
@@ -67,7 +67,7 @@ class commands_<{$module}>_<{$name}> extends commands_AbstractChange<{$type}>Com
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
 	 * @see c_ChangescriptCommand::parseArgs($args)
 	 */
-	function _execute($params, $options)
+	public function _execute($params, $options)
 	{
 		$this->message("== <{$name}> ==");
 
