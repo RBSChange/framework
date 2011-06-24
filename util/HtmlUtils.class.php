@@ -175,11 +175,11 @@ abstract class f_util_HtmlUtils
 			// FIX #583 - If we have a popup link, make the title RGAA compatible
 			if (isset($attributes['title']))
 			{
-				$attributes['title'] .= ' ' . f_Locale::translate('&framework.util.htmlutils.popupTitleAddition;');
+				$attributes['title'] .= ' ' . LocaleService::getInstance()->transFO('f.util.htmlutils.popuptitleaddition', array('attr'));
 			}
 			else
 			{
-				$attributes['title'] =  f_Locale::translate('&framework.util.htmlutils.popupTitleAddition;');
+				$attributes['title'] = LocaleService::getInstance()->transFO('f.util.htmlutils.popuptitleaddition', array('attr'));
 			}
 		}
 
