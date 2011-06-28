@@ -72,6 +72,8 @@
 		<define name="TRACKER_MODE">mysql</define>
 		<define name="DISABLE_DATACACHE">false</define>
 		
+		<define name="CHANGE_COMMAND">framework/bin/change.php</define>
+		
 		<!-- DEPRECATED -->
 		<define name="AG_ACTION_ACCESSOR">action</define>
 		<define name="AG_MODULE_ACCESSOR">module</define>
