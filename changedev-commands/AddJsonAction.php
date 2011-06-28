@@ -66,6 +66,12 @@ class commands_AddJsonAction extends commands_AbstractChangedevCommand
 			$this->warnMessage('Action "'.$actionName.'" already exists in module '.$moduleName.'".');
 		}
 
+		$dir = 'modules/'.$moduleName.'/actions/';
+		if (!is_dir($dir))
+		{
+			f_util_FileUtils::mkdir($dir);
+		}
+		
 		$actionFile = 'modules/'.$moduleName.'/actions/'.$actionName.'Action.class.php';
 		$moduleGenerator = new builder_ModuleGenerator($moduleName);
 		$moduleGenerator->setAuthor($this->getAuthor());
