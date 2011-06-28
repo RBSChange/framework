@@ -61,6 +61,17 @@ class import_ScriptReader extends BaseService
 		{
 			throw new Exception("Could not find any script named $scriptName for module $moduleName");
 		}
+		
+		// Set default values of tempalte and templateHome attributes.
+		if (!isset($attributes['template']))
+		{
+			$attributes['template'] = Framework::getConfigurationValue('modules/website/sample/defaultPageTemplate');
+		}
+		if (!isset($attributes['templateHome']))
+		{
+			$attributes['templateHome'] = Framework::getConfigurationValue('modules/website/sample/defaultHomeTemplate');
+		}
+		
 		$this->execute($path, $attributes);
 	}
 
