@@ -79,7 +79,7 @@ class commands_CheckHotfix extends commands_AbstractChangeCommand
 		$this->message("You should apply the following hotfixes:");
 		foreach ($hotfixes as $hotfixNumber => $hotfixName)
 		{
-			$this->message(" apply-hotfix ".$hotfixName);
+			$this->message('  ' . CHANGE_COMMAND . " apply-hotfix " . $hotfixName);
 		}
 	}
 }

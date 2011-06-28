@@ -256,7 +256,7 @@ class commands_EditDocument extends commands_AbstractChangedevCommand
 		$this->message("Executed SQL:\n".join("\n", $sqls)."
 
 You may create a new patch to handle this modification.
-Use 'change.php create-patch $moduleName' to initiate the patch and copy-paste the following:
+Use '" . CHANGE_COMMAND . " create-patch $moduleName' to initiate the patch and copy-paste the following:
 
 \$archivePath = f_util_FileUtils::buildWebeditPath('$archivePath');
 \$oldModel = generator_PersistentModel::loadModelFromString(f_util_FileUtils::read(\$archivePath), '$moduleName', '$documentName');
@@ -310,7 +310,7 @@ f_persistentdocument_PersistentProvider::getInstance()->delProperty('$moduleName
 		$this->message("Executed SQL:\n".join("\n", $sqls)."
 
 You may create a new patch to handle this modification.
-Use 'change.php create-patch $moduleName' to initiate the patch and copy-paste the following:
+Use '" . CHANGE_COMMAND . " create-patch $moduleName' to initiate the patch and copy-paste the following:
 
 \$archivePath = f_util_FileUtils::buildWebeditPath('$archivePath');
 \$newPath = f_util_FileUtils::buildWebeditPath('$newPath');
@@ -540,7 +540,7 @@ $compileSchema");
 		$this->message("Executed SQL:\n".join("\n", $sqls)."
 
 You may create a new patch to handle this modification.
-Use 'change.php create-patch $moduleName' to initiate the patch and copy-paste the following:
+Use '" . CHANGE_COMMAND . " create-patch $moduleName' to initiate the patch and copy-paste the following:
 
 \$newPath = f_util_FileUtils::buildWebeditPath('$newPath');
 \$newModel = generator_PersistentModel::loadModelFromString(f_util_FileUtils::read(\$newPath), '$moduleName', '$documentName');

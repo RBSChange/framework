@@ -43,7 +43,7 @@ class commands_ApplyHotfix extends commands_CheckHotfix
 				$module = str_replace('modules_', '', $packageName);
 				foreach ($patchList as $patchName)
 				{
-					$errStr .= '  change.php apply-patch ' . $module . ' ' . $patchName."\n";
+					$errStr .= '  ' . CHANGE_COMMAND . ' apply-patch ' . $module . ' ' . $patchName."\n";
 				}
 			}
 			return $this->quitError($errStr);
