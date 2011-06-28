@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <perspective>
 	<models>
-<{if $useFolder}>
 		<model name="modules_generic/rootfolder">
 			<children>	
 				<child model="modules_generic/folder" />
@@ -37,54 +36,6 @@
 				<contextaction name="openFolder" />
 			</contextactions>
 		</model>
-<{elseif $useTopic}>	
-		<model name="modules_generic/rootfolder">
-			<children>
-				<child model="modules_website/websitetopicsfolder" />
-			</children>
-			<drops>
-				<drop model="modules_website/websitetopicsfolder" action="move" />
-			</drops>
-			<contextactions>
-				<contextaction name="edit" />
-				<contextaction name="addTopic" />
-				<contextaction name="openTreeNodeOrder" />		
-			</contextactions>
-		</model>
-		<model name="modules_website/websitetopicsfolder">
-			<children>
-				<child model="modules_website/topic" from="topics" />
-				<child model="modules_website/systemtopic" from="topics" />
-			</children>
-			<columns>
-				<column name="pathOf" label="PathOf" flex="3" />
-			</columns>
-			<contextactions>
-				<contextaction name="openFolder" />
-				<contextaction name="openTopicOrder"/>
-			</contextactions>
-		</model>
-		<model name="modules_website/topic">
-			<children>
-				<child model="modules_website/topic" />
-				<child model="modules_website/systemtopic" />
-			</children>
-			<contextactions>
-				<contextaction name="openFolder" />
-				<contextaction name="edit" />
-			</contextactions>
-		</model>
-		<model name="modules_website/systemtopic">
-			<children>
-				<child model="modules_website/topic" />
-				<child model="modules_website/systemtopic" />
-			</children>
-			<contextactions>
-				<contextaction name="openFolder" />
-				<contextaction name="edit" />
-			</contextactions>
-		</model>			
-<{/if}>	
 	</models>
 	<toolbar>
 		<toolbarbutton name="edit" />
@@ -105,11 +56,6 @@
 		<action name="deactivated" permission="Deactivated" icon="deactivated" label="&amp;modules.uixul.bo.actions.Deactivate;" />
 		<action name="reactivate" permission="ReActivate" icon="reactivate" label="&amp;modules.uixul.bo.actions.ReActivate;" />
 		<action name="openTreeNodeOrder" single="true" permission="Order" icon="sort" label="&amp;modules.uixul.bo.actions.Set-children-order;" />
-<{if $useTopic}>
-		<action name="addTopic" single="true" permission="Update_rootfolder" icon="add-topic" label="&amp;modules.uixul.bo.actions.AddTopic;" />
-		<action name="openTopicOrder" single="true" permission="Order" icon="sort" label="&amp;modules.uixul.bo.actions.Set-children-order;" />
-<{elseif $useFolder}>
 		<action name="createFolder" single="true" permission="Insert_folder" icon="create-folder" label="&amp;modules.uixul.bo.actions.Create-folder;" />
-<{/if}>
 	</actions>
 </perspective>

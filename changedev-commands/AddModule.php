@@ -4,18 +4,18 @@ class commands_AddModule extends commands_AbstractChangedevCommand
 	/**
 	 * @return String
 	 */
-	function getUsage()
+	public function getUsage()
 	{
-		$usage = "<moduleName> <topic|folder> [icon]";
+		$usage = "<moduleName> [icon]";
 		return $usage;
 	}
 
 	/**
 	 * @return String
 	 */
-	function getDescription()
+	public function getDescription()
 	{
-		return "add an empty module to your project, topic or folder based.";
+		return "add an empty module to your project.";
 	}
 
 	/**
@@ -24,16 +24,7 @@ class commands_AddModule extends commands_AbstractChangedevCommand
 	 */
 	protected function validateArgs($params, $options)
 	{
-		return count($params) >= 2 && ($params[1] == "topic" || $params[1] == "folder");
-	}
-
-	function getParameters($completeParamCount, $params, $options, $current)
-	{
-		if ($completeParamCount == 1)
-		{
-			return array("topic", "folder");
-		}
-		return null;
+		return count($params) >= 1;
 	}
 
 	/**
@@ -46,8 +37,7 @@ class commands_AddModule extends commands_AbstractChangedevCommand
 		$this->message("== Add module ==");
 
 		$moduleName = $params[0];
-		$useTopic = ($params[1] == "topic");
-		$icon = isset($params[2]) ? $params[2] : "package";
+		$icon = isset($params[1]) ? $params[1] : "package";
 		
 		$this->loadFramework();
 		$modulePath = f_util_FileUtils::buildWebeditPath("modules", $moduleName);
@@ -57,15 +47,12 @@ class commands_AddModule extends commands_AbstractChangedevCommand
 		}
 		f_util_FileUtils::mkdir($modulePath);
 
-		// TODO: refactor with modulebuilder_ModuleService::generateModule($module)
-
 		// Make auto generated file
 		$moduleGenerator = new builder_ModuleGenerator($moduleName);
 		$moduleGenerator->setAuthor($this->getAuthor());
 		$moduleGenerator->setVersion(FRAMEWORK_VERSION);
 		$moduleGenerator->setTitle(ucfirst($moduleName) . ' module');
 		$moduleGenerator->setIcon($icon);
-		$moduleGenerator->setUseTopic($useTopic);
 		$moduleGenerator->generateAllFile();
 
 		// Generate locale for new module

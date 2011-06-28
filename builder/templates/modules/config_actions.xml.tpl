@@ -19,12 +19,8 @@
 		]]></body>
 	</action>
 	-->
-<{if $useFolder}>
 	<action name="createFolder">
 		<parameter name="listWidget" />
-		<body><![CDATA[
-			this.createDocumentEditor('modules_<{$name}>_folder', listWidget.getSelectedItems()[0].id);
-		]]></body>
+		<body><![CDATA[this.createDocumentEditor('modules_<{$name}>_folder', listWidget.getSelectedItems()[0].id);]]></body>
 	</action>
-<{/if}>
 </actions>

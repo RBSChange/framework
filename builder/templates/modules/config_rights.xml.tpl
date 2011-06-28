@@ -2,11 +2,7 @@
 <rights>
 	<actions>
 		<document name="rootfolder" />
-<{if $useTopic}>
-		<document name="topic" />
-<{elseif $useFolder}>
 		<document name="folder" />
-<{/if}>
 	</actions>
 	<roles>	
 		<role name="Admin">
@@ -15,9 +11,6 @@
 			<permission name="SavePermissions.*" />
 			<permission name="GetPreferencesDocument" />
 			<permission name="EditLocale" />
-<{if $useTopic}>
-			<permission name="Update.rootfolder" />
-<{/if}>
 		</role>
 		<role name="Writer" extend="Guest">
 			<permission name="Order" />
@@ -28,13 +21,7 @@
 			<permission name="Delete.*" />
 			<permission name="Insert.*" />
 			<permission name="Move.*" />
-<{if $useTopic}>
-			<!-- The rootfolder can be edited only by admin so here you need 
-				to add the permission for each other document explicitly. -->
-			<!-- permission name="Update.xxx" /-->
-<{else}>
 			<permission name="Update.*" />
-<{/if}>
 		</role>
 		<role name="Translator" extend="Guest">
 			<permission name="Load.*" />

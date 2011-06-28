@@ -39,21 +39,6 @@ class builder_ModuleGenerator
 	 * @var string
 	 */
 	private $icon = null;
-
-	/**
-	 * Deprecated: use useTopic or useFolder instead.
-	 * Use frontoffice. Boolean true => use topic, false => use folder
-	 * @var string
-	 */
-	private $front = null;
-	/**
-	 * @var Boolean
-	 */
-	private $useTopic = null;
-	/**
-	 * @var Boolean
-	 */
-	private $useFolder = null;
 	
 	/**
 	 * Category (emplacement) of the module in the menu bar
@@ -119,19 +104,6 @@ class builder_ModuleGenerator
 		$this->icon = $value;
 		return $this;
 	}
-
-	/**
-	 * Front setter
-	 * @param Boolean $value
-	 * @return builder_ModuleGenerator
-	 */
-	public function setUseTopic($value)
-	{
-		$this->front = $value;
-		$this->useTopic = $value;
-		$this->useFolder = !$value;
-		return $this;
-	}
 	
 	/**
 	 * @param String $value
@@ -153,8 +125,8 @@ class builder_ModuleGenerator
 		
 		// Launch the generation of over writable files
 		$this->generateOnce();
-
 		$this->addConfiguration();
+		
 		// return the current object
 		return $this;
 	}
@@ -162,37 +134,21 @@ class builder_ModuleGenerator
 	private function generateDirectories()
 	{
 		$pathBase = AG_MODULE_DIR . DIRECTORY_SEPARATOR . $this->name . DIRECTORY_SEPARATOR;
-		f_util_FileUtils::mkdir($pathBase . 'actions');
 		f_util_FileUtils::mkdir($pathBase . 'config');
-		f_util_FileUtils::mkdir($pathBase . 'doc');
 		f_util_FileUtils::mkdir($pathBase . 'forms' . DIRECTORY_SEPARATOR . 'editor' . DIRECTORY_SEPARATOR . 'rootfolder');
-		f_util_FileUtils::mkdir($pathBase . 'lib' . DIRECTORY_SEPARATOR . 'blocks');
 		f_util_FileUtils::mkdir($pathBase . 'lib' . DIRECTORY_SEPARATOR . 'services');
 		f_util_FileUtils::mkdir($pathBase . 'persistentdocument' . DIRECTORY_SEPARATOR . 'import');
 		f_util_FileUtils::mkdir($pathBase . 'setup');
 		f_util_FileUtils::mkdir($pathBase . 'style');
 		f_util_FileUtils::mkdir($pathBase . 'templates' . DIRECTORY_SEPARATOR . 'perspectives');
-		f_util_FileUtils::mkdir($pathBase . 'views');
-		if ($this->useFolder)
-		{
-			f_util_FileUtils::mkdir($pathBase . 'forms/editor/folder');
-		}
-		else
-		{
-			f_util_FileUtils::mkdir($pathBase . 'forms/editor/topic');
-			f_util_FileUtils::mkdir($pathBase . 'forms/editor/systemtopic');
-		}
+		f_util_FileUtils::mkdir($pathBase . 'forms/editor/folder');
 	}
 	
 	private function addConfiguration()
 	{
-		$info = array('ENABLED' => true, 'VISIBLE' => true, 
-					  'CATEGORY' => $this->category, 'ICON' => $this->icon, 
-					  'USETOPIC' => ($this->useTopic == true), 
-					  'VERSION' => $this->version);
+		$info = array('ENABLED' => true, 'VISIBLE' => true, 'CATEGORY' => $this->category, 'ICON' => $this->icon);
 		Framework::addPackageConfiguration('modules_' . $this->name, $info);
 		ModuleService::clearInstance();
-	
 	}
 
 	/**
@@ -201,6 +157,8 @@ class builder_ModuleGenerator
 	 */
 	public function generateOnce()
 	{
+		$crs = ClassResolver::getInstance();
+		
 		// Define de root new module directory
 		$pathBase = AG_MODULE_DIR . DIRECTORY_SEPARATOR . $this->name . DIRECTORY_SEPARATOR;
 
@@ -214,17 +172,13 @@ class builder_ModuleGenerator
 		// Generate configuration files
 		f_util_FileUtils::write($pathBase . 'change.xml', $this->generateFile('change.xml'));
 		f_util_FileUtils::write($configPath . 'module.xml', $this->generateFile('config_module.xml'));
-		
 		f_util_FileUtils::write($configPath . 'actions.xml', $this->generateFile('config_actions.xml'));
 		f_util_FileUtils::write($configPath . 'rights.xml', $this->generateFile('config_rights.xml'));
 		f_util_FileUtils::write($configPath . 'perspective.xml', $this->generateFile('config_perspective.xml'));
-		
-			
+
 		// Generate localisation files		
 		$this->generateGeneralLocales();
-									
-		$crs = ClassResolver::getInstance();
-
+		
 		// Generate setup file
 		$path = $pathBase . DIRECTORY_SEPARATOR . 'setup' . DIRECTORY_SEPARATOR . 'initData.php';
 		f_util_FileUtils::write($path, $this->generateFile('initData'));
@@ -246,28 +200,14 @@ class builder_ModuleGenerator
 		// Generate editor for rootfolder
 		$path = $editorPath  . 'rootfolder' . DIRECTORY_SEPARATOR . 'panels.xml';
 		f_util_FileUtils::write($path, $this->generateFile('form_editor_rootfolder_panels.xml'));
-		if ($this->useTopic)
-		{
-			$path = $editorPath  . 'rootfolder' . DIRECTORY_SEPARATOR . 'properties.xml';
-			f_util_FileUtils::write($path, $this->generateFile('form_editor_rootfolder_properties.xml'));
-		}
 		$path = $editorPath  . 'rootfolder' . DIRECTORY_SEPARATOR . 'resume.xml';
 		f_util_FileUtils::write($path, $this->generateFile('form_editor_rootfolder_resume.xml'));
 		
-		// Generate editor for topics and folders
-		if ($this->useTopic)
-		{
-			$path = $editorPath  . 'topic' . DIRECTORY_SEPARATOR . 'panels.xml';
-			f_util_FileUtils::write($path, $this->generateFile('form_editor_topic_panels.xml'));
-		}
-		else
-		{
-			$path = $editorPath  . 'folder' . DIRECTORY_SEPARATOR . 'panels.xml';
-			f_util_FileUtils::write($path, $this->generateFile('form_editor_folder_panels.xml'));
-			$path = $editorPath  . 'folder' . DIRECTORY_SEPARATOR . 'panels.xml';
-			f_util_FileUtils::write($path, $this->generateFile('form_editor_folder_resume.xml'));
-			
-		}
+		// Generate editor for folders
+		$path = $editorPath  . 'folder' . DIRECTORY_SEPARATOR . 'panels.xml';
+		f_util_FileUtils::write($path, $this->generateFile('form_editor_folder_panels.xml'));
+		$path = $editorPath  . 'folder' . DIRECTORY_SEPARATOR . 'panels.xml';
+		f_util_FileUtils::write($path, $this->generateFile('form_editor_folder_resume.xml'));
 		
 		// return the current object
 		return $this;
@@ -317,12 +257,8 @@ class builder_ModuleGenerator
 		$generator->assign('version', $this->version);
 		$generator->assign('frameworkVersion', Framework::getVersion());
 		$generator->assign('icon', $this->icon);
-		// TODO: deprecated "front", in favor to useTopic | useFolder. Make sense...
-		$generator->assign('front', $this->front);
-		$generator->assign('useTopic', $this->front);
-		$generator->assign('useFolder', !$this->front);
 		$generator->assign('category', $this->category);
-
+		
 		// Execute template and return result
 		$result = $generator->fetch($templateName .'.tpl');
 		return $result;

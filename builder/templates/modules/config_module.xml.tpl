@@ -5,6 +5,6 @@
 		<visible>true</visible>
 		<icon><{$icon}></icon>
 <{if $category}>		<category><{$category}></category>
-<{/if}>		<usetopic><{if $front == 1}>true<{else}>false<{/if}></usetopic>
+<{/if}>
 	</module>
 </config>
