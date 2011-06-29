@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.rbs.fr/schema/change-document/1.0" xmlns="http://www.rbs.fr/schema/change-document/1.0">
+
+	<!--
+		This file is actually published on http://www.rbschange.fr/static/schema/change-document/1.0.xsd 
+	-->
+
+	<!-- TODO: handle non permitted cases -->
+
+	<xs:simpleType name="propertyType">
+		<xs:annotation>
+			<xs:documentation source="version">1.0</xs:documentation>
+			<xs:documentation source="description">
+				A property type : String | Boolean | Integer | Double |
+				DateTime | LongString | XHTMLFragment | Lob |
+				modules_xxxxx/yyyyy
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:pattern value="String|Boolean|Integer|Double|DateTime|LongString|XHTMLFragment|Lob|modules_[a-z]+/[A-Za-z]+" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="documentModel">
+		<xs:annotation>
+			<xs:documentation source="version">1.0</xs:documentation>
+			<xs:documentation source="description">
+				a document model name : modules_[a-z]+/[A-Za-z]+
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:pattern value="modules_[a-z]+/[A-Za-z]+" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="documentStatus">
+		<xs:restriction base="xs:NMTOKEN">
+			<xs:enumeration value="DRAFT" />
+			<xs:enumeration value="CORRECTION" />
+			<xs:enumeration value="ACTIVE" />
+			<xs:enumeration value="PUBLICATED" />
+			<xs:enumeration value="DEACTIVATED" />
+			<xs:enumeration value="FILED" />
+			<xs:enumeration value="DEPRECATED" />
+			<xs:enumeration value="TRASH" />
+			<xs:enumeration value="WORKFLOW" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:element name="document">
+		<xs:annotation>
+			<xs:documentation source="version">1.0</xs:documentation>
+			<xs:documentation source="description">
+				The &lt;code&gt;&amp;lt;document&amp;gt;&lt;/code&gt;
+				element is the root element.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:all>
+				<xs:element name="properties" minOccurs="0"
+					maxOccurs="1">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="add" minOccurs="0" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="constraints" type="xs:string" minOccurs="0" maxOccurs="1" />
+									</xs:sequence>
+									<xs:attribute name="name" use="required" type="xs:string" />
+									<xs:attribute name="type" use="optional" type="propertyType" default="String" />
+									<xs:attribute name="cascade-delete" type="xs:boolean" default="false" />
+									<xs:attribute name="min-occurs" type="xs:int" default="0" />
+									<xs:attribute name="max-occurs" type="xs:int" default="1" />
+									<xs:attribute name="from-list" type="xs:string" />				
+									<xs:attribute name="db-mapping" type="xs:string" />
+									<xs:attribute name="db-mapping-oci" type="xs:string" />
+									<xs:attribute name="db-size" type="xs:positiveInteger" />
+									<xs:attribute name="tree-node" default="false">
+										<xs:simpleType>
+											<xs:restriction base="xs:NMTOKEN">
+												<xs:enumeration value="true" />
+												<xs:enumeration value="false" />
+												<xs:enumeration value="both" />
+												<xs:enumeration value="direct" />
+												<xs:enumeration value="inverse" />
+												<xs:enumeration value="none" />
+											</xs:restriction>
+										</xs:simpleType>
+									</xs:attribute>
+									<xs:attribute name="preserve-old-value" type="xs:boolean" default="false" />
+									<xs:attribute name="localized" type="xs:boolean" default="false" />
+									<xs:attribute name="inverse" type="xs:boolean" default="false" />
+									<xs:attribute name="default-value" type="xs:string" />
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="serializedproperties" minOccurs="0" maxOccurs="1">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="add" minOccurs="0" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="constraints" type="xs:string" minOccurs="0" maxOccurs="1" />
+									</xs:sequence>
+									<xs:attribute name="name" use="required" type="xs:string" />
+									<xs:attribute name="type" use="optional" type="propertyType" default="String" />
+									<xs:attribute name="min-occurs" type="xs:int" default="0" />
+									<xs:attribute name="max-occurs" type="xs:int" default="1" />
+									<xs:attribute name="from-list" type="xs:string" />
+									<xs:attribute name="localized" type="xs:boolean" default="false" />
+									<xs:attribute name="default-value" type="xs:string" />
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="statuses" minOccurs="0"
+					maxOccurs="1">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="add" minOccurs="0"
+								maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:attribute name="name"
+										type="documentStatus" />
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+						<xs:attribute name="default"
+							type="documentStatus" />
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="workflow" minOccurs="0"
+					maxOccurs="1">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="parameter" minOccurs="0" maxOccurs="unbounded">
+								<xs:complexType mixed="true">
+									<xs:attribute name="name" type="xs:string" />
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+						<xs:attribute name="start-task"
+							type="xs:string" />
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="children" minOccurs="0"
+					maxOccurs="1">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="child" minOccurs="0" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:attribute name="name" use="required" type="xs:string" />
+									<xs:attribute name="type" use="required" type="documentModel" />
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="form" minOccurs="0" maxOccurs="1">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="property" minOccurs="0" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation source="version">1.0</xs:documentation>
+									<xs:documentation
+										source="description">
+										* Balise :
+										<br />
+										* Attributs autorisés :
+										<br />
+										name="xxxxxx"
+										<br />
+										control-type="text | date |
+										boolean | picker | .."
+										<br />
+										display="hidden | readonly |
+										[edit]"
+										<br />
+										required="true | [false]"
+										<br />
+
+										Pour un element picker
+										(sous-document), les attributs
+										suivants sont disponibles : -
+										actions="xxxxx" Où "xxxxx" est
+										une chaîne pouvant contenir
+										"create", "edit" et/ou "delete".
+										Ex. : actions="edit delete" -
+										parent-type="xxxxx" Où "xxxxx"
+										est une chaîne contenant le type
+										de parent autorisé ou "auto"
+										pour indiquer que le parent sera
+										déterminé automatiquement, par
+										code (le champ de sélection du
+										parent n'apparaît donc pas). Si
+										parent-type n'est pas spécifié,
+										par défaut il vaut
+										"modules_generic/folder". Ex. :
+										parent-type="modules_website/topic"
+										Ex. : parent-type="auto"
+									</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:attribute name="name" type="xs:string" use="required" />
+									<xs:attribute name="control-type">
+										<xs:simpleType>
+											<xs:restriction
+												base="xs:NMTOKEN">
+												<xs:enumeration value="Boolean" />
+												<xs:enumeration value="Color" />
+												<xs:enumeration value="Date" />
+												<xs:enumeration value="Filepicker" />
+												<xs:enumeration value="List" />
+												<xs:enumeration value="Number" />
+												<xs:enumeration value="Picker" />
+												<xs:enumeration value="Size" />
+												<xs:enumeration value="Text" />
+											</xs:restriction>
+										</xs:simpleType>
+									</xs:attribute>
+									<xs:attribute name="display" default="edit">
+										<xs:simpleType>
+											<xs:restriction base="xs:NMTOKEN">
+												<xs:enumeration value="hidden" />
+												<xs:enumeration value="readonly" />
+												<xs:enumeration value="edit" />
+												<xs:enumeration value="editonce" />
+											</xs:restriction>
+										</xs:simpleType>
+									</xs:attribute>
+									<xs:attribute name="required" type="xs:boolean" default="false" />
+									<xs:attribute name="actions" type="xs:string" />	
+									<xs:attribute name="width" type="xs:string" />	
+									<xs:attribute name="height" type="xs:string" />	
+									<xs:attribute name="enddate" type="xs:boolean" default="true" />
+									<xs:attribute name="compact" type="xs:boolean" default="true" />
+									<xs:attribute name="allow" type="xs:string" />	
+									<xs:attribute name="rows" type="xs:int" />	
+									<xs:attribute name="cols" type="xs:int" />	
+									<xs:attribute name="multiple" type="xs:boolean" default="true" />									
+									<xs:anyAttribute />
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:all>
+			<xs:attribute name="model-version" type="xs:string" use="required" />
+			<xs:attribute name="icon" type="xs:string" />
+			<xs:attribute name="edit-module" type="xs:string" />
+			<xs:attribute name="linked-to-root-module" type="xs:boolean" default="false" />
+			<xs:attribute name="use-correction" type="xs:boolean" default="false" />
+			<xs:attribute name="table-name" type="xs:string" />
+			<xs:attribute name="table-name-oci" type="xs:string" />	
+			<xs:attribute name="extend" type="xs:string" />
+			<xs:attribute name="inject" type="xs:boolean" default="false" />
+			<xs:attribute name="has-url" type="xs:boolean" default="true" />
+			<xs:attribute name="indexable" type="xs:boolean" default="false" />
+			<xs:attribute name="backoffice-indexable" type="xs:boolean" default="true" />
+			<xs:attribute name="publish-on-day-change" type="xs:boolean" default="true" />
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

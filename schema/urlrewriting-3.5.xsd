@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:simpleType name="typeParam">
+    <xs:restriction base="xs:NMTOKEN">
+      <xs:enumeration value="all" />
+      <xs:enumeration value="out" />
+      <xs:enumeration value="global" />
+      <xs:enumeration value="module" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:element name="urlrewriting">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="rules">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element maxOccurs="unbounded" minOccurs="0" name="rule">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="template" type="xs:string" />
+                    <xs:element name="parameters" minOccurs="0">
+                      <xs:complexType>
+                        <xs:sequence minOccurs="0">
+                          <xs:element maxOccurs="unbounded" name="parameter">
+                            <xs:complexType>
+                              <xs:attribute name="name" type="xs:string" use="required" />
+                              <xs:attribute name="forwardTo" type="xs:string" use="optional" />
+                              <xs:attribute name="type" type="typeParam" use="optional" default="out"/>
+                              <xs:attribute name="method" type="xs:string" use="optional" />
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="pageTag" type="xs:string" use="optional" />
+                  <xs:attribute name="redirection" type="xs:string" use="optional" />
+                  <xs:attribute name="documentModel" type="xs:string" use="optional" />
+                  <xs:attribute name="viewMode" type="xs:string" use="optional" fixed="detail" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

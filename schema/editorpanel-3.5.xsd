@@ -1,0 +1,196 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:attribute name="id" type="xs:string" />
+  <xs:attribute name="anonid" type="xs:string" />
+  <xs:attribute name="class" type="xs:string" />
+
+  <xs:complexType name="decorationElement">
+    <xs:attribute name="label" type="xs:string" use="optional" />
+    <xs:attribute name="value" type="xs:string" use="optional" />
+    <xs:anyAttribute />
+  </xs:complexType>
+  
+  <xs:complexType name="fieldLabelElement">
+    <xs:attribute name="id" type="xs:string" use="optional" />
+    <xs:attribute name="control" type="xs:string" use="optional" />
+    <xs:attribute name="label" type="xs:string" use="optional" />
+    <xs:attribute name="labeli18n" type="xs:string" use="optional" />
+  </xs:complexType>
+  
+  <xs:complexType name="fieldElement">
+    <xs:sequence minOccurs="0">
+      <xs:choice maxOccurs="unbounded">
+        <xs:element minOccurs="0" maxOccurs="unbounded" name="fieldlistitem">
+          <xs:complexType>
+            <xs:attribute name="labeli18n" type="xs:string" use="required" />
+            <xs:attribute name="value" type="xs:string" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element minOccurs="0" name="constraints" type="xs:string" />
+        <xs:element minOccurs="0" maxOccurs="unbounded" name="constraint">
+          <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required" />
+            <xs:attribute name="parameter" type="xs:string" use="required" />
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:sequence>
+    
+    <xs:attribute name="hidden" type="xs:boolean" use="optional" />
+    <xs:attribute name="name" type="xs:string" use="required" />
+    <xs:attribute name="type" type="xs:string" use="optional" />
+    <xs:attribute name="fieldtype" type="xs:string" use="optional" />
+
+    <xs:attribute name="min-occurs" type="xs:integer" use="optional" default="0" />
+    <xs:attribute name="max-occurs" type="xs:integer" use="optional" default="1" />
+    <xs:attribute name="required" type="xs:boolean" use="optional" />
+    <xs:attribute name="default-value" type="xs:string" use="optional" />
+    <xs:attribute name="initialvalue" type="xs:string" use="optional" />
+
+
+    <xs:attribute name="list-id" type="xs:string" use="optional" />
+    <xs:attribute name="from-list" type="xs:string" use="optional" />
+    <xs:attribute name="nocache" type="xs:boolean" use="optional" />
+    <xs:attribute name="emptylabel" type="xs:string" use="optional" />
+
+    <xs:attribute name="labeli18n" type="xs:string" use="optional" />
+    <xs:attribute name="hidehelp" type="xs:boolean" use="optional" />
+    <xs:attribute name="shorthelpi18n" type="xs:string" use="optional" />
+
+
+    <xs:attribute name="allow" type="xs:string" use="optional" />
+    <xs:attribute name="allowunits" type="xs:string" use="optional" />
+
+    <xs:attribute name="orient" type="xs:string" use="optional" />
+    <xs:attribute name="disabled" type="xs:string" use="optional" />
+
+    <xs:attribute name="size" type="xs:integer" use="optional" />
+    <xs:attribute name="maxlength" type="xs:integer" use="optional" />
+    <xs:attribute name="cols" type="xs:integer" use="optional" />
+    <xs:attribute name="rows" type="xs:integer" use="optional" />
+
+    <xs:attribute name="editwidth" type="xs:integer" use="optional" />
+    <xs:attribute name="editheight" type="xs:integer" use="optional" />
+    <xs:attribute name="compact" type="xs:boolean" use="optional" />
+    <xs:attribute name="blankUrlParams" type="xs:string" use="optional" />
+
+    <xs:attribute name="hidespinbuttons" type="xs:boolean" use="optional" />
+    <xs:attribute name="increment" type="xs:decimal" use="optional" />
+
+    <xs:attribute name="moduleselector" type="xs:string" use="optional" />
+    <xs:attribute name="dialog" type="xs:string" use="optional" />
+    <xs:attribute name="allowfile" type="xs:string" use="optional" />
+    <xs:attribute name="mediafoldername" type="xs:string" use="optional" />
+    <xs:attribute name="hideorder" type="xs:boolean" use="optional" />
+    <xs:attribute name="hidedelete" type="xs:boolean" use="optional" />
+    <xs:attribute name="hideselector" type="xs:boolean" use="optional" />
+
+    <xs:attribute name="hidetime" type="xs:boolean" use="optional" />
+    <xs:attribute name="hidehours" type="xs:boolean" use="optional" />
+    <xs:attribute name="timeoffset" type="xs:integer" use="optional" />
+
+    <xs:anyAttribute />
+    
+  </xs:complexType>
+  
+  <xs:complexType name="sectionRowElement">
+    <xs:attribute name="labeli18n" type="xs:string" use="required" />
+    <xs:attribute name="id" type="xs:string" use="required" />
+  </xs:complexType>
+
+  <xs:complexType name="boxElement">
+    <xs:sequence minOccurs="0">
+      <xs:choice maxOccurs="unbounded">
+        <xs:element name="vbox" type="boxElement" />
+        <xs:element name="hbox" type="boxElement" />
+        <xs:element name="row" type="boxElement" />
+        
+        <xs:element name="fieldlabel" type="fieldLabelElement" />
+        <xs:element name="label" type="decorationElement" />
+        <xs:element name="rowlabel" type="decorationElement" />
+        <xs:element name="toolbarbutton" type="decorationElement" />
+      </xs:choice>
+    </xs:sequence>
+    <xs:anyAttribute />
+  </xs:complexType>
+  
+  <xs:element name="panel">
+    <xs:complexType>
+      <xs:sequence minOccurs="0">
+        <xs:choice maxOccurs="unbounded">
+          <xs:element maxOccurs="unbounded" name="section">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice maxOccurs="unbounded">
+                  <xs:element maxOccurs="unbounded" name="field" type="fieldElement" />
+                  <xs:element maxOccurs="unbounded" name="sectionrow" type="sectionRowElement" />
+                  <xs:element name="vbox" type="boxElement" />
+                  <xs:element name="hbox" type="boxElement" />
+                  <xs:element name="row" type="boxElement" />
+                </xs:choice>
+              </xs:sequence>
+              <xs:attribute name="hidden" type="xs:boolean" use="optional" />
+              <xs:attribute name="label" type="xs:string" use="optional" />
+              <xs:attribute name="labeli18n" type="xs:string" use="required" />
+              <xs:attribute name="class" type="xs:string" use="optional" />
+              <xs:attribute name="image" type="xs:string" use="optional" />
+              <xs:attribute name="anonid" type="xs:string" use="optional" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="vbox" type="boxElement" />
+          <xs:element name="hbox" type="boxElement" />
+          <xs:element name="row" type="boxElement" />
+          <xs:element name="xul">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="javascript">
+                  <xs:complexType>
+                    <xs:sequence>
+                      <xs:choice maxOccurs="unbounded">
+                        <xs:element name="constructor" type="xs:string" minOccurs="0" maxOccurs="1"  default="&lt;![CDATA[...]]&gt;"/>
+                        <xs:element name="destructor" type="xs:string" minOccurs="0" maxOccurs="1"  default="&lt;![CDATA[...]]&gt;"/>
+                        <xs:element name="field" minOccurs="0" maxOccurs="unbounded">
+                          <xs:complexType>
+                            <xs:simpleContent>
+                              <xs:extension base="xs:string">
+                                <xs:attribute name="name" type="xs:string" use="required" />
+                              </xs:extension>
+                            </xs:simpleContent>
+                          </xs:complexType>
+                        </xs:element>
+                        <xs:element name="property" minOccurs="0" maxOccurs="unbounded">
+                          <xs:complexType>
+                            <xs:sequence>
+                              <xs:element name="getter" type="xs:string" minOccurs="0" maxOccurs="1" default="&lt;![CDATA[...]]&gt;"/>
+                              <xs:element name="setter" type="xs:string" minOccurs="0" maxOccurs="1" default="&lt;![CDATA[...]]&gt;"/>
+                            </xs:sequence>
+                            <xs:attribute name="name" type="xs:string" use="required" />
+                          </xs:complexType>
+                        </xs:element>
+                        <xs:element minOccurs="0" maxOccurs="unbounded" name="method">
+                          <xs:complexType>
+                            <xs:sequence>
+                              <xs:element name="parameter" minOccurs="0" maxOccurs="unbounded">
+                                <xs:complexType>
+                                  <xs:attribute name="name" type="xs:string" use="required" />
+                                </xs:complexType>
+                              </xs:element>
+                              <xs:element name="body" type="xs:string" default="&lt;![CDATA[...]]&gt;"/>
+                            </xs:sequence>
+                            <xs:attribute name="name" type="xs:string" use="required" />
+                          </xs:complexType>
+                        </xs:element>
+                      </xs:choice>
+                    </xs:sequence>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:sequence>
+      <xs:attribute name="use" type="xs:string" use="optional" />
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

@@ -1,0 +1,186 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<xs:simpleType name="parameterType">
+		<xs:annotation>
+			<xs:documentation>
+				A property type : String | Boolean | Integer | Double |
+				DateTime | LongString | XHTMLFragment | Lob |
+				modules_xxxxx/yyyyy
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:pattern value="String|Boolean|Integer|Double|DateTime|LongString|XHTMLFragment|Lob|modules_[a-z0-9]+/[A-Za-z0-9]+" />
+		</xs:restriction>
+	</xs:simpleType>
+
+  <xs:complexType name="parameterElement">
+    <xs:annotation>
+      <xs:documentation source="version">1.0</xs:documentation>
+      <xs:documentation source="description">A parametre definition
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence minOccurs="0">
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="fieldlistitem">
+        <xs:complexType>
+          <xs:attribute name="labeli18n" type="xs:string" use="required" />
+          <xs:attribute name="value" type="xs:string" use="required" />
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="constraints" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="constraint">
+        <xs:complexType>
+          <xs:attribute name="name" type="xs:string" use="required" />
+          <xs:attribute name="parameter" type="xs:string" use="required" />
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="hidden" type="xs:boolean" use="optional" />
+    <xs:attribute name="name" type="xs:string" use="required" />
+    <xs:attribute name="type" type="parameterType" use="optional" default="String"/>
+    <xs:attribute name="fieldtype" type="xs:string" use="optional" />
+    
+    <xs:attribute name="min-occurs" type="xs:integer" use="optional" default="0" />
+    <xs:attribute name="max-occurs" type="xs:integer" use="optional" default="1" />
+    <xs:attribute name="required" type="xs:boolean" use="optional" />
+    <xs:attribute name="default-value" type="xs:string" use="optional" />
+    <xs:attribute name="initialvalue" type="xs:string" use="optional" />
+    
+
+    <xs:attribute name="list-id" type="xs:string" use="optional" />
+    <xs:attribute name="from-list" type="xs:string" use="optional" />
+    <xs:attribute name="nocache" type="xs:boolean" use="optional" />
+    <xs:attribute name="emptylabel" type="xs:string" use="optional" />
+    
+    <xs:attribute name="labeli18n" type="xs:string" use="optional" />
+    <xs:attribute name="hidehelp" type="xs:boolean" use="optional" />
+    <xs:attribute name="shorthelpi18n" type="xs:string" use="optional" />
+   
+   
+    <xs:attribute name="allow" type="xs:string" use="optional" />
+    <xs:attribute name="allowunits" type="xs:string" use="optional" />
+
+    <xs:attribute name="orient" type="xs:string" use="optional" />
+    <xs:attribute name="class" type="xs:string" use="optional" />
+    <xs:attribute name="disabled" type="xs:string" use="optional" />
+    
+    <xs:attribute name="size" type="xs:integer" use="optional" />
+    <xs:attribute name="maxlength" type="xs:integer" use="optional" />
+    <xs:attribute name="cols" type="xs:integer" use="optional" />
+    <xs:attribute name="rows" type="xs:integer" use="optional" />
+
+    <xs:attribute name="editwidth" type="xs:integer" use="optional" />
+    <xs:attribute name="editheight" type="xs:integer" use="optional" />
+    <xs:attribute name="compact" type="xs:boolean" use="optional" />
+    <xs:attribute name="blankUrlParams" type="xs:string" use="optional" />
+
+    <xs:attribute name="hidespinbuttons" type="xs:boolean" use="optional" />
+    <xs:attribute name="increment" type="xs:decimal" use="optional" />
+
+    <xs:attribute name="moduleselector" type="xs:string" use="optional" />
+    <xs:attribute name="dialog" type="xs:string" use="optional" />
+    <xs:attribute name="allowfile" type="xs:string" use="optional" />
+    <xs:attribute name="mediafoldername" type="xs:string" use="optional" />
+    <xs:attribute name="hideorder" type="xs:boolean" use="optional" />
+    <xs:attribute name="hidedelete" type="xs:boolean" use="optional" />
+    <xs:attribute name="hideselector" type="xs:boolean" use="optional" />
+
+    <xs:attribute name="hidetime" type="xs:boolean" use="optional" />
+    <xs:attribute name="hidehours" type="xs:boolean" use="optional" />
+    <xs:attribute name="timeoffset" type="xs:integer" use="optional" />
+
+   </xs:complexType>
+
+  <xs:complexType name="metaElement">
+    <xs:attribute name="name" type="xs:string" use="required" />
+    <xs:attribute name="allow" type="xs:string" use="required" />
+  </xs:complexType>
+  
+  <xs:element name="blocks">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" name="block">
+          <xs:complexType mixed="true">
+            <xs:sequence minOccurs="0">
+              <xs:element name="parameters" minOccurs="0" maxOccurs="1">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element maxOccurs="unbounded" name="parameter" type="parameterElement" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element minOccurs="0" name="metas" maxOccurs="1">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element maxOccurs="unbounded" name="meta" type="metaElement" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element minOccurs="0" name="xul" maxOccurs="1">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="javascript" minOccurs="1">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:choice maxOccurs="unbounded">
+                            <xs:element name="constructor" type="xs:string" minOccurs="0" maxOccurs="1"  default="&lt;![CDATA[...]]&gt;"/>
+                            <xs:element name="destructor" type="xs:string" minOccurs="0" maxOccurs="1"  default="&lt;![CDATA[...]]&gt;"/>
+                            <xs:element name="field" minOccurs="0" maxOccurs="unbounded">
+                              <xs:complexType>
+                                <xs:simpleContent>
+                                  <xs:extension base="xs:string">
+                                    <xs:attribute name="name" type="xs:string" use="required" />
+                                  </xs:extension>
+                                </xs:simpleContent>
+                              </xs:complexType>
+                            </xs:element>
+                            <xs:element name="property" minOccurs="0" maxOccurs="unbounded">
+                              <xs:complexType>
+                                <xs:sequence>
+                                  <xs:element name="getter" type="xs:string" minOccurs="0" maxOccurs="1" default="&lt;![CDATA[...]]&gt;"/>
+                                  <xs:element name="setter" type="xs:string" minOccurs="0" maxOccurs="1" default="&lt;![CDATA[...]]&gt;"/>
+                                </xs:sequence>
+                                <xs:attribute name="name" type="xs:string" use="required" />
+                              </xs:complexType>
+                            </xs:element>
+                            <xs:element minOccurs="0" maxOccurs="unbounded" name="method">
+                              <xs:complexType>
+                                <xs:sequence>
+                                  <xs:element name="parameter" minOccurs="0" maxOccurs="unbounded">
+                                    <xs:complexType>
+                                      <xs:attribute name="name" type="xs:string" use="required" />
+                                    </xs:complexType>
+                                  </xs:element>
+                                  <xs:element name="body" type="xs:string" default="&lt;![CDATA[...]]&gt;"/>
+                                </xs:sequence>
+                                <xs:attribute name="name" type="xs:string" use="required" />
+                              </xs:complexType>
+                            </xs:element>
+                          </xs:choice>
+                          </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="type" type="xs:string" use="required" />
+            <xs:attribute name="section" type="xs:string" use="optional" />
+            <xs:attribute name="dashboard" type="xs:boolean" use="optional" />
+            
+            <xs:attribute name="icon" type="xs:string" use="optional" />
+            
+            <xs:attribute name="label" type="xs:string" use="optional" />
+            <xs:attribute name="hidden" type="xs:boolean" use="optional" />
+            
+           
+            <xs:attribute name="dropModels" type="xs:string" use="optional" />
+            <xs:attribute name="inject" type="xs:string" use="optional" />
+            <xs:attribute name="requestModule" type="xs:string" use="optional" />
+            <xs:attribute name="templateModule" type="xs:string" use="optional" />
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
