@@ -21,7 +21,7 @@ class commands_ClearDatacache extends commands_AbstractChangeCommand
 	{
 		return "clear data cache";
 	}
-
+	
 	/**
 	 * @param String[] $params
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true

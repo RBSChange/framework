@@ -87,34 +87,6 @@ class f_DataCacheMySqlService extends f_DataCacheService
 		$stmt->execute();
 	}
 	
-	/**
-	 * @param f_DataCacheItem $item
-	 * @param String $subCache
-	 */
-	public final function clearSubCache($item, $subCache)
-	{
-		$this->registerShutdown();
-		
-		$query = 'DELETE FROM `f_data_cache` WHERE `cache_key` = :id';
-		$stmt = $this->pdo->prepare($query);
-		$stmt->bindValue(':id', $item->getNamespace().'-'.$item->getKeyParameters(), PDO::PARAM_STR);
-		$stmt->execute();
-		
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug(__METHOD__ . ' ' . $item->getNamespace().'-'.$item->getKeyParameters().' : '.$subCache);
-		}
-		
-		if (!array_key_exists($item->getNamespace(), $this->idToClear))
-		{
-			$this->idToClear[$item->getNamespace()] = array($item->getKeyParameters() => $subCache);
-		}
-		else if (is_array($this->idToClear[$item->getNamespace()]))
-		{
-			$this->idToClear[$item->getNamespace()][$item->getKeyParameters()] = $subCache;
-		}
-	}
-	
 	public function clearCommand()
 	{
 		$query = 'DELETE FROM `f_data_cache`';

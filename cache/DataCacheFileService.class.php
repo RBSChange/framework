@@ -43,22 +43,22 @@ class f_DataCacheFileService extends f_DataCacheService
 			$newPatterns = array();
 		}
 		$item = $this->getNewCacheItem($namespace, $keyParameters, $newPatterns);
-		$item->setValidity(true);
-		if ($this->exists($item))
+		$dirPath = $this->getCachePath($item);
+		if (is_dir($dirPath))
 		{
-			$dirPath = $this->getCachePath($item);
 			$subCaches = f_util_FileUtils::getDirFiles($dirPath);
-			if (f_util_ArrayUtils::isNotEmpty($subCaches))
+			foreach ($subCaches as $subCache)
 			{
-				$item->setCreationTime(filemtime($dirPath));
-			}
-			if ($subCaches != null)
-			{
-				foreach ($subCaches as $subCache)
+				$subCacheName = basename($subCache);
+				if ($subCacheName != self::INVALID_CACHE_ENTRY)
 				{
-					$item->setValue(basename($subCache), f_util_FileUtils::read($subCache));
+					$item->setCreationTime(@filemtime($subCache));
+					$item->setValue($subCacheName, f_util_FileUtils::read($subCache));
 				}
 			}
+			$expireTime = @filemtime($this->getCachePath($item, self::INVALID_CACHE_ENTRY));
+			$item->setTTL($expireTime-$item->getCreationTime());
+			$item->setValidity($expireTime > time());
 			return $item;
 		}
 		return ($returnItem) ? $item : null;
@@ -72,7 +72,7 @@ class f_DataCacheFileService extends f_DataCacheService
 		f_util_FileUtils::mkdir($this->getCachePath($item));
 		$this->register($item);
 		$data = $item->getValues();
-		$this->markAsBeingRegenerated($item);
+		f_util_FileUtils::touch($this->getCachePath($item, self::INVALID_CACHE_ENTRY), time()+$item->getTTL());
 		try
 		{
 			foreach ($data as $k => $v)
@@ -87,10 +87,7 @@ class f_DataCacheFileService extends f_DataCacheService
 		catch (Exception $e)
 		{
 			// Do not let potential partial or broken content rest on disk
-			if ($this->exists($item))
-			{
-				@f_util_FileUtils::rmdir($this->getCachePath($item));
-			}
+			f_util_FileUtils::rmdir($this->getCachePath($item));
 			throw $e;
 		}
 	}
@@ -102,14 +99,17 @@ class f_DataCacheFileService extends f_DataCacheService
 	 */
 	public function exists($item, $subCache = null)
 	{
-		$itemPath = $this->getCachePath($item);
-		$cachePath = $this->getCachePath($item, $subCache);
-		$result = file_exists($cachePath) && f_util_FileUtils::getDirFiles($itemPath) !== null && $this->isValid($item)
-			&& ($item->getTTL() === null || (time() - filemtime($cachePath)) < $item->getTTL()); 
-		$this->markAsBeingRegenerated($item);
-		return $result;
+		$dirPath = $this->getCachePath($item);
+		if (!is_dir($dirPath))
+		{
+			return false;
+		}
+		if ($subCache === null)
+		{
+			return count(f_util_FileUtils::getDirFiles($dirPath)) > 1;
+		}
+		return file_exists($this->getCachePath($item, $subCache));
 	}
-	
 	
 	/**
 	 * This is the same as BlockCache::commitClear()
@@ -125,6 +125,7 @@ class f_DataCacheFileService extends f_DataCacheService
 	public function cleanExpiredCache()
 	{
 		$directoryIterator = new DirectoryIterator(f_util_FileUtils::buildChangeCachePath('simplecache'));
+		$now = time();
 		foreach ($directoryIterator as $classNameDir)
 		{
 			if ($classNameDir->isDir())
@@ -133,13 +134,9 @@ class f_DataCacheFileService extends f_DataCacheService
 				foreach ($subDirIterator as $cacheKeyDir)
 				{
 					$invalidCacheFilePath = $cacheKeyDir->getPathname() . DIRECTORY_SEPARATOR . self::INVALID_CACHE_ENTRY;
-					if ($cacheKeyDir->isDir() && file_exists($invalidCacheFilePath))
+					if ($cacheKeyDir->isDir() && file_exists($invalidCacheFilePath) && @filemtime($invalidCacheFilePath) < $now)
 					{
-						$fileInfo = new SplFileInfo($invalidCacheFilePath);
-						if (abs(date_Calendar::getInstance()->getTimestamp() - $fileInfo->getMTime()) > self::MAX_TIME_LIMIT)
-						{
-							f_util_FileUtils::rmdir($cacheKeyDir->getPathname());
-						}
+						f_util_FileUtils::rmdir($cacheKeyDir->getPathname());
 					}
 				}
 			}
@@ -151,42 +148,9 @@ class f_DataCacheFileService extends f_DataCacheService
 		f_util_FileUtils::cleanDir(f_util_FileUtils::buildCachePath("simplecache"));
 	}
 	
-	/**
-	 * @param String $pattern
-	 */
-	public function clearCacheByPattern($pattern)
+	public function getCacheIdsForPattern($pattern)
 	{
-		$cacheIds = $this->getPersistentProvider()->getCacheIdsByPattern($pattern);
-		foreach ($cacheIds as $cacheId)
-		{
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug("[". __CLASS__ . "]: clear $cacheId cache");
-			}
-			$this->clear($cacheId);
-		}
-	}
-	
-	/**
-	 * @param f_DataCacheItem $item
-	 * @param String $subCache
-	 */
-	public final function clearSubCache($item, $subCache)
-	{
-		$this->registerShutdown();
-		$cachePath = $this->getCachePath($item, $subCache);
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug(__METHOD__ . ' ' . $cachePath);
-		}
-		if (!array_key_exists($item->getNamespace(), $this->idToClear))
-		{
-			$this->idToClear[$item->getNamespace()] = array($item->getKeyParameters() => $subCache);
-		}
-		else if (is_array($this->idToClear[$item->getNamespace()]))
-		{
-			$this->idToClear[$item->getNamespace()][$item->getKeyParameters()] = $subCache;
-		}
+		return $this->getPersistentProvider()->getCacheIdsByPattern($pattern);
 	}
 	
 	protected function commitClear()
@@ -343,17 +307,17 @@ class f_DataCacheFileService extends f_DataCacheService
 	 */
 	protected function isValid($item)
 	{
-		return !file_exists($this->getCachePath($item, self::INVALID_CACHE_ENTRY));
+		return @filemtime($this->getCachePath($item, self::INVALID_CACHE_ENTRY)) > time();
 	}
 	
 	/**
 	 * @param f_DataCacheItem $item
 	 */
-	protected function markAsBeingRegenerated($item)
+	public function markAsBeingRegenerated($item)
 	{
-		if (!$this->isValid($item))
+		if ($this->exists($item))
 		{
-			f_util_FileUtils::unlink($this->getCachePath($item, self::INVALID_CACHE_ENTRY));
+			f_util_FileUtils::touch($this->getCachePath($item, self::INVALID_CACHE_ENTRY), time()+2);
 		}
 	}
 

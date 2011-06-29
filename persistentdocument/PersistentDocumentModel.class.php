@@ -212,11 +212,33 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	/**
 	 * returns an array of the type : array('moduleA' => array('modules_moduleA/doc1', ...), ...);
 	 *
-	 * @return unknown
+	 * @return array
 	 */
 	public static function getDocumentModelNamesByModules()
 	{
 		return unserialize(file_get_contents(f_util_FileUtils::buildChangeBuildPath('documentmodels.php')));
+	}
+	
+	private static $modelChildren;
+	/**
+	 * If no child is available for model, key does not exists in returned array
+	 * @return array array('modules_moduleA/doc1' => array('modules_moduleA/doc2', ...), ...)
+	 */
+	public static function getModelChildrenNames($modelName = null)
+	{
+		if (self::$modelChildren === null)
+		{
+			self::$modelChildren = unserialize(file_get_contents(f_util_FileUtils::buildChangeBuildPath('documentmodelschildren.php')));	
+		}
+		if ($modelName === null)
+		{
+			return self::$modelChildren;	
+		}
+		if (isset(self::$modelChildren[$modelName]))
+		{
+			return self::$modelChildren[$modelName];
+		}
+		return array();
 	}
 
 	protected function __construct($documentModelname)

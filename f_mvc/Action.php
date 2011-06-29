@@ -110,15 +110,48 @@ abstract class f_mvc_Action
 	{
 		if ($this->cacheEnabled === null)
 		{
-			$this->cacheEnabled = is_array($this->getCacheDependencies());
+			$this->cacheEnabled = $this->getConfiguration()->isCacheEnabled() 
+				&& $this->getConfiguration()->getCusecache();
 		}
 		return $this->cacheEnabled;
 	}
+	
+	/**
+	 * @return int
+	 */
+	public function getCacheTtl()
+	{
+		return $this->getConfiguration()->getCacheTtl();
+	}
 
 	/**
-	 * @return array or null
+	 * @return array
 	 */
 	public function getCacheDependencies()
+	{
+		return null;
+	}
+	
+	/**
+	 * @param f_mvc_Request $request
+	 */
+	public function getCacheKeyParameters($request)
+	{
+		return null;
+	}
+	
+	/**
+	 * @return array
+	 */
+	public function getConfiguredCacheKeys()
+	{
+		return null;
+	}
+	
+	/**
+	 * @return array
+	 */
+	public function getConfiguredCacheDeps()
 	{
 		return null;
 	}
@@ -154,12 +187,7 @@ abstract class f_mvc_Action
 	 * @return String
 	 */
 	abstract function getInputViewName();
-
-	/**
-	 * @param f_mvc_Request $request
-	 */
-	abstract public function getCacheKeyParameters($request);
-
+	
 	/**
 	 * @return f_mvc_Context
 	 */

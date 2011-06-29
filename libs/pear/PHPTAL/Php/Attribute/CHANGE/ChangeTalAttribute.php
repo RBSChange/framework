@@ -46,7 +46,7 @@ class ChangeTalAttribute extends PHPTAL_Php_Attribute
 		$this->getRenderMethodCall($parametersString);
 	}
 
-	protected function initParams()
+	protected function initParams($excludedNames = null)
 	{
 		$expressions = $this->tag->generator->splitExpression($this->expression);
 		$parameters = array();
@@ -64,6 +64,10 @@ class ChangeTalAttribute extends PHPTAL_Php_Attribute
 		$varRegexp = '/\${[^}]*}/';
 		foreach ($this->tag->attributes as $name => $val)
 		{
+			if ($excludedNames !== null && in_array($name, $excludedNames))
+			{
+				continue;
+			}
 			if (preg_match_all($varRegexp, $val, $matches))
 			{
 				$paramValue = null;

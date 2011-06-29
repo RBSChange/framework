@@ -906,6 +906,11 @@ class f_persistentdocument_DatabaseCacheService extends f_persistentdocument_Cac
 		return true;
 	}
 	
+	public function clearByTTL($ttl)
+	{
+		$this->getPersistentProvider()->clearFrameworkCacheByTTL($ttl);
+	}
+	
 	/**
 	 * @return boolean
 	 */

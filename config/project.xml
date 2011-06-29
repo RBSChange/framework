@@ -26,6 +26,7 @@
 		<define name="CHANGE_CACHE_DIR">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . PROFILE</define>
 		<define name="WEB_CACHE_DIR">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'www'</define>
 		<define name="CHANGE_CACHE_PDF">DIRECTORY_SEPARATOR . 'pdf' . DIRECTORY_SEPARATOR . 'tmp'</define>
+		
 
 		<define name="AG_DEVELOPMENT_MODE">false</define>
 		
@@ -65,6 +66,7 @@
 		<define name="AG_DISABLE_BLOCK_CACHE">false</define>
 		<!-- (AG_DISABLE_SIMPLECACHE == true) => (AG_DISABLE_BLOCK_CACHE == true) -->
 		<define name="AG_DISABLE_SIMPLECACHE">false</define>
+		<define name="CHANGE_CACHE_MAX_TIME">3600</define>
 		
 		<define name="SECURE_SESSION_BY_IP">false</define>
 		
@@ -101,6 +103,12 @@
 			<entry name="googleChartProvider">http://chart.apis.google.com/chart</entry>
 		</charts>
 		
+		<documentcache>
+			<!-- Max time (in seconds) a document cache entry is valid.
+				It is then cleaned by task_ClearDocumentCacheTask -->
+			<entry name="ttl">86400</entry>
+		</documentcache>
+		
 		<!-- 
 		<mongoDB>
       		<authentication>
@@ -117,17 +125,14 @@
         		<entry name="default">localhost:27017</entry>
       		</serversWrite>
     	</mongoDB>
-    	<redis>
-    		<authentication>
-        		<entry name="username"/>
-        		<entry name="password"/>
-      		</authentication>  
-      		<server>
-        		<entry name="host">127.0.0.1</entry>
-        		<entry name="port">6379</entry>
-        		<entry name="database">0</entry>
-      		</server>
-    	</redis>
+    	<datacache-redis>
+			<server>
+				<entry name="host">...</entry>
+				<entry name="port">...</entry>
+				<entry name="database">...</entry>
+				<entry name="password">...(optionnal)</entry>
+			</server>
+		</datacache-redis>
     	<memcache>
     		<authentication>
         		<entry name="username"/>

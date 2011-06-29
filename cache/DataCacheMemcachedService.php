@@ -38,39 +38,11 @@ class f_DataCacheMemcachedService extends f_DataCacheService
 	public function writeToCache($item)
 	{	
 		$this->register($item);
-		$data = $item->getValues();
 		
-		$data["timestamp"] = time();
-		$data["isValid"] = true;
-		$data["ttl"] = $item->getTTL();
+		$data = array("v" => $item->getValues(),
+			"c" => time(), "t" => $item->getTTL());
 		
-		$serialized = serialize($data);
-		$this->memcache->set(self::MEMCACHE_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters(), $serialized, $item->getTTL());
-	}
-	
-	/**
-	 * @param f_DataCacheItem $item
-	 * @param String $subCache
-	 */
-	public final function clearSubCache($item, $subCache)
-	{
-		$this->registerShutdown();
-		
-		$this->memcache->delete(self::MEMCACHE_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters());
-		
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug(__METHOD__ . ' ' . $item->getNamespace().'-'.$item->getKeyParameters().' : '.$subCache);
-		}
-		
-		if (!array_key_exists($item->getNamespace(), $this->idToClear))
-		{
-			$this->idToClear[$item->getNamespace()] = array($item->getKeyParameters() => $subCache);
-		}
-		else if (is_array($this->idToClear[$item->getNamespace()]))
-		{
-			$this->idToClear[$item->getNamespace()][$item->getKeyParameters()] = $subCache;
-		}
+		$this->memcache->set(self::MEMCACHE_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters(), serialize($data), $item->getTTL());
 	}
 	
 	public function clearCommand()
@@ -271,32 +243,20 @@ class f_DataCacheMemcachedService extends f_DataCacheService
 	 */
 	protected function getData($item)
 	{
-		$object = $this->memcache->get(self::MEMCACHE_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters());
+		$dataSer = $this->memcache->get(self::MEMCACHE_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters());
 		
-		if ($object !== false)
+		if ($dataSer !== false)
 		{
-			$object = unserialize($object);
-			
-			foreach ($object as $k => $v)
+			$data = unserialize($dataSer);
+			if ($data !== false)
 			{
-				if ($k == "isValid")
-				{
-					$item->setValidity($v);
-					continue;
-				}
-				if ($k == "timestamp")
-				{
-					$item->setCreationTime($v);
-					continue;
-				}
-				if ($k == "ttl")
-				{
-					$item->setTTL($v);
-					continue;
-				}
-				$item->setValue($k, $v);
+				$item->setCreationTime($data["c"]);
+				$item->setValues($data["v"]);
+				$item->setTTL($data["t"]);
+				$item->setValidity(true);
 			}
 		}
+		
 		return $item;
 	}
 }

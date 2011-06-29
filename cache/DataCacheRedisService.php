@@ -1,25 +1,95 @@
 <?php
+/**
+ * This class uses phpredis (https://github.com/nicolasff/phpredis) for redis client.
+ * To configure, add the following to your project.xml :
+   <injection>
+     <entry name="f_DataCacheService">f_DataCacheRedisService</entry>
+   </injection>
+   <datacache-redis>
+     <server>
+       <entry name="host">...</entry>
+       <entry name="port">...</entry>
+       <entry name="database">...</entry>
+       <!-- Optionnal entries -->
+       <entry name="password">...</entry>
+     </server>
+   </datacache-redis>
+ */
 class f_DataCacheRedisService extends f_DataCacheService
 {
-	const REDIS_KEY_PREFIX = 'redisDataCache-';
-	const REDIS_REGISTRATION_KEY_PREFIX = 'redisDataCacheRegistration-';
-	
 	private static $instance;
+	private static $defaultRedisPort = 6379;
+	
+	/**
+	 * @var Redis
+	 */
 	private $redis = null;
 	
 	protected function __construct()
 	{
-		$provider = new f_RedisProvider(Framework::getConfiguration('redis'));
-		if ($provider->isAvailable())
-		{
-			$this->redis = $provider->getConnection();
-		}
-		else
-		{
-			Framework::info("DataCacheRedisService : could not obtain redis instance");
-		}
+		$this->redis = $this->getRedis();
 	}
-
+	
+	/**
+	 * @return Redis
+	 */
+	protected function getRedis()
+	{
+		if ($this->redis === null)
+		{
+			$conf = Framework::getConfiguration("datacache-redis/server");
+			$redis = new Redis();
+			
+			try
+			{
+				if (!isset($conf["host"]))
+				{
+					Framework::warn(__METHOD__." host is not defined");
+					$redis = new f_FakeRedis();
+				}
+				
+				if (!isset($conf["port"]))
+				{
+					if (Framework::isDebugEnabled())
+					{
+						Framework::debug(__METHOD__." using default port ".self::$defaultRedisPort);
+					}
+					$conf["port"] = self::$defaultRedisPort;
+				}
+				if (!$redis->connect($conf["host"], $conf["port"]))
+				{
+					Framework::warn(__METHOD__." could not connect to ".$conf["host"].":".$conf["port"]);
+					$redis = new f_FakeRedis();
+				}
+				
+				if (isset($conf["password"]) && ! $redis->auth($conf["password"]))
+				{
+					Framework::warn(__METHOD__." could not authenticate");
+					$redis = new f_FakeRedis();
+				}
+				
+				if (!isset($conf["database"]))
+				{
+					Framework::warn(__METHOD__." database not defined");
+					$redis = new f_FakeRedis();
+				}
+				
+				if (!$redis->select($conf["database"]))
+				{
+					Framework::warn(__METHOD__." could not select database ".$conf["database"]);
+					$redis = new f_FakeRedis();
+				}
+			}
+			catch (RedisException $e)
+			{
+				$redis = new f_FakeRedis();
+			}
+			
+			$this->redis = $redis;
+		}
+		return $this->redis;
+	}
+	
 	/**
 	 * @return f_DataCacheService
 	 */
@@ -32,65 +102,9 @@ class f_DataCacheRedisService extends f_DataCacheService
 		return self::$instance;
 	}
 	
-	/**
-	 * @param f_DataCacheItem $item
-	 */
-	public function writeToCache($item)
-	{	
-		$this->register($item);
-		$data = $item->getValues();
-		
-		$data["timestamp"] = time();
-		$data["isValid"] = true;
-		$data["ttl"] = $item->getTTL();
-		
-		$serialized = serialize($data);
-		$this->redis->set(self::REDIS_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters(), $serialized);
-		
-		$this->redis->setTimeout(self::REDIS_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters(), $item->getTTL());
-	}
-	
-	/**
-	 * @param f_DataCacheItem $item
-	 * @param String $subCache
-	 */
-	public final function clearSubCache($item, $subCache)
-	{
-		$this->registerShutdown();
-		
-		$this->redis->delete(self::REDIS_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters());
-		
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug(__METHOD__ . ' ' . $item->getNamespace().'-'.$item->getKeyParameters().' : '.$subCache);
-		}
-		
-		if (!array_key_exists($item->getNamespace(), $this->idToClear))
-		{
-			$this->idToClear[$item->getNamespace()] = array($item->getKeyParameters() => $subCache);
-		}
-		else if (is_array($this->idToClear[$item->getNamespace()]))
-		{
-			$this->idToClear[$item->getNamespace()][$item->getKeyParameters()] = $subCache;
-		}
-	}
-	
 	public function clearCommand()
 	{
-		$keys = $this->redis->getKeys(self::REDIS_KEY_PREFIX.'*');
-		if (!is_array($keys))
-		{
-			$keys = array();
-		}
-		$registrationKeys = $this->redis->getKeys(self::REDIS_REGISTRATION_KEY_PREFIX.'*');
-		if (!is_array($registrationKeys))
-		{
-			$registrationKeys = array();
-		}
-		
-		$allKeys = array_merge($keys, $registrationKeys);
-		
-		$this->redis->delete($allKeys);
+		$this->redis->flushDB();
 	}
 	
 	/**
@@ -98,109 +112,55 @@ class f_DataCacheRedisService extends f_DataCacheService
 	 */
 	public function getCacheIdsForPattern($pattern)
 	{
-		$keys = $this->redis->getKeys(self::REDIS_REGISTRATION_KEY_PREFIX.'*');
-		$objects = $this->redis->getMultiple($keys);
-		
-		$docs = array();
-		
-		for ($i = 0; $i < count($keys); $i++)
-		{
-			$object = unserialize($objects[$i]);
-			
-			if (isset($object["pattern"]))
-			{
-				foreach ($object["pattern"] as $p)
-				{
-					if ($p == $pattern)
-					{
-						$docs[] = substr($keys[$i], strlen(self::REDIS_REGISTRATION_KEY_PREFIX));
-					}
-				}
-			}
-		}
-		
-		return $docs;
+		return $this->redis->sMembers("pattern-".$pattern);
 	}
 	
 	protected function commitClear()
 	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("DataCacheRedisService->commitClear");
-		}
+		Framework::debug(__METHOD__);
 		if ($this->clearAll)
 		{
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug("Clear all");
-			}
-			$keys = $this->redis->getKeys(self::REDIS_KEY_PREFIX.'*');
-			if (!is_array($keys))
-			{
-				$keys = array();
-			}
-			$this->redis->delete($keys);	
+			Framework::debug(__METHOD__." : clear all");
+			$this->redis->flushDB();
 		}
 		else
 		{
+			$keysToDelete = array();
 			if (!empty($this->idToClear))
 			{
-				$ids = array();
-				foreach (array_keys($this->idToClear) as $id)
+				if (Framework::isDebugEnabled())
 				{
-					$ids[] = $id;
+					Framework::debug(__METHOD__.": idToClear : ".var_export($this->idToClear, true));
 				}
-				self::buildInvalidCacheList($ids);
+				foreach (array_keys($this->idToClear) as $itemNameSpace)
+				{
+					$itemsKey = "items-$itemNameSpace";
+					foreach ($this->redis->sMembers($itemsKey) as $keyParams)
+					{
+						$keysToDelete[] = "item-$itemNameSpace-$keyParams";
+					}
+				}
 			}
 			if (!empty($this->docIdToClear))
 			{
-				$docIds = array();
+				if (Framework::isDebugEnabled())
+				{
+					Framework::debug(__METHOD__.": docIdToClear : ".var_export($this->docIdToClear, true));
+				}
 				foreach (array_keys($this->docIdToClear) as $docId)
 				{
-					$docIds[] = self::REDIS_REGISTRATION_KEY_PREFIX.$docId;
+					foreach ($this->redis->sMembers("pattern-".$docId) as $cacheKey)
+					{
+						$keysToDelete[] = "item-$cacheKey";
+					}
 				}
-				self::commitClearByDocIds($docIds);
 			}
+			$this->redis->delete($keysToDelete);
 		}
 		
 		$this->clearAll = false;
 		$this->idToClear = null;
 		$this->docIdToClear = null;
-	}
-
-	/**
-	 * @param Array $docIds
-	 */
-	protected function commitClearByDocIds($docIds)
-	{
-		$keys = $this->redis->getMultiple($docIds);
-		$keyParameters = array();
-		
-		foreach ($keys as $k)
-		{
-			if ($k === false)
-			{
-				continue;
-			}
-			$a = unserialize($k);
-			$keyParameters[] = self::REDIS_KEY_PREFIX.$a["keyParameters"];
-		}
-		
-		$this->redis->delete($keyParameters);
-	}
-
-	/**
-	 * @param Array $dirsToClear
-	 */
-	protected function buildInvalidCacheList($dirsToClear)
-	{
-		$keys = array();
-		
-		foreach ($dirsToClear as $id)
-		{
-			$keys = array_merge($keys, $this->redis->getKeys(self::REDIS_KEY_PREFIX.$id.'-*'));
-		}
-		$this->redis->delete($keys);
 	}
 	
 	/**
@@ -208,91 +168,128 @@ class f_DataCacheRedisService extends f_DataCacheService
 	 */
 	protected function register($item)
 	{
-		if (!$this->isRegistered($item))
-		{	
-			$object = $this->redis->get(self::REDIS_REGISTRATION_KEY_PREFIX.$item->getNamespace());
-			if ($object !== false)
-			{
-				$object = unserialize($object);
-			}
-			$object["pattern"] = $this->optimizeCacheSpecs($item->getPatterns());
-			
-			$serialized = serialize($object);
-			$this->redis->set(self::REDIS_REGISTRATION_KEY_PREFIX.$item->getNamespace(), $serialized);
-			
-			$object = null;
-			$serialized = null;
-		}
-	
-		foreach ($item->getPatterns() as $spec)
+		$itemNamespace = $item->getNamespace();
+		if (!$this->redis->sIsMember("registration", $itemNamespace))
 		{
-			if (is_numeric($spec))
+			$multiRedis = $this->redis->multi(Redis::PIPELINE);
+			foreach ($this->optimizeCacheSpecs($item->getPatterns()) as $pattern)
 			{
-				$object = $this->redis->get(self::REDIS_REGISTRATION_KEY_PREFIX.$spec);
-				if ($object !== false)
-				{
-					$object = unserialize($object);
-				}
-				$object["keyParameters"] = $item->getNamespace().'-'.$item->getKeyParameters();
-				
-				$serialized = serialize($object);
-				$this->redis->set(self::REDIS_REGISTRATION_KEY_PREFIX.$spec, $serialized);
-				
-				$object = null;
-				$serialized = null;
+				$multiRedis->sAdd("pattern-".$pattern, $itemNamespace);
 			}
+			$multiRedis->sAdd("registration", $itemNamespace);
+			$multiRedis->exec();
+		}
+		
+		$itemKey = $item->getNamespace()."-".$item->getKeyParameters();
+		foreach ($item->getPatterns() as $pattern)
+		{
+			$multiRedis = $this->redis->multi(Redis::PIPELINE);
+			if (is_numeric($pattern))
+			{
+				$multiRedis->sAdd("pattern-".$pattern, $itemKey);
+			}
+			$multiRedis->exec();
 		}
 	}
 	
 	/**
 	 * @param f_DataCacheItem $item
-	 * @param unknown_type $id
-	 * @param unknown_type $keyParameters
-	 * @return Boolean
 	 */
-	protected function isRegistered($item, $id = null, $keyParameters = null)
+	public function writeToCache($item)
 	{
-		if ($id === null && $keyParameters === null)
-		{
-			$object = $this->redis->get(self::REDIS_REGISTRATION_KEY_PREFIX.$item->getNamespace());
+		$this->register($item);
+		$data = array("v" => $item->getValues(),
+			"c" => time(), "t" => $item->getTTL());
+		$keyParams = $item->getKeyParameters();
+		$itemNameSpace = $item->getNamespace();
 		
-			return ($object !== false);
-		}
-		return false;
+		$this->redis->multi(Redis::PIPELINE)
+			->sAdd("items-$itemNameSpace", $keyParams)
+			->setex("item-".$itemNameSpace."-".$keyParams, $item->getTTL(), serialize($data))
+			->exec();
 	}
-	
+
 	/**
 	 * @param f_DataCacheItem $item
 	 * @return f_DataCacheItem
 	 */
 	protected function getData($item)
 	{
-		$object = $this->redis->get(self::REDIS_KEY_PREFIX.$item->getNamespace().'-'.$item->getKeyParameters());
-		
-		if ($object !== false)
+		$dataSer = $this->redis->get("item-".$item->getNamespace()."-".$item->getKeyParameters());
+		if ($dataSer !== false)
 		{
-			$object = unserialize($object);
-			
-			foreach ($object as $k => $v)
+			$data = unserialize($dataSer);
+			if ($data !== false)
 			{
-				if ($k == "isValid")
-				{
-					$item->setValidity($v);
-					continue;
-				}
-				if ($k == "timestamp")
-				{
-					$item->setCreationTime($v);
-					continue;
-				}
-				if ($k == "ttl")
-				{
-					$item->setTTL($v);
-					continue;
-				}
-				$item->setValue($k, $v);
+				$item->setCreationTime($data["c"]);
+				$item->setValues($data["v"]);
+				$item->setTTL($data["t"]);
+				$item->setValidity(true);
 			}
 		}
 		return $item;
+	}
+}
+
+class f_FakeRedis
+{
+	private $multiMode = false;
+	
+	function auth()
+	{
+		return true;
+	}
+	
+	function select()
+	{
+		return true;
+	}
+	
+	function flushDB()
+	{
+		return true;
+	}
+
+	function sMembers()
+	{
+		return ($this->multiMode) ? $this : array();
+	}
+
+	function delete()
+	{
+		return ($this->multiMode) ? $this : 1;
+	}
+	
+	function sIsMember()
+	{
+		return ($this->multiMode) ? $this : false;
+	}
+	
+	function sAdd()
+	{
+		return ($this->multiMode) ? $this : true;
+	}
+		
+	function setex($key, $ttl, $value)
+	{
+		return ($this->multiMode) ? $this : true;
+	}
+	
+	function get($key)
+	{
+		 
+		return ($this->multiMode) ? $this : false;
+	}
+	
+	function multi()
+	{
+		$this->multiMode = true;
+		return $this;
+	}
+	
+	function exec()
+	{
+		$this->multiMode = false;
+		return array();
 	}
 }

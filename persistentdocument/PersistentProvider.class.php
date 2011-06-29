@@ -3148,6 +3148,22 @@ abstract class f_persistentdocument_PersistentProvider
 	 * @return String
 	 */
 	protected abstract function clearFrameworkCacheTruncateQuery();
+	
+	/**
+	 * @param int $ttl
+	 */
+	public function clearFrameworkCacheByTTL($ttl)
+	{
+		$stmt = $this->prepareStatement($this->clearFrameworkCacheByTTLQuery());
+		$stmt->bindValue(':ttl', intval($ttl), PersistentProviderConst::PARAM_INT);
+		$this->executeStatement($stmt);
+	}
+	
+	/**
+	 * DELETE FROM f_cache WHERE (insert_time + :ttl) < NOW()
+	 * @return string
+	 */
+	protected abstract function clearFrameworkCacheByTTLQuery();
 
 	/**
 	 * @return void

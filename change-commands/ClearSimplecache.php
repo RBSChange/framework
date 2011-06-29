@@ -21,6 +21,11 @@ class commands_ClearSimplecache extends commands_AbstractChangeCommand
 	{
 		return "Deprecated use clear-datacache instead";
 	}
+	
+	function isHidden()
+	{
+		return true;
+	}
 
 	/**
 	 * @param String[] $params

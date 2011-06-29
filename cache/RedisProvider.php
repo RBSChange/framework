@@ -1,4 +1,7 @@
 <?php
+/**
+ * @deprecated
+ */
 class f_RedisProvider
 {
 	private static $redisInstance = null;

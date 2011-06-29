@@ -74,6 +74,9 @@ class commands_CompileDocuments extends commands_AbstractChangeCommand
 		$this->message("== Compile Models by Module ==");
 		generator_PersistentModel::buildModelsByModuleNameCache();
 		
+		$this->message("== Compile Models children ==");
+		generator_PersistentModel::buildModelsChildrenCache();
+		
 		$this->message("== Compile Publication Infos ==");
 		generator_PersistentModel::buildPublishListenerInfos();
 		

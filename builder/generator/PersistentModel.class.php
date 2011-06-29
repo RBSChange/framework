@@ -181,13 +181,6 @@ class generator_PersistentModel
 	public static function buildModelsByModuleNameCache()
 	{
 		$modelsByModule = array();
-		
-		$ms = ModuleService::getInstance();
-		foreach ($ms->getModules() as $packageName)
-		{
-			$moduleName = $ms->getShortModuleName($packageName);
-		}
-		
 		foreach (self::loadModels() as $model)
 		{
 			$moduleName = $model->getModuleName();
@@ -203,6 +196,26 @@ class generator_PersistentModel
 		
 		$compiledFilePath = f_util_FileUtils::buildChangeBuildPath('documentmodels.php');
 		f_util_FileUtils::writeAndCreateContainer($compiledFilePath, serialize($modelsByModule), f_util_FileUtils::OVERRIDE);
+	}
+	
+	public static function buildModelsChildrenCache()
+	{
+		$modelsChildren = array();
+		foreach (self::loadModels() as $model)
+		{
+			$childrenNames = array();
+			foreach ($model->getFinalChildren() as $child)
+			{
+				$childrenNames[] = $child->getName();
+			}
+			if (count($childrenNames) > 0)
+			{
+				$modelsChildren[$model->getName()] = $childrenNames;
+			}
+		}
+		
+		$compiledFilePath = f_util_FileUtils::buildChangeBuildPath('documentmodelschildren.php');
+		f_util_FileUtils::writeAndCreateContainer($compiledFilePath, serialize($modelsChildren), f_util_FileUtils::OVERRIDE);
 	}
 	
 	public static function buildPublishListenerInfos()

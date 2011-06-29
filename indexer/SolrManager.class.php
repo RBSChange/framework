@@ -112,20 +112,39 @@ class indexer_SolrManager
 	{
 		if (!self::$confRead)
 		{
-			$className = Framework::getConfigurationValue("indexer/SolrManager/cacheClass");
-			if ($className !== null)
-			{
-				$class = new ReflectionClass($className);
-				if (!$class->isSubclassOf(new ReflectionClass("indexer_Cache")))
-				{
-					throw new Exception($className." is not a indexer_Cache subclass");
-				}
-				self::$cache = $class->newInstance();
-			}
-			
+			self::$cache = self::getCache();
 			self::$schemaVersion = Framework::getConfigurationValue("indexer/SolrManager/schemaVersion", "2.0.4");
 			self::$confRead = true;
 		}
+	}
+	
+	protected static function getCache()
+	{
+		$className = Framework::getConfigurationValue("indexer/SolrManager/cacheClass");
+		if ($className !== null)
+		{
+			$class = new ReflectionClass($className);
+			if (!$class->isSubclassOf(new ReflectionClass("indexer_Cache")))
+			{
+				throw new Exception($className." is not a indexer_Cache subclass");
+			}
+			return $class->newInstance();
+		}
+		return null;
+	}
+	
+	/**
+	 * @return Boolean true if some cache is configured
+	 */
+	public static function clearCache()
+	{
+		$cache = self::getCache();
+		if ($cache !== null)
+		{
+			$cache->clear();
+			return true;
+		}
+		return false;
 	}
 	
 	/**

@@ -96,39 +96,6 @@ class f_DataCacheMongoService extends f_DataCacheService
 		return true;
 	}
 	
-	/**
-	 * @param f_DataCacheItem $item
-	 * @param String $subCache
-	 */
-	public final function clearSubCache($item, $subCache)
-	{
-		$this->writeMode();
-		$this->registerShutdown();
-		
-		try
-		{
-			$this->mongoCollection->remove(array("_id" => $item->getNamespace().'-'.$item->getKeyParameters()), array("safe" => true));
-		}
-		catch (MongoCursorException $e)
-		{
-			Framework::exception($e);
-		}
-		
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug(__METHOD__ . ' ' . $item->getNamespace().'-'.$item->getKeyParameters().' : '.$subCache);
-		}
-		
-		if (!array_key_exists($item->getNamespace(), $this->idToClear))
-		{
-			$this->idToClear[$item->getNamespace()] = array($item->getKeyParameters() => $subCache);
-		}
-		else if (is_array($this->idToClear[$item->getNamespace()]))
-		{
-			$this->idToClear[$item->getNamespace()][$item->getKeyParameters()] = $subCache;
-		}
-	}
-	
 	public function clearCommand()
 	{
 		$this->writeMode();

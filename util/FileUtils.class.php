@@ -615,11 +615,21 @@ abstract class f_util_FileUtils
 	 * @param String $path
 	 * @throws IOException on error
 	 */
-	static function touch($path)
+	static function touch($path, $time = null)
 	{
-		if (!touch($path))
+		if ($time === null)
 		{
-			throw new IOException('Could not touch '.$path);
+			if (!touch($path))
+			{
+				throw new IOException('Could not touch '.$path);
+			}
+		}
+		else
+		{
+			if (!touch($path, $time))
+			{
+				throw new IOException('Could not touch '.$path);
+			}
 		}
 	}
 

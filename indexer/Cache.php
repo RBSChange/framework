@@ -11,37 +11,23 @@ interface indexer_Cache
 	 * @param indexer_CachedQuery $cachedQuery
 	 */
 	function store($cachedQuery);
+	
+	function clear();
 }
 
-class indexer_FSCache implements indexer_Cache
+class indexer_DataCache implements indexer_Cache
 {
-	private $dir;
-	
-	function __construct($dir = null)
-	{
-		if ($dir === null)
-		{
-			$dir = Framework::getConfigurationValue("indexer/FSCache/directory", "solr_requests");
-		}
-		$this->dir = $dir;
-	}
-	
-	private function getPath($queryId)
-	{
-		$queryRelPath = $queryId[0]."/".$queryId[1]."/".$queryId[2]."/".$queryId;
-		return f_util_FileUtils::buildCachePath($this->dir, $queryRelPath);
-	}
-	
 	/**
 	 * @param $queryId
 	 * @return indexer_CachedQuery
 	 */
 	function get($queryId)
 	{
-		$path = $this->getPath($queryId);
-		if (file_exists($path))
+		$cacheItem = f_DataCacheService::getInstance()->readFromCache("indexer_Cache", $queryId, array());
+		$cachedQuery = unserialize($cacheItem->getValue("cachedQuery"));
+		if ($cachedQuery !== false)
 		{
-			return unserialize(file_get_contents($path));
+			return $cachedQuery;
 		}
 		return null;
 	}
@@ -51,7 +37,15 @@ class indexer_FSCache implements indexer_Cache
 	 */
 	function store($cachedQuery)
 	{
-		f_util_FileUtils::writeAndCreateContainer($this->getPath($cachedQuery->getId()), serialize($cachedQuery), f_util_FileUtils::OVERRIDE);
+		$cs = f_DataCacheService::getInstance();
+		$cacheItem = $cs->getNewCacheItem("indexer_Cache", $cachedQuery->getId(), array());
+		$cacheItem->setValue("cachedQuery", serialize($cachedQuery));
+		$cs->writeToCache($cacheItem);
+	}
+	
+	function clear()
+	{
+		f_DataCacheService::getInstance()->clearCacheByNamespace("indexer_Cache");
 	}
 }
 

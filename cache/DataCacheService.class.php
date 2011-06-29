@@ -290,16 +290,6 @@ class f_DataCacheItemImpl implements f_DataCacheItem
 		return $this->isValid && $this->getCreationTime() !== null && ($this->getCreationTime()+$this->timeLimit > time());
 	}
 	
-	public function isRegenerated()
-	{
-		return $this->regenerated;
-	}
-	
-	public function markAsBeingRegenerated()
-	{
-		$this->regenerated = true;
-	}
-	
 	public function markAsNew()
 	{
 		$this->isNew = true;
@@ -395,6 +385,14 @@ class f_DataCacheService extends BaseService
 	
 	/**
 	 * @param f_DataCacheItem $item
+	 */
+	public function markAsBeingRegenerated($item)
+	{
+		// nothing
+	}
+	
+	/**
+	 * @param f_DataCacheItem $item
 	 * @param String $subCache
 	 * @return Boolean
 	 */
@@ -403,18 +401,8 @@ class f_DataCacheService extends BaseService
 		$result = $item->isValid();
 		if ($subCache !== null)
 		{
-			$subResult = $item->getValue($subCache) !== null;
+			return $result && $item->getValue($subCache) !== null;
 		}
-		else 
-		{
-			$subResult = true;
-		}
-		$result = $result && $subResult;
-		/*if (!$result && !$item->isRegenerated())
-		{
-			$item->markAsBeingRegenerated();
-			$this->writeToCache($item);
-		}*/
 		return $result;
 	}
 	
@@ -435,6 +423,7 @@ class f_DataCacheService extends BaseService
 	}
 	
 	/**
+	 * Has to be implemeted by sub class
 	 * @param string $pattern
 	 * @return array
 	 */
@@ -509,15 +498,6 @@ class f_DataCacheService extends BaseService
 	}
 	
 	protected function commitClear()
-	{
-		return true;
-	}
-	
-	/**
-	 * @param f_DataCacheItem $item
-	 * @param String $subCache
-	 */
-	public function clearSubCache($item, $subCache)
 	{
 		return true;
 	}
@@ -619,8 +599,9 @@ class f_DataCacheService extends BaseService
 		$this->clearAll = true;
 		$this->commitClear();
 	}
-	
+
 	/**
+	 * Has to be implemeted by sub class
 	 * @param f_DataCacheItem $item
 	 * @return f_DataCacheItem
 	 */
@@ -637,4 +618,12 @@ class f_DataCacheService extends BaseService
 		$this->dispatch = $dispatch;
 	}
 
+	// deprecated
+	/**
+	 * @deprecated 
+	 */
+	public function clearSubCache($item, $subCache)
+	{
+		return true;
+	}
 }

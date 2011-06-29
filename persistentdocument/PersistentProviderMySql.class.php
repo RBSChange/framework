@@ -1130,6 +1130,15 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		{
 			return 'TRUNCATE TABLE f_cache';
 		}
+		
+		/**
+		 * DELETE FROM f_cache WHERE (insert_time + :ttl) < NOW()
+		 * @return string
+		 */
+		protected function clearFrameworkCacheByTTLQuery()
+		{
+			return 'DELETE FROM f_cache WHERE (insert_time + :ttl) < NOW()';
+		}
 
 		// f_locale 
 		

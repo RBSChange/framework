@@ -594,7 +594,8 @@ class DocumentHelper
 	 */
 	public static function expandModelList($modelList)
 	{
-		$models = array();	
+		$models = array();
+		$modelsChildren = f_persistentdocument_PersistentDocumentModel::getModelChildrenNames(); 
 		foreach (explode(',', $modelList) as $modelItem)
 		{
 			$modelItem = trim($modelItem);
@@ -603,16 +604,15 @@ class DocumentHelper
 				$modelName = str_replace(array('[', ']'), '', $modelItem);
 				try 
 				{
-					$model = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($modelName);
 					$models[$modelName] = true;
-					$children = $model->getChildrenNames();
-					if (is_array($children))
+					if (isset($modelsChildren[$modelName]))
 					{
-						foreach ($children as $childModelName)
+						foreach ($modelsChildren[$modelName] as $childModelName)
 						{
 							$models[$childModelName] = true;
 						}
 					}
+					
 					continue;
 				}
 				catch (Exception $e)
@@ -635,7 +635,7 @@ class DocumentHelper
 			}
 		}
 		return array_keys($models);
-	}	
+	}
 	
 	// Deprecated
 	

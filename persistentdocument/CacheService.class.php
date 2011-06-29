@@ -74,6 +74,11 @@ abstract class f_persistentdocument_CacheService
 	public abstract function commit();
 
 	public abstract function rollBack();
+	
+	public function clearByTTL($ttl)
+	{
+		// nothing
+	}
 }
 
 class f_persistentdocument_NoopCacheService extends f_persistentdocument_CacheService

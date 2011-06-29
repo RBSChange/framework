@@ -1,4 +1,7 @@
 <?php
+/**
+ * This class uses mongo (http://pecl.php.net/package/mongo) for driver
+ */
 class f_MongoProvider
 {
 	private $databaseName = null;
