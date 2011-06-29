@@ -119,7 +119,10 @@ class SessionStorage extends Storage
 		session_name($sessionName);
 		if ($this->getParameter('auto_start', true))
 		{
-			session_start();
+			if (session_id() == "")
+			{
+				session_start();
+			}
 			$this->started = true;
 		}
 	}
