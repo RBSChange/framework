@@ -2,6 +2,7 @@
 ignore_user_abort(true);
 define('WEBEDIT_HOME', dirname(realpath(__FILE__)));
 set_time_limit(0);
+session_start();
 if (!isset($_POST['noframework']) || $_POST['noframework'] !== 'true')
 {
 	require_once WEBEDIT_HOME . "/framework/Framework.php";
