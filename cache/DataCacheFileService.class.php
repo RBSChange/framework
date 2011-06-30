@@ -124,21 +124,13 @@ class f_DataCacheFileService extends f_DataCacheService
 	
 	public function cleanExpiredCache()
 	{
-		$directoryIterator = new DirectoryIterator(f_util_FileUtils::buildChangeCachePath('simplecache'));
+		$cachePath = f_util_FileUtils::buildChangeCachePath('simplecache');
 		$now = time();
-		foreach ($directoryIterator as $classNameDir)
+		foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($cachePath, RecursiveDirectoryIterator::KEY_AS_FILENAME), RecursiveIteratorIterator::LEAVES_ONLY) as $fileName => $info)
 		{
-			if ($classNameDir->isDir())
+			if ($fileName === self::INVALID_CACHE_ENTRY && @filemtime($info->getPathname()) < $now)
 			{
-				$subDirIterator = new DirectoryIterator($classNameDir->getPathname());
-				foreach ($subDirIterator as $cacheKeyDir)
-				{
-					$invalidCacheFilePath = $cacheKeyDir->getPathname() . DIRECTORY_SEPARATOR . self::INVALID_CACHE_ENTRY;
-					if ($cacheKeyDir->isDir() && file_exists($invalidCacheFilePath) && @filemtime($invalidCacheFilePath) < $now)
-					{
-						f_util_FileUtils::rmdir($cacheKeyDir->getPathname());
-					}
-				}
+				f_util_FileUtils::rmdir($info->getPath());
 			}
 		}
 	}
