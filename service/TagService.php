@@ -1007,8 +1007,8 @@ class TagService extends BaseService
 				Framework::debug("**** Processing module ".$moduleName." ****");
 			}
 			$dirsToProcess = array();
-			$configPaths = Resolver::getInstance('file')->setPackageName($moduleName)->setDirectory('config')->getPaths('');
-
+			$configPaths = FileResolver::getInstance()->setPackageName($moduleName)->setDirectory('config')->getPaths('');
+					
 			// intbonjf 2007-06-01:
 			// fixing #194: process the files in the modules THEN in the webapp.
 			$configPaths = array_reverse($configPaths);

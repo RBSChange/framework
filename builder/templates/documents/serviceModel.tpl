@@ -371,7 +371,7 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 	 * @param string $bockName
 	 * @return array with entries 'module' and 'template'. 
 	 */
-//	public function getSolrserachResultItemTemplate($document, $bockName)
+//	public function getSolrsearchResultItemTemplate($document, $bockName)
 //	{
 //		return array('module' => '<{$module}>', 'template' => '<{$moduleUCFirst}>-Inc-<{$nameUCFirst}>ResultDetail');
 //	}
