@@ -245,7 +245,10 @@ class f_DataCacheFileService extends f_DataCacheService
 			}
 			if (!is_numeric($subDir) && strlen($subDir) > 1)
 			{
-				@touch($dir.DIRECTORY_SEPARATOR.$subDir.DIRECTORY_SEPARATOR.self::INVALID_CACHE_ENTRY);
+				if (!touch($dir.DIRECTORY_SEPARATOR.$subDir.DIRECTORY_SEPARATOR.self::INVALID_CACHE_ENTRY))
+				{
+					f_util_FileUtils::rmdir($dir.DIRECTORY_SEPARATOR.$subDir);
+				}
 			}
 			else
 			{
