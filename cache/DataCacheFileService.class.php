@@ -57,8 +57,16 @@ class f_DataCacheFileService extends f_DataCacheService
 				}
 			}
 			$expireTime = @filemtime($this->getCachePath($item, self::INVALID_CACHE_ENTRY));
-			$item->setTTL($expireTime-$item->getCreationTime());
-			$item->setValidity($expireTime > time());
+			if ($expireTime > time())
+			{
+				$item->setTTL($expireTime-$item->getCreationTime());
+				$item->setValidity(true);
+			}
+			else
+			{
+				$item->setInvalid();
+			}
+			
 			return $item;
 		}
 		return ($returnItem) ? $item : null;
