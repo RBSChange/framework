@@ -409,7 +409,7 @@ abstract class f_util_HtmlUtils
 				
 			if ($formatted)
 			{
-				$html = '<a class="lightbox" href="' . media_MediaService::getInstance()->generateUrl($document, null, $docInfo) . '" title="'.$attributes["alt"].'">' . $html . '</a>';
+				$html = '<a class="lightbox" href="' . LinkHelper::getDocumentUrl($document) . '" title="'.$attributes["alt"].'">' . $html . '</a>';
 			}
 		}
 		return $html;
