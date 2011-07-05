@@ -693,6 +693,10 @@ abstract class f_persistentdocument_PersistentProvider
 			if ($nbDocs > 1 && Framework::isWarnEnabled())
 			{
 				Framework::warn(get_class($this).'->findUnique() called while find() returned more than 1 results');
+				if (Framework::isInfoEnabled())
+				{
+					Framework::info(f_util_ProcessUtils::getBackTrace());
+				}
 			}
 			return $docs[0];
 		}
