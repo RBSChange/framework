@@ -14,7 +14,6 @@ class f_tasks_BackgroundIndexingTask extends task_SimpleSystemTask
 			$maxId = intval($row['max_id']);
 			while ($maxId > 0) 
 			{
-				$this->plannedTask->ping();
 				$maxId = $this->backgroundIndex($mode, $maxId, 100, $errors);
 			}
 		}
