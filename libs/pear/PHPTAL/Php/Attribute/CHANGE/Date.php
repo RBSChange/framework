@@ -82,11 +82,11 @@ class PHPTAL_Php_Attribute_CHANGE_date extends ChangeTalAttribute
 			{
 				if ($dropTimeInfo)
 				{
-					$format = date_Formatter::getDefaultDateFormat();
+					$format = date_Formatter::getDefaultDateFormat(RequestContext::getInstance()->getLang());
 				}
 				else
 				{
-					$format = date_Formatter::getDefaultDateTimeFormat();
+					$format = date_Formatter::getDefaultDateTimeFormat(RequestContext::getInstance()->getLang());
 				}
 			}
 			$dateStr = date_Formatter::format($uiDate, $format);
