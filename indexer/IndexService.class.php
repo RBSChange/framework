@@ -1367,4 +1367,20 @@ class indexer_IndexService extends BaseService
 		}
 		return false;
 	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function setAutoCommit($bool)
+	{
+		
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function commit()
+	{
+		
+	}
 }
