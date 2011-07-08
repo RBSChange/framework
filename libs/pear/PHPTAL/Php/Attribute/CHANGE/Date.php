@@ -80,9 +80,16 @@ class PHPTAL_Php_Attribute_CHANGE_date extends ChangeTalAttribute
 		{
 			if ($format == "classic") 
 			{
-			    $format = null;
+				if ($dropTimeInfo)
+				{
+					$format = date_Formatter::getDefaultDateFormat();
+				}
+				else
+				{
+					$format = date_Formatter::getDefaultDateTimeFormat();
+				}
 			}
-			$dateStr = date_DateFormat::format($uiDate, $format);
+			$dateStr = date_Formatter::format($uiDate, $format);
 		}
     	return $dateStr;
 	}
@@ -118,7 +125,6 @@ class PHPTAL_Php_Attribute_CHANGE_date extends ChangeTalAttribute
 
 class PHPTAL_Php_Attribute_CHANGE_datetime extends PHPTAL_Php_Attribute_CHANGE_date
 {		
-	
 	public static function renderDateTime($params)
 	{
 		return self::renderDate($params, false);
