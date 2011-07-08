@@ -6,34 +6,22 @@ class f_tasks_BackgroundIndexingTask extends task_SimpleSystemTask
 	 */
 	protected function execute()
 	{
-		$stats = f_persistentdocument_PersistentProvider::getInstance()->getIndexingStats();
-		f_persistentdocument_PersistentProvider::getInstance()->refresh();
-		
-		$result = array();
+		$stats = f_persistentdocument_PersistentProvider::getInstance()->getIndexingPendingEntries();
+		$errors = array();	
 		foreach ($stats as $row) 
 		{
-			if ($row['indexing_status'] !== 'INDEXED')
+			$mode = intval($row['indexing_mode']);
+			$maxId = intval($row['max_id']);
+			while ($maxId > 0) 
 			{
-				$mode = intval($row['indexing_mode']);
-				$maxId = intval($row['max_id']);
-				if (isset($result[$mode]))
-				{
-					$result[$mode] = max($result[$mode], $maxId);
-				}
-				else
-				{
-					$result[$mode] =  $maxId;
-				}
-				
+				$this->plannedTask->ping();
+				$maxId = $this->backgroundIndex($mode, $maxId, 100, $errors);
 			}
 		}
 		
-		foreach ($result as $mode => $maxId) 
+		if (count($errors))
 		{
-			while ($maxId > 0) 
-			{
-				$maxId = $this->backgroundIndex($mode, $maxId, 100);
-			}
+			throw new Exception(implode("\n", $errors));
 		}
 	}
 	

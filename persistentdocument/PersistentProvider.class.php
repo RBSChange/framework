@@ -4481,6 +4481,24 @@ abstract class f_persistentdocument_PersistentProvider
 		return $result;
 	}	
 	
+	protected function getIndexingPendingEntriesQuery()
+	{
+		return "SELECT `indexing_mode`, max(`document_id`) as max_id FROM `f_indexing` WHERE `indexing_status` <> 'INDEXED' GROUP BY `indexing_mode`";
+	}
+	
+	/**
+	 * @return array<indexing_mode => integer, max_id => integer >
+	 */
+	public final function getIndexingPendingEntries()
+	{
+		$stmt = $this->prepareStatement($this->getIndexingPendingEntriesQuery());
+		$this->executeStatement($stmt);
+		$result = $stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC);
+		$stmt->closeCursor();
+		return $result;
+	}
+		
+	
 	protected function getIndexingDocumentsQuery($chunkSize)
 	{
 		return "SELECT `document_id` FROM `f_indexing` WHERE  `indexing_mode` = :indexing_mode AND `document_id` <= :document_id AND `indexing_status` <> 'INDEXED' ORDER BY `document_id` DESC LIMIT 0, " .intval($chunkSize);
