@@ -2838,10 +2838,11 @@ class f_persistentdocument_DocumentService extends BaseService
 	
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param String[] $propertiesName
-	 * @param Array $datas
+	 * @param string[] $propertiesName
+	 * @param array $datas
+	 * @param integer $parentId
 	 */
-	public function addFormProperties($document, $propertiesName, &$datas)
+	public function addFormProperties($document, $propertiesName, &$datas, $parentId = null)
 	{
 		if (f_util_ClassUtils::methodExists($document, 'addFormProperties'))
 		{

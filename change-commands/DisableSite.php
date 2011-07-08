@@ -30,6 +30,7 @@ class commands_DisableSite extends commands_AbstractChangeCommand
 	function _execute($params, $options)
 	{
 		$this->message("== Disable site ==");
+		$this->loadFramework();
 		
 		$flagFile = "site_is_disabled"; 
 		if (file_exists($flagFile))
