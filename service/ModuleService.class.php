@@ -196,13 +196,11 @@ class ModuleService extends BaseService
 	{
 		return $this->getVisibleModulesForUser(users_UserService::getInstance()->getCurrentBackEndUser());
 	}
-	
+		
 	/**
-	 * Get the list of installed modules
-	 * @todo this should be named getModuleNames() and be deprecated in favor to <code>getModules(): c_Module[]</code> 
-	 * @return String[]
+	 * @return string[]
 	 */
-	public final function getModules()
+	public final function getPackageNames()
 	{
 		$this->initializeIfNeeded();
 		return array_keys($this->packages);
@@ -274,6 +272,8 @@ class ModuleService extends BaseService
 		$this->initializeIfNeeded();
 		return $this->packages;
 	}
+
+
 	
 	/**
 	 * Return an associative array of the versions for the packages.
@@ -285,9 +285,10 @@ class ModuleService extends BaseService
 	{
 		$packageVersion = array();
 		$packageVersionArray = $this->getPackageVersionList();
+		$ls = LocaleService::getInstance();
 		foreach ($packageVersionArray as $packageName => $version)
 		{
-			$packageVersion[f_Locale::translate('&modules.' . substr($packageName, 8) . '.bo.general.Module-name;')] = $version;
+			$packageVersion[$ls->transFO('m.' . substr($packageName, 8) . '.bo.general.module-name', array('ucf'))] = $version;
 		}
 		krsort($packageVersion);
 		$packageVersion['Framework'] = FRAMEWORK_VERSION;
@@ -686,6 +687,60 @@ class ModuleService extends BaseService
 		}
 		return array_keys($modules);
 	}
+	
+	// Deprecarted
+	
+	/**
+	 * @deprecated (will be removed in 4.0) with no replacement.
+	 */
+	public function getRequiredTags($moduleName, $onlyMissingTags = false)
+	{
+		return array();
+	}
+		
+	/**
+	 * @deprecated (will be removed in 4.0) Use getPackageVersionList() instead.
+	 */
+	public final function getModuleVersionList()
+	{
+		return $this->getPackageVersionList();
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0) use getDefinedDocumentNames($moduleName)
+	 */
+	public function getDefinedDocuments($moduleName)
+	{
+		return $this->getDefinedDocumentNames($moduleName);
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0)  use getPackageNames()
+	 */
+	public final function getModules()
+	{
+		return $this->getPackageNames();
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0) use getPreferencesDocument($moduleName)
+	 */
+	public static function getPreferencesDocumentId($moduleName)
+	{
+		if (empty($moduleName))
+		{
+			throw new BaseException('invalid-empty-module-name', 'framework.exception.errors.Invalid-empty-module-name');
+		}
+		
+		$preferencesDocument = self::getPreferencesDocument($moduleName);
+		
+		if (is_null($preferencesDocument))
+		{
+			throw new BaseException('preferences-document-not-found', 'framework.exception.errors.Preferences-document-not-found');
+		}
+		
+		return $preferencesDocument->getId();
+	}
 }
 
 class c_Module
@@ -824,6 +879,14 @@ class c_Module
 	/**
 	 * @return String
 	 */
+	function getHotfix()
+	{
+		return isset($this->infos['HOTFIX']) ? $this->infos['HOTFIX'] : null;
+	}
+	
+	/**
+	 * @return String
+	 */
 	function getIconName()
 	{
 		return isset($this->infos['ICON']) ? $this->infos['ICON'] : 'package';
@@ -843,51 +906,5 @@ class c_Module
 	function getRootFolderId()
 	{
 		return ModuleService::getInstance()->getRootFolderId($this->name);
-	}
-	
-	// Deprecarted
-	
-	/**
-	 * @deprecated (will be removed in 4.0) with no replacement.
-	 */
-	public function getRequiredTags($moduleName, $onlyMissingTags = false)
-	{
-		return array();
-	}
-		
-	/**
-	 * @deprecated (will be removed in 4.0) Use getPackageVersionList() instead.
-	 */
-	public final function getModuleVersionList()
-	{
-		return $this->getPackageVersionList();
-	}
-	
-	/**
-	 * @deprecated (will be removed in 4.0) use getDefinedDocumentNames($moduleName)
-	 */
-	public function getDefinedDocuments($moduleName)
-	{
-		return $this->getDefinedDocumentNames($moduleName);
-	}
-	
-	/**
-	 * @deprecated (will be removed in 4.0) use getPreferencesDocument($moduleName)
-	 */
-	public static function getPreferencesDocumentId($moduleName)
-	{
-		if (empty($moduleName))
-		{
-			throw new BaseException('invalid-empty-module-name', 'framework.exception.errors.Invalid-empty-module-name');
-		}
-		
-		$preferencesDocument = self::getPreferencesDocument($moduleName);
-		
-		if (is_null($preferencesDocument))
-		{
-			throw new BaseException('preferences-document-not-found', 'framework.exception.errors.Preferences-document-not-found');
-		}
-		
-		return $preferencesDocument->getId();
 	}
 }

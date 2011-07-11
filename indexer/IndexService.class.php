@@ -1465,7 +1465,7 @@ class indexer_IndexService extends BaseService
 
 	
 	/**
-	 * @deprecated
+	 * @deprecated (will be removed in 4.0)
 	 */
 	public function isDirty()
 	{

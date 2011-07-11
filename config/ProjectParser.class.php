@@ -121,11 +121,14 @@ class config_ProjectParser
 			$this->addConstant($configArray['defines'], "OUTGOING_HTTP_PROXY_HOST", $computedDeps["OUTGOING_HTTP_PROXY_HOST"]);
 			$this->addConstant($configArray['defines'], "OUTGOING_HTTP_PROXY_PORT", $computedDeps["OUTGOING_HTTP_PROXY_PORT"]);
 		}
-	
+		$fDeps = $computedDeps['change-lib']['framework'];
+		$this->addConstant($configArray['defines'], "FRAMEWORK_VERSION", $fDeps['version']);
+		$fHotfix = (count($fDeps['hotfix']) > 0) ?  end($fDeps['hotfix']) : null;
+		$this->addConstant($configArray['defines'], "FRAMEWORK_HOTFIX", $fHotfix);
 
 		// -- Modules informations.
 		$configArray['packageversion'] = $this->compilePackageVersion();
-		$this->compileModulesConfig($configArray);
+		$this->compileModulesConfig($configArray, $computedDeps['module']);
 		$configArray['config']['packageversion'] = $configArray['packageversion'];
 		unset($configArray['packageversion']);
 								
@@ -307,7 +310,9 @@ class config_ProjectParser
 			$doc->load($changeXmlFile);
 			if ($doc->documentElement)
 			{
-				$name = null; $version =null;
+				$name = null; 
+				$version =null;
+				
 				foreach ($doc->documentElement->childNodes as $node) 
 				{
 					if ($node->nodeName == 'name')
@@ -321,7 +326,7 @@ class config_ProjectParser
 				}
 				if ($name && $version)
 				{
-					$packagesVersion['modules_' . $name] = $version;
+					$packagesVersion['modules_' . $name] = $version;	
 				}
 				continue;
 			}
@@ -333,7 +338,7 @@ class config_ProjectParser
 	/**
 	 * @param array $configArray
 	 */
-	private function compileModulesConfig(&$configArray)
+	private function compileModulesConfig(&$configArray, $computedModulesDeps)
 	{
 		$constants = array();
 		$moduleXmlFiles = array();		
@@ -357,33 +362,45 @@ class config_ProjectParser
 				if (isset($moduleConfig['module']))
 				{
 					$pname = 'modules_'.$moduleName;
-					$version = isset($configArray['packageversion'][$pname]) ? $configArray['packageversion'][$pname] : null;
-					$configArray['packageversion'][$pname] = array('ENABLED' => true, 'VISIBLE' => true, 'CATEGORY' => null, 'ICON' => 'package', 'USETOPIC' => false, 'VERSION' => $version);
+					$version = isset($configArray['packageversion'][$pname]) ? $configArray['packageversion'][$pname] : null;	
+					$configArray['packageversion'][$pname] = array('ENABLED' => true, 'VISIBLE' => true, 'CATEGORY' => null, 
+						'ICON' => 'package', 'USETOPIC' => false, 'VERSION' => $version, 'HOTFIX' => null);
 					
+					if (isset($computedModulesDeps[$moduleName]))
+					{
+						
+						$hotFixes = $computedModulesDeps[$moduleName]['hotfix'];
+						$hotFixCount  = count($hotFixes);
+						if ($hotFixCount > 0)
+						{
+							$configArray['packageversion'][$pname]['HOTFIX'] = $hotFixes[$hotFixCount - 1];
+						}
+					}	
+									
 					foreach ($moduleConfig['module'] as $key => $value)
 					{
 						$key = strtoupper($key);
-						switch ($key) 
+						switch ($key)
 						{
-							case 'ENABLED':
-							case 'VISIBLE':
-							case 'CATEGORY':
-							case 'ICON':
-							case 'USETOPIC':
+							case 'ENABLED' :
+							case 'VISIBLE' :
+							case 'CATEGORY' :
+							case 'ICON' :
+							case 'USETOPIC' :
 								if ($value === 'true')
 								{
 									$value = true;
 								}
-								else if ($value === 'false')
+								elseif ($value === 'false')
 								{
 									$value = false;
 								}
 								$configArray['packageversion'][$pname][$key] = $value;
 								break;
-							default:	
+							default :
 								$constantName = 'MOD_' . strtoupper($moduleName) . '_' . $key;
-								$configArray['defines'][$constantName] = $value;
-							break;
+								$configArray['defines'][$constantName] = $value;	
+								break;
 						}
 					}
 				}

@@ -13,7 +13,7 @@
 		<define name="PROJECT_OVERRIDE">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'override'</define>
 		<define name="DOCUMENT_ROOT">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'webapp' . DIRECTORY_SEPARATOR . 'www'</define>
 		
-		<define name="FRAMEWORK_VERSION">3.5.0</define>
+
 		<define name="CHANGE_RELEASE">3.5</define>
 
 		<define name="CAPTCHA_SESSION_KEY">CHANGE_CAPTCHA</define>
