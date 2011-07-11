@@ -45,17 +45,17 @@
 		<toolbarbutton name="reactivate" />
 	</toolbar>
 	<actions>
-		<action name="refresh" single="true" icon="refresh" label="&amp;modules.uixul.bo.actions.Refresh;" />
-		<action name="edit" single="true" permission="Load" icon="edit" label="&amp;modules.uixul.bo.actions.Edit;" />
-		<action name="delete" permission="Delete" icon="delete" label="&amp;modules.uixul.bo.actions.Delete;" />
-		<action name="openFolder" single="true" icon="open-folder" label="&amp;modules.uixul.bo.actions.OpenFolder;" />
-		<action name="move" permission="Move" icon="up_down" label="&amp;modules.uixul.bo.actions.Move;" />
-		<action name="openTags" single="true" permission="LoadTags" icon="edit-tags" label="&amp;modules.uixul.bo.actions.Open-tags-panel;" />
-		<action name="duplicate" single="true" permission="Duplicate" icon="duplicate" label="&amp;modules.uixul.bo.actions.Duplicate;" />
-		<action name="activate" single="true" permission="Activate" icon="activate" label="&amp;modules.uixul.bo.actions.Activate;" />
-		<action name="deactivated" permission="Deactivated" icon="deactivated" label="&amp;modules.uixul.bo.actions.Deactivate;" />
-		<action name="reactivate" permission="ReActivate" icon="reactivate" label="&amp;modules.uixul.bo.actions.ReActivate;" />
-		<action name="openTreeNodeOrder" single="true" permission="Order" icon="sort" label="&amp;modules.uixul.bo.actions.Set-children-order;" />
-		<action name="createFolder" single="true" permission="Insert_folder" icon="create-folder" label="&amp;modules.uixul.bo.actions.Create-folder;" />
+		<action name="refresh" single="true" icon="refresh" labeli18n="m.uixul.bo.actions.refresh" />
+		<action name="edit" single="true" permission="Load" icon="edit" labeli18n="m.uixul.bo.actions.edit" />
+		<action name="delete" permission="Delete" icon="delete" labeli18n="m.uixul.bo.actions.delete" />
+		<action name="openFolder" single="true" icon="open-folder" labeli18n="m.uixul.bo.actions.openfolder" />
+		<action name="move" permission="Move" icon="up_down" labeli18n="m.uixul.bo.actions.move" />
+		<action name="openTags" single="true" permission="LoadTags" icon="edit-tags" labeli18n="m.uixul.bo.actions.open-tags-panel" />
+		<action name="duplicate" single="true" permission="Duplicate" icon="duplicate" labeli18n="m.uixul.bo.actions.duplicate" />
+		<action name="activate" single="true" permission="Activate" icon="activate" labeli18n="m.uixul.bo.actions.activate" />
+		<action name="deactivated" permission="Deactivated" icon="deactivated" labeli18n="m.uixul.bo.actions.deactivate" />
+		<action name="reactivate" permission="ReActivate" icon="reactivate" labeli18n="m.uixul.bo.actions.reactivate" />
+		<action name="openTreeNodeOrder" single="true" permission="Order" icon="sort" labeli18n="m.uixul.bo.actions.set-children-order" />
+		<action name="createFolder" single="true" permission="Insert_folder" icon="create-folder" labeli18n="m.uixul.bo.actions.create-folder" />
 	</actions>
 </perspective>
