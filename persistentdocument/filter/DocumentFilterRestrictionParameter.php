@@ -329,7 +329,7 @@ class f_persistentdocument_DocumentFilterRestrictionParameter extends f_persiste
 		if (!$this->propertyInfoLocked)
 		{
 			$values['property'] = $this->propertyName;
-			$pattern .= '<cFilterParameterProperty>' . $this->getPropertyLabelAsText() . '</cFilterParameterProperty>';
+			$pattern .= '<cFilterParameterProperty>' . f_util_HtmlUtils::textToHtml($this->getPropertyLabelAsText()) . '</cFilterParameterProperty>';
 		}
 		else 
 		{
@@ -340,7 +340,7 @@ class f_persistentdocument_DocumentFilterRestrictionParameter extends f_persiste
 		if (!$this->restrictionLocked)
 		{
 			$values['restriction'] = $this->restriction;
-			$pattern .= '<cFilterParameterRestriction>' . $this->getRestrictionLabelAsText() . '</cFilterParameterRestriction>';
+			$pattern .= '<cFilterParameterRestriction>' . f_util_HtmlUtils::textToHtml($this->getRestrictionLabelAsText()) . '</cFilterParameterRestriction>';
 		}
 		else 
 		{

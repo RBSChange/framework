@@ -138,7 +138,7 @@ class f_persistentdocument_DocumentFilterValueParameter extends f_persistentdocu
 	public function getValueForXul()
 	{
 		return array(
-			'pattern' => '<cFilterParameterValue>' . $this->getValueAsText() . '</cFilterParameterValue>', 
+			'pattern' => '<cFilterParameterValue>' . f_util_HtmlUtils::textToHtml($this->getValueAsText()) . '</cFilterParameterValue>', 
 			'value' => $this->getValue()
 		);
 	}
