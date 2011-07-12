@@ -4,15 +4,11 @@
 		<define name="AG_WEBAPP_NAME">Project ${project} ${author}</define>
 		
 		<define name="AG_SUPPORTED_LANGUAGES">fr en</define>
-    	<define name="AG_UI_SUPPORTED_LANGUAGES">fr en</define>
+		<define name="AG_UI_SUPPORTED_LANGUAGES">fr en</define>
     	
-    	<define name="AG_LOGGING_LEVEL">WARN</define>
-    	<define name="AG_DEVELOPMENT_MODE">false</define>
+		<define name="AG_LOGGING_LEVEL">WARN</define>
     	
-		<define name="CHANGE_USE_WORKFLOW">true</define>
-		
-		<define name="AG_DISABLE_BLOCK_CACHE">false</define>
-		<define name="AG_DISABLE_SIMPLECACHE">false</define>		
+		<define name="CHANGE_USE_WORKFLOW">true</define>		
 	</defines>
 
 	<config>
@@ -23,16 +19,23 @@
 		</databases>
 		
 		<modules>		
-	     	<media>
-	     		<secureMediaStrategyClass>
-	     			<entry name="default">media_DisplaySecuremediaDefaultStrategy</entry>
-	     		</secureMediaStrategyClass>
-	     		<!-- External icons library 
-	     		<icons>
-	     			<entry name="library">/usr/share/pear/rbs/webedit4/libs/icons-1.0</entry>
-	     		</icons>
-	     		-->
-	     	</media>
+		    <media>
+			    <secureMediaStrategyClass>
+				    <entry name="default">media_DisplaySecuremediaDefaultStrategy</entry>
+			    </secureMediaStrategyClass>
+			    <!-- External icons library 
+			    <icons>
+				    <entry name="library">/usr/share/pear/rbs/webedit4/libs/icons-1.0</entry>
+			    </icons>
+			    -->
+		    </media>
+		    <!-- to change the default template for module samples, uncomment and modify the lines below -->
+		    <!--website>
+			<sample>
+			    <entry name="defaultPageTemplate">webfactory/tplTwo</entry>
+			    <entry name="defaultHomeTemplate">webfactory/tplOne</entry>
+			</sample>
+		    </website-->
 	     </modules> 
 	     <!-- Web browsers compatibility -->
 	     <browsers>

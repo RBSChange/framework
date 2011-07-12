@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project>
 	<defines>
+		<!-- to switch to development mode, please use DEVELOPMENT_MODE=true in your change.properties file -->
 		<!-- 
 		<define name="AG_LOGGING_LEVEL">DEBUG</define>
-		<define name="AG_DEVELOPMENT_MODE">true</define>
 		-->
     	 
 		<!--  
-		<define name="AG_DISABLE_BLOCK_CACHE">true</define>
-		<define name="AG_DISABLE_SIMPLECACHE">true</define>
+		<define name="DISABLE_DATACACHE">true</define>
 		-->
 		
 		${solrDef}
