@@ -7,9 +7,7 @@
 //   <span change:date="format \l\e d \d\u \m\o\i\s \d\e F, \a\n\n\é\e Y; value page/getStartpublicationdate" />
 
 /**
- * @package phptal.php.attribute
- * @author INTbonjF
- * 2007-04-19
+ * @deprecated use date and datetime prefixes
  */
 class PHPTAL_Php_Attribute_CHANGE_date extends ChangeTalAttribute 
 {	
@@ -78,7 +76,7 @@ class PHPTAL_Php_Attribute_CHANGE_date extends ChangeTalAttribute
 		}
 		else
 		{
-			if ($format == "classic") 
+			if ($format == "classic" || $format === null) 
 			{
 				if ($dropTimeInfo)
 				{

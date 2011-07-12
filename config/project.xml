@@ -227,6 +227,16 @@
 				<entry name="FrameworkSecurityUser">FrameworkSecurityUser</entry>	
 			</classes>	
 		</mvc>
+						
+		<tal>
+			<prefix>
+				<entry name="trans">f_TalesI18n</entry>
+				<entry name="transui">f_TalesI18n</entry>
+				<entry name="date">f_TalDate</entry>
+				<entry name="datetime">f_TalDate</entry>
+			</prefix>
+		</tal>
+		
 		<!-- Web browsers compatibility -->
 		<browsers>
 				<!--

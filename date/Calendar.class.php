@@ -72,6 +72,23 @@ abstract class date_Calendar
 	
 	/**
 	 * Builds a new date_Calendar instance initialized from the given date as a
+	 * string. Allowed format is the MySQL one: "Y-m-d H:i:s". Time information
+	 * is optionnal, so "Y-m-d" is a valid argument.
+	 *
+	 * @param string $dateString
+	 * @param string $impl Desired implementation (only Gregorian is implemented for now).
+	 *
+	 * @return date_Calendar
+	 *
+	 * @throws ClassNotFoundException
+	 */
+	public static function getUIInstance($dateString = null, $impl = 'Gregorian')
+	{
+		return date_Converter::convertDateToLocal(self::getInstance($dateString, $impl));
+	}
+	
+	/**
+	 * Builds a new date_Calendar instance initialized from the given date as a
 	 * timestamp.
 	 *
 	 * @param Integer $dateString

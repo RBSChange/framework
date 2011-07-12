@@ -11,19 +11,26 @@ class TemplateObject
 	private $fileName;
 	private $lang;
 	private $originalPath;
+	private static $prefixregistered;
 
-
-	public function __construct( $fileName, $mimeContentType )
+	/**
+	 * @param string $fileName
+	 * @param string $mimeContentType
+	 */
+	public function __construct($fileName, $mimeContentType)
 	{
 		$this->mimeContentType = $mimeContentType;
 		$this->fileName = $fileName;
 		$this->template = new PHPTAL($fileName);
 		$this->lang = RequestContext::getInstance()->getLang();
 		$registry = PHPTAL_TalesRegistry::getInstance();
-		if (!$registry->isRegistered('trans'))
+		if (!self::$prefixregistered)
 		{
-			$registry->registerPrefix('trans', array('f_TalesI18n', 'trans'));
-			$registry->registerPrefix('transui', array('f_TalesI18n', 'transui'));
+			self::$prefixregistered = true;
+			foreach (Framework::getConfigurationValue('tal/prefix') as $prefix => $class)
+			{
+				$registry->registerPrefix($prefix, array($class, $prefix));
+			}			
 		}
 	}
 
@@ -247,5 +254,88 @@ class f_TalesI18n implements PHPTAL_Tales
 			}
 		}
 		return "LocaleService::getInstance()->formatKey('$lang', '$key', array(".implode(', ', $formattersStr)."), array(".implode(', ', $replacementsStr)."))";
+	}
+}
+
+class f_TalDate implements PHPTAL_Tales
+{
+	/**
+	 * trans: modifier.
+	 *
+	 * Returns the code required to localize a key
+	 * <?php echo phptal_escape(RETURN_VALUE, ENT_QUOTES, 'UTF-8');?>
+	 */
+	static public function date($src, $nothrow)
+	{
+		return self::renderDate($src, 'date');
+	}
+		
+	/**
+	 * transui: modifier.
+	 *
+	 * Returns the code required to localize a key
+	 * <?php echo phptal_escape(RETURN_VALUE, ENT_QUOTES, 'UTF-8');?>
+	 */
+	static public function datetime($src, $nothrow)
+	{
+		return self::renderDate($src, 'datetime');
+	}
+	
+	/**
+	 * Returns the code required to localize a key
+	 * <?php echo phptal_escape(RETURN_VALUE, ENT_QUOTES, 'UTF-8');?>
+	 * @param string $mode date|datetime
+	 */
+	static private function renderDate($src, $mode)
+	{
+		$params = explode(',', $src);
+
+		$dateExpr = trim(array_shift($params));
+		if ($dateExpr == '')
+		{
+			$dateValue = 'date_Calendar::getUIInstance()';
+		}
+		else
+		{
+			$dateValue = self::evalExpr($dateExpr);
+		}	
+		
+		if (count($params) > 0)
+		{
+			$format = self::evalExpr(implode(',', $params));
+		}
+		else if ($mode == 'date')
+		{
+			$format = var_export(date_Formatter::getDefaultDateFormat(RequestContext::getInstance()->getLang()), true);
+		}
+		else
+		{
+			$format = var_export(date_Formatter::getDefaultDateTimeFormat(RequestContext::getInstance()->getLang()), true);
+		}
+		
+		return "date_Formatter::format($dateValue, $format)";
+	}
+	
+	/**
+	 * @param string $value
+	 * @return mixed
+	 */
+	private static function evalExpr($value)
+	{
+		$value = trim($value);
+		$l = strlen($value);
+		if ($l > 0 && !is_numeric($value) && $value[0] != '\'')
+		{
+			return phptal_tales($value);
+		}
+		else if ($l > 1 && $value[0] == '\'' && $value[$l-1] == '\'')
+		{
+			$value = htmlspecialchars_decode(substr($value, 1, $l - 2));
+			return var_export($value , true);
+		}
+		else
+		{
+			return var_export($value , true);
+		}
 	}
 }
