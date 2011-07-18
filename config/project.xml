@@ -14,7 +14,7 @@
 		<define name="DOCUMENT_ROOT">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'webapp' . DIRECTORY_SEPARATOR . 'www'</define>
 		
 
-		<define name="CHANGE_RELEASE">3.5</define>
+		<define name="CHANGE_RELEASE">4.0</define>
 
 		<define name="CAPTCHA_SESSION_KEY">CHANGE_CAPTCHA</define>
 
