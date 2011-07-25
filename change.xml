@@ -234,5 +234,12 @@
 				<version>2.6</version>
 			</versions>
 		</dependency>
+		
+		<dependency>
+			<name>lib/phptal</name>
+			<versions>
+				<version>1.2.2</version>
+			</versions>
+		</dependency>
 	</dependencies>
 </change>

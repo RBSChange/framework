@@ -1,17 +1,36 @@
 <?php
 /**
- * Auto-generated doc comment
  * @package framework.object
  */
-
 class TemplateObject
 {
+	
+	public static $lastTemplateFileName = null;
+	
+	/**
+	 * @var PHPTAL
+	 */
 	private $template;
+
+	/**
+	 * @var string
+	 */
 	private $mimeContentType;
+	
+	/**
+	 * @var string
+	 */	
 	private $fileName;
+	
+	/**
+	 * @var string
+	 */
 	private $lang;
+	
+	/**
+	 * @var string
+	 */	
 	private $originalPath;
-	private static $prefixregistered;
 
 	/**
 	 * @param string $fileName
@@ -20,17 +39,20 @@ class TemplateObject
 	public function __construct($fileName, $mimeContentType)
 	{
 		$this->mimeContentType = $mimeContentType;
+		self::$lastTemplateFileName = $fileName;
+		
 		$this->fileName = $fileName;
 		$this->template = new PHPTAL($fileName);
 		$this->lang = RequestContext::getInstance()->getLang();
-		$registry = PHPTAL_TalesRegistry::getInstance();
-		if (!self::$prefixregistered)
+		if (!PHPTAL_Dom_Defs::getInstance()->isHandledNamespace(PHPTAL_Namespace_CHANGE::NAMESPACE_URI))
 		{
-			self::$prefixregistered = true;
+			spl_autoload_unregister(array('PHPTAL', 'autoload'));
+			PHPTAL_Dom_Defs::getInstance()->registerNamespace(new PHPTAL_Namespace_CHANGE());	
+			$registry = PHPTAL_TalesRegistry::getInstance();
 			foreach (Framework::getConfigurationValue('tal/prefix') as $prefix => $class)
 			{
 				$registry->registerPrefix($prefix, array($class, $prefix));
-			}			
+			}
 		}
 	}
 
@@ -57,23 +79,29 @@ class TemplateObject
 		$this->template->set($name, $value);
 	}
 
+	/**
+	 * @param boolean $noheader
+	 */
 	public function execute($noheader = false)
 	{
 		try
 		{
 			RequestContext::getInstance()->beginI18nWork($this->lang);
-
-			$this->template->setTranslator(new LocaleTranslator($this->lang));
 			$this->template->getContext()->noThrow(true);
-
+			$this->template->stripComments(!Framework::inDevelopmentMode());
+			$path = PHPTAL_PHP_CODE_DESTINATION . $this->lang;
+			f_util_FileUtils::mkdir($path);
+			$this->template->setPhpCodeDestination($path);	
+					
 			if ($this->mimeContentType === K::XUL || $this->mimeContentType === K::XML)
 			{
 				$this->template->set('HOST',  Framework::getUIBaseUrl());
-				$this->template->setOutputMode(PHPTAL_XML);
+				$this->template->setOutputMode(PHPTAL::XML);
 			}
 			else
 			{
 				$this->template->set('HOST', Framework::getBaseUrl());
+				$this->template->setOutputMode(PHPTAL::XHTML);
 			}
 			
 			$this->template->set('UIHOST',  Framework::getUIBaseUrl());
@@ -97,7 +125,9 @@ class TemplateObject
 		}
 		catch(Exception $e)
 		{
-			Framework::warn(__METHOD__ . ' EXCEPTION while executing template: ' . $e->getMessage());
+			Framework::warn(__METHOD__ . ' EXCEPTION while executing template ('. $this->fileName . ') :' . $e->getMessage());
+			Framework::exception($e);
+			die();
 			RequestContext::getInstance()->endI18nWork($e);
 		}
 	}
@@ -132,210 +162,5 @@ class TemplateObject
 				break;
 		}
 		return $header;
-	}
-	
-	// Deprecated
-	
-	/**
-	 * @deprecated (will be removed in 4.0) 
-	 */
-	public function setSigned($signed)
-	{
-	}
-}
-
-class LocaleTranslator implements PHPTAL_TranslationService
-{
-	function __construct($lang)
-	{
-		$this->lang = $lang;
-	}
-
-	function setLanguage()
-	{
-		// nothing
-	}
-
-	/**
-	 * Set the domain to use for translations.
-	 */
-	function useDomain($domain)
-	{
-		// nothing
-	}
-
-	/**
-	 * Set an interpolation var.
-	 */
-	function setVar($key, $value)
-	{
-		// nothing
-	}
-
-	/**
-	 * Translate a gettext key and interpolate variables.
-	 */
-	function translate($key)
-	{
-		return f_Locale::translate($key, null, $this->lang);
-	}
-}
-
-class f_TalesI18n implements PHPTAL_Tales
-{
-	/**
-	 * trans: modifier.
-	 *
-	 * Returns the code required to localize a key
-	 * <?php echo phptal_escape(RETURN_VALUE, ENT_QUOTES, 'UTF-8');?>
-	 */
-	static public function trans($src, $nothrow)
-	{
-		return self::translate($src, RequestContext::getInstance()->getLang());
-	}
-		
-	/**
-	 * transui: modifier.
-	 *
-	 * Returns the code required to localize a key
-	 * <?php echo phptal_escape(RETURN_VALUE, ENT_QUOTES, 'UTF-8');?>
-	 */
-	static public function transui($src, $nothrow)
-	{
-		return self::translate($src, RequestContext::getInstance()->getUILang());
-	}
-
-	/**
-	 * Returns the code required to localize a key
-	 * <?php echo phptal_escape(RETURN_VALUE, ENT_QUOTES, 'UTF-8');?>
-	 */
-	static private function translate($src, $lang)
-	{
-		list($key, $formatters, $replacements) = LocaleService::getInstance()->parseTransString($src);
-		
-		$formattersStr = array();
-		$addHTMLFormatter = true;
-		foreach ($formatters as $formatter) 
-		{
-			if ($formatter === 'html' || $formatter === 'js' || $formatter === 'attr' || $formatter === 'raw')
-			{
-				$addHTMLFormatter = false;
-			}
-			$formattersStr[] = var_export($formatter , true);
-		}
-		if ($addHTMLFormatter) 
-		{
-			$formatter = 'html'; 
-			$formatters[] = $formatter;
-			$formattersStr[] = var_export($formatter , true);	
-		}
-		
-		if (count($replacements) === 0)
-		{
-			return var_export(LocaleService::getInstance()->formatKey($lang, $key, $formatters), true);
-		}
-		
-		$replacementsStr = array();
-		foreach ($replacements as $name => $value) 
-		{
-			$l = strlen($value);
-			if ($l > 0 && !is_numeric($value) && $value[0] != '\'')
-			{
-				$replacementsStr[] = var_export($name , true). ' => ' . phptal_tales($value);
-			}
-			else if ($l > 1 && $value[0] == '\'' && $value[$l-1] == '\'')
-			{
-				$value = htmlspecialchars_decode(substr($value, 1, $l - 2));
-				$replacementsStr[] = var_export($name , true). ' => ' . var_export($value , true);
-			}
-			else
-			{
-				$replacementsStr[] = var_export($name , true). ' => ' . var_export($value , true);
-			}
-		}
-		return "LocaleService::getInstance()->formatKey('$lang', '$key', array(".implode(', ', $formattersStr)."), array(".implode(', ', $replacementsStr)."))";
-	}
-}
-
-class f_TalDate implements PHPTAL_Tales
-{
-	/**
-	 * trans: modifier.
-	 *
-	 * Returns the code required to localize a key
-	 * <?php echo phptal_escape(RETURN_VALUE, ENT_QUOTES, 'UTF-8');?>
-	 */
-	static public function date($src, $nothrow)
-	{
-		return self::renderDate($src, 'date');
-	}
-		
-	/**
-	 * transui: modifier.
-	 *
-	 * Returns the code required to localize a key
-	 * <?php echo phptal_escape(RETURN_VALUE, ENT_QUOTES, 'UTF-8');?>
-	 */
-	static public function datetime($src, $nothrow)
-	{
-		return self::renderDate($src, 'datetime');
-	}
-	
-	/**
-	 * Returns the code required to localize a key
-	 * <?php echo phptal_escape(RETURN_VALUE, ENT_QUOTES, 'UTF-8');?>
-	 * @param string $mode date|datetime
-	 */
-	static private function renderDate($src, $mode)
-	{
-		$params = explode(',', $src);
-
-		$dateExpr = trim(array_shift($params));
-		if ($dateExpr == '')
-		{
-			$dateValue = 'date_Calendar::getUIInstance()';
-		}
-		else
-		{
-			$dateValue = self::evalExpr($dateExpr);
-		}	
-		
-		if (count($params) > 0)
-		{
-			$format = self::evalExpr(implode(',', $params));
-		}
-		else if ($mode == 'date')
-		{
-			$format = var_export(date_Formatter::getDefaultDateFormat(RequestContext::getInstance()->getLang()), true);
-		}
-		else
-		{
-			$format = var_export(date_Formatter::getDefaultDateTimeFormat(RequestContext::getInstance()->getLang()), true);
-		}
-		
-		return "date_Formatter::format($dateValue, $format)";
-	}
-	
-	/**
-	 * @param string $value
-	 * @return mixed
-	 */
-	private static function evalExpr($value)
-	{
-		$value = trim($value);
-		$l = strlen($value);
-		if ($l > 0 && !is_numeric($value) && $value[0] != '\'')
-		{
-			return phptal_tales($value);
-		}
-		else if ($l > 1 && $value[0] == '\'' && $value[$l-1] == '\'')
-		{
-			$value = htmlspecialchars_decode(substr($value, 1, $l - 2));
-			return var_export($value , true);
-		}
-		else
-		{
-			return var_export($value , true);
-		}
 	}
 }

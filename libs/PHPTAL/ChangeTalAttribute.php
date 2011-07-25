@@ -38,36 +38,57 @@ class ChangeTalAttribute extends PHPTAL_Php_Attribute
 	}
 
 	/**
-	 * @see PHPTAL_Php_Attribute::start
-	 */
-	public function start()
-	{
-		$parametersString = $this->initParams();
-		$this->getRenderMethodCall($parametersString);
+     * Called before element printing.
+     */
+    public function before(PHPTAL_Php_CodeWriter $codewriter)
+    {
+		$parametersString = $this->initParams($codewriter);
+		$this->getRenderMethodCall($codewriter, $parametersString);
+	}
+	
+	/**
+     * Called after element printing.
+     */
+    public function after(PHPTAL_Php_CodeWriter $codewriter)
+    {
+
 	}
 
-	protected function initParams($excludedNames = null)
+	protected function initParams(PHPTAL_Php_CodeWriter $codewriter, $excludedNames = null)
 	{
-		$expressions = $this->tag->generator->splitExpression($this->expression);
 		$parameters = array();
-		$parameters[] =	'"tagname" =>' . var_export($this->tag->name, true);
+		$parameters['tagname'] =	'"tagname" =>' . var_export($this->phpelement->getLocalName(), true);
 
 		//TODO: cleanup parameters
 		$this->parameters = $this->getDefaultValues();
 
 		foreach ($this->getDefaultValues() as $name => $val)
 		{
-			$parameters[] = var_export($name, true) . '=>' . var_export(f_util_Convert::fixDataType($val), true);
+			$parameters[$name] = var_export($name, true) . '=>' . var_export(f_util_Convert::fixDataType($val), true);
 		}
 
+		
 		// Parse "direct" attributes
 		$varRegexp = '/\${[^}]*}/';
-		foreach ($this->tag->attributes as $name => $val)
+		foreach ($this->phpelement->getAttributeNodes() as  $attrNode)
 		{
+			/* @var $attrNode PHPTAL_Dom_Attr */
+			if ($attrNode->getNamespaceURI() !== '') 
+			{
+				if ($attrNode->getQualifiedName() === 'xml:lang')
+				{
+					$this->parameters[$name] = $attrNode->getValueEscaped();
+					$parameters[$name] = var_export($name, true) . '=>' . var_export($this->parameters[$name], true);
+				}
+				continue;
+			}
+			
+			$name = $attrNode->getLocalName();
 			if ($excludedNames !== null && in_array($name, $excludedNames))
 			{
 				continue;
 			}
+			$val = $attrNode->getValueEscaped();
 			if (preg_match_all($varRegexp, $val, $matches))
 			{
 				$paramValue = null;
@@ -91,7 +112,7 @@ class ChangeTalAttribute extends PHPTAL_Php_Attribute
 						{
 							$paramValue .= '.';
 						}
-						$paramValue .= $this->tag->generator->evaluateExpression($var);
+						$paramValue .= $codewriter->evaluateExpression($var);
 					}
 					else
 					{
@@ -107,24 +128,23 @@ class ChangeTalAttribute extends PHPTAL_Php_Attribute
 					$i++;
 				}
 				$this->parameters[$name] = $paramValue;
-				$parameters[] = var_export($name, true) . '=>' . $paramValue;
+				$parameters[$name] = var_export($name, true) . '=>' . $paramValue;
 			}
 			elseif (preg_match('#^<\?php echo (.*) \?>$#', $val, $matches))
 			{
-				$paramValue = $matches[1];
-				$this->parameters[$name] = $paramValue;
-				$parameters[] = var_export($name, true) . '=>' . $paramValue;
+				$this->parameters[$name] = $matches[1];
+				$parameters[$name] = var_export($name, true) . '=>' . $this->parameters[$name];
 			}
-			elseif (strpos($name, ':') === false || $name === 'xml:lang')
+			else
 			{
-				$convertedVal = f_util_Convert::fixDataType($val);
-				$this->parameters[$name] = $convertedVal;
-				$parameters[] = var_export($name, true) . '=>' . var_export($convertedVal, true);
+				$this->parameters[$name] = f_util_Convert::fixDataType($val);
+				$parameters[$name] = var_export($name, true) . '=>' . var_export($this->parameters[$name], true);
 			}
 		}
 
 		$evaluateAll = $this->evaluateAll();
-		// Parse change:xxxx attribute
+		$expressions = $codewriter->splitExpression($this->expression);
+		
 		foreach ($expressions as $exp)
 		{
 			if (f_util_StringUtils::isEmpty($exp))
@@ -132,7 +152,7 @@ class ChangeTalAttribute extends PHPTAL_Php_Attribute
 				continue;	
 			}
 			list($parameterName, $value) = $this->parseSetExpression($exp);
-			
+
 			if ($value === null)
 			{
 				$defaultParameterName = $this->getDefaultParameterName();
@@ -151,27 +171,21 @@ class ChangeTalAttribute extends PHPTAL_Php_Attribute
 				}
 			}
 
-
-			if (f_Locale::isLocaleKey($value . ';'))
-			{
-				$value = $value . ';';
-			}
-
 			if ($evaluateAll || in_array($parameterName, $this->getEvaluatedParameters()))
 			{
-				$this->parameters[$parameterName] = $this->evaluate($value);
-				$parameters[] = $this->evaluateParameter($parameterName, $value);
+				$this->parameters[$parameterName] = $codewriter->evaluateExpression($value);			
+				$parameters[$parameterName] = var_export($parameterName, true) . '=>' . $this->parameters[$parameterName];
 			}
 			else
 			{
 				$this->parameters[$parameterName] = $value;
-				$parameters[] = var_export($parameterName, true) . '=>' . var_export(f_util_Convert::fixDataType($value), true);
+				$parameters[$parameterName] = var_export($parameterName, true) . '=>' . var_export(f_util_Convert::fixDataType($value), true);
 			}
 
 		}
-		return $parametersString = 'array(' . implode(', ', $parameters) . ')';
+		return 'array(' . implode(', ', $parameters) . ')';
 	}
-
+	
 	/**
 	 * @return String
 	 */
@@ -187,14 +201,6 @@ class ChangeTalAttribute extends PHPTAL_Php_Attribute
 	{
 		$nameParts = explode("_", get_class($this));
 		return 'render'. ucfirst(f_util_ArrayUtils::lastElement($nameParts));
-	}
-
-	/**
-	 * @see PHPTAL_Php_Attribute::end
-	 */
-	public function end()
-	{
-
 	}
 
 	/**
@@ -254,26 +260,12 @@ class ChangeTalAttribute extends PHPTAL_Php_Attribute
 		return null;
 	}
 
-	private function evaluateParameter($name, $value)
-	{
-		$normalizedValue = $this->evaluate($value);
-		if ($normalizedValue[0] == '\'')
-		{
-			$normalizedValue = substr($normalizedValue, 1, strlen($normalizedValue) - 2);
-		}
-		if (strpos($normalizedValue, '$ctx') === false)
-		{
-			return var_export($name, true) . '=>' . var_export(f_util_Convert::fixDataType($normalizedValue), true);
-		}
-		return var_export($name, true) . '=>' . $normalizedValue;
-	}
-
 	/**
 	 * @param String $parametersString
 	 */
-	protected function getRenderMethodCall($parametersString)
+	protected function getRenderMethodCall(PHPTAL_Php_CodeWriter $codeWriter, $parametersString)
 	{
-		$this->tag->generator->pushCode('echo '.$this->getRenderClassName() . '::' . $this->getRenderMethodName() . '(' . $parametersString  . ', $ctx)');
+		$codeWriter->pushCode('echo '.$this->getRenderClassName() . '::' . $this->getRenderMethodName() . '(' . $parametersString  . ', $ctx)');
 	}
 
 	/**

@@ -1,13 +1,9 @@
 <?php
-// change:include
-//
-
 /**
- * @package phptal.php.attribute
- * @author INTbonjF
- * 2007-06-14
+ * <tal:block change:include="" type="html" module="mymodule" template="templatename" transmitAll="true" /> 
+ * <tal:block change:include="module 'mymodule'; template 'templatename'; transmitAll true" /> 
  */
-class PHPTAL_Php_Attribute_CHANGE_include extends ChangeTalAttribute 
+class PHPTAL_Php_Attribute_CHANGE_Include extends ChangeTalAttribute 
 {
 	
 	/**
@@ -59,6 +55,7 @@ class PHPTAL_Php_Attribute_CHANGE_include extends ChangeTalAttribute
 				}
 			}
 		}
+		
 		foreach ($params as $name => $value) 
 		{
 			$template->setAttribute($name, $value);	

@@ -63,9 +63,9 @@ class TemplateLoader extends FileLoader implements ResourceLoader
 		{
 			throw new TemplateNotFoundException($this->getDirectory()."/".$filename, $this->getPackageName());
 		}
-		$localizedPath = $this->templateLocalize($path);
-		$template = new TemplateObject($localizedPath, $this->resolver->getMimeContentType());
-
+		
+		$template = new TemplateObject($path, $this->resolver->getMimeContentType());
+		
 		if (Framework::inDevelopmentMode() && $this->resolver->getMimeContentType() === K::HTML)
 		{
 			$template->setOriginalPath($path); 
@@ -93,25 +93,5 @@ class TemplateLoader extends FileLoader implements ResourceLoader
 	private function appendTemplatesArray($templateName, $path)
 	{
 
-	}
-
-	/**
-	 * @param String $filePath
-	 * @return String
-	 */
-	protected final function templateLocalize($filePath)
-	{
-		$lang = RequestContext::getInstance()->getLang();
-
-		$precompiledFilePath = f_util_FileUtils::buildAbsolutePath(PHPTAL_PHP_CODE_DESTINATION, $lang, $this->getPackageName(), basename($filePath).'_'.md5($filePath).f_util_FileUtils::getFileExtension($filePath, true));
-
-		if (!file_exists($precompiledFilePath) || filectime($precompiledFilePath) < filectime($filePath))
-		{
-			$originalContent = str_replace(array('${lang}', '{lang}'), $lang, f_util_FileUtils::read($filePath));
-			$content = preg_replace(array('/i18n:translate/', '/i18n:attributes/'), array('change:translate', 'change:i18nattr') , $originalContent);
-
-			f_util_FileUtils::writeAndCreateContainer($precompiledFilePath, $content, f_util_FileUtils::OVERRIDE);
-		}
-		return $precompiledFilePath;
 	}
 }

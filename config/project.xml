@@ -27,9 +27,6 @@
 		<define name="WEB_CACHE_DIR">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'www'</define>
 		<define name="CHANGE_CACHE_PDF">DIRECTORY_SEPARATOR . 'pdf' . DIRECTORY_SEPARATOR . 'tmp'</define>
 		
-
-		<define name="AG_DEVELOPMENT_MODE">false</define>
-		
 		<define name="PHPTAL_PHP_CODE_DESTINATION">AG_CACHE_DIR . DIRECTORY_SEPARATOR . 'template/'</define>
 
 		<define name="AG_DEFAULT_MODULE">website</define>
@@ -232,8 +229,8 @@
 			<prefix>
 				<entry name="trans">f_TalesI18n</entry>
 				<entry name="transui">f_TalesI18n</entry>
-				<entry name="date">f_TalDate</entry>
-				<entry name="datetime">f_TalDate</entry>
+				<entry name="date">f_TalesDate</entry>
+				<entry name="datetime">f_TalesDate</entry>
 			</prefix>
 		</tal>
 		
