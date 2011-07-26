@@ -187,6 +187,21 @@ class ChangeTalAttribute extends PHPTAL_Php_Attribute
 	}
 	
 	/**
+	 * Add [ ] char in parameter name
+	 * @see PHPTAL_Php_Attribute::parseSetExpression()
+	 */
+    protected function parseSetExpression($exp)
+    {
+        $exp = trim($exp);
+        // (dest) (value)
+        if (preg_match('/^([a-z0-9:\[\]\-_]+)\s+(.*?)$/si', $exp, $m)) {
+            return array($m[1], trim($m[2]));
+        }
+        // (dest)
+        return array($exp, null);
+    }
+	
+	/**
 	 * @return String
 	 */
 	protected function getRenderClassName()

@@ -31,18 +31,37 @@ class f_TalesDate implements PHPTAL_Tales
 	 */
 	static private function renderDate($src, $mode)
 	{
-		$params = explode(',', $src);
-
-		$dateExpr = trim(array_shift($params));
-		if ($dateExpr == '')
+		$params = array();
+		$from = 'local';
+		$dateValue = null;
+		foreach (explode(',', $src) as $value) 
 		{
-			$dateValue = 'date_Calendar::getUIInstance()';
+			$tv = trim($value);
+			if ($dateValue === null)
+			{
+				$dateValue = ($tv == '') ? 'date_Calendar::getUIInstance()' : self::evalExpr($tv);
+			}
+			else
+			{
+				$convertPart = explode('=', $tv);
+				if (count($convertPart) === 2)
+				{
+					$or = trim($convertPart[0]);
+					$ty = trim($convertPart[1]);
+					if ($or === 'from' && ($ty === 'gmt' || $ty === 'local'))
+					{
+						$from = $ty;
+						continue;
+					}
+				}
+				$params[] = $value;
+			}
 		}
-		else
+		if ($from === 'gmt')
 		{
-			$dateValue = self::evalExpr($dateExpr);
-		}	
-		
+			$dateValue = 'date_Converter::convertDateToLocal('. $dateValue . ')';
+		}
+				
 		if (count($params) > 0)
 		{
 			$format = self::evalExpr(implode(',', $params));
@@ -69,7 +88,7 @@ class f_TalesDate implements PHPTAL_Tales
 		$l = strlen($value);
 		if ($l > 0 && !is_numeric($value) && $value[0] != '\'')
 		{
-			return phptal_tales($value);
+			return phptal_tales($value, true);
 		}
 		else if ($l > 1 && $value[0] == '\'' && $value[$l-1] == '\'')
 		{

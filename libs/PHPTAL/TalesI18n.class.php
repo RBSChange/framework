@@ -59,7 +59,7 @@ class f_TalesI18n implements PHPTAL_Tales
 			$l = strlen($value);
 			if ($l > 0 && !is_numeric($value) && $value[0] != '\'')
 			{
-				$replacementsStr[] = var_export($name , true). ' => ' . phptal_tales($value);
+				$replacementsStr[] = var_export($name , true). ' => ' . phptal_tales($value, true);
 			}
 			else if ($l > 1 && $value[0] == '\'' && $value[$l-1] == '\'')
 			{
