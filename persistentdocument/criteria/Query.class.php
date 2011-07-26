@@ -397,21 +397,10 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 		{
 			if ($includeChildren)
 			{
-				if ($documentModel->isInjectedModel())
-				{
-					$model = $documentModel->getSourceInjectionModel();
-					$isInjected = true;
-				}
-				else
-				{
-					$model = $documentModel;
-					$isInjected = false;
-				}
-
+				$model = $documentModel;				
 				if ($model->hasChildren())
 				{
 					$modelNames = $model->getChildrenNames();
-					if (!$isInjected) { $modelNames[] = $documentModel->getName();}
 					$this->add(Restrictions::in("model", $modelNames));
 				}
 				else

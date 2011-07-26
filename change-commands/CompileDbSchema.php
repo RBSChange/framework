@@ -67,7 +67,7 @@ class commands_CompileDbSchema extends commands_AbstractChangeCommand
 
 		$this->message('=== Generate Tree tables ===');
 		$ms = ModuleService::getInstance();
-		foreach ($ms->getModules() as $packageName)
+		foreach ($ms->getPackageNames() as $packageName)
 		{
 			$moduleName = $ms->getShortModuleName($packageName);
 			$ms->getRootFolderId($moduleName);

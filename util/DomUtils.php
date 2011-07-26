@@ -71,16 +71,6 @@ abstract class f_util_DOMUtils
 	{
 		f_util_FileUtils::writeAndCreateContainer($path, $document->saveXML(), f_util_FileUtils::OVERRIDE);
 	}
-	
-	// Deprecated
-	
-	/**
-	 * @deprecated (will be removed in 4.0) use fromPath
-	 */
-	static function getDocument($path)
-	{
-		return self::fromPath($path);
-	}
 }
 
 class f_util_DOMDocument extends DOMDocument

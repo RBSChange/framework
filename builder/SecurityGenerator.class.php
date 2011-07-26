@@ -30,7 +30,7 @@ class builder_SecurityGenerator
 		$this->initClassBackList();
 		$this->initClassFrontList();
 		
-		foreach ($moduleService->getModules() as $moduleName)
+		foreach ($moduleService->getPackageNames() as $moduleName)
 		{
 			$shortModuleName = $moduleService->getShortModuleName($moduleName);
 			$baseRightsPath = f_util_FileUtils::buildWebeditPath('modules', $shortModuleName, self::CONFIG_DIR_NAME, self::ROLE_DEF_FILE_NAME);

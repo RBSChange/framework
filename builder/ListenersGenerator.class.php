@@ -14,7 +14,7 @@ class builder_ListenersGenerator
 	{
 		$this->listenerArray = $this->parseConfigListener(f_util_FileUtils::buildFrameworkPath('config', 'listeners.xml'));
 		$fileResolver = Resolver::getInstance('file');
-		foreach (ModuleService::getInstance()->getModules() as $moduleName)
+		foreach (ModuleService::getInstance()->getPackageNames() as $moduleName)
 		{
 			$fileResolver->setPackageName($moduleName);
 			$path = $fileResolver->getPath('config/listeners.xml');

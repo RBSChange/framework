@@ -21,7 +21,7 @@ class builder_BackofficeActionUpdater
 		// config/actions.xml file
 		$fileActions = f_util_FileUtils::buildWebeditPath('modules', $this->model->getModuleName(), 'config', 'actions.xml');
 
-		$domDoc = f_util_DOMUtils::getDocument($fileActions);
+		$domDoc = f_util_DOMUtils::fromPath($fileActions);
 		$domDoc->preserveWhiteSpace = false;
 
 		$actionName = 'create' . ucfirst( $this->model->getDocumentName() );
@@ -67,7 +67,7 @@ class builder_BackofficeActionUpdater
 
 		// module perspective model entry
 		$perspectivePath = f_util_FileUtils::buildWebeditPath('modules', $this->model->getModuleName(), 'config', 'perspective.xml');
-		$perspective = f_util_DOMUtils::getDocument($perspectivePath);
+		$perspective = f_util_DOMUtils::fromPath($perspectivePath);
 		$perspectiveUpdated = false;
 		if ($this->xPath($perspective, "models/model[@name = '".$this->model->getName()."']")->length == 0)
 		{

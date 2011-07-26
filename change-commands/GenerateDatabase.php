@@ -114,7 +114,7 @@ class commands_GenerateDatabase extends commands_AbstractChangeCommand
 		}
 		else 
 		{
-			$packages = ModuleService::getInstance()->getModules();
+			$packages = ModuleService::getInstance()->getPackageNames();
 			$array[] = f_util_FileUtils::buildFrameworkPath('dataobject');
 		}
 		

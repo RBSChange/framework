@@ -33,7 +33,7 @@ class commands_InitPatchDb extends commands_AbstractChangeCommand
 		if ($completeParamCount == 0)
 		{
 			$components = array("framework", "webapp");
-			$components = array_merge($components, ModuleService::getInstance()->getModules());
+			$components = array_merge($components, ModuleService::getInstance()->getPackageNames());
 			return $components;
 		}
 		return null;

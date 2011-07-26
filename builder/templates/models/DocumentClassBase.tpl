@@ -120,19 +120,11 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 
 	/**
-	 * @return String constant '<{$model->getTableName()}>'
-	 */
-	public function getDatabaseTableName()
-	{
-		return '<{$model->getTableName()}>';
-	}
-
-	/**
 	 * @return Boolean
 	 */
 	public function isLocalized()
 	{
-		return <{$model->escapeBoolean($model->isInternationalized())}>;
+		return <{$model->escapeBoolean($model->isLocalized())}>;
 	}
 
 	/**
@@ -146,7 +138,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 <{if $model->getInitSerializedproperties()}>
 		$this->serializeS18s();
 <{/if}>
-<{if $model->isInternationalized()}>
+<{if $model->isLocalized()}>
 		$voObject = $this->getI18nVoObject();
 <{foreach from=$model->getClassI18nMember() item=property}>
 		$propertyBag['<{$property->getName()}>'] = $voObject->get<{$property->getPhpName()}>();
@@ -841,7 +833,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		$this->propertyUpdated('s18s');
 	}
 	
-<{if $model->isInternationalized()}>
+<{if $model->isLocalized()}>
 	protected function getI18NS18sProperty($name)
 	{
 		if ($this->m_s18sArray === null) {$this->unserializeS18s();}
@@ -1478,7 +1470,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		$indexedDoc->setDateField('creationdate', $this->getCreationdate());
 		$indexedDoc->setStringField('author', $this->getAuthor());
 		$indexedDoc->setStringField('publicationstatus', $this->getPublicationstatus());
-		$indexedDoc->setStringField('module', $this->getPersistentModel()->getOriginalModuleName());
+		$indexedDoc->setStringField('module', $this->getPersistentModel()->getModuleName());
 		$indexedDoc->setStringField('editmodule', uixul_DocumentEditorService::getInstance()->getEditModuleName($this));
 		$indexedDoc->setStringField('documentpath', $ds->getPathOf($this));
 		$indexedDoc->setStringField('volang', $this->getLang());
@@ -1492,7 +1484,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 			$parentId = $parentDocument->getId();
 		}
 		$indexedDoc->setIntegerField('parentid', $parentId);
-<{if $model->isInternationalized() }>
+<{if $model->isLocalized() }>
 		$indexedDoc->setLang(RequestContext::getInstance()->getLang());
 <{else}>
 		$indexedDoc->setLang($this->getLang());

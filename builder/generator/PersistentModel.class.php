@@ -148,9 +148,9 @@ class generator_PersistentModel
 									}
 								}
 							}
-							catch (ClassException $e)
+							catch (BaseException $e)
 							{
-								if ($e->getClassError() != "document-type-does-not-exists")
+								if ($e->getMessage() != "document-type-does-not-exists")
 								{
 									closedir($dh);
 									throw $e;
@@ -373,7 +373,7 @@ class generator_PersistentModel
 					throw new Exception("Could not find extended model ".$model->extend);
 				}
 				
-				if ($model->isInternationalized() && !$models[$model->extend]->isInternationalized())
+				if ($model->isLocalized() && !$models[$model->extend]->isLocalized())
 				{
 					throw new Exception("Can not render model ".$model->name." localized while ".$models[$model->extend]->name." is not");
 				}
@@ -1229,7 +1229,7 @@ class generator_PersistentModel
 	/**
 	 * @return Boolean
 	 */
-	public function isInternationalized()
+	public function isLocalized()
 	{
 		return $this->localized === true;
 	}

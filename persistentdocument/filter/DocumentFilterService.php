@@ -373,7 +373,7 @@ class f_persistentdocument_DocumentFilterService extends BaseService
 		$filtersByAlias = array();
 		
 		// Get filters in modules.
-		$modules = ModuleService::getInstance()->getModules();
+		$modules = ModuleService::getInstance()->getPackageNames();
 		foreach ($modules as $module)
 		{
 			$dir = $this->getFiltersDirectoryByPackage($module);

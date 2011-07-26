@@ -243,7 +243,7 @@ class builder_DocumentGenerator
 			if (file_exists($bindingsPath))
 			{
 				echo "Updating $bindingsPath\n";
-				$document = f_util_DOMUtils::getDocument($bindingsPath);
+				$document = f_util_DOMUtils::fromPath($bindingsPath);
 				$script = $document->documentElement;
 			}
 			else
@@ -288,7 +288,7 @@ class builder_DocumentGenerator
 		
 		if (!$this->modelObject->inject())
 		{
-			if ($this->modelObject->isInternationalized())
+			if ($this->modelObject->isLocalized())
 			{
 				$fileContent .= "\n".$this->modelObject->generatePhpI18nClass();
 			}
@@ -302,7 +302,7 @@ class builder_DocumentGenerator
 			$classResolver->appendToAutoloadFile($this->modelObject->getDocumentClassName() . 'model', $filePath);
 		}
 		$classResolver->appendToAutoloadFile($this->module .'_persistentdocument_' . $this->name . 'base', $filePath);
-		if ($this->modelObject->isInternationalized())
+		if ($this->modelObject->isLocalized())
 		{
 			$classResolver->appendToAutoloadFile($this->module .'_persistentdocument_' . $this->name . 'I18n', $filePath);
 		}
@@ -313,7 +313,7 @@ class builder_DocumentGenerator
 	public function updateRights()
 	{
 		$rightsPath = f_util_FileUtils::buildWebeditPath("modules", $this->module, "config", "rights.xml");
-		$rights = f_util_DOMUtils::getDocument($rightsPath);
+		$rights = f_util_DOMUtils::fromPath($rightsPath);
 		if ($rights->exists("actions/document[@name = '".$this->name."']"))
 		{
 			echo "$this->name is already declared in $rightsPath\n";
@@ -361,7 +361,7 @@ class builder_DocumentGenerator
 		}
 
 		// If document is internationnalized. Excute the same previous action
-		if ( $this->modelObject->isInternationalized() )
+		if ( $this->modelObject->isLocalized() )
 		{
 			$tablefilename = $this->modelObject->getTableName(). '_i18n';
 			if ($this->modelObject->hasParentModel())

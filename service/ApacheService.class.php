@@ -54,7 +54,7 @@ class ApacheService extends BaseService
 		$contents = array();
 		
 		// Get contents in modules.
-		$modules = ModuleService::getInstance()->getModules();
+		$modules = ModuleService::getInstance()->getPackageNames();
 		foreach ($modules as $module)
 		{
 			$dir = $this->getApacheDirectoryByPackage($module);
@@ -254,15 +254,5 @@ class ApacheService extends BaseService
 			}
 		}
 		return $contents;
-	}
-	
-	// Deprecated
-	
-	/**
-	 * @deprecated (will be removed in 4.0) with no replacement
-	 */
-	public function createApacheDirectory()
-	{
-		// moved in ApplyWebappPolicy
 	}
 }

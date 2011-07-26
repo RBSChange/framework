@@ -99,7 +99,7 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 		}
 		else
 		{
-			$documentModelName = DocumentHelper::getDocumentInstance($documentId)->getPersistentModel()->getOriginalModelName();
+			$documentModelName = DocumentHelper::getDocumentInstance($documentId)->getPersistentModel()->getName();
 			list($longModuleName, ) = explode('/', $documentModelName);
 			$testRoleName = $longModuleName . '.' . $roleName;
 		}
@@ -215,7 +215,6 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 		try
 		{
 			$this->tm->beginTransaction();
-			$user = $this->convertLoginToUser($user);	
 			foreach ($domain as $nodeId)
 			{
 				if (!$this->userHasRole($user, $roleName, $nodeId))
@@ -269,8 +268,6 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 	 */
 	public function removeUserPermission($user, $roleName = null, $domain = null)
 	{
-		$user = $this->convertLoginToUser($user);
-		
 		$affectedNodes = array();
 		$query = $this->pp->createQuery('modules_generic/userAcl');
 		$query->add(Restrictions::eq('user.id', $user->getId()));
@@ -401,7 +398,6 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 	 */
 	public function checkPermission($user, $permission, $nodeId)
 	{
-		$user = $this->convertLoginToUser($user);
 		if (!$this->hasPermission($user, $permission, $nodeId) )
 		{
 			if ($user !== null)
@@ -432,7 +428,6 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 			}
 			return true;
 		}
-		$user = $this->convertLoginToUser($user);
 		if ($user === null || ($user instanceof users_persistentdocument_frontenduser))
 		{
 			return $this->hasFrontEndPermission($user, $permission, $nodeId);
@@ -703,10 +698,8 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 	 * @param String $module
 	 * @return array<String, array<Integer>> where the array key is a qualified roleName.
 	 */
-	public function getRolesByUser($user, $module = null )
+	public function getRolesByUser($user, $module = null)
 	{
-		$user = $this->convertLoginToUser($user);
-		
 		$result = array();
 		$userQuery = $this->pp->createQuery('modules_generic/userAcl');
 		$userQuery->add(Restrictions::eq('user.id', $user->getId()));
@@ -1099,20 +1092,6 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 	}
 
 	/**
-	 * Get the complete list of permissions for login $login on node id $nodeId.
-	 * @deprecated use getPermissionsForUserByDefPointNodeId
-	 * @param String $login
-	 * @param Integer $nodeId
-	 * @return array<String>
-	 */
-	public function getPermissionsForLoginByNodeId($login, $nodeId)
-	{
-		$user = $this->convertLoginToUser($login);
-		$defId = $this->getDefinitionPoint($nodeId);
-		return $this->getPermissionsForUserByDefPointNodeId($user, $defId);
-	}
-
-	/**
 	 * Get the complete list of permissions for user $user on definition point node $node.
 	 *
 	 * @param users_persistentdocument_backenduser $user
@@ -1154,18 +1133,6 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 	}
 
 	/**
-	 * Get the array of accessor Id's for the login $login.
-	 * @deprecated use getAccessorIdsByUser
-	 * @param String $login
-	 * @return Array<Integer>
-	 */
-	public function getAccessorIdsByLogin($login)
-	{
-		$user = $this->convertLoginToUser($login);
-		return $this->getAccessorIdsByUser($user);
-	}
-
-	/**
 	 * Sends a permission updated event
 	 *
 	 * @param Array $eventParam
@@ -1204,28 +1171,11 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 	}
 	
 	/**
-	 * @deprecated for compatibility only
-	 * @param mixed $userLogin
-	 * @return users_persistentdocument_user
+	 * @param string $forModuleName
+	 * @param string $fromModuleName
+	 * @param string $configFileName
+	 * @throws Exception
 	 */
-	private function convertLoginToUser($userLogin)
-	{
-		if ($userLogin instanceof users_persistentdocument_user)
-		{
-			return $userLogin;
-		}
-		else if (is_string($userLogin))
-		{
-			if (Framework::isInfoEnabled())
-			{
-				Framework::info(__METHOD__ . ' deprecated call');
-				Framework::info(f_util_ProcessUtils::getBackTrace());
-			}
-			return $this->getUserService()->getUserByLogin($userLogin);
-		}
-		return null;
-	}
-	
 	public function addImportInRight($forModuleName, $fromModuleName, $configFileName)
 	{
 		$destPath = f_util_FileUtils::buildOverridePath('modules', $forModuleName, 'config', 'rights.xml');

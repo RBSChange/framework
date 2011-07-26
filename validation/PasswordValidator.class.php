@@ -9,11 +9,6 @@ class validation_PasswordValidator extends validation_ValidatorImpl implements v
 	const SECURITY_LEVEL_HIGH = 'high';
 	const SECURITY_LEVEL_MINIMAL = 'minimal';
 	
-	/**
-	 * @deprecated (will be removed in 4.0)
-	 */
-	const SECURITY_LEVEL_NONE = false; 
-	
 	private $securityLevel = null;
 
 	/**
@@ -79,10 +74,6 @@ class validation_PasswordValidator extends validation_ValidatorImpl implements v
 				break;
 			case self::SECURITY_LEVEL_MINIMAL:
 				$validate = $this->doValidateMinimal($field->getValue());
-				break;
-			// @deprecated (will be removed in 4.0)
-			case self::SECURITY_LEVEL_NONE:
-				$validate = true;
 				break;
 			default:
 				throw new ValidatorConfigurationException(__CLASS__ . ' must have a valid parameter: value must be "' . self::SECURITY_LEVEL_MINIMAL . '", "' . self::SECURITY_LEVEL_LOW . '", "' . self::SECURITY_LEVEL_MEDIUM . '" or "' . self::SECURITY_LEVEL_HIGH . '"');

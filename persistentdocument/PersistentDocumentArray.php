@@ -474,14 +474,4 @@ class f_persistentdocument_PersistentDocumentArray extends ArrayObject
 
 		return array();
 	}
-		
-	// Deprecated
-	
-	/**
-	 * @deprecated (will be removed in 4.0) use DocumentArray->isModified
-	 */
-	public function checkModified($oldRelation)
-	{
-		return $this->isModified();
-	}
 }

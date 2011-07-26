@@ -1022,7 +1022,7 @@ abstract class f_persistentdocument_PersistentProvider
 			return $this->m_documentClassByType[$modelName];
 		}
 		$model = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($modelName);
-		$className = $model->getOriginalModuleName()."_persistentdocument_".$model->getOriginalDocumentName();
+		$className = $model->getModuleName()."_persistentdocument_".$model->getDocumentName();
 		$this->m_documentClassByType[$modelName] = $className;
 		return $className;
 	}
@@ -1172,7 +1172,7 @@ abstract class f_persistentdocument_PersistentProvider
 		{
 			Framework::debug("PersistentProvider::loadDocument ($documentId) ". get_class($persistentDocument));
 		}
-		$table = $persistentDocument->getDatabaseTableName();
+		$table = $persistentDocument->getPersistentModel()->getTableName();
 
 		$sql = $this->getLoadDocumentQuery($table);
 		$stmt = $this->prepareStatement($sql);
@@ -1353,7 +1353,7 @@ abstract class f_persistentdocument_PersistentProvider
 
 		if (f_util_ArrayUtils::isNotEmpty($mapping))
 		{
-			$sql = $this->getUpdateDocumentQuery($persistentDocument->getDatabaseTableName(), $mapping, $lobParameters);
+			$sql = $this->getUpdateDocumentQuery($persistentDocument->getPersistentModel()->getTableName(), $mapping, $lobParameters);
 			$stmt = $this->prepareStatement($sql);
 			$this->buildRelationDataAndBindValues($dataRelations, $propertiesInfo, $properties, $stmt, $mapping);
 			$stmt->bindValue(':document_id', $documentId, PersistentProviderConst::PARAM_INT);
@@ -1518,7 +1518,7 @@ abstract class f_persistentdocument_PersistentProvider
 				$persistentDocument->preCascadeDelete();
 			}
 
-			$table = $persistentDocument->getDatabaseTableName();
+			$table = $persistentDocument->getPersistentModel()->getTableName();
 			$sql = $this->getDeleteDocumentQuery1();
 			$stmt = $this->prepareStatement($sql);
 			$stmt->bindValue(':document_id', $documentId, PersistentProviderConst::PARAM_INT);
@@ -1663,7 +1663,7 @@ abstract class f_persistentdocument_PersistentProvider
 
 			$this->executeStatement($stmt);
 
-			$documentId = $this->getLastInsertId($persistentDocument->getDatabaseTableName());
+			$documentId = $this->getLastInsertId($persistentDocument->getPersistentModel()->getTableName());
 		}
 		else
 		{
@@ -1701,7 +1701,7 @@ abstract class f_persistentdocument_PersistentProvider
 	 */
 	protected function _insertDocument($documentId, $persistentDocument)
 	{
-		$table = $persistentDocument->getDatabaseTableName();
+		$table = $persistentDocument->getPersistentModel()->getTableName();
 		$documentModel = $persistentDocument->getPersistentModel();
 
 		$propertiesInfo = $documentModel->getPropertiesInfos();
@@ -4525,54 +4525,6 @@ abstract class f_persistentdocument_PersistentProvider
 		}
 		return $result;
 	}	
-	// Deprecated
-	
-	/**
-	 * @deprecated (will be removed in 4.0)
-	 */
-	public function setTreeNodeCache($useTreeNodeCache)
-	{
-		//TODO Deplacement du cache de node
-		return $this;
-	}
-	
-	/**
-	 * @deprecated (will be removed in 4.0) unused by TagSevice
-	 */
-	public function setExclusiveTag($documentId, $tag)
-	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("PersistentProvider::setExclusiveTag($documentId, $tag)");
-		}
-
-		// Begin new transaction...
-		$tm = f_persistentdocument_TransactionManager::getInstance();
-		try
-		{
-			$tm->beginTransaction();
-
-			$stmt = $this->prepareStatement($this->getRemoveExclusiveTagQuery());
-			$stmt->bindValue(':tag', $tag, PersistentProviderConst::PARAM_STR);
-			$this->executeStatement($stmt);
-
-			$stmt = $this->prepareStatement($this->getAddTagQuery());
-			$stmt->bindValue(':id', $documentId, PersistentProviderConst::PARAM_INT);
-			$stmt->bindValue(':tag', $tag, PersistentProviderConst::PARAM_STR);
-
-			$this->executeStatement($stmt);
-			$tm->commit();
-		}
-		catch (Exception $e)
-		{
-			$tm->rollBack($e);
-		}
-	}
-	
-	/**
-	 * @deprecated (will be removed in 4.0)
-	 */
-	protected abstract function clearFrameworkCacheDeletePatternQuery();
 }
 
 class f_DatabaseException extends Exception

@@ -1047,16 +1047,6 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 	 * @param Boolean $copyToVo
 	 * @return f_persistentdocument_PersistentDocument
 	 */
-	public function copyTo($document, $copyToVo = true)
-	{
-		return $this->copyPropertiesTo($document, $copyToVo);
-	}
-
-	/**
-	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param Boolean $copyToVo
-	 * @return f_persistentdocument_PersistentDocument
-	 */
 	public function copyPropertiesTo($document, $copyToVo = true)
 	{
 		$this->transfertProperties($document, false, $copyToVo);
@@ -1375,43 +1365,6 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 			{
 				$this->m_metas = array();
 			}
-		}
-	}
-		
-	// Deprecated
-	
-	/**
-	 * @deprecated (will be removed in 4.0) use isPublished()
-	 */
-	public final function isPublicated()
-	{
-		return $this->isPublished();
-	}
-	
-	/**
-	 * @deprecated (will be removed in 4.0) use getPersistentModel()
-	 */
-	function getDocumentModel()
-	{
-		return $this->getPersistentModel();
-	}
-	
-	/**
-	 * @deprecated (will be removed in 4.0) use getModifiedPropertyNames
-	 */
-	public function getModifiedProperties()
-	{
-		return $this->getModifiedPropertyNames();
-	}
-	
-	/**
-	 * @deprecated (will be removed in 4.0) use <YourDocumentService>::addTreeAttributes
-	 */
-	public function addTreeAttributesCompatibility($moduleName, $treeType, &$nodeAttributes)
-	{
-		if (f_util_ClassUtils::methodExists($this, 'addTreeAttributes'))
-		{
-			$this->addTreeAttributes($moduleName, $treeType, $nodeAttributes);
 		}
 	}
 }

@@ -66,7 +66,6 @@ class TagService extends BaseService
 		$modelsName = array();
 		while (true)
 		{
-			if ($model->isInjectedModel()) {$model = $model->getSourceInjectionModel();}
 			$modelsName[$model->getName()] = true;
 			if (!$model->hasParent()) {break;}
 			$model = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($model->getParentName());
@@ -999,7 +998,7 @@ class TagService extends BaseService
 			Framework::debug("[CompileTags] processModules BEGIN");
 		}
 
-		$modulesArray = ModuleService::getInstance()->getModules();
+		$modulesArray = ModuleService::getInstance()->getPackageNames();
 		foreach ($modulesArray as $moduleName)
 		{
 			if (Framework::isDebugEnabled())
@@ -1219,12 +1218,6 @@ class TagService extends BaseService
 		$model = $document->getPersistentModel();
 		$moduleName = $model->getModuleName();
 		$documentName = $model->getDocumentName();
-						
-		if ($model->isInjectedModel())
-		{
-			$documentName = $model->getOriginalDocumentName();
-			$moduleName = $model->getOriginalModuleName();
-		}
 
 		$tags = $this->getAvailableTags();
 		$tag = 'functional_' . $moduleName . '_' . $documentName .'-list';

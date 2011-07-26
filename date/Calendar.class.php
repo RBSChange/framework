@@ -588,15 +588,6 @@ abstract class date_Calendar
 		return date_Formatter::toDefaultDateTimeBO($this);
 	}
 	
-    /**
-     * @deprecated
-     */
-    public function getTime()
-    {
-    	return new date_Date($this->toString());
-    }
-
-
 	/**
 	 * Adds an $amount of time to the given $field, which can be one among the
 	 * following: ::SECOND, ::MINUTE, ::HOUR, ::DAY, ::MONTH, ::YEAR.
@@ -773,10 +764,8 @@ abstract class date_Calendar
     		&& $this->minute == $calendar->minute
     		&& $this->second == $calendar->second;
     }
-
-
-// --- PRIVATE STUFF -----------------------------------------------------------
-
+    
+	// Private stuff.
 
 	/**
 	 * @var Integer

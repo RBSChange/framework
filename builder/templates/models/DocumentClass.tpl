@@ -21,7 +21,7 @@ class <{$model->getDocumentClassName()}> extends <{$model->getDocumentClassName(
 		$indexedDoc->setId($this->getId());
 		$indexedDoc->setDocumentModel('<{$model->getName()}>');
 		$indexedDoc->setLabel($this->getLabel());
-<{if $model->isInternationalized() }>
+<{if $model->isLocalized() }>
 		$indexedDoc->setLang(RequestContext::getInstance()->getLang());
 <{else}>
 		$indexedDoc->setLang($this->getLang());

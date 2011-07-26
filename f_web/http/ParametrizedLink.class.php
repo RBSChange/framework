@@ -138,24 +138,6 @@ class f_web_ParametrizedLink extends f_web_HttpLink
 
 		return $this;
 	}
-	
-	// Deprecated
-	
-	/**
-	 * @deprecated (will be removed in 4.0) use setQueryParameters
-	 */
-	public function setQueryParametres($queryParameters)
-	{
-		return $this->setQueryParameters($queryParameters);
-	}
-
-	/**
-	 * @deprecated (will be removed in 4.0) use setQueryParameter
-	 */
-	public function setQueryParametre($key, $value)
-	{
-		return $this->setQueryParameter($key, $value);		
-	}
 }
 
 class f_web_ChromeParametrizedLink extends f_web_ParametrizedLink

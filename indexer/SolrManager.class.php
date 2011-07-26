@@ -747,22 +747,4 @@ class indexer_SolrManager
 		$this->setTask(self::UPDATE_TASK);
 		$this->sendXMLData('<delete><query>' . urldecode($query->toSolrString()) . '</query></delete>');
 	}
-	
-	// Deprecated
-	
-	/**
-	 * @deprecated (will be removed in 4.0)
-	 */
-	public function getSynonymsLists()
-	{
-		return array();
-	}
-	
-	/**
-	 * @deprecated (will be removed in 4.0)
-	 */
-	public function updateSynonymsList($name, $content)
-	{
-		return;
-	}
 }

@@ -159,7 +159,7 @@ abstract class f_util_HtmlUtils
 
 		$classes = isset($attributes['class']) ? explode(' ', $attributes['class']) : array();
 
-		//Deprecated attribute
+		// Deprecated attribute
 		if (isset($attributes['popup']))
 		{
 			unset($attributes['popup']);
@@ -201,7 +201,7 @@ abstract class f_util_HtmlUtils
 			}
 		}
 
-		//Deprecated attribute
+		// Deprecated attribute
 		if (isset($attributes['cmpref']))
 		{
 			if ($documentId == 0)

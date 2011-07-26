@@ -459,10 +459,6 @@ class f_DataCacheService extends BaseService
 			Framework::debug("[". __CLASS__ . "]: clear cache by model:".$model->getName());
 		}
 		$this->clearCacheByPattern($model->getName());
-		if ($model->isInjectedModel())
-		{
-			$this->clearCacheByPattern($model->getOriginalModelName());
-		}
 	}
 
 	/**
@@ -616,14 +612,5 @@ class f_DataCacheService extends BaseService
 	public function setDispatch($dispatch = true)
 	{
 		$this->dispatch = $dispatch;
-	}
-
-	// deprecated
-	/**
-	 * @deprecated 
-	 */
-	public function clearSubCache($item, $subCache)
-	{
-		return true;
 	}
 }

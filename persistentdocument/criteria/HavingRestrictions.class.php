@@ -23,7 +23,6 @@ class HavingRestrictions
 	 * Apply an "equal" constraint to the named property
 	 * @param String $propertyName
 	 * @param mixed $value
-	 * @param boolean $ignoreCase deprecated, use ieq($propertyName, $value) instead of eq($propertyName, $value, true)
 	 * @example eq("author", "me")
 	 * @return SimpleExpression
 	 */

@@ -545,7 +545,7 @@ abstract class f_util_FileUtils
 	static public function deleteTmpFile($filePath = null)
 	{
 		if (!is_string($filePath) && !is_array($filePath)) {
-			throw new FrameworkException('deleteTmpFile_invalid_parmater');
+			throw new BaseException('deleteTmpFile_invalid_parmater');
 		}
 		if (empty($filePath)) {
 			return TRUE;
@@ -1097,34 +1097,6 @@ abstract class f_util_FileUtils
 					}
 				}
 			}
-		}
-	}
-	
-	// Deprecated
-	
-	/**
-	 * @deprecated (will be removed in 4.0)
-	 */
-	public static function buildWebappPath()
-	{
-		$args = func_get_args();
-		Framework::warn(__METHOD__);
-		array_unshift($args, PROJECT_OVERRIDE);
-		return self::buildAbsolutePathFromArray($args);
-	}
-	
-	/**
-	 * @deprecated (will be removed in 4.0) use write, replace $override = true with FileUtils::OVERRIDE
-	 */
-	static public function saveFile($path, $content, $override = true)
-	{
-		if ($override)
-		{
-			return self::write($path, $content, self::OVERRIDE);
-		}
-		else
-		{
-			return self::write($path, $content);
 		}
 	}
 }

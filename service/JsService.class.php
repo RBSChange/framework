@@ -309,7 +309,7 @@ class JsService extends BaseService
 			$this->readJsDependenciesFile($frameworkJsFilePath, $declaredDependencies, $noReplacementScripts, $localizedScripts);
 		}
 
-		foreach ($moduleService->getModules() as $packageName)
+		foreach ($moduleService->getPackageNames() as $packageName)
 		{
 			$fileResolver->setPackageName($packageName)->setDirectory('config');
 			$jsDepsFilePath = $fileResolver->getPath("jsDependencies.xml");

@@ -350,26 +350,4 @@ interface f_persistentdocument_PersistentDocument
 	 * @return Boolean if value was founded
 	 */
 	public function hasMetaValue($name, $value);
-	
-	// Deprecated
-	
-	/**
-	 * @deprecated (will be removed in 4.0) use isPublished()
-	 */
-	function isPublicated();
-			
-	/**
-	 * @deprecated (will be removed in 4.0) use getPersistentModel()
-	 */
-	function getDocumentModel();
-	
-	/**
-	 * @deprecated (will be removed in 4.0) Use DocumentModel->getTableName()
-	 */
-	function getDatabaseTableName();
-	
-	/**
-	 * @deprecated (will be removed in 4.0) use copyPropertiesTo instead
-	 */
-	function copyTo($document, $copyToVo = true);
 }

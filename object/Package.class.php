@@ -110,7 +110,7 @@ class Package
      *
      * @return mixed Result of the call of methodName.
      *
-     * @throws FrameworkException if the method is not callable.
+     * @throws BaseException if the method is not callable.
      */
     public function callClassMethod($className, $methodName)
     {

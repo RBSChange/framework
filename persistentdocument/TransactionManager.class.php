@@ -109,7 +109,7 @@ class f_persistentdocument_TransactionManager
 			{
 				Framework::debug('TransactionManager::commit() => bad transaction count ('.$this->transactionCount.')');
 			}
-			throw new FrameworkException('commit-bad-transaction-count ('.$this->transactionCount.')');
+			throw new BaseException('commit-bad-transaction-count ('.$this->transactionCount.')');
 		}
 		if ($this->transactionCount == 1)
 		{
@@ -133,7 +133,7 @@ class f_persistentdocument_TransactionManager
 	/**
 	 * cancel transaction.
 	 * @param Exception $e
-	 * @throws FrameworkException('rollback-bad-transaction-count') if rollback called while no transaction
+	 * @throws BaseException('rollback-bad-transaction-count') if rollback called while no transaction
 	 * @throws TransactionCancelledException on embeded transaction
 	 * @return Exception the given exception so it is easy to throw it
 	 */
@@ -153,7 +153,7 @@ class f_persistentdocument_TransactionManager
 			{
 				Framework::warn('TransactionManager->rollBack() => bad transaction count (no transaction)');
 			}
-			throw new FrameworkException('rollback-bad-transaction-count');
+			throw new BaseException('rollback-bad-transaction-count');
 		}
 		$this->transactionCount--;
 		if (!$this->dirty)

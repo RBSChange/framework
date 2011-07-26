@@ -47,20 +47,6 @@ abstract class View
 	abstract function getEngine();
 	
 	abstract function render();
-	
-	
-	// Deprecated
-	private $template;
-	
-	public function setTemplate($template)
-	{
-		$this->template = $template;
-	}
-	
-	public function getTemplate()
-	{
-		return $this->template;
-	}
 }
 
 abstract class f_view_BaseView extends View
@@ -241,7 +227,6 @@ abstract class f_view_BaseView extends View
 		$this->setAttribute('status', $status);
 	}
 
-
 	/**
 	 * Returns the current lang.
 	 *
@@ -286,15 +271,5 @@ abstract class f_view_BaseView extends View
 	protected final function forceModuleName($moduleName)
 	{
 		$this->forceModuleName = $moduleName;
-	}
-	
-	// Deprecated
-	
-	/**
-	 * @deprecated (will be removed in 4.0) Use setTemplateName
-	 */
-	public function setTemplate($template)
-	{
-		parent::setTemplate($template);
 	}
 }

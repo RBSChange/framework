@@ -35,11 +35,6 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	 */
 	protected  $m_parentName;
 
-	/**
-	 * @var f_persistentdocument_PersistentDocumentModel
-	 */
-	protected  $m_sourceInjectionModel = null;
-
 	const PRIMARY_KEY_ID = "id";
 	const BASE_MODEL = 'modules_generic/Document';
 
@@ -87,7 +82,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 		list ($packageType, $packageName) = explode('_', $package);
 		if ($packageType != 'modules')
 		{
-			throw new FrameworkException("type_must_be_a_module");
+			throw new BaseException("type_must_be_a_module");
 		}
 
 		return  self::getInstance($packageName, $docName);
@@ -113,11 +108,11 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 		// TODO: this is too ugly "old fashioned"...
 		if (empty($moduleName))
 		{
-			throw new FrameworkException("module-name-cannot-be-empty");
+			throw new BaseException("module-name-cannot-be-empty");
 		}
 		if (empty($documentName))
 		{
-			throw new FrameworkException("module-type-cannot-be-empty");
+			throw new BaseException("module-type-cannot-be-empty");
 		}
 
 		$documentModelName = self::buildDocumentModelName($moduleName, $documentName);
@@ -183,7 +178,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 		list ($packageType, $packageName) = explode('_', $package);
 		if ($packageType != 'modules')
 		{
-			throw new FrameworkException("type_must_be_a_module");
+			throw new BaseException("type_must_be_a_module");
 		}
 		
 		return f_util_ClassUtils::classExists(self::getClassNameFromDocument($packageName, $docName));
@@ -911,87 +906,5 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	public function __toString()
 	{
 		return $this->getName();
-	}
-
-	// Deprecated
-	
-	/**
-	 * @deprecated (will be removed in 4.0) with no replacement
-	 */
-	public function getInjectionModel()
-	{
-		return  ($this->m_sourceInjectionModel === null) ? null : $this;
-	}
-	
-	/**
-	 * @deprecated (will be removed in 4.0) use isLocalized()
-	 */
-	public final function isInternationalized()
-	{
-		return $this->isLocalized();
-	}
-
-	/**
-	 * @deprecated (will be removed in 4.0) with no replacement
-	 */
-	public final function getComponentClassName()
-	{
-		return null;
-	}
-	
-	/**
-	 * @deprecated (will be removed in 4.0) with no replacement
-	 */
-	public final function getClassName()
-	{
-		return null;
-	}
-
-	/**
-	 * @deprecated (will be removed in 4.0) with no replacement
-	 */
-	public final function getSynchronize()
-	{
-		return array();
-	}
-	
-	/**
-	 * @deprecated (will be removed in 4.0) with no replacement
-	 */
-	public function isInjectedModel()
-	{
-		return ($this->m_sourceInjectionModel !== null);
-	}
-
-	/**
-	 * @deprecated (will be removed in 4.0) with no replacement
-	 */
-	public function getSourceInjectionModel()
-	{
-		return $this->m_sourceInjectionModel;
-	}
-
-	/**
-	 * @deprecated (will be removed in 4.0) with no replacement
-	 */
-	public function getOriginalModelName()
-	{
-		return $this->isInjectedModel() ? $this->getSourceInjectionModel()->getName() : $this->getName();
-	}
-	
-	/**
-	 * @deprecated (will be removed in 4.0) with no replacement
-	 */
-	public function getOriginalModuleName()
-	{
-		return $this->isInjectedModel() ? $this->getSourceInjectionModel()->getModuleName() : $this->getModuleName();
-	}
-	
-	/**
-	 * @deprecated (will be removed in 4.0) with no replacement
-	 */
-	public function getOriginalDocumentName()
-	{
-		return $this->isInjectedModel() ? $this->getSourceInjectionModel()->getDocumentName() : $this->getDocumentName();
 	}
 }

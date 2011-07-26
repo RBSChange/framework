@@ -41,16 +41,6 @@ class import_ScriptBaseElement
 	/**
 	 * @param String $name
 	 * @return import_ScriptBaseElement
-	 * @deprecated getAncestor($name)
-	 */
-	protected function getAncestror($name)
-	{
-		return $this->getAncestor($name);
-	}
-
-	/**
-	 * @param String $name
-	 * @return import_ScriptBaseElement
 	 */
 	protected function getAncestor($name)
 	{

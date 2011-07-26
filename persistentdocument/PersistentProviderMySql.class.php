@@ -1110,14 +1110,6 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		/**
 		 * @return String
 		 */
-		protected function clearFrameworkCacheDeletePatternQuery()
-		{
-			return 'DELETE FROM f_cache where cache_key like :pattern';
-		}
-
-		/**
-		 * @return String
-		 */
 		protected function clearFrameworkCacheDeleteQuery()
 		{
 			return 'DELETE FROM f_cache';

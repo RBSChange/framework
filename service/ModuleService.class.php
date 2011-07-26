@@ -687,60 +687,6 @@ class ModuleService extends BaseService
 		}
 		return array_keys($modules);
 	}
-	
-	// Deprecarted
-	
-	/**
-	 * @deprecated (will be removed in 4.0) with no replacement.
-	 */
-	public function getRequiredTags($moduleName, $onlyMissingTags = false)
-	{
-		return array();
-	}
-		
-	/**
-	 * @deprecated (will be removed in 4.0) Use getPackageVersionList() instead.
-	 */
-	public final function getModuleVersionList()
-	{
-		return $this->getPackageVersionList();
-	}
-	
-	/**
-	 * @deprecated (will be removed in 4.0) use getDefinedDocumentNames($moduleName)
-	 */
-	public function getDefinedDocuments($moduleName)
-	{
-		return $this->getDefinedDocumentNames($moduleName);
-	}
-	
-	/**
-	 * @deprecated (will be removed in 4.0)  use getPackageNames()
-	 */
-	public final function getModules()
-	{
-		return $this->getPackageNames();
-	}
-	
-	/**
-	 * @deprecated (will be removed in 4.0) use getPreferencesDocument($moduleName)
-	 */
-	public static function getPreferencesDocumentId($moduleName)
-	{
-		if (empty($moduleName))
-		{
-			throw new BaseException('invalid-empty-module-name', 'framework.exception.errors.Invalid-empty-module-name');
-		}
-		
-		$preferencesDocument = self::getPreferencesDocument($moduleName);
-		
-		if (is_null($preferencesDocument))
-		{
-			throw new BaseException('preferences-document-not-found', 'framework.exception.errors.Preferences-document-not-found');
-		}
-		
-		return $preferencesDocument->getId();
-	}
 }
 
 class c_Module

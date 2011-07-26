@@ -161,7 +161,7 @@ class <{$model->getFinalDocumentClassName()}>model extends f_persistentdocument_
 	 */
 	public final function isLocalized()
 	{
-		return <{$model->escapeBoolean($model->isInternationalized())}>;
+		return <{$model->escapeBoolean($model->isLocalized())}>;
 	}
 
 	/**

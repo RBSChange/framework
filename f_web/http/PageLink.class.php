@@ -117,15 +117,5 @@ class f_web_PageLink extends f_web_HttpLink
 	public function getPath()
 	{
 		return $this->path;
-	}	
-	
-	// Deprecated
-	
-	/**
-	 * @deprecated (will be removed in 4.0) use setQueryParameter
-	 */
-	public function setQueryParametre($key, $value)
-	{
-		return $this->setQueryParameter($key, $value);
 	}
 }

@@ -502,7 +502,7 @@ abstract class f_action_BaseAction extends Action
 	 */
 	protected function isDocumentAction()
 	{
-		return $this->suffixSecureActionByDocument();
+		return false;
 	}
 
 	protected function getSecureNodeIds()
@@ -533,15 +533,5 @@ abstract class f_action_BaseAction extends Action
 	{
 		$this->setException($request, $e, $popupAlert);
 		return self::getErrorView();
-	}
-	
-	// Deprecated
-	
-	/**
-	 * @deprecated (will be removed in 4.0) override isDocumentAction
-	 */
-	protected function suffixSecureActionByDocument()
-	{
-		return false;
 	}
 }

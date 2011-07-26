@@ -20,13 +20,6 @@ class BadInitializationException extends Exception
 }
 
 /**
- * ClassException is used in every class that must thorw exception
- */
-class ClassException extends BaseException
-{
-}
-
-/**
  * ClassNotFoundException is used when a class are not found in project
  */
 class ClassNotFoundException extends Exception
@@ -42,13 +35,6 @@ class FileNotFoundException extends BaseException
 		$attributes = array('file' => $file);
 		parent::__construct('file-not-found', $key, $attributes);
 	}
-}
-
-/**
- * FrameworkException is used by Framework package classes to throw exception
- */
-class FrameworkException extends BaseException
-{
 }
 
 class IllegalArgumentException extends Exception
@@ -121,29 +107,8 @@ class InvalidTagException extends TagException
 	}
 }
 
-
 class IOException extends Exception
 {
-}
-
-/**
- * ListNotFoundException is used when a list is not found
- */
-class ListNotFoundException extends Exception
-{
-}
-
-
-/**
- * NoUserForWorkitemException is used at workitem initialization if trere is not valid user.
- */
-class NoUserForWorkitemException extends BaseException
-{
-	public function __construct ($argumentName)
-	{
-		$key = 'framework.exception.errors.No-valid-user-found-for-this-workitem';
-		parent::__construct($argumentName, $key);
-	}	
 }
 
 class ServiceNotFoundException extends Exception 
@@ -196,8 +161,6 @@ class TransactionCancelledException extends Exception
 		return $this->sourceException;
 	}
 }
-
-
 
 class UnavailableModuleException extends Exception
 {

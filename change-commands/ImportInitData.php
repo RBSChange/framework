@@ -85,7 +85,7 @@ class commands_ImportInitData extends commands_AbstractChangeCommand
 		}
 		else
 		{
-			$modules = ModuleService::getInstance()->getModules();
+			$modules = ModuleService::getInstance()->getPackageNames();
 			foreach ($modules as $module)
 			{
 				if ($this->checkImport($module))

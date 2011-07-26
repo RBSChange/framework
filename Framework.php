@@ -479,49 +479,6 @@ class Framework
 	{
 		return AG_WEBAPP_NAME;
 	}
-	
-	// Deprecated
-
-	/**
-	 * @deprecated (will be removed in 4.0)
-	 */
-	public final static function parseComponentType($componentType,$whatwewant=null,$noException=false)
-	{
-		$matches = array();
-		if (preg_match('#^(.*)/([\w_\-]+)$#', $componentType, $matches))
-		{
-			$res = array();
-			$res['component'] = $matches[2];
-			$res['package']   = $matches[1];
-			$tt = explode("_", $res['package']);
-
-			if ($tt[0] == "framework")
-			{
-				$res['package_type'] = "framework";
-				$res['package_name'] = "framework";
-			}
-			else
-			{
-				$res['package_type'] = $tt[0];
-				$res['package_name'] = $tt[1];
-			}
-
-			if ($whatwewant===null)
-			{
-				return $res;
-			}
-			else
-			{
-				return $res[$whatwewant];
-			}
-		}
-
-		if ($noException) return null;
-
-		$e = new ClassException("invalid-component-type");
-		$e->setAttribute('componentType', $componentType);
-		throw $e;
-	}
 }
 
 // Load configuration
@@ -533,8 +490,6 @@ require_once(FRAMEWORK_HOME . '/loader/Resolver.class.php');
 require_once(FRAMEWORK_HOME . '/loader/ResourceLoader.class.php');
 require_once(FRAMEWORK_HOME . '/loader/ClassLoader.class.php');
 require_once(FRAMEWORK_HOME . '/loader/Loader.class.php');
-
-
 
 function f_errorHandler($errno, $errstr, $errfile, $errline)
 {
@@ -592,7 +547,6 @@ require_once(FRAMEWORK_HOME . '/service/LoggingService.class.php');
 // +---------------------------------------------------------------------------+
 // Configuration du gestionnaire d'erreurs
 set_error_handler("f_errorHandler");
-
 
 // Set the locale.
 $localResult = setlocale(LC_ALL, 'en_US.UTF-8');

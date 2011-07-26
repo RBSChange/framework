@@ -530,14 +530,4 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 	{
 		$this->script->setAttribute('byDocumentId', $this->getPersistentDocument()->getId());
 	}
-	
-	// Deprecated
-	
-	/**
-	 * @deprecated (will be removed in 4.0) use getAncestorByClassName
-	 */
-	protected final function getParentByClassName($className)
-	{
-		return $this->getAncestorByClassName($className);
-	}
 }

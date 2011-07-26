@@ -57,11 +57,6 @@ class paginator_PaginatorItem
 class paginator_Paginator extends ArrayObject
 {
 	/**
-	 * @deprecated (will be removed in 4.0) use PAGEINDEX_PARAMETER_NAME
-	 */
-	const REQUEST_PARAMETER_NAME = 'page';
-	
-	/**
 	 * The page index parameter name
 	 */
 	const PAGEINDEX_PARAMETER_NAME = 'page';

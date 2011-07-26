@@ -121,7 +121,7 @@ class PatchService extends BaseService
 	
 	private function getInstalledPackage()
 	{
-		$packageList = array_merge(array('framework', 'webapp'), ModuleService::getInstance()->getModules());
+		$packageList = array_merge(array('framework', 'webapp'), ModuleService::getInstance()->getPackageNames());
 		return $packageList;
 	}
 	

@@ -1495,15 +1495,7 @@ class f_persistentdocument_DocumentService extends BaseService
 	 */
 	protected function publicationStatusChanged($document, $oldPublicationStatus, $params)
 	{
-		// TODO: remove when onPublicationStatusChanged will be removed.
-		$this->onPublicationStatusChanged($document, $oldPublicationStatus);
-	}
-
-	/**
-	 * @deprecated (will be removed in 4.0) in favor to publicationStatusChanged
-	 */
-	protected function onPublicationStatusChanged($document, $oldPublicationStatus)
-	{
+		// Nothing done by default.
 	}
 
 	/**
@@ -1526,7 +1518,6 @@ class f_persistentdocument_DocumentService extends BaseService
 		$document->getDocumentService()->publicationStatusChanged($document, $oldPublicationStatus, $eventParams);
 		f_event_EventManager::dispatchEvent($eventName, $this, $eventParams);
 	}
-
 
 	/**
 	 * Rend actif le document
@@ -2672,7 +2663,7 @@ class f_persistentdocument_DocumentService extends BaseService
 		}
 		else
 		{
-			$documentName = $document->getPersistentModel()->getOriginalDocumentName();
+			$documentName = $document->getPersistentModel()->getDocumentName();
 			foreach ($allPermissions as $permission)
 			{
 				$parts = explode('.', $permission);
@@ -2696,7 +2687,7 @@ class f_persistentdocument_DocumentService extends BaseService
 		$contextlang = RequestContext::getInstance()->getLang();
 		$usecontextlang = $document->isLangAvailable($contextlang);
 		$infos = array('id' => $document->getId(),
-				'model' => $model->getOriginalModelName(),
+				'model' => $model->getName(),
 				'contextlang' => $contextlang,
 				'vo' => $document->getLang(),
 				'label' => $model->isLocalized() ? $document->getVoLabel() :  $document->getLabel(),
@@ -2738,8 +2729,8 @@ class f_persistentdocument_DocumentService extends BaseService
 			if ($allowedSections === null || isset($allowedSections['publication']))
 			{
 				$data['publication'] = array(
-				'status' => f_Locale::translateUI(DocumentHelper::getPublicationstatusLocaleKey($document)),
-				'workflow' => ''
+					'status' => LocaleService::getInstance()->transBO(DocumentHelper::getStatusLocaleKey($document)),
+					'workflow' => ''
 				);
 				
 				$status = $document->getPublicationstatus();
@@ -2833,7 +2824,7 @@ class f_persistentdocument_DocumentService extends BaseService
 	 */
 	public function addTreeAttributes($document, $moduleName, $treeType, &$nodeAttributes)
 	{
-		$document->addTreeAttributesCompatibility($moduleName, $treeType, $nodeAttributes);
+		// Nothing done by default.
 	}
 	
 	/**
@@ -2844,10 +2835,7 @@ class f_persistentdocument_DocumentService extends BaseService
 	 */
 	public function addFormProperties($document, $propertiesName, &$datas, $parentId = null)
 	{
-		if (f_util_ClassUtils::methodExists($document, 'addFormProperties'))
-		{
-			$document->addFormProperties($propertiesName, $datas);
-		}
+		// Nothing done by default.
 	}
 	
 	/**
@@ -2862,88 +2850,5 @@ class f_persistentdocument_DocumentService extends BaseService
 	{
 		$attributes['href'] = LinkHelper::getDocumentUrl($document, $lang);
 		return f_util_HtmlUtils::buildLink($attributes, $content);
-	}
-	
-	// Deprecated
-	
-	/**
-	 * @deprecated (will be removed in 4.0) use TagService->addTag
-	 */
-	public function addTag($document, $tag)
-	{
-		$this->getTagService()->addTag($document, $tag);
-	}
-	
-	/**
-	 * @deprecated (will be removed in 4.0) use TagService::removeTag
-	 */
-	public function removeTag($document, $tag)
-	{
-		$this->getTagService()->removeTag($document, $tag);
-	}
-	
-	/**
-	 * @deprecated (will be removed in 4.0) use TagService::regenerateTags
-	 */
-	public function regenerateTags()
-	{
-		$this->getTagService()->regenerateTags();
-	}
-
-	/**
-	 * @deprecated (will be removed in 4.0) use TagService::getDocumentByExclusiveTag
-	 */
-	public function getDocumentByExclusiveTag($tag)
-	{
-		return $this->getTagService()->getDocumentByExclusiveTag($tag);
-	}
-
-	/**
-	 * @deprecated (will be removed in 4.0) use TagService::getDocumentByContextualTag
-	 */
-	public function getDocumentByContextualTag($tag, $contextDocument)
-	{
-		return $this->getTagService()->getDocumentByContextualTag($tag, $contextDocument);
-	}
-
-	/**
-	 * @deprecated (will be removed in 4.0) use TagService::getDocumentBySiblingTag
-	 */
-	public function getDocumentBySiblingTag($tag, $siblingDocument)
-	{
-		return $this->getTagService()->getDocumentBySiblingTag($tag, $siblingDocument);
-	}
-
-	/**
-	 * @deprecated (will be removed in 4.0) use TagService::getDocumentsByTag
-	 */
-	public final function getDocumentsByTag($tag)
-	{
-		return $this->getTagService()->getDocumentsByTag($tag);
-	}
-
-	/**
-	 * @deprecated (will be removed in 4.0) use $document->isPublished() instead
-	 */
-	public function isPublicated($document)
-	{
-		return $document->isPublished();
-	}
-	
-	/**
-	 * @deprecated (will be removed in 4.0) with no remplacement
-	 */
-	public final function setUrlRewriting($document, $lang, $url)
-	{
-	}
-	
-	/**
-	 * @deprecated (will be removed in 4.0) use website_UrlRewritingService::getCustomPath
-	 */
-	public final function getUrlRewriting($document, $lang)
-	{
-		$websiteId = $this->getWebsiteId($document);
-		$website = ($websiteId === null) ? website_WebsiteModuleService::getInstance()->getCurrentWebsite() : DocumentHelper::getDocumentInstance($websiteId);
-		return website_UrlRewritingService::getInstance()->getCustomPath($document, $website, $lang);
 	}
 }

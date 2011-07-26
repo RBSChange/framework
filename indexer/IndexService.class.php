@@ -1179,7 +1179,7 @@ class indexer_IndexService extends BaseService
 			}
 			if ($parent !== null)
 			{
-				$moduleName = $document->getPersistentModel()->getOriginalModuleName();
+				$moduleName = $document->getPersistentModel()->getModuleName();
 				if ($parent->getPersistentDocument() instanceof website_persistentdocument_topic && $moduleName !== 'website')
 				{
 					$indexedDocument->addDocumentAncestor(ModuleService::getInstance()->getRootFolderId($moduleName));
@@ -1197,7 +1197,7 @@ class indexer_IndexService extends BaseService
 			// still no parent, fallback to the root node of the original module
 			if ($parent == null)
 			{
-				$parentId = ModuleService::getInstance()->getRootFolderId($document->getPersistentModel()->getOriginalModuleName());
+				$parentId = ModuleService::getInstance()->getRootFolderId($document->getPersistentModel()->getModuleName());
 			}
 			else 
 			{
@@ -1415,64 +1415,5 @@ class indexer_IndexService extends BaseService
 			return $parent->getId();
 		}
 		return null;
-	}
-	
-
-	
-	// DEPRECATED
-	
-	/**
-	 * @deprecated (will be removed in 4.0) 
-	 */
-	public function getSynonymsLists()
-	{
-		return array();
-	}
-	
-	/**
-	 * @deprecated (will be removed in 4.0)
-	 */
-	public function updateSynonymsList($synonymsList, $content)
-	{
-		return;
-	}
-	
-	/**
-	 * @deprecated (will be removed in 4.0) use isModelNameIndexable
-	 */
-	public function isModelIndexable($model)
-	{
-		return $this->isModelNameIndexable($model->getName());
-	}
-		
-	/**
-	 * @deprecated (will be removed in 4.0)
-	 */
-	public function scheduleReindexing()
-	{
-		$taskService = task_PlannedtaskService::getInstance();
-		if (f_util_ArrayUtils::isEmpty($taskService->getRunnableBySystemtaskclassname('f_tasks_ReindexDocumentsTask')))
-		{
-			$runDate = date_Calendar::getInstance()->add(date_Calendar::MINUTE, 720);
-			$reindexDocumentTask = $taskService->getNewDocumentInstance();
-			$reindexDocumentTask->setSystemtaskclassname('f_tasks_ReindexDocumentsTask');
-			$reindexDocumentTask->setLabel(__METHOD__);
-			$reindexDocumentTask->setUniqueExecutiondate($runDate);
-			$reindexDocumentTask->save();
-		}
-	}
-	
-
-	
-	/**
-	 * @deprecated (will be removed in 4.0)
-	 */
-	public function isDirty()
-	{
-		if ($this->manager !== null)
-		{
-			return $this->manager->isDirty();
-		}
-		return false;
 	}
 }

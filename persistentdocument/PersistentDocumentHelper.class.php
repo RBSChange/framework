@@ -636,22 +636,4 @@ class DocumentHelper
 		}
 		return array_keys($models);
 	}
-	
-	// Deprecated
-	
-	/**
-	 * @deprecated (will be removed in 4.0) Use equals() instead.
-	 */
-	public static function isEquals($a, $b)
-	{
-		return self::equals($a, $b);
-	}
-	
-	/**
-	 * @deprecated (will be removed in 4.0) use getStatusLocaleKey
-	 */
-	public static function getPublicationstatusLocaleKey($document)
-	{
-		return  '&framework.persistentdocument.status.'. ucfirst(strtolower($document->getPublicationstatus())) .";";
-	}
 }

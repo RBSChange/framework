@@ -645,14 +645,4 @@ class ClassResolverDevMode extends ClassResolver
 		}
 		return $maxMTime;
 	}
-	
-	// Deprecated
-	
-	/**
-	 * @deprecated (will be removed in 4.0)
-	 */
-	public function loadCacheFile()
-	{
-		// nothing
-	}
 }
