@@ -127,7 +127,6 @@ class TemplateObject
 		{
 			Framework::warn(__METHOD__ . ' EXCEPTION while executing template ('. $this->fileName . ') :' . $e->getMessage());
 			Framework::exception($e);
-			die();
 			RequestContext::getInstance()->endI18nWork($e);
 		}
 	}
