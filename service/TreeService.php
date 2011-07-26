@@ -725,80 +725,13 @@ class TreeService extends BaseService
 		return in_array($ancestorId, $treeNode->getAncestorsId());
 	}
 	
+	// Deprecated
+	
 	/**
-	 * @param Integer $rootFolderId
-	 * @param String $dateString
-	 *
-	 * @return generic_persistentdocument_folder
+	 * @deprecated (will be removed in 5.0) use generic_FolderService::getInstance()->getFolderOfDate()
 	 */
 	public function getFolderOfDate($rootFolderId, $dateString = null)
 	{
-		$dateCalendar = date_Calendar::getInstance($dateString);
-
-		$pp = $this->getPersistentProvider();
-
-		// Search if folders exist
-		$folderDay = $pp->createQuery('modules_generic/folder')
-		->add(Restrictions::descendentOf($rootFolderId))
-		->add(Restrictions::eq('label', date_DateFormat::format($dateCalendar, 'Y-m-d')))
-		->findUnique();
-
-		if ( is_null($folderDay) )
-		{
-			$this->folderService = generic_FolderService::getInstance();
-
-			// Year folder
-			$folderYear = $pp->createQuery('modules_generic/folder')
-			->add(Restrictions::childOf($rootFolderId))
-			->add(Restrictions::eq('label', date_DateFormat::format($dateCalendar, 'Y')))
-			->findUnique();
-
-			if ( is_null($folderYear) )
-			{
-				// Create the year, month and the day folders
-				$folderYear = $this->createFolder($rootFolderId, date_DateFormat::format($dateCalendar, 'Y'));
-				$folderMonth = $this->createFolder($folderYear->getId(), date_DateFormat::format($dateCalendar, 'Y-m'));
-				$folderDay = $this->createFolder($folderMonth->getId(), date_DateFormat::format($dateCalendar, 'Y-m-d'));
-			}
-			else
-			{
-				// Month folder
-				$folderMonth = $pp->createQuery('modules_generic/folder')
-				->add(Restrictions::childOf($folderYear->getId()))
-				->add(Restrictions::eq('label', date_DateFormat::format($dateCalendar, 'Y-m')))
-				->findUnique();
-
-				if ( is_null($folderMonth) )
-				{
-					// Create the month and the day folders
-					$folderMonth = $this->createFolder($folderYear->getId(), date_DateFormat::format($dateCalendar, 'Y-m'));
-					$folderDay = $this->createFolder($folderMonth->getId(), date_DateFormat::format($dateCalendar, 'Y-m-d'));
-				}
-				else
-				{
-					$folderDay = $this->createFolder($folderMonth->getId(), date_DateFormat::format($dateCalendar, 'Y-m-d'));
-				}
-			}
-		}
-
-		return $folderDay;
+		return generic_FolderService::getInstance()->getFolderOfDate($rootFolderId, $dateString);
 	}
-
-
-	/**
-	 * @param Integer $parentFolderId
-	 * @param String $label
-	 * @return generic_persistentdocument_folder
-	 */
-	private function createFolder($parentFolderId, $label)
-	{
-		$folder = generic_FolderService::getInstance()->getNewDocumentInstance();
-		$folder->setLabel($label);
-		$folder->save($parentFolderId);
-		return $folder;
-	}	
-	
-    /*
-     * *********************************************************************************
-     */	
 }
