@@ -648,7 +648,7 @@ class DocumentHelper
 	}
 	
 	/**
-	 * @deprecated (will be removed in 4.0)
+	 * @deprecated (will be removed in 4.0) use getStatusLocaleKey
 	 */
 	public static function getPublicationstatusLocaleKey($document)
 	{

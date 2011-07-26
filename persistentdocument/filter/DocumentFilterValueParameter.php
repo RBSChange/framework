@@ -91,10 +91,11 @@ class f_persistentdocument_DocumentFilterValueParameter extends f_persistentdocu
 			}
 			else 
 			{
+				$ls = LocaleService::getInstance();
 				switch ($this->propertyInfo->getType())
 				{
 					case BeanPropertyType::DATETIME: 
-						$value = date_DateFormat::format(date_Calendar::getInstance($tmpValue), f_Locale::translateUI('&modules.filter.bo.general.date-format;'));
+						$value = date_Formatter::format(date_Calendar::getInstance($tmpValue), $ls->transBO('m.filter.bo.general.date-format'));
 						break;
 						
 					case BeanPropertyType::DOCUMENT:
@@ -115,12 +116,12 @@ class f_persistentdocument_DocumentFilterValueParameter extends f_persistentdocu
 							{
 								Framework::exception($e);
 							}
-							$value = f_Locale::translateUI('&modules.uixul.bo.general.Document-not-found;');
+							$value = $ls->transBO('m.uixul.bo.general.document-not-found', array('ucf'));
 						}
 						break;
 						
 					case BeanPropertyType::BOOLEAN: 
-						$value = f_Locale::translateUI('&modules.uixul.bo.general.' . ($tmpValue == 'true' ? 'yes' : 'no') . ';');
+						$value = $ls->transBO('m.uixul.bo.general.' . ($tmpValue == 'true' ? 'yes' : 'no'));
 						break;
 						
 					default : 
@@ -193,7 +194,7 @@ class f_persistentdocument_DocumentFilterValueParameter extends f_persistentdocu
 			}
 			else if ($converter instanceof bean_DateTimeConverter)
 			{
-				$converter->setDateFormat(date_DateFormat::SQL_DATE_FORMAT);
+				$converter->setDateFormat(date_Formatter::SQL_DATE_FORMAT);
 			}
 			if ($converter->isValidRequestValue($value))
 			{

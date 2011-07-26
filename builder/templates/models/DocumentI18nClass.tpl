@@ -227,11 +227,11 @@ class <{$model->getDocumentClassName()}>I18n implements f_persistentdocument_I18
 <{if $property->getType() == "DateTime"}>
 		if ($<{$property->getName()}> instanceof date_Calendar)
 		{
-			$<{$property->getName()}> = date_DateFormat::format($<{$property->getName()}>, "Y-m-d H:i:s");
+			$<{$property->getName()}> = date_Formatter::format($<{$property->getName()}>, date_Formatter::SQL_DATE_FORMAT);
 		}
 		else if (is_long($<{$property->getName()}>))
 		{
-			$<{$property->getName()}> = date("Y-m-d H:i:s", $<{$property->getName()}>);
+			$<{$property->getName()}> = date(date_Formatter::SQL_DATE_FORMAT, $<{$property->getName()}>);
 		}
 <{/if}>
 		if ($this->m_<{$property->getName()}> !== $<{$property->getName()}>)

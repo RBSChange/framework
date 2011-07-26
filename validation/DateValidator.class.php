@@ -54,7 +54,7 @@ class validation_DateValidator extends validation_ValidatorImpl implements valid
 				{
 					$originalFormat = sprintf('%04d-%02d-%02d %02d:%02d:%02d', $parts['Y'], $parts['m'], $parts['d'], $parts['H'], $parts['i'], $parts['s']);
 					$dateTime = date_Calendar::getInstance($originalFormat);
-					$calculated = date_DateFormat::format($dateTime, 'Y-m-d H:i:s');
+					$calculated = date_Formatter::format($dateTime, 'Y-m-d H:i:s');
 					$rejected = $originalFormat != $calculated;
 					
 					$dateCalculated = substr($calculated, 0, 10);
@@ -159,11 +159,11 @@ class validation_DateValidator extends validation_ValidatorImpl implements valid
 			{
 				case 'min' :
 					$date = date_Calendar::getInstance($this->minDate);
-					$dateformated = date_DateFormat::format($date, $this->originalFormat);
+					$dateformated = date_Formatter::format($date, $this->originalFormat);
 					return f_Locale::translate('&framework.validation.validator.Date.Min.message;', array('mindate' => $dateformated));
 				case 'max' :
 					$date = date_Calendar::getInstance($this->maxDate);
-					$dateformated = date_DateFormat::format($date, $this->originalFormat);
+					$dateformated = date_Formatter::format($date, $this->originalFormat);
 					return f_Locale::translate('&framework.validation.validator.Date.Max.message;', array('maxdate' => $dateformated));
 				default :
 					return f_Locale::translate($this->getMessageCode(), array('format' => $this->humanReadableFormat));

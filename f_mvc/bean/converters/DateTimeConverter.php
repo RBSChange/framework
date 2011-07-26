@@ -14,7 +14,7 @@ class bean_DateTimeConverter implements BeanValueConverter
 	{
 		if ($this->dateFormat === null)
 		{
-			return date_DateFormat::getDateFormatForLang(RequestContext::getInstance()->getLang());
+			return date_Formatter::getDefaultDateFormat();
 		}
 		return $this->dateFormat;
 	}
@@ -41,7 +41,7 @@ class bean_DateTimeConverter implements BeanValueConverter
 			$convertedValue = date_Calendar::getInstance($value);
 			$convertedValue = date_Converter::convertDateToLocal($convertedValue);
 			$convertedValue = $convertedValue->toString();
-			return date_DateFormat::format($convertedValue, date_DateFormat::getDateFormatForLang($lang));
+			return date_Formatter::format($convertedValue, $this->getDateFormat());
 		}
 		return "";
 	}

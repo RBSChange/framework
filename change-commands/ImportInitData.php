@@ -130,7 +130,7 @@ class commands_ImportInitData extends commands_AbstractChangeCommand
 	private function setImport($packageName)
 	{
 		$pp = f_persistentdocument_PersistentProvider::getInstance();
-		$initData = date_DateFormat::format(date_Calendar::now());
+		$initData = date_Formatter::format(date_Calendar::now());
 		$pp->setSettingValue($packageName, 'init-data', $initData);
 	}
 }

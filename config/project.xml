@@ -5,14 +5,8 @@
 		<define name="$name">$value</define> <=> <?php define($name, $value); ?>
 		-->
 	<defines>
-
-		<!-- Deprecated -->
-		<define name="WEBAPP_HOME">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'override'</define>
-		
-			
 		<define name="PROJECT_OVERRIDE">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'override'</define>
 		<define name="DOCUMENT_ROOT">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'webapp' . DIRECTORY_SEPARATOR . 'www'</define>
-		
 
 		<define name="CHANGE_RELEASE">4.0</define>
 
@@ -76,6 +70,7 @@
 		<!-- DEPRECATED -->
 		<define name="AG_ACTION_ACCESSOR">action</define>
 		<define name="AG_MODULE_ACCESSOR">module</define>
+		<define name="WEBAPP_HOME">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'override'</define>
 	</defines>
 
 	<config>

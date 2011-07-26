@@ -42,7 +42,7 @@ class indexer_RangeQuery extends indexer_QueryBase implements indexer_Query
 		$this->field = $field;
 		if ($min instanceof date_Calendar )
 		{
-			$this->min = date_DateFormat::format($min, indexer_Field::SOLR_DATE_FORMAT);
+			$this->min = date_Formatter::format($min, indexer_Field::SOLR_DATE_FORMAT);
 		}
 		else
 		{
@@ -50,7 +50,7 @@ class indexer_RangeQuery extends indexer_QueryBase implements indexer_Query
 		}
 		if ($max instanceof date_Calendar )
 		{
-			$this->max = date_DateFormat::format($max, indexer_Field::SOLR_DATE_FORMAT);
+			$this->max = date_Formatter::format($max, indexer_Field::SOLR_DATE_FORMAT);
 		}
 		else
 		{
