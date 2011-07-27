@@ -82,7 +82,7 @@ class LocaleService extends BaseService
 			{
 				foreach ($paths as $i18nPath)
 				{
-					$name = basename(dirname($path));
+					$name = basename(dirname($i18nPath));
 					$basekey = 't.' . $name;
 					$this->importOverrideDir($i18nPath, $basekey);
 				}	
@@ -158,179 +158,6 @@ class LocaleService extends BaseService
 		f_util_FileUtils::rmdir($dir);	
 	}
 	
-	
-	/**
-	 * @param string $name [null] | framework | modules_NAME | themes_NAME
-	 * @param boolean $removeLocalFolder
-	 * @param boolean $overrideI18Folder
-	 * @return boolean
-	 */
-	public function convertLocales($name = null, $removeLocalFolder = false, $overrideI18Folder = false)
-	{
-		if ($name === null || $name === 'framework')
-		{
-			$path = f_util_FileUtils::buildWebeditPath('framework', 'locale');
-			if (is_dir($path))
-			{
-				echo "Convert framework...\n";
-				$i18nPath = f_util_FileUtils::buildWebeditPath('framework', 'i18n');
-				if ($overrideI18Folder && is_dir($i18nPath))
-				{
-					f_util_FileUtils::rmdir($i18nPath);
-				}
-				$this->convertDir('f', $path, false);
-				if ($removeLocalFolder)
-				{
-					f_util_FileUtils::rmdir($path);
-				}
-			}
-			
-			$path = f_util_FileUtils::buildOverridePath('framework', 'locale');
-			if (is_dir($path))
-			{
-				echo "Convert framework override...\n";
-				$i18nPath = f_util_FileUtils::buildOverridePath('framework', 'i18n');
-				if ($overrideI18Folder && is_dir($i18nPath))
-				{
-					f_util_FileUtils::rmdir($i18nPath);
-				}
-				$this->convertDir('f', $path, true);
-				if ($removeLocalFolder)
-				{
-					f_util_FileUtils::rmdir($path);
-				}
-			}
-			
-			if ($name === 'framework')
-			{
-				return true;
-			}
-		}
-		
-		if ($name === null)
-		{
-			//Themes locales conversion
-			$pathPattern = f_util_FileUtils::buildWebeditPath('themes', '*', 'locale');
-			foreach (glob($pathPattern, GLOB_ONLYDIR) as $path)
-			{
-				$name = basename(dirname($path));
-				echo "Convert theme $name ...\n";
-				$i18nPath = f_util_FileUtils::buildWebeditPath('themes', $name, 'i18n');
-				if ($overrideI18Folder && is_dir($i18nPath))
-				{
-					f_util_FileUtils::rmdir($i18nPath);
-				}
-				$this->convertDir('t.' . $name, $path, false);
-				if ($removeLocalFolder)
-				{
-					f_util_FileUtils::rmdir($path);
-				}
-			}
-			
-			$pathPattern = f_util_FileUtils::buildOverridePath('themes', '*', 'locale');
-			foreach (glob($pathPattern, GLOB_ONLYDIR) as $path)
-			{
-				$name = basename(dirname($path));
-				echo "Convert theme $name override...\n";
-				$i18nPath = f_util_FileUtils::buildOverridePath('themes', $name, 'i18n');
-				if ($overrideI18Folder && is_dir($i18nPath))
-				{
-					f_util_FileUtils::rmdir($i18nPath);
-				}
-				$this->convertDir('t.' . $name, $path, true);
-				if ($removeLocalFolder)
-				{
-					f_util_FileUtils::rmdir($path);
-				}
-			}
-			
-			//Modules locales conversion
-			$pathPattern = f_util_FileUtils::buildWebeditPath('modules', '*', 'locale');
-			foreach (glob($pathPattern, GLOB_ONLYDIR) as $path)
-			{
-				$name = basename(dirname($path));
-				echo "Convert module $name ...\n";
-				$i18nPath = f_util_FileUtils::buildWebeditPath('modules', $name, 'i18n');
-				if ($overrideI18Folder && is_dir($i18nPath))
-				{
-					f_util_FileUtils::rmdir($i18nPath);
-				}
-				$this->convertDir('m.' . $name, $path, false);
-				if ($removeLocalFolder)
-				{
-					f_util_FileUtils::rmdir($path);
-				}
-			}
-			
-			$pathPattern = f_util_FileUtils::buildOverridePath('modules', '*', 'locale');
-			foreach (glob($pathPattern, GLOB_ONLYDIR) as $path)
-			{
-				$name = basename(dirname($path));
-				echo "Convert module $name override...\n";
-				$i18nPath = f_util_FileUtils::buildOverridePath('modules', $name, 'i18n');
-				if ($overrideI18Folder && is_dir($i18nPath))
-				{
-					f_util_FileUtils::rmdir($i18nPath);
-				}
-				$this->convertDir('m.' . $name, $path, true);
-				if ($removeLocalFolder)
-				{
-					f_util_FileUtils::rmdir($path);
-				}
-			}
-			return true;
-		}
-		
-		$parts = explode('/', $name);
-		if (count($parts) != 2)
-		{
-			return false;
-		}
-		if ($parts[0] === 'modules')
-		{
-			$basekey = 'm.' . $parts[1];
-		}
-		else if ($parts[0] === 'themes')
-		{
-			$basekey = 't.' . $parts[1];
-		}
-		else
-		{
-			return false;
-		}
-		
-		$path = f_util_FileUtils::buildWebeditPath($parts[0], $parts[1], 'locale');
-		if (is_dir($path))
-		{
-			$i18nPath = f_util_FileUtils::buildWebeditPath($parts[0], $parts[1], 'i18n');
-			if ($overrideI18Folder && is_dir($i18nPath))
-			{
-				f_util_FileUtils::rmdir($i18nPath);
-			}
-			$this->convertDir($basekey, $path, false);
-			if ($removeLocalFolder)
-			{
-				f_util_FileUtils::rmdir($path);
-			}
-		}
-		
-		$path = f_util_FileUtils::buildOverridePath($parts[0], $parts[1], 'locale');
-		if (is_dir($path))
-		{
-			$i18nPath = f_util_FileUtils::buildOverridePath($parts[0], $parts[1], 'i18n');
-			if ($overrideI18Folder && is_dir($i18nPath))
-			{
-				f_util_FileUtils::rmdir($i18nPath);
-			}
-			$this->convertDir($basekey, $path, true);
-			if ($removeLocalFolder)
-			{
-				f_util_FileUtils::rmdir($path);
-			}
-		}
-		return true;
-	}
-	
 	/**
 	 * @param string $baseKey
 	 * @param array $keysInfos [lcid => [id => [text, format]]
@@ -350,109 +177,6 @@ class LocaleService extends BaseService
 				}
 			}
 		}
-	}
-	
-	/**
-	 * Parse recursively directory and launch the genration of localization for all locale XML file
-	 *
-	 * @param string $package
-	 * @param string $dir
-	 * @param boolean $override
-	 */
-	private function convertDir($package, $dir, $override)
-	{
-		$dirs = array();
-		foreach (scandir($dir) as $file)
-		{
-			if ($file[0] == ".")
-			{
-				continue;
-			}
-			$absFile = $dir . DIRECTORY_SEPARATOR . $file;
-			if (is_dir($absFile))
-			{
-				$dirs[$package . '.' . $file] = $absFile;
-			}
-			elseif (f_util_StringUtils::endsWith($file, '.xml'))
-			{
-				$entities = array();
-				$includes = '';
-				$this->readOldFile($absFile, $entities, $includes);
-				$baseKey = $package . '.' . basename($absFile, '.xml');
-				$keys = $this->convertEntities($entities, $baseKey);
-				foreach ($keys as $lcid => $data)
-				{
-					foreach ($data as $baseKey => $values)
-					{
-						$this->updateI18nFile($baseKey, $lcid, $values, $includes, $override, false);
-					}
-				}
-			}
-		}
-		foreach ($dirs as $package => $dir)
-		{
-			$this->convertDir($package, $dir, $override);
-		}
-	}
-	
-	private function readOldFile($file, &$entities, &$extend)
-	{
-		// Load the XMl file
-		$dom = f_util_DOMUtils::fromPath($file);
-		if ($dom->documentElement->hasAttribute("extend"))
-		{
-			$parentInfo = explode(".", $dom->documentElement->getAttribute("extend"));
-			if ($parentInfo[0] == "framework")
-			{
-				$parentInfo[0] = 'f';
-				$extend = implode('.', $parentInfo);
-			}
-			elseif ($parentInfo[0] == "modules")
-			{
-				$parentInfo[0] = "m";
-				$extend = implode('.', $parentInfo);
-			}
-			elseif ($parentInfo[0] == "themes")
-			{
-				$parentInfo[0] = "t";
-				$extend = implode('.', $parentInfo);
-			}
-		}
-		
-		foreach ($dom->find("entity") as $entity)
-		{
-			$entityId = strtolower($entity->getAttribute('id'));
-			if (! array_key_exists($entityId, $entities))
-			{
-				$entities[$entityId] = array();
-				foreach ($dom->find("locale", $entity) as $locale)
-				{
-					$lang = strtolower($locale->getAttribute('lang'));
-					if (! array_key_exists($lang, $entities[$entityId]))
-					{
-						$entities[$entityId][$lang] = array();
-						$content = str_replace('"', '″', $locale->textContent);
-						$entities[$entityId][$lang]['value'] = $content;
-					}
-				}
-			}
-		}
-	}
-	
-	private function convertEntities($entities, $baseKey)
-	{
-		$keys = array();
-		foreach ($entities as $subKey => $langsInfos)
-		{
-			$id = strtolower($baseKey . '.' . $subKey);
-			foreach ($langsInfos as $lang => $data)
-			{
-				$key = $this->getKeyId($id);
-				$path = $this->getBaseKey($id);
-				$keys[$this->getLCID($lang)][$path][$key] = $data['value'];
-			}
-		}
-		return $keys;
 	}
 	
 	private function getBaseKey($key)
@@ -702,8 +426,10 @@ class LocaleService extends BaseService
 	 */
 	private function processModule($moduleName)
 	{
-		$availablePaths = FileResolver::getInstance()->setPackageName('modules_' . $moduleName)->setDirectory(
-				'i18n')->getPaths('');
+		$availablePaths = FileResolver::getInstance()
+			->setPackageName('modules_' . $moduleName)
+			->setDirectory('i18n')->getPaths('');
+			
 		if ($availablePaths === null)
 		{
 			return;
@@ -1057,6 +783,60 @@ class LocaleService extends BaseService
 			return str_replace(array('&modules.', '&framework.', '&themes.', ';', '&'), array('m.', 'f.', 't.', '', ''), $oldKey);
 		}
 		return false;
+	}
+	
+	/**
+	 * @param string $cleanOldKey
+	 * @return string[]
+	 */
+	public function getFormattersByCleanOldKey(&$cleanOldKey)
+	{
+		$formatters = array();	
+		
+		if ($cleanOldKey === false) return $formatters;
+		$keyParts = explode('.', $cleanOldKey);
+		if (count($keyParts) < 3 || !in_array($keyParts[0], array('m', 'f', 't'))) return $formatters;
+		
+		$keyId = $keyParts[count($keyParts) - 1];
+		if (preg_match('/^[A-Z][a-z-]+/', $keyId))
+		{
+			$formatters[] = 'ucf';
+		}
+		elseif (preg_match('/^[A-Z][A-Z]+/', $keyId))
+		{
+			$formatters[] = 'uc';
+		}
+		
+		if (preg_match('/[a-z0-9]+label$/i', $keyId))
+		{
+			$formatters[] = 'lab';
+			$keyId = substr($keyId, 0, strlen($keyId) - 5);
+			
+			if (preg_match('/[a-z0-9]+mandatory$/i', $keyId))
+			{
+				//Ignored
+				$keyId = substr($keyId, 0, strlen($keyId) - 9);
+			}
+		}
+		elseif (preg_match('/[a-z0-9]+mandatory$/i', $keyId))
+		{
+			//Ignored
+			$keyId = substr($keyId, 0, strlen($keyId) - 9);
+		}
+		elseif (preg_match('/[a-z0-9]+spaced$/i', $keyId))
+		{
+			$formatters[] = 'space';
+			$keyId = substr($keyId, 0, strlen($keyId) - 6);
+		}
+		elseif (preg_match('/[a-z0-9]+ellipsis$/i', $keyId))
+		{
+			$formatters[] = 'etc';
+			$keyId = substr($keyId, 0, strlen($keyId) - 8);
+		}
+		$keyParts[count($keyParts) - 1]	= $keyId;
+		$cleanOldKey = strtolower(implode('.', $keyParts));
+		
+		return $formatters;
 	}
 	
 	/**
