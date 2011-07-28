@@ -4,14 +4,11 @@
  */
 class TemplateObject
 {
-	
+	/**
+	 * @var string
+	 */	
 	public static $lastTemplateFileName = null;
 	
-	/**
-	 * @var PHPTAL
-	 */
-	private $template;
-
 	/**
 	 * @var string
 	 */
@@ -33,27 +30,24 @@ class TemplateObject
 	private $originalPath;
 
 	/**
+	 * @var string
+	 */
+	private $engine = 'PHPTAL';
+	
+	/**
+	 * @var array
+	 */
+	private $attributes = array();
+	
+	/**
 	 * @param string $fileName
 	 * @param string $mimeContentType
 	 */
 	public function __construct($fileName, $mimeContentType)
 	{
 		$this->mimeContentType = $mimeContentType;
-		self::$lastTemplateFileName = $fileName;
-		
 		$this->fileName = $fileName;
-		$this->template = new PHPTAL($fileName);
 		$this->lang = RequestContext::getInstance()->getLang();
-		if (!PHPTAL_Dom_Defs::getInstance()->isHandledNamespace(PHPTAL_Namespace_CHANGE::NAMESPACE_URI))
-		{
-			spl_autoload_unregister(array('PHPTAL', 'autoload'));
-			PHPTAL_Dom_Defs::getInstance()->registerNamespace(new PHPTAL_Namespace_CHANGE());	
-			$registry = PHPTAL_TalesRegistry::getInstance();
-			foreach (Framework::getConfigurationValue('tal/prefix') as $prefix => $class)
-			{
-				$registry->registerPrefix($prefix, array($class, $prefix));
-			}
-		}
 	}
 
 	/**
@@ -76,59 +70,7 @@ class TemplateObject
 	 */
 	public function setAttribute($name, $value)
 	{
-		$this->template->set($name, $value);
-	}
-
-	/**
-	 * @param boolean $noheader
-	 */
-	public function execute($noheader = false)
-	{
-		try
-		{
-			RequestContext::getInstance()->beginI18nWork($this->lang);
-			$this->template->getContext()->noThrow(true);
-			$this->template->stripComments(!Framework::inDevelopmentMode());
-			$path = PHPTAL_PHP_CODE_DESTINATION . $this->lang;
-			f_util_FileUtils::mkdir($path);
-			$this->template->setPhpCodeDestination($path);	
-					
-			if ($this->mimeContentType === K::XUL || $this->mimeContentType === K::XML)
-			{
-				$this->template->set('HOST',  Framework::getUIBaseUrl());
-				$this->template->setOutputMode(PHPTAL::XML);
-			}
-			else
-			{
-				$this->template->set('HOST', Framework::getBaseUrl());
-				$this->template->setOutputMode(PHPTAL::XHTML);
-			}
-			
-			$this->template->set('UIHOST',  Framework::getUIBaseUrl());
-
-			$mode = Controller::getInstance()->getRenderMode();
-			if (($mode != View::RENDER_VAR) && ($noheader === false))
-			{
-				$header = $this->getHeader();
-				if ((is_null($header) === false) && (headers_sent() == false))
-				{
-					header('Content-type: ' . $header);
-				}
-			}
-			$result = $this->template->execute();
-			RequestContext::getInstance()->endI18nWork();
-			if ($this->originalPath !== null)
-			{
-				$result .= "<!-- C4TEMPLATE_END ".$this->originalPath." -->";
-			}
-			return $result;
-		}
-		catch(Exception $e)
-		{
-			Framework::warn(__METHOD__ . ' EXCEPTION while executing template ('. $this->fileName . ') :' . $e->getMessage());
-			Framework::exception($e);
-			RequestContext::getInstance()->endI18nWork($e);
-		}
+		$this->attributes[$name] = $value;
 	}
 	
 	/**
@@ -140,7 +82,111 @@ class TemplateObject
 		$this->originalPath = $path;
 	}
 
-	private function getHeader()
+	/**
+	 * @param boolean $noheader
+	 * @return string
+	 */
+	public function execute($noheader = false)
+	{
+		$previousFileName = self::$lastTemplateFileName;
+		self::$lastTemplateFileName = $this->fileName;
+		
+		try
+		{
+			RequestContext::getInstance()->beginI18nWork($this->lang);
+			
+			if ($noheader) {$this->sendHeader();}			
+			if ($this->engine == 'PHPTAL')
+			{
+				$result = $this->executePHPTAL();
+			}
+			else
+			{
+				$result = null;
+			}
+			
+			RequestContext::getInstance()->endI18nWork();
+		}
+		catch(Exception $e)
+		{
+			Framework::error(__METHOD__ . ' EXCEPTION while executing template ('. $this->fileName . ') :' . $e->getMessage());
+			RequestContext::getInstance()->endI18nWork($e);
+		}
+		
+		self::$lastTemplateFileName = $previousFileName;
+		return $result;
+	}
+	
+	/**
+	 * @return string
+	 */
+	protected function executePHPTAL()
+	{
+		$fileName = $this->fileName;
+		$lang = $this->lang;
+		$mimeContentType = $this->mimeContentType;
+
+		$template = new PHPTAL($fileName);
+		if (!PHPTAL_Dom_Defs::getInstance()->isHandledNamespace(PHPTAL_Namespace_CHANGE::NAMESPACE_URI))
+		{
+			spl_autoload_unregister(array('PHPTAL', 'autoload'));
+			PHPTAL_Dom_Defs::getInstance()->registerNamespace(new PHPTAL_Namespace_CHANGE());	
+			$registry = PHPTAL_TalesRegistry::getInstance();
+			foreach (Framework::getConfigurationValue('tal/prefix') as $prefix => $class)
+			{
+				$registry->registerPrefix($prefix, array($class, $prefix));
+			}
+		}
+		
+		foreach ($this->attributes as $attrName => $attrValue) 
+		{
+			$template->set($attrName, $attrValue);
+		}
+		
+		$template->getContext()->noThrow(true);
+		$template->stripComments(!Framework::inDevelopmentMode());
+		$path = f_util_FileUtils::buildCachePath('template', $lang);
+		
+		f_util_FileUtils::mkdir($path);
+		$template->setPhpCodeDestination($path);
+		$template->set('LANG', $lang);	
+				
+		if ($mimeContentType === K::XUL || $mimeContentType === K::XML)
+		{
+			$template->set('HOST',  Framework::getUIBaseUrl());
+			$template->setOutputMode(PHPTAL::XML);
+		}
+		else
+		{
+			$template->set('HOST', Framework::getBaseUrl());
+			$template->setOutputMode(PHPTAL::XHTML);
+		}
+		
+		$template->set('UIHOST',  Framework::getUIBaseUrl());
+		
+		$result = $template->execute();
+		
+		if ($this->originalPath !== null)
+		{
+			$result .= "<!-- C4TEMPLATE_END ".$this->originalPath." -->";
+		}
+		return $result;		
+	}
+		
+	protected function sendHeader()
+	{
+		$mode = Controller::getInstance()->getRenderMode();
+		if (($mode != View::RENDER_VAR))
+		{
+			$header = $this->getHeader();
+			if ((is_null($header) === false) && (headers_sent() == false))
+			{
+				header('Content-type: ' . $header);
+			}
+		}		
+	}
+
+	protected function getHeader()
 	{
 		switch($this->mimeContentType)
 		{
