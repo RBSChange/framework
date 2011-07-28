@@ -5,12 +5,7 @@
 class indexer_SearchResult
 {
 	private $fields = array();
-	
-	/**
-	 * @var solrsearch_GaugeObject
-	 */
-	private $gaugeObject;
-	
+		
 	/**
 	 * @param String $name
 	 * @param String $value
@@ -69,18 +64,6 @@ class indexer_SearchResult
 	{
 		list($id, ) = explode('/', $this->getId());
 		return intval($id);
-	}
-	
-	/**
-	 * @return solrsearch_GaugeObject
-	 */	
-	public function getGauge()
-	{
-		if (null == $this->gaugeObject)
-		{
-			$this->gaugeObject = new solrsearch_GaugeObject($this->getNormalizedScore());			
-		}
-		return $this->gaugeObject;
 	}
 	
 	/**

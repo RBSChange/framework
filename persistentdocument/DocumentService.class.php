@@ -1365,19 +1365,6 @@ class f_persistentdocument_DocumentService extends BaseService
 	}
 
 	/**
-	 * Returns an associative array of attributes to display in the backoffice
-	 * preview panel.
-	 *
-	 * @param f_persistentdocument_PersistentDocument $document
-	 * @return array<string, string>
-	 */
-	public function getPreviewAttributes($document)
-	{
-		return array();
-	}
-
-
-	/**
 	 * Add custom log informations
 	 * @param f_persistentdocument_PersistentDocument $document
 	 * @param string $actionName
