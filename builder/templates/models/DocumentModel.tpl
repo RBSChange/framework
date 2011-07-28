@@ -46,19 +46,6 @@ class <{$model->getFinalDocumentClassName()}>model extends f_persistentdocument_
 		);	
 	}
 	
-	protected final function loadFormProperties()
-	{
-<{if ($model->useDocumentEditor())}>	
-		$this->m_formProperties = array();		
-<{else}>
-		$this->m_formProperties = array(
-<{foreach from=$model->getFormProperties() item=property}>
-			'<{$property->getName()}>' => new FormPropertyInfo('<{$property->getName()}>', '<{$property->getControlType()}>', '<{$property->getDisplay()}>', <{$model->escapeBoolean($property->isRequired())}>, '<{$property->getLabel()}>', '<{$property->getSerializedAttributes()}>'),
-<{/foreach}>
-		);		
-<{/if}> 
-	}
-	
 	protected final function loadInvertProperties()
 	{
 		// These properties are order by "inheritance order": the parent before the child.

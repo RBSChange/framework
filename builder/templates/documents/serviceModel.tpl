@@ -394,5 +394,4 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 //	public function addFormProperties($document, $propertiesName, &$datas)
 //	{
 //	}
-		
 }

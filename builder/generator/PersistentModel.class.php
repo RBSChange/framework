@@ -60,7 +60,6 @@ class generator_PersistentModel
 
 	private $properties = array();
 	private $serializedproperties = array();
-	private $formProperties = array();
 	private $childrenProperties = array();
 	private $inverseProperties = array();
 	private $statuses = array();
@@ -594,8 +593,6 @@ class generator_PersistentModel
 
 		$this->importSerializedProperties($xml);
 
-		$this->importFormProperties($xml);
-
 		$this->importChildrenProperties($xml);
 
 		$this->importPublicationStatus($xml);
@@ -930,22 +927,6 @@ class generator_PersistentModel
 
 	/**
 	 * @param String $name
-	 * @return generator_FormProperty
-	 */
-	private function getFormPropertyByName($name)
-	{
-		foreach ($this->formProperties as $property)
-		{
-			if ($property->getName() == $name)
-			{
-				return $property;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * @param String $name
 	 * @return generator_ChildrenProperty
 	 */
 	private function getChildrenPropertyByName($name)
@@ -997,7 +978,6 @@ class generator_PersistentModel
 	 */
 	private function applyGenericDocumentModel($baseDocument)
 	{
-
 		$this->extend = null;
 		$pp = f_persistentdocument_PersistentProvider::getInstance();
 		$properties = array('tableName' => $this->tableName, 'moduleName' => $this->moduleName, 'documentName' => $this->documentName, 'tableNameOci' => $this->tableNameOci);
@@ -1021,22 +1001,6 @@ class generator_PersistentModel
 				$newProperty->mergeGeneric($property);
 			}
 		
-		}
-
-		foreach ($baseDocument->formProperties as $key => $property)
-		{
-			$propertyName = $property->getName();
-			$newProperty = $this->getFormPropertyByName($propertyName);
-			if (is_null($newProperty))
-			{
-				$newProperty = clone($property);
-				$newProperty->setModel($this);
-				array_unshift($this->formProperties, $newProperty);
-			}
-			else
-			{
-				$newProperty->mergeGeneric($property);
-			}
 		}
 
 		$this->statuses = $baseDocument->statuses;
@@ -1170,15 +1134,6 @@ class generator_PersistentModel
 		foreach ($this->properties as $property)
 		{
 			$parentProperty = $parentModel->getPropertyByName($property->getName());
-			if (!is_null($parentProperty))
-			{
-				$property->setParentProperty($parentProperty);
-			}
-		}
-
-		foreach ($this->formProperties as $property)
-		{
-			$parentProperty = $parentModel->getFormPropertyByName($property->getName());
 			if (!is_null($parentProperty))
 			{
 				$property->setParentProperty($parentProperty);
@@ -1459,14 +1414,6 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return array<generator_FormProperty>
-	 */
-	public function getFormProperties()
-	{
-		return $this->formProperties;
-	}
-
-	/**
 	 * @return array<generator_ChildrenProperty>
 	 */
 	public function getChildrenProperties()
@@ -1593,7 +1540,6 @@ class generator_PersistentModel
 		$model = clone($this);
 
 		$model->properties = array();
-		$model->formProperties = array();
 		$model->childrenProperties = array();
 
 		$modelsList = array();
@@ -1615,20 +1561,6 @@ class generator_PersistentModel
 					$newproperty = clone($property);
 					$newproperty->setModel($model);
 					$model->properties[] = $newproperty;
-				}
-				else
-				{
-					$newproperty->override($property);
-				}
-			}
-
-			foreach ($currentModel->getFormProperties() as $property)
-			{
-				$newproperty = $model->getFormPropertyByName($property->getName());
-				if (is_null($newproperty))
-				{
-					$newproperty = clone($property);
-					$model->formProperties[] = $newproperty;
 				}
 				else
 				{
@@ -1667,19 +1599,6 @@ class generator_PersistentModel
 
 		// Sort inverse properties in order to always have a parent model before its descendants.
 		usort($model->inverseProperties, array('generator_PersistentModel', 'compareInverseProperties'));
-
-		foreach ($model->getProperties() as $property)
-		{
-			$name = $property->getName();
-			if ($name == 'id' || $name == 'model') {continue;}
-			$newproperty = $model->getFormPropertyByName($property->getName());
-			if (is_null($newproperty))
-			{
-				$newproperty = new generator_FormProperty($this);
-				$model->formProperties[] = $newproperty;
-			}
-			$newproperty->linkTo($property);
-		}
 
 		$generator->assign_by_ref('model', $model);
 		$result = $generator->fetch('DocumentModel.tpl');
@@ -2305,28 +2224,6 @@ class generator_PersistentModel
 	{
 		$this->serializedproperties[$property->getId()] = $property;
 	}
-
-	/**
-	 * @param DOMElement $xmlElement
-	 */
-	private function importFormProperties($xmlElement)
-	{
-		$nodeList = $xmlElement->getElementsByTagName('form');
-		if ($nodeList->length > 0)
-		{
-			foreach ($nodeList->item(0)->childNodes as $xmlProperty)
-			{
-
-				if ($xmlProperty->nodeName == "property")
-				{
-					$property = new generator_FormProperty($this);
-					$property->initialize($xmlProperty);
-					$this->formProperties[] = $property;
-				}
-			}
-		}
-	}
-
 
 	/**
 	 * @param DOMElement $xmlElement

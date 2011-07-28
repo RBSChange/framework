@@ -619,32 +619,6 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 		}
 		return array_values($componentNames);
 	}
-
-	protected abstract function loadFormProperties();
-	
-	/**
-	 * @return array<FormPropertyInfo>
-	 */
-	public final function getFormPropertiesInfos()
-	{
-		if ($this->m_formProperties === null) {$this->loadFormProperties();}
-		return $this->m_formProperties;
-	}
-
-
-	/**
-	 * @param string $propertyName
-	 * @return FormPropertyInfo
-	 */
-	public final function getFormProperty($propertyName)
-	{
-		if ($this->m_formProperties === null) {$this->loadFormProperties();}
-		if (isset($this->m_formProperties[$propertyName]))
-		{
-			return $this->m_formProperties[$propertyName];
-		}
-		return null;
-	}
 	
 	protected abstract function loadChildrenProperties();
 	
@@ -833,7 +807,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 			{
 				continue;
 			}
-			$this->beanPropertiesInfo[$propertyName] = new f_persistentdocument_PersistentDocumentBeanPropertyInfo($this->getModuleName(), $this->getDocumentName(), $propertyInfo, $this->getFormProperty($propertyName));
+			$this->beanPropertiesInfo[$propertyName] = new f_persistentdocument_PersistentDocumentBeanPropertyInfo($this->getModuleName(), $this->getDocumentName(), $propertyInfo);
 		}
 	}
 	/**
@@ -906,5 +880,27 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	public function __toString()
 	{
 		return $this->getName();
+	}
+
+	/**
+	 * @param string $name
+	 * @param array $arguments
+	 * @deprecated
+	 */
+	public function __call($name, $arguments)
+	{
+		switch ($name)
+		{
+			case 'getFormProperty': 
+				Framework::error('Call to deleted ' . get_class($this) . '->getFormProperty method');
+				return null;
+				
+			case 'getFormPropertiesInfos':
+				Framework::error('Call to deleted ' . get_class($this) . '->getFormPropertiesInfos method');
+				return array();
+			
+			default: 
+				throw new Exception('No method ' . get_class($this) . '->' . $name);
+		}
 	}
 }

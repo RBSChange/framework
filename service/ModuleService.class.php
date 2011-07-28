@@ -638,31 +638,28 @@ class ModuleService extends BaseService
 	{
 		return f_Locale::translateUI("&modules.$moduleName.bo.general.Module-name;");
 	}
-	
-
+		
 	/**
-	 * @param String $moduleName
-	 * @return array<String> module names
+	 * @param string $name
+	 * @param array $arguments
+	 * @deprecated
 	 */
-	public function getLinkedModules($moduleName)
+	public function __call($name, $arguments)
 	{
-		$modules = array();
-		$models = f_persistentdocument_PersistentDocumentModel::getDocumentModels();
-		foreach ($models as $model)
+		switch ($name)
 		{
-			if ($model->getModuleName() == $moduleName)
-			{
-				$properties = $model->getPropertiesInfos();
-				foreach ($properties as $property)
+			case 'getLinkedModules': 
+				Framework::error('Call to deleted ' . get_class($this) . '->getLinkedModules method');
+				$moduleName = $arguments[0];
+				$modules = array();
+				$models = f_persistentdocument_PersistentDocumentModel::getDocumentModels();
+				foreach ($models as $model)
 				{
-					if ($property->isDocument())
+					if ($model->getModuleName() == $moduleName)
 					{
-						$formProperty = $model->getFormProperty($property->getName());
-						$attributes = $formProperty->getAttributes();
-						
-						if (!$formProperty->isHidden() && !$formProperty->isReadonly() && !array_key_exists('list-id', $attributes))
+						foreach ($model->getPropertiesInfos() as $property)
 						{
-							if ($property->getType() && isset($models[$property->getType()]))
+							if ($property->isDocument() && $property->getType() && isset($models[$property->getType()]))
 							{
 								$linkedModel = $models[$property->getType()];
 								if (!is_null($linkedModel))
@@ -673,19 +670,21 @@ class ModuleService extends BaseService
 						}
 					}
 				}
-			}
+				$ps = f_permission_PermissionService::getInstance();
+				if (!is_null($ps->getRoleServiceByModuleName($moduleName)))
+				{
+					$modules['users'] = true;
+				}
+				$cModule = $this->getModule($moduleName);
+				if ($cModule->isTopicBased())
+				{
+					$modules['website'] = true;
+				}
+				return array_keys($modules);
+			
+			default: 
+				throw new Exception('No method ' . get_class($this) . '->' . $name);
 		}
-		$ps = f_permission_PermissionService::getInstance();
-		if (!is_null($ps->getRoleServiceByModuleName($moduleName)))
-		{
-			$modules['users'] = true;
-		}
-		$cModule = $this->getModule($moduleName);
-		if ($cModule->isTopicBased())
-		{
-			$modules['website'] = true;
-		}
-		return array_keys($modules);
 	}
 }
 

@@ -7,11 +7,6 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 	private $propertyInfo;
 	
 	/**
-	 * @var FormPropertyInfo
-	 */
-	private $formPropertyInfo;
-	
-	/**
 	 * @var String
 	 */
 	private $moduleName;
@@ -38,10 +33,9 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 	 */
 	private $className;
 	
-	public function __construct($moduleName, $documentName, $propertyInfo, $formPropertyInfo)
+	public function __construct($moduleName, $documentName, $propertyInfo)
 	{
 		$this->propertyInfo = $propertyInfo;
-		$this->formPropertyInfo = $formPropertyInfo;
 		$this->moduleName = $moduleName;
 		$this->documentName = $documentName;
 	}
@@ -203,14 +197,6 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 	}
 	
 	/**
-	 * @return FormPropertyInfo
-	 */
-	public function getFormPropertyInfo()
-	{
-		return $this->formPropertyInfo;
-	}
-	
-	/**
 	 * @see BeanPropertyInfo::isRequired()
 	 *
 	 * @return Boolean
@@ -239,7 +225,6 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 		return false;
 	}
 	
-
 	/**
 	 * @see BeanPropertyInfo::getConverter()
 	 * 
@@ -350,5 +335,23 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 			return 'get' . ucfirst($this->getName()) . 'AsHtml';
 		}
 		return 'get' . ucfirst($this->getName());
+	}
+	
+	/**
+	 * @param string $name
+	 * @param array $arguments
+	 * @deprecated
+	 */
+	public function __call($name, $arguments)
+	{
+		switch ($name)
+		{
+			case 'getFormPropertyInfo': 
+				Framework::error('Call to deleted ' . get_class($this) . '->getFormPropertyInfo method');
+				return null;
+			
+			default: 
+				throw new Exception('No method ' . get_class($this) . '->' . $name);
+		}
 	}
 }

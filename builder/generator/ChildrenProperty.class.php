@@ -57,7 +57,7 @@ class generator_ChildrenProperty
 	}
 
 	/**
-	 * @param generator_FormProperty $parentProperty
+	 * @param generator_ChildrenProperty $parentProperty
 	 */
 	public function setParentProperty($parentProperty)
 	{
