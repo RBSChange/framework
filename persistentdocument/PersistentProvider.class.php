@@ -1608,10 +1608,18 @@ abstract class f_persistentdocument_PersistentProvider
 			{
 				$this->getCacheService()->commit();
 			}
-			indexer_IndexService::getInstance()->commitIndex();
 			$this->commitInternal();
-			$this->m_inTransaction = false;
+			$this->m_inTransaction = false;		
+				
+			$this->commitIndexService();
 		}
+	}
+	
+	protected function commitIndexService()
+	{
+		$this->beginTransactionInternal();
+		indexer_IndexService::getInstance()->commitIndex();
+		$this->commitInternal();
 	}
 
 	protected abstract function commitInternal();
@@ -4382,6 +4390,11 @@ abstract class f_persistentdocument_PersistentProvider
 		return array(null, null);
 	}
 	
+	protected function setIndexingDocumentStatusSelectQuery()
+	{
+		return "SELECT `indexing_status` FROM `f_indexing` WHERE `document_id` = :document_id AND `indexing_mode` = :indexing_mode FOR UPDATE";
+	}
+	
 	protected function setUpdateIndexingDocumentStatusQuery()
 	{
 		return "UPDATE `f_indexing` SET `indexing_status` = :indexing_status, `lastupdate` = :lastupdate WHERE `document_id` = :document_id AND `indexing_mode` = :indexing_mode";
@@ -4400,14 +4413,18 @@ abstract class f_persistentdocument_PersistentProvider
 	 */
 	public final function setIndexingDocumentStatus($documentId, $mode, $newStatus, $lastUpdate = null)
 	{
-		$stmt = $this->prepareStatement($this->getIndexingDocumentStatusQuery());
+		$stmt = $this->prepareStatement($this->setIndexingDocumentStatusSelectQuery());
 		$stmt->bindValue(':document_id', $documentId, PersistentProviderConst::PARAM_INT);
 		$stmt->bindValue(':indexing_mode', $mode, PersistentProviderConst::PARAM_INT);
 		$this->executeStatement($stmt);
-		$result = $stmt->fetch(PersistentProviderConst::FETCH_ASSOC);
+		$result = $stmt->fetch(PersistentProviderConst::FETCH_NUM);
 		$stmt->closeCursor();
+		if (is_array($result) && $result[0] === $newStatus)
+		{
+			return array($newStatus, null);
+		}
 		
-		if ($result)
+		if (is_array($result))
 		{
 			$updatestmt = $this->prepareStatement($this->setUpdateIndexingDocumentStatusQuery());
 		}
