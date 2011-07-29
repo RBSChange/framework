@@ -401,6 +401,7 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 				if ($model->hasChildren())
 				{
 					$modelNames = $model->getChildrenNames();
+					$modelNames[] = $documentModel->getName();
 					$this->add(Restrictions::in("model", $modelNames));
 				}
 				else
