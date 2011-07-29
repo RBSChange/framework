@@ -110,7 +110,8 @@ class generator_PersistentModel
 			self::$m_models = &$models;
 			$hasModelParam = true;
 		}
-		foreach (array_keys(ModuleService::getInstance()->getPackageVersionList()) as $packageName)
+		
+		foreach (ModuleService::getInstance()->getPackageNames() as $packageName)
 		{
 			$dirs = FileResolver::getInstance()->setPackageName($packageName)->getPaths("persistentdocument");
 			if (is_null($dirs))
@@ -118,6 +119,7 @@ class generator_PersistentModel
 				//self::addMessage("No persistent document for package : $packageName");
 				continue;
 			}
+			
 			foreach ($dirs as $dir)
 			{
 				$dh = opendir($dir);
@@ -354,13 +356,12 @@ class generator_PersistentModel
 	private static function postImportProcess($models)
 	{
 		$inversePropertiesByModel = array();
-		$virtualModel = $models[self::BASE_MODEL];
-		unset($models[self::BASE_MODEL]);
-
+		$xmlDoc = self::loadFile(f_util_FileUtils::buildFrameworkPath('persistentdocument','document.xml'));
+		$virtualModel = new generator_PersistentModel($xmlDoc, 'generic', 'Document');
+										
 		// Set common properties.
 		foreach ($models as $model)
 		{
-			
 			if (is_null($model->extend) || $model->extend == self::BASE_MODEL)
 			{
 				$model->applyGenericDocumentModel($virtualModel);

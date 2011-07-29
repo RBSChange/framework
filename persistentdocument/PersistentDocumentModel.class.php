@@ -36,6 +36,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	protected  $m_parentName;
 
 	const PRIMARY_KEY_ID = "id";
+	
 	const BASE_MODEL = 'modules_generic/Document';
 
 	/**
@@ -144,8 +145,6 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 
 	/**
-	 * Enter description here...
-	 *
 	 * @param String $moduleName
 	 * @param String $documentName
 	 * @return f_persistentdocument_PersistentDocumentModel
