@@ -95,7 +95,7 @@ class TemplateObject
 		{
 			RequestContext::getInstance()->beginI18nWork($this->lang);
 			
-			if ($noheader) {$this->sendHeader();}			
+			if (!$noheader) {$this->sendHeader();}			
 			if ($this->engine == 'PHPTAL')
 			{
 				$result = $this->executePHPTAL();
