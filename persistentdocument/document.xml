@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://www.rbs.fr/schema/change-document/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.rbs.fr/schema/change-document/1.0 http://www.rbschange.fr/static/schema/change-document/3.5.xsd" 
+	model-version="4.0" icon="document" use-correction="false" linked-to-root-module="false" 
+	has-url="true" use-rewrite-url="true"
+	publish-on-day-change="true" indexable="false" backoffice-indexable="true">
+	<properties>
+		<add name="label" type="String" min-occurs="1" db-mapping="document_label" db-size="255" />
+		<add name="author" type="String" db-mapping="document_author" db-size="50" />
+		<add name="authorid" type="Integer" db-mapping="document_authorid" />
+		<add name="creationdate" type="DateTime" db-mapping="document_creationdate" />
+		<add name="modificationdate" type="DateTime" db-mapping="document_modificationdate" />
+		<add name="publicationstatus" type="String" db-mapping="document_publicationstatus" db-size="50" />
+		<add name="lang" type="String" db-mapping="document_lang" db-size="2" />
+		<add name="modelversion" type="String" db-mapping="document_modelversion" db-size="20" />
+		<add name="documentversion" type="Integer" db-mapping="document_version" default-value="0" />
+		<add name="startpublicationdate" type="DateTime" db-mapping="document_startpublicationdate" />
+		<add name="endpublicationdate" type="DateTime" db-mapping="document_endpublicationdate" />
+		<add name="metastring" type="LongString" db-mapping="document_metas" />
+	</properties>
+
+	<statuses default="DRAFT">
+		<add name="DRAFT" />
+		<add name="CORRECTION" />
+		<add name="ACTIVE" />
+		<add name="PUBLICATED" />
+		<add name="DEACTIVATED" />
+		<add name="FILED" />
+		<add name="DEPRECATED" />
+		<add name="TRASH" />
+		<add name="WORKFLOW" />
+	</statuses>
+</document>
