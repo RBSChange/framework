@@ -4,14 +4,14 @@ class commands_CompileConfig extends commands_AbstractChangeCommand
 	/**
 	 * @return String
 	 */
-	function getUsage()
+	public function getUsage()
 	{
 		return "[options]
 Where options in:
   --no-auto-changes: do not launch other commands on configuration changes";
 	}
 	
-	function getAlias()
+	public function getAlias()
 	{
 		return "cconf";
 	}
@@ -19,7 +19,7 @@ Where options in:
 	/**
 	 * @return String
 	 */
-	function getDescription()
+	public function getDescription()
 	{
 		return "compile the change configuration";
 	}
@@ -29,7 +29,7 @@ Where options in:
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
 	 * @see c_ChangescriptCommand::parseArgs($args)
 	 */
-	function _execute($params, $options)
+	public function _execute($params, $options)
 	{
 		$this->message("== Compile config ==");
 		
@@ -72,8 +72,6 @@ Where options in:
 			$token = md5($ts . mt_rand()) .'#' . md5($ts . mt_rand());
 			file_put_contents(WEBEDIT_HOME . '/build/config/oauth/script/token.txt', $token);
 		}
-		
-		
 		
 		if ($oldAndCurrent !== null)
 		{
@@ -132,7 +130,6 @@ Where options in:
 				else
 				{
 					$this->loadFramework();
-					
 					CacheService::getInstance()->clearAllWebappCache();
 					$this->okMessage("webapp cache cleared");
 				}	

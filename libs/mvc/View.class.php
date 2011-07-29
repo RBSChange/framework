@@ -238,26 +238,6 @@ abstract class f_view_BaseView extends View
 	}
 
 	/**
-	 * Returns the StyleService instance to use within this view.
-	 *
-	 * @return StyleService
-	 */
-	public final function getStyleService()
-	{
-		return StyleService::getInstance();
-	}
-
-	/**
-	 * Returns the JsService instance to use within this view.
-	 *
-	 * @return JsService
-	 */
-	public final function getJsService()
-	{
-		return JsService::getInstance();
-	}
-
-	/**
 	 * @return f_persistentdocument_DocumentService
 	 */
 	public final function getDocumentService()
@@ -271,5 +251,27 @@ abstract class f_view_BaseView extends View
 	protected final function forceModuleName($moduleName)
 	{
 		$this->forceModuleName = $moduleName;
+	}
+	
+	/**
+	 * @param string $name
+	 * @param array $arguments
+	 * @deprecated
+	 */
+	public function __call($name, $arguments)
+	{
+		switch ($name)
+		{
+			case 'getJsService': 
+				Framework::error('Call to deleted ' . get_class($this) . '->getJsService method');
+				return website_JsService::getInstance();
+				
+			case 'getStyleService': 
+				Framework::error('Call to deleted ' . get_class($this) . '->getStyleService method');
+				return website_StyleService::getInstance();
+			
+			default: 
+				throw new Exception('No method ' . get_class($this) . '->' . $name);
+		}
 	}
 }

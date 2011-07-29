@@ -54,7 +54,7 @@ class builder_BackofficeStyleUpdater
 
 		if (file_exists($file))
 		{
-			$css = f_web_CSSStylesheet::getInstanceFromFile($file);
+			$css = website_CSSStylesheet::getInstanceFromFile($file);
 			foreach ($css->getCSSRules() as $rule)
 			{
 				if ($rule->getSelectorText() == $selector)
