@@ -28,7 +28,7 @@ class builder_LocaleFileGenerator
 	 */
 	public function __construct($model)
 	{
-		$this->managedLocaleList = explode(" ", AG_UI_SUPPORTED_LANGUAGES);
+		$this->managedLocaleList = array(RequestContext::getInstance()->getDefaultLang());
 		$this->isModelInjected = $model->inject();
 		if ($this->isModelInjected)
 		{

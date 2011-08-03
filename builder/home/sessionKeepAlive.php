@@ -1,12 +1,15 @@
 <?php
-define('WEBEDIT_HOME', dirname(realpath(__FILE__)));
+define('PROJECT_HOME', dirname(realpath(__FILE__)));
+define('WEBEDIT_HOME', PROJECT_HOME);
 
 // Starts the framework
-require_once WEBEDIT_HOME . "/framework/Framework.php";
+require_once PROJECT_HOME . "/framework/Framework.php";
 
-$controller = Controller::newInstance("controller_ChangeController");
+$controller = change_Controller::newInstance('change_Controller');
 $controller->setNoCache();
 RequestContext::getInstance()->setMode(RequestContext::BACKOFFICE_MODE);
+
+users_UserService::getInstance()->pingBackEndUser();
 
 if (!isset($_SESSION['sessionKeepAlive']))
 {
@@ -17,7 +20,7 @@ else
 	$_SESSION['sessionKeepAlive'] = intval($_SESSION['sessionKeepAlive']) + 1;
 }
 
-users_UserService::getInstance()->pingBackEndUser();
+
 
 echo session_id() . ' - ' . $_SESSION['sessionKeepAlive'];
 

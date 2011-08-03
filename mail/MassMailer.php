@@ -206,7 +206,7 @@ class MassMailer
 	 */
 	private function getMailboxPath()
 	{
-		return f_util_FileUtils::buildWebeditPath('mailbox');
+		return f_util_FileUtils::buildProjectPath('mailbox');
 	}
 	
 	/**
@@ -214,7 +214,7 @@ class MassMailer
 	 */
 	private function getLogsPath()
 	{
-		return f_util_FileUtils::buildWebeditPath('mailbox', 'logs');
+		return f_util_FileUtils::buildProjectPath('mailbox', 'logs');
 	}
 	
 	/**
@@ -222,7 +222,7 @@ class MassMailer
 	 */
 	private function getOutboxPath()
 	{
-		return f_util_FileUtils::buildWebeditPath('mailbox', 'outbox');
+		return f_util_FileUtils::buildProjectPath('mailbox', 'outbox');
 	}
 	
 	/**
@@ -239,7 +239,7 @@ class MassMailer
 	 */
 	private function getTrashPath()
 	{
-		return f_util_FileUtils::buildWebeditPath('mailbox', 'trash');
+		return f_util_FileUtils::buildProjectPath('mailbox', 'trash');
 	}
 	
 	/**

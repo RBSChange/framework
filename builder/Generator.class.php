@@ -12,11 +12,11 @@ class builder_Generator extends Smarty
 	     $this->Smarty();
 	     if ($relativePath !== null)
 	     {
-	     	$this->template_dir = FRAMEWORK_HOME . '/builder' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . $relativePath . DIRECTORY_SEPARATOR;
+	     	$this->template_dir = f_util_FileUtils::buildFrameworkPath('builder', 'templates', $relativePath, '');
 	     }
-	     $this->compile_dir = AG_CACHE_DIR . '/smarty/templates_c/';
-	     $this->config_dir = AG_CACHE_DIR . '/smarty/configs/';
-	     $this->cache_dir = AG_CACHE_DIR . '/smarty/cache/';
+	     $this->compile_dir = f_util_FileUtils::buildChangeCachePath('smarty', 'templates_c', '');
+	     $this->config_dir = f_util_FileUtils::buildChangeCachePath('smarty', 'configs', '');
+	     $this->cache_dir = f_util_FileUtils::buildChangeCachePath('smarty', 'cache', '');
 	     $this->caching = false;
 	     $this->left_delimiter = "<{";
 	     $this->right_delimiter = "}>";

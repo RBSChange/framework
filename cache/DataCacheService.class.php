@@ -344,7 +344,7 @@ class f_DataCacheService extends BaseService
 	 */
 	public function isEnabled()
 	{
-		return !defined("DISABLE_DATACACHE") || constant("DISABLE_DATACACHE") !== true;
+		return DISABLE_DATACACHE !== true;
 	}
 	
 	/**

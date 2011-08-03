@@ -1,23 +1,25 @@
 <?php
 ignore_user_abort(true);
-define('WEBEDIT_HOME', dirname(realpath(__FILE__)));
+define('PROJECT_HOME', dirname(realpath(__FILE__)));
+define('WEBEDIT_HOME', PROJECT_HOME);
+
 set_time_limit(0);
 session_start();
 if (!isset($_POST['noframework']) || $_POST['noframework'] !== 'true')
 {
-	require_once WEBEDIT_HOME . "/framework/Framework.php";
+	require_once PROJECT_HOME . "/framework/Framework.php";
 	RequestContext::getInstance()->setMode(RequestContext::BACKOFFICE_MODE);
 }
 else
 {
-	require_once WEBEDIT_HOME . "/framework/f_web/oauth/Request.class.php";
-	require_once WEBEDIT_HOME . "/framework/f_web/oauth/Token.class.php";
-	require_once WEBEDIT_HOME . "/framework/f_web/oauth/Consumer.class.php";
-	require_once WEBEDIT_HOME . "/framework/f_web/oauth/Signature.class.php";
-	require_once WEBEDIT_HOME . "/framework/util/StringUtils.class.php";
-	require_once WEBEDIT_HOME . "/framework/util/FileUtils.class.php";
-	require_once WEBEDIT_HOME . "/framework/f_web/http/Link.class.php";
-	require_once WEBEDIT_HOME . "/framework/f_web/http/HttpLink.class.php";
+	require_once PROJECT_HOME . "/framework/f_web/oauth/Request.class.php";
+	require_once PROJECT_HOME . "/framework/f_web/oauth/Token.class.php";
+	require_once PROJECT_HOME . "/framework/f_web/oauth/Consumer.class.php";
+	require_once PROJECT_HOME . "/framework/f_web/oauth/Signature.class.php";
+	require_once PROJECT_HOME . "/framework/util/StringUtils.class.php";
+	require_once PROJECT_HOME . "/framework/util/FileUtils.class.php";
+	require_once PROJECT_HOME . "/framework/f_web/http/Link.class.php";
+	require_once PROJECT_HOME . "/framework/f_web/http/HttpLink.class.php";
 }
 $headers = f_web_oauth_Util::parseOauthAutorizationHeader();
 if (!isset($headers['oauth_signature']) || !isset($headers['oauth_consumer_key']) || !isset($headers['oauth_token']) || !isset($headers['oauth_timestamp']))
@@ -30,14 +32,14 @@ if (abs(time()-intval($headers['oauth_timestamp'])) > 60)
 	header("HTTP/1.1 401 Unauthorized");
 	die("Invalid Timestamp");
 }
-list($name, $secret) = explode('#', file_get_contents(WEBEDIT_HOME . '/build/config/oauth/script/consumer.txt'));
+list($name, $secret) = explode('#', file_get_contents(PROJECT_HOME . '/build/config/oauth/script/consumer.txt'));
 if ($name !== $headers['oauth_consumer_key'])
 {
 	header("HTTP/1.1 401 Unauthorized");
 	die("Invalid signature");
 }
 $consumer = new f_web_oauth_Consumer($name, $secret);
-list($name, $secret) = explode('#', file_get_contents(WEBEDIT_HOME . '/build/config/oauth/script/token.txt'));
+list($name, $secret) = explode('#', file_get_contents(PROJECT_HOME . '/build/config/oauth/script/token.txt'));
 if ($name !== $headers['oauth_token'])
 {
 	header("HTTP/1.1 401 Unauthorized");
@@ -66,16 +68,8 @@ if ($headers['oauth_signature'] !== f_web_oauth_Util::encode($request->getSignat
 }
 if (isset($_POST['phpscript']) && (!isset($_POST['argv']) || is_array($_POST['argv'])))
 {
-	$scriptPath = WEBEDIT_HOME . '/' . $_POST['phpscript'];
-	if (defined('FRAMEWORK_HOME'))
-	{
-		if (Framework::isInfoEnabled())
-		{
-			Framework::info("execute $scriptPath with (" . (isset($_POST['argv']) ? count($_POST['argv']) : 'null') . " args)");
-		}
-	}
-	chdir(WEBEDIT_HOME);
-	
+	$scriptPath = PROJECT_HOME . '/' . $_POST['phpscript'];
+	chdir(PROJECT_HOME);
 	if (file_exists($scriptPath) && is_readable($scriptPath) && strrpos($scriptPath, '.php') === strlen($scriptPath) - 4)
 	{
 		include_once $scriptPath;

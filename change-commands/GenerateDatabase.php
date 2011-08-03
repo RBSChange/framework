@@ -121,7 +121,7 @@ class commands_GenerateDatabase extends commands_AbstractChangeCommand
 		foreach ($packages as $module)
 		{
 			$array[] = f_util_FileUtils::buildChangeBuildPath(str_replace('_', DIRECTORY_SEPARATOR, $module), 'dataobject');
-			$array[] = f_util_FileUtils::buildWebeditPath(str_replace('_', DIRECTORY_SEPARATOR, $module), 'dataobject');
+			$array[] = f_util_FileUtils::buildProjectPath(str_replace('_', DIRECTORY_SEPARATOR, $module), 'dataobject');
 		}
 			
 		foreach ($array as $dir)

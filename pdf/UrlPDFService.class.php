@@ -930,13 +930,11 @@ class UrlPDFService extends BaseService
 			}
 		}
 		
-		if(is_null($currentUrl))
+		if (is_null($currentUrl))
 		{			
 			$currentUrl	= base64_encode( paginator_Url::getInstanceFromCurrentUrl()->getStringRepresentation());
 		}
 		
-		return HttpController::getInstance()->genURL( null, array( 'url'=>$currentUrl, 'module'=>'generic', 'action'=>'ConvertPdf' ) );
+		return LinkHelper::getParametrizedLink(array('url'=>$currentUrl, 'module'=>'generic', 'action'=>'ConvertPdf' ))->getUrl();
 	}
-	
 }
-?>

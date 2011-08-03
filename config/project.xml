@@ -1,88 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project>
-	<!--
-		Define section :
-		<define name="$name">$value</define> <=> <?php define($name, $value); ?>
-		-->
-	<defines>
-		<define name="PROJECT_OVERRIDE">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'override'</define>
-		<define name="DOCUMENT_ROOT">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'webapp' . DIRECTORY_SEPARATOR . 'www'</define>
-
+	<defines>		
 		<define name="CHANGE_RELEASE">4.0</define>
-
-		<define name="CAPTCHA_SESSION_KEY">CHANGE_CAPTCHA</define>
-
-		<define name="AG_CONFIG_DIR">FRAMEWORK_HOME . DIRECTORY_SEPARATOR . 'config'</define>
-		<define name="AG_LIB_DIR">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'libs'</define>
-		<define name="AG_MODULE_DIR">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'modules'</define>
-
-		<define name="CHANGE_CONFIG_DIR">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'config'</define>
-		<define name="CHANGE_CACHE_DIR">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . PROFILE</define>
-		<define name="WEB_CACHE_DIR">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'www'</define>
-		<define name="CHANGE_CACHE_PDF">DIRECTORY_SEPARATOR . 'pdf' . DIRECTORY_SEPARATOR . 'tmp'</define>
+		<define name="LOGGING_LEVEL">WARN</define>
 		
-		<define name="PHPTAL_PHP_CODE_DESTINATION">AG_CACHE_DIR . DIRECTORY_SEPARATOR . 'template/'</define>
-
-		<define name="AG_DEFAULT_MODULE">website</define>
-		<define name="AG_DEFAULT_ACTION">Index</define>
-
-		<define name="AG_ERROR_404_MODULE">website</define>
-		<define name="AG_ERROR_404_ACTION">Error404</define>
-
-		<define name="AG_LOGIN_MODULE">users</define>
-		<define name="AG_LOGIN_ACTION">Login</define>
-
-		<define name="AG_CONTENT_TYPE">html</define>
-
-		<define name="AG_LOGGING_LEVEL">WARN</define>
+		<define name="SUPPORTED_LANGUAGES">fr en</define>
+		<define name="UI_SUPPORTED_LANGUAGES">fr en</define>
 		
-		<define name="AG_USER_NAMESPACE">rbs/webedit4</define>
-		<define name="AG_WEBAPP_NAME">WebappName</define>
-
-		<define name="AG_SUPPORTED_LANGUAGES">fr</define>
-
-		<define name="AG_UI_SUPPORTED_LANGUAGES">fr</define>
-
 		<define name="CHANGE_USE_CORRECTION">true</define>
 		<define name="CHANGE_USE_WORKFLOW">false</define>	
-		<define name="DEFAULT_UI_PROTOCOL">http</define>
 		
+		<define name="DEFAULT_UI_PROTOCOL">http</define>		
 		<define name="DEFAULT_TIMEZONE">Europe/Paris</define>
 		
 		<define name="RICHTEXT_PRESERVE_H1_TAGS">false</define>
 		
-		<define name="USE_NEW_TEMPLATES_ONLY">true</define>
-		<!-- Optional constants -->
-
-		<define name="AG_DISABLE_BLOCK_CACHE">false</define>
-		<!-- (AG_DISABLE_SIMPLECACHE == true) => (AG_DISABLE_BLOCK_CACHE == true) -->
-		<define name="AG_DISABLE_SIMPLECACHE">false</define>
+		<define name="DISABLE_BLOCK_CACHE">false</define>
+		<define name="DISABLE_DATACACHE">false</define>
 		<define name="CHANGE_CACHE_MAX_TIME">3600</define>
 		
 		<define name="SECURE_SESSION_BY_IP">false</define>
-		
-		<define name="CHANGE4_CACHE_SERVICE_CLASS">f_persistentdocument_DatabaseCacheService</define>
-		<define name="TRACKER_MODE">mysql</define>
-		<define name="DISABLE_DATACACHE">false</define>
-		
-		<define name="CHANGE_COMMAND">framework/bin/change.php</define>
-		
-		<!-- DEPRECATED -->
-		<define name="AG_ACTION_ACCESSOR">action</define>
-		<define name="AG_MODULE_ACCESSOR">module</define>
-		<define name="WEBAPP_HOME">WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'override'</define>
 	</defines>
 
 	<config>
 		<!-- GENERAL -->
 		<general>
-			<entry name="os">linux</entry>
 			<entry name="server-fqdn">fully-qualified-domain-name</entry>
-			<entry name="server-ip">serveur.ip.address</entry>
 			<!-- What $_SERVER entry to use to detect https queries -->
 			<entry name="https-request-marker">HTTPS</entry>
 			<!-- What is the value of https-request-marker for https queries -->
 			<entry name="https-request-marker-value">on</entry>
+			
+			<entry name="projectName">RBS CHANGE 4.0</entry>
 		</general>
 		
 		<i18n>
@@ -90,12 +39,15 @@
 			<entry name="us">en_US</entry>
 			<entry name="ar">ar_KW</entry>
 		</i18n>
+	
 		<charts>
 			<!--  This can be google directly or eastwood for instance -->
 			<entry name="googleChartProvider">http://chart.apis.google.com/chart</entry>
 		</charts>
 		
 		<documentcache>
+			<entry name="cacheServiceClass">f_persistentdocument_DatabaseCacheService</entry>
+			
 			<!-- Max time (in seconds) a document cache entry is valid.
 				It is then cleaned by task_ClearDocumentCacheTask -->
 			<entry name="ttl">86400</entry>
@@ -212,11 +164,11 @@
 		
 		<mvc>
 			<classes>
-				<entry name="controller_ChangeController">controller_ChangeController</entry>
-				<entry name="controller_XulController">controller_XulController</entry>
-				<entry name="ChangeSessionStorage">ChangeSessionStorage</entry>	
-				<entry name="ChangeRequest">ChangeRequest</entry>	
-				<entry name="FrameworkSecurityUser">FrameworkSecurityUser</entry>	
+				<entry name="change_Controller">change_Controller</entry>
+				<entry name="change_XulController">change_XulController</entry>
+				<entry name="change_Storage">change_Storage</entry>	
+				<entry name="change_Request">change_Request</entry>	
+				<entry name="change_User">change_User</entry>	
 			</classes>	
 		</mvc>
 						

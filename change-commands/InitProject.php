@@ -41,11 +41,11 @@ class commands_InitProject extends commands_AbstractChangeCommand
 		$computedDeps = $this->getComputedDeps();
 		
 		// config directory: generate default config files
-		$builderResourcePath = f_util_FileUtils::buildWebeditPath("framework", "builder");
+		$builderResourcePath = f_util_FileUtils::buildFrameworkPath("builder");
 		f_util_FileUtils::mkdir("config");
 		// base config
 		$fileName = 'config/project.xml';
-		if (!file_exists(f_util_FileUtils::buildWebeditPath($fileName)))
+		if (!file_exists(f_util_FileUtils::buildProjectPath($fileName)))
 		{
 			$this->message("Create $fileName");
 			$baseProject = f_util_FileUtils::read("$builderResourcePath/config/project.xml");
@@ -61,7 +61,7 @@ class commands_InitProject extends commands_AbstractChangeCommand
 
 		// current user config
 		$fileName = 'config/project.'.$this->getProfile().'.xml';
-		if (!file_exists(f_util_FileUtils::buildWebeditPath($fileName)))
+		if (!file_exists(f_util_FileUtils::buildProjectPath($fileName)))
 		{
 			$this->message("Create $fileName");
 			$profilProject = f_util_FileUtils::read("$builderResourcePath/config/project_profil.xml");

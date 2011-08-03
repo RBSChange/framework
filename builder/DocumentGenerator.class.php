@@ -61,12 +61,12 @@ class builder_DocumentGenerator
 		$this->name = $name;
 		$this->module = $module;
 		$this->date = date('r');
-		$this->pathBaseModule = AG_MODULE_DIR . DIRECTORY_SEPARATOR . $module . DIRECTORY_SEPARATOR;
+		$this->pathBaseModule = f_util_FileUtils::buildModulesPath($module, "");
 		$this->model = 'modules_' . $module . '/' . $name;
 		$this->modelObject = generator_PersistentModel::getModelByName('modules_' . $module . '/' . $name);
 
 		// Test if module directory is a symbolic link
-		if ($checkLink && !is_writable(AG_MODULE_DIR . DIRECTORY_SEPARATOR . $module) )
+		if ($checkLink && !is_writable(f_util_FileUtils::buildModulesPath($module)))
 		{
 			throw new IOException('Cannot write in module directory.');
 		}
@@ -211,7 +211,7 @@ class builder_DocumentGenerator
 			$model = $this->modelObject;
 			while ($model)
 			{
-				$parentfilePath = f_util_FileUtils::buildWebeditPath('modules', $model->getModuleName(), 'persistentdocument', $model->getDocumentName() . '.class.php');
+				$parentfilePath = f_util_FileUtils::buildModulesPath($model->getModuleName(), 'persistentdocument', $model->getDocumentName() . '.class.php');
 				if (file_exists($parentfilePath))
 				{
 					$content = file_get_contents($parentfilePath);
@@ -312,7 +312,7 @@ class builder_DocumentGenerator
 
 	public function updateRights()
 	{
-		$rightsPath = f_util_FileUtils::buildWebeditPath("modules", $this->module, "config", "rights.xml");
+		$rightsPath = f_util_FileUtils::buildModulesPath($this->module, "config", "rights.xml");
 		$rights = f_util_DOMUtils::fromPath($rightsPath);
 		if ($rights->exists("actions/document[@name = '".$this->name."']"))
 		{

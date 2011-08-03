@@ -29,11 +29,13 @@ class commands_ApplyWebappPolicy extends commands_AbstractChangeCommand
 	 */
 	function _execute($params, $options)
 	{
-		$this->message("== Apply webapp policy ==");
-		
+		$this->message("== Apply webapp policy ==");	
 		$apacheGroup = $this->getApacheGroup();
 		$user = $this->getUser();
-		$dirs = array(WEB_CACHE_DIR, PROJECT_OVERRIDE, "media", "securemedia");
+		$dirs = array(f_util_FileUtils::buildOverridePath(), 
+			f_util_FileUtils::buildProjectPath("cache"), 
+			f_util_FileUtils::buildProjectPath("media"), 
+			f_util_FileUtils::buildProjectPath("securemedia"));
 		
 		foreach ($dirs as $dir)
 		{
@@ -53,7 +55,7 @@ class commands_ApplyWebappPolicy extends commands_AbstractChangeCommand
 			}
 		}
 
-		foreach (glob(WEBEDIT_HOME."/*.php") as $phpFile)
+		foreach (glob(PROJECT_HOME."/*.php") as $phpFile)
 		{
 			f_util_FileUtils::chmod($phpFile, "755");
 		}

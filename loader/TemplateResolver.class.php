@@ -54,10 +54,6 @@ class TemplateResolver extends FileResolver implements ResourceResolver
 		// Set engine informations
 		$this->resolveBrowserEngine();
 		$this->setDirectory('templates');
-		if (!is_dir(PHPTAL_PHP_CODE_DESTINATION))
-		{
-			@mkdir(PHPTAL_PHP_CODE_DESTINATION, 0777, true);
-		}
 	}
 
 	/**

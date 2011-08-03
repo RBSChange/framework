@@ -30,15 +30,10 @@ class commands_ClearLog extends commands_AbstractChangeCommand
 	function _execute($params, $options)
 	{
 		$this->message("== Clear log ==");
-
 		$profile = $this->getProfile();
+		if (!defined('PROJECT_HOME')) {define('PROJECT_HOME', realpath('.'));}
 
-		if ( ! defined('WEBEDIT_HOME') )
-		{
-			define('WEBEDIT_HOME', realpath('.'));
-		}
-
-		$logProfileDirectory = WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'log' . DIRECTORY_SEPARATOR . $profile;
+		$logProfileDirectory = PROJECT_HOME . DIRECTORY_SEPARATOR . 'log' . DIRECTORY_SEPARATOR . $profile;
 
 		// Test if the log directory of selected profile exist
 		if ( is_dir( $logProfileDirectory ) )

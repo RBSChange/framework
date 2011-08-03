@@ -1,5 +1,5 @@
 <?php
-if (!defined("PROFILE") || !defined("WEBEDIT_HOME") || !isset($bootStrap) || !isset($script))
+if (!defined("PROFILE") || !defined("PROJECT_HOME") || !isset($bootStrap) || !isset($script))
 {
 	exit(-1);
 }
@@ -12,25 +12,25 @@ if ($clearKey !== false)
 	$argv = array_values($argv);
 	$bootStrap->cleanDependenciesCache();
 }
-
+$frameworkHome = PROJECT_HOME . '/framework';
 $script->setBootStrap($bootStrap);
 $script->setEnvVar('computedDeps', $bootStrap->getComputedDependencies());
 
 $addDevCmds = $bootStrap->getProperties()->getProperty('DEVELOPMENT_MODE') == true;
 if ($addDevCmds && !defined('CHANGE_DEV_MODE')) {define('CHANGE_DEV_MODE', true);}
 
-$cmdPath  = FRAMEWORK_HOME . '/change-commands';
+$cmdPath  = $frameworkHome . '/change-commands';
 $bootStrap->appendToAutoload($cmdPath);
 $script->addCommandDir($cmdPath);
 
 if ($addDevCmds)
 {
-	$devPath = FRAMEWORK_HOME.'/changedev-commands';
+	$devPath = $frameworkHome.'/changedev-commands';
 	$bootStrap->appendToAutoload($devPath);
 	$script->addGhostCommandDir($devPath);
 }
 
-$path = WEBEDIT_HOME."/modules";
+$path = PROJECT_HOME."/modules";
 if (is_dir($path))
 {
 	foreach (new DirectoryIterator($path) as $fileInfo)

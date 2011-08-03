@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project>
-	<defines>
-		<define name="AG_WEBAPP_NAME">Project ${project} ${author}</define>
-		
-		<define name="AG_SUPPORTED_LANGUAGES">fr en</define>
-		<define name="AG_UI_SUPPORTED_LANGUAGES">fr en</define>
-    	
-		<define name="AG_LOGGING_LEVEL">WARN</define>
-    	
+	<defines>		
+		<define name="SUPPORTED_LANGUAGES">fr en</define>
+		<define name="UI_SUPPORTED_LANGUAGES">fr en</define>  	
+		<define name="LOGGING_LEVEL">WARN</define>
 		<define name="CHANGE_USE_WORKFLOW">true</define>		
 	</defines>
 
 	<config>
+		<general>
+			<entry name="projectName">Project ${project} ${author}</entry>
+		</general>
+		
 		<databases>			
 			<connections>
 				<entry name="default">webapp</entry>

@@ -1,12 +1,13 @@
 <?php
 ignore_user_abort(true);
-define('WEBEDIT_HOME', dirname(realpath(__FILE__)));
-if (file_exists(WEBEDIT_HOME."/site_is_disabled"))
+define('PROJECT_HOME', dirname(realpath(__FILE__)));
+define('WEBEDIT_HOME', PROJECT_HOME);
+if (file_exists(PROJECT_HOME."/site_is_disabled"))
 {
 	exit(0);
 }
 
-require_once WEBEDIT_HOME . "/framework/Framework.php";
+require_once PROJECT_HOME . "/framework/Framework.php";
 if (defined('DISABLE_CHANGECRON_EXECUTION') && constant('DISABLE_CHANGECRON_EXECUTION') == true)
 {
 	exit(0);
@@ -36,8 +37,8 @@ else
 //Exectut Task
 if (isset($_GET['taskId']))
 {
-	chdir(WEBEDIT_HOME);
-	Controller::newInstance("controller_ChangeController");
+	chdir(PROJECT_HOME);
+	change_Controller::newInstance('change_Controller');
 	try
 	{
 		$runnableTask = DocumentHelper::getDocumentInstance(intval($_GET['taskId']));

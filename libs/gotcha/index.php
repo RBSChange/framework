@@ -39,7 +39,7 @@ $CAPTCHA_IMAGE_URI = 'captcha_image.php';
 
 if(isset($_POST['code'])){
 	
-	$text = isset($_SESSION[CAPTCHA_SESSION_KEY])? $_SESSION[CAPTCHA_SESSION_KEY] : NULL;
+	$text = isset($_SESSION['CHANGE_CAPTCHA'])? $_SESSION['CHANGE_CAPTCHA'] : NULL;
 	
 	if(!$p =trim($_POST['code'])){
 		
@@ -52,7 +52,7 @@ if(isset($_POST['code'])){
 	else{
 		$MESSAGE = '<strong style="color: #00CC99">Correct!!!</strong><br/> CODE:  "<strong>'.stripslashes($_POST['code']).'</strong>"';
 	}
-	$_SESSION[CAPTCHA_SESSION_KEY] = NULL;
+	$_SESSION['CHANGE_CAPTCHA'] = NULL;
 }
 
 ?>

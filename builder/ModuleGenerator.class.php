@@ -52,12 +52,13 @@ class builder_ModuleGenerator
 	public function __construct($name)
 	{
 		$this->name = $name;
-		$this->date = date('r');
-
+		$this->date = date('r');	
+		$path = realpath(f_util_FileUtils::buildModulesPath($this->name));
+		
 		// Test if module directory is writeable
-		if (!is_writeable(AG_MODULE_DIR . DIRECTORY_SEPARATOR . $this->name ))
+		if ($path === false || !is_writeable($path))
 		{
-			throw new IOException('Cannot write in directory '.AG_MODULE_DIR . DIRECTORY_SEPARATOR . $this->name);
+			throw new IOException('Cannot write in directory: '. f_util_FileUtils::buildModulesPath($this->name));
 		}
 	}
 
@@ -133,15 +134,16 @@ class builder_ModuleGenerator
 	
 	private function generateDirectories()
 	{
-		$pathBase = AG_MODULE_DIR . DIRECTORY_SEPARATOR . $this->name . DIRECTORY_SEPARATOR;
-		f_util_FileUtils::mkdir($pathBase . 'config');
-		f_util_FileUtils::mkdir($pathBase . 'forms' . DIRECTORY_SEPARATOR . 'editor' . DIRECTORY_SEPARATOR . 'rootfolder');
-		f_util_FileUtils::mkdir($pathBase . 'lib' . DIRECTORY_SEPARATOR . 'services');
-		f_util_FileUtils::mkdir($pathBase . 'persistentdocument' . DIRECTORY_SEPARATOR . 'import');
-		f_util_FileUtils::mkdir($pathBase . 'setup');
-		f_util_FileUtils::mkdir($pathBase . 'style');
-		f_util_FileUtils::mkdir($pathBase . 'templates' . DIRECTORY_SEPARATOR . 'perspectives');
-		f_util_FileUtils::mkdir($pathBase . 'forms/editor/folder');
+		$pathBase = f_util_FileUtils::buildModulesPath($this->name);
+		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase,  'config'));
+		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'forms', 'editor', 'rootfolder'));	
+		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'lib', 'services'));
+		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'persistentdocument', 'import'));
+		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'setup'));
+		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'style'));
+		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'templates', 'perspectives'));
+		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'forms', 'editor', 'rootfolder'));
+		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'forms', 'editor', 'folder'));
 	}
 	
 	private function addConfiguration()
@@ -159,55 +161,40 @@ class builder_ModuleGenerator
 	{
 		$crs = ClassResolver::getInstance();
 		
-		// Define de root new module directory
-		$pathBase = AG_MODULE_DIR . DIRECTORY_SEPARATOR . $this->name . DIRECTORY_SEPARATOR;
-
-		// Define all relative path in this module
-		$libPath = $pathBase . 'lib' . DIRECTORY_SEPARATOR;
-		$servicesPath = $libPath . 'services' . DIRECTORY_SEPARATOR;
-		$configPath = $pathBase . 'config' . DIRECTORY_SEPARATOR ;
-		$templatePath = $pathBase . 'templates' . DIRECTORY_SEPARATOR ;
-		$editorPath = $pathBase . 'forms' . DIRECTORY_SEPARATOR . 'editor' . DIRECTORY_SEPARATOR;
-		
 		// Generate configuration files
-		f_util_FileUtils::write($pathBase . 'change.xml', $this->generateFile('change.xml'));
-		f_util_FileUtils::write($configPath . 'module.xml', $this->generateFile('config_module.xml'));
-		f_util_FileUtils::write($configPath . 'actions.xml', $this->generateFile('config_actions.xml'));
-		f_util_FileUtils::write($configPath . 'rights.xml', $this->generateFile('config_rights.xml'));
-		f_util_FileUtils::write($configPath . 'perspective.xml', $this->generateFile('config_perspective.xml'));
+		f_util_FileUtils::write(f_util_FileUtils::buildModulesPath($this->name, 'change.xml'), $this->generateFile('change.xml'));
+		f_util_FileUtils::write(f_util_FileUtils::buildModulesPath($this->name, 'config', 'module.xml'), $this->generateFile('config_module.xml'));
+		f_util_FileUtils::write(f_util_FileUtils::buildModulesPath($this->name, 'config', 'actions.xml'), $this->generateFile('config_actions.xml'));
+		f_util_FileUtils::write(f_util_FileUtils::buildModulesPath($this->name, 'config', 'rights.xml'), $this->generateFile('config_rights.xml'));
+		f_util_FileUtils::write(f_util_FileUtils::buildModulesPath($this->name, 'config', 'perspective.xml'), $this->generateFile('config_perspective.xml'));
 
 		// Generate localisation files		
 		$this->generateGeneralLocales();
 		
 		// Generate setup file
-		$path = $pathBase . DIRECTORY_SEPARATOR . 'setup' . DIRECTORY_SEPARATOR . 'initData.php';
+		$path = f_util_FileUtils::buildModulesPath($this->name, 'setup', 'initData.php');
 		f_util_FileUtils::write($path, $this->generateFile('initData'));
 		$crs->appendToAutoloadFile($this->name . '_Setup', $path);
 
 		// Generate services files
-		$path = $servicesPath . 'ModuleService.class.php';
+		$path = f_util_FileUtils::buildModulesPath($this->name, 'lib', 'services', 'ModuleService.class.php');
 		f_util_FileUtils::write($path, $this->generateFile('ModuleService.class.php'));
 		$crs->appendToAutoloadFile($this->name . '_ModuleService', $path);
 
 		// Generate perspectives file
-		$path = $templatePath . 'perspectives' . DIRECTORY_SEPARATOR . 'default.all.all.xul';
+		$path = f_util_FileUtils::buildModulesPath($this->name, 'templates', 'perspectives', 'default.all.all.xul');
 		f_util_FileUtils::write($path, $this->generateFile('default.all.all.xul'));
 
 		// Generate persistentdocument/import file
-		$path = $pathBase . 'persistentdocument' . DIRECTORY_SEPARATOR  . 'import' . DIRECTORY_SEPARATOR. $this->name . '_binding.xml';
+		$path = f_util_FileUtils::buildModulesPath($this->name, 'persistentdocument', 'import', $this->name . '_binding.xml');
 		f_util_FileUtils::write($path, $this->generateFile('import_binding.xml'));
 		
 		// Generate editor for rootfolder
-		$path = $editorPath  . 'rootfolder' . DIRECTORY_SEPARATOR . 'panels.xml';
-		f_util_FileUtils::write($path, $this->generateFile('form_editor_rootfolder_panels.xml'));
-		$path = $editorPath  . 'rootfolder' . DIRECTORY_SEPARATOR . 'resume.xml';
-		f_util_FileUtils::write($path, $this->generateFile('form_editor_rootfolder_resume.xml'));
+		$path = f_util_FileUtils::buildModulesPath($this->name, 'forms', 'editor', 'rootfolder',  'empty.txt');
 		
 		// Generate editor for folders
-		$path = $editorPath  . 'folder' . DIRECTORY_SEPARATOR . 'panels.xml';
-		f_util_FileUtils::write($path, $this->generateFile('form_editor_folder_panels.xml'));
-		$path = $editorPath  . 'folder' . DIRECTORY_SEPARATOR . 'panels.xml';
-		f_util_FileUtils::write($path, $this->generateFile('form_editor_folder_resume.xml'));
+		$path = f_util_FileUtils::buildModulesPath($this->name, 'forms', 'editor', 'folder',  'empty.txt');
+		f_util_FileUtils::write($path, '');
 		
 		// return the current object
 		return $this;

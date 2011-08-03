@@ -59,7 +59,7 @@ class commands_CreateDocument extends commands_AbstractChangedevCommand
 		$documentName = $params[1];
 		
 		$this->loadFramework();
-		$to = f_util_FileUtils::buildWebeditPath("modules", $moduleName, "persistentdocument", "$documentName.xml");
+		$to = f_util_FileUtils::buildModulesPath($moduleName, "persistentdocument", "$documentName.xml");
 		if (file_exists($to))
 		{
 			return $this->quitError("Document $moduleName/$documentName already exists (check $to)");

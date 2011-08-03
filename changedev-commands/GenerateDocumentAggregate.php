@@ -88,7 +88,7 @@ class commands_GenerateDocumentAggregate extends commands_AbstractChangedevComma
 			}
 		}
 		
-		$moduleLibDir = f_util_FileUtils::buildPath(WEBEDIT_HOME, 'modules', $shortModuleName, 'lib');
+		$moduleLibDir = f_util_FileUtils::buildModulesPath($shortModuleName, 'lib');
 		
 		if (!f_util_FileUtils::isDirectoryWritable(dirname($moduleLibDir)))
 		{

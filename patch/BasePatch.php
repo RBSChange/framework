@@ -22,13 +22,13 @@ abstract class patch_BasePatch
 		switch ($this->getModuleName())
 		{
 			case 'framework' :
-				$this->basePath = FRAMEWORK_HOME;
+				$this->basePath = PROJECT_HOME. '/framework';
 				break;
 			case 'webapp':
-				$this->basePath = PROJECT_OVERRIDE;
+				$this->basePath = PROJECT_HOME. '/override';
 				break;
 			default:
-				$this->basePath = f_util_FileUtils::buildRelativePath(AG_MODULE_DIR, $this->getModuleName());
+				$this->basePath = f_util_FileUtils::buildModulesPath($this->getModuleName());
 		}
 	}
 
@@ -379,24 +379,24 @@ abstract class patch_BasePatch
 		{
 			// Framework.
 			case 'framework' :
-				$packagePath = FRAMEWORK_HOME;
+				$packagePath = PROJECT_HOME. '/framework';
 				break;
 
 			// Webapp.
 			case 'webapp' :
-				$packagePath = PROJECT_OVERRIDE;
+				$packagePath = PROJECT_HOME. '/override';
 				break;
 
 			// Module.
 			default :
-				$packagePath = f_util_FileUtils::buildRelativePath(AG_MODULE_DIR, $shortName);
+				$packagePath = f_util_FileUtils::buildModulesPath($shortName);
 				break;
 		}
 		return $packagePath;
 	}
 	
 	/**
-	 * @param string $relativeScriptPath to WEBEDIT_HOME
+	 * @param string $relativeScriptPath to PROJECT_HOME
 	 * @param array $arguments
 	 * @return String
 	 */

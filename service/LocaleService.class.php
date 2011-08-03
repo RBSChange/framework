@@ -210,12 +210,12 @@ class LocaleService extends BaseService
 				$parts[1] .= '/i18n';
 				break;
 		}
+		
 		if ($override)
 		{
-			return PROJECT_OVERRIDE . implode('/', $parts);
-		}
-		
-		return WEBEDIT_HOME . implode('/', $parts);
+			array_unshift($parts, 'override');
+		}	
+		return PROJECT_HOME . implode('/', $parts);
 	}
 	
 	/**
@@ -398,7 +398,7 @@ class LocaleService extends BaseService
 	 */
 	private function processModules()
 	{
-		$paths = glob(WEBEDIT_HOME . "/modules/*/i18n", GLOB_ONLYDIR);
+		$paths = glob(PROJECT_HOME . "/modules/*/i18n", GLOB_ONLYDIR);
 		if (! is_array($paths))
 		{
 			return;
@@ -412,7 +412,7 @@ class LocaleService extends BaseService
 	
 	private function processThemes()
 	{
-		$paths = glob(WEBEDIT_HOME . "/themes/*/i18n", GLOB_ONLYDIR);
+		$paths = glob(PROJECT_HOME . "/themes/*/i18n", GLOB_ONLYDIR);
 		foreach ($paths as $path)
 		{
 			$themeName = basename(dirname($path));

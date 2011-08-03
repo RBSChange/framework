@@ -108,25 +108,19 @@ class Browscap
 	 *
 	 * @param string $cache_dir
 	 */
-	public function __construct($cache_dir = AG_CACHE_DIR)
+	public function __construct($cache_dir = null)
 	{
-		date_default_timezone_set('UTC');
-
-		if (!isset($cache_dir)) {
-			throw new Browscap_Exception(
-				'You have to provide a path to read/store the browscap cache file'
-			);
+		if ($cache_dir === null) 
+		{
+			$cache_dir = f_util_FileUtils::buildChangeCachePath($this->cacheFilename);
 		}
-
 		$cache_dir = realpath($cache_dir);
-
 		if (substr($cache_dir, -4) === '.php') {
 			$this->cacheFilename = basename($cache_dir);
 			$this->cacheDir = dirname($cache_dir);
 		} else {
 			$this->cacheDir = $cache_dir;
 		}
-
 		$this->cacheDir .= DIRECTORY_SEPARATOR;
 	}
 
@@ -226,14 +220,14 @@ class Browscap
 	 */
 	public function updateCache()
 	{
-		$custom_ini_path =  WEBEDIT_HOME . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . $this->iniFilename;
+		$custom_ini_path =  PROJECT_HOME . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . $this->iniFilename;
 		if (file_exists($custom_ini_path))
 		{
 			$ini_path = $custom_ini_path;
 		}
 		else
 		{
-			$ini_path =  FRAMEWORK_HOME . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . $this->iniFilename;
+			$ini_path =  PROJECT_HOME . DIRECTORY_SEPARATOR . "framework" . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . $this->iniFilename;
 		}
 		
 		$cache_path			=  $this->cacheDir . $this->cacheFilename;

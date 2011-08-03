@@ -110,8 +110,8 @@ class ApacheService extends BaseService
 		$from[] = ' ';
 		$to[] = "\\ ";
 		$dr = str_replace($from, $to, DOCUMENT_ROOT);
-		$wh = str_replace($from, $to, WEBEDIT_HOME);
-		return str_replace(array('%{DOCUMENT_ROOT}', '%{WEBEDIT_HOME}'), 
+		$wh = str_replace($from, $to, PROJECT_HOME);
+		return str_replace(array('%{DOCUMENT_ROOT}', '%{PROJECT_HOME}'), 
 				array($dr, $wh), $content);
 	}
 	

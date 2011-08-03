@@ -40,7 +40,7 @@ class commands_AddModule extends commands_AbstractChangedevCommand
 		$icon = isset($params[1]) ? $params[1] : "package";
 		
 		$this->loadFramework();
-		$modulePath = f_util_FileUtils::buildWebeditPath("modules", $moduleName);
+		$modulePath = f_util_FileUtils::buildModulesPath($moduleName);
 		if (file_exists($modulePath))
 		{
 			return $this->quitError("Module $moduleName already exists");

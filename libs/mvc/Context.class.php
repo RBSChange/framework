@@ -1,77 +1,86 @@
 <?php
-class Context
+class change_Context
 {
 	/**
-	 * @var Context
+	 * @var change_Context
 	 */
 	protected static $instance = null;
 	
 	/**
-	 * @var ActionStack
+	 * @var change_ActionStack
 	 */
 	protected $actionStack = null;
 	
 	/**
-	 * @var Controller
+	 * @var change_Controller
 	 */
 	protected $controller = null;
 	
 	/**
-	 * @var ChangeRequest
+	 * @var change_Request
 	 */
 	protected $request = null;
 	
 	/**
-	 * @var ChangeSessionStorage
+	 * @var change_Storage
 	 */
 	protected $storage = null;
 	
 	/**
 	 * 
-	 * @var FrameworkSecurityUser
+	 * @var change_User
 	 */
 	protected $user = null;
 	
+	
 	protected function __construct() 
 	{
-
 	}
-
-	public function getActionName ()
-	{
-
-		// get the last action stack entry
-		$actionEntry = $this->actionStack->getLastEntry();
-
-		return $actionEntry->getActionName();
-
-	}
-
+	
+	/**
+	 * @return change_ActionStack
+	 */
 	public function getActionStack()
 	{
 		return $this->actionStack;
 	}
 
-	
-	public function getController ()
+	/**
+	 * @return string
+	 */
+	public function getActionName()
 	{
-
-		return $this->controller;
-
+		// get the last action stack entry
+		$actionEntry = $this->actionStack->getLastEntry();
+		return $actionEntry->getActionName();
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getModuleName()
+	{
+		// get the last action stack entry
+		$actionEntry = $this->actionStack->getLastEntry();
+		return $actionEntry->getModuleName();
 	}
 
+	/**
+	 * @param change_Controller $controller
+	 * @return change_Context
+	 */
 	public static function getInstance($controller)
 	{
 		if (self::$instance === null) 
 		{
 			self::$instance = new self();
 			self::$instance->controller 			= $controller;
-			self::$instance->actionStack			= new ActionStack();
+			self::$instance->actionStack			= new change_ActionStack();
 
 			$classes = Framework::getConfiguration('mvc/classes');
-			self::$instance->request = new $classes['ChangeRequest'];
-			self::$instance->storage = new $classes['ChangeSessionStorage'];
-			self::$instance->user = new $classes['FrameworkSecurityUser'];
+			self::$instance->request = new $classes['change_Request'];
+			self::$instance->storage = new $classes['change_Storage'];
+			self::$instance->user = new $classes['change_User'];
 			
 			self::$instance->request->initialize(self::$instance, null);
 			self::$instance->storage->initialize(self::$instance, null);
@@ -80,32 +89,33 @@ class Context
 		return self::$instance;
 	}
 
-	public function getModuleDirectory()
+	/**
+	 * @return change_Controller
+	 */
+	public function getController ()
 	{
-		$actionEntry = $this->actionStack->getLastEntry();
-		return AG_MODULE_DIR . '/' . $actionEntry->getModuleName();
+		return $this->controller;
 	}
 
-	public function getModuleName ()
-	{
-
-		// get the last action stack entry
-		$actionEntry = $this->actionStack->getLastEntry();
-
-		return $actionEntry->getModuleName();
-
-	}
-
+	/**
+	 * @return change_Request
+	 */
 	public function getRequest ()
 	{
 		return $this->request;
 	}
 	
+	/**
+	 * @return change_Storage
+	 */
 	public function getStorage ()
 	{
 		return $this->storage;
 	}
 
+	/**
+	 * @return change_User
+	 */
 	public function getUser ()
 	{
 		return $this->user;

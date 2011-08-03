@@ -37,40 +37,40 @@ Where options in:
 		$oldAndCurrent = $projectParser->execute($this->getComputedDeps());
 		$this->getParent()->setEnvVar("commands_CompileConfig_oldAndCurrent", $oldAndCurrent);
 		
-		if (defined("FRAMEWORK_HOME"))
+		if (class_exists('Framework', false))
 		{
 			// Framework is loaded and configuration may have changed
 			Framework::reloadConfiguration(PROFILE);
 		}
 		
 		//OAuth identification files
-		if (!is_dir(WEBEDIT_HOME . '/build/config/oauth/script'))
+		if (!is_dir(PROJECT_HOME . '/build/config/oauth/script'))
 		{
-			mkdir(WEBEDIT_HOME . '/build/config/oauth/script', 0777, true);
+			mkdir(PROJECT_HOME . '/build/config/oauth/script', 0777, true);
 		}
 		
 		if (Framework::hasConfiguration('oauth/consumer'))
 		{
 			$consumer = Framework::getConfiguration('oauth/consumer');
-			file_put_contents(WEBEDIT_HOME . '/build/config/oauth/script/consumer.txt', $consumer);
+			file_put_contents(PROJECT_HOME . '/build/config/oauth/script/consumer.txt', $consumer);
 		}
-		else if (!file_exists(WEBEDIT_HOME . '/build/config/oauth/script/consumer.txt'))
+		else if (!file_exists(PROJECT_HOME . '/build/config/oauth/script/consumer.txt'))
 		{
-			$profile = trim(file_get_contents(WEBEDIT_HOME . '/profile'));
+			$profile = trim(file_get_contents(PROJECT_HOME . '/profile'));
 			$consumer = $profile .'#' . $profile;
-			file_put_contents(WEBEDIT_HOME . '/build/config/oauth/script/consumer.txt', $consumer);
+			file_put_contents(PROJECT_HOME . '/build/config/oauth/script/consumer.txt', $consumer);
 		}
 		
 		if (Framework::hasConfiguration('oauth/token'))
 		{
 			$token = Framework::getConfiguration('oauth/token');
-			file_put_contents(WEBEDIT_HOME . '/build/config/oauth/script/token.txt', $token);
+			file_put_contents(PROJECT_HOME . '/build/config/oauth/script/token.txt', $token);
 		}
-		else if (!file_exists(WEBEDIT_HOME . '/build/config/oauth/script/token.txt'))
+		else if (!file_exists(PROJECT_HOME . '/build/config/oauth/script/token.txt'))
 		{	
 			$ts = time();
 			$token = md5($ts . mt_rand()) .'#' . md5($ts . mt_rand());
-			file_put_contents(WEBEDIT_HOME . '/build/config/oauth/script/token.txt', $token);
+			file_put_contents(PROJECT_HOME . '/build/config/oauth/script/token.txt', $token);
 		}
 		
 		if ($oldAndCurrent !== null)
@@ -78,9 +78,9 @@ Where options in:
 			$old = $oldAndCurrent["old"];
 			$current = $oldAndCurrent["current"];
 			
-			if ($old["defines"]["AG_LOGGING_LEVEL"] != $current["defines"]["AG_LOGGING_LEVEL"])
+			if ($old["defines"]["LOGGING_LEVEL"] != $current["defines"]["LOGGING_LEVEL"])
 			{
-				$this->message("AG_LOGGING_LEVEL is now ".$current["defines"]["AG_LOGGING_LEVEL"]);
+				$this->message("LOGGING_LEVEL is now ".$current["defines"]["LOGGING_LEVEL"]);
 				if (isset($options["no-auto-changes"]))
 				{
 					$this->warnMessage("You must run manually compile-js-dependencies");
@@ -90,9 +90,9 @@ Where options in:
 					$this->getParent()->executeCommand("compile-js-dependencies");
 				}
 			}
-			if ($old["defines"]["AG_SUPPORTED_LANGUAGES"] != $current["defines"]["AG_SUPPORTED_LANGUAGES"])
+			if ($old["defines"]["SUPPORTED_LANGUAGES"] != $current["defines"]["SUPPORTED_LANGUAGES"])
 			{
-				$this->message("AG_SUPPORTED_LANGUAGES changed");
+				$this->message("SUPPORTED_LANGUAGES changed");
 				if (isset($options["no-auto-changes"]))
 				{
 					$this->warnMessage("You must run manually generate-database");
@@ -116,11 +116,11 @@ Where options in:
 				{
 					$this->getParent()->executeCommand("compile-documents");	
 				}
-				
 			}
-			if ($old["defines"]["AG_DEVELOPMENT_MODE"] != $current["defines"]["AG_DEVELOPMENT_MODE"])
+			
+			if ($old["defines"]["DEVELOPMENT_MODE"] != $current["defines"]["DEVELOPMENT_MODE"])
 			{
-				$this->message("AG_DEVELOPMENT_MODE is now ".$current["defines"]["AG_DEVELOPMENT_MODE"]);
+				$this->message("DEVELOPMENT_MODE is now ".$current["defines"]["DEVELOPMENT_MODE"]);
 				
 				if (isset($options["no-auto-changes"]))
 				{

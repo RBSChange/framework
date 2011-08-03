@@ -112,7 +112,7 @@ class CacheService extends BaseService
 	
 	public function clearBrowscapCache()
 	{
-		$browscap = new Browscap(AG_CACHE_DIR);
+		$browscap = new Browscap();
 		$browscap->updateCache();
 	}
 	

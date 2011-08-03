@@ -120,14 +120,14 @@ class InitDataService extends BaseService
 	{
 		$result = false;
 		
-		$file = f_util_FileUtils::buildAbsolutePath(AG_MODULE_DIR, $moduleName, 'setup', 'initData.php');
+		$file = f_util_FileUtils::buildModulesPath($moduleName, 'setup', 'initData.php');
 		if ( is_readable($file) )
 		{
 			$this->doImport($file, $this->getSetupClassName($moduleName, false));
 			$result = true;
 		}
 
-		$file = f_util_FileUtils::buildAbsolutePath(PROJECT_OVERRIDE, 'modules', $moduleName, 'setup', 'initData.php');
+		$file = f_util_FileUtils::buildOverridePath('modules', $moduleName, 'setup', 'initData.php');
 		if ( is_readable($file) )
 		{
 			$this->doImport($file, $this->getSetupClassName($moduleName, true));

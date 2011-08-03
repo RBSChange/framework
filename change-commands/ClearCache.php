@@ -32,13 +32,10 @@ class commands_ClearCache extends commands_AbstractChangeCommand
 		$this->message("== Clear cache ==");
 
 		$profile = $this->getProfile();
-		if ( ! defined('WEBEDIT_HOME') )
-		{
-			define('WEBEDIT_HOME', realpath('.'));
-		}
+		if (!defined('PROJECT_HOME')) {define('PROJECT_HOME', realpath('.'));}
 
-		$cacheProfileDirectory = WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . $profile;
-		$wwwCache = WEBEDIT_HOME . DIRECTORY_SEPARATOR .  'cache' . DIRECTORY_SEPARATOR . 'www';
+		$cacheProfileDirectory = PROJECT_HOME . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . $profile;
+		$wwwCache = PROJECT_HOME . DIRECTORY_SEPARATOR .  'cache' . DIRECTORY_SEPARATOR . 'www';
 		// Test if the cache directory of selected profile exist
 		if ( is_dir( $cacheProfileDirectory ) )
 		{

@@ -3,14 +3,15 @@
  * <{$module}>_<{$name}>Action
  * @package modules.<{$module}>.actions
  */
-class <{$module}>_<{$name}>Action extends f_action_BaseAction
+class <{$module}>_<{$name}>Action extends change_Action
 {
 	/**
-	 * @param Context $context
-	 * @param Request $request
+	 * @param change_Context $context
+	 * @param change_Request $request
+	 * @return string
 	 */
 	public function _execute($context, $request)
 	{
-		return self::getSuccessView();
+		return change_View::NONE;
 	}
 }

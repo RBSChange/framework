@@ -14,25 +14,14 @@ abstract class f_persistentdocument_CacheService
 	 */
 	public static function getInstance()
 	{
-		if (is_null(self::$serviceInstance))
+		if (self::$serviceInstance === null)
 		{
-			if (defined('CHANGE4_CACHE_SERVICE_CLASS'))
+			$className = Framework::getConfigurationValue('documentcache/cacheServiceClass');
+			if (empty($className))
 			{
-				if (Framework::isDebugEnabled())
-				{
-					Framework::debug(get_class().'->getInstance() Using '.CHANGE4_CACHE_SERVICE_CLASS);
-				}
-
-				self::$serviceInstance = f_util_ClassUtils::callMethod(CHANGE4_CACHE_SERVICE_CLASS, 'getInstance');
+				$className = 'f_persistentdocument_NoopCacheService';
 			}
-			else
-			{
-				if (Framework::isDebugEnabled())
-				{
-					Framework::debug(get_class().'->getInstance() Using default CHANGE4_CACHE_SERVICE_CLASS f_persistentdocument_NoopCacheService');
-				}
-				self::$serviceInstance = f_persistentdocument_NoopCacheService::getInstance();
-			}
+			self::$serviceInstance = f_util_ClassUtils::callMethod($className, 'getInstance');
 		}
 		return self::$serviceInstance;
 	}

@@ -81,7 +81,7 @@ class commands_CompileLocales extends commands_AbstractChangeCommand
 			}
 			else
 			{
-				if (is_dir(f_util_FileUtils::buildWebeditPath('modules', $componentName, 'i18n')))
+				if (is_dir(f_util_FileUtils::buildModulesPath($componentName, 'i18n')))
 				{
 					$ls->regenerateLocalesForModule($componentName);
 					$this->message("$componentName module locales compiled");

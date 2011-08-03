@@ -38,11 +38,7 @@ include_once('gotcha.php');
 //Feel free to replace this with a custom solution.
 $t =  md5(uniqid(rand(), 1));
 
-
-//You can eliminate the above variable ($CAPTCHA_SESSION_KEY) and use
-// the key string literal directly below.
-
-$_SESSION[CAPTCHA_SESSION_KEY] =  $text = substr($t, rand(0, (strlen($t)-6)), rand(3,6));
+$_SESSION['CHANGE_CAPTCHA'] =  $text = substr($t, rand(0, (strlen($t)-6)), rand(3,6));
 $image_width = 230;
 $image_height = 60;
 $font_size = 30;
@@ -62,8 +58,8 @@ if($img->create()){
 	$img->apply(new DotEffect());
 	//Add the text.
 	$t  = new TextEffect($text, $font_size, $font_depth);
-	$t->addFont(f_util_FileUtils::buildAbsolutePath(FRAMEWORK_HOME, 'libs', 'gotcha', 'SFTransRoboticsExtended.ttf'));
-	$t->addFont(f_util_FileUtils::buildAbsolutePath(FRAMEWORK_HOME, 'libs', 'gotcha', 'arialbd.ttf'));
+	$t->addFont(f_util_FileUtils::buildFrameworkPath('libs', 'gotcha', 'SFTransRoboticsExtended.ttf'));
+	$t->addFont(f_util_FileUtils::buildFrameworkPath('libs', 'gotcha', 'arialbd.ttf'));
 	// repeat the process for as much fonts as you want. Actually, the more the better.
 	// A font type will be randomly selected for each character in the text code.
 	$img->apply($t);

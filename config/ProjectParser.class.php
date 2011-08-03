@@ -39,16 +39,6 @@ class config_ProjectParser
 		if (!isset($configArray[$tagName]) || is_string($configArray[$tagName]) || count($configArray[$tagName]) == 0)
 		{
 			$configArray[$tagName] = trim($xmlElement->textContent);
-			/*
-			if ($configArray[$tagName] === 'true')
-			{
-				$configArray[$tagName] = true;
-			} 
-			elseif ($configArray[$tagName] === 'false')
-			{
-				$configArray[$tagName] = false;
-			}
-			*/
 		}
 	}
 	
@@ -59,19 +49,38 @@ class config_ProjectParser
 	public function execute($computedDeps)
 	{
 		// Config dir.
-		$configDir = WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'config';
+		$configDir = PROJECT_HOME . DIRECTORY_SEPARATOR . 'config';
 		if (!is_dir($configDir))
 		{
 			return;
 		}
 
 		// Cache config dir.
-		$cacheConfigDir = WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'build' . DIRECTORY_SEPARATOR . 'config';
+		$cacheConfigDir = PROJECT_HOME . DIRECTORY_SEPARATOR . 'build' . DIRECTORY_SEPARATOR . 'config';		
+		$currentProfile = (defined("PROFILE") ? PROFILE : trim(file_get_contents(PROJECT_HOME."/profile")));
 		
-		$currentProfile = (defined("PROFILE") ? PROFILE : trim(file_get_contents(WEBEDIT_HOME."/profile")));
-		$cacheFile = $cacheConfigDir."/project.".$currentProfile.".xml.php";
-		$oldConfig = null;
+		$cacheFile = $cacheConfigDir."/project.".$currentProfile.".php";
+		$cacheDefinesFile = $cacheConfigDir."/project.".$currentProfile.".defines.php";
+	
 		$oldDefines = array();
+		if (is_file($cacheDefinesFile))
+		{
+			$lines = file($cacheDefinesFile, FILE_IGNORE_NEW_LINES);
+			if ($lines !== false)
+			{
+				unset($lines[0]);
+				foreach ($lines as $lineIndex => $line)
+				{
+					$matches = null;
+					if (preg_match('/^define\(\'(.*)\', (.*)\);$/', $line, $matches))
+					{
+						$oldDefines[$matches[1]] = $matches[2];
+					}
+				}
+			}
+		}
+		
+		$oldConfig = null;
 		if (is_file($cacheFile))
 		{
 			$lines = file($cacheFile, FILE_IGNORE_NEW_LINES);
@@ -81,11 +90,7 @@ class config_ProjectParser
 				foreach ($lines as $lineIndex => $line)
 				{
 					$matches = null;
-					if (preg_match('/^define\(\'(.*)\', (.*)\);$/', $line, $matches))
-					{
-						$lines[$lineIndex] = '$oldDefines[\'' .$matches[1] .'\'] = \''.str_replace("'", "\\'", $matches[2]).'\';';
-					}
-					elseif (substr($line, 0, 20) == 'Framework::$config =') 
+					if (substr($line, 0, 20) === 'Framework::$config =') 
 					{
 						$lines[$lineIndex] = '$oldConfig ='.substr($line, 20);
 					}
@@ -99,28 +104,8 @@ class config_ProjectParser
 		$fileList = scandir($configDir);
 		
 		$configArray = array();
-		$this->loadXmlConfigFile(WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'framework' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'project.xml', $configArray);
-		
-		
-		
-		// -- Global constants.
-		if (isset($computedDeps["PEAR_DIR"]))
-		{
-			$this->addConstant($configArray['defines'], "PEAR_DIR", $computedDeps["PEAR_DIR"]);
-		}
-		if (isset($computedDeps["LOCAL_REPOSITORY"]))
-		{
-			$this->addConstant($configArray['defines'], "LOCAL_REPOSITORY", $computedDeps["LOCAL_REPOSITORY"]);
-		}
-		if (isset($computedDeps["WWW_GROUP"]))
-		{
-			$this->addConstant($configArray['defines'], "WWW_GROUP", $computedDeps["WWW_GROUP"]);
-		}
-		if (isset($computedDeps["OUTGOING_HTTP_PROXY_HOST"]))
-		{
-			$this->addConstant($configArray['defines'], "OUTGOING_HTTP_PROXY_HOST", $computedDeps["OUTGOING_HTTP_PROXY_HOST"]);
-			$this->addConstant($configArray['defines'], "OUTGOING_HTTP_PROXY_PORT", $computedDeps["OUTGOING_HTTP_PROXY_PORT"]);
-		}
+		$this->loadXmlConfigFile(PROJECT_HOME . DIRECTORY_SEPARATOR . 'framework' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'project.xml', $configArray);
+				
 		$fDeps = $computedDeps['change-lib']['framework'];
 		$this->addConstant($configArray['defines'], "FRAMEWORK_VERSION", $fDeps['version']);
 		$fHotfix = (count($fDeps['hotfix']) > 0) ?  end($fDeps['hotfix']) : null;
@@ -147,7 +132,7 @@ class config_ProjectParser
 			$configArray['config']['injection']['document'] = $docInjections;
 		}		
 		
-		$this->loadXmlConfigFile(WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'project.xml', $configArray);
+		$this->loadXmlConfigFile(PROJECT_HOME . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'project.xml', $configArray);
 		$profilFile = $configDir . DIRECTORY_SEPARATOR . "project.".$currentProfile.".xml";
 		if (is_readable($profilFile))
 		{
@@ -158,49 +143,26 @@ class config_ProjectParser
 			die($profilFile);
 		}
 		
-		if (!isset($configArray['defines']['TMP_PATH']))
+		// -- Global constants.
+		foreach (array('PEAR_DIR', 'LOCAL_REPOSITORY', 'WWW_GROUP', 'TMP_PATH', 
+			'CHANGE_COMMAND', 'DOCUMENT_ROOT', 'PROJECT_LICENSE', 'FAKE_EMAIL', 
+			'PHP_CLI_PATH', 'DEVELOPMENT_MODE') as $constName) 
 		{
-			if (function_exists('sys_get_temp_dir'))
+			if (isset($computedDeps[$constName]))
 			{
-				$TMP_PATH = sys_get_temp_dir();
+				$this->addConstant($configArray['defines'], $constName, $computedDeps[$constName]);
 			}
-			else
+			elseif ($constName === 'TMP_PATH' && !isset($configArray['defines']['TMP_PATH']))
 			{
-				$tmpfile = @tempnam(null, 'loc_');
-				if ($tmpfile)
-				{
-					$TMP_PATH = dirname($tmpfile);
-					@unlink($tmpfile);
-				}
-				else  if (DIRECTORY_SEPARATOR === '\\')
-				{
-					if (isset($_ENV['TMP']))
-					{
-						$TMP_PATH = $_ENV['TMP'];
-					} 
-					else if (isset($_ENV['TEMP']))
-					{
-						$TMP_PATH = $_ENV['TEMP'];
-					}
-					else 
-					{
-						throw new Exception('Please define TMP_PATH in project.xml config file');
-					}
-				}
-				else
-				{
-					$TMP_PATH ='/tmp';
-				}
+				$this->addConstant($configArray['defines'], $constName, $this->evaluateTmpPath());			
 			}
-			$configArray['defines']['TMP_PATH'] = $TMP_PATH;					
-		}
-	
-		if (isset($computedDeps["DEVELOPMENT_MODE"]) && $computedDeps["DEVELOPMENT_MODE"])
-		{
-			$configArray['defines']['AG_DEVELOPMENT_MODE'] = true;
 		}
 		
-		$configArray['defines']['PHP_CLI_PATH'] = (isset($computedDeps["PHP_CLI_PATH"])) ?  $computedDeps["PHP_CLI_PATH"] : '';
+		if (isset($computedDeps["OUTGOING_HTTP_PROXY_HOST"]))
+		{
+			$this->addConstant($configArray['defines'], "OUTGOING_HTTP_PROXY_HOST", $computedDeps["OUTGOING_HTTP_PROXY_HOST"]);
+			$this->addConstant($configArray['defines'], "OUTGOING_HTTP_PROXY_PORT", $computedDeps["OUTGOING_HTTP_PROXY_PORT"]);
+		}
 		
 		if (!isset($configArray['config']['browsers']['frontoffice']) || !is_array($configArray['config']['browsers']['frontoffice']))
 		{
@@ -214,14 +176,14 @@ class config_ProjectParser
 		}		
 		unset($configArray['defines']);
 		
-		
 		// Write in file
-		$content = "<?php // File auto generated by ProjectParser.";
-		$content .= "\n // DEFINE PART // \n";
+		$content = "<?php // DEFINE PART auto generated by ProjectParser.\n";
 		$content .= implode("\n", $defineLines);
+		$this->writeFile($cacheDefinesFile, $content);
 		
-		$content .= "\n // Framework::\$config PART // \n";
-		$content .= "Framework::\$config = " . var_export($configArray['config'], true) . ';';
+		$content = "<?php // Config PART generated by ProjectParser.\n";
+		$content .= 'Framework::$config = ' . var_export($configArray['config'], true) . ';';
+		$this->writeFile($cacheFile, $content);
 		
 		if ($oldConfig !== null)
 		{
@@ -237,9 +199,44 @@ class config_ProjectParser
 			$currentConfig = array("config" => $configArray['config'], "defines" => $currentDefines);
 		}
 		
-		$this->writeFile($cacheConfigDir."/project.".$currentProfile.".xml.php", $content);
-
 		return ($oldConfig !== null) ? array("old" => array("defines" => $oldDefines, "config" => $oldConfig), "current" => $currentConfig) : null;
+	}
+	
+	public function evaluateTmpPath()
+	{
+		if (function_exists('sys_get_temp_dir'))
+		{
+			$TMP_PATH = sys_get_temp_dir();
+		}
+		else
+		{
+			$tmpfile = @tempnam(null, 'loc_');
+			if ($tmpfile)
+			{
+				$TMP_PATH = dirname($tmpfile);
+				@unlink($tmpfile);
+			}
+			else  if (DIRECTORY_SEPARATOR === '\\')
+			{
+				if (isset($_ENV['TMP']))
+				{
+					$TMP_PATH = $_ENV['TMP'];
+				} 
+				else if (isset($_ENV['TEMP']))
+				{
+					$TMP_PATH = $_ENV['TEMP'];
+				}
+				else 
+				{
+					throw new Exception('Please define TMP_PATH in project.xml config file');
+				}
+			}
+			else
+			{
+				$TMP_PATH ='/tmp';
+			}
+		}	
+		return $TMP_PATH;	
 	}
 
 	private function writeFile($path, $content)
@@ -281,10 +278,6 @@ class config_ProjectParser
 		else if (!is_numeric($value))
 		{
 			$quoteCount = substr_count($value, "'");
-			// For strings, I quote the ones that contain an odd number of single quotes.
-			// This generally means that the developper really wanted to use a single quote.
-			// For example:
-			// <define name="AG_WEBAPP_NAME">Fred's Change</define>
 			if ($quoteCount == 0 || ($quoteCount & 1))
 			{
 				$value = var_export($value, true);
@@ -299,7 +292,7 @@ class config_ProjectParser
 	private function compilePackageVersion()
 	{
 		$packagesVersion = array();
-		$files = glob(WEBEDIT_HOME . '/modules/*/change.xml');
+		$files = glob(PROJECT_HOME . '/modules/*/change.xml');
 		if (!is_array($files) || count($files) == 0)
 		{
 			return $packagesVersion;
@@ -342,7 +335,7 @@ class config_ProjectParser
 	{
 		$constants = array();
 		$moduleXmlFiles = array();		
-		$files = glob(WEBEDIT_HOME . '/modules/*/config/module.xml');
+		$files = glob(PROJECT_HOME . '/modules/*/config/module.xml');
 		if (is_array($files) || count($files) > 0)
 		{
 			foreach ($files as $moduleXmlFile)
@@ -353,7 +346,7 @@ class config_ProjectParser
 				$moduleName = basename(dirname(dirname($moduleXmlFile)));
 				
 				
-				$moduleXmlOverrideFile = implode(DIRECTORY_SEPARATOR, array(WEBEDIT_HOME, 'override', 'modules', $moduleName, 'config', 'module.xml'));
+				$moduleXmlOverrideFile = implode(DIRECTORY_SEPARATOR, array(PROJECT_HOME, 'override', 'modules', $moduleName, 'config', 'module.xml'));
 				if (is_readable($moduleXmlOverrideFile))
 				{
 					$this->loadXmlConfigFile($moduleXmlOverrideFile, $moduleConfig);
@@ -431,7 +424,7 @@ class config_ProjectParser
 	private function searchForDocInjections()
 	{
 		$injections = array();
-		foreach (glob(WEBEDIT_HOME . '/modules/*/persistentdocument/*.xml') as $docFile)
+		foreach (glob(PROJECT_HOME . '/modules/*/persistentdocument/*.xml') as $docFile)
 		{
 			$doc = f_util_DOMUtils::fromPath($docFile);
 			$root = $doc->documentElement;

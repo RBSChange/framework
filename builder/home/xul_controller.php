@@ -1,7 +1,7 @@
 <?php
 $start = microtime(true);
-define('WEBEDIT_HOME', dirname(realpath(__FILE__)));
-
+define('PROJECT_HOME', dirname(realpath(__FILE__)));
+define('WEBEDIT_HOME', PROJECT_HOME);
 // Set exception handler, called when an exception is not caught.
 function KO_exception_handler($exception)
 {
@@ -38,7 +38,7 @@ if (get_magic_quotes_gpc()) {
 set_exception_handler('KO_exception_handler');
 
 // Starts the framework
-require_once WEBEDIT_HOME . "/framework/Framework.php";
+require_once PROJECT_HOME . "/framework/Framework.php";
 
 // Log request time and remote_addr.
 if (Framework::isDebugEnabled())
@@ -50,7 +50,7 @@ if (Framework::isDebugEnabled())
 
 
 // Instantiate controller_XulController and dispatch the request
-$controller = Controller::newInstance("controller_XulController");
+$controller = change_Controller::newInstance('change_XulController');
 $controller->dispatch();
 
 if (Framework::isDebugEnabled())

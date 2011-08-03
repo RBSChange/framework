@@ -419,10 +419,10 @@ class DocumentHelper
 	/**
 	 * Sets the properties of the $document from the $request parameters.
 	 *
-	 * @param Request $request The Request where to get parameters value.
+	 * @param change_Request $request The Request where to get parameters value.
 	 * @param f_persistentdocument_PersistentDocument $document The document to set.
 	 */
-	public static function setPropertiesFromRequestTo(Request $request, f_persistentdocument_PersistentDocument $document)
+	public static function setPropertiesFromRequestTo(change_Request $request, f_persistentdocument_PersistentDocument $document)
 	{
 		$documentModel = $document->getPersistentModel();
 		//$properties = $documentModel->getComponentNames();

@@ -358,7 +358,7 @@ class PatchService extends BaseService
 	
 	private function setCodePatch($packagename, $patchName)
 	{
-		$path = f_util_FileUtils::buildWebeditPath('installedpatch');
+		$path = f_util_FileUtils::buildProjectPath('installedpatch');
 		f_util_FileUtils::mkdir($path);
 		$fileName = f_util_FileUtils::buildPath($path, $packagename . '_' . $patchName . '.txt');
 		f_util_FileUtils::write($fileName, date_Calendar::now()->toString());
@@ -366,7 +366,7 @@ class PatchService extends BaseService
 	
 	private function getCodePatch($packagename, $patchName)
 	{
-		$fileName = f_util_FileUtils::buildWebeditPath('installedpatch', $packagename . '_' . $patchName . '.txt');
+		$fileName = f_util_FileUtils::buildProjectPath('installedpatch', $packagename . '_' . $patchName . '.txt');
 		if (is_readable($fileName))
 		{
 			return f_util_FileUtils::read($fileName);

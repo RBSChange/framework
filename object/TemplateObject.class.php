@@ -145,7 +145,7 @@ class TemplateObject
 		
 		$template->getContext()->noThrow(true);
 		$template->stripComments(!Framework::inDevelopmentMode());
-		$path = f_util_FileUtils::buildCachePath('template', $lang);
+		$path = f_util_FileUtils::buildChangeCachePath('template', $lang);
 		
 		f_util_FileUtils::mkdir($path);
 		$template->setPhpCodeDestination($path);
@@ -175,11 +175,10 @@ class TemplateObject
 		
 	protected function sendHeader()
 	{
-		$mode = Controller::getInstance()->getRenderMode();
-		if (($mode != View::RENDER_VAR))
+		if (!headers_sent())
 		{
 			$header = $this->getHeader();
-			if ((is_null($header) === false) && (headers_sent() == false))
+			if ($header !== null)
 			{
 				header('Content-type: ' . $header);
 			}

@@ -1,15 +1,13 @@
 <?php
-abstract class Request
+class change_Request
 {
 	
 	public static function newInstance ($class)
 	{
 		$object = new $class();
-		if (!($object instanceof Request))
+		if (!($object instanceof change_Request))
 		{
-
-			$error = 'Class "%s" is not of the type Request';
-			$error = sprintf($error, $class);
+			$error = 'Class "'. $class.'" is not of the type ChangeRequest';
 			throw new Exception($error);
 		}
 		return $object;
@@ -248,13 +246,6 @@ abstract class Request
 		throw new Exception($error);
 	}
 
-	abstract function initialize ($context, $parameters = null);
-
-	abstract function shutdown ();
-}
-
-class WebRequest extends Request
-{
 	public function getFile($name)
 	{
 		if (isset($_FILES[$name]))
@@ -436,10 +427,7 @@ class WebRequest extends Request
 	public function shutdown ()
 	{
 	}
-}
 
-class ChangeRequest extends WebRequest
-{
 	/**
 	 * Set a cookie.
 	 * @param string Cookie key

@@ -160,7 +160,7 @@ class FileResolver implements ResourceResolver
 	 */
 	private function resetPotentialDirectories()
 	{
-		$this->potentialDirectories = array(PROJECT_OVERRIDE, WEBEDIT_HOME, f_util_FileUtils::buildChangeBuildPath());
+		$this->potentialDirectories = array(f_util_FileUtils::buildOverridePath(), f_util_FileUtils::buildProjectPath(), f_util_FileUtils::buildChangeBuildPath());
 	}
 	
 	/**
@@ -190,7 +190,7 @@ class FileResolver implements ResourceResolver
 		$currentWebsite = website_WebsiteModuleService::getInstance()->getCurrentWebsite();
 		if (!is_null($currentWebsite))
 		{
-			$directory = PROJECT_OVERRIDE . DIRECTORY_SEPARATOR . 'hostspecificresources' . DIRECTORY_SEPARATOR . $currentWebsite->getDomain();
+			$directory = f_util_FileUtils::buildOverridePath('hostspecificresources', $currentWebsite->getDomain());
 			if (is_dir($directory)) 
 			{
 				$this->addPotentialDirectory($directory);

@@ -9,7 +9,7 @@ class c_ChangeBootStrap
 	static $DEP_THEME = 20;
 	
 	/**
-	 * WEBEDIT_HOME
+	 * PROJECT_HOME
 	 * @var String
 	 */
 	private $wd;
@@ -239,9 +239,17 @@ class c_ChangeBootStrap
 		$computedComponents["USE_CHANGE_PEAR_LIB"] = $this->useChangePearLib();
 		$computedComponents["PEAR_WRITEABLE"] = $this->pearInfos['writeable'];
 		$computedComponents["LOCAL_REPOSITORY"] = $localRepo;
-		$computedComponents["WWW_GROUP"] = $this->getProperties()->getProperty("WWW_GROUP");
-		$computedComponents["DEVELOPMENT_MODE"] = $this->getProperties()->getProperty("DEVELOPMENT_MODE") == true;
-		$computedComponents["PHP_CLI_PATH"] = $this->getProperties()->getProperty("PHP_CLI_PATH") . "";
+		$computedComponents["WWW_GROUP"] = $this->getProperties()->getProperty('WWW_GROUP');
+		$computedComponents["DEVELOPMENT_MODE"] = $this->getProperties()->getProperty('DEVELOPMENT_MODE', false) == true;
+		$computedComponents["PHP_CLI_PATH"] = $this->getProperties()->getProperty('PHP_CLI_PATH', '');
+		
+		$computedComponents["TMP_PATH"] = $this->getProperties()->getProperty('TMP_PATH');
+		
+		$computedComponents["CHANGE_COMMAND"] = $this->getProperties()->getProperty('CHANGE_COMMAND', 'framework/bin/change.php');
+		$computedComponents["PROJECT_HOME"] = $this->getProperties()->getProperty('PROJECT_HOME', $this->wd);
+		$computedComponents["DOCUMENT_ROOT"] = $this->getProperties()->getProperty('DOCUMENT_ROOT', $this->wd);
+		$computedComponents["PROJECT_LICENSE"] = $this->getProperties()->getProperty('PROJECT_LICENSE', 'OS');
+		$computedComponents["FAKE_EMAIL"] = $this->getProperties()->getProperty('FAKE_EMAIL');
 		
 		$proxy = $this->getProxy();
 		if ($proxy !== null)

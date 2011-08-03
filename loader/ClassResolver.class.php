@@ -19,14 +19,14 @@ class ClassResolver implements ResourceResolver
 	
 	protected function __construct()
 	{
-		require_once (FRAMEWORK_HOME . '/util/FileUtils.class.php');
-		require_once (FRAMEWORK_HOME . '/util/StringUtils.class.php');
+		require_once (PROJECT_HOME . '/framework/util/FileUtils.class.php');
+		require_once (PROJECT_HOME . '/framework/util/StringUtils.class.php');
 		
-		$this->keys = array('%FRAMEWORK_HOME%', '%WEBEDIT_HOME%', '%PROFILE%');
-		$this->reps = array(FRAMEWORK_HOME, WEBEDIT_HOME, PROFILE);
+		$this->keys = array('%PROJECT_HOME%', '%PROFILE%');
+		$this->reps = array(PROJECT_HOME, PROFILE);
 		
-		$this->cacheDir = WEBEDIT_HOME . '/cache/autoload';
-		$this->aopBackupDir = WEBEDIT_HOME . '/cache/aop-backup';
+		$this->cacheDir = PROJECT_HOME . '/cache/autoload';
+		$this->aopBackupDir = PROJECT_HOME . '/cache/aop-backup';
 		
 		if (! is_dir($this->cacheDir))
 		{
@@ -43,7 +43,7 @@ class ClassResolver implements ResourceResolver
 	{
 		if (is_null(self::$instance))
 		{
-			if (AG_DEVELOPMENT_MODE)
+			if (DEVELOPMENT_MODE)
 			{
 				self::$instance = new ClassResolverDevMode();
 			}
@@ -62,7 +62,7 @@ class ClassResolver implements ResourceResolver
 	{
 		if ($this->aop === null)
 		{
-			require_once (FRAMEWORK_HOME . '/aop/AOP.php');
+			require_once (PROJECT_HOME . '/framework/aop/AOP.php');
 			$this->aop = new f_AOP();
 		}
 		return $this->aop;
@@ -106,7 +106,7 @@ class ClassResolver implements ResourceResolver
 	
 	function getAOPPath($className)
 	{
-		return WEBEDIT_HOME . '/cache/aop/' . $className. ".class.php";
+		return PROJECT_HOME . '/cache/aop/' . $className. ".class.php";
 	}
 	
 	public function compileAOP()
@@ -194,20 +194,20 @@ class ClassResolver implements ResourceResolver
 	{
 		 
 		$result = array(
-				array('path' => '%FRAMEWORK_HOME%/', 'recursive' => 'true', 
-						'exclude' => array('deprecated', 'doc', 'module', 'webapp')), 
-				array('path' => '%WEBEDIT_HOME%/libs/', 'recursive' => 'true',
+				array('path' => '%PROJECT_HOME%/framework/', 'recursive' => 'true', 
+						'exclude' => array('deprecated', 'doc', 'module', 'webapp', 'patch')), 
+				array('path' => '%PROJECT_HOME%/libs/', 'recursive' => 'true',
 					'exclude' => array('fckeditor', 'icons', 'pearlibs')),
-				array('path' => '%WEBEDIT_HOME%/build/%PROFILE%/', 'recursive' => 'true'), 
-				array('path' => '%WEBEDIT_HOME%/modules/*/actions'), 
-				array('path' => '%WEBEDIT_HOME%/modules/*/change-commands', 'recursive' => 'true'), 
-				array('path' => '%WEBEDIT_HOME%/modules/*/changedev-commands', 'recursive' => 'true'), 
-				array('path' => '%WEBEDIT_HOME%/modules/*/lib/', 'recursive' => 'true'), 
-				array('path' => '%WEBEDIT_HOME%/modules/*/views/'), 
-				array('path' => '%WEBEDIT_HOME%/modules/*/persistentdocument/', 'recursive' => 'true'), 
-				array('path' => '%WEBEDIT_HOME%/override/modules/*/actions'), 
-				array('path' => '%WEBEDIT_HOME%/override/modules/*/lib/', 'recursive' => 'true'), 
-				array('path' => '%WEBEDIT_HOME%/override/modules/*/views/'));
+				array('path' => '%PROJECT_HOME%/build/%PROFILE%/', 'recursive' => 'true'), 
+				array('path' => '%PROJECT_HOME%/modules/*/actions'), 
+				array('path' => '%PROJECT_HOME%/modules/*/change-commands', 'recursive' => 'true'), 
+				array('path' => '%PROJECT_HOME%/modules/*/changedev-commands', 'recursive' => 'true'), 
+				array('path' => '%PROJECT_HOME%/modules/*/lib/', 'recursive' => 'true'), 
+				array('path' => '%PROJECT_HOME%/modules/*/views/'), 
+				array('path' => '%PROJECT_HOME%/modules/*/persistentdocument/', 'recursive' => 'true'), 
+				array('path' => '%PROJECT_HOME%/override/modules/*/actions'), 
+				array('path' => '%PROJECT_HOME%/override/modules/*/lib/', 'recursive' => 'true'), 
+				array('path' => '%PROJECT_HOME%/override/modules/*/views/'));
 				
 		if (defined('PEAR_DIR'))
 		{
@@ -223,7 +223,7 @@ class ClassResolver implements ResourceResolver
 	{
 		$ini = $this->getPathsToAnalyse();
 		// we automatically add our php classes
-		require_once (FRAMEWORK_HOME . '/util/Finder.class.php');
+		require_once (PROJECT_HOME . '/framework/util/Finder.class.php');
 		$ext = '.php';
 		
 		// let's do our fancy work
@@ -292,7 +292,7 @@ class ClassResolver implements ResourceResolver
 	function getClassNames($basePattern = null)
 	{
 		$classNames = array();
-		$path = WEBEDIT_HOME . '/cache/autoload';
+		$path = PROJECT_HOME . '/cache/autoload';
 		$pathLength = strlen($path) + 1;
 		
 		if ($basePattern !== null)
@@ -338,7 +338,7 @@ class ClassResolver implements ResourceResolver
 	public function update()
 	{
 		$oldCacheDir = $this->cacheDir;
-		$this->cacheDir = WEBEDIT_HOME . '/cache/autoload_tmp';
+		$this->cacheDir = PROJECT_HOME . '/cache/autoload_tmp';
 		try
 		{
 			f_util_FileUtils::rmdir($this->cacheDir);
@@ -432,7 +432,7 @@ class ClassResolver implements ResourceResolver
 	{
 		$ini = $this->getPathsToAnalyse();
 		// we automatically add our php classes
-		require_once (FRAMEWORK_HOME . '/util/Finder.class.php');
+		require_once (PROJECT_HOME . '/framework/util/Finder.class.php');
 		$ext = '.php';		
 		// let's do our fancy work
 		foreach ($ini as $entry)

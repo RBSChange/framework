@@ -117,9 +117,9 @@ class RequestContext
 			{
 				$languages = explode(' ', strtolower($supportedLanguages));
 			}
-			else if (defined('AG_SUPPORTED_LANGUAGES'))
+			else if (defined('SUPPORTED_LANGUAGES'))
 			{
-				$languages = explode(' ', strtolower(AG_SUPPORTED_LANGUAGES));
+				$languages = explode(' ', strtolower(SUPPORTED_LANGUAGES));
 			}
 			else
 			{
@@ -130,9 +130,9 @@ class RequestContext
 			{
 				$ui_languages = explode(' ', strtolower($ui_supportedLanguages));
 			}
-			else if (defined('AG_UI_SUPPORTED_LANGUAGES'))
+			else if (defined('UI_SUPPORTED_LANGUAGES'))
 			{
-				$ui_languages = explode(' ', strtolower(AG_UI_SUPPORTED_LANGUAGES));
+				$ui_languages = explode(' ', strtolower(UI_SUPPORTED_LANGUAGES));
 			}
 			else
 			{
@@ -462,7 +462,7 @@ class RequestContext
 			{
 				$userAgent = "";
 			}
-			$browscap = new Browscap(AG_CACHE_DIR);
+			$browscap = new Browscap();
 			$this->m_browser = $browscap->getBrowser($userAgent);
 			if (Framework::isDebugEnabled())
 			{
@@ -487,7 +487,7 @@ class RequestContext
 		{
 			$this->m_os = self::OS_OTHER;
 
-			if (Controller::getInstance()->getContext()->getRequest()->getMethod() == Request::CONSOLE)
+			if (change_Controller::getInstance()->getContext()->getRequest()->getMethod() == change_Request::CONSOLE)
 			{
 				$os = strtolower(PHP_OS);
 
@@ -534,8 +534,8 @@ class RequestContext
 	{
 		if (is_null($this->m_userAgentType))
 		{
-			$request = Controller::getInstance()->getContext()->getRequest();
-			if ($request->getMethod() == Request::CONSOLE)
+			$request = change_Controller::getInstance()->getContext()->getRequest();
+			if ($request->getMethod() == change_Request::CONSOLE)
 			{
 				$userAgentType = $request->getParameter('force-user-agent-type');
 			}
@@ -562,8 +562,8 @@ class RequestContext
 	{
 		if (is_null($this->m_userAgentTypeVersion))
 		{
-			$request = Controller::getInstance()->getContext()->getRequest();
-			if ($request->getMethod()==Request::CONSOLE)
+			$request = change_Controller::getInstance()->getContext()->getRequest();
+			if ($request->getMethod()==change_Request::CONSOLE)
 			{
 				$userAgentTypeVersion = $request->getParameter('force-user-agent-typeversion');
 			}
@@ -599,7 +599,7 @@ class RequestContext
 	{
 		if (is_null($this->m_mimeContentType))
 		{
-			$mimeContentType = Controller::getInstance()->getContext()->getRequest()->getParameter('contentType');
+			$mimeContentType = change_Controller::getInstance()->getContext()->getRequest()->getParameter('contentType');
 			if (!$mimeContentType)
 			{
 				$mimeContentType = K::HTML;

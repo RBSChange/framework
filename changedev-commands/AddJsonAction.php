@@ -80,7 +80,6 @@ class commands_AddJsonAction extends commands_AbstractChangedevCommand
 		f_util_FileUtils::write($actionFile, $result);
 		$class = $moduleName.'_'.$actionName . 'Action';
 		ClassResolver::getInstance()->appendToAutoloadFile($class, realpath($actionFile));
-		$this->quitOk("Action $actionName added in module $moduleName
-Please now edit $actionFile.");
+		$this->quitOk("Action $actionName added in module $moduleName Please now edit $actionFile.");
 	}
 }

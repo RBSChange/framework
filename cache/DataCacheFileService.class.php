@@ -8,7 +8,7 @@ class f_DataCacheFileService extends f_DataCacheService
 	
 	protected function __construct()
 	{
-		$this->registrationFolder = f_util_FileUtils::buildCachePath('simplecache', 'registration');
+		$this->registrationFolder = f_util_FileUtils::buildChangeCachePath('simplecache', 'registration');
 		f_util_FileUtils::mkdir($this->registrationFolder);
 	}
 
@@ -145,7 +145,7 @@ class f_DataCacheFileService extends f_DataCacheService
 	
 	public function clearCommand()
 	{
-		f_util_FileUtils::cleanDir(f_util_FileUtils::buildCachePath("simplecache"));
+		f_util_FileUtils::cleanDir(f_util_FileUtils::buildChangeCachePath("simplecache"));
 	}
 	
 	public function getCacheIdsForPattern($pattern)
@@ -159,7 +159,7 @@ class f_DataCacheFileService extends f_DataCacheService
 		{
 			Framework::debug("DataCacheFileService->commitClear");
 		}
-		$cachePath = f_util_FileUtils::buildCachePath('simplecache');
+		$cachePath = f_util_FileUtils::buildChangeCachePath('simplecache');
 		$dirsToClear = array();
 		if ($this->clearAll)
 		{
@@ -294,7 +294,7 @@ class f_DataCacheFileService extends f_DataCacheService
 		if ($cachePath === null)
 		{
 			$keyParameters = $item->getKeyParameters();
-			$cachePath = f_util_FileUtils::buildCachePath('simplecache', $item->getNamespace(), $keyParameters[0], $keyParameters[1], $keyParameters[2], $keyParameters);
+			$cachePath = f_util_FileUtils::buildChangeCachePath('simplecache', $item->getNamespace(), $keyParameters[0], $keyParameters[1], $keyParameters[2], $keyParameters);
 			$item->setCachePath($cachePath);
 		}
 		if ($subCache === null)

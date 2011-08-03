@@ -165,7 +165,7 @@ abstract class f_util_FileUtils
 	 * @param String $pattern
 	 * @param String $fromPath
 	 * @return String[] the founded files as a "relative to $fromPath path" array
-	 * @example f_util_FileUtils::find("*.php", util_File_Utils::buildWebeditPath("modules", "myModule"));
+	 * @example f_util_FileUtils::find("*.php", util_File_Utils::buildProjectPath("modules", "myModule"));
 	 */
 	static public function find($pattern, $fromPath)
 	{
@@ -219,7 +219,7 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @example FileUtils::buildRelativePath('home', 'toto') returns 'home/toto'
+	 * @example f_util_FileUtils::buildRelativePath('home', 'toto') returns 'home/toto'
 	 * @return String the path builded using concatenated arguments
 	 */
 	public static function buildRelativePath()
@@ -229,8 +229,8 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @example FileUtils::buildPath('home', 'toto') returns 'home/toto'
-	 * @example FileUtils::buildPath('/home/titi/tutu', 'toto') returns '/home/titi/tutu/toto'
+	 * @example f_util_FileUtils::buildPath('home', 'toto') returns 'home/toto'
+	 * @example f_util_FileUtils::buildPath('/home/titi/tutu', 'toto') returns '/home/titi/tutu/toto'
 	 * @return String the path builded using concatenated arguments
 	 */
 	public static function buildPath()
@@ -240,8 +240,8 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @example FileUtils::buildAbsolutePath('home', 'toto') returns '/home/toto'
-	 * @example FileUtils::buildAbsolutePath('/home', 'toto') returns '/home/toto'
+	 * @example f_util_FileUtils::buildAbsolutePath('home', 'toto') returns '/home/toto'
+	 * @example f_util_FileUtils::buildAbsolutePath('/home', 'toto') returns '/home/toto'
 	 * @return String the path builded using concatenated arguments
 	 */
 	public static function buildAbsolutePath()
@@ -272,31 +272,42 @@ abstract class f_util_FileUtils
 		array_unshift($args, LOCAL_REPOSITORY);
 		return self::buildAbsolutePathFromArray($args);
 	}
-
+	
 	/**
-	 * @example FileUtils::buildWebeditPath('bin', 'tasks') returns WEBEDIT_HOME.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'tasks'
+	 * @example f_util_FileUtils::buildProjectPath('libs', 'icons')
 	 * @return String
 	 */
-	public static function buildWebeditPath()
+	public static function buildProjectPath()
 	{
 		$args = func_get_args();
-		array_unshift($args, WEBEDIT_HOME);
+		array_unshift($args, PROJECT_HOME);
 		return self::buildAbsolutePathFromArray($args);
 	}
-		
+
 	/**
-	 * @example FileUtils::buildOverridePath('toto') returns PROJECT_OVERRIDE.DIRECTORY_SEPARATOR.'toto'
+	 * @example f_util_FileUtils::buildModulesPath('mymodule', 'config')
+	 * @return String
+	 */
+	public static function buildModulesPath()
+	{
+		$args = func_get_args();
+		array_unshift($args, PROJECT_HOME, 'modules');
+		return self::buildAbsolutePathFromArray($args);
+	}
+	
+	/**
+	 * @example f_util_FileUtils::buildOverridePath('modules', 'mymodule', 'config')
 	 * @return String
 	 */
 	public static function buildOverridePath()
 	{
 		$args = func_get_args();
-		array_unshift($args, PROJECT_OVERRIDE);
+		array_unshift($args, PROJECT_HOME, 'override');
 		return self::buildAbsolutePathFromArray($args);
 	}
 
 	/**
- 	 * @example FileUtils::buildDocumentRootPath('toto') returns DOCUMENT_ROOT.DIRECTORY_SEPARATOR.'toto'
+ 	 * @example f_util_FileUtils::buildDocumentRootPath('index.php')
 	 * @return String
 	 */
 	public static function buildDocumentRootPath()
@@ -307,24 +318,12 @@ abstract class f_util_FileUtils
 	}
 	
 	/**
-	 * @example FileUtils::buildCachePath('toto') returns AG_CACHE_DIR.DIRECTORY_SEPARATOR.'toto'
-	 * @return String
-	 */
-	public static function buildCachePath()
-	{
-		$args = func_get_args();
-		array_unshift($args, CHANGE_CACHE_DIR);
-		return self::buildAbsolutePathFromArray($args);
-	}
-
-	/**
-	 * @example FileUtils::buildCachePath('toto') returns AG_CACHE_DIR.DIRECTORY_SEPARATOR.'toto'
 	 * @return String
 	 */
 	public static function buildChangeCachePath()
 	{
 		$args = func_get_args();
-		array_unshift($args, CHANGE_CACHE_DIR);
+		array_unshift($args, PROJECT_HOME, 'cache' , PROFILE);
 		return self::buildAbsolutePathFromArray($args);
 	}
 	
@@ -335,7 +334,7 @@ abstract class f_util_FileUtils
 	public static function buildWebCachePath()
 	{
 		$args = func_get_args();
-		array_unshift($args, WEB_CACHE_DIR);
+		array_unshift($args, PROJECT_HOME, 'cache' , 'www');
 		return self::buildAbsolutePathFromArray($args);
 	}
 
@@ -346,29 +345,29 @@ abstract class f_util_FileUtils
 	public static function buildChangeBuildPath()
 	{
 		$args = func_get_args();
-		array_unshift($args, CHANGE_BUILD_DIR);
+		array_unshift($args, PROJECT_HOME, 'build', PROFILE);
 		return self::buildAbsolutePathFromArray($args);
 	}
 
 	/**
-	 * @example FileUtils::buildFrameworkPath('indexer.log') returns CHANGE_LOG_DIR.DIRECTORY_SEPARATOR.'indexer.log'
+	 * @example FileUtils::buildLogPath('application.log')
 	 * @return String
 	 */
 	public static function buildLogPath()
 	{
 		$args = func_get_args();
-		array_unshift($args, CHANGE_LOG_DIR);
+		array_unshift($args, PROJECT_HOME, "log", PROFILE);
 		return self::buildAbsolutePathFromArray($args);
 	}
 
 	/**
-	 * @example FileUtils::buildFrameworkPath('config', 'listeners.xml') returns FRAMEWORK_HOME.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'listeners.xml'
+	 * @example FileUtils::buildFrameworkPath('config', 'listeners.xml')
 	 * @return String
 	 */
 	public static function buildFrameworkPath()
 	{
 		$args = func_get_args();
-		array_unshift($args, FRAMEWORK_HOME);
+		array_unshift($args, PROJECT_HOME, "framework");
 		return self::buildAbsolutePathFromArray($args);
 	}
 
@@ -1044,11 +1043,7 @@ abstract class f_util_FileUtils
 		$uid = posix_getuid();
 		if ($group !== null)
 		{
-			if (is_numeric($group))
-			{
-				$group = $group;
-			}
-			else
+			if (!is_numeric($group))
 			{
 				$groupInfo = posix_getgrnam($group);
 				$group = $groupInfo["gid"];
@@ -1098,5 +1093,26 @@ abstract class f_util_FileUtils
 				}
 			}
 		}
+	}
+	
+	/**
+	 * @deprecated use f_util_FileUtils::buildProjectPath
+	 * @return String
+	 */
+	public static function buildWebeditPath()
+	{
+		$args = func_get_args();
+		array_unshift($args, PROJECT_HOME);
+		return self::buildAbsolutePathFromArray($args);
+	}
+	
+	/**
+	 * @deprecated use f_util_FileUtils::buildChangeCachePath
+	 */
+	public static function buildCachePath()
+	{
+		$args = func_get_args();
+		array_unshift($args, PROJECT_HOME, 'cache' , PROFILE);
+		return self::buildAbsolutePathFromArray($args);
 	}
 }

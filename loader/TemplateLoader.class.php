@@ -53,7 +53,7 @@ class TemplateLoader extends FileLoader implements ResourceLoader
 			$currentPage = DocumentHelper::getDocumentInstance($currentPageId, "modules_website/page");
 			list($theme, ) = explode('/', $currentPage->getTemplate());
 			
-			$themeDir = f_util_FileUtils::buildWebeditPath('themes', $theme);
+			$themeDir = f_util_FileUtils::buildProjectPath('themes', $theme);
 			$this->resolver->addPotentialDirectory($themeDir);
 			$overrideThemeDir = f_util_FileUtils::buildOverridePath('themes', $theme);
 			$this->resolver->addPotentialDirectory($overrideThemeDir);

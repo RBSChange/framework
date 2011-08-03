@@ -5,7 +5,7 @@ class import_ScriptBindingElement extends import_ScriptBaseElement
 	{
 		if (isset($this->attributes['fileName']))
 		{
-			$fileName = f_util_FileUtils::buildAbsolutePath(WEBEDIT_HOME, $this->attributes['fileName']);
+			$fileName = f_util_FileUtils::buildProjectPath($this->attributes['fileName']);
 			if (file_exists($fileName))
 			{
 				$this->script->executeInternal($fileName);

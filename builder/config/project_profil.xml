@@ -3,7 +3,7 @@
 	<defines>
 		<!-- to switch to development mode, please use DEVELOPMENT_MODE=true in your change.properties file -->
 		<!-- 
-		<define name="AG_LOGGING_LEVEL">DEBUG</define>
+		<define name="LOGGING_LEVEL">DEBUG</define>
 		-->
     	 
 		<!--  
@@ -36,7 +36,6 @@
 				<entry name="host">${database_host}</entry>
 				<entry name="protocol">mysql</entry>
 				<entry name="port">3306</entry>
-				<!-- <entry name="emulate_prepares">false</entry> -->
 			</webapp>
 		</databases>
 	</config>

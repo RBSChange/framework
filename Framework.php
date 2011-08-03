@@ -2,25 +2,19 @@
 umask(0002);
 if (!defined('PROFILE') )
 {
-	$profile = file_get_contents(WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'profile');
+	$profile = file_get_contents(PROJECT_HOME . DIRECTORY_SEPARATOR . 'profile');
 	if ( $profile === false || $profile == '' )
 	{
 		throw new Exception('Profile not defined. Please define a profile in file ./profile.');
 	}
 	define('PROFILE', trim($profile) );
 }
-if (!defined('FRAMEWORK_HOME'))
-{
-	define('FRAMEWORK_HOME', WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'framework');
-}
-if (!defined('AG_CACHE_DIR'))
-{
-	define('AG_CACHE_DIR', WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . PROFILE);
-}
 
-define('CHANGE_LOG_DIR', WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'log' . DIRECTORY_SEPARATOR . PROFILE);
+define('CHANGE_LOG_DIR', PROJECT_HOME . DIRECTORY_SEPARATOR . 'log' . DIRECTORY_SEPARATOR . PROFILE);
+
 if (!is_dir(CHANGE_LOG_DIR)) @mkdir(CHANGE_LOG_DIR, 0777, true);
-define('CHANGE_BUILD_DIR', WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'build' . DIRECTORY_SEPARATOR . PROFILE);
+
+define('CHANGE_BUILD_DIR', PROJECT_HOME . DIRECTORY_SEPARATOR . 'build' . DIRECTORY_SEPARATOR . PROFILE);
 
 class Framework
 {
@@ -49,12 +43,20 @@ class Framework
 	}
 
 	/**
-	 * @see project config and AG_DEVELOPMENT_MODE constant
+	 * @see project config and DEVELOPMENT_MODE constant
 	 * @return Boolean
 	 */
 	public static function inDevelopmentMode()
 	{
-		return AG_DEVELOPMENT_MODE;
+		return DEVELOPMENT_MODE;
+	}
+	
+	/**
+	 * @return string
+	 */
+	public static function getProfile()
+	{
+		return PROFILE;
 	}
 
 	/**
@@ -62,7 +64,7 @@ class Framework
 	 */
 	public static function isSiteEnabled()
 	{
-		$siteDisabledFlag = f_util_FileUtils::buildWebeditPath("site_is_disabled");
+		$siteDisabledFlag = f_util_FileUtils::buildProjectPath("site_is_disabled");
 		return !file_exists($siteDisabledFlag);
 	}
 
@@ -114,10 +116,18 @@ class Framework
 	{
 		if (self::$logLevel === null)
 		{
-			self::$logLevel = constant('Logger::'.AG_LOGGING_LEVEL);
+			self::$logLevel = constant('Logger::'.LOGGING_LEVEL);
 			if (self::$logLevel == false) {self::$logLevel = Logger::WARN;}
 		}
 		return self::$logLevel;
+	}
+	
+	/**
+	 * @return string (DEBUG, INFO, WARN, ERROR, FATAL) 
+	 */
+	public static function getLogLevelName()
+	{
+		return LOGGING_LEVEL;
 	}
 
 	/**
@@ -411,49 +421,29 @@ class Framework
 	 * @param string $env
 	 * @param Boolean $onlyConfig
 	 */
-	public static function loadConfiguration($env = '', $onlyConfig = false)
+	public static function loadConfiguration($currentProfile = '', $onlyConfig = false)
 	{
 		// If configuration not yet loaded, load it
 		if (self::$config === null)
 		{
-			// If specific environnement add a dot to complet in path file
-			if ( $env != '' )
-			{
-				$env .= '.';
-			}
-
-			$fileName = 'project.'.$env.'xml.php';
-			$pathOfConfigFile = WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'build' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . $fileName;
-			self::$config = array();
-			if (!is_file($pathOfConfigFile))
-			{
-				throw new Exception("Could not find $pathOfConfigFile. You must compile your configuration.");
-			}
+			$cacheConfigDir = PROJECT_HOME . DIRECTORY_SEPARATOR . 'build' . DIRECTORY_SEPARATOR . 'config';	
+			
 			if (!$onlyConfig)
 			{
-				require($pathOfConfigFile);
+				$cacheDefinesFile = $cacheConfigDir."/project.".$currentProfile.".defines.php";
+				if (!is_file($cacheDefinesFile))
+				{
+					throw new Exception("Could not find $cacheDefinesFile. You must compile your configuration.");
+				}
+				require($cacheDefinesFile);
 			}
-			else
+			
+			$cacheFile = $cacheConfigDir."/project.".$currentProfile.".php";
+			if (!is_file($cacheFile))
 			{
-				$config = file($pathOfConfigFile);
-				if ($config === false)
-				{
-					throw new Exception("Could not read $pathOfConfigFile");
-				}
-				unset($config[0]); // first line is php tag
-				foreach ($config as $key => $value)
-				{
-					if (preg_match('/^define\(\'([^\']+)\', .*$/', $value, $matches))
-					{
-						 $constantName = $matches[1];
-						 if (defined($constantName)) // ignore define as we can not redeclare a constant
-						 {
-						 	unset($config[$key]);
-						 }
-					}
-				}
-				eval(join("\n", $config));
+				throw new Exception("Could not find $cacheFile. You must compile your configuration.");
 			}
+			require($cacheFile);
 		}
 	}
 
@@ -477,19 +467,19 @@ class Framework
 	 */
 	public static function getCompanyName()
 	{
-		return AG_WEBAPP_NAME;
+		return self::$config['general']['projectName'];
 	}
 }
 
 // Load configuration
 Framework::loadConfiguration(PROFILE);
 
-require_once(FRAMEWORK_HOME . '/loader/ResourceResolver.class.php');
-require_once(FRAMEWORK_HOME . '/loader/ClassResolver.class.php');
-require_once(FRAMEWORK_HOME . '/loader/Resolver.class.php');
-require_once(FRAMEWORK_HOME . '/loader/ResourceLoader.class.php');
-require_once(FRAMEWORK_HOME . '/loader/ClassLoader.class.php');
-require_once(FRAMEWORK_HOME . '/loader/Loader.class.php');
+require_once(PROJECT_HOME . '/framework/loader/ResourceResolver.class.php');
+require_once(PROJECT_HOME . '/framework/loader/ClassResolver.class.php');
+require_once(PROJECT_HOME . '/framework/loader/Resolver.class.php');
+require_once(PROJECT_HOME . '/framework/loader/ResourceLoader.class.php');
+require_once(PROJECT_HOME . '/framework/loader/ClassLoader.class.php');
+require_once(PROJECT_HOME . '/framework/loader/Loader.class.php');
 
 function f_errorHandler($errno, $errstr, $errfile, $errline)
 {
@@ -516,31 +506,23 @@ if (spl_autoload_register(array(ClassLoader::getInstance(), "autoload")) === fal
 	throw new Exception("Could not register Change framework autoload function");
 }
 
-define('AG_WEBAPP_DIR', PROJECT_OVERRIDE);
 
-ini_set('include_path', FRAMEWORK_HOME . '/libs/pear' . PATH_SEPARATOR . PEAR_DIR);
+ini_set('include_path', PEAR_DIR);
 
 ini_set('arg_separator.output',      '&amp;');
 ini_set('display_errors',            1);
 ini_set('magic_quotes_runtime',      0);
 
 error_reporting(E_ALL);
-require_once(FRAMEWORK_HOME.'/libs/mvc/Context.class.php');
-require_once(FRAMEWORK_HOME.'/libs/mvc/Controller.class.php');
-require_once(FRAMEWORK_HOME.'/libs/mvc/Request.class.php');
-require_once(FRAMEWORK_HOME.'/libs/mvc/Storage.class.php');
-require_once(FRAMEWORK_HOME.'/libs/mvc/User.class.php');
-require_once(FRAMEWORK_HOME.'/libs/mvc/Action.class.php');
-require_once(FRAMEWORK_HOME.'/libs/mvc/View.class.php');
 
 // Load modules informations
-require_once(FRAMEWORK_HOME."/service/Injection.php");
-require_once(FRAMEWORK_HOME."/service/BaseService.class.php");
-require_once(FRAMEWORK_HOME."/service/ModuleService.class.php");
+require_once(PROJECT_HOME . '/framework/service/Injection.php');
+require_once(PROJECT_HOME . '/framework/service/BaseService.class.php');
+require_once(PROJECT_HOME . '/framework/service/ModuleService.class.php');
 $ms = ModuleService::getInstance();
 $ms->loadCacheFile();
 
-require_once(FRAMEWORK_HOME . '/service/LoggingService.class.php');
+require_once(PROJECT_HOME . '/framework/service/LoggingService.class.php');
 
 // +---------------------------------------------------------------------------+
 // | error handler

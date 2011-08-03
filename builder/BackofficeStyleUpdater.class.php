@@ -40,7 +40,7 @@ class builder_BackofficeStyleUpdater
 	private static function updateCssFile($moduleName, $documentName, $iconName)
 	{
 		$fileName = 'backoffice.css';
-		$file = f_util_FileUtils::buildWebeditPath('modules', $moduleName, 'style', $fileName);
+		$file = f_util_FileUtils::buildModulesPath($moduleName, 'style', $fileName);
 
 		$selector = 'treechildren::-moz-tree-image(modules_'.$moduleName.'_'.$documentName.')';
 		if (f_util_StringUtils::isNotEmpty($iconName))

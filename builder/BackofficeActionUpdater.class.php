@@ -19,7 +19,7 @@ class builder_BackofficeActionUpdater
 	public function updateXmlDocument($parents)
 	{
 		// config/actions.xml file
-		$fileActions = f_util_FileUtils::buildWebeditPath('modules', $this->model->getModuleName(), 'config', 'actions.xml');
+		$fileActions = f_util_FileUtils::buildModulesPath($this->model->getModuleName(), 'config', 'actions.xml');
 
 		$domDoc = f_util_DOMUtils::fromPath($fileActions);
 		$domDoc->preserveWhiteSpace = false;
@@ -54,7 +54,7 @@ class builder_BackofficeActionUpdater
 		}
 
 		// document editor directory
-		$editordir = f_util_FileUtils::buildWebeditPath('modules', $this->model->getModuleName(), 'forms', 'editor', $this->model->getDocumentName());
+		$editordir = f_util_FileUtils::buildModulesPath($this->model->getModuleName(), 'forms', 'editor', $this->model->getDocumentName());
 		if (!is_dir($editordir))
 		{
 			echo "Create $editordir directory\n";
@@ -66,7 +66,7 @@ class builder_BackofficeActionUpdater
 		}
 
 		// module perspective model entry
-		$perspectivePath = f_util_FileUtils::buildWebeditPath('modules', $this->model->getModuleName(), 'config', 'perspective.xml');
+		$perspectivePath = f_util_FileUtils::buildModulesPath($this->model->getModuleName(), 'config', 'perspective.xml');
 		$perspective = f_util_DOMUtils::fromPath($perspectivePath);
 		$perspectiveUpdated = false;
 		if ($this->xPath($perspective, "models/model[@name = '".$this->model->getName()."']")->length == 0)

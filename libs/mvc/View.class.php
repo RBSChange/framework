@@ -1,5 +1,5 @@
 <?php
-abstract class View
+abstract class change_View
 {
 	
 	const ALERT = 'Alert';
@@ -7,21 +7,44 @@ abstract class View
 	const INPUT = 'Input';
 	const NONE = null;
 	const SUCCESS = 'Success';
+
+	const STATUS_OK    = 'OK';
+	const STATUS_ERROR = 'ERROR';
 	
-	const RENDER_CLIENT = 2;
-	const RENDER_NONE = 1;
-	const RENDER_VAR = 4;
-	
+	/**
+	 * @var change_Context
+	 */
 	private $context;
 	
-	abstract function clearAttributes();
+	/**
+	 * @var array
+	 */
+	private $attributes = array();
 	
-	abstract function execute();
+	/**
+	 * @var string
+	 */
+	private $mimeContentType = null;
+
 	
-	abstract function getAttribute($name);
+	/**
+	 * @return TemplateObject
+	 */
+	private $engine = null;
+
+	/**
+	 * @var string
+	 */	
+	private $forceModuleName = null;
+
+	/**
+	 * @var string
+	 */
+	private $nullref = null;
 	
-	abstract function getAttributeNames();
-	
+	/**
+	 * @return change_Context
+	 */
 	public final function getContext()
 	{
 		return $this->context;
@@ -34,48 +57,31 @@ abstract class View
 		return true;
 	}
 	
-	abstract function removeAttribute($name);
-	
-	abstract function setAttribute($name, $value);
-	
-	abstract function setAttributeByRef($name, &$value);
-	
-	abstract function setAttributes($values);
-	
-	abstract function setAttributesByRef(&$values);
-	
-	abstract function getEngine();
-	
-	abstract function render();
-}
-
-abstract class f_view_BaseView extends View
-{
-	const STATUS_OK    = 'OK';
-	const STATUS_ERROR = 'ERROR';
-
-	private $attributes = array();
-	
-	private $mimeContentType = null;
-	
 	/**
-	 * @return TemplateObject
+	 * Please do not override this method, but _execute() instead!
+	 * @return string View name.
 	 */
-	private $engine = null;
-
-	private $forceModuleName = null;
-
-	private $nullref = null;
+	public function execute()
+	{
+		$context = $this->getContext();
+		$this->sendHttpHeaders();
+		return $this->_execute($context, $context->getRequest());
+	}
 
 	/**
 	 * PLEASE USE THIS METHOD for the action body instead of execute() (without
-	 * the underscore): it is called by execute() and directly receives Context
+	 * the underscore): it is called by execute() and directly receives f_Context
 	 * and Request objects.
-	 * @param Context $context
-	 * @param Request $request
+	 * @param change_Context $context
+	 * @param change_Request $request
 	 */
 	abstract protected function _execute($context, $request);
 
+	
+	/**
+	 * @param string $mimeContentType
+	 * @throws IllegalArgumentException
+	 */
 	public function setMimeContentType($mimeContentType)
 	{
 		if(empty($mimeContentType))
@@ -86,6 +92,10 @@ abstract class f_view_BaseView extends View
 		$this->mimeContentType = $mimeContentType;
 	}
 
+	/**
+	 * @param string $templateName
+	 * @param string $mimeType
+	 */
 	public function setTemplateName($templateName, $mimeType = K::HTML)
 	{
 		if (is_null($this->forceModuleName))
@@ -121,11 +131,18 @@ abstract class f_view_BaseView extends View
 		$this->attributes = array();
 	}
 
+	/**
+	 * @param string $name
+	 */
 	public function hasAttribute($name)
 	{
 		return array_key_exists($name, $this->attributes);
 	}
 
+	/**
+	 * @param string $name
+	 * @return mixed
+	 */
 	public function getAttribute($name)
 	{
 		if ($this->hasAttribute($name))
@@ -135,6 +152,9 @@ abstract class f_view_BaseView extends View
 		return null;
 	}
 
+	/**
+	 * @param string $name
+	 */
 	public function removeAttribute($name)
 	{
 		if ($this->hasAttribute($name))
@@ -144,11 +164,18 @@ abstract class f_view_BaseView extends View
 		return null;
 	}
 
+	/**
+	 * @param string $name
+	 * @param mixed $value
+	 */
 	public function setAttribute($name, $value)
 	{
 		$this->attributes[$name] = $value;
 	}
 
+	/**
+	 * @param array $attributes
+	 */
 	public function setAttributes($attributes)
 	{
 		foreach ($attributes as $name => $value)
@@ -157,16 +184,26 @@ abstract class f_view_BaseView extends View
 		}
 	}
 
+	/**
+	 * @return string[]
+	 */
 	public function getAttributeNames()
 	{
 		return array_keys($this->attributes);
 	}
 
+	/**
+	 * @param string $name
+	 * @param mixed $value
+	 */
 	public function setAttributeByRef($name, &$value)
 	{
 		$this->attributes[$name] = $value;
 	}
 
+	/**
+	 * @param array $attributes
+	 */
 	public function setAttributesByRef(&$attributes)
 	{
 		foreach ($attributes as $name => $value)
@@ -186,20 +223,7 @@ abstract class f_view_BaseView extends View
 	}
 
 	/**
-	 * Please do not override this method, but _execute() instead!
-	 *
-	 * @return string View name.
-	 */
-	public function execute()
-	{
-		$context = $this->getContext();
-		$this->sendHttpHeaders();
-		return $this->_execute($context, $context->getRequest());
-	}
-
-	/**
-	 * @param Request $request
-	 * @return String
+	 * @return string
 	 */
 	protected final function getModuleName()
 	{
@@ -214,7 +238,7 @@ abstract class f_view_BaseView extends View
 
 	protected function sendHttpHeaders()
 	{
-		controller_ChangeController::setNoCache();
+		change_Controller::setNoCache();
 	}
 
 	/**

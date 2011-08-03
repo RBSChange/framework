@@ -354,7 +354,7 @@ class f_AOP
 	{
 		if ($this->alterations === null)
 		{
-			$aopConfigFile = f_util_FileUtils::buildWebeditPath("config", "aop.xml");
+			$aopConfigFile = f_util_FileUtils::buildProjectPath("config", "aop.xml");
 			if (file_exists($aopConfigFile))
 			{
 				$doc = new DOMDocument();

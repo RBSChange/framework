@@ -68,7 +68,7 @@ class commands_AddCommand extends commands_AbstractChangedevCommand
 		$commandName = ucfirst($params[1]);
 		if ($componentName === "framework")
 		{
-			$commandFolder = f_util_FileUtils::buildWebeditPath('framework', 'change' . $type . '-commands');
+			$commandFolder = f_util_FileUtils::buildFrameworkPath('change' . $type . '-commands');
 			$commandFile = $commandFolder . DIRECTORY_SEPARATOR . $commandName . '.php';
 			$class = 'commands_' . $commandName;
 		}
@@ -78,7 +78,7 @@ class commands_AddCommand extends commands_AbstractChangedevCommand
 		}
 		else
 		{
-			$commandFolder = f_util_FileUtils::buildWebeditPath('modules', $componentName, 'change' . $type . '-commands');
+			$commandFolder = f_util_FileUtils::buildModulesPath($componentName, 'change' . $type . '-commands');
 			$commandFile = $commandFolder . DIRECTORY_SEPARATOR . $componentName . '_' . $commandName . '.php';
 			$class = 'commands_' . $componentName . '_' . $commandName;
 		}

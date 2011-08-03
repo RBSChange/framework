@@ -85,17 +85,17 @@ class f_util_System
 	}
 	
 	/**
-	 * @param string $relativeScriptPath to WEBEDIT_HOME
+	 * @param string $relativeScriptPath to PROJECT_HOME
 	 * @param array $arguments
 	 * @param boolean $noFramework
 	 * @param string $baseUrl
 	 */
 	public static function execHTTPScript($relativeScriptPath, $arguments = array(), $noFramework = false, $baseUrl = null)
 	{
-		list($name, $secret) = explode('#', file_get_contents(WEBEDIT_HOME . '/build/config/oauth/script/consumer.txt'));
+		list($name, $secret) = explode('#', file_get_contents(PROJECT_HOME . '/build/config/oauth/script/consumer.txt'));
 		$consumer = new f_web_oauth_Consumer($name, $secret);
 
-		list($name, $secret) = explode('#', file_get_contents(WEBEDIT_HOME . '/build/config/oauth/script/token.txt'));	
+		list($name, $secret) = explode('#', file_get_contents(PROJECT_HOME . '/build/config/oauth/script/token.txt'));	
 		$token = new f_web_oauth_Token($name, $secret);
 		
 		if ($baseUrl === null) 
@@ -131,7 +131,7 @@ class f_util_System
 	}
 	
 	/**
-	 * @param string $relativeScriptPath to WEBEDIT_HOME
+	 * @param string $relativeScriptPath to PROJECT_HOME
 	 * @param array $arguments
 	 */
 	public static function execChangeHTTPCommand($commandName, $arguments = array())
@@ -140,7 +140,7 @@ class f_util_System
 	}
 	
 	/**
-	 * @param string $relativeScriptPath to WEBEDIT_HOME
+	 * @param string $relativeScriptPath to PROJECT_HOME
 	 * @param array $arguments
 	 */
 	public static function execChangeConsoleCommand($commandName, $arguments = array())
@@ -151,7 +151,7 @@ class f_util_System
 	}
 	
 	/**
-	 * @param string $relativeScriptPath to WEBEDIT_HOME
+	 * @param string $relativeScriptPath to PROJECT_HOME
 	 * @param array $arguments
 	 */
 	public static function execChangeCommand($commandName, $arguments = array())

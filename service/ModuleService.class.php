@@ -766,7 +766,7 @@ class c_Module
 	 */
 	function getPath()
 	{
-		return realpath(AG_MODULE_DIR . "/" . $this->name);
+		return realpath(f_util_FileUtils::buildModulesPath($this->name));
 	}
 
 	/**

@@ -258,7 +258,7 @@ class commands_EditDocument extends commands_AbstractChangedevCommand
 You may create a new patch to handle this modification.
 Use '" . CHANGE_COMMAND . " create-patch $moduleName' to initiate the patch and copy-paste the following:
 
-\$archivePath = f_util_FileUtils::buildWebeditPath('$archivePath');
+\$archivePath = f_util_FileUtils::buildProjectPath('$archivePath');
 \$oldModel = generator_PersistentModel::loadModelFromString(f_util_FileUtils::read(\$archivePath), '$moduleName', '$documentName');
 \$oldProp = \$oldModel->getPropertyByName('$propertyName');
 f_persistentdocument_PersistentProvider::getInstance()->delProperty('$moduleName', '$documentName', \$oldProp);
@@ -312,8 +312,8 @@ f_persistentdocument_PersistentProvider::getInstance()->delProperty('$moduleName
 You may create a new patch to handle this modification.
 Use '" . CHANGE_COMMAND . " create-patch $moduleName' to initiate the patch and copy-paste the following:
 
-\$archivePath = f_util_FileUtils::buildWebeditPath('$archivePath');
-\$newPath = f_util_FileUtils::buildWebeditPath('$newPath');
+\$archivePath = f_util_FileUtils::buildProjectPath('$archivePath');
+\$newPath = f_util_FileUtils::buildProjectPath('$newPath');
 \$oldModel = generator_PersistentModel::loadModelFromString(f_util_FileUtils::read(\$archivePath), '$moduleName', '$documentName');
 \$oldProp = \$oldModel->getPropertyByName('$propertyName');
 \$newModel = generator_PersistentModel::loadModelFromString(f_util_FileUtils::read(\$newPath), '$moduleName', '$documentName');
@@ -542,7 +542,7 @@ $compileSchema");
 You may create a new patch to handle this modification.
 Use '" . CHANGE_COMMAND . " create-patch $moduleName' to initiate the patch and copy-paste the following:
 
-\$newPath = f_util_FileUtils::buildWebeditPath('$newPath');
+\$newPath = f_util_FileUtils::buildProjectPath('$newPath');
 \$newModel = generator_PersistentModel::loadModelFromString(f_util_FileUtils::read(\$newPath), '$moduleName', '$documentName');
 \$newProp = \$newModel->getPropertyByName('$propertyName');
 f_persistentdocument_PersistentProvider::getInstance()->addProperty('$moduleName', '$documentName', \$newProp);

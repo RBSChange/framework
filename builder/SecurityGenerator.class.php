@@ -33,7 +33,7 @@ class builder_SecurityGenerator
 		foreach ($moduleService->getPackageNames() as $moduleName)
 		{
 			$shortModuleName = $moduleService->getShortModuleName($moduleName);
-			$baseRightsPath = f_util_FileUtils::buildWebeditPath('modules', $shortModuleName, self::CONFIG_DIR_NAME, self::ROLE_DEF_FILE_NAME);
+			$baseRightsPath = f_util_FileUtils::buildModulesPath($shortModuleName, self::CONFIG_DIR_NAME, self::ROLE_DEF_FILE_NAME);
 			if (!file_exists($baseRightsPath)) {$baseRightsPath = null;}
 			$overrideRightsPath = f_util_FileUtils::buildOverridePath('modules', $shortModuleName, self::CONFIG_DIR_NAME, self::ROLE_DEF_FILE_NAME);
 			if (!file_exists($overrideRightsPath)) {$overrideRightsPath = null;}
@@ -78,7 +78,7 @@ class builder_SecurityGenerator
 	 */
 	public function getRolesFields($moduleName)
 	{
-		$baseRightsPath = f_util_FileUtils::buildWebeditPath('modules', $moduleName, self::CONFIG_DIR_NAME, self::ROLE_DEF_FILE_NAME);
+		$baseRightsPath = f_util_FileUtils::buildModulesPath($moduleName, self::CONFIG_DIR_NAME, self::ROLE_DEF_FILE_NAME);
 		if (!file_exists($baseRightsPath)) {$baseRightsPath = null;}
 		$overrideRightsPath = f_util_FileUtils::buildOverridePath('modules', $moduleName, self::CONFIG_DIR_NAME, self::ROLE_DEF_FILE_NAME);
 		if (!file_exists($overrideRightsPath)) {$overrideRightsPath = null;}
