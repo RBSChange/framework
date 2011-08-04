@@ -114,7 +114,7 @@ class Browscap
 		{
 			$cache_dir = f_util_FileUtils::buildChangeCachePath($this->cacheFilename);
 		}
-		$cache_dir = realpath($cache_dir);
+		
 		if (substr($cache_dir, -4) === '.php') {
 			$this->cacheFilename = basename($cache_dir);
 			$this->cacheDir = dirname($cache_dir);
