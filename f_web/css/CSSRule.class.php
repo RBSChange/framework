@@ -26,7 +26,7 @@ class f_web_CSSRule
 	 */
 	private $declarationBlock;
 	
-
+	
 	private $comments;
 	/**
 	 * @var CSSDeclaration[]
@@ -161,7 +161,7 @@ class f_web_CSSRule
 			}
 			if (count($declarations) > 0)
 			{
-				return $this->getSelectorText() . "{" . implode("", $declarations) . "}\n";			
+				return $this->getSelectorText() . "{" . implode("", $declarations) . "}\n";	
 			}
 		}
 		return null;		
@@ -273,5 +273,26 @@ class f_web_CSSRule
 	{
 		$this->label = $label;
 	}
+	
+    /**
+     * @var String 
+     */
+    private $mediaType;
+    
+    /**
+     * @return String 
+     */
+    public function getMediaType() 
+    {
+		return $this->mediaType;
+    }
+
+    /**
+     * @param String $type 
+     */
+    public function setMediaType($type) 
+    {
+		$this->mediaType = $type;
+    }
 
 }

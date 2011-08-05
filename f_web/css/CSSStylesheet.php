@@ -63,12 +63,26 @@ class f_web_CSSStylesheet
 	public function getAsCSS($fullEngine, $skin)
 	{
 		$result = array();
+		$media = null;
 		foreach ($this->cssRules as $rule)
 		{
-			$rule = $rule->getAsCSS($fullEngine, $skin);
-			if ($rule !== null)
+			$ruleText = $rule->getAsCSS($fullEngine, $skin);
+			$currentMedia = $rule->getMediaType();
+			if ($currentMedia!= $media)
 			{
-				$result[] = $rule;
+				if ($media !== null)
+				{
+					$result[] = "}\n";
+				}
+				if ($currentMedia !== null)
+				{
+					$result[] ='@media ' . $currentMedia . " {\n";
+				}
+				$media = $currentMedia;
+			}
+			if ($ruleText !== null)
+			{
+				$result[] = $ruleText;
 			}
 		}
 		if (count($result) > 0)
@@ -345,8 +359,11 @@ class f_web_CSSStylesheet
 		$inParenthesis = false;
 		$inDeclarationBlock = false;
 		$inSelector = true;
+		$inMediaType = false;
+		$inMediaRule = false;
 		$selectorText = "";
 		$declarationText = "";
+		$mediaText = "";
 		$commentText = "";
 		$comments = array();
 		$currentRule = null;
@@ -364,24 +381,36 @@ class f_web_CSSStylesheet
 					$inParenthesis = false;
 				}
 			}
-			if ($cssText[$i] === '@' && $inSelector && substr($cssText, $i, 7) === '@import' && !$inComment)
+			if ($cssText[$i] === '@' && $inSelector)
 			{
-				$idx = strpos($cssText, ";", $i);
-				if (!$idx)
+			    // handle import
+			    if (substr($cssText, $i, 7) === '@import' && !$inComment)
+			    {
+					$idx = strpos($cssText, ";", $i);
+					if (!$idx)
+					{
+						throw new Exception('Invalid directive @import syntax');
+					}
+					$directive = substr($cssText, $i, $idx - $i);
+					$matches = array();
+					if (preg_match('/url\((.*)\)/', $directive, $matches))
+					{
+						$this->importCSS(trim($matches[1]));
+					}
+					else
+					{
+						throw new Exception('Invalid directive @import syntax');
+					}
+					$i = $idx;
+			    }
+			    else if (substr($cssText, $i, 6) === '@media' && !$inComment)
 				{
-					throw new Exception('Invalid directive @import syntax');
-				}
-				$directive = substr($cssText, $i, $idx - $i);
-				$matches = array();
-				if (preg_match('/url\((.*)\)/', $directive, $matches))
-				{
-					$this->importCSS(trim($matches[1]));
-				}
-				else
-				{
-					throw new Exception('Invalid directive @import syntax');
-				}
-				$i = $idx;
+					$inMediaRule = true;
+					$inMediaType = true;
+					$i += 6;
+					$inSelector = false;
+			    }
+			    
 			}
 			else if ($cssText[$i] === '/' && $cssText[$i + 1] === '*' && !$inComment)
 			{
@@ -404,29 +433,40 @@ class f_web_CSSStylesheet
 			}
 			else if ($cssText[$i] === '}' && !$inComment)
 			{
-				if ($inDeclarationBlock && !f_util_StringUtils::isEmpty($declarationText))
+				
+				if ($inDeclarationBlock)
 				{
-					if ($lastDeclaration !== null)
+					if (!f_util_StringUtils::isEmpty($declarationText))
 					{
-						$currentRule->addDeclaration($lastDeclaration);
-						$lastDeclaration = null;
+						if ($lastDeclaration !== null)
+						{
+							$currentRule->addDeclaration($lastDeclaration);
+							$lastDeclaration = null;
+						}
+						$lastDeclaration = new f_web_CSSDeclaration();
+						$lastDeclaration->setCssText(trim($declarationText));
+						if (f_util_ArrayUtils::isNotEmpty($comments))
+						{
+							$lastDeclaration->setComments($comments);
+							$comments = array();
+						}
+						$declarationText = "";
 					}
-					$lastDeclaration = new f_web_CSSDeclaration();
-					$lastDeclaration->setCssText(trim($declarationText));
-					if (f_util_ArrayUtils::isNotEmpty($comments))
-					{
-						$lastDeclaration->setComments($comments);
-						$comments = array();
-					}
-					$declarationText = "";
+					
+					
+					// End of declarations
+					$inSelector = true;
+
+					$inDeclarationBlock = false;
+					$selectorText = "";
+					
+				}								
+				else if ($inMediaRule)
+				{
+					$inMediaRule = false;
+					$mediaText = "";
 				}
 				
-
-				// End of declarations
-				$inSelector = true;
-
-				$inDeclarationBlock = false;
-				$selectorText = "";
 				if ($currentRule)
 				{
 					if ($lastDeclaration !== null)
@@ -441,31 +481,42 @@ class f_web_CSSStylesheet
 			}
 			else if ($cssText[$i] === '{' && !$inComment)
 			{
-				// Beginning of declarations
-				if (!$inSelector)
+			    if ($inMediaType)
+			    {
+					$inMediaType = false;
+					$inSelector = true;
+			    }
+				else
 				{
-					Framework::fatal("$i " . substr($cssText, $i-50, 50));
-					throw new Exception("Declarations without a selector");
-				}
-				$inDeclarationBlock = true;
-				$inSelector = false;
+					// Beginning of declarations
+					if (!$inSelector)
+					{
+						throw new Exception("Declarations without a selector");
+					}
+					$inDeclarationBlock = true;
+					$inSelector = false;
 
-				if ($lastDeclaration !== null && $currentRule)
-				{
-					$currentRule->addDeclaration($lastDeclaration);
-					$lastDeclaration = null;
-				}
+					if ($lastDeclaration !== null && $currentRule)
+					{
+						$currentRule->addDeclaration($lastDeclaration);
+						$lastDeclaration = null;
+					}
 
-				$currentRule = new f_web_CSSRule();
-				$currentRule->setSelectorText(trim($selectorText));
-				if ($currentEngine !== null)
-				{
-					$currentRule->setEngine($currentEngine);
-				}
-				if (f_util_ArrayUtils::isNotEmpty($comments))
-				{
-					$currentRule->setComments($comments);
-					$comments = array();
+					$currentRule = new f_web_CSSRule();
+					$currentRule->setSelectorText(trim($selectorText));
+					if ($mediaText != "")
+					{
+						$currentRule->setMediaType(trim($mediaText));
+					}
+					if ($currentEngine !== null)
+					{
+						$currentRule->setEngine($currentEngine);
+					}
+					if (f_util_ArrayUtils::isNotEmpty($comments))
+					{
+						$currentRule->setComments($comments);
+						$comments = array();
+					}
 				}
 			}
 			else if ($cssText[$i] === ";"  && !$inParenthesis && !$inComment)
@@ -489,13 +540,17 @@ class f_web_CSSStylesheet
 			}
 			else
 			{
-				if (!$inDeclarationBlock && !$inComment)
+				if (!$inDeclarationBlock && !$inComment && !$inMediaType)
 				{
 					$selectorText .= $cssText[$i];
 				}
 				else if ($inDeclarationBlock && !$inComment)
 				{
 					$declarationText .= $cssText[$i];
+				}
+				else if ($inMediaType && !$inComment)
+				{
+					$mediaText .= $cssText[$i];
 				}
 				else if ($inComment)
 				{
