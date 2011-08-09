@@ -181,6 +181,12 @@
 			</prefix>
 		</tal>
 		
+	    <indexer>
+	      <SolrManager>
+	        <entry name="schemaVersion">3.0.3</entry>
+	      </SolrManager>
+	    </indexer>
+	    
 		<!-- Web browsers compatibility -->
 		<browsers>
 				<!--

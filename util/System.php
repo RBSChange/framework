@@ -87,6 +87,58 @@ class f_util_System
 	/**
 	 * @param string $relativeScriptPath to PROJECT_HOME
 	 * @param array $arguments
+	 */
+	public static function execScript($relativeScriptPath, $arguments = array())
+	{
+		if (isset($_SERVER['REMOTE_ADDR']))
+		{
+			// Mode web
+			return self::execHTTPScript($relativeScriptPath, $arguments);
+		}
+		return self::execConsoleScript($relativeScriptPath, $arguments);
+	}
+	
+	/**
+	 * @param string $relativeScriptPath to PROJECT_HOME
+	 * @param array $arguments
+	 */
+	public static function execConsoleScript($relativeScriptPath, $arguments = array())
+	{
+		$phpCliPath = (defined('PHP_CLI_PATH')) ? PHP_CLI_PATH : '';
+		if (!empty($phpCliPath)) {$phpCliPath .= ' ';}
+		$phpCliPath .= f_util_FileUtils::buildFrameworkPath('bin', 'script.php');
+		if (is_array($arguments) && count($arguments))
+		{
+			$file = f_util_FileUtils::getTmpFile('script_');
+			f_util_FileUtils::write($file, serialize($arguments), f_util_FileUtils::OVERRIDE);
+		}
+		else
+		{
+			$file = null;
+		}
+		$args = array($relativeScriptPath);
+		if ($file !== null)
+		{
+			$args[] = $file;
+		}
+		$cmd = $phpCliPath . ' ' . implode(" ", array_map('base64_encode', $args));
+		Framework::fatal('execConsoleScript: ' . $cmd );
+		return self::exec($cmd); 
+	}
+
+	public static function escapeArgs($args)
+	{	
+		return array_map(array(self, 'escapeArg'), $args);
+	}
+	
+	public static function escapeArg($arg)
+	{
+		return base64_encode($arg);
+	}
+	
+	/**
+	 * @param string $relativeScriptPath to PROJECT_HOME
+	 * @param array $arguments
 	 * @param boolean $noFramework
 	 * @param string $baseUrl
 	 */
