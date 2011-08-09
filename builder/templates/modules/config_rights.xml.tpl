@@ -10,7 +10,6 @@
 			<permission name="LoadPermissions.*" />
 			<permission name="SavePermissions.*" />
 			<permission name="GetPreferencesDocument" />
-			<permission name="EditLocale" />
 		</role>
 		<role name="Writer" extend="Guest">
 			<permission name="Order" />

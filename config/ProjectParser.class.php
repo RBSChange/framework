@@ -375,7 +375,6 @@ class config_ProjectParser
 						$key = strtoupper($key);
 						switch ($key)
 						{
-							case 'ENABLED' :
 							case 'VISIBLE' :
 							case 'CATEGORY' :
 							case 'ICON' :

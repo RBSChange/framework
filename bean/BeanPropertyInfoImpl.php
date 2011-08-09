@@ -225,7 +225,10 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 		return $this->labelKey;
 	}
 
-	function setLabelKey($labelKey)
+	/**
+	 * @param String $helpKey
+	 */
+	public function setLabelKey($labelKey)
 	{
 		$this->labelKey = $labelKey;
 	}
