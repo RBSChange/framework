@@ -4,24 +4,33 @@ define('PROJECT_HOME', dirname(realpath(__FILE__)));
 define('WEBEDIT_HOME', PROJECT_HOME);
 
 set_time_limit(0);
-session_start();
-if (!isset($_POST['noframework']) || $_POST['noframework'] !== 'true')
+
+require_once PROJECT_HOME . "/framework/Framework.php";
+RequestContext::getInstance()->setMode(RequestContext::BACKOFFICE_MODE);
+
+$headers = array();
+if (isset($_SERVER['HTTP_AUTHORIZATION']))
 {
-	require_once PROJECT_HOME . "/framework/Framework.php";
-	RequestContext::getInstance()->setMode(RequestContext::BACKOFFICE_MODE);
+	$rawHeader = $_SERVER['HTTP_AUTHORIZATION'];
+	if (strpos($rawHeader, 'OAuth') === 0)
+	{
+		foreach (explode(',', trim(substr($rawHeader, 5))) as $part)
+		{
+			$firstEqual = strpos($part, '=');
+			$name = substr($part, 0, $firstEqual);
+			if (strpos($name, 'oauth_') === 0)
+			{
+				$value = substr($part, $firstEqual+1);
+				if (strlen($value) > 1 && $value[0] == '"' && $value[strlen($value)-1] == '"')
+				{	
+					$value = substr($value, 1, strlen($value)-2);
+				}
+				$headers[$name] = $value;
+			}
+		}
+	}
 }
-else
-{
-	require_once PROJECT_HOME . "/framework/f_web/oauth/Request.class.php";
-	require_once PROJECT_HOME . "/framework/f_web/oauth/Token.class.php";
-	require_once PROJECT_HOME . "/framework/f_web/oauth/Consumer.class.php";
-	require_once PROJECT_HOME . "/framework/f_web/oauth/Signature.class.php";
-	require_once PROJECT_HOME . "/framework/util/StringUtils.class.php";
-	require_once PROJECT_HOME . "/framework/util/FileUtils.class.php";
-	require_once PROJECT_HOME . "/framework/f_web/http/Link.class.php";
-	require_once PROJECT_HOME . "/framework/f_web/http/HttpLink.class.php";
-}
-$headers = f_web_oauth_Util::parseOauthAutorizationHeader();
+
 if (!isset($headers['oauth_signature']) || !isset($headers['oauth_consumer_key']) || !isset($headers['oauth_token']) || !isset($headers['oauth_timestamp']))
 {
 	header("HTTP/1.1 401 Unauthorized");
@@ -32,20 +41,21 @@ if (abs(time()-intval($headers['oauth_timestamp'])) > 60)
 	header("HTTP/1.1 401 Unauthorized");
 	die("Invalid Timestamp");
 }
-list($name, $secret) = explode('#', file_get_contents(PROJECT_HOME . '/build/config/oauth/script/consumer.txt'));
+
+list($name, $consumerSecret) = explode('#', file_get_contents(PROJECT_HOME . '/build/config/oauth/script/consumer.txt'));
 if ($name !== $headers['oauth_consumer_key'])
 {
 	header("HTTP/1.1 401 Unauthorized");
 	die("Invalid signature");
 }
-$consumer = new f_web_oauth_Consumer($name, $secret);
-list($name, $secret) = explode('#', file_get_contents(PROJECT_HOME . '/build/config/oauth/script/token.txt'));
+
+list($name, $tokenSecret) = explode('#', file_get_contents(PROJECT_HOME . '/build/config/oauth/script/token.txt'));
 if ($name !== $headers['oauth_token'])
 {
 	header("HTTP/1.1 401 Unauthorized");
 	die("Invalid signature");
 }
-$token = new f_web_oauth_Token($name, $secret);
+
 if ($_SERVER["SERVER_PORT"] == 443)
 {
 	$protocol = 'https://';
@@ -55,15 +65,15 @@ else
 	$protocol = 'http://';
 }
 $currentUrl = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-$request = new f_web_oauth_Request($currentUrl, $consumer, f_web_oauth_Request::METHOD_POST);
-$request->setToken($token);
 
-f_web_oauth_Util::setParametersFromArray($request, $_POST);
-f_web_oauth_Util::setParametersFromArray($request, $headers);
+$util = new Zend_Oauth_Http_Utility();
 
-if ($headers['oauth_signature'] !== f_web_oauth_Util::encode($request->getSignature()))
+$mergedParams = f_web_HttpLink::flattenArray(array_merge($_POST, $headers));
+if ($headers['oauth_signature'] !== $util->urlEncode($util->sign($mergedParams, $headers['oauth_signature_method'], $consumerSecret, $tokenSecret, Zend_Http_Client::POST, $currentUrl)))
 {
 	header("HTTP/1.1 401 Unauthorized");
+	Framework::fatal($headers['oauth_signature']  . "/" . $util->urlEncode($util->sign($mergedParams, $headers['oauth_signature_method'], $consumerSecret, $tokenSecret, Zend_Http_Client::POST, $currentUrl)));
+
 	die("Invalid signature");
 }
 if (isset($_POST['phpscript']) && (!isset($_POST['argv']) || is_array($_POST['argv'])))

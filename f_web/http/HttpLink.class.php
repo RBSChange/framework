@@ -44,6 +44,10 @@ abstract class f_web_HttpLink implements f_web_Link
 		return $this->getUrl();
 	}
 
+	/**
+	 * @param array $parts
+	 * @return string 
+	 */
 	public static function http_build_url($parts)
 	{
 		if (extension_loaded('http'))
@@ -83,6 +87,9 @@ abstract class f_web_HttpLink implements f_web_Link
 		return implode('', $url);	
 	}
 	
+	/**
+	 * @param array $queryParamerters 
+	 */
 	public static function sortQueryParamerters(&$queryParamerters)
 	{
 		if (is_array($queryParamerters))
@@ -90,5 +97,40 @@ abstract class f_web_HttpLink implements f_web_Link
 			ksort($queryParamerters);
 			foreach ($queryParamerters as &$subSet) {if (is_array($subSet)) {ksort($subSet);}}
 		}
+	}
+	
+	/**
+	 * Transforms an multi-dimensonnial query parameter array into a flat array
+	 * 
+	 * @param array $array
+	 * @param String $key
+	 * @return array 
+	 */
+	public static function flattenArray($array, $key = null)
+	{
+		$result = array();
+		foreach ($array as $index => $value)
+		{
+			if ($value === null)
+			{
+				continue;
+			}
+			if (!is_array($value))
+			{
+				if ($key === null)
+				{
+					$result[$index] = $value;
+				}
+				else
+				{
+					$result[$key . '[' . $index . ']'] = $value;
+				}
+			}
+			else
+			{
+				$result = array_merge($result, self::flattenArray($value, $index));
+			}
+		}
+		return $result;
 	}
 }

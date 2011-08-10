@@ -144,11 +144,11 @@ class f_util_System
 	 */
 	public static function execHTTPScript($relativeScriptPath, $arguments = array(), $noFramework = false, $baseUrl = null)
 	{
-		list($name, $secret) = explode('#', file_get_contents(PROJECT_HOME . '/build/config/oauth/script/consumer.txt'));
-		$consumer = new f_web_oauth_Consumer($name, $secret);
-
 		list($name, $secret) = explode('#', file_get_contents(PROJECT_HOME . '/build/config/oauth/script/token.txt'));	
-		$token = new f_web_oauth_Token($name, $secret);
+		
+		$token = new Zend_Oauth_Token_Access();
+		$token->setToken($name);
+		$token->setTokenSecret($secret);
 		
 		if ($baseUrl === null) 
 		{
@@ -165,21 +165,26 @@ class f_util_System
 				$baseUrl = 'http://'.Framework::getUIDefaultHost();
 			}
 		}
-		
-		$request = new f_web_oauth_Request($baseUrl .'/changescriptexec.php', $consumer, f_web_oauth_Request::METHOD_POST);
-		$request->setParameter('phpscript', $relativeScriptPath);
+		list($name, $secret) = explode('#', file_get_contents(PROJECT_HOME . '/build/config/oauth/script/consumer.txt'));
+		$client = $token->getHttpClient(array( 'consumerKey' => $name, 'consumerSecret' => $secret));
+		$client->setUri($baseUrl .'/changescriptexec.php');
+		$client->setMethod(Zend_Http_Client::POST);
+		$client->setParameterPost('phpscript', $relativeScriptPath);
 		if ($noFramework)
 		{
-			$request->setParameter('noframework', 'true');
+			$client->setParameterPost('noframework', 'true');
 		}
 		if (count($arguments) > 0)
 		{
-			$request->setParameter('argv', $arguments);
+
+			foreach ($arguments as $i => $v)
+			{
+				$client->setParameterPost(f_web_HttpLink::flattenArray(array('argv' => $arguments)));
+			}
+			
 		}
-		$request->setToken($token);
-		$client = new f_web_oauth_HTTPClient($request);
-		$client->getBackendClientInstance()->setTimeOut(0);
-		return $client->execute();		
+		$response = $client->request();
+		return $response->getBody();
 	}
 	
 	/**

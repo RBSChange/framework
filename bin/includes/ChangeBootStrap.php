@@ -238,6 +238,7 @@ class c_ChangeBootStrap
 		$computedComponents["PEAR_DIR"] = $this->pearInfos['include_path'];
 		$computedComponents["USE_CHANGE_PEAR_LIB"] = $this->useChangePearLib();
 		$computedComponents["PEAR_WRITEABLE"] = $this->pearInfos['writeable'];
+		$computedComponents["ZEND_FRAMEWORK_PATH"] = $this->getProperties()->getProperty('ZEND_FRAMEWORK_PATH');
 		$computedComponents["LOCAL_REPOSITORY"] = $localRepo;
 		$computedComponents["WWW_GROUP"] = $this->getProperties()->getProperty('WWW_GROUP');
 		$computedComponents["DEVELOPMENT_MODE"] = $this->getProperties()->getProperty('DEVELOPMENT_MODE', false) == true;

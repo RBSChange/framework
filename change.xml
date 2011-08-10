@@ -152,90 +152,6 @@
 		</dependency>
 		
 		<dependency>
-			<name>pear/Mail</name>
-			<versions>	
-				<version>1.2.0</version>
-			</versions>
-		</dependency>
-		
-		<dependency>
-			<name>pear/Mail_Mime</name>
-			<versions>	
-				<version>1.8.1</version>
-			</versions>
-		</dependency>
-				
-		<dependency>
-			<name>pear/Net_SMTP</name>
-			<versions>
-				<version>1.4.2</version>
-			</versions>
-			<description>
-			Used by MailService 
-			</description>
-		</dependency>
-		
-		<dependency>
-			<name>pear/Auth_SASL</name>
-			<versions>
-				<version>1.0.4</version>
-			</versions>
-			<description>
-			Used by MailService 
-			</description>
-		</dependency>
-		
-		<dependency optionnal="true">
-			<name>pear/pear.phpunit.de/PHPUnit</name>
-			<versions>
-				<version>3.1.9</version>
-			</versions>
-			<description>
-			Used by change test
-			</description>
-		</dependency>
-		
-		<dependency optionnal="true">
-			<name>extension/oci8</name>
-			<versions>
-				<version>1.2.3</version>
-			</versions>
-			<description>
-			Only required if you want to use Oracle DB engine.
-			</description>
-		</dependency>
-		
-		<dependency optionnal="true">
-			<name>pear/PhpDocumentor</name>
-			<versions>
-				<version>1.4.0RC1</version>
-			</versions>
-			<description>
-			Used by change generate-doc
-			</description>
-		</dependency>
-		
-		<dependency optionnal="true">
-			<name>extension/memcache</name>
-			<description>
-			   Only required if you make the use of f_persistentdocument_MemcachedCacheService for document cache
-			</description>
-			<versions>
-				<version>2.2.5</version>
-			</versions>
-		</dependency>
-		
-		<dependency optionnal="true">
-			<name>extension/APC</name>
-			<description>
-			   For best performance, use APC
-			</description>
-			<versions>
-				<version>3.0.19</version>
-			</versions>
-		</dependency>
-		
-		<dependency>
 			<name>lib/smarty</name>
 			<versions>
 				<version>2.6</version>
@@ -246,6 +162,12 @@
 			<name>lib/phptal</name>
 			<versions>
 				<version>1.2.2</version>
+			</versions>
+		</dependency>
+		<dependency>
+			<name>lib/zfminimal</name>
+			<versions>
+				<version>1.11.10</version>
 			</versions>
 		</dependency>
 	</dependencies>

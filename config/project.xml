@@ -53,6 +53,10 @@
 			<entry name="ttl">86400</entry>
 		</documentcache>
 		
+		<http>
+			<entry name="adapter">Zend_Http_Client_Adapter_Curl</entry>
+		</http>
+		
 		<!-- 
 		<mongoDB>
       		<authentication>
@@ -106,7 +110,6 @@
 			<entry name="type">Smtp</entry>
 			<entry name="host">localhost</entry>
 			<entry name="port">25</entry>
-			<entry name="auth">false</entry>
 			<entry name="username"></entry>
 			<entry name="password"></entry>
 

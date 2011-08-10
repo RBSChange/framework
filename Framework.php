@@ -469,6 +469,14 @@ class Framework
 	{
 		return self::$config['general']['projectName'];
 	}
+	
+	/**
+	 * @return array
+	 */
+	public static function getHttpClientConfig()
+	{
+		return self::$config['http'];
+	}
 }
 
 // Load configuration
@@ -507,7 +515,7 @@ if (spl_autoload_register(array(ClassLoader::getInstance(), "autoload")) === fal
 }
 
 
-ini_set('include_path', PEAR_DIR);
+ini_set('include_path', ZEND_FRAMEWORK_PATH . PATH_SEPARATOR . PEAR_DIR);
 
 ini_set('arg_separator.output',      '&amp;');
 ini_set('display_errors',            1);

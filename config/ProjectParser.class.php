@@ -144,7 +144,7 @@ class config_ProjectParser
 		}
 		
 		// -- Global constants.
-		foreach (array('PEAR_DIR', 'LOCAL_REPOSITORY', 'WWW_GROUP', 'TMP_PATH', 
+		foreach (array('PEAR_DIR', 'ZEND_FRAMEWORK_PATH', 'LOCAL_REPOSITORY', 'WWW_GROUP', 'TMP_PATH', 
 			'CHANGE_COMMAND', 'DOCUMENT_ROOT', 'PROJECT_LICENSE', 'FAKE_EMAIL', 
 			'PHP_CLI_PATH', 'DEVELOPMENT_MODE') as $constName) 
 		{
@@ -162,6 +162,16 @@ class config_ProjectParser
 		{
 			$this->addConstant($configArray['defines'], "OUTGOING_HTTP_PROXY_HOST", $computedDeps["OUTGOING_HTTP_PROXY_HOST"]);
 			$this->addConstant($configArray['defines'], "OUTGOING_HTTP_PROXY_PORT", $computedDeps["OUTGOING_HTTP_PROXY_PORT"]);
+			if ($configArray['config']['http']['adapter'] == 'Zend_Http_Client_Adapter_Curl')
+			{
+				$configArray['config']['http']['curloptions'][CURLOPT_PROXY] = $computedDeps["OUTGOING_HTTP_PROXY_HOST"].':'.$computedDeps["OUTGOING_HTTP_PROXY_PORT"];
+			}
+			else if ($configArray['config']['http']['adapter'] == 'Zend_Http_Client_Adapter_Proxy' || $configArray['config']['http']['adapter'] == 'Zend_Http_Client_Adapter_Socket')
+			{
+				$configArray['config']['http']['adapter'] = 'Zend_Http_Client_Adapter_Proxy';
+				$configArray['config']['http']['proxy_host'] = $computedDeps["OUTGOING_HTTP_PROXY_HOST"];
+				$configArray['config']['http']['proxy_port'] = $computedDeps["OUTGOING_HTTP_PROXY_PORT"];
+			}
 		}
 		
 		if (!isset($configArray['config']['browsers']['frontoffice']) || !is_array($configArray['config']['browsers']['frontoffice']))
