@@ -1031,7 +1031,7 @@ class f_chart_PieChart extends f_chart_Chart
 
 	function setColors($colors)
 	{
-		$this->setOption("colors", $color);
+		$this->setOption("colors", $colors);
 	}
 
 	function getQueryString()
@@ -1066,11 +1066,19 @@ class f_chart_PieChart extends f_chart_Chart
 			$chl .= join("|", $labels);
 			$q .= $chl;
 		}
-
 		$colors = $this->getOption("colors", $this->getOption("masterColor"));
 		if ($colors !== null)
 		{
-			$q .= "&chco=".$colors;
+		    $colorsFormated = "";
+		    if (is_array($colors))
+		    {
+			$colorsFormated = implode("|", $colors);
+		    }
+		    else
+		    {
+			$colorsFormated = $colors;
+		    }
+		    $q .= "&chco=".$colorsFormated;
 		}
 
 		return $q;
