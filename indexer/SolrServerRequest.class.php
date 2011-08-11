@@ -18,15 +18,14 @@ class indexer_SolrServerRequest
 	 * @var String
 	 */
 	private $method;
-	private $curlHandle;
 	private $data;
 	private $timeout;
-
+	private $contentType;
+	
 	public function __construct($url)
 	{
 		$this->url = $url;
 		$this->setMethod(self::METHOD_GET);
-		$this->initCurlHandle();
 	}
 	/**
 	 * @return String
@@ -57,60 +56,53 @@ class indexer_SolrServerRequest
 		$this->cache = $cache;
 	}
 
-	private $headers = array();
 
 	/**
 	 * @return String
 	 */
 	public function execute()
 	{
-		$time = -microtime(true);
+		$timeout = $this->getTimeout();
+		if ($timeout > 0)
+		{
+			$config = array('timeout' => $timeout);
+		}
+		else
+		{
+			$config = array();
+		}
+		
+		$client = change_HttpClientService::getInstance()->getNewHttpClient($config);
+		$client->setUri(trim($this->url));
+		if ($this->getMethod() == self::METHOD_POST)
+		{
+			$client->setMethod(Zend_Http_Client::POST);
+			$client->setRawData($this->data, $this->contentType);
+			$client->setHeaders('Content-Type: ' . $this->contentType);
+		}
 		$cachedQuery = null;
 		if ($this->cache !== null)
 		{
 			$cachedQuery = $this->cache->get(md5($this->url));
 			if ($cachedQuery !== null)
 			{
-				$this->headers[] = "If-Modified-Since: ".gmdate('D, d M Y H:i:s \G\M\T', $cachedQuery->getTime());
+				$client->setHeaders("If-Modified-Since: ".gmdate('D, d M Y H:i:s \G\M\T', $cachedQuery->getTime()));
 			}
 		}
-		if ($this->getMethod() == self::METHOD_POST)
-		{
-			curl_setopt($this->curlHandle, CURLOPT_POSTFIELDS, $this->data);
-		}
-			
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug(__METHOD__ . " : " . $this->url . " data: " . $this->data);
-		}
-		$timeout = $this->getTimeout();
-		if ($timeout > 0)
-		{
-			curl_setopt($this->curlHandle, CURLOPT_TIMEOUT, $this->getTimeout());
-		}
-			
-		curl_setopt($this->curlHandle, CURLOPT_HTTPHEADER, $this->headers);
-		$data = curl_exec($this->curlHandle);
-		$errno = curl_errno($this->curlHandle);
-		$httpReturnCode = curl_getinfo($this->curlHandle, CURLINFO_HTTP_CODE);
-		curl_close($this->curlHandle);
-		if ($errno)
-		{
-			throw new IndexException(__METHOD__ . " (URL = " . $this->url . ") failed with error number " . $errno);
-		}
-
-		$time += microtime(true);
+		
+		$request = $client->request();
+		$httpReturnCode = $request->getStatus();
+		
 		if ($this->cache !== null)
 		{
 			if ($cachedQuery !== null && $httpReturnCode == 304)
 			{
 				return $cachedQuery->getData();
 			}
-			// TODO: cache only if time > ...
 			$cachedQuery = new indexer_CachedQuery($this->url, $data);
 			$this->cache->store($cachedQuery);
 		}
-		return $data;
+		return $request->getBody();
 	}
 
 	/**
@@ -118,7 +110,7 @@ class indexer_SolrServerRequest
 	 */
 	public function setContentType($type)
 	{
-		$this->headers[] = "Content-Type: $type";
+		$this->contentType = $type;
 
 	}
 
@@ -128,26 +120,6 @@ class indexer_SolrServerRequest
 	public function setPostData($data)
 	{
 		$this->data = $data;
-	}
-
-	private function initCurlHandle()
-	{
-		$this->curlHandle = curl_init();
-		$this->headers = array();
-		if ($this->getMethod() == self::METHOD_GET)
-		{
-			curl_setopt($this->curlHandle, CURLOPT_POST, 0);
-		}
-		else
-		{
-			$this->headers[] = "Content-Type: application/x-www-form-urlencoded; charset=UTF-8";
-			curl_setopt($this->curlHandle, CURLOPT_POST, 1);
-		}
-		curl_setopt($this->curlHandle, CURLOPT_URL, $this->url);
-		curl_setopt($this->curlHandle, CURLOPT_FOLLOWLOCATION, 1);
-		curl_setopt($this->curlHandle, CURLOPT_CONNECTTIMEOUT, self::DEFAULT_TIMEOUT);
-		curl_setopt($this->curlHandle, CURLOPT_DNS_USE_GLOBAL_CACHE, 1);
-		curl_setopt($this->curlHandle, CURLOPT_RETURNTRANSFER, 1);
 	}
 
 	/**

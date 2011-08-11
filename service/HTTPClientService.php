@@ -30,7 +30,7 @@ class change_HttpClientService extends BaseService
  	 * 
 	 * @return array
 	 */
-	public function getHttpClientConfig()
+	public function getHttpClientConfig($params = array())
 	{
 		if ($this->config === null)
 		{
@@ -38,14 +38,12 @@ class change_HttpClientService extends BaseService
 			switch($this->config['adapter'])
 			{
 				case "Zend_Http_Client_Adapter_Curl":
-					$this->config['curloptions'][CURLOPT_RETURNTRANSFER] = true;
-					$this->config['curloptions'][CURLOPT_TIMEOUT] = 60;
+					$this->config['curloptions'][CURLOPT_TIMEOUT] = isset($params['timeout'])  ? $params['timeout'] : 60;
 					$this->config['curloptions'][CURLOPT_CONNECTTIMEOUT] = 5;
-					$this->config['curloptions'][CURLOPT_FOLLOWLOCATION] = 1;
 					break;
 				case "Zend_Http_Client_Adapter_Socket":
 				case "Zend_Http_Client_Adapter_Proxy":
-					$this->config['curloptions']['timeout'] = 60;
+					$this->config['timeout'] = isset($params['timeout'])  ? $params['timeout'] : 60;
 					break;
 			}
 		}
@@ -57,6 +55,12 @@ class change_HttpClientService extends BaseService
 	 */
 	public function getNewHttpClient()
 	{
-		return new Zend_Http_Client(null, $this->getHttpClientConfig());
+		$clientInstance = new Zend_Http_Client(null, $this->getHttpClientConfig());
+		//  avoid dreaded 100-Continue statuses cf. http://the-stickman.com/web-development/php-and-curl-disabling-100-continue-header/
+		if ($clientInstance->getAdapter() instanceof Zend_Http_Client_Adapter_Curl)
+		{
+			$clientInstance->setHeaders('Expect:');
+		}
+		return $clientInstance;
 	}
 }
