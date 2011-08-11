@@ -72,8 +72,6 @@ $mergedParams = f_web_HttpLink::flattenArray(array_merge($_POST, $headers));
 if ($headers['oauth_signature'] !== $util->urlEncode($util->sign($mergedParams, $headers['oauth_signature_method'], $consumerSecret, $tokenSecret, Zend_Http_Client::POST, $currentUrl)))
 {
 	header("HTTP/1.1 401 Unauthorized");
-	Framework::fatal($headers['oauth_signature']  . "/" . $util->urlEncode($util->sign($mergedParams, $headers['oauth_signature_method'], $consumerSecret, $tokenSecret, Zend_Http_Client::POST, $currentUrl)));
-
 	die("Invalid signature");
 }
 if (isset($_POST['phpscript']) && (!isset($_POST['argv']) || is_array($_POST['argv'])))
@@ -83,6 +81,7 @@ if (isset($_POST['phpscript']) && (!isset($_POST['argv']) || is_array($_POST['ar
 	if (file_exists($scriptPath) && is_readable($scriptPath) && strrpos($scriptPath, '.php') === strlen($scriptPath) - 4)
 	{
 		$arguments = isset($_POST['argv']) ? $_POST['argv'] : array();
+		Framework::info('HTTP script:' . $scriptPath);
 		include_once $scriptPath;
 		exit();
 	}

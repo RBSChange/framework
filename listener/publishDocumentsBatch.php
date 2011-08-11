@@ -4,7 +4,7 @@ $rc = RequestContext::getInstance();
 try
 {
 	$tm->beginTransaction();
-	foreach ($_POST['argv'] as $documentIdAndLang) 
+	foreach ($arguments as $documentIdAndLang) 
 	{
 		list($id, $lang) = explode("/", $documentIdAndLang);
 		try

@@ -1,7 +1,11 @@
 <?php
 ignore_user_abort(true);
-define('PROJECT_HOME', dirname(realpath(__FILE__)));
-define('WEBEDIT_HOME', PROJECT_HOME);
+if (!defined('PROJECT_HOME'))
+{
+	define('PROJECT_HOME', dirname(realpath(__FILE__)));
+	define('WEBEDIT_HOME', PROJECT_HOME);
+}
+
 if (file_exists(PROJECT_HOME."/site_is_disabled"))
 {
 	exit(0);
@@ -13,10 +17,7 @@ if (defined('DISABLE_CHANGECRON_EXECUTION') && constant('DISABLE_CHANGECRON_EXEC
 	exit(0);
 }
 
-Framework::info($_SERVER['SERVER_NAME'] ." ".  $_SERVER['SERVER_PORT'] . " " .$_SERVER['REQUEST_URI']);
-
 RequestContext::getInstance()->setMode(RequestContext::BACKOFFICE_MODE);
-
 
 if (defined('NODE_NAME') && ModuleService::getInstance()->moduleExists('clustersafe'))
 {
@@ -38,7 +39,6 @@ else
 if (isset($_GET['taskId']))
 {
 	chdir(PROJECT_HOME);
-	change_Controller::newInstance('change_Controller');
 	try
 	{
 		$runnableTask = DocumentHelper::getDocumentInstance(intval($_GET['taskId']));

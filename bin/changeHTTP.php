@@ -1,16 +1,19 @@
 <?php
-define("PROJECT_HOME", getcwd());
-define("WEBEDIT_HOME", PROJECT_HOME);
-
-$profile = @file_get_contents(PROJECT_HOME . DIRECTORY_SEPARATOR . 'profile');
-if ($profile === false || empty($profile))
+if (!defined("PROJECT_HOME"))
 {
-	header("HTTP/1.1 500 Internal Server Error");
-	echo 'Profile not defined. Please define a profile in file ./profile.';
-	exit(-1);
+	define("PROJECT_HOME", getcwd());
+	define("WEBEDIT_HOME", PROJECT_HOME);
+	
+	$profile = @file_get_contents(PROJECT_HOME . DIRECTORY_SEPARATOR . 'profile');
+	if ($profile === false || empty($profile))
+	{
+		header("HTTP/1.1 500 Internal Server Error");
+		echo 'Profile not defined. Please define a profile in file ./profile.';
+		exit(-1);
+	}
+	
+	define('PROFILE', trim($profile));
 }
-
-define('PROFILE', trim($profile));
 
 require_once dirname(__FILE__) . '/bootstrap.php';
 umask(0002);

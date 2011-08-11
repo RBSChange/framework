@@ -122,20 +122,9 @@ class f_util_System
 			$args[] = $file;
 		}
 		$cmd = $phpCliPath . ' ' . implode(" ", array_map('base64_encode', $args));
-		Framework::fatal('execConsoleScript: ' . $cmd );
 		return self::exec($cmd); 
 	}
 
-	public static function escapeArgs($args)
-	{	
-		return array_map(array(self, 'escapeArg'), $args);
-	}
-	
-	public static function escapeArg($arg)
-	{
-		return base64_encode($arg);
-	}
-	
 	/**
 	 * @param string $relativeScriptPath to PROJECT_HOME
 	 * @param array $arguments

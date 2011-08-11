@@ -35,7 +35,7 @@ class f_listener_PublishListener
 		$script = 'framework/listener/publishDocumentsBatch.php';
 		foreach ($documentsArray as $chunk)
 		{
-			f_util_System::execHTTPScript($script, $chunk);
+			f_util_System::execScript($script, $chunk);
 		}
 	}
 	

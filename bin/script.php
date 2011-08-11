@@ -22,14 +22,13 @@ if (count($_SERVER['argv']) >= 2)
 		if (count($_SERVER['argv']) == 3)
 		{
 			$tmpFile =  base64_decode($_SERVER['argv'][2]);
-			Framework::fatal('TMPFILE :' . $tmpFile);
 			if (file_exists($tmpFile) && is_readable($tmpFile))
 			{
 				$arguments = unserialize(file_get_contents($tmpFile));
-				Framework::fatal('ARGS :' . var_export($arguments, true));
 				@unlink($tmpFile);
 			}
 		}
+		Framework::info('Console script:' . $scriptPath);
 		include_once $scriptPath;
 		exit();
 	}
