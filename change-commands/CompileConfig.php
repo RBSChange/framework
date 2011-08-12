@@ -40,7 +40,7 @@ Where options in:
 		if (class_exists('Framework', false))
 		{
 			// Framework is loaded and configuration may have changed
-			Framework::reloadConfiguration(PROFILE);
+			Framework::reloadConfiguration();
 		}
 		
 		//OAuth identification files

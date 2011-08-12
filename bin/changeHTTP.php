@@ -11,8 +11,6 @@ if (!defined("PROJECT_HOME"))
 		echo 'Profile not defined. Please define a profile in file ./profile.';
 		exit(-1);
 	}
-	
-	define('PROFILE', trim($profile));
 }
 
 require_once dirname(__FILE__) . '/bootstrap.php';

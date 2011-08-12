@@ -7,8 +7,6 @@ if ($profile === false || empty($profile))
 	echo 'Profile not defined. Please define a profile in file ./profile.';
 	exit(-1);
 }
-
-define('PROFILE', trim($profile));
 ignore_user_abort(true);
 require_once PROJECT_HOME . "/framework/Framework.php";
 RequestContext::getInstance()->setMode(RequestContext::BACKOFFICE_MODE);

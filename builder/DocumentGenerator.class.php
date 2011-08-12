@@ -269,7 +269,7 @@ class builder_DocumentGenerator
 	 */
 	public function generatePersistentDocumentFile()
 	{
-		$buildPathPersistentDocuments = CHANGE_BUILD_DIR . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . $this->module . DIRECTORY_SEPARATOR . 'persistentdocument' . DIRECTORY_SEPARATOR;
+		$buildPathPersistentDocuments = f_util_FileUtils::buildChangeBuildPath('modules', $this->module , 'persistentdocument') . DIRECTORY_SEPARATOR;
 		f_util_FileUtils::mkdir($buildPathPersistentDocuments);
 		$filePath = $buildPathPersistentDocuments . $this->name . 'model_and_base.class.php';
 		$fileContent = "<?php\n";
@@ -332,9 +332,8 @@ class builder_DocumentGenerator
 	 */
 	public function generateSqlDocumentFile($add = true)
 	{
-		$buildPathDataobject = CHANGE_BUILD_DIR . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . $this->module . DIRECTORY_SEPARATOR . 'dataobject' . DIRECTORY_SEPARATOR;
+		$buildPathDataobject = f_util_FileUtils::buildChangeBuildPath('modules' , $this->module , 'dataobject') . DIRECTORY_SEPARATOR;
 		f_util_FileUtils::mkdir($buildPathDataobject);
-
 		$provider = f_persistentdocument_PersistentProvider::getInstance();
 		$fileExtension = $provider->getSQLScriptSufixName();
 

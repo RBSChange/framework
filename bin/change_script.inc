@@ -1,5 +1,5 @@
 <?php
-if (!defined("PROFILE") || !defined("PROJECT_HOME") || !isset($bootStrap) || !isset($script))
+if (!defined("PROJECT_HOME") || !isset($bootStrap) || !isset($script))
 {
 	exit(-1);
 }

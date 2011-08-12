@@ -1,21 +1,5 @@
 <?php
 umask(0002);
-if (!defined('PROFILE') )
-{
-	$profile = file_get_contents(PROJECT_HOME . DIRECTORY_SEPARATOR . 'profile');
-	if ( $profile === false || $profile == '' )
-	{
-		throw new Exception('Profile not defined. Please define a profile in file ./profile.');
-	}
-	define('PROFILE', trim($profile) );
-}
-
-define('CHANGE_LOG_DIR', PROJECT_HOME . DIRECTORY_SEPARATOR . 'log' . DIRECTORY_SEPARATOR . PROFILE);
-
-if (!is_dir(CHANGE_LOG_DIR)) @mkdir(CHANGE_LOG_DIR, 0777, true);
-
-define('CHANGE_BUILD_DIR', PROJECT_HOME . DIRECTORY_SEPARATOR . 'build' . DIRECTORY_SEPARATOR . PROFILE);
-
 class Framework
 {
 	/**
@@ -56,7 +40,14 @@ class Framework
 	 */
 	public static function getProfile()
 	{
-		return PROFILE;
+		if (file_exists(PROJECT_HOME.'/profile'))
+		{
+			return trim(file_get_contents(PROJECT_HOME.'/profile'));
+		}
+		else
+		{
+			return 'default';
+		}
 	}
 
 	/**
@@ -417,11 +408,9 @@ class Framework
 	/**
 	 * Load the framework configuration. Use the file php auto generated in cache/config
 	 * You can specify an environnement to load a particular config file
-	 *
-	 * @param string $env
 	 * @param Boolean $onlyConfig
 	 */
-	public static function loadConfiguration($currentProfile = '', $onlyConfig = false)
+	public static function loadConfiguration($onlyConfig = false)
 	{
 		// If configuration not yet loaded, load it
 		if (self::$config === null)
@@ -430,7 +419,7 @@ class Framework
 			
 			if (!$onlyConfig)
 			{
-				$cacheDefinesFile = $cacheConfigDir."/project.".$currentProfile.".defines.php";
+				$cacheDefinesFile = $cacheConfigDir."/project.defines.php";
 				if (!is_file($cacheDefinesFile))
 				{
 					throw new Exception("Could not find $cacheDefinesFile. You must compile your configuration.");
@@ -438,7 +427,7 @@ class Framework
 				require($cacheDefinesFile);
 			}
 			
-			$cacheFile = $cacheConfigDir."/project.".$currentProfile.".php";
+			$cacheFile = $cacheConfigDir."/project.php";
 			if (!is_file($cacheFile))
 			{
 				throw new Exception("Could not find $cacheFile. You must compile your configuration.");
@@ -450,12 +439,12 @@ class Framework
 	/**
 	 * @param String $env
 	 */
-	public static function reloadConfiguration($env = '')
+	public static function reloadConfiguration()
 	{
 		if (self::$config !== null)
 		{
 			self::$config = null;
-			self::loadConfiguration($env, true);
+			self::loadConfiguration(true);
 			// TODO: inverse dependences
 			ModuleService::clearInstance();
 			generator_PersistentModel::reloadModels();
@@ -480,7 +469,7 @@ class Framework
 }
 
 // Load configuration
-Framework::loadConfiguration(PROFILE);
+Framework::loadConfiguration();
 
 require_once(PROJECT_HOME . '/framework/loader/ResourceResolver.class.php');
 require_once(PROJECT_HOME . '/framework/loader/ClassResolver.class.php');

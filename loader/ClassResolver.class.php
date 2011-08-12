@@ -22,8 +22,8 @@ class ClassResolver implements ResourceResolver
 		require_once (PROJECT_HOME . '/framework/util/FileUtils.class.php');
 		require_once (PROJECT_HOME . '/framework/util/StringUtils.class.php');
 		
-		$this->keys = array('%PROJECT_HOME%', '%PROFILE%');
-		$this->reps = array(PROJECT_HOME, PROFILE);
+		$this->keys = array('%PROJECT_HOME%');
+		$this->reps = array(PROJECT_HOME);
 		
 		$this->cacheDir = PROJECT_HOME . '/cache/autoload';
 		$this->aopBackupDir = PROJECT_HOME . '/cache/aop-backup';
@@ -198,7 +198,7 @@ class ClassResolver implements ResourceResolver
 						'exclude' => array('deprecated', 'doc', 'module', 'webapp', 'patch')), 
 				array('path' => '%PROJECT_HOME%/libs/', 'recursive' => 'true',
 					'exclude' => array('fckeditor', 'icons', 'pearlibs')),
-				array('path' => '%PROJECT_HOME%/build/%PROFILE%/', 'recursive' => 'true'), 
+				array('path' => '%PROJECT_HOME%/build/project/', 'recursive' => 'true'), 
 				array('path' => '%PROJECT_HOME%/modules/*/actions'), 
 				array('path' => '%PROJECT_HOME%/modules/*/change-commands', 'recursive' => 'true'), 
 				array('path' => '%PROJECT_HOME%/modules/*/changedev-commands', 'recursive' => 'true'), 

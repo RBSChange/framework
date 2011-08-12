@@ -74,7 +74,9 @@ class ClassLoader implements ResourceLoader
 				debug_print_backtrace();
 				$trace = ob_get_contents();
 				ob_end_clean();
-				$rc = fopen(CHANGE_LOG_DIR . DIRECTORY_SEPARATOR .'phperror.log', 'a+');
+				$filePath = implode(DIRECTORY_SEPARATOR, PROJECT_HOME , 'log', 'project', 'phperror.log');
+				if (!is_dir(dirname($filePath))) {@mkdir(dirname($filePath), 0777, true);}
+				$rc = fopen($filePath, 'a+');
 				fwrite($rc, $trace);
 				fclose($rc);
 			}

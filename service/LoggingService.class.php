@@ -50,8 +50,10 @@ class LoggingService
 	
 	protected function __construct()
 	{
-		$this->stdLogFilePath = CHANGE_LOG_DIR . DIRECTORY_SEPARATOR . 'application.log';
-		$this->errLogFilePath = CHANGE_LOG_DIR . DIRECTORY_SEPARATOR . 'phperror.log';
+		$logDir = implode(DIRECTORY_SEPARATOR, array(PROJECT_HOME , 'log', 'project'));
+		if (!is_dir($logDir)) {@mkdir($logDir, 0777, true);}		
+		$this->stdLogFilePath = $logDir . DIRECTORY_SEPARATOR . 'application.log';
+		$this->errLogFilePath = $logDir . DIRECTORY_SEPARATOR . 'phperror.log';
 	}
 	
 	/**

@@ -323,12 +323,11 @@ abstract class f_util_FileUtils
 	public static function buildChangeCachePath()
 	{
 		$args = func_get_args();
-		array_unshift($args, PROJECT_HOME, 'cache' , PROFILE);
+		array_unshift($args, PROJECT_HOME, 'cache' , 'project');
 		return self::buildAbsolutePathFromArray($args);
 	}
 	
 	/**
-	 * @example FileUtils::buildWebCachePath('toto') returns WEB_CACHE_DIR.DIRECTORY_SEPARATOR.'toto'
 	 * @return String
 	 */
 	public static function buildWebCachePath()
@@ -339,13 +338,12 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @example FileUtils::buildChangeBuildPath('toto') returns CHANGE_BUILD_DIR.DIRECTORY_SEPARATOR.'toto'
 	 * @return String
 	 */
 	public static function buildChangeBuildPath()
 	{
 		$args = func_get_args();
-		array_unshift($args, PROJECT_HOME, 'build', PROFILE);
+		array_unshift($args, PROJECT_HOME, 'build', 'project');
 		return self::buildAbsolutePathFromArray($args);
 	}
 
@@ -356,7 +354,7 @@ abstract class f_util_FileUtils
 	public static function buildLogPath()
 	{
 		$args = func_get_args();
-		array_unshift($args, PROJECT_HOME, "log", PROFILE);
+		array_unshift($args, PROJECT_HOME, "log", 'project');
 		return self::buildAbsolutePathFromArray($args);
 	}
 
@@ -1112,7 +1110,7 @@ abstract class f_util_FileUtils
 	public static function buildCachePath()
 	{
 		$args = func_get_args();
-		array_unshift($args, PROJECT_HOME, 'cache' , PROFILE);
+		array_unshift($args, PROJECT_HOME, 'cache' , 'project');
 		return self::buildAbsolutePathFromArray($args);
 	}
 }

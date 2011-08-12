@@ -56,11 +56,19 @@ class config_ProjectParser
 		}
 
 		// Cache config dir.
-		$cacheConfigDir = PROJECT_HOME . DIRECTORY_SEPARATOR . 'build' . DIRECTORY_SEPARATOR . 'config';		
-		$currentProfile = (defined("PROFILE") ? PROFILE : trim(file_get_contents(PROJECT_HOME."/profile")));
+		$cacheConfigDir = PROJECT_HOME . DIRECTORY_SEPARATOR . 'build' . DIRECTORY_SEPARATOR . 'config';
+		if (file_exists(PROJECT_HOME.'/profile'))
+		{
+			$currentProfile = trim(file_get_contents(PROJECT_HOME.'/profile'));
+		}
+		else
+		{
+			$currentProfile = 'default';
+		}	
 		
-		$cacheFile = $cacheConfigDir."/project.".$currentProfile.".php";
-		$cacheDefinesFile = $cacheConfigDir."/project.".$currentProfile.".defines.php";
+		
+		$cacheFile = $cacheConfigDir."/project.php";
+		$cacheDefinesFile = $cacheConfigDir."/project.defines.php";
 	
 		$oldDefines = array();
 		if (is_file($cacheDefinesFile))
