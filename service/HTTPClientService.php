@@ -53,9 +53,9 @@ class change_HttpClientService extends BaseService
 	/**
 	 * @return Zend_Http_Client
 	 */
-	public function getNewHttpClient()
+	public function getNewHttpClient($params = array())
 	{
-		$clientInstance = new Zend_Http_Client(null, $this->getHttpClientConfig());
+		$clientInstance = new Zend_Http_Client(null, $this->getHttpClientConfig($params));
 		//  avoid dreaded 100-Continue statuses cf. http://the-stickman.com/web-development/php-and-curl-disabling-100-continue-header/
 		if ($clientInstance->getAdapter() instanceof Zend_Http_Client_Adapter_Curl)
 		{
