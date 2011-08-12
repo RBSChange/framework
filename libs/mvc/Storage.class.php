@@ -8,6 +8,12 @@ class change_Storage
 	private $context = null;
 	
 	/**
+	 *
+	 * @var Zend_Session_Namespace 
+	 */
+	private $changeSessionNameSpace;
+	
+	/**
 	 * @var array
 	 */
 	protected $parameters = array('session_name' => '__CHANGESESSIONID', 'auto_start' => true);
@@ -25,7 +31,7 @@ class change_Storage
 		{
 			$this->parameters = array_merge($this->parameters, $parameters);
 		}	
-			
+	
 		if (!$this->getParameter('auto_start'))
 		{
 			$this->startSession();
@@ -34,16 +40,15 @@ class change_Storage
 	
 	protected function startSession()
 	{
+
 		if (isset($_SERVER["SERVER_ADDR"]))
 		{
-			$sessionName = $this->getParameter('session_name');
-			session_name($sessionName);
-			if (session_id() == "")
-			{
-				session_start();
-			}
+			session_name($this->getParameter('session_name'));
+			Zend_Session::start();
+			$this->changeSessionNameSpace = new Zend_Session_Namespace('C4');
 			$this->started = true;
-		
+
+	
 			$currentKey =  $this->getSecureKey(); 
 			$md5 = $this->read('SecureKey');
 			if ($md5 === null)
@@ -53,15 +58,15 @@ class change_Storage
 			} 
 			else if ($md5 !== $currentKey)
 			{
-				$oldSessionId = session_id();
-				session_regenerate_id();
+				$oldSessionId = Zend_Session::getId();
+				Zend_Session::regenerateId();
 				$_SESSION = array();
 				$this->sessionIdChanged($oldSessionId);
 			}
 			else if ($this->read('SecurePort') !== $_SERVER["SERVER_PORT"])
 			{
-				$oldSessionId = session_id();
-				session_regenerate_id();
+				$oldSessionId = Zend_Session::getId();
+				Zend_Session::regenerateId();
 				$this->write('SecurePort', $_SERVER["SERVER_PORT"]);
 				$this->sessionIdChanged($oldSessionId);	
 			}
@@ -77,7 +82,7 @@ class change_Storage
 		if ($this->started === true)
 		{
 			$this->started = null;
-			session_write_close();
+			Zend_Session::stop();
 		}
 	}
 
@@ -191,9 +196,9 @@ class change_Storage
 	{
 		if ($this->started === null) {$this->startSession();}
 		$retval = null;
-		if ($this->started && isset($_SESSION[$key]))
+		if ($this->started && isset($this->changeSessionNameSpace->$key))
 		{
-			$retval = &$_SESSION[$key];
+			$retval =  $this->changeSessionNameSpace->$key;	
 		}
 		return $retval;
 	}
@@ -203,10 +208,10 @@ class change_Storage
 		if ($this->started === null) {$this->startSession();}
 		
 		$retval = null;
-		if ($this->started && isset($_SESSION[$key]))
+		if ($this->started && isset($this->changeSessionNameSpace->$key))
 		{
-			$retval = $_SESSION[$key];
-			unset($_SESSION[$key]);
+			$retval = $this->changeSessionNameSpace->$key;
+			unset($this->changeSessionNameSpace->$key);
 		}
 		return $retval;
 	}
@@ -221,7 +226,17 @@ class change_Storage
 		if ($this->started === null) {$this->startSession();}
 		if ($this->started)
 		{
-			$_SESSION[$key] = &$data;
+			$this->changeSessionNameSpace->$key = $data;
 		}
+	}
+	
+	public function readAll()
+	{
+		if ($this->started === null) {$this->startSession();}
+		if ($this->started)
+		{
+			return $this->changeSessionNameSpace->getIterator()->getArrayCopy();
+		}
+		return array();
 	}
 }

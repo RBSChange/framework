@@ -161,7 +161,7 @@ class change_Controller
 	/**
 	 * @return change_Request
 	 */
-	protected function getRequest()
+	public function getRequest()
 	{
 		return $this->getContext()->getRequest();
 	}
@@ -295,6 +295,19 @@ class change_Controller
 		return $this->context;
 	}
 
+		
+	/**
+	 * @return change_Storage
+	 */
+	public function getStorage()
+	{
+		return $this->storage;
+	}
+	
+	/**
+	 *
+	 * @return change_Context 
+	 */
 	public static function getInstance()
 	{	
 		if (null !== self::$instance)
