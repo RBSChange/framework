@@ -2512,7 +2512,7 @@ class MysqlStatment
 	public function bindValue($parameterName, $value, $type = null)
 	{
 		$this->stmt->bindValue($parameterName, $value, $this->getStatmentType($type));
-		if (Framework::isDebugEnabled())
+		if (Framework::isBenchEnabled())
 		{
 			$this->params[$parameterName] = $value;
 		}
@@ -2520,10 +2520,9 @@ class MysqlStatment
 
 	public function execute($parameters = null)
 	{
-		if (Framework::isDebugEnabled())
+		if (Framework::isBenchEnabled())
 		{
-			Framework::startBench();
-				
+			Framework::startBench();		
 			if (is_array($parameters))
 			{
 				foreach ($parameters as $parameterName => $parameterValue)
@@ -2539,10 +2538,10 @@ class MysqlStatment
 		if (!$this->stmt->execute($parameters) && $this->stmt->errorCode() != '00000')
 		{
 			self::$time['err']++;
-			if (Framework::isDebugEnabled())
+			if (Framework::isBenchEnabled())
 			{
-				$trace = "SQL|". str_replace(array("\n", "\t"), '', $this->sql.'|'. var_export($this->params, true));
-				Framework::endBench($trace);
+				$trace = "SQL ERROR||". str_replace(array("\n", "\t"), '', $this->sql.'||'. var_export($this->params, true));
+				Framework::endBench(str_replace('||', "\t", $trace));
 			}
 			return false;
 		}
@@ -2550,18 +2549,18 @@ class MysqlStatment
 		$time = (microtime(true) - $start);
 		self::$time['exec'] += $time;
 
-		if (Framework::isDebugEnabled())
+		if (Framework::isBenchEnabled())
 		{
 			if ($time > 0.01)
 			{
-				$trace = 'SQL|' .$time . '|SLOWQUERY|' . str_replace(array("\n", "\t"), '', $this->sql . "|" . var_export($this->params, true));
+				$trace = 'SQL SLOWQUERY||' .$time . '||' . str_replace(array("\n", "\t"), '', $this->sql . "||" . var_export($this->params, true));
 			}
 			else
 			{
-				$trace = "SQL|". str_replace(array("\n", "\t"), '', $this->sql.'|'. var_export($this->params, true));
+				$trace = "SQL||". str_replace(array("\n", "\t"), '', $this->sql.'||'. var_export($this->params, true));
 			}
 				
-			Framework::endBench($trace);
+			Framework::endBench(str_replace('||', "\t", $trace));
 		}
 		return true;
 	}

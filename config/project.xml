@@ -185,6 +185,10 @@
 			</prefix>
 		</tal>
 		
+		<bench>
+			<entry name="enabled">false</entry>
+		</bench>
+		
 	    <indexer>
 	      <SolrManager>
 	        <entry name="schemaVersion">3.0.3</entry>

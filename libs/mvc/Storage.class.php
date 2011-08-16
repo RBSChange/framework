@@ -47,7 +47,7 @@ class change_Storage
 			Zend_Session::start();
 			$this->changeSessionNameSpace = new Zend_Session_Namespace('C4');
 			$this->started = true;
-
+			Framework::sessionStarted(Zend_Session::getId());
 	
 			$currentKey =  $this->getSecureKey(); 
 			$md5 = $this->read('SecureKey');
@@ -55,19 +55,23 @@ class change_Storage
 			{
 				$this->write('SecureKey', $currentKey);
 				$this->write('SecurePort', $_SERVER["SERVER_PORT"]);
+				
 			} 
 			else if ($md5 !== $currentKey)
 			{
 				$oldSessionId = Zend_Session::getId();
-				Zend_Session::regenerateId();
-				$_SESSION = array();
+				Zend_Session::destroy();
+				Zend_Session::start();		
+				Framework::sessionStarted(Zend_Session::getId());		
 				$this->sessionIdChanged($oldSessionId);
+				
 			}
 			else if ($this->read('SecurePort') !== $_SERVER["SERVER_PORT"])
 			{
 				$oldSessionId = Zend_Session::getId();
 				Zend_Session::regenerateId();
 				$this->write('SecurePort', $_SERVER["SERVER_PORT"]);
+				Framework::sessionStarted(Zend_Session::getId());
 				$this->sessionIdChanged($oldSessionId);	
 			}
 		}
@@ -103,7 +107,7 @@ class change_Storage
 	{
 		if (Framework::isInfoEnabled())
 		{
-			Framework::info(__METHOD__ . ' ' . $oldSessionId . ' -> ' . session_id());
+			Framework::info(__METHOD__ . ' Old Id:' . $oldSessionId);
 		}		
 	}
 	

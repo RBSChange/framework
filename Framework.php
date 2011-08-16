@@ -6,18 +6,251 @@ class Framework
 	 * The project config compiled
 	 */
 	private static $config = null;
-	static $logLevel = null;
-	private static $debugEnabled, $infoEnabled, $warnEnabled, $errorEnabled, $fatalEnabled;
 
+	/**
+	 * @var Zend_Log
+	 */
+	private static $log;
+
+
+
+
+	/**
+	 * @return string (DEBUG, INFO, NOTICE, WARN, ERR, ALERT, EMERG) 
+	 */
+	public static function getLogLevelName()
+	{
+		return LOGGING_LEVEL;
+	}
+	
+	/**
+	 * @return integer
+	 */
+	public static function getLogPriority()
+	{
+		return LOGGING_PRIORITY;
+	}
+	
+	/**
+	 * @return Zend_Log
+	 */
+	private static function getZendLog()
+	{
+		if (self::$log === null)
+		{
+			self::$log = new Zend_Log();
+			$filePath = f_util_FileUtils::buildLogPath('application.log');
+			if (!file_exists($filePath))
+			{
+				f_util_FileUtils::mkdir(dirname($filePath));
+			}
+			$writer = new Zend_Log_Writer_Stream($filePath);
+			$writer->setFormatter(new Zend_Log_Formatter_Simple('%timestamp% [%priorityName%] %sessionId%: %message%' . PHP_EOL));
+			self::$log->addWriter($writer);
+			
+			$filter = new Zend_Log_Filter_Priority(LOGGING_PRIORITY);
+			self::$log->addFilter($filter);
+			self::$log->setEventItem('sessionId' , '');
+			self::$log->setTimestampFormat('Y-m-d H:i:s');
+		}
+		self::$log->registerErrorHandler();
+		return self::$log;
+	}
+	
+	public static function registerLogErrorHandler()
+	{
+		self::getZendLog()->registerErrorHandler();
+	}
+	
+	public static function sessionStarted($id)
+	{
+		self::$log->setEventItem('sessionId' , '(' . $id . ')');
+	}
+	/**
+	 * @param string $message
+	 * @param integer $priority elementof {Zend_Log::DEBUG, Zend_Log::INFO, Zend_Log::NOTICE, Zend_Log::WARN, 
+	 * 	Zend_Log::ERR, Zend_Log::EMERG}
+	 */
+	public static function log($message, $priority)
+	{
+		self::getZendLog()->log($message, $priority);
+	}
+
+	public static function debug($message)
+	{
+		self::getZendLog()->log($message, Zend_Log::DEBUG);
+	}
+
+	public static function info($message)
+	{
+		self::getZendLog()->log($message, Zend_Log::INFO);
+	}
+
+	public static function warn($message)
+	{
+		self::getZendLog()->log($message, Zend_Log::WARN);
+	}
+
+	public static function error($message)
+	{
+		self::getZendLog()->log($message, Zend_Log::ERR);
+	}
+
+	public static function exception($e)
+	{
+		self::getZendLog()->log(get_class($e).": ".$e->getMessage()."\n".$e->getTraceAsString(), Zend_Log::ALERT);
+	}
+
+	public static function fatal($message)
+	{
+		self::getZendLog()->log($message, Zend_Log::EMERG);
+	}
+
+	/**
+	 * @return Boolean DEBUG if debug log is enabled
+	 */
+	public static function isDebugEnabled()
+	{
+		return LOGGING_PRIORITY >= Zend_Log::DEBUG;
+	}
+
+	/**
+	 * @return Boolean true if INFO log is enabled
+	 */
+	public static function isInfoEnabled()
+	{
+		return LOGGING_PRIORITY >= Zend_Log::INFO;
+	}
+	
+	/**
+	 * @return Boolean true if WARN log is enabled
+	 */
+	public static function isWarnEnabled()
+	{
+		return LOGGING_PRIORITY >= Zend_Log::WARN;
+	}
+
+	/**
+	 * @return Boolean true if ERR log is enabled
+	 */
+	public static function isErrorEnabled()
+	{
+		return LOGGING_PRIORITY >= Zend_Log::ERR;
+	}
+
+	/**
+	 * @return Boolean true if EMERG log is enabled
+	 */
+	public static function isFatalEnabled()
+	{
+		return LOGGING_PRIORITY >= Zend_Log::EMERG;
+	}
+	
+	/**
+	 * @var Zend_Log
+	 */
+	private static $benchLog;
+	
 	/**
 	 * @var Float[]
 	 */
 	private static $benchSteps = array();
+	
 	/**
 	 * @var Integer
 	 */
 	private static $benchStepsIndex = -1;
+	
+	/**
+	 * @return boolean true if NOTICE log is enabled
+	 */
+	public static function isBenchEnabled()
+	{
+		return self::getZendBenchLog() !== false;
+	}	
 
+	
+	/**
+	 * @example
+	 * Framework::startBench(); // begin bench process
+	 * $brands = $this->getBrandsList();
+	 * Framework::bench("getBrandList"); // debug time between this call and last call
+	 * foreach ($brands as $brand)
+	 * {
+	 *  $label = $brand->getLabel();
+	 *  $index[strtolower($label[0])][$label] = $brand;
+	 * }
+	 * Framework::endBench("getBrandList processing"); // debug time between this call and last call and end bench process
+	 * @param String $msg
+	 */
+	public static function startBench($start = null)
+	{
+		self::$benchSteps[] = ($start === null) ? microtime(true) : $start;
+		self::$benchStepsIndex++;
+	}
+
+	/**
+	 * @return Zend_Log
+	 */
+	private static function getZendBenchLog()
+	{
+		if (self::$benchLog === null)
+		{
+			if (self::getConfigurationValue('bench/enabled', 'false') !== 'true')
+			{
+				self::$benchLog = false;
+				return self::$benchLog;
+			}
+			
+			self::$benchLog = new Zend_Log();
+			$filePath = f_util_FileUtils::buildLogPath('bench.log');
+			if (!file_exists($filePath))
+			{
+				f_util_FileUtils::mkdir(dirname($filePath));
+			}
+			$writer = new Zend_Log_Writer_Stream($filePath);
+			$writer->setFormatter(new Zend_Log_Formatter_Simple("%id%\t%stepTime%\t%currentTime%\t%diffTime%\t%memory%\t%message%" . PHP_EOL));
+			self::$benchLog->addWriter($writer);
+			self::$benchLog->setEventItem('id' , rand() . "\t" . microtime(true));
+		}
+		return self::$benchLog;
+	}
+	
+	/**
+	 * @see Framework::startBench($msg)
+	 * @param String $msg
+	 */
+	public static function bench($msg)
+	{
+		$benchLog = self::getZendBenchLog();
+		
+		if ($benchLog !== false)
+		{
+			$newStep = microtime(true);
+			$benchLog->log($msg, Zend_Log::NOTICE, array('currentTime' => $newStep, 
+				'stepTime' => self::$benchSteps[self::$benchStepsIndex],
+				'diffTime' => $newStep - self::$benchSteps[self::$benchStepsIndex],
+				'memory' => memory_get_usage(),
+			));
+			self::$benchSteps[self::$benchStepsIndex] = $newStep;
+		}
+	}
+
+	/**
+	 * @see Framework::startBench($msg)
+	 * @param String $msg
+	 */
+	public static function endBench($msg = null)
+	{
+		if (!is_null($msg))
+		{
+			self::bench($msg);
+		}
+		array_pop(self::$benchSteps);
+		self::$benchStepsIndex--;
+	}
+
+	
 	/**
 	 * @return String
 	 */
@@ -58,186 +291,7 @@ class Framework
 		$siteDisabledFlag = f_util_FileUtils::buildProjectPath("site_is_disabled");
 		return !file_exists($siteDisabledFlag);
 	}
-
-	/**
-	 * @param String $message
-	 * @see Logger
-	 * @param Integer $priority elementof {Logger::DEBUG, ...}
-	 * @param String $loggerGroup
-	 */
-	public static function log($message, $priority, $loggerGroup = "webapp")
-	{
-		if (self::getLogLevel() <= $priority)
-		{
-			LoggingService::getInstance()->log($message, $loggerGroup);
-		}
-	}
-
-	public static function debug($message, $loggerGroup = "webapp")
-	{
-		self::log("[DEBUG]\t".$message, Logger::DEBUG, $loggerGroup);
-	}
-
-	public static function info($message, $loggerGroup = "webapp")
-	{
-		self::log("[INFO]\t".$message, Logger::INFO, $loggerGroup);
-	}
-
-	public static function warn($message, $loggerGroup = "webapp")
-	{
-		self::log("[WARN]\t".$message, Logger::WARN, $loggerGroup);
-	}
-
-	public static function error($message, $loggerGroup = "webapp")
-	{
-		self::log("[ERROR]\t".$message, Logger::ERROR, $loggerGroup);
-	}
-
-	public static function exception($e, $loggerGroup = "webapp")
-	{
-		self::log("[EXCEPTION]\t".get_class($e).": ".$e->getMessage()."\n".$e->getTraceAsString(), Logger::ERROR, $loggerGroup);
-	}
-
-	public static function fatal($message, $loggerGroup = "webapp")
-	{
-		self::log("[FATAL]\t".$message, Logger::FATAL, $loggerGroup);
-	}
-
-	private static function getLogLevel()
-	{
-		if (self::$logLevel === null)
-		{
-			self::$logLevel = constant('Logger::'.LOGGING_LEVEL);
-			if (self::$logLevel == false) {self::$logLevel = Logger::WARN;}
-		}
-		return self::$logLevel;
-	}
 	
-	/**
-	 * @return string (DEBUG, INFO, WARN, ERROR, FATAL) 
-	 */
-	public static function getLogLevelName()
-	{
-		return LOGGING_LEVEL;
-	}
-
-	/**
-	 * @see Logger
-	 * @param Integer $priority elementof {Logger::DEBUG, ...}
-	 * @return Boolean true if log of priority $priority is enabled
-	 */
-	private static function isLogEnabled($priority)
-	{
-		return self::getLogLevel() <= $priority;
-	}
-
-	/**
-	 * @return Boolean true if debug log is enabled
-	 */
-	public static function isDebugEnabled()
-	{
-		if (null === self::$debugEnabled)
-		{
-			self::$debugEnabled = self::isLogEnabled(Logger::DEBUG);
-		}
-		return self::$debugEnabled;
-	}
-
-	/**
-	 * @return Boolean true if info log is enabled
-	 */
-	public static function isInfoEnabled()
-	{
-		if (null === self::$infoEnabled)
-		{
-			self::$infoEnabled = self::isLogEnabled(Logger::INFO);
-		}
-		return self::$infoEnabled;
-	}
-
-	/**
-	 * @return Boolean true if warn log is enabled
-	 */
-	public static function isWarnEnabled()
-	{
-		if (null === self::$warnEnabled)
-		{
-			self::$warnEnabled = self::isLogEnabled(Logger::WARN);
-		}
-		return self::$warnEnabled;
-	}
-
-	/**
-	 * @return Boolean true if error log is enabled
-	 */
-	public static function isErrorEnabled()
-	{
-		if (null === self::$errorEnabled)
-		{
-			self::$errorEnabled = self::isLogEnabled(Logger::ERROR);
-		}
-		return self::$errorEnabled;
-	}
-
-	/**
-	 * @return Boolean true if fatal log is enabled
-	 */
-	public static function isFatalEnabled()
-	{
-		if (null === self::$fatalEnabled)
-		{
-			self::$fatalEnabled = self::isLogEnabled(Logger::FATAL);
-		}
-		return self::$fatalEnabled;
-	}
-
-	/**
-	 * @example
-	 * Framework::startBench(); // begin bench process
-	 * $brands = $this->getBrandsList();
-	 * Framework::bench("getBrandList"); // debug time between this call and last call
-	 * foreach ($brands as $brand)
-	 * {
-	 *  $label = $brand->getLabel();
-	 *  $index[strtolower($label[0])][$label] = $brand;
-	 * }
-	 * Framework::endBench("getBrandList processing"); // debug time between this call and last call and end bench process
-	 * @param String $msg
-	 */
-	public static function startBench()
-	{
-		self::$benchSteps[] = microtime(true);
-		self::$benchStepsIndex++;
-	}
-
-	/**
-	 * @see Framework::startBench($msg)
-	 * @param String $msg
-	 */
-	public static function bench($msg)
-	{
-		if (self::isDebugEnabled())
-		{
-			$newStep = microtime(true);
-			self::debug('|BENCH|' . ($newStep-self::$benchSteps[self::$benchStepsIndex]) . '|' . $msg);
-			self::$benchSteps[self::$benchStepsIndex] = $newStep;
-		}
-	}
-
-	/**
-	 * @see Framework::startBench($msg)
-	 * @param String $msg
-	 */
-	public static function endBench($msg = null)
-	{
-		if (!is_null($msg))
-		{
-			self::bench($msg);
-		}
-		array_pop(self::$benchSteps);
-		self::$benchStepsIndex--;
-	}
-
 	/**
 	 * @return String
 	 */
@@ -478,31 +532,10 @@ require_once(PROJECT_HOME . '/framework/loader/ResourceLoader.class.php');
 require_once(PROJECT_HOME . '/framework/loader/ClassLoader.class.php');
 require_once(PROJECT_HOME . '/framework/loader/Loader.class.php');
 
-function f_errorHandler($errno, $errstr, $errfile, $errline)
-{
-	$message = "(type $errno,line $errline) $errstr in file ($errfile)";
-	switch ($errno)
-	{
-		case E_USER_ERROR:
-		case E_USER_WARNING:
-			LoggingService::getInstance()->errorLog($message, 'error');
-			throw new Exception($message);
-			break;
-		case E_STRICT:
-			//do nothing
-			break;
-		case E_USER_NOTICE:
-		default:
-			LoggingService::getInstance()->errorLog($message, 'error');
-			break;
-	}
-}
-
 if (spl_autoload_register(array(ClassLoader::getInstance(), "autoload")) === false)
 {
 	throw new Exception("Could not register Change framework autoload function");
 }
-
 
 ini_set('include_path', ZEND_FRAMEWORK_PATH . PATH_SEPARATOR . PEAR_DIR);
 
@@ -519,13 +552,7 @@ require_once(PROJECT_HOME . '/framework/service/ModuleService.class.php');
 $ms = ModuleService::getInstance();
 $ms->loadCacheFile();
 
-require_once(PROJECT_HOME . '/framework/service/LoggingService.class.php');
-
-// +---------------------------------------------------------------------------+
-// | error handler
-// +---------------------------------------------------------------------------+
-// Configuration du gestionnaire d'erreurs
-set_error_handler("f_errorHandler");
+Framework::registerLogErrorHandler();
 
 // Set the locale.
 $localResult = setlocale(LC_ALL, 'en_US.UTF-8');

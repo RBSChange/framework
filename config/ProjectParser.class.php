@@ -186,6 +186,34 @@ class config_ProjectParser
 		{
 			$configArray['config']['browsers']['frontoffice'] = array();
 		}
+		
+		switch ($configArray['defines']['LOGGING_LEVEL']) 
+		{
+			case 'EXCEPTION':
+				$configArray['defines']['LOGGING_LEVEL'] = 'ALERT';
+			case 'ALERT':
+				$configArray['defines']['LOGGING_PRIORITY'] = 1;
+				break;
+				
+			case 'ERROR':
+				$configArray['defines']['LOGGING_LEVEL'] = 'ERR';
+			case 'ERR':
+				$configArray['defines']['LOGGING_PRIORITY'] = 3;
+				break;
+			case 'NOTICE':
+				$configArray['defines']['LOGGING_PRIORITY'] = 5;
+				break;					
+			case 'DEBUG':
+				$configArray['defines']['LOGGING_PRIORITY'] = 7;
+				break;		
+			case 'INFO':
+				$configArray['defines']['LOGGING_PRIORITY'] = 6;
+				break;
+			default:
+				$configArray['defines']['LOGGING_LEVEL'] = 'WARN';
+				$configArray['defines']['LOGGING_PRIORITY'] = 4;
+				break;
+		}
 				
 		$defineLines = array();
 		foreach ($configArray['defines'] as $constName => $value) 
