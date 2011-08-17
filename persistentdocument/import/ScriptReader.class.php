@@ -133,7 +133,7 @@ class import_ScriptReader extends BaseService
 				$this->errors[] = $errstr;
 				break;
 		}
-		return f_errorHandler($errno, $errstr, $errfile, $errline);
+		return Framework::getZendLog()->errorHandler($errno, $errstr, $errfile, $errline, null);
 	}
 
 	/**
