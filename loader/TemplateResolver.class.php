@@ -26,7 +26,7 @@ class TemplateResolver extends FileResolver implements ResourceResolver
 	 * Content type of template (html, xml, xul, ...)
 	 * @var string
 	 */
-	private $mimeContentType = K::HTML ;
+	private $mimeContentType = 'html' ;
 
 	/**
 	 * Return the current TemplateResolver
@@ -65,7 +65,7 @@ class TemplateResolver extends FileResolver implements ResourceResolver
 	{
 		parent::reset();
 		$this->setDirectory('templates');
-		$this->setMimeContentType(K::HTML);
+		$this->setMimeContentType('html');
 		return $this;
 	}
 

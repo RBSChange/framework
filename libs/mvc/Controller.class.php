@@ -83,7 +83,7 @@ class change_Controller
 	private function setLangFromRequest()
 	{
 		$request = $this->getRequest();
-		$lang = $request->getParameter(K::LANG_ACCESSOR);
+		$lang = $request->getParameter('lang');
 		if (!f_util_StringUtils::isEmpty($lang))
 		{
 			$requestContext = RequestContext::getInstance();

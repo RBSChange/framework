@@ -494,7 +494,7 @@ abstract class f_util_HtmlUtils
 					$attributes['change:id'] = 'media-' . $documentId;
 					if ($document->getDescription())
 					{
-						$attributes['longdesc'] = LinkHelper::getActionUrl("media", "DisplayMediaDescription", array(K::COMPONENT_ID_ACCESSOR => $document->getId(), "label" => $document->getLabel(), "lang" => $lang));
+						$attributes['longdesc'] = LinkHelper::getActionUrl("media", "DisplayMediaDescription", array(change_Request::DOCUMENT_ID => $document->getId(), "label" => $document->getLabel(), "lang" => $lang));
 					}
 					if (isset($attributes["format"]))
 					{

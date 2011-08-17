@@ -273,7 +273,7 @@ abstract class change_Action
 	 */
 	protected function getDocumentIdArrayFromRequest($request)
 	{
-		$docIds = $request->getParameter(K::COMPONENT_ID_ACCESSOR, array());
+		$docIds = $request->getParameter(change_Request::DOCUMENT_ID, array());
 		if (is_string($docIds) && intval($docIds) == $docIds)
 		{
 			$docIds = array(intval($docIds));

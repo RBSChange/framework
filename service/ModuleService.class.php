@@ -347,7 +347,7 @@ class ModuleService extends BaseService
 	 * @param string $type
 	 * @return array<string>
 	 */
-	public function getAvailableForms($moduleName, $type = K::XUL)
+	public function getAvailableForms($moduleName, $type = 'xul')
 	{
 		$forms = array();
 		$pathArray = FileResolver::getInstance()->setPackageName('modules_' . $moduleName)->getPaths('forms');
@@ -406,7 +406,7 @@ class ModuleService extends BaseService
 		$rootNodeId = null;
 		$tm = f_persistentdocument_TransactionManager::getInstance();
 		
-		if ($moduleName !== K::GENERIC_MODULE_NAME)
+		if ($moduleName !== 'generic')
 		{
 			$package = 'modules_' . $moduleName;
 			
@@ -487,7 +487,7 @@ class ModuleService extends BaseService
 		
 		$tm = f_persistentdocument_TransactionManager::getInstance();
 		
-		if ($ownerModuleName !== K::GENERIC_MODULE_NAME)
+		if ($ownerModuleName !== 'generic')
 		{
 			$package = 'modules_' . $ownerModuleName . '/modules_' . $relatedModuleName;
 			

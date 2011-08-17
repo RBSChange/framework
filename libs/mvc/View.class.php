@@ -96,7 +96,7 @@ abstract class change_View
 	 * @param string $templateName
 	 * @param string $mimeType
 	 */
-	public function setTemplateName($templateName, $mimeType = K::HTML)
+	public function setTemplateName($templateName, $mimeType = 'html')
 	{
 		if (is_null($this->forceModuleName))
 		{
@@ -114,7 +114,7 @@ abstract class change_View
 		}
 		catch (TemplateNotFoundException $e)
 		{
-			$this->engine = $templateLoader->setPackageName('modules_' . K::GENERIC_MODULE_NAME)->load($templateName);
+			$this->engine = $templateLoader->setPackageName('modules_' . 'generic')->load($templateName);
 		}
 	}
 
@@ -228,7 +228,7 @@ abstract class change_View
 	protected final function getModuleName()
 	{
 		$request = $this->getContext()->getRequest();
-		$moduleName = $request->getParameter(K::WEBEDIT_MODULE_ACCESSOR);
+		$moduleName = $request->getParameter('wemod');
 		if (empty($moduleName))
 		{
 			$moduleName = $request->getParameter('module');

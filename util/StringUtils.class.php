@@ -723,12 +723,12 @@ class f_util_StringUtils
         {
             $string = preg_replace(
             	array('/<a[^>]+href="([^"]+)"[^>]*>([^<]+)<\/a>/i', '/<img[^>]+alt="([^"]+)"[^>]*\/>/i'),
-            	array('$2 [$1]', K::CRLF . '[$1]' . K::CRLF), $string);
+            	array('$2 [$1]', PHP_EOL . '[$1]' . PHP_EOL), $string);
         }
         $string = trim(html_entity_decode(strip_tags($string), ENT_QUOTES, 'UTF-8'));
         if ($convertNlToSpace)
         {
-            $string = str_replace(K::CRLF, ' ', $string);
+            $string = str_replace(PHP_EOL, ' ', $string);
         }
         return $string;
     }
@@ -747,10 +747,10 @@ class f_util_StringUtils
 		if (is_null(self::$htmlToTagsFrom))
     	{
     		self::$htmlToTagsFrom = array('</div>','</p>', '<br/>','<br>', '</li>');
-    		self::$htmlToTagsTo = array('</div>'. K::CRLF,'</p>'. K::CRLF, '<br/>'. K::CRLF,'<br>'. K::CRLF, '</li>'. K::CRLF);
+    		self::$htmlToTagsTo = array('</div>'. PHP_EOL,'</p>'. PHP_EOL, '<br/>'. PHP_EOL,'<br>'. PHP_EOL, '</li>'. PHP_EOL);
     	}
     	$html = str_replace(self::$htmlToTagsFrom, self::$htmlToTagsTo, $html);
-        $html = preg_replace('/<\/h(\d)>/i', '</h$1>' . K::CRLF, $html);
+        $html = preg_replace('/<\/h(\d)>/i', '</h$1>' . PHP_EOL, $html);
         return $html;
 	}
     

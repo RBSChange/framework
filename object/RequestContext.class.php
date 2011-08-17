@@ -123,7 +123,7 @@ class RequestContext
 			}
 			else
 			{
-				$languages = array(K::DEFAULT_LANG);
+				$languages = array('fr');
 			}
 
 			if ($ui_supportedLanguages !== null)
@@ -136,7 +136,7 @@ class RequestContext
 			}
 			else
 			{
-				$ui_languages = array(K::DEFAULT_LANG);
+				$ui_languages = array('fr');
 			}
 
 			self::$m_instance = new RequestContext($languages, $ui_languages);
@@ -602,7 +602,7 @@ class RequestContext
 			$mimeContentType = change_Controller::getInstance()->getContext()->getRequest()->getParameter('contentType');
 			if (!$mimeContentType)
 			{
-				$mimeContentType = K::HTML;
+				$mimeContentType = 'html';
 			}
 			$this->m_mimeContentType = $mimeContentType;
 		}

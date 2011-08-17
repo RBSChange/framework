@@ -17,6 +17,8 @@ class change_Request
 	const NONE = 1;
 	const POST = 4;
 	const CONSOLE = 8;
+	
+	const DOCUMENT_ID = 'cmpref';
 
 	private $attributes = array();
 	private $errors     = array();

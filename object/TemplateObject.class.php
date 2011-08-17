@@ -151,7 +151,7 @@ class TemplateObject
 		$template->setPhpCodeDestination($path);
 		$template->set('LANG', $lang);	
 				
-		if ($mimeContentType === K::XUL || $mimeContentType === K::XML)
+		if ($mimeContentType === 'xul' || $mimeContentType === 'xml')
 		{
 			$template->set('HOST',  Framework::getUIBaseUrl());
 			$template->setOutputMode(PHPTAL::XML);
@@ -189,15 +189,15 @@ class TemplateObject
 	{
 		switch($this->mimeContentType)
 		{
-		    case K::XUL :
+		    case 'xul' :
 				$header = 'application/vnd.mozilla.xul+xml';
 				break;
 
-			case K::XML :
+			case 'xml' :
 				$header = 'text/xml';
 				break;
 
-			case K::HTML :
+			case 'html' :
 				$header = 'text/html';
 				break;
 

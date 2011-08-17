@@ -66,7 +66,7 @@ class TemplateLoader extends FileLoader implements ResourceLoader
 		
 		$template = new TemplateObject($path, $this->resolver->getMimeContentType());
 		
-		if (Framework::inDevelopmentMode() && $this->resolver->getMimeContentType() === K::HTML)
+		if (Framework::inDevelopmentMode() && $this->resolver->getMimeContentType() === 'html')
 		{
 			$template->setOriginalPath($path); 
 		}
