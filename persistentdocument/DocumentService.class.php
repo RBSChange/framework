@@ -2441,16 +2441,23 @@ class f_persistentdocument_DocumentService extends BaseService
 	private function updateDuplicateLabel($label, $parentNodeId, $size = -1)
 	{
 		$defaultPrefix = f_Locale::translate('&modules.generic.backoffice.Duplicate-prefix;') . ' ';
-		$number = 0;
+		$number = -1;
 		$prefix = $defaultPrefix;
 		while ($parentNodeId)
 		{
-			$prefix = str_replace('{number}', $number == 0 ? '' : ' ('.$number.')', $defaultPrefix);
+			if ($number < 0)
+			{
+				$prefix = '';
+			}
+			else
+			{
+				$prefix = str_replace('{number}', $number == 0 ? '' : ' ('.$number.')', $defaultPrefix);
+			}
 			if ($prefix == $defaultPrefix) {break;}
 			$result = $this->createQuery()
-			->add(Restrictions::eq('label', $prefix.$label))
-			->add(Restrictions::childOf($parentNodeId))
-			->setProjection(Projections::rowCount('count'))->find();
+				->add(Restrictions::eq('label', $prefix.$label))
+				->add(Restrictions::childOf($parentNodeId))
+				->setProjection(Projections::rowCount('count'))->find();
 
 			if ($result[0]['count'] == 0)
 			{
