@@ -34,7 +34,7 @@ class Framework
 	/**
 	 * @return Zend_Log
 	 */
-	private static function getZendLog()
+	public static function getZendLog()
 	{
 		if (self::$log === null)
 		{
