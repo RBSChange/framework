@@ -33,6 +33,8 @@ Where options in:
 	{
 		$this->message("== Compile config ==");
 		
+		$this->getParent()->getBootStrap()->cleanDependenciesCache();
+		
 		$projectParser = new config_ProjectParser();
 		$oldAndCurrent = $projectParser->execute($this->getComputedDeps());
 		$this->getParent()->setEnvVar("commands_CompileConfig_oldAndCurrent", $oldAndCurrent);
