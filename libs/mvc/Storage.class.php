@@ -14,6 +14,18 @@ class change_Storage
 	private $changeSessionNameSpace;
 	
 	/**
+	 *
+	 * @var Zend_Session_Namespace 
+	 */
+	private $backuserSessionNameSpace;
+	
+	/**
+	 *
+	 * @var Zend_Session_Namespace 
+	 */
+	private $frontuserSessionNameSpace;
+	
+	/**
 	 * @var array
 	 */
 	protected $parameters = array('session_name' => '__CHANGESESSIONID', 'auto_start' => true);
@@ -32,7 +44,7 @@ class change_Storage
 			$this->parameters = array_merge($this->parameters, $parameters);
 		}	
 	
-		if (!$this->getParameter('auto_start'))
+		if (!$this->parameters['auto_start'])
 		{
 			$this->startSession();
 		}
@@ -43,18 +55,20 @@ class change_Storage
 
 		if (isset($_SERVER["SERVER_ADDR"]))
 		{
-			session_name($this->getParameter('session_name'));
+			session_name($this->parameters['session_name']);
 			Zend_Session::start();
-			$this->changeSessionNameSpace = new Zend_Session_Namespace('C4');
+			$this->changeSessionNameSpace = new Zend_Session_Namespace('GLOBAL');
+			$this->backuserSessionNameSpace = new Zend_Session_Namespace('BACKOFFICE');
+			$this->frontuserSessionNameSpace = new Zend_Session_Namespace('FRONTOFFICE');
 			$this->started = true;
 			Framework::sessionStarted(Zend_Session::getId());
 	
 			$currentKey =  $this->getSecureKey(); 
-			$md5 = $this->read('SecureKey');
+			$md5 = $this->read('framework_SecureKey');
 			if ($md5 === null)
 			{
-				$this->write('SecureKey', $currentKey);
-				$this->write('SecurePort', $_SERVER["SERVER_PORT"]);
+				$this->write('framework_SecureKey', $currentKey);
+				$this->write('framework_SecurePort', $_SERVER["SERVER_PORT"]);
 				
 			} 
 			else if ($md5 !== $currentKey)
@@ -66,11 +80,11 @@ class change_Storage
 				$this->sessionIdChanged($oldSessionId);
 				
 			}
-			else if ($this->read('SecurePort') !== $_SERVER["SERVER_PORT"])
+			else if ($this->read('framework_SecurePort') !== $_SERVER["SERVER_PORT"])
 			{
 				$oldSessionId = Zend_Session::getId();
 				Zend_Session::regenerateId();
-				$this->write('SecurePort', $_SERVER["SERVER_PORT"]);
+				$this->write('framework_SecurePort', $_SERVER["SERVER_PORT"]);
 				Framework::sessionStarted(Zend_Session::getId());
 				$this->sessionIdChanged($oldSessionId);	
 			}
@@ -103,73 +117,15 @@ class change_Storage
 		return md5($string);
 	}
 	
+	/**
+	 * @param String $oldSessionId 
+	 */
 	protected function sessionIdChanged($oldSessionId)
 	{
 		if (Framework::isInfoEnabled())
 		{
 			Framework::info(__METHOD__ . ' Old Id:' . $oldSessionId);
 		}		
-	}
-	
-	public function clearParameters()
-	{
-		$this->parameters = null;
-		$this->parameters = array();
-	}
-
-	public function getParameter($name, $default = null)
-	{
-		return (isset($this->parameters[$name])) ? $this->parameters[$name] : $default;
-	}
-
-	public function getParameterNames()
-	{
-		return array_keys($this->parameters);
-	}
-
-	public function getParameters()
-	{
-		return $this->parameters;
-	}
-
-	public function hasParameter($name)
-	{
-		return isset($this->parameters[$name]);
-
-	}
-
-	public function removeParameter($name)
-	{
-		if (isset($this->parameters[$name]))
-		{
-			$retval = $this->parameters[$name];
-			unset($this->parameters[$name]);
-			return $retval;
-		}
-		return null;
-	}
-
-	public function setParameter($name, $value)
-	{
-		$this->parameters[$name] = $value;
-	}
-
-	public function setParameterByRef($name, &$value)
-	{
-		$this->parameters[$name] = &$value;
-	}
-
-	public function setParameters ($parameters)
-	{
-		$this->parameters = array_merge($this->parameters, $parameters);
-	}
-
-	public function setParametersByRef(&$parameters)
-	{
-		foreach ($parameters as $key => &$value)
-		{
-			$this->parameters[$key] = &$value;
-		}
 	}
 
 	/**
@@ -180,7 +136,10 @@ class change_Storage
 		return $this->context;
 	}
 
-
+	/**
+	 * @param String $class
+	 * @return change_Storage 
+	 */
 	public static function newInstance($class)
 	{
 		$object = new $class();
@@ -192,55 +151,167 @@ class change_Storage
 		}
 		return $object;
 	}
-		
-
 	
-
+	/**
+	 * @param String $key
+	 * @param Zend_Session_Namespace $ns
+	 * @return Mixed 
+	 */
+	public function &readNS($key, $ns)
+	{
+		if ($this->started === null) {$this->startSession();}
+		$retval = null;
+		if ($this->started && isset($ns->$key))
+		{
+			$retval =  $ns->$key;	
+		}
+		return $retval;
+	}
+	
+	/**
+	 * @param String $key
+	 * @return String 
+	 */
 	public function &read($key)
 	{
-		if ($this->started === null) {$this->startSession();}
-		$retval = null;
-		if ($this->started && isset($this->changeSessionNameSpace->$key))
-		{
-			$retval =  $this->changeSessionNameSpace->$key;	
-		}
-		return $retval;
+		return $this->readNS($key, $this->changeSessionNameSpace);
 	}
-
-	public function remove($key)
+	
+	/**
+	 * @param String $key
+	 * @return String 
+	 */
+	public function &readForUser($key)
+	{
+		return $this->readNS($key, $this->getUserSessionNamespaceInstance());
+	}
+	
+	public function removeNS($key, $ns)
 	{
 		if ($this->started === null) {$this->startSession();}
 		
 		$retval = null;
-		if ($this->started && isset($this->changeSessionNameSpace->$key))
+		if ($this->started && isset($ns->$key))
 		{
-			$retval = $this->changeSessionNameSpace->$key;
-			unset($this->changeSessionNameSpace->$key);
+			$retval = $ns->$key;
+			unset($ns->$key);
 		}
 		return $retval;
 	}
+	
+	/**
+	 * @param String $key
+	 * @return Mixed
+	 */
+	public function remove($key)
+	{
+		return $this->removeNS($key, $this->changeSessionNameSpace);
+	}
+	
+	/**
+	 * @param String $key
+	 * @return Mixed
+	 */
+	public function removeForUser($key)
+	{
+		return $this->removeNS($key, $this->getUserSessionNamespaceInstance());
+	}
 
+
+	/**
+	 * @param String $key
+	 * @param Mixed $data
+	 * @param Zend_Session_Namespace $ns 
+	 */
+	public function writeNS($key, &$data, $ns)
+	{
+		if ($this->started === null) {$this->startSession();}
+		if ($this->started)
+		{
+			$ns->$key = $data;
+		}
+	}
+	
+	/**
+	 * @param String $key
+	 * @param Mixed $data
+	 */
+	public function write($key, &$data)
+	{
+		$this->writeNS($key, $data, $this->changeSessionNameSpace);
+	}
+	
+	/**
+	 * @param String $key
+	 * @param Mixed $data
+	 */
+	public function writeForUser($key, &$data)
+	{
+		$this->writeNS($key, $data, $this->getUserSessionNamespaceInstance());
+	}
+	
+	/**
+	 * @param Zend_Session_Namespace $ns
+	 * @return Array 
+	 */
+	public function readAllNS($ns)
+	{
+		if ($this->started === null) {$this->startSession();}
+		if ($this->started)
+		{
+			return $ns->getIterator()->getArrayCopy();
+		}
+		return array();
+	}
+	
+	/**
+	 * @return Array 
+	 */
+	public function readAll()
+	{
+		return $this->readAllNS($this->changeSessionNameSpace);
+	}
+		
+	/**
+	 * @return Array 
+	 */
+	public function readAllForUser()
+	{
+		return $this->readAllNS($this->getUserSessionNamespaceInstance());
+	}
+	
+	public function clear()
+	{
+		$this->changeSessionNameSpace->unsetAll();
+	}
+	
+	public function clearForUser()
+	{
+		$this->getUserSessionNamespaceInstance()->unsetAll();
+	}
+	
 	public function shutdown ()
 	{
 		$this->stopSession();
 	}
-
-	public function write($key, &$data)
+	
+	/**
+	 * This method returns the Zend_Session_Namespace instance used to store related session data
+	 * 
+	 * @return Zend_Session_Namespace 
+	 */
+	public function getChangeSessionNamespaceInstance()
 	{
-		if ($this->started === null) {$this->startSession();}
-		if ($this->started)
-		{
-			$this->changeSessionNameSpace->$key = $data;
-		}
+		return $this->changeSessionNameSpace;
 	}
 	
-	public function readAll()
+	/**
+	 * This method returns the Zend_Session_Namespace instance used to store session data whose scope is authentified navigation only (ie: gets cleaned when authentified user disconnects)
+	 * 
+	 * @return Zend_Session_Namespace 
+	 */
+	public function getUserSessionNamespaceInstance()
 	{
-		if ($this->started === null) {$this->startSession();}
-		if ($this->started)
-		{
-			return $this->changeSessionNameSpace->getIterator()->getArrayCopy();
-		}
-		return array();
+		return $this->context->getUser()->getUserNamespace() === change_User::BACKEND_NAMESPACE ? $this->backuserSessionNameSpace : $this->frontuserSessionNameSpace;	
 	}
 }

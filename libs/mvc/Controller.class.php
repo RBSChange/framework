@@ -305,8 +305,17 @@ class change_Controller
 	}
 	
 	/**
+	 * @return change_User
+	 */
+	public function getUser()
+	{
+		return $this->user;
+	}
+	
+	
+	/**
 	 *
-	 * @return change_Context 
+	 * @return change_Controller 
 	 */
 	public static function getInstance()
 	{	

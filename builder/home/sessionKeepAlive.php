@@ -10,21 +10,21 @@ $controller->setNoCache();
 RequestContext::getInstance()->setMode(RequestContext::BACKOFFICE_MODE);
 
 users_UserService::getInstance()->pingBackEndUser();
-
-if (!isset($_SESSION['sessionKeepAlive']))
+$ka = change_Controller::getInstance()->getStorage()->read('framework_sessionKeepAlive');
+if (!$ka)
 {
-	$_SESSION['sessionKeepAlive'] = 0;
+	change_Controller::getInstance()->getStorage()->write('framework_sessionKeepAlive', $ka);
 }
 else
 {
-	$_SESSION['sessionKeepAlive'] = intval($_SESSION['sessionKeepAlive']) + 1;
+	change_Controller::getInstance()->getStorage()->write('framework_sessionKeepAlive', intval($ka)+1);
 }
 
 
+$ka = change_Controller::getInstance()->getStorage()->read('framework_sessionKeepAlive');
+echo Zend_Session::getId() . ' - ' . $ka;
 
-echo session_id() . ' - ' . $_SESSION['sessionKeepAlive'];
-
-if (($_SESSION['sessionKeepAlive'] % 10) == 0)
+if (($ka % 10) == 0)
 {
 	if (defined('NODE_NAME') && ModuleService::getInstance()->moduleExists('clustersafe'))
 	{

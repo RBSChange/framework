@@ -38,12 +38,17 @@ class change_User
 		return $this->context;
 	}
 	
+	/**
+	 *
+	 * @param String $class
+	 * @return change_User 
+	 */
 	public static function newInstance($class)
 	{
 		$object = new $class();
 		if (!($object instanceof change_User))
 		{
-			$error = 'Class "'.$class.'" is not of the type FrameworkSecurityUser';
+			$error = 'Class "'.$class.'" is not of the type change_User';
 			throw new Exception($error);
 		}
 		return $object;
@@ -56,34 +61,16 @@ class change_User
 	
 	public function shutdown()
 	{	
-		if ($this->attributes !== null)
-		{	
-			$storage = $this->getContext()->getStorage();
-			$storage->write(self::AUTH_NAMESPACE, $this->authenticated);
-			$storage->write(self::ATTRIBUTE_NAMESPACE, $this->attributes);
-		}
+		
 	}
 	
+	/**
+	 *@deprecated
+	 */
 	protected function checkLoadedNamespace($ns = null)
 	{
-		if ($this->attributes === null)
-		{
-			$storage = $this->getContext()->getStorage();
-			$this->attributes = $storage->read(self::ATTRIBUTE_NAMESPACE);
-			if ($this->attributes == null)
-			{
-				$this->attributes = array();
-			}
-			
-			$this->authenticated = $storage->read(self::AUTH_NAMESPACE);
-			if ($this->authenticated == null)
-			{
-				$this->authenticated = array();
-				$storage->write(self::AUTH_NAMESPACE, $this->authenticated);
-			}
-		}
-		
-		return $ns === null ? $this->userNamespace : $ns;
+		// No implementation
+		return false;
 	}
 	
 	/**
@@ -103,11 +90,20 @@ class change_User
 	}
 	
 	/**
+	 *
+	 * @return String 
+	 */
+	public function getUserNamespace()
+	{
+		return $this->userNamespace;
+	}
+
+	/**
 	 * @return string
 	 */
 	public function getLogin()
 	{
-		return $this->getAttribute('login', $this->userNamespace);
+		return change_Controller::getInstance()->getStorage()->readForUser('framework_login'); 
 	}
 	
 	/**
@@ -115,7 +111,7 @@ class change_User
 	 */
 	public function setLogin($login)
 	{
-		$this->setAttribute('login', $login, $this->userNamespace);
+		change_Controller::getInstance()->getStorage()->writeForUser('framework_login', $login); 
 	}
 	
 	/**
@@ -123,7 +119,7 @@ class change_User
 	 */
 	public function getId()
 	{
-		return $this->getAttribute('userid', $this->userNamespace);
+		return change_Controller::getInstance()->getStorage()->readForUser('framework_userid');
 	}
 	
 	/**
@@ -131,7 +127,7 @@ class change_User
 	 */
 	public function setId($id)
 	{
-		$this->setAttribute('userid', $id, $this->userNamespace);
+		change_Controller::getInstance()->getStorage()->writeForUser('framework_userid', $id);
 	}
 	
 	/**
@@ -142,19 +138,17 @@ class change_User
 	 */
 	public function setUser($user)
 	{
+		
 		if ($user instanceof users_persistentdocument_backenduser)
 		{
-			$this->setAttribute('isRoot', $user->getIsroot(), $this->userNamespace);
-		}
-		else if ($user instanceof users_persistentdocument_frontenduser)
-		{
-			$this->setAttribute('isRoot', false, $this->userNamespace);
+			$isRoot = $user->getIsroot();
 		}
 		else
 		{
-			$this->setAttribute('isRoot', false, $this->userNamespace);
+			$isRoot = false;
 		}
 		
+		change_Controller::getInstance()->getStorage()->writeForUser('framework_isRoot', $isRoot);
 		$this->setLogin($user->getLogin());
 		$this->setId($user->getId());
 	}
@@ -166,162 +160,155 @@ class change_User
 	 */
 	public function isRoot()
 	{
-		return $this->getAttribute('isRoot', $this->userNamespace) === true;
+		return change_Controller::getInstance()->getStorage()->readForUser('framework_isRoot') === true;
 	}
 	
 	/**
-	 * @return void
+	 * @deprecated
 	 */
 	public function clearAttributes()
 	{
-		$namespaces = $this->getAttributeNamespaces();
-		if ($this->userNamespace === self::BACKEND_NAMESPACE)
-		{
-			$reserved = self::FRONTEND_NAMESPACE;
-		}
-		else
-		{
-			$reserved = self::BACKEND_NAMESPACE;
-		}
-		
-		foreach ($namespaces as $namespace)
-		{
-			if ($namespace == $reserved)
-			{
-				continue;
-			}
-			$this->removeAttributeNamespace($namespace);
-		}
+		Framework::error('Call to deprecated method ' . get_class($this) . '->clearAttributes');
+		change_Controller::getInstance()->getStorage()->clearForUser();
 	}
 	
 	/**
-	 * @param String $name
-	 * @param String $ns
-	 * @return String
+	 * @deprecated
 	 */
 	public function hasAttribute($name, $ns = null)
 	{
-		$ns = $this->checkLoadedNamespace($ns);	
-		return (isset($this->attributes[$ns])) && isset($this->attributes[$ns][$name]);
+		Framework::error('Call to deprecated method ' . get_class($this) . '->hasAttribute');
+		if ($ns)
+		{
+			$zns = new Zend_Session_Namespace($ns);
+			return change_Controller::getInstance()->getStorage()->readNS($name, $zns);
+		}
+		return change_Controller::getInstance()->getStorage()->readForUser($name, $zns);
 	}
 	
 	/**
-	 * @param String $name
-	 * @param String $ns
-	 * @return Mixed
+	 * @deprecated
 	 */
 	public function removeAttribute($name, $ns = null)
 	{
-		$ns = $this->checkLoadedNamespace($ns);	
-		
+		Framework::error('Call to deprecated method ' . get_class($this) . '->removeAttribute');
 		$retval = null;
-		if (isset($this->attributes[$ns]) && isset($this->attributes[$ns][$name]))
+		if ($ns)
 		{
-			$retval = $this->attributes[$ns][$name];
-			unset($this->attributes[$ns][$name]);
+			$zns = new Zend_Session_Namespace($ns);
+			$retval = change_Controller::getInstance()->getStorage()->readNS($name, $zns);
+			change_Controller::getInstance()->getStorage()->removeNS($name, $zns);
+		}
+		else
+		{
+			$retval = change_Controller::getInstance()->getStorage()->readForUser($name, $zns);
+			change_Controller::getInstance()->getStorage()->removeForUser($name);
 		}
 		return $retval;
 	}
 		
 	/**
-	 * @param String $name
-	 * @param String $ns
-	 * @return mixed
+	 * @deprecated
 	 */
 	public function getAttribute($name, $ns = null)
 	{
-		$ns = $this->checkLoadedNamespace($ns);	
-		
-		$retval = null;
-		if (isset($this->attributes[$ns]) && isset($this->attributes[$ns][$name]))
+		Framework::error('Call to deprecated method ' . get_class($this) . '->getAttribute');
+		if ($ns)
 		{
-			return $this->attributes[$ns][$name];
+			$zns = new Zend_Session_Namespace($ns);
+			return change_Controller::getInstance()->getStorage()->readNS($name, $zns);
 		}
-		return $retval;
+		return change_Controller::getInstance()->getStorage()->readForUser($name, $zns);
 	}
 	
 	/**
-	 * @param String $ns
-	 * @return Array
+	 * @deprecated
 	 */
 	public function getAttributeNames($ns = null)
 	{
-		$ns = $this->checkLoadedNamespace($ns);			
-		if (isset($this->attributes[$ns]))
+		Framework::error('Call to deprecated method ' . get_class($this) . '->getAttributeNames');
+		if ($ns)
 		{
-			return array_keys($this->attributes[$ns]);
+			$zns = new Zend_Session_Namespace($ns);
 		}
-		return array();
+		else
+		{
+			$zns = change_Controller::getInstance()->getStorage()->getUserSessionNamespaceInstance();
+		}
+		return array_keys($zns->getIterator());
 	}
 		
 	/**
-	 * @param String $name
-	 * @param mixed $value
-	 * @param String $ns
+	 * @deprecated
 	 */
 	public function setAttribute($name, $value, $ns = null)
 	{
-		$ns = $this->checkLoadedNamespace($ns);
-		if (!isset($this->attributes[$ns]))
+		Framework::error('Call to deprecated method ' . get_class($this) . '->setAttribute');
+		if ($ns)
 		{
-			$this->attributes[$ns] = array();
+			$zns = new Zend_Session_Namespace($ns);
 		}
-		$this->attributes[$ns][$name] = $value;
+		else
+		{
+			$zns = change_Controller::getInstance()->getStorage()->getUserSessionNamespaceInstance();
+		}
+		change_Controller::getInstance()->getStorage()->writeNS($name, $value, $zns);
 	}
 
 	/**
-	 * Set an attribute by reference.
-	 *
-	 * @param String $name
-	 * @param mixed $value
-	 * @param String $ns
+	 * @deprecated
 	 */
 	public function setAttributeByRef($name, &$value, $ns = null)
 	{
-		$ns = $this->checkLoadedNamespace($ns);
-		if (!isset($this->attributes[$ns]))
+		Framework::error('Call to deprecated method ' . get_class($this) . '->setAttributeByRef');
+		if ($ns)
 		{
-			$this->attributes[$ns] = array();
+			$zns = new Zend_Session_Namespace($ns);
 		}
-		$this->attributes[$ns][$name] = &$value;
+		else
+		{
+			$zns = change_Controller::getInstance()->getStorage()->getUserSessionNamespaceInstance();
+		}
+		change_Controller::getInstance()->getStorage()->writeNS($name, $value, $zns);
 	}
 
 	/**
-	 * Set an array of attributes.
-	 * If an existing attribute name matches any of the keys in the supplied
-	 * array, the associated value will be overridden.
-	 *
-	 * @param Array $attributes
-	 * @param String $ns
+	 * @deprecated
 	 */
 	public function setAttributes($attributes, $ns = null)
 	{
-		$ns = $this->checkLoadedNamespace($ns);
-		if (!isset($this->attributes[$ns]))
+		Framework::error('Call to deprecated method ' . get_class($this) . '->setAttributes');
+		if ($ns)
 		{
-			$this->attributes[$ns] = array();
+			$zns = new Zend_Session_Namespace($ns);
 		}
-		$this->attributes[$ns] = array_merge($this->attributes[$ns], $attributes);
+		else
+		{
+			$zns = change_Controller::getInstance()->getStorage()->getUserSessionNamespaceInstance();
+		}
+		foreach ($attributes as $name => $value)
+		{
+			change_Controller::getInstance()->getStorage()->writeNS($name, $value, $zns);
+		}
 	}
 	
 	/**
-	 * Set an array of attributes by reference.
-	 * If an existing attribute name matches any of the keys in the supplied
-	 * array, the associated value will be overridden.
-	 *
-	 * @param Array $attributes
-	 * @param String $ns
+	 * @deprecated
 	 */
 	public function setAttributesByRef (&$attributes, $ns = null)
 	{
-		$ns = $this->checkLoadedNamespace($ns);
-		if (!isset($this->attributes[$ns]))
+		Framework::error('Call to deprecated method ' . get_class($this) . '->setAttributesByRef');
+		if ($ns)
 		{
-			$this->attributes[$ns] = array();
+			$zns = new Zend_Session_Namespace($ns);
 		}
-		foreach ($attributes as $key => &$value)
+		else
 		{
-			$this->attributes[$ns][$key] = &$value;
+			$zns = change_Controller::getInstance()->getStorage()->getUserSessionNamespaceInstance();
+		}
+		foreach ($attributes as $name => $value)
+		{
+			change_Controller::getInstance()->getStorage()->writeNS($name, $value, $zns);
 		}
 	}
 		
@@ -330,8 +317,7 @@ class change_User
 	 */
 	public function isAuthenticated()
 	{
-		$ns = $this->checkLoadedNamespace();
-		return isset($this->authenticated[$ns]) && $this->authenticated[$ns];
+		return change_Controller::getInstance()->getStorage()->readForUser('framework_isAuthenticated') == true;
 	}
 	
 	/**
@@ -342,44 +328,53 @@ class change_User
 		$ns = $this->checkLoadedNamespace();
 		if ($authenticated === true)
 		{
-			$this->authenticated[$ns] = true;
+			$authenticated = true;
+			return change_Controller::getInstance()->getStorage()->writeForUser('framework_isAuthenticated', $authenticated);
 		}
-		else if (isset($this->authenticated[$ns]))
+		else
 		{
-			unset($this->authenticated[$ns]);
+			change_Controller::getInstance()->getStorage()->removeForUser('framework_isAuthenticated');
 		}
 	}
 	
+	/**
+	 * @deprecated
+	 */
 	public function getAttributeNamespace($ns = null)
 	{
-		$ns = $this->checkLoadedNamespace($ns);
-		$retval = null;
-		if (isset($this->attributes[$ns]))
+		Framework::error('Call to deprecated method ' . get_class($this) . '->getAttributeNamespace');
+		if ($ns)
 		{
-			return $this->attributes[$ns];
+			$zns = new Zend_Session_Namespace($ns);
 		}
-		return $retval;
+		else
+		{
+			$zns = change_Controller::getInstance()->getStorage()->getUserSessionNamespaceInstance();
+		}
+		return $zns->getIterator()->getArrayCopy();
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public function getAttributeNamespaces()
 	{
-		$this->checkLoadedNamespace();
-		return array_keys($this->attributes);
+		return Zend_Session::getIterator()->getIterator();
 	}
 
-
+	/**
+	 * @deprecated
+	 */
 	public function hasAttributeNamespace($ns)
 	{
-		$ns = $this->checkLoadedNamespace($ns);
-		return isset($this->attributes[$ns]);
+		return Zend_Session::namespaceIsset($ns);
 	}
-
+	
+	/**
+	 * @deprecated
+	 */
 	public function removeAttributeNamespace($ns)
 	{
-		$ns = $this->checkLoadedNamespace($ns);
-		if (isset($this->attributes[$ns]))
-		{
-			unset($this->attributes[$ns]);
-		}
+		return Zend_Session::namespaceUnset($ns);
 	}
 }
