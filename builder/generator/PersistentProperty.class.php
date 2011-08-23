@@ -8,27 +8,18 @@ class generator_PersistentProperty
 	 * @var generator_PersistentModel
 	 */
 	private $model;
+	
+	private $indexed;
 
-	private $id;
-	/**
-	 * @var Boolean
-	 */
-	private $indexed = false;
-	/**
-	 * @var Boolean
-	 */
-	private $specificIndex = false;
 	private $name;
 	private $type;
 	private $typeModel; // Used for inverse properties sorting and set only for them.
 	private $minOccurs;
 	private $maxOccurs;
 	private $dbMapping;
-	private $dbMappingOci;
 	private $dbSize;
 
 	private $fromList;
-	private $primaryKey;
 	private $cascadeDelete;
 
 	private $defaultValue;
@@ -43,6 +34,8 @@ class generator_PersistentProperty
 
 	private $relationName;
 	private $tableName;
+	
+	
 	/**
 	 * @var generator_PersistentProperty
 	 */
@@ -83,14 +76,15 @@ class generator_PersistentProperty
 
 			switch ($name)
 			{
-				case "id":
-					$this->id = $value;
-					break;
 				case "indexed":
-					$this->indexed = generator_PersistentModel::getBoolean($value);
-					break;
-				case "specific-index":
-					$this->specificIndex = generator_PersistentModel::getBoolean($value);
+					if ($value == 'description' || $value == 'property')
+					{
+						$this->indexed = $value;
+					}
+					else
+					{
+						$this->indexed = 'none';
+					}
 					break;
 				case "name":
 					$this->name = $value;
@@ -100,9 +94,6 @@ class generator_PersistentProperty
 					break;
 				case "from-list":
 					$this->fromList = $value;
-					break;
-				case "primary-key":
-					$this->primaryKey = generator_PersistentModel::getBoolean($value);
 					break;
 				case "cascade-delete":
 					$this->cascadeDelete = generator_PersistentModel::getBoolean($value);
@@ -118,9 +109,6 @@ class generator_PersistentProperty
 					break;
 				case "db-mapping":
 					$this->dbMapping = $value;
-					break;
-				case "db-mapping-oci":
-					$this->dbMappingOci = $value;
 					break;
 				case "db-size":
 					$this->dbSize = intval($value);
@@ -207,7 +195,6 @@ class generator_PersistentProperty
 		$property->minOccurs = 1;
 		$property->maxOccurs = 1;
 		$property->type = f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER;
-		$property->primaryKey = true;
 		$property->localized = false;
 		return $property;
 	}
@@ -224,9 +211,8 @@ class generator_PersistentProperty
 		$property->minOccurs = 1;
 		$property->maxOccurs = 1;
 		$property->type = f_persistentdocument_PersistentDocument::PROPERTYTYPE_STRING;
-		$property->primaryKey = false;
 		$property->localized = false;
-
+		$property->indexed = 'none';
 		return $property;
 	}
 
@@ -242,7 +228,6 @@ class generator_PersistentProperty
 		$property->maxOccurs = 1;
 		$property->minOccurs = 0;
 		$property->type = f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER;
-		$property->primaryKey = false;
 		$property->localized = false;
 		return $property;
 	}
@@ -259,7 +244,6 @@ class generator_PersistentProperty
 		$property->maxOccurs = 1;
 		$property->minOccurs = 0;
 		$property->type = f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER;
-		$property->primaryKey = false;
 		$property->localized = false;
 		return $property;
 	}
@@ -277,7 +261,6 @@ class generator_PersistentProperty
 		$property->maxOccurs = 1;
 		$property->minOccurs = 0;
 		$property->type = f_persistentdocument_PersistentDocument::PROPERTYTYPE_LOB;
-		$property->primaryKey = false;
 		$property->localized = $localized;
 		return $property;
 	}	
@@ -285,7 +268,7 @@ class generator_PersistentProperty
 	/**
 	 * @param generator_PersistentProperty $property
 	 */
-	public function generateInverseProperty($property)
+	public static function generateInverseProperty($property)
 	{
 		$document = generator_PersistentModel::getModelByName($property->getType());
 		$invertProperty = new generator_PersistentProperty($document);
@@ -393,31 +376,27 @@ class generator_PersistentProperty
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
-	public function getId()
+	public function getIndexed()
 	{
-		if ($this->id !== null)
+		if (is_null($this->indexed))
 		{
-			return $this->id;
-		}
-		return $this->name;
-	}
-
-	/**
-	 * @return Boolean
-	 */
-	public function isIndexed()
-	{
+			if (!is_null($this->parentProperty))
+			{
+				return $this->parentProperty->getIndexed();
+			}
+			switch ($this->type) {
+				case null:
+				case 'String':
+				case 'LongString':
+				case 'XHTMLFragment':
+					return 'property';		
+				default:
+					return 'none';
+			}
+		}		
 		return $this->indexed;
-	}
-
-	/**
-	 * @return Boolean
-	 */
-	public function hasSpecificIndex()
-	{
-		return $this->specificIndex;
 	}
 
 	/**
@@ -427,10 +406,10 @@ class generator_PersistentProperty
 	{
 		$this->type = $property->type;
 		$this->dbMapping = $property->dbMapping;
-		$this->dbMappingOci = $property->dbMappingOci;
 		$this->maxOccurs = $property->maxOccurs;
 		if (is_null($this->dbSize)) {$this->dbSize = $property->dbSize;}
 		if (is_null($this->minOccurs)) {$this->minOccurs = $property->minOccurs;}
+		if (is_null($this->indexed)) {$this->indexed = $property->indexed;}
 	}
 
 	/**
@@ -446,10 +425,8 @@ class generator_PersistentProperty
 		{
 			$this->type = $parentProperty->type;
 		}
-		$this->primaryKey = $parentProperty->primaryKey;
 		$this->cascadeDelete = $parentProperty->cascadeDelete;
 		$this->dbMapping = $parentProperty->dbMapping;
-		$this->dbMappingOci = $parentProperty->dbMappingOci;
 		$this->treeNode = $parentProperty->treeNode;
 		$this->inverse = $parentProperty->inverse;
 	}
@@ -472,11 +449,6 @@ class generator_PersistentProperty
 		else 
 		{
 			$constraints = array();
-		}
-		
-		if ($this->getMinOccurs() != 0)
-		{
-			$constraints[] = "blank:false";
 		}
 
 		if ($this->type == f_persistentdocument_PersistentDocument::PROPERTYTYPE_STRING)
@@ -510,6 +482,7 @@ class generator_PersistentProperty
 	public function override($property)
 	{
 		if (!is_null($property->fromList)) {$this->fromList = $property->fromList;}
+		if (!is_null($property->indexed)) {$this->indexed = $property->indexed;}
 		if (!is_null($property->defaultValue)) {$this->defaultValue = $property->defaultValue;}
 		if (!is_null($property->preserveOldValue)) {$this->preserveOldValue = $property->preserveOldValue;}
 		
@@ -562,17 +535,10 @@ class generator_PersistentProperty
 	public function getDbName()
 	{
 		$pp = f_persistentdocument_PersistentProvider::getInstance();
-		$properties = array('dbMapping' => $this->dbMapping, 'name' => $this->name, 'dbMappingOci' => $this->dbMappingOci);
+		$properties = array('dbMapping' => $this->dbMapping, 'name' => $this->name);
 		return $pp->generateFieldName($properties);
 	}
 
-	/**
-	 * @return Boolean
-	 */
-	public function isPrimaryKey()
-	{
-		return is_null($this->primaryKey) ? false : $this->primaryKey;
-	}
 
 	/**
 	 * @return String

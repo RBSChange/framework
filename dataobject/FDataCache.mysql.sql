@@ -5,4 +5,4 @@ CREATE TABLE IF NOT EXISTS `f_data_cache` (
 `ttl` INT(11) ,
 `is_valid` tinyint(1) NOT NULL DEFAULT '0' ,
 PRIMARY KEY ( `cache_key` )
-) ENGINE=InnoDB CHARACTER SET utf8 COLLATE utf8_bin;
+) ENGINE=InnoDB CHARACTER SET utf8 COLLATE utf8_unicode_ci;

@@ -401,8 +401,7 @@ abstract class f_persistentdocument_PersistentProvider
 			$query->setProjection(Projections::this());
 		}
 		$params = array();
-		$queryStr = $this->buildQueryString($query, $params);
-
+		$queryStr = $this->buildQueryString($query, $params);		
 		$statement = $this->prepareStatement($queryStr);
 		// N.B.: we must check if errorCode is a real error code since execute()
 		// can return false for correct executions !
@@ -411,7 +410,7 @@ abstract class f_persistentdocument_PersistentProvider
 			throw new Exception("Error while executing :[$queryStr]" . " ". var_export($params, true) .':' . join(', ', $statement->errorInfo()));
 		}
 		$rows = $statement->fetchAll(PersistentProviderConst::FETCH_ASSOC);
-		//Framework::debug("FIND from : ".f_util_ProcessUtils::getBackTrace());
+		
 		if (!$query->hasProjectionDeep())
 		{
 			$docs = array();
@@ -4366,20 +4365,17 @@ abstract class f_persistentdocument_PersistentProvider
 	// Indexing function
 	protected function getIndexingDocumentStatusQuery()
 	{
-		return "SELECT `indexing_status`, `lastupdate` FROM `f_indexing` WHERE `document_id` = :document_id AND `indexing_mode` = :indexing_mode";
+		return "SELECT `indexing_status`, `lastupdate` FROM `f_indexing` WHERE `document_id` = :document_id";
 	}
 	
 	/** 
 	 * @param integer $documentId
-	 * @param integer $mode
 	 * @param array<status, lastupdate>
 	 */
-	public final function getIndexingDocumentStatus($documentId, $mode)
+	public final function getIndexingDocumentStatus($documentId)
 	{
-		//Framework::fatal(__METHOD__ . "($documentId, $mode)");
 		$stmt = $this->prepareStatement($this->getIndexingDocumentStatusQuery());
 		$stmt->bindValue(':document_id', $documentId, PersistentProviderConst::PARAM_INT);
-		$stmt->bindValue(':indexing_mode', $mode, PersistentProviderConst::PARAM_INT);
 		$this->executeStatement($stmt);
 		$result = $stmt->fetch(PersistentProviderConst::FETCH_ASSOC);
 		$stmt->closeCursor();
@@ -4392,30 +4388,28 @@ abstract class f_persistentdocument_PersistentProvider
 	
 	protected function setIndexingDocumentStatusSelectQuery()
 	{
-		return "SELECT `indexing_status` FROM `f_indexing` WHERE `document_id` = :document_id AND `indexing_mode` = :indexing_mode FOR UPDATE";
+		return "SELECT `indexing_status` FROM `f_indexing` WHERE `document_id` = :document_id FOR UPDATE";
 	}
 	
 	protected function setUpdateIndexingDocumentStatusQuery()
 	{
-		return "UPDATE `f_indexing` SET `indexing_status` = :indexing_status, `lastupdate` = :lastupdate WHERE `document_id` = :document_id AND `indexing_mode` = :indexing_mode";
+		return "UPDATE `f_indexing` SET `indexing_status` = :indexing_status, `lastupdate` = :lastupdate WHERE `document_id` = :document_id";
 	}
 
 	protected function setInsertIndexingDocumentStatusQuery()
 	{
-		return "INSERT INTO `f_indexing` (`indexing_status`, `lastupdate`, `document_id`, `indexing_mode`) VALUES (:indexing_status, :lastupdate, :document_id, :indexing_mode)";
+		return "INSERT INTO `f_indexing` (`indexing_status`, `lastupdate`, `document_id`) VALUES (:indexing_status, :lastupdate, :document_id)";
 	}
 	
 	/**
 	 * @param integer $documentId
-	 * @param integer $mode
 	 * @param string $newStatus
 	 * @param string $lastUpdate
 	 */
-	public final function setIndexingDocumentStatus($documentId, $mode, $newStatus, $lastUpdate = null)
+	public final function setIndexingDocumentStatus($documentId, $newStatus, $lastUpdate = null)
 	{
 		$stmt = $this->prepareStatement($this->setIndexingDocumentStatusSelectQuery());
 		$stmt->bindValue(':document_id', $documentId, PersistentProviderConst::PARAM_INT);
-		$stmt->bindValue(':indexing_mode', $mode, PersistentProviderConst::PARAM_INT);
 		$this->executeStatement($stmt);
 		$result = $stmt->fetch(PersistentProviderConst::FETCH_NUM);
 		$stmt->closeCursor();
@@ -4437,60 +4431,52 @@ abstract class f_persistentdocument_PersistentProvider
 		$updatestmt->bindValue(':indexing_status', $newStatus, PersistentProviderConst::PARAM_STR);
 		$updatestmt->bindValue(':lastupdate', $lastUpdate, PersistentProviderConst::PARAM_STR);
 		$updatestmt->bindValue(':document_id', $documentId, PersistentProviderConst::PARAM_INT);
-		$updatestmt->bindValue(':indexing_mode', $mode, PersistentProviderConst::PARAM_INT);
 		$this->executeStatement($updatestmt);
 		return array($newStatus, $lastUpdate);
 	}
 	
 	protected function deleteIndexingDocumentStatusQuery()
 	{
-		return "DELETE FROM `f_indexing` WHERE `document_id` = :document_id AND `indexing_mode` = :indexing_mode";
+		return "DELETE FROM `f_indexing` WHERE `document_id` = :document_id";
 	}
 	
 	/**
 	 * @param integer $documentId
-	 * @param integer $mode
 	 * @return boolean
 	 */
-	public final function deleteIndexingDocumentStatus($documentId, $mode)
+	public final function deleteIndexingDocumentStatus($documentId)
 	{
-		//Framework::fatal(__METHOD__ . "($documentId, $mode)");
 		$stmt = $this->prepareStatement($this->deleteIndexingDocumentStatusQuery());
 		$stmt->bindValue(':document_id', $documentId, PersistentProviderConst::PARAM_INT);
-		$stmt->bindValue(':indexing_mode', $mode, PersistentProviderConst::PARAM_INT);
 		$this->executeStatement($stmt);
 		return $stmt->rowCount() == 1;
 	}
 	
 	protected function clearIndexingDocumentStatusQuery()
 	{
-		return "DELETE FROM `f_indexing` WHERE `indexing_mode` = :indexing_mode";
+		return "DELETE FROM `f_indexing`";
 	}
 	
 	/**
-	 * @param integer $mode
 	 * @return integer
 	 */
-	public final function clearIndexingDocumentStatus($mode)
+	public final function clearIndexingDocumentStatus()
 	{
-		//Framework::fatal(__METHOD__ . "($mode)");
 		$stmt = $this->prepareStatement($this->clearIndexingDocumentStatusQuery());
-		$stmt->bindValue(':indexing_mode', $mode, PersistentProviderConst::PARAM_INT);
 		$this->executeStatement($stmt);
 		return $stmt->rowCount();		
 	}
 	
 	protected function getIndexingStatsQuery()
 	{
-		return "SELECT `indexing_mode`, `indexing_status`, count(`document_id`) as nb_document,  max(`document_id`) as max_id FROM `f_indexing` GROUP BY `indexing_mode`, `indexing_status`";
+		return "SELECT `indexing_status`, count(`document_id`) as nb_document,  max(`document_id`) as max_id FROM `f_indexing` GROUP BY `indexing_status`";
 	}
 	
 	/**
-	 * @return array<indexing_mode =>, indexing_status =>, nb_document =>, max_id>
+	 * @return array<indexing_status =>, nb_document =>, max_id>
 	 */
 	public final function getIndexingStats()
 	{
-		//Framework::fatal(__METHOD__);
 		$stmt = $this->prepareStatement($this->getIndexingStatsQuery());
 		$this->executeStatement($stmt);
 		$result = $stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC);
@@ -4501,11 +4487,11 @@ abstract class f_persistentdocument_PersistentProvider
 	
 	protected function getIndexingPendingEntriesQuery()
 	{
-		return "SELECT `indexing_mode`, max(`document_id`) as max_id FROM `f_indexing` WHERE `indexing_status` <> 'INDEXED' GROUP BY `indexing_mode`";
+		return "SELECT max(`document_id`) as max_id FROM `f_indexing` WHERE `indexing_status` <> 'INDEXED'";
 	}
 	
 	/**
-	 * @return array<indexing_mode => integer, max_id => integer >
+	 * @return array<max_id => integer >
 	 */
 	public final function getIndexingPendingEntries()
 	{
@@ -4518,19 +4504,17 @@ abstract class f_persistentdocument_PersistentProvider
 	
 	protected function getIndexingDocumentsQuery($chunkSize)
 	{
-		return "SELECT `document_id` FROM `f_indexing` WHERE  `indexing_mode` = :indexing_mode AND `document_id` <= :document_id AND `indexing_status` <> 'INDEXED' ORDER BY `document_id` DESC LIMIT 0, " .intval($chunkSize);
+		return "SELECT `document_id` FROM `f_indexing` WHERE `document_id` <= :document_id AND `indexing_status` <> 'INDEXED' ORDER BY `document_id` DESC LIMIT 0, " .intval($chunkSize);
 	}
 	
 	/** 
-	 * @param integer $documentId
-	 * @param integer $mode
+	 * @param integer $maxDocumentId
+	 * @param integer $chunkSize
 	 * @param integer[]
 	 */
-	public final function getIndexingDocuments($mode, $maxDocumentId, $chunkSize = 100)
+	public final function getIndexingDocuments($maxDocumentId, $chunkSize = 100)
 	{
-		//Framework::fatal(__METHOD__ . "($mode, $maxDocumentId, $chunkSize)");
 		$stmt = $this->prepareStatement($this->getIndexingDocumentsQuery($chunkSize));
-		$stmt->bindValue(':indexing_mode', $mode, PersistentProviderConst::PARAM_INT);
 		$stmt->bindValue(':document_id', $maxDocumentId, PersistentProviderConst::PARAM_INT);	
 		$this->executeStatement($stmt);
 		$rows = $stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC);

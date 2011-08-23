@@ -312,7 +312,8 @@ class f_persistentdocument_DocumentService extends BaseService
 
 			$this->postInsert($document, $parentNodeId);
 			$this->postSave($document, $parentNodeId);
-
+			
+			$this->setToIndexIfNeeded($document, 'Insert');
 			$document->setModifiedPropertyNames();
 						
 			$this->tm->commit();
@@ -477,7 +478,9 @@ class f_persistentdocument_DocumentService extends BaseService
 
 			$this->postUpdate($document, $parentNodeId);
 			$this->postSave($document, $parentNodeId);
-
+			
+			$this->setToIndexIfNeeded($document, 'Update');
+			
 			$document->setOldValues();
 			$document->setModifiedPropertyNames();
 
@@ -615,6 +618,8 @@ class f_persistentdocument_DocumentService extends BaseService
 			{
 				$this->postDeleteLocalized($document);
 			}
+			
+			$this->setToIndexIfNeeded($document, 'Delete');
 
 			$this->tm->commit();
 		}
@@ -673,6 +678,8 @@ class f_persistentdocument_DocumentService extends BaseService
 					}
 					$original = $this->getDocumentInstance($correctionOfId);
 					$original->setCorrectionid(null);
+					
+					$this->setToIndexIfNeeded($original, 'Update');
 					$this->pp->updateDocument($original);
 					RequestContext::getInstance()->endI18nWork();
 				}
@@ -1566,6 +1573,9 @@ class f_persistentdocument_DocumentService extends BaseService
 						$document->setCorrectionid(null);
 						$document->setPublicationstatus('DEPRECATED');
 						$this->pp->updateDocument($document);
+						
+						//Correction deprecated
+						$this->setToIndexIfNeeded($document, 'UpdateStatus');
 
 						// Effacement de la correction dans l'arbre
 						$ts = TreeService::getInstance();
@@ -1602,7 +1612,7 @@ class f_persistentdocument_DocumentService extends BaseService
 				$this->pp->updateDocument($document);
 				$eventName = 'persistentDocumentActivated';
 			}
-
+			$this->setToIndexIfNeeded($document, 'UpdateStatus');
 			$this->tm->commit();
 		}
 		catch (Exception $e)
@@ -1736,7 +1746,8 @@ class f_persistentdocument_DocumentService extends BaseService
 				{
 					$document->setPublicationstatus('PUBLICATED');
 					$this->removeActivePublicationStatusInfo($document);
-					$this->pp->updateDocument($document);
+					$this->pp->updateDocument($document);					
+					$this->setToIndexIfNeeded($document, 'UpdateStatus');
 					$eventName = 'persistentDocumentPublished';
 					$published = true;
 				}
@@ -1745,6 +1756,8 @@ class f_persistentdocument_DocumentService extends BaseService
 			{
 				$document->setPublicationstatus('ACTIVE');
 				$this->pp->updateDocument($document);
+				
+				$this->setToIndexIfNeeded($document, 'UpdateStatus');
 				$eventName = 'persistentDocumentUnpublished';
 				$published = false;
 			}
@@ -1773,6 +1786,7 @@ class f_persistentdocument_DocumentService extends BaseService
 		{
 			$document->setPublicationstatus('ACTIVE');
 			$this->pp->updateDocument($document);
+			$this->setToIndexIfNeeded($document, 'UpdateStatus');
 			$this->dispatchPublicationStatusChanged($document, 'PUBLICATED', 'persistentDocumentUnpublished', $extraEventParams);
 		}
 	}
@@ -1810,6 +1824,57 @@ class f_persistentdocument_DocumentService extends BaseService
 		}
 
 		return true;
+	}
+	
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param string $operation [Insert, Update, Delete, UpdateStatus]
+	 */
+	protected function setToIndexIfNeeded($document, $operation)
+	{	
+		$pm = $document->getPersistentModel();
+		if ($pm->isBackofficeIndexable() || $pm->isIndexable())
+		{
+			
+			if ($operation === 'Update')
+			{
+				$ip = $pm->getIndexedPropertiesInfos();
+				$mp = $document->getModifiedPropertyNames();
+				$count = count(array_intersect($mp, array_keys($ip)));
+				if ($count == 0)
+				{
+					return;
+				}	
+			}
+			indexer_IndexService::getInstance()->toIndex($document);
+		}
+	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param indexer_IndexService $indexService
+	 * @return indexer_IndexedDocument || null
+	 */
+	public function getIndexedDocument($document, $indexService)
+	{
+		$pm = $document->getPersistentModel();		
+		$indexedDocument = $indexService->getNewIndexedDocument($document);
+		if ($indexedDocument !== null)
+		{
+			$this->updateIndexDocument($indexedDocument, $document, $indexService);
+		}
+		return $indexedDocument;	
+	}
+	
+	/**
+	 * @param indexer_IndexedDocument $indexedDocument
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param indexer_IndexService $indexService
+	 */
+	protected function updateIndexDocument($indexedDocument, $document, $indexService)
+	{
+		// Nothing done by default.
 	}
 	
 	/**
@@ -1928,6 +1993,7 @@ class f_persistentdocument_DocumentService extends BaseService
 			$this->saveMeta($document);
 			$eventName = 'persistentDocumentDeactivated';
 			
+			$this->setToIndexIfNeeded($document, 'UpdateStatus');
 			$this->tm->commit();
 		}
 		catch (Exception $e)
@@ -1976,7 +2042,10 @@ class f_persistentdocument_DocumentService extends BaseService
 			$document->setPublicationstatus('FILED');
 			$this->removeActivePublicationStatusInfo($document);
 			$this->pp->updateDocument($document);
+			
 			$this->saveMeta($document);
+			
+			$this->setToIndexIfNeeded($document, 'UpdateStatus');
 			$eventName = 'persistentDocumentFiled';
 
 			$this->tm->commit();
@@ -2098,6 +2167,9 @@ class f_persistentdocument_DocumentService extends BaseService
 			}
 
 			$this->pp->updateDocument($document);
+			
+			$this->setToIndexIfNeeded($document, 'UpdateStatus');
+			
 			$eventName = 'persistentDocumentWorkflowCanceled';
 
 			$this->tm->commit();
@@ -2147,6 +2219,8 @@ class f_persistentdocument_DocumentService extends BaseService
 			$correction->setDocumentversion($document->getDocumentversion());
 			$correction->setPublicationstatus('CORRECTION');
 			$this->pp->insertDocument($correction);
+			
+			$this->setToIndexIfNeeded($document, 'Insert');
 			$correctionId = $correction->getId();
 
 			$folderId = $this->getCorrectionParentNodeId($correction);
@@ -2183,7 +2257,7 @@ class f_persistentdocument_DocumentService extends BaseService
 				}
 			}
 			$document->setCorrectionid($correctionId);
-			
+				
 			$this->pp->updateDocument($document);
 			if ($modifiedProperties !== null)
 			{
@@ -2194,6 +2268,7 @@ class f_persistentdocument_DocumentService extends BaseService
 				$i18nDoc->setModifiedProperties($i18nModifiedProperties);
 			}
 			
+			$this->setToIndexIfNeeded($document, 'Update');
 			$this->tm->commit();
 		}
 		catch (Exception $e)
@@ -2278,6 +2353,7 @@ class f_persistentdocument_DocumentService extends BaseService
 				{
 					$document->setPublicationstatus('WORKFLOW');
 					$this->pp->updateDocument($document);
+					$this->setToIndexIfNeeded($document, 'UpdateStatus');
 					$eventName = 'persistentDocumentWorkflowInstanceCreated';
 				}
 			}
@@ -2834,7 +2910,7 @@ class f_persistentdocument_DocumentService extends BaseService
 	
 	/**
 	 * @see f_util_HtmlUtils::renderDocumentLink
-	 * @param media_persistentdocument_media $document
+	 * @param f_persistentdocument_PersistentDocument $document
 	 * @param array $attributes
 	 * @param string $content
 	 * @param string $lang

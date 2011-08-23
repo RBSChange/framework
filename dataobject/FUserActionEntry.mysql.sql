@@ -8,4 +8,4 @@ CREATE TABLE IF NOT EXISTS `f_user_action_entry` (
   `username` varchar(100) NULL,
   `info` text,
   PRIMARY KEY  (`entry_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 CHARACTER SET utf8 COLLATE utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=1 CHARACTER SET utf8 COLLATE utf8_unicode_ci;

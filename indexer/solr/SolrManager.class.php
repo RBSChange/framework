@@ -13,7 +13,6 @@ class indexer_SolrManager
 	private $deleteQueue = array();
 	private $updateQueue = array();
 	
-	private $clientId;
 	private $batchMode = true;
 	
 	/**
@@ -36,115 +35,42 @@ class indexer_SolrManager
 	private $indexTask = null;
 	
 	private $dirty = false;
-	
+		
 	/**
-	 * Used for select queries, if configured.
-	 * See <code>project/config/indexer/SolrManager/cacheClass</code>
-	 * configuration section.
-	 * @var indexer_Cache
-	 */
-	private static $cache;
-	
-	/**
-	 * Value of <code>project/config/indexer/SolrManager/schemaVersion</code>
-	 * configuration section.
 	 * @var String
 	 */
-	private static $schemaVersion;
+	private $schemaVersion;
+	
+	private $clientId;
+	
+	private $disableCommit = false;
+	
+	private $requestMethod = 'POST';
+	
+	private $disableDocumentCache = false;
+
 	
 	/**
-	 * @var Boolean
+	 * @param string $indexURL
+	 * @param array $config
 	 */
-	private static $confRead = false;
-	
-	public function __construct($indexURL)
+	public function __construct($indexURL, $config)
 	{
+		$this->clientId = $config['clientId'];
+		$this->schemaVersion = $config['schemaVersion'];
 		$this->setBaseURL($indexURL);
-		if (defined('SOLR_INDEXER_DISABLE_BATCH_MODE'))
-		{
-			$this->batchMode = (bool)SOLR_INDEXER_DISABLE_BATCH_MODE;
-		}
-		self::readConfiguration();
-	}
-	
-	/**
-	 * @return String
-	 */
-	public static function getSchemaVersion()
-	{
-		self::readConfiguration();
-		return self::$schemaVersion;
+		$this->batchMode = ($config['batch_mode'] == 'true');
+		$this->disableCommit = ($config['disable_commit'] == 'true');
+		$this->disableDocumentCache = ($config['disable_document_cache'] == 'true');
+		$this->requestMethod = ($config['request_method'] === 'POST') ? 'POST' : 'GET'; 
 	}
 	
 	/**
 	 * @return boolean
 	 */
-	public static function hasSuggestionInOnRequest()
+	public function getDisableDocumentCache()
 	{
-		return self::getSchemaVersion() !== "2.0.4";
-	}
-	
-	/**
-	 * @return boolean
-	 */
-	public static function hasAggregateText()
-	{
-		return self::getSchemaVersion() !== "2.0.4";
-	}
-	
-	/**
-	 * @return boolean
-	 */
-	public static function hasFacetAbility()
-	{
-		return self::getSchemaVersion() !== "2.0.4";
-	}
-	
-	/**
-	 * @return boolean
-	 */
-	public static function hasVolatileDynamicFields()
-	{
-		return self::getSchemaVersion() !== "2.0.4";
-	}
-	
-	protected static function readConfiguration()
-	{
-		if (!self::$confRead)
-		{
-			self::$cache = self::getCache();
-			self::$schemaVersion = Framework::getConfigurationValue("indexer/SolrManager/schemaVersion", "2.0.4");
-			self::$confRead = true;
-		}
-	}
-	
-	protected static function getCache()
-	{
-		$className = Framework::getConfigurationValue("indexer/SolrManager/cacheClass");
-		if ($className !== null)
-		{
-			$class = new ReflectionClass($className);
-			if (!$class->isSubclassOf(new ReflectionClass("indexer_Cache")))
-			{
-				throw new Exception($className." is not a indexer_Cache subclass");
-			}
-			return $class->newInstance();
-		}
-		return null;
-	}
-	
-	/**
-	 * @return Boolean true if some cache is configured
-	 */
-	public static function clearCache()
-	{
-		$cache = self::getCache();
-		if ($cache !== null)
-		{
-			$cache->clear();
-			return true;
-		}
-		return false;
+		return $this->disableDocumentCache;
 	}
 	
 	/**
@@ -158,27 +84,17 @@ class indexer_SolrManager
 	 */
 	public function query($solrSearch)
 	{
-		$usePost = false;
 		$this->setTask(self::SELECT_TASK);
-		
 		// Set the clientId on the query
-		$solrSearch->setClientId($this->getClientId());
+		$solrSearch->setClientId($this->clientId);
 		
-		// If SOLR_USE_POST_QUERIES is set we use POST for queries
-		if (defined("SOLR_USE_POST_QUERIES"))
-		{
-			if (is_bool(SOLR_USE_POST_QUERIES))
-			{
-				$usePost = SOLR_USE_POST_QUERIES;
-			}
-		}
 		// Build Query String
 		$queryString = $solrSearch->getQueryString();
 	
-		if ($usePost)
+		if ($this->requestMethod === 'POST')
 		{
 			$solrQuery = $this->getReadSolrRequest($this->getUrl());
-			$solrQuery->setMethod(indexer_SolrServerRequest::METHOD_POST);
+			$solrQuery->setMethod('POST');
 			$solrQuery->setPostData($queryString);
 		}
 		else
@@ -189,9 +105,7 @@ class indexer_SolrManager
 	}
 	
 	/**
-	 * Update the indexable document 
-	 *
-	 * @param indexer_IndexableDocument $indexableDocument
+	 * @param indexer_IndexedDocument $indexableDocument
 	 */
 	public function update($indexableDocument)
 	{
@@ -205,20 +119,14 @@ class indexer_SolrManager
 	 */
 	public function delete($id)
 	{
-		$clientId = $this->getClientId();
-		$indexableDocumentId = $clientId . $id;
+		$indexableDocumentId = $this->clientId . $id;
 		if ($this->batchMode)
 		{
-			if (isset($this->updateQueue[$clientId][$indexableDocumentId]))
+			if (isset($this->updateQueue[$indexableDocumentId]))
 			{
-				unset($this->updateQueue[$clientId][$indexableDocumentId]);
+				unset($this->updateQueue[$indexableDocumentId]);
 			}
-			
-			if (!isset($this->deleteQueue[$clientId]))
-			{
-				$this->deleteQueue[$clientId] = array();
-			}
-			$this->deleteQueue[$clientId][$indexableDocumentId] = $indexableDocumentId;
+			$this->deleteQueue[$indexableDocumentId] = $indexableDocumentId;
 		}
 		else
 		{
@@ -237,55 +145,28 @@ class indexer_SolrManager
 		$this->sendUpdate($string);
 	}
 	
-	private $forcedClientId;
-	
-	protected function setClientId($clientId)
-	{
-		$this->forcedClientId = $clientId;
-	}
-	
-	protected function unsetClientId()
-	{
-		$this->forcedClientId = null;
-	}
-	
 	/**
 	 * Add document to the solr indexer.
 	 *
-	 * @param indexer_IndexableDocument $indexableDocument
+	 * @param indexer_IndexedDocument $indexableDocument
 	 */
 	public function add($indexableDocument)
 	{
-		$clientId = $this->getClientId();
 		if ($this->batchMode)
 		{
-			$indexableDocumentId = $this->getFinalIdForIndexableDocument($indexableDocument);
-			if (isset($this->deleteQueue[$clientId][$indexableDocumentId]))
+			$indexableDocumentId = $this->clientId . $indexableDocument->getUniqueKey();
+			if (isset($this->deleteQueue[$indexableDocumentId]))
 			{
-				unset($this->deleteQueue[$clientId][$indexableDocumentId]);
+				unset($this->deleteQueue[$indexableDocumentId]);
 			}
-			elseif (!isset($this->updateQueue[$clientId]))
-			{
-				$this->updateQueue[$clientId] = array();
-			}
-			$this->updateQueue[$clientId][$indexableDocumentId] = $indexableDocument;
+			$this->updateQueue[$indexableDocumentId] = $indexableDocument;
 		}
 		else
 		{
 			$this->addInternal($indexableDocument);
 		}
 	}
-	
-	/**
-	 * @param indexer_IndexedDocument $indexableDocument
-	 * @return String
-	 */
-	private function getFinalIdForIndexableDocument($indexableDocument)
-	{
-		$fields = $indexableDocument->getFields();
-		return strval($this->getClientId() . $fields['id']['value']);
-	}
-	
+		
 	/**
 	 * @param indexer_IndexedDocument $indexableDocument
 	 */
@@ -326,13 +207,13 @@ class indexer_SolrManager
 					// Add the client field
 					$this->xmlWriterAdd->startElement('field');
 					$this->xmlWriterAdd->writeAttribute('name', 'client');
-					$this->xmlWriterAdd->text($this->xmlentities($this->getClientId()));
+					$this->xmlWriterAdd->text($this->xmlentities($this->clientId));
 					$this->xmlWriterAdd->endElement();
 					
 					// Build the finalId
 					$this->xmlWriterAdd->startElement('field');
 					$this->xmlWriterAdd->writeAttribute('name', 'finalId');
-					$this->xmlWriterAdd->text($this->xmlentities(strval($this->getClientId() . $values[0])));
+					$this->xmlWriterAdd->text($this->xmlentities(strval($this->clientId . $values[0])));
 					$this->xmlWriterAdd->endElement();
 					break;
 				case 'lang':
@@ -386,10 +267,7 @@ class indexer_SolrManager
 	public function sendCommit()
 	{
 		$this->dirty = false;
-		if (defined("SOLR_INDEXER_DISABLE_COMMIT") && SOLR_INDEXER_DISABLE_COMMIT == true)
-		{
-			return "";
-		}
+		if ($this->disableCommit) {return "";}
 		$this->setTask(self::UPDATE_TASK);
 		return $this->sendXMLData("<commit/>");
 	}
@@ -402,6 +280,17 @@ class indexer_SolrManager
 		$this->setTask(self::UPDATE_TASK);
 		return $this->sendXMLData("<optimize/>", 60);
 	}
+	
+	/**
+	 * Clear the solr index
+	 */
+	public function optimizeIndexQuery()
+	{
+		$queryXml = '<?xml version="1.0" encoding="UTF-8" ?><optimize/>';
+		$this->setTask(self::UPDATE_TASK);
+		$this->sendXMLData($queryXml);
+	}
+	
 	/**
 	 * @param String $name
 	 * @param String $data
@@ -455,45 +344,15 @@ class indexer_SolrManager
 	 */
 	public function clearIndexQuery()
 	{
-		$this->deleteByQuery(new indexer_TermQuery('client', $this->getClientId()));
+		$this->deleteByQuery(new indexer_TermQuery('client', $this->clientId));
 		$this->sendCommit();
 	}
-	
-	/**
-	 * Clear the solr index
-	 */
-	public function optimizeIndexQuery()
-	{
-		$queryXml = '<?xml version="1.0" encoding="UTF-8" ?><optimize/>';
-		$this->setTask(self::UPDATE_TASK);
-		$this->sendXMLData($queryXml);
-	}
-	
+		
 	public function rebuildSpellCheckIndexForLang($lang)
 	{
-		if (self::getSchemaVersion() == "2.0.4")
-		{
-			$queryString = '/?client=' . $this->getClientId() . '&qt=spellchecker_' . $lang . '&cmd=rebuild';
-		}
-		else
-		{
-			$queryString = '/?client=' . $this->getClientId() .
-				'&q=*:*&rows=0&spellcheck=true&spellcheck.build=true&spellcheck.q=change&qt=/spellchecker_' . $lang;
-		}
+		$queryString = '/?client=' . $this->clientId . '&q=*:*&rows=0&spellcheck=true&spellcheck.build=true&spellcheck.q=change&qt=/spellchecker_' . $lang;
 		$this->setTask(self::SELECT_TASK);
 		$this->getData($queryString, -1);
-	}
-	
-	/**
-	 * @return String
-	 */
-	protected function getClientId()
-	{
-		if ($this->forcedClientId !== null)
-		{
-			return $this->forcedClientId;
-		}
-		return indexer_IndexService::getInstance()->getClientId();
 	}
 	
 	/**
@@ -593,10 +452,6 @@ class indexer_SolrManager
 	protected function getReadSolrRequest($url)
 	{
 		$request = new indexer_SolrServerRequest($url);
-		if (self::$cache !== null)
-		{
-			$request->setCache(self::$cache);
-		}
 		return $request;
 	}
 	
@@ -686,14 +541,7 @@ class indexer_SolrManager
 	
 	private function addExtraInformation(&$indexableDocumentFields)
 	{
-		$lang = $indexableDocumentFields['lang']['value'];
-		
-		if (self::getSchemaVersion() != "3.0.3")
-		{
-			$indexableDocumentFields[$lang . '_aggregateText']['value'] = $indexableDocumentFields['label']['value'] . "\n" . $indexableDocumentFields['text']['value'];
-			$indexableDocumentFields[$lang . '_aggregateText']['type'] = indexer_Field::INDEXED;
-		}
-		
+		$lang = $indexableDocumentFields['lang']['value'];		
 		$indexableDocumentFields[$lang . '_sortableLabel']['value'] = mb_strtolower(trim(preg_replace('/[\s+]/u', ' ', $indexableDocumentFields['label']['value'])), "UTF-8");
 		$indexableDocumentFields[$lang . '_sortableLabel']['type'] = indexer_Field::INDEXED;
 	}
@@ -707,28 +555,19 @@ class indexer_SolrManager
 		try
 		{
 			$deleteQuery = indexer_QueryHelper::orInstance();
-			foreach ($this->deleteQueue as $clientId => $documentsToDelete)
+			foreach ($this->deleteQueue as $indexableDocumentId)
 			{
-				$this->setClientId($clientId);
-				foreach ($documentsToDelete as $indexableDocumentId)
-				{
-					$deleteQuery->add(new indexer_TermQuery('finalId', $indexableDocumentId));
-				}
-				$this->unsetClientId();
+				$deleteQuery->add(new indexer_TermQuery('finalId', $indexableDocumentId));
 			}
+			
 			if ($deleteQuery->getSubqueryCount() > 0)
 			{
 				$this->deleteByQuery($deleteQuery);
 			}
 			$this->deleteQueue = array();
-			foreach ($this->updateQueue as $clientId => $documentsToUpdate)
+			foreach ($this->updateQueue as $indexableDocument)
 			{
-				$this->setClientId($clientId);
-				foreach ($documentsToUpdate as $indexableDocumentId => $indexableDocument)
-				{
-					$this->addInternal($indexableDocument);
-				}
-				$this->unsetClientId();
+				$this->addInternal($indexableDocument);
 			}
 			$this->updateQueue = array();
 			$this->commitBatch();

@@ -65,38 +65,28 @@ class indexer_SearchResult
 		list($id, ) = explode('/', $this->getId());
 		return intval($id);
 	}
-	
-	/**
-	 * Gets the "css" friendly type of the result eg: modules_news_news, modules_media_media_pdf, ....
-	 * 
-	 *  @return String
-	 */
-	public function getResultType()
-	{
-		$res = $this->getDocumentModel(); 
-		if ($this->isMedia())
-		{
-			$res .= "_" . $this->getMediaType();
-		}
-		return str_replace('/', '_', $res);
-	}
-
-	/**
-	 * Returns true if result is a media.
-	 *
-	 * @return unknown
-	 */
-	public function isMedia()
-	{
-		return $this->getDocumentModel() == 'modules_media/media';
-	}
-	
+		
 	/**
 	 * Magic "getter" method
 	 */
 	public function __call($method, $args)
 	{
-		if (f_util_StringUtils::beginsWith($method, "getHighlighted"))
+		if ($method === 'getResultType')
+		{
+			Framework::error('Call to deleted ' . get_class($this) . '->' .$method. ' method');
+			$res = $this->getDocumentModel(); 
+			if ($this->isMedia())
+			{
+				$res .= "_" . $this->getMediaType();
+			}
+			return str_replace('/', '_', $res);
+		}
+		elseif ($method === 'isMedia')
+		{
+			Framework::error('Call to deleted ' . get_class($this) . '->' .$method. ' method');
+			return $this->getDocumentModel() == 'modules_media/media';
+		} 
+		elseif (f_util_StringUtils::beginsWith($method, "getHighlighted"))
 		{
 			$propName = f_util_StringUtils::lcfirst(substr($method, 14));
 			return $this->getHighlightedProperty($propName);

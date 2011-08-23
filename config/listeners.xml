@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <listeners>
   <listener listenerClass="listener_SimpleCacheListener" />
-  <listener listenerClass="f_listener_PublishListener" />
-  <listener listenerClass="f_listener_IndexListener" />
-  <listener listenerClass="f_listener_BackofficeIndexListener" />
 </listeners>

@@ -298,11 +298,6 @@ interface f_persistentdocument_PersistentDocument
 	public function isI18InfoModified();
 	
 	/**
-	 * @return indexer_BackofficeIndexedDocument
-	 */
-	public function getBackofficeIndexedDocument();
-	
-	/**
 	 * @param String $name
 	 * @return Boolean
 	 */

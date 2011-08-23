@@ -43,7 +43,6 @@ class generator_PersistentModel
 	private $modelVersion;
 
 	private $tableName;
-	private $tableNameOci;
 
 	private $className;
 	private $useCorrection;
@@ -62,7 +61,6 @@ class generator_PersistentModel
 	private $serializedproperties = array();
 	private $childrenProperties = array();
 	private $inverseProperties = array();
-	private $statuses = array();
 
 	private $initSerializedproperties;
 
@@ -981,7 +979,7 @@ class generator_PersistentModel
 	{
 		$this->extend = null;
 		$pp = f_persistentdocument_PersistentProvider::getInstance();
-		$properties = array('tableName' => $this->tableName, 'moduleName' => $this->moduleName, 'documentName' => $this->documentName, 'tableNameOci' => $this->tableNameOci);
+		$properties = array('tableName' => $this->tableName, 'moduleName' => $this->moduleName, 'documentName' => $this->documentName);
 		$this->tableName = $pp->generateTableName($properties);
 
 		foreach (array_reverse($baseDocument->properties) as $property)
@@ -994,17 +992,15 @@ class generator_PersistentModel
 				$newProperty->setModel($this);
 				// Use this to preserve the generic > specific order of the properties
 				$props = array_reverse($this->properties, true);
-				$props[$newProperty->getId()] = $newProperty;
+				$props[$newProperty->getName()] = $newProperty;
 				$this->properties = array_reverse($props, true);
 			}
 			else
 			{
 				$newProperty->mergeGeneric($property);
 			}
-		
 		}
 
-		$this->statuses = $baseDocument->statuses;
 		if ($this->defaultStatus === null)
 		{
 			$this->defaultStatus = $baseDocument->defaultStatus;
@@ -1457,11 +1453,6 @@ class generator_PersistentModel
 		return count($this->getPreservedPropertiesNames() != 0);
 	}
 
-	public function getStatuses()
-	{
-		return count($this->statuses) == 0 ? $this->getParentModel()->getStatuses() : $this->statuses;
-	}
-
 	/**
 	 * @return String
 	 */
@@ -1472,6 +1463,15 @@ class generator_PersistentModel
 			return $this->getParentModel()->getDocumentClassName();
 		}
 		return self::BASE_CLASS_NAME;
+	}
+	
+	public function getBaseModelClassName()
+	{
+		if ($this->hasParentModel())
+		{
+			return $this->getParentModel()->getFinalDocumentClassName() . 'model';
+		}
+		return 'f_persistentdocument_PersistentDocumentModel';		
 	}
 
 	/**
@@ -1538,6 +1538,10 @@ class generator_PersistentModel
 	public function generatePhpModel()
 	{
 		$generator = new builder_Generator('models');
+		$generator->assign_by_ref('model', $this);
+		$result = $generator->fetch('DocumentModel.tpl');
+		return $result;
+		
 		$model = clone($this);
 
 		$model->properties = array();
@@ -2139,9 +2143,6 @@ class generator_PersistentModel
 				case "table-name":
 					$this->tableName = $value;
 					break;
-				case "table-name-oci":
-					$this->tableNameOci = $value;
-					break;
 				case "classname":
 					$this->className = $value;
 					break;
@@ -2193,7 +2194,7 @@ class generator_PersistentModel
 	 */
 	private function addProperty($property)
 	{
-		$this->properties[$property->getId()] = $property;
+		$this->properties[$property->getName()] = $property;
 	}
 
 
@@ -2223,7 +2224,7 @@ class generator_PersistentModel
 	 */
 	private function addSerializedProperty($property)
 	{
-		$this->serializedproperties[$property->getId()] = $property;
+		$this->serializedproperties[$property->getName()] = $property;
 	}
 
 	/**
@@ -2276,18 +2277,6 @@ class generator_PersistentModel
 			if ($statuses->hasAttribute('default'))
 			{
 				$this->defaultStatus = $statuses->getAttribute('default');
-			}
-
-			if ($this->name == self::BASE_MODEL)
-			{
-				foreach ($statuses->childNodes as $status)
-				{
-					if ($status->nodeName == "add")
-					{
-						$name = $status->getAttribute('name');
-						$this->statuses[$name] = $name;
-					}
-				}
 			}
 		}
 	}

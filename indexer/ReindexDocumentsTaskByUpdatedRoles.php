@@ -8,27 +8,21 @@ class f_tasks_ReindexDocumentsByUpdatedRolesTask extends task_SimpleSystemTask
 	 */
 	protected function execute()
 	{
-		
-		$frontEndModels = array();
-		$backEndModels = array();
-		
+		$models = array();
 		foreach ($this->getParameter("updatedRoles") as $roleName)
 		{
-			$frontEndModels =  array_merge($frontEndModels, indexer_IndexService::getInstance()->getIndexableDocumentModelsForModifiedRole($roleName));
-			$backEndModels = array_merge($backEndModels, indexer_IndexService::getInstance()->getBackofficeIndexableDocumentModelsForModifiedRole($roleName));
+			$models =  array_unique(array_merge($models, indexer_IndexService::getInstance()->getIndexableDocumentModelsForModifiedRole($roleName)));
 		}
+		
 		$errors = array();
-		
-		$this->processModels(array_unique($frontEndModels), 'front', $errors);
-		$this->processModels(array_unique($backEndModels), 'back', $errors);
-		
+		$this->processModels($models, $errors);				
 		if (count($errors))
 		{
 			throw new Exception(implode("\n", $errors));
 		}
 	}
 	
-	private function processModels($modelsName, $mode, &$errors)
+	private function processModels($modelsName, &$errors)
 	{
 		if (count($modelsName) == 0) {return ;}
 		
@@ -40,14 +34,13 @@ class f_tasks_ReindexDocumentsByUpdatedRolesTask extends task_SimpleSystemTask
 		error_log("\n". gmdate('Y-m-d H:i:s')."\t".__METHOD__ . "\t START", 3, $indexerLogPath);
 		foreach ($modelsName as $modelName) 
 		{
-			$modeParam = array($mode);
 			$documentIndex = 0;
 			$progres = true;
 			error_log("\n". gmdate('Y-m-d H:i:s')."\t Processing $modelName", 3, $indexerLogPath);
 			while ($progres) 
 			{
 				$this->plannedTask->ping();
-				$output = f_util_System::execScript($scriptPath, array($mode, $modelName, $documentIndex, $chunkSize, 1));
+				$output = f_util_System::execScript($scriptPath, array($modelName, $documentIndex, $chunkSize, 1));
 				if (!is_numeric($output))
 				{
 					$progres = false;
