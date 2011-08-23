@@ -26,7 +26,7 @@ class change_Injection
      
 		if (in_array($this->originalClassInfo['name'], $declaredClasses) || in_array($this->replacingClassInfo['name'], $declaredClasses) )
         {
-            throw new Exception('Too late....I\'m not Chuck Norris');
+           throw new Exception('Could not check injection validity at run time - please make sure that ' . $this->originalClassInfo['name'] . ' can be injected by ' . $this->replacingClassInfo['name']);
         }
         if (isset($infos[$this->originalClassInfo['name']]['path']))
         {
@@ -40,7 +40,6 @@ class change_Injection
 		$originalReflectionClass = new Zend_Reflection_Class($this->originalClassInfo['name']);
 		$reflectionClass = new Zend_Reflection_Class($this->replacingClassInfo['name']);
 		return $originalReflectionClass->isUserDefined() && $reflectionClass->isSubclassOf($originalReflectionClass->getName()) && !$originalReflectionClass->isFinal(); 
-
 	}
     
     public function __construct($originalClassInfo, $classInfo)
@@ -134,7 +133,10 @@ class change_Injection
 		$originalFileInfo = new SplFileInfo($this->originalClassInfo['path']);
 		$originalFileContent = file_get_contents($originalFileInfo->getPathname());
 		$originalClassName = $this->originalClassInfo['name'];
-
+        if (strpos($originalFileInfo->getPathname(), 'build' . DIRECTORY_SEPARATOR .  'injection') !== false)
+        {
+            throw new Exception('Your autoload seems to be corrupted - please run ' . CHANGE_COMMAND . 'update-autoload');
+        }
 		$newClassName = $originalClassName . '_h4x0r3d';
 		$infos = array();
 		// Process the original file
@@ -162,6 +164,12 @@ class change_Injection
 		$injectFileInfo = new SplFileInfo($this->replacingClassInfo['path']);
 		$injectFileContent = file_get_contents($injectFileInfo->getPathname());
 		$injectClassName = $this->replacingClassInfo['name'];
+		
+        if (strpos($injectFileInfo->getPathname(), 'build' . DIRECTORY_SEPARATOR .  'injection') !== false)
+        {
+            throw new Exception('Your autoload seems to be corrupted - please run ' . CHANGE_COMMAND . 'update-autoload');
+        }
+		
 		$classes = $this->processInjectedFile($injectFileContent, $injectClassName , $originalClassName, $newClassName, PHP_EOL);
 		$combinedContent .= $classes[$originalClassName];
 		

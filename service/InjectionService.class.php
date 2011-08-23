@@ -114,7 +114,7 @@ class change_InjectionService
 			$replacingClassInfo = $this->buildClassInfo($className);
 
 		    $injection = new change_Injection($originalClassInfo, $replacingClassInfo);
-			if ($checkValidity && $injection->isValid())
+			if (!$checkValidity || ($checkValidity && $injection->isValid()))
 			{
 				$newInjectionInfos = array_merge($newInjectionInfos, $injection->generate());
 				$returnValue[$originalClassName] = $className; 

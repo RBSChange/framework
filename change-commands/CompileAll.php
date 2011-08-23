@@ -34,7 +34,6 @@ class commands_CompileAll extends c_ChangescriptCommand
 		$parent = $this->getParent();
 		$parent->executeCommand("compileConfig");
 		$parent->executeCommand("compileDocuments");
-		$parent->executeCommand("compileInjection");
 		$parent->executeCommand("compileDocumentFilters");
 		$parent->executeCommand("compileRoles");
 		$parent->executeCommand("compilePermissions");

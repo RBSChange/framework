@@ -51,10 +51,15 @@ class ClassResolver implements ResourceResolver
 	public function getPath($className)
 	{
 		$this->validateClassName($className);
-		return $this->cacheDir . DIRECTORY_SEPARATOR . str_replace('_', DIRECTORY_SEPARATOR, 
-				$className) . DIRECTORY_SEPARATOR . "to_include";
+		// Support for Zend Framework
+		if (strpos($className, 'Zend_') === 0)
+		{
+		    return ZEND_FRAMEWORK_PATH . DIRECTORY_SEPARATOR . str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
+		}
+		return $this->cacheDir . DIRECTORY_SEPARATOR . str_replace('_', DIRECTORY_SEPARATOR, $className) . DIRECTORY_SEPARATOR . "to_include";
 	}
 	
+
 	/**
 	 * @param string $className Name of researched class
 	 * @return string Path of resource or null
@@ -89,7 +94,7 @@ class ClassResolver implements ResourceResolver
 				array('path' => '%PROJECT_HOME%/framework/', 'recursive' => 'true', 
 						'exclude' => array('deprecated', 'doc', 'module', 'webapp', 'patch')), 
 				array('path' => '%PROJECT_HOME%/libs/', 'recursive' => 'true',
-					'exclude' => array('fckeditor', 'icons', 'pearlibs')),
+					'exclude' => array('fckeditor', 'icons', 'pearlibs', 'zfminimal')),
 				array('path' => '%PROJECT_HOME%/build/project/', 'recursive' => 'true'), 
 				array('path' => '%PROJECT_HOME%/modules/*/actions'), 
 				array('path' => '%PROJECT_HOME%/modules/*/change-commands', 'recursive' => 'true'), 
@@ -145,6 +150,7 @@ class ClassResolver implements ResourceResolver
 			}
 			
 			$matches = $this->glob($path);
+			$files = $finder->in($path);
 			if ($matches)
 			{
 				$files = $finder->in($matches);
@@ -160,19 +166,7 @@ class ClassResolver implements ResourceResolver
 			$result = glob($path);
 			return (is_array($result) && count($result) > 0) ? $result : false;
 		}
-		$cleanPath = str_replace('/*', '', $path);
-		$result = array($cleanPath);
-		if (is_dir($cleanPath))
-		{
-			foreach (new DirectoryIterator($cleanPath) as $fileInfo)
-			{
-				if (! $fileInfo->isDot())
-				{
-					$result[] = realpath($fileInfo->getPathname());
-				}
-			}
-		}
-		return count($result) > 0 ? $result : false;
+		return array($path);
 	}
 	
 	/**
@@ -391,15 +385,6 @@ class ClassResolver implements ResourceResolver
 					$className = $tokenArray[$index + 2][1];
 					$definedClasses[] = $className;
 					$cachePaths[$className] = $this->appendToAutoloadFile($className, $file, $override);
-				}
-			}
-            
-			if (count($definedClasses) > 1)
-			{
-				$definedSer = serialize($definedClasses);
-				foreach ($cachePaths as $className => $cachePath)
-				{
-					f_util_FileUtils::write($cachePath . ".classes", $definedSer);
 				}
 			}
 		}

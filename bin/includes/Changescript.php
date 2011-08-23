@@ -187,13 +187,32 @@ class c_Changescript
 	}
 	
 	/**
+	 * @return void
+	 */
+	public function loadFramework()
+	{
+		if (!class_exists("Framework", false))
+		{
+			foreach (spl_autoload_functions() as $fct) 
+			{
+				if (is_array($fct) && ($fct[0] instanceof cboot_ClassDirAnalyzer))
+				{
+					spl_autoload_unregister($fct);
+				}
+			}
+			require_once(realpath(PROJECT_HOME."/framework/Framework.php"));
+		}
+	}
+	
+	/**
 	 * Public executeCommand for other commands using
 	 * @param String $cmdName
 	 * @param String[] $args
 	 */
 	function executeCommand($cmdName, $args = array())
 	{
-		return $this->_executeCommand($cmdName, $args, true);
+	    $this->loadFramework();
+	    echo f_util_System::execChangeCommand($cmdName, $args);
 	}
 
 	/**
