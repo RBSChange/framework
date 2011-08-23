@@ -41,10 +41,12 @@ abstract class BaseService
 	 * @param String $selfClassName 
 	 * @return mixed an instance of the service or a subclass indicated in injection config section
 	 * @throws ConfigurationException if the overriden class is not a subclass of $selfClassName
+	 * @deprecated
 	 */
 	protected static final function getServiceClassInstance($selfClassName)
 	{
-		$finalClassName = Injection::getFinalClassName($selfClassName);
-		return new $finalClassName();
+		return new $selfClassName();
 	}
+	
+	
 }

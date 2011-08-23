@@ -16,12 +16,7 @@ abstract class f_persistentdocument_CacheService
 	{
 		if (self::$serviceInstance === null)
 		{
-			$className = Framework::getConfigurationValue('documentcache/cacheServiceClass');
-			if (empty($className))
-			{
-				$className = 'f_persistentdocument_NoopCacheService';
-			}
-			self::$serviceInstance = f_util_ClassUtils::callMethod($className, 'getInstance');
+			self::$serviceInstance = new self();
 		}
 		return self::$serviceInstance;
 	}

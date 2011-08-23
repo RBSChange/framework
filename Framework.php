@@ -546,9 +546,10 @@ ini_set('magic_quotes_runtime',      0);
 error_reporting(E_ALL);
 
 // Load modules informations
-require_once(PROJECT_HOME . '/framework/service/Injection.php');
 require_once(PROJECT_HOME . '/framework/service/BaseService.class.php');
 require_once(PROJECT_HOME . '/framework/service/ModuleService.class.php');
+require_once(PROJECT_HOME . '/framework/service/InjectionService.class.php');
+
 $ms = ModuleService::getInstance();
 $ms->loadCacheFile();
 
@@ -559,3 +560,8 @@ $localResult = setlocale(LC_ALL, 'en_US.UTF-8');
 
 // Set GMT TimeZone
 date_default_timezone_set('GMT');
+
+if (Framework::inDevelopmentMode())
+{
+	change_InjectionService::getInstance()->update();
+}

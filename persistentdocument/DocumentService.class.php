@@ -33,7 +33,7 @@ class f_persistentdocument_DocumentService extends BaseService
 	{
 		if (self::$instance === null)
 		{
-			self::$instance = self::getServiceClassInstance(get_class());
+			self::$instance = new self();
 		}
 		return self::$instance;
 	}
@@ -2645,15 +2645,15 @@ class f_persistentdocument_DocumentService extends BaseService
 	 */
 	private function getPermissions($document, $forModuleName)
 	{
-		$ps = f_permission_PermissionService::getInstance();
+		$ps = change_PermissionService::getInstance();
 		$defPointId = $ps->getDefinitionPointForPackage($document->getId(), "modules_" . $forModuleName);
 		$allPermissions = $ps->getPermissionsForUserByDefPointNodeId(
 		users_UserService::getInstance()->getCurrentBackEndUser(), $defPointId);
 
 		$permissions = array();
-		if (count($allPermissions) === 1 && $allPermissions[0] === f_permission_PermissionService::ALL_PERMISSIONS)
+		if (count($allPermissions) === 1 && $allPermissions[0] === change_PermissionService::ALL_PERMISSIONS)
 		{
-			$permissions[f_permission_PermissionService::ALL_PERMISSIONS] = true;
+			$permissions[change_PermissionService::ALL_PERMISSIONS] = true;
 		}
 		else
 		{

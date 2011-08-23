@@ -45,9 +45,7 @@
 			<entry name="googleChartProvider">http://chart.apis.google.com/chart</entry>
 		</charts>
 		
-		<documentcache>
-			<entry name="cacheServiceClass">f_persistentdocument_DatabaseCacheService</entry>
-			
+		<documentcache>			
 			<!-- Max time (in seconds) a document cache entry is valid.
 				It is then cleaned by task_ClearDocumentCacheTask -->
 			<entry name="ttl">86400</entry>
@@ -94,7 +92,10 @@
     	-->
 
 		<injection>
-			<entry name="f_DataCacheService">f_DataCacheFileService</entry>
+			<class>
+				<entry name="f_DataCacheService">f_DataCacheFileService</entry>
+				<entry name="f_persistentdocument_CacheService">f_persistentdocument_DatabaseCacheService</entry>
+			</class>
 		</injection>
 		
 		<modules>		

@@ -15,7 +15,7 @@ class UserActionLoggerService extends BaseService
 		{
 			if (f_util_ClassUtils::classExists('useractionlogger_ModuleService'))
 			{
-				self::$instance = self::getServiceClassInstance('useractionlogger_ModuleService');
+				self::$instance = new useractionlogger_ModuleService(); 
 			}
 			else
 			{
@@ -23,7 +23,7 @@ class UserActionLoggerService extends BaseService
 				{
 					Framework::info('Module useractionlogger not installed, logging descativated');
 				}
-				self::$instance = self::getServiceClassInstance(get_class());
+				self::$instance = new self();
 			}
 		}
 		return self::$instance;

@@ -314,4 +314,20 @@ class change_Storage
 	{
 		return $this->context->getUser()->getUserNamespace() === change_User::BACKEND_NAMESPACE ? $this->backuserSessionNameSpace : $this->frontuserSessionNameSpace;	
 	}
+	
+	/**
+	 * @return Zend_Session_Namespace 
+	 */
+	public function getBackofficeSessionNamespaceInstance()
+	{
+		return $this->backuserSessionNameSpace;	
+	}
+	
+	/**
+	 * @return Zend_Session_Namespace 
+	 */
+	public function getFrontofficeSessionNamespaceInstance()
+	{
+		return $this->backuserSessionNameSpace;	
+	}
 }

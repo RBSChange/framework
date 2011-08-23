@@ -265,7 +265,7 @@ abstract class indexer_QueryBase
 		$res->add(new indexer_TermQuery('document_accessor', indexer_IndexService::PUBLIC_DOCUMENT_ACCESSOR_ID));
 		if ($currentUser !== null)
 		{
-			$ps = f_permission_PermissionService::getInstance();
+			$ps = change_PermissionService::getInstance();
 
 			foreach ($ps->getAccessorIdsByUser($currentUser) as $id )
 			{

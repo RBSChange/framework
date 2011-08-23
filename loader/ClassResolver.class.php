@@ -7,13 +7,8 @@ class ClassResolver implements ResourceResolver
 	 */
 	private static $instance = null;
 	protected $cacheDir = null;
-	protected $aopBackupDir = null;
 	
-	/**
-	 * @var f_AOP
-	 */
-	protected $aop;
-	
+
 	private $keys;
 	private $reps;
 	
@@ -26,7 +21,6 @@ class ClassResolver implements ResourceResolver
 		$this->reps = array(PROJECT_HOME);
 		
 		$this->cacheDir = PROJECT_HOME . '/cache/autoload';
-		$this->aopBackupDir = PROJECT_HOME . '/cache/aop-backup';
 		
 		if (! is_dir($this->cacheDir))
 		{
@@ -42,53 +36,10 @@ class ClassResolver implements ResourceResolver
 	public static function getInstance()
 	{
 		if (is_null(self::$instance))
-		{
-			if (DEVELOPMENT_MODE)
-			{
-				self::$instance = new ClassResolverDevMode();
-			}
-			else
-			{
-				self::$instance = new ClassResolver();
-			}
+		{	
+			self::$instance = new ClassResolver();
 		}
 		return self::$instance;
-	}
-	
-	/**
-	 * @return f_AOP
-	 */
-	protected function getAOP()
-	{
-		if ($this->aop === null)
-		{
-			require_once (PROJECT_HOME . '/framework/aop/AOP.php');
-			$this->aop = new f_AOP();
-		}
-		return $this->aop;
-	}
-	
-	protected function loadInjection()
-	{
-		// read config and get document injections
-		$injections = Framework::getConfiguration("injection");
-		if (isset($injections["document"]))
-		{
-			foreach ($injections["document"] as $injectedDoc => $replacerDoc)
-			{
-				//echo "AOP: replace document $injectedDoc => $replacerDoc\n";
-				list ($injectedModule, $injectedDoc) = explode("/", $injectedDoc);
-				list ($replacerModule, $replacerDoc) = explode("/", $replacerDoc);
-				
-				$this->aop->addReplaceClassAlteration(
-						$injectedModule . "_persistentdocument_" . $injectedDoc, 
-						$replacerModule . "_persistentdocument_" . $replacerDoc);
-				
-				$this->aop->addReplaceClassAlteration(
-						$injectedModule . "_" . ucfirst($injectedDoc) . "Service", 
-						$replacerModule . "_" . ucfirst($replacerDoc) . "Service");
-			}
-		}
 	}
 	
 	/**
@@ -102,65 +53,6 @@ class ClassResolver implements ResourceResolver
 		$this->validateClassName($className);
 		return $this->cacheDir . DIRECTORY_SEPARATOR . str_replace('_', DIRECTORY_SEPARATOR, 
 				$className) . DIRECTORY_SEPARATOR . "to_include";
-	}
-	
-	function getAOPPath($className)
-	{
-		return PROJECT_HOME . '/cache/aop/' . $className. ".class.php";
-	}
-	
-	public function compileAOP()
-	{
-		$this->restoreAutoload();
-		$aop = $this->getAOP();
-		$this->loadInjection();
-		foreach ($aop->getAlterations() as $classAlterations)
-		{
-			$className = $classAlterations[0][2];
-			$path = $this->getCachePath($className, $this->cacheDir);
-			if (! file_exists($path))
-			{
-				throw new Exception("Could not find $className in " . $this->cacheDir);
-			}
-			$newFileContent = $aop->applyAlterations($classAlterations);
-			$backupPath = $this->getCachePath($className, $this->aopBackupDir);
-			
-			f_util_FileUtils::mkdir(dirname($backupPath));
-			if (! rename($path, $backupPath))
-			{
-				throw new Exception("Could not move " . $path . " to " . $backupPath);
-			}
-			clearstatcache();
-			f_util_FileUtils::write($path, $newFileContent);
-		}
-	}
-	
-	private function restoreAutoload()
-	{
-		if (is_dir($this->aopBackupDir))
-		{
-			foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->aopBackupDir, RecursiveDirectoryIterator::KEY_AS_PATHNAME), RecursiveIteratorIterator::CHILD_FIRST) as $file => $info)
-			{
-				$fileName = $info->getFilename();
-				if ($fileName === '.' || $fileName === '..')
-				{
-					continue;
-				}
-				if ($info->isLink())
-				{
-					$originalPath = str_replace($this->aopBackupDir, $this->cacheDir, $file);
-					rename($file, $originalPath);
-				}
-				elseif ($info->isFile())
-				{
-					throw new Exception($file . " is not a symlink ?! Corrupted autoload ?");
-				}
-				elseif ($info->isDir())
-				{
-					rmdir($file);
-				}
-			}
-		}
 	}
 	
 	/**
@@ -498,11 +390,10 @@ class ClassResolver implements ResourceResolver
 				{
 					$className = $tokenArray[$index + 2][1];
 					$definedClasses[] = $className;
-					$cachePaths[$className] = $this->appendToAutoloadFile($className, $file, 
-							$override);
+					$cachePaths[$className] = $this->appendToAutoloadFile($className, $file, $override);
 				}
 			}
-			
+            
 			if (count($definedClasses) > 1)
 			{
 				$definedSer = serialize($definedClasses);
@@ -517,132 +408,5 @@ class ClassResolver implements ResourceResolver
 	private function replaceConstants($value)
 	{
 		return str_replace($this->keys, $this->reps, $value);
-	}
-}
-
-class ClassResolverDevMode extends ClassResolver
-{
-	public function getPath($className)
-	{
-		$path = $this->getRessourcePath($className);
-		if ($path === null)
-		{
-			$matches = null;
-			if (preg_match('/(.*)_replaced[0-9]+$/', $className, $matches))
-			{
-				$className = $matches[1];
-				$path = $this->getRessourcePath($className);
-			}
-			
-			if ($path === null)
-			{
-				throw new Exception("Could not find $className");
-			}
-		}
-		
-		$this->checkAOPTime($className, $path);
-		return $path;
-	}
-	
-	/**
-	 * @param string $className Name of researched class
-	 * @return string Path of resource or null
-	 */
-	public function getPathOrNull($className)
-	{
-		$path = $this->getRessourcePath($className);
-		if ($path !== null)
-		{
-			$this->checkAOPTime($className, $path);
-		}
-		return $path;
-	}
-	
-	private function checkAOPTime($className, $path)
-	{
-		$aop = $this->getAOP();
-		if (! $aop->hasAlterations())
-		{
-			return;
-		}
-		
-		if (file_exists($path . ".classes"))
-		{
-			$classes = unserialize(f_util_FileUtils::read($path . ".classes"));
-		}
-		else
-		{
-			$classes = array($className);
-		}
-		
-		$alterations = array();
-		foreach ($classes as $class)
-		{
-			$otherAlterations = $aop->getAlterationsByClassName($class);
-			if ($otherAlterations !== null)
-			{
-				$alterations = array_merge($alterations, $otherAlterations);
-			}
-		}
-		
-		if (count($alterations) == 0)
-		{
-			return;
-		}
-		
-		if ($this->getMaxModifiedTime($aop, $alterations) > filemtime($path))
-		{
-			while (ob_get_level() > 0)
-			{
-				echo ob_get_clean();
-			}
-			$msg = "ERROR: you should compile-aop";
-			Framework::error($msg);
-			die($msg);
-		}
-	}
-	
-	/**
-	 * @param f_AOP $aop
-	 * @param array $alterations
-	 * @return int
-	 */
-	private function getMaxModifiedTime($aop, $alterations)
-	{
-		$maxMTime = $aop->getAlterationsDefTime();
-		foreach ($alterations as $alteration)
-		{
-			switch ($alteration[1])
-			{
-				case "renameParentClass" :
-					$alterationSources = array($alteration[2]);
-					break;
-				case "replaceClass" :
-				case "applyAddMethodsAdvice" :
-					$alterationSources = array($alteration[2], $alteration[3]);
-					break;
-				default :
-					$alterationSources = array($alteration[0], $alteration[2]);
-			}
-			
-			foreach ($alterationSources as $source)
-			{
-				$aopBackupFile = $this->aopBackupDir . "/" . str_replace("_", "/", $source) . "/to_include";
-				if (file_exists($aopBackupFile))
-				{
-					$sourcePath = $aopBackupFile;
-				}
-				else
-				{
-					$sourcePath = $this->getCachePath($source, $this->cacheDir);
-				}
-				$alteratorMTime = filemtime(realpath($sourcePath));
-				if ($alteratorMTime > $maxMTime)
-				{
-					$maxMTime = $alteratorMTime;
-				}
-			}
-		}
-		return $maxMTime;
 	}
 }

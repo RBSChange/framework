@@ -30,8 +30,7 @@ class TemplateLoader extends FileLoader implements ResourceLoader
 	{
 		if (self::$instance === null)
 		{
-			$finalClassName = Injection::getFinalClassName(get_class());
-			self::$instance = new $finalClassName();
+			self::$instance = new self();
 		}
 		self::$instance->resolver->reset();
 		return self::$instance;

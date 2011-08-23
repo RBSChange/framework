@@ -1,10 +1,10 @@
 <?php
-class f_permission_PermissionService extends f_persistentdocument_DocumentService
+class change_PermissionService extends f_persistentdocument_DocumentService
 {
 	const ALL_PERMISSIONS = "allpermissions";
 
 	/**
-	 * @var f_permission_PermissionService
+	 * @var change_PermissionService
 	 */
 	private static $instance;
 
@@ -25,13 +25,13 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 	}
 
 	/**
-	 * @return f_permission_PermissionService
+	 * @return change_PermissionService
 	 */
 	public static function getInstance()
 	{
 		if (is_null(self::$instance))
 		{
-			self::$instance = new f_permission_PermissionService();
+			self::$instance = new change_PermissionService();
 		}
 		return self::$instance;
 	}
@@ -40,7 +40,7 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 	 * Get the RoleService instance handling the role $fullRoleName.
 	 *
 	 * @param String $fullRoleName
-	 * @return f_permission_RoleService
+	 * @return change_RoleService
 	 */
 	public static function getRoleServiceByRole($fullRoleName)
 	{
@@ -51,7 +51,7 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 	 * Get the Modu instance handling the role $fullRoleName.
 	 *
 	 * @param String $fullRoleName
-	 * @return f_permission_RoleService
+	 * @return change_RoleService
 	 */
 	public static function getModuleNameByRole($fullRoleName)
 	{
@@ -68,7 +68,7 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 
 	/**
 	 * @param String $moduleName
-	 * @return f_permission_RoleService
+	 * @return change_RoleService
 	 */
 	public static function getRoleServiceByModuleName($moduleName)
 	{
@@ -184,16 +184,16 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 	 * Get the list of accessors for a given role on a given node.
 	 * @param String $roleName
 	 * @param Integer $nodeId
-	 * @return array<f_permission_ACL>
+	 * @return array
 	 */
 	public function getACLForNode($nodeId)
 	{
 		$defPoint = $this->getDefinitionPoint($nodeId);
 		if (!is_null($defPoint))
 		{
-			$userQuery = $this->pp->createQuery('modules_generic/userAcl');
+			$userQuery = generic_UserAclService::getInstance()->createQuery();
 			$userQuery->add(Restrictions::eq('documentId', $defPoint));
-			$groupQuery = $this->pp->createQuery('modules_generic/groupAcl');
+			$groupQuery = generic_GroupAclService::getInstance()->createQuery();
 			$groupQuery->add(Restrictions::eq('documentId', $defPoint));
 			$groupResult = $this->pp->find($groupQuery);
 			$userResult = $this->pp->find($userQuery);
@@ -394,17 +394,23 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 	 * @param users_persistentdocument_user $user
 	 * @param String $permission
 	 * @param Integer $nodeId element of a possible domain
-	 * @throws permission_MissingPermissionException
 	 */
 	public function checkPermission($user, $permission, $nodeId)
 	{
 		if (!$this->hasPermission($user, $permission, $nodeId) )
 		{
-			if ($user !== null)
+			$message = str_replace(array('_', '.'), '-', $permission);
+			$data = explode('-', $message);
+			if (count($data) > 1 && $data[0] == 'modules')
 			{
-				throw new permission_MissingPermissionException($user->getLogin(), $permission, $nodeId);
+				$moduleName = $data[1];
 			}
-			throw new permission_MissingPermissionException('', $permission, $nodeId);
+			else
+			{
+				$moduleName = 'generic';
+			}
+			$key = 'modules.'. $moduleName . '.errors.' . ucfirst($message);
+			throw new BaseException($message , $key);
 		}
 	}
 

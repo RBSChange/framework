@@ -1,5 +1,5 @@
 <?php
-class commands_CompileAop extends commands_AbstractChangeCommand
+class commands_CompileInjection extends commands_AbstractChangeCommand
 {
 	/**
 	 * @return String
@@ -11,7 +11,7 @@ class commands_CompileAop extends commands_AbstractChangeCommand
 	
 	function getAlias()
 	{
-		return "caop";
+		return "cinj";
 	}
 
 	/**
@@ -19,7 +19,7 @@ class commands_CompileAop extends commands_AbstractChangeCommand
 	 */
 	function getDescription()
 	{
-		return "compile AOP files";
+		return "compile injection of classes and documents";
 	}
 
 	/**
@@ -29,11 +29,9 @@ class commands_CompileAop extends commands_AbstractChangeCommand
 	 */
 	function _execute($params, $options)
 	{
-		$this->message("== Compile AOP ==");
-		
+		$this->message("== Compile Injection ==");
 		$this->loadFramework();
-		ClassResolver::getInstance()->compileAOP();
-		
-		$this->quitOk("AOP compiled");
+		change_InjectionService::getInstance()->compile();
+		$this->quitOk("Injection compiled");
 	}
 }

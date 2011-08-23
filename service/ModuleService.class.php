@@ -40,7 +40,7 @@ class ModuleService extends BaseService
 	{
 		if (is_null(self::$instance))
 		{
-			self::$instance = self::getServiceClassInstance(get_class());
+			self::$instance = new self();
 		}
 		return self::$instance;
 	}
@@ -165,7 +165,7 @@ class ModuleService extends BaseService
 	public function getVisibleModulesForUser($user)
 	{
 		$modulesList = array();
-		$permissionService = f_permission_PermissionService::getInstance();
+		$permissionService = change_PermissionService::getInstance();
 		foreach ($this->getModulesObj() as $module)
 		{
 			if ($module->isVisible())
@@ -670,7 +670,7 @@ class ModuleService extends BaseService
 						}
 					}
 				}
-				$ps = f_permission_PermissionService::getInstance();
+				$ps = change_PermissionService::getInstance();
 				if (!is_null($ps->getRoleServiceByModuleName($moduleName)))
 				{
 					$modules['users'] = true;
@@ -752,7 +752,7 @@ class c_Module
 	}
 	
 	/**
-	 * (Une belle absurdité qu'on va se dépécher d'enlever...)
+	 * (Une belle absurdit‚àö¬© qu'on va se d‚àö¬©p‚àö¬©cher d'enlever...)
 	 * @return String "modules_<Name>"
 	 */
 	function getFullName()

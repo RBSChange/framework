@@ -56,7 +56,7 @@ class indexer_IndexService extends BaseService
 	{
 		if (null === self::$instance)
 		{
-			$newInstance = self::getServiceClassInstance(get_class());
+			$newInstance = new self();
 			if (defined('SOLR_INDEXER_URL'))
 			{
 				$solrURL = SOLR_INDEXER_URL;
@@ -927,14 +927,14 @@ class indexer_IndexService extends BaseService
 	 */
 	private function getBackendAccessorIds($document, $indexedDocument)
 	{
-		$ps = f_permission_PermissionService::getInstance();
+		$ps = change_PermissionService::getInstance();
 		$model = $document->getPersistentModel();
 		$fields = $indexedDocument->getFields();
 		$module = $fields['editmodule' . indexer_Field::STRING]['value'];
 		if (empty($module)) {$module = $fields['module' . indexer_Field::STRING]['value'];}
 		$packageName = 'modules_' . $module;
 		
-		$roleService = f_permission_PermissionService::getRoleServiceByModuleName($module);		
+		$roleService = change_PermissionService::getRoleServiceByModuleName($module);		
 		if ($roleService === null || count($roleService->getRoles()) === 0)
 		{
 			// We have no role service or no roles declared
@@ -956,7 +956,7 @@ class indexer_IndexService extends BaseService
 		$page = $document->getDocumentService()->getDisplayPage($document);
 		if ($page !== null)
 		{
-			$userIds = f_permission_PermissionService::getInstance()->getAccessorIdsForRoleByDocumentId('modules_website.AuthenticatedFrontUser', $page->getId());
+			$userIds = change_PermissionService::getInstance()->getAccessorIdsForRoleByDocumentId('modules_website.AuthenticatedFrontUser', $page->getId());
 		}
 		return $userIds;
 	}
@@ -1369,7 +1369,7 @@ class indexer_IndexService extends BaseService
 	 */
 	public function getIndexableDocumentModelsForModifiedRole($roleName)
 	{
-		$roleService = f_permission_PermissionService::getRoleServiceByRole($roleName);
+		$roleService = change_PermissionService::getRoleServiceByRole($roleName);
 		if ($roleService->isBackEndRole($roleName))
 		{
 			return array();
@@ -1387,12 +1387,12 @@ class indexer_IndexService extends BaseService
 	 */
 	public function getBackofficeIndexableDocumentModelsForModifiedRole($roleName)
 	{
-		$roleService = f_permission_PermissionService::getRoleServiceByRole($roleName);
+		$roleService = change_PermissionService::getRoleServiceByRole($roleName);
 		if ($roleService->isFrontEndRole($roleName))
 		{
 			return array();
 		}
-		$modelNames = ModuleService::getInstance()->getDefinedDocumentModelNames(f_permission_PermissionService::getModuleNameByRole($roleName));
+		$modelNames = ModuleService::getInstance()->getDefinedDocumentModelNames(change_PermissionService::getModuleNameByRole($roleName));
 		$result = array();
 		foreach ($modelNames as $modelName)
 		{

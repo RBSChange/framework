@@ -183,7 +183,7 @@ class change_User
 			$zns = new Zend_Session_Namespace($ns);
 			return change_Controller::getInstance()->getStorage()->readNS($name, $zns);
 		}
-		return change_Controller::getInstance()->getStorage()->readForUser($name, $zns);
+		return change_Controller::getInstance()->getStorage()->readForUser($name);
 	}
 	
 	/**
@@ -325,10 +325,8 @@ class change_User
 	 */
 	public function setAuthenticated($authenticated)
 	{
-		$ns = $this->checkLoadedNamespace();
 		if ($authenticated === true)
 		{
-			$authenticated = true;
 			return change_Controller::getInstance()->getStorage()->writeForUser('framework_isAuthenticated', $authenticated);
 		}
 		else

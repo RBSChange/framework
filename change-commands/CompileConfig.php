@@ -137,6 +137,7 @@ Where options in:
 				}	
 			}
 		}
+		$this->getParent()->executeCommand("compile-injection");
 		
 		$this->quitOk("Config compiled");
 	}

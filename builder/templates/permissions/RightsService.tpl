@@ -1,5 +1,5 @@
 <?php
-class roles_<{$module->name|capitalize}>RoleService implements f_permission_RoleService
+class roles_<{$module->name|capitalize}>RoleService implements change_RoleService
 {
 	private static $instance = null;
 	private static $moduleName = '<{$module->name}>';

@@ -33,7 +33,7 @@ class commands_CompilePermissions extends commands_AbstractChangeCommand
 		
 		$this->loadFramework();
 		f_persistentdocument_PersistentProvider::getInstance()->clearAllPermissions();
-		$ps = f_permission_PermissionService::getInstance();
+		$ps = change_PermissionService::getInstance();
 		$ps->compileAllPermissions();
 		
 		$this->quitOk("Permissions compiled");

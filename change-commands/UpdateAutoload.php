@@ -58,7 +58,7 @@ class commands_UpdateAutoload extends commands_AbstractChangeCommand
 			}
 		}
 		
-		$this->getParent()->executeCommand("compile-aop");
+		$this->getParent()->executeCommand("compile-injection");
 		
 		if ($this->hasError())
 		{

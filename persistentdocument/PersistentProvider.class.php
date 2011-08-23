@@ -3632,7 +3632,7 @@ abstract class f_persistentdocument_PersistentProvider
 	/**
 	 * Compile a user/groupAcl in f_permission_compiled.
 	 *
-	 * @param f_permission_ACL $acl
+	 * @param users_persistentdocument_userAcl | users_persistentdocument_groupAcl $acl
 	 */
 	public function compileACL($acl)
 	{
@@ -3640,7 +3640,7 @@ abstract class f_persistentdocument_PersistentProvider
 		$nodeId = $acl->getDocumentId();
 		$role = $acl->getRole();
 
-		$roleService = f_permission_PermissionService::getRoleServiceByRole($role);
+		$roleService = change_PermissionService::getRoleServiceByRole($role);
 		if ($roleService === null)
 		{
 			$acl->getDocumentService()->delete($acl);

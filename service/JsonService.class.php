@@ -20,7 +20,7 @@ class JsonService extends BaseService
 		{
 			if (function_exists('json_encode'))
 			{
-				self::$instance = self::getServiceClassInstance(get_class());
+				self::$instance = new self();
 			}
 			else
 			{

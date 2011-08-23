@@ -39,7 +39,7 @@ class import_ScriptReader extends BaseService
 	{
 		if (self::$instance === null)
 		{
-			self::$instance = self::getServiceClassInstance(get_class());
+			self::$instance = new self();
 		}
 		return self::$instance;
 	}
@@ -81,7 +81,7 @@ class import_ScriptReader extends BaseService
 	 */
 	public function execute($fileName, $attributes = array())
 	{		
-		$scriptInstance = self::getServiceClassInstance(get_class());
+		$scriptInstance = new self();
 		$scriptInstance->initialize();
 		if (is_array($attributes))
 		{

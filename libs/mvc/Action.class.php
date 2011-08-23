@@ -396,10 +396,10 @@ abstract class change_Action
 			Framework::debug(__METHOD__);
 		}
 		$moduleName = $this->getModuleName();
-		$roleService = f_permission_PermissionService::getRoleServiceByModuleName($moduleName);
+		$roleService = change_PermissionService::getRoleServiceByModuleName($moduleName);
 		if ($roleService !== null)
 		{
-			$permissionService = f_permission_PermissionService::getInstance();	
+			$permissionService = change_PermissionService::getInstance();	
 			$nodeIds = $this->getSecureNodeIds();
 			if (count($nodeIds) == 0)
 			{

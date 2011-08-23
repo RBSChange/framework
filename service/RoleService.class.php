@@ -1,5 +1,8 @@
 <?php
-interface f_permission_RoleService
+/**
+ * formerly f_permission_RoleService
+ */
+interface change_RoleService
 {
 	/**
 	 * returns the list of permissions attributed to each roles defined for 
@@ -100,4 +103,3 @@ interface f_permission_RoleService
 	 */
 	function isBackEndRole($roleName);
 }
-?>
