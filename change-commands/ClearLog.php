@@ -13,7 +13,7 @@ class commands_ClearLog extends commands_AbstractChangeCommand
 	{
 		return "cl";
 	}
-
+	
 	/**
 	 * @return String
 	 */
@@ -21,7 +21,7 @@ class commands_ClearLog extends commands_AbstractChangeCommand
 	{
 		return "clear log files";
 	}
-
+	
 	/**
 	 * @param String[] $params
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
@@ -29,30 +29,20 @@ class commands_ClearLog extends commands_AbstractChangeCommand
 	 */
 	function _execute($params, $options)
 	{
-		$this->message("== Clear log ==");
-		$profile = $this->getProfile();
-		if (!defined('PROJECT_HOME')) {define('PROJECT_HOME', realpath('.'));}
-
-		$logProfileDirectory = PROJECT_HOME . DIRECTORY_SEPARATOR . 'log' . DIRECTORY_SEPARATOR . $profile;
-
-		// Test if the log directory of selected profile exist
-		if ( is_dir( $logProfileDirectory ) )
+		$this->message("== Clear log ==");	
+		$logProfileDirectory = implode(DIRECTORY_SEPARATOR, array(PROJECT_HOME, 'log', 'project'));
+		
+		if (is_dir($logProfileDirectory))
 		{
-			$listOfFiles = scandir( $logProfileDirectory );
-
+			$listOfFiles = scandir($logProfileDirectory);
 			foreach ($listOfFiles as $file)
 			{
-				if ( ! is_dir($logProfileDirectory . DIRECTORY_SEPARATOR . $file) )
+				if (!is_dir($logProfileDirectory . DIRECTORY_SEPARATOR . $file))
 				{
-					unlink( $logProfileDirectory . DIRECTORY_SEPARATOR . $file );
+					unlink($logProfileDirectory . DIRECTORY_SEPARATOR . $file);
 				}
 			}
 		}
-		else
-		{
-			return $this->quitError('The profile ' . $profile . ' doest not exist.');
-		}
-
 		return $this->quitOk("Log files cleared");
 	}
 }

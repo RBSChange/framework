@@ -10,12 +10,11 @@ class f_tasks_BackgroundIndexingTask extends task_SimpleSystemTask
 		$errors = array();	
 		foreach ($stats as $row) 
 		{
-			$mode = intval($row['indexing_mode']);
 			$maxId = intval($row['max_id']);
 			while ($maxId > 0) 
 			{
 				$this->plannedTask->ping();
-				$maxId = $this->backgroundIndex($mode, $maxId, 100, $errors);
+				$maxId = $this->backgroundIndex($maxId, 100, $errors);
 			}
 		}
 		
@@ -25,23 +24,22 @@ class f_tasks_BackgroundIndexingTask extends task_SimpleSystemTask
 		}
 	}
 	
-	private function backgroundIndex($indexingMode, $maxId, $chunkSize = 100, &$errors)
+	private function backgroundIndex($maxId, $chunkSize = 100, &$errors)
 	{
 		$scriptPath = 'framework/indexer/backgroundDocumentIndexer.php';
 		$indexerLogPath = f_util_FileUtils::buildLogPath('indexer.log');
-		$modeLabel = $indexingMode == indexer_IndexService::INDEXER_MODE_BACKOFFICE ? 'BO' : 'FO';
-		error_log("\n". gmdate('Y-m-d H:i:s')."\t".__METHOD__ . "\t $modeLabel \t $maxId", 3, $indexerLogPath);				
-		$output = f_util_System::execScript($scriptPath, array($indexingMode, $maxId, $chunkSize));
+		error_log("\n". gmdate('Y-m-d H:i:s')."\t".__METHOD__ . "\t $maxId", 3, $indexerLogPath);				
+		$output = f_util_System::execScript($scriptPath, array($maxId, $chunkSize));
 		if (!is_numeric($output))
 		{
-			$chunkInfo = " Error on processsing $modeLabel at index $maxId.";
+			$chunkInfo = " Error on index processsing at index $maxId. ($output)";
 			$errors[] = $chunkInfo;
 			error_log("\n". gmdate('Y-m-d H:i:s')."\t".$chunkInfo, 3, $indexerLogPath);
 			$output = -1;
 		}
 		else if (intval($output) <= 0)
 		{
-			$chunkInfo = " End on processing $modeLabel.";
+			$chunkInfo = " End on index processing.";
 			error_log("\n". gmdate('Y-m-d H:i:s')."\t".$chunkInfo, 3, $indexerLogPath);
 		}
 		

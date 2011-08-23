@@ -248,26 +248,17 @@ abstract class indexer_QueryBase
 	 */
 	private function getAccessorFilterQuery()
 	{
-		$userService = users_UserService::getInstance();
-		if (indexer_IndexService::getInstance()->getIndexerMode() == indexer_IndexService::INDEXER_MODE_BACKOFFICE)
+		$currentUser = users_UserService::getInstance()->getCurrentUser();
+		if (($currentUser instanceof users_persistentdocument_backenduser) && $currentUser->getIsroot())
 		{
-			$currentUser = $userService->getCurrentBackEndUser();
-			if ($currentUser->getIsroot())
-			{
-				return null;
-			}
-		}
-		else
-		{
-			$currentUser = $userService->getCurrentFrontEndUser();
+			return null;
 		}
 		$res = indexer_QueryHelper::orInstance();
 		$res->add(new indexer_TermQuery('document_accessor', indexer_IndexService::PUBLIC_DOCUMENT_ACCESSOR_ID));
 		if ($currentUser !== null)
 		{
 			$ps = change_PermissionService::getInstance();
-
-			foreach ($ps->getAccessorIdsByUser($currentUser) as $id )
+			foreach ($ps->getAccessorIdsByUser($currentUser) as $id)
 			{
 				$res->add(new indexer_TermQuery('document_accessor', $id));
 			}

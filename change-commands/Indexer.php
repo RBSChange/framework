@@ -37,9 +37,7 @@ class commands_Indexer extends commands_AbstractChangeCommand
 		}
 		else if ($completeParamCount == 1 && $params[0] === 'import-model')
 		{
-			return array_unique(
-				array_merge(indexer_IndexService::getInstance()->getBackOfficeModelsName(), 
-					indexer_IndexService::getInstance()->getFrontOfficeModelsName()));
+			return indexer_IndexService::getInstance()->getIndexableModelsName();
 		}
 		return null;
 	}
@@ -51,12 +49,9 @@ class commands_Indexer extends commands_AbstractChangeCommand
 	protected function validateArgs($params, $options)
 	{
 		$ok = count($params) >= 1 && in_array($params[0], $this->actions);
-		if ($ok && $params[0] === 'import-model')
+		if ($ok && $params[0] === 'import-model' && count($params) > 1)
 		{
-			$models =  array_unique(
-				array_merge(indexer_IndexService::getInstance()->getBackOfficeModelsName(), 
-					indexer_IndexService::getInstance()->getFrontOfficeModelsName()));
-			$ok = count($params) == 2 && in_array($params[1], $models);
+			$ok = count($params) == 2 && indexer_IndexService::getInstance()->isModelNameIndexable($params[1]);
 		} 
 		else if (count($params) != 1)
 		{
@@ -82,27 +77,26 @@ class commands_Indexer extends commands_AbstractChangeCommand
 				indexer_IndexService::getInstance()->clearIndex();
 				break;
 			case 'clear-backoffice':
-				indexer_IndexService::getInstance()->clearBackofficeIndex();
+				indexer_IndexService::getInstance()->clearIndex();
 				break;
 			case 'clear-frontofficee':
-				indexer_IndexService::getInstance()->clearFrontofficeIndex();
+				indexer_IndexService::getInstance()->clearIndex();
 				break;
 			case 'reset':
 				indexer_IndexService::getInstance()->clearIndex();
-				$this->indexFrontofficeDocuments();
-				$this->indexBackofficeDocuments();
+				$this->indexDocuments();
 				$this->rebuildSpell();
 				$this->optimizeIndex();				
 				break;
 			case 'reset-backoffice':
-				indexer_IndexService::getInstance()->clearBackofficeIndex();
-				$this->indexBackofficeDocuments();
+				indexer_IndexService::getInstance()->clearIndex();
+				$this->indexDocuments();
 				$this->rebuildSpell();
 				$this->optimizeIndex();				
 				break;
 			case 'reset-frontoffice':
-				indexer_IndexService::getInstance()->clearFrontofficeIndex();
-				$this->indexFrontofficeDocuments();
+				indexer_IndexService::getInstance()->clearIndex();
+				$this->indexDocuments();
 				$this->rebuildSpell();
 				$this->optimizeIndex();				
 				break;
@@ -113,23 +107,32 @@ class commands_Indexer extends commands_AbstractChangeCommand
 				$this->optimizeIndex();			
 				break;
 			case 'import':
-				$this->indexFrontofficeDocuments();
-				$this->indexBackofficeDocuments();
+				$this->indexDocuments();
 				$this->rebuildSpell();
 				$this->optimizeIndex();		
 				break;
 			case 'import-frontoffice':
-				$this->indexFrontofficeDocuments();
+				$this->indexDocuments();
 				$this->rebuildSpell();
 				$this->optimizeIndex();		
 				break;
 			case 'import-backoffice':
-				$this->indexBackofficeDocuments();
+				$this->indexDocuments();
 				$this->rebuildSpell();
 				$this->optimizeIndex();		
 				break;
 			case 'import-model':
-				$this->reIndexModelName($params[1]);	
+				if (isset($params[1]))
+				{
+					$this->reIndexModelName($params[1]);
+				}
+				else
+				{
+					foreach (indexer_IndexService::getInstance()->getIndexableModelsName() as $modelName) 
+					{
+						$this->reIndexModelName($modelName);
+					}
+				}
 				break;
 		}
 		$this->quitOk("Indexer: $action OK");
@@ -149,30 +152,21 @@ class commands_Indexer extends commands_AbstractChangeCommand
 		}
 	}
 
-	private function indexBackofficeDocuments()
+	private function indexDocuments()
 	{
 		$is = indexer_IndexService::getInstance();
-		$modelsName = $is->getBackOfficeModelsName();
+		$modelsName = $is->getIndexableModelsName();
 		$this->message("* Number of Document models: " . count($modelsName));
-		$this->processModels($modelsName, 'back');
+		$this->processModels($modelsName);
 	}
 		
-	
-	private function indexFrontofficeDocuments()
-	{
-		$is = indexer_IndexService::getInstance();
-		$modelsName = $is->getFrontOfficeModelsName();
-		$this->message("* Number of Document models: " . count($modelsName));
-		$this->processModels($modelsName, 'front');
-	}
-	
-	private function processModels($modelsName, $mode)
+	private function processModels($modelsName)
 	{
 		$totalDocumentCount = 0;
 		$scriptPath = 'framework/indexer/chunkDocumentIndexer.php';
 		$indexerLogPath = f_util_FileUtils::buildLogPath('indexer.log');
 		$chunkSize = 100;
-		$chunkInfo = "* Start indexing $mode documents.";
+		$chunkInfo = "* Start indexing documents.";
 		error_log("\n". gmdate('Y-m-d H:i:s')."\t".$chunkInfo, 3, $indexerLogPath);
 		$this->message($chunkInfo);
 		
@@ -182,11 +176,11 @@ class commands_Indexer extends commands_AbstractChangeCommand
 			$progres = true;
 			while ($progres) 
 			{
-				$output = f_util_System::execScript($scriptPath, array($mode, $modelName, $documentIndex, $chunkSize, 0));
+				$output = f_util_System::execScript($scriptPath, array($modelName, $documentIndex, $chunkSize, 0));
 				if (!is_numeric($output))
 				{
 					$progres = false;
-					$chunkInfo = "* Error on processsing $modelName at index $documentIndex.";
+					$chunkInfo = "* Error on processsing $modelName at index $documentIndex. ($output)";
 				}
 				if (intval($output) == $chunkSize)
 				{

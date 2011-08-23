@@ -17,7 +17,7 @@
 -->
 <document xmlns="http://www.rbs.fr/schema/change-document/1.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.rbs.fr/schema/change-document/1.0 http://www.rbschange.fr/static/schema/change-document/3.5.xsd"
+	xsi:schemaLocation="http://www.rbs.fr/schema/change-document/1.0 http://www.rbschange.fr/static/schema/change-document/4.0.xsd"
 	model-version="4.0" has-url="false" use-rewrite-url="false">
 	<properties>
 		<!--
@@ -26,7 +26,7 @@
 			* Attributs autorisés :
 			
 			name="propertyName"
-			type="String | Boolean | Integer | Double | DateTime | LongString | Lob | XHTMLFragment | modules_xxxxx/yyyyy"
+			type="[String] | Boolean | Integer | Double | DateTime | LongString | Lob | XHTMLFragment | modules_xxxxx/yyyyy"
 			cascade-delete="true | [false]"
 			min-occurs="[0]..n"
 			max-occurs="[1]..n | -1"
@@ -44,7 +44,7 @@
 	</properties>
 
 	<!--
-		<statuses default="ACTIVE" />
+		<statuses default="[DRAFT] | CORRECTION | ACTIVE | PUBLICATED | DEACTIVATED | FILED | DEPRECATED | TRASH | WORKFLOW" />
 	-->
 
 	<!--

@@ -4,102 +4,58 @@
  */
 class PropertyInfo
 {
-	private $m_name;
-	private $m_type;
-	private $m_minOccurs;
-	private $m_maxOccurs;
-	private $m_dbMapping;
-	private $m_dbTable;
-	private $m_primaryKey;
-	private $m_cascadeDelete;
-	private $m_treeNode;
-	private $m_isArray;
-	private $m_isDocument;
-	private $m_defaultValue;
-	private $m_constraints;
-	private $m_isLocalized;
-	private $m_isIndexed;
-	private $m_hasSpecificIndex;
-	private $m_fromList;
-
+	private $name;
+	private $type = f_persistentdocument_PersistentDocument::PROPERTYTYPE_STRING;
+	private $minOccurs = 0;
+	private $maxOccurs = 1;
+	private $dbMapping;
+	private $dbTable;
+	private $cascadeDelete = false;
+	private $treeNode = false;
+	private $isDocument = false;
+	private $defaultValue;
+	private $constraints;
+	private $localized = false;
+	private $indexed = 'none'; //none, property, description
+	private $fromList;
 
 	/**
-	 * Constructor of PropertyInfo
+	 * @param string $name
+	 * @param string $type
 	 */
-	function __construct($name, $type, $minOccurs, $maxOccurs, $dbMapping, $dbTable, $primaryKey, $cascadeDelete, $treeNode,
-						$Array, $Document, $defaultValue, $constraints, $localized, $indexed, $specificIndex, $fromList)
+	function __construct($name, $type = null)
 	{
-		$this->m_name = $name;
-		$this->m_type = $type;
-		$this->m_minOccurs = $minOccurs;
-		$this->m_maxOccurs = $maxOccurs;
-		$this->m_dbMapping = $dbMapping;
-		$this->m_dbTable = $dbTable;
-		$this->m_primaryKey = $primaryKey;
-		$this->m_cascadeDelete = $cascadeDelete;
-		$this->m_treeNode = $treeNode;
-		$this->m_isArray = $Array;
-		$this->m_isDocument = $Document;
-		$this->m_defaultValue = $defaultValue;
-		$this->m_constraints = $constraints;
-		$this->m_isLocalized = $localized;
-		$this->m_isIndexed = $indexed;
-		$this->m_hasSpecificIndex = $specificIndex;
-		$this->m_fromList = $fromList;
+		$this->name = $name;
+		if ($type != null)
+		{
+			$this->setType($type);
+		}
 	}
 
 	/**
-	 * Returns the property's name.
-	 *
 	 * @return string
 	 */
 	public function getName()
 	{
-		return $this->m_name;
+		return $this->name;
+	}
+	
+	/**
+	 * @return boolean
+	 */
+	public function getTreeNode()
+	{
+		return $this->treeNode;
 	}
 
 	/**
-	 * Returns the property's type.
-	 *
 	 * @return string
 	 */
 	public function getType()
 	{
-		return $this->m_type;
+		return $this->type;
 	}
-
-	/**
-	 * Returns the type of subdocuments with the slash replaced by an underscore
-	 * for use on the backoffice side.
-	 *
-	 * @return string
-	 */
-	public function getTypeForBackofficeWidgets()
-	{
-		return f_persistentdocument_PersistentDocumentModel::convertModelNameToBackoffice($this->m_type);
-	}
-
-	/**
-	 * Indicates whether the document property accepts documents of type $type.
-	 *
-	 * @return boolean
-	 */
-	public function acceptType($type)
-	{
-		return f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($type)->isModelCompatible($this->m_type);
-	}
-
-	/**
-	 * Indicates whether the document property accepts all types of document.
-	 *
-	 * @return boolean
-	 */
-	public function acceptAllTypes()
-	{
-		return ($this->m_type == '*' ||
-				$this->m_type == 'modules_generic/Document');
-	}
-
+	
 	/**
 	 * Returns the name of the field that represents this property into the
 	 * database table.
@@ -108,7 +64,7 @@ class PropertyInfo
 	 */
 	public function getDbMapping()
 	{
-		return $this->m_dbMapping;
+		return $this->dbMapping;
 	}
 
 	/**
@@ -118,85 +74,135 @@ class PropertyInfo
 	 */
 	public function getDbTable()
 	{
-		return $this->m_dbTable;
+		return $this->dbTable;
 	}
-
-	public function isPrimaryKey()
-	{
-		return $this->m_primaryKey;
-	}
-
-	public function isCascadeDelete()
-	{
-		return $this->m_cascadeDelete;
-	}
-
+	
 	/**
-	 * Indicates whether the property is a virtual tree node or not.
-	 *
-	 * @return boolean
-	 */
-	public function isTreeNode()
-	{
-		return $this->m_treeNode;
-	}
-
-	/**
-	 * Returns the "min-occurs" value.
-	 *
 	 * @return integer
 	 */
 	public function getMinOccurs()
 	{
-		return $this->m_minOccurs;
+		return $this->minOccurs;
 	}
 
 	/**
-	 * Returns the "min-occurs" value.
-	 *
 	 * @return integer
 	 */
 	public function getMaxOccurs()
 	{
-		return $this->m_maxOccurs;
+		return $this->maxOccurs;
 	}
 
 	/**
-	 * Returns the "from-list" value.
 	 * @return string | null
 	 */
 	public function getFromList()
 	{
-		return $this->m_fromList;
-	}
+		return $this->fromList;
+	}	
 	
 	/**
-	 * @param Integer $value
-	 * @return PropertyInfo
+	 * @return boolean
 	 */
-	public function setMinOccurs($value)
+	public function getCascadeDelete()
 	{
-		$this->m_minOccurs = intval($value);
-		return $this;
+		return $this->cascadeDelete;
 	}
 
 	/**
-	 * @param Integer $value
-	 * @return PropertyInfo
+	 * @return boolean
 	 */
-	public function setMaxOccurs($value)
+	public function getLocalized()
 	{
-		$this->m_maxOccurs = intval($value);
-		$this->m_isArray = $value > 1 || $value == -1;
-		return $this;
+		return $this->localized;
+	}
+
+	/**
+	 * @return string [none], property, description
+	 */
+	public function getIndexed()
+	{
+		return $this->indexed;
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
-	public function isRequired()
+	public function isIndexed()
 	{
-		return $this->m_minOccurs > 0;
+		return $this->indexed != 'none';
+	}
+
+	/**
+	 * @return f_persistentdocument_PersistentDocumentModel || null
+	 */
+	public function getPersistentModel()
+	{
+		if ($this->isDocument)
+		{
+			return f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($this->type);
+		}
+		return null;
+	}
+		
+
+	/**
+	 * Returns the type of subdocuments with the slash replaced by an underscore
+	 * for use on the backoffice side.
+	 *
+	 * @return string
+	 */
+	public function getTypeForBackofficeWidgets()
+	{
+		return f_persistentdocument_PersistentDocumentModel::convertModelNameToBackoffice($this->type);
+	}
+
+	/**
+	 * Indicates whether the document property accepts documents of type $type.
+	 *
+	 * @return boolean
+	 */
+	public function acceptType($type)
+	{
+		return f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($type)->isModelCompatible($this->type);
+	}
+
+	/**
+	 * Indicates whether the document property accepts all types of document.
+	 *
+	 * @return boolean
+	 */
+	public function acceptAllTypes()
+	{
+		return $this->type === 'modules_generic/Document';
+	}
+	
+	/**
+	 * Indicates whether the property is a string or not.
+	 *
+	 * @return boolean
+	 */
+	public function isString()
+	{
+		return $this->type === f_persistentdocument_PersistentDocument::PROPERTYTYPE_STRING;
+	}
+
+	/**
+	 * Indicates whether the property is a long string or not.
+	 *
+	 * @return boolean
+	 */
+	public function isLob()
+	{
+		switch ($this->type)
+		{
+			case f_persistentdocument_PersistentDocument::PROPERTYTYPE_LOB:
+			case f_persistentdocument_PersistentDocument::PROPERTYTYPE_LONGSTRING:
+			case f_persistentdocument_PersistentDocument::PROPERTYTYPE_XHTMLFRAGMENT:
+				return true;
+			default:
+				return false;
+		}
 	}
 	
 	/**
@@ -206,22 +212,37 @@ class PropertyInfo
 	 */
 	public function isDocument()
 	{
-		return $this->m_isDocument;
+		return $this->isDocument;
+	}
+
+	/**
+	 * @param Integer $value
+	 * @return PropertyInfo
+	 */
+	public function setMinOccurs($value)
+	{
+		$this->minOccurs = intval($value);
+		return $this;
+	}
+
+	/**
+	 * @param Integer $value
+	 * @return PropertyInfo
+	 */
+	public function setMaxOccurs($value)
+	{
+		$this->maxOccurs = intval($value);
+		return $this;
 	}
 	
 	/**
-	 * Shortcut to get document model if the property is a document property 
-	 * @return f_persistentdocument_PersistentDocumentModel
+	 * @return Boolean
 	 */
-	public function getDocumentModel()
+	public function isRequired()
 	{
-		if (!$this->m_isDocument)
-		{
-			throw new Exception("Invalid call to ".__METHOD__.": ".$this->m_name." is not a document property");
-		}
-		return f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($this->m_type);
+		return $this->minOccurs > 0;
 	}
-
+	
 	/**
 	 * Indicates whether the property is multi-valued or not.
 	 *
@@ -229,7 +250,7 @@ class PropertyInfo
 	 */
 	public function isArray()
 	{
-		return $this->m_isArray;
+		return $this->maxOccurs != 1;
 	}
 
 	/**
@@ -239,7 +260,7 @@ class PropertyInfo
 	 */
 	public function isUnique()
 	{
-		return !$this->m_isArray;
+		return $this->maxOccurs == 1;
 	}
 
 	/* Information de présentation */
@@ -249,7 +270,7 @@ class PropertyInfo
 	 */
 	public function getDefaultValue()
 	{
-		return $this->m_defaultValue;
+		return $this->defaultValue;
 	}
 
 	/**
@@ -258,7 +279,7 @@ class PropertyInfo
 	 */
 	public function setDefaultValue($value)
 	{
-		$this->m_defaultValue = $value;
+		$this->defaultValue = $value;
 		return $this;
 	}
 
@@ -269,83 +290,7 @@ class PropertyInfo
 	 */
 	public function getConstraints()
 	{
-		return $this->m_constraints;
-	}
-
-	/**
-	 * @param String $value
-	 * @return PropertyInfo
-	 */
-	public function setConstraints($constraints)
-	{
-		$this->m_constraints = $constraints;
-		return $this;
-	}
-
-	/**
-	 * Indicates whether the property is localized or not.
-	 *
-	 * @return boolean
-	 */
-	public function isLocalized()
-	{
-		return $this->m_isLocalized;
-	}
-	
-	/**
-	 * is the property declared as indexed ?
-	 * @return Boolean
-	 */
-	public function isIndexed()
-	{
-		return $this->m_isIndexed;
-	}
-	
-	/**
-	 * does the property have a dedicated index ?
-	 * @return Boolean
-	 */
-	public function hasSpecificIndex()
-	{
-		return $this->m_hasSpecificIndex;
-	}
-
-	/**
-	 * @param Boolean $bool
-	 * @return PropertyInfo
-	 */
-	public function setLocalized($bool)
-	{
-		$this->m_isLocalized = $bool ? true : false;
-		return $this;
-	}
-
-	/**
-	 * Indicates whether the property is a string or not.
-	 *
-	 * @return boolean
-	 */
-	public function isString()
-	{
-		return f_persistentdocument_PersistentDocument::PROPERTYTYPE_STRING == $this->m_type;
-	}
-
-	/**
-	 * Indicates whether the property is a long string or not.
-	 *
-	 * @return boolean
-	 */
-	public function isLob()
-	{
-		switch ($this->m_type)
-		{
-			case f_persistentdocument_PersistentDocument::PROPERTYTYPE_LOB:
-			case f_persistentdocument_PersistentDocument::PROPERTYTYPE_LONGSTRING:
-			case f_persistentdocument_PersistentDocument::PROPERTYTYPE_XHTMLFRAGMENT:
-				return true;
-			default:
-				return false;
-		}
+		return $this->constraints;
 	}
 
 	/**
@@ -353,15 +298,169 @@ class PropertyInfo
 	 */
 	public function getMaxSize()
 	{
-		if ($this->m_constraints !== null && $this->isString())
+		if ($this->constraints !== null && $this->isString())
 		{
 			$match = array();
-			preg_match("/maxSize:([0-9]+)/", $this->m_constraints, $match);
+			preg_match("/maxSize:([0-9]+)/", $this->constraints, $match);
 			if (isset($match[1]))
 			{
 				return intval($match[1]);
 			}
 		}
 		return -1;
+	}
+	
+	/**
+	 * @param string $name
+	 * @return PropertyInfo
+	 */
+	public function setName($name)
+	{
+		$this->name = $name;
+		return $this;
+	}
+
+	/**
+	 * @param string $type
+	 * @return PropertyInfo
+	 */
+	public function setType($type)
+	{
+		$this->type = $type;
+		$this->isDocument = (strpos($this->type, 'modules_') === 0);
+		return $this;
+	}
+
+	/**
+	 * @param string $dbMapping
+	 * @return PropertyInfo
+	 */
+	public function setDbMapping($dbMapping)
+	{
+		$this->dbMapping = $dbMapping;
+		return $this;
+	}
+
+	/**
+	 * @param string $dbTable
+	 * @return PropertyInfo
+	 */
+	public function setDbTable($dbTable)
+	{
+		$this->dbTable = $dbTable;
+		return $this;
+	}
+
+	/**
+	 * @param boolean $cascadeDelete
+	 * @return PropertyInfo
+	 */
+	public function setCascadeDelete($cascadeDelete)
+	{
+		$this->cascadeDelete = $cascadeDelete;
+		return $this;
+	}
+
+	/**
+	 * @param string $indexed
+	 * @return PropertyInfo
+	 */
+	public function setIndexed($indexed)
+	{
+		$this->indexed = $indexed;
+		return $this;
+	}
+
+	/**
+	 * @param string $fromList
+	 * @return PropertyInfo
+	 */
+	public function setFromList($fromList)
+	{
+		$this->fromList = $fromList;
+		return $this;
+	}
+
+	/**
+	 * @param string $value
+	 * @return PropertyInfo
+	 */
+	public function setConstraints($constraints)
+	{
+		$this->constraints = $constraints;
+		return $this;
+	}
+	
+	/**
+	 * @param boolean $bool
+	 * @return PropertyInfo
+	 */
+	public function setLocalized($bool)
+	{
+		$this->localized = $bool ? true : false;
+		return $this;
+	}
+	
+	/**
+	 * @param mixed $treeNode
+	 * @return PropertyInfo
+	 */
+	public function setTreeNode($treeNode)
+	{
+		$this->treeNode = $treeNode;
+		return $this;
+	}
+	
+		
+	/**
+	 * @deprecated with no replacement
+	 */
+	public function isPrimaryKey()
+	{
+		return false;
+	}
+	
+	/**
+	 * @deprecated with no replacement
+	 */
+	public function hasSpecificIndex()
+	{
+		return false;
+	}
+	
+	/**
+	 * @deprecated use getTreeNode
+	 */
+	public function isTreeNode()
+	{
+		return $this->treeNode;
+	}
+	
+	/**
+	 * @deprecated use getCascadeDelete
+	 */
+	public function isCascadeDelete()
+	{
+		return $this->cascadeDelete;
+	}
+	
+	/**
+	 * @deprecated use getLocalized
+	 */
+	public function isLocalized()
+	{
+		return $this->localized;
+	}
+	
+	/**
+	 * @deprecated use getPersistentModel
+	 */
+	public function getDocumentModel()
+	{
+		if (!$this->isDocument())
+		{
+			throw new Exception("Invalid call to ".__METHOD__.": ".$this->name." is not a document property");
+		}
+		return f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($this->type);
 	}
 }

@@ -10,33 +10,19 @@ class generic_persistentdocument_Documentmodel extends f_persistentdocument_Pers
 	 */
 	protected function __construct()
 	{
-		parent::__construct($this->getName());
-		$this->m_statuses = array('DRAFT','CORRECTION','ACTIVE','PUBLICATED','DEACTIVATED','FILED','DEPRECATED','TRASH','WORKFLOW',);
+		parent::__construct();
 	}
 	
-	protected final function loadProperties()
+	protected function loadProperties()
 	{
-		$this->m_properties = array(
-			'id' => new PropertyInfo('id', 'Integer', 1, 1, 'document_id', 'f_document', 
-				true, false, false, false, false, null, 'blank:false', false, false, false, null),
-			'model' => new PropertyInfo('model', 'String', 1, 1, 'document_model', 'f_document', 
-				false, false, false, false, false, null, 'blank:false;maxSize:255', false, false, false, null));
+		parent::loadProperties();
+		$p = new PropertyInfo('id');
+		$p->setDbTable('f_document')->setDbMapping('document_id')->setType('Integer')->setMinOccurs(1);
+		$this->m_properties[$p->getName()] = $p;
+		$p = new PropertyInfo('model');
+		$p->setDbTable('f_document')->setDbMapping('document_model')->setType('String')->setMinOccurs(1);
+		$this->m_properties[$p->getName()] = $p;
 	}
-	
-	protected final function loadSerialisedProperties()
-	{
-		$this->m_serialisedproperties = array();	
-	}
-	
-	protected final function loadInvertProperties()
-	{
-		$this->m_invertProperties = array();
-	}	
-	
-	protected final function loadChildrenProperties()
-	{
-		$this->m_childrenProperties = array();
-	}	
 	
 	static function getGenericDocumentPropertiesNames()
 	{

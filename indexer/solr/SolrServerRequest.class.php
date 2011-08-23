@@ -44,20 +44,6 @@ class indexer_SolrServerRequest
 	}
 
 	/**
-	 * @var indexer_Cache
-	 */
-	private $cache;
-
-	/**
-	 * @param indexer_Cache $cache
-	 */
-	public function setCache($cache)
-	{
-		$this->cache = $cache;
-	}
-
-
-	/**
 	 * @return String
 	 */
 	public function execute()
@@ -80,28 +66,9 @@ class indexer_SolrServerRequest
 			$client->setRawData($this->data, $this->contentType);
 			$client->setHeaders('Content-Type: ' . $this->contentType);
 		}
-		$cachedQuery = null;
-		if ($this->cache !== null)
-		{
-			$cachedQuery = $this->cache->get(md5($this->url));
-			if ($cachedQuery !== null)
-			{
-				$client->setHeaders("If-Modified-Since: ".gmdate('D, d M Y H:i:s \G\M\T', $cachedQuery->getTime()));
-			}
-		}
-		
+
 		$request = $client->request();
 		$httpReturnCode = $request->getStatus();
-		
-		if ($this->cache !== null)
-		{
-			if ($cachedQuery !== null && $httpReturnCode == 304)
-			{
-				return $cachedQuery->getData();
-			}
-			$cachedQuery = new indexer_CachedQuery($this->url, $data);
-			$this->cache->store($cachedQuery);
-		}
 		return $request->getBody();
 	}
 

@@ -1145,6 +1145,7 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 	 */
 	public function dispatchPermissionsUpdatedEvent($eventParam)
 	{
+		indexer_IndexService::getInstance()->scheduleReindexingByUpdatedRoles($eventParam['updatedRoles']);
 		f_event_EventManager::dispatchEvent('permissionsUpdated', $this, $eventParam);
 	}
 

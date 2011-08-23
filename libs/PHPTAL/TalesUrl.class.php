@@ -71,7 +71,6 @@ class f_TalesUrl implements PHPTAL_Tales
 	 */
 	public static function buildURL($document, $parameters, $formatter)
 	{
-		Framework::fatal(__METHOD__ . implode(' , ', array_keys($parameters)));
 		$url = '';
 		try 
 		{

@@ -69,7 +69,7 @@ class commands_InitProject extends commands_AbstractChangeCommand
 				"author" => $this->getAuthor(), "serverHost" => $this->getServerHost(),
 				"database" => str_replace(".", "_", "C4_".$this->getAuthor()."_".$this->getProjectName()),
 				"database_host" => $this->getDatabaseHost(),
-				"serverFqdn" => $this->getServerFqdn(), "fakeMailDef" => $this->getFakeMailDef(),
+				"serverFqdn" => $this->getServerFqdn(),
 				"solrDef" => $this->getSolrDef());
 			f_util_FileUtils::write($fileName, $this->substitueVars($profilProject, $profilSubstitutions), f_util_FileUtils::OVERRIDE);
 		}
@@ -79,10 +79,13 @@ class commands_InitProject extends commands_AbstractChangeCommand
 		}
 
 		// build directory
-		f_util_FileUtils::mkdir("build/".$this->getProfile());
+		f_util_FileUtils::mkdir("build/project");
 
 		// log directory
-		f_util_FileUtils::mkdir("log/".$this->getProfile());
+		f_util_FileUtils::mkdir("log/project");
+		
+		// cache directory
+		f_util_FileUtils::mkdir("cache/project");
 
 		f_util_FileUtils::mkdir("mailbox");
 		
@@ -127,32 +130,31 @@ class commands_InitProject extends commands_AbstractChangeCommand
 		return $projectName.".".$this->getAuthor()."."."localhost";
 	}
 	
-	private function getFakeMailDef()
-	{
-		$props = $this->getProperties();
-		if ($props->hasProperty("FAKE_EMAIL"))
-		{
-			return "<!-- Comment the following to disable 'fake email' functionality -->
-		<define name=\"FAKE_EMAIL\">".$props->getProperty("FAKE_EMAIL")."</define>";
-		}
-		return '<!-- Uncomment and fill the following to enable FAKE_EMAIL functionality
-		<define name="FAKE_EMAIL">xxxx.xxxx@rbs.fr</define>
-		-->';
-	}
 	
 	private function getSolrDef()
 	{
 		$props = $this->getProperties();
 		if ($props->hasProperty("SOLR_SHARED"))
 		{
-			return '<define name="SOLR_INDEXER_URL">'.$props->getProperty("SOLR_SHARED").'</define>
-  		<define name="SOLR_INDEXER_CLIENT">'.$this->getAuthor().'.'.$this->getProjectName().'</define>';
+			$url = $props->getProperty("SOLR_SHARED");
 		}
+		else
+		{
+			$url = 'http://127.0.0.1:8983/solr';
+		}
+		$solr = '<solr>
+			<entry name="clientId">'.$url.'</entry>
+			<entry name="url">'.$this->getAuthor().'.'.$this->getProjectName().'</entry>
+		</solr>';
 		
-		return '<!-- Uncomment and fill the following to enable indexation. Then execute "indexer reset" command. 
-  		<define name="SOLR_INDEXER_URL">http://127.0.0.1:8080/solr_shared</define>
-  		<define name="SOLR_INDEXER_CLIENT">'.$this->getAuthor().'.'.$this->getProjectName().'</define>		
-		-->';
+		if ($props->hasProperty("SOLR_SHARED"))
+		{
+			return $solr;
+		}
+		else
+		{ 
+			return '<!-- '. $solr . ' -->';
+		}
 	}
 	
 	private function getDatabaseHost()

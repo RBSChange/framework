@@ -4,5 +4,5 @@ CREATE TABLE IF NOT EXISTS f_settings (
   userid bigint(20) unsigned NOT NULL default '0',
   value varchar(50) NOT NULL default '',
   UNIQUE KEY NewIndex (name,package,userid)
-) ENGINE=InnoDB CHARACTER SET utf8 COLLATE utf8_bin;
+) ENGINE=InnoDB CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 

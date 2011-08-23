@@ -3,74 +3,103 @@
  * <{$model->getFinalDocumentClassName()}>model
  * @package modules.<{$model->getFinalModuleName()}>.persistentdocument
  */
-class <{$model->getFinalDocumentClassName()}>model extends f_persistentdocument_PersistentDocumentModel
+class <{$model->getFinalDocumentClassName()}>model extends <{$model->getBaseModelClassName()}>
 {
 	/**
 	 * Constructor of <{$model->getFinalDocumentClassName()}>model
 	 */
 	protected function __construct()
 	{
-		parent::__construct($this->getName());
-		$this->m_preservedPropertiesNames = array(<{foreach from=$model->getPreservedPropertiesNames() item=name}>'<{$name}>' => true,<{/foreach}>);
-		$this->m_statuses = array(<{foreach from=$model->getStatuses() item=status}>'<{$status}>',<{/foreach}>);
-<{if ($model->getFinalChildren())}>	
-		$this->m_childrenNames = array(
+		parent::__construct();	
+		$this->m_childrenNames = array(		
+<{if ($model->getFinalChildren())}>
 <{foreach from=$model->getFinalChildren() item=children}>
 			'<{$children->getName()}>',
 <{/foreach}>
-		);
-<{/if}>
+<{/if}>);
 		
 <{if ($model->hasFinalParentModel())}>
 		$this->m_parentName = '<{$model->getFinalParentModelName()}>';
+		$this->m_preservedPropertiesNames = array_merge($this->m_preservedPropertiesNames, 
+			array(<{foreach from=$model->getPreservedPropertiesNames() item=name}>'<{$name}>' => true,<{/foreach}>));
+<{else}>		
+		$this->m_preservedPropertiesNames = array(<{foreach from=$model->getPreservedPropertiesNames() item=name}>'<{$name}>' => true,<{/foreach}>);
 <{/if}> 
 	}
 
-	protected final function loadProperties()
+<{if (count($model->getProperties()))}>	
+	protected function loadProperties()
 	{
-		$this->m_properties = array(
+		parent::loadProperties();
 <{foreach from=$model->getProperties() item=property}>
-			'<{$property->getName()}>' => new PropertyInfo('<{$property->getName()}>', '<{$property->getType()}>', <{$property->getMinOccurs()}>, <{$property->getMaxOccurs()}>, '<{$property->getDbName()}>', '<{$model->getTableName()}>',
-				<{$model->escapeBoolean($property->isPrimaryKey())}>, <{$model->escapeBoolean($property->isCascadeDelete())}>, <{$model->escapeBoolean($property->isTreeNode())}>, <{$model->escapeBoolean($property->isArray())}>, <{$model->escapeBoolean($property->isDocument())}>, <{$model->escapeString($property->getDefaultValue())}>, <{$model->escapeString($property->getConstraints())}>, <{$model->escapeBoolean($property->isLocalized())}>, <{$model->escapeBoolean($property->isIndexed())}>, <{$model->escapeBoolean($property->hasSpecificIndex())}>, <{$model->escapeString($property->getFromList())}>),
+		$p = new PropertyInfo(<{$model->escapeString($property->getName())}>, <{$model->escapeString($property->getType())}>);
+		$p->setDbTable(<{$model->escapeString($model->getTableName())}>)->setDbMapping(<{$model->escapeString($property->getDbName())}>)<{if ($property->getMinOccurs() != 0)}>->setMinOccurs(<{$property->getMinOccurs()}>)<{/if}>
+<{if ($property->getMaxOccurs() != 1)}>->setMaxOccurs(<{$property->getMaxOccurs()}>)<{/if}>
+<{if ($property->isCascadeDelete())}>->setCascadeDelete(true)<{/if}>
+<{if ($property->isTreeNode())}>->setTreeNode(true)<{/if}>
+<{if ($property->getDefaultValue() != null)}>->setDefaultValue(<{$model->escapeString($property->getDefaultValue())}>)<{/if}>
+<{if ($property->getConstraints() != null)}>->setConstraints(<{$model->escapeString($property->getConstraints())}>)<{/if}>
+<{if ($property->isLocalized())}>->setLocalized(true)<{/if}>
+<{if ($property->getIndexed() != 'none')}>->setIndexed(<{$model->escapeString($property->getIndexed())}>)<{/if}>
+<{if ($property->getFromList() != null)}>->setFromList(<{$model->escapeString($property->getFromList())}>)<{/if}>;
+		$this->m_properties[$p->getName()] = $p;
 <{/foreach}>
-		);
 	}
-	
-	protected final function loadSerialisedProperties()
+<{/if}>
+
+<{if (count($model->getSerializedProperties()))}>		
+	protected function loadSerialisedProperties()
 	{
-		$this->m_serialisedproperties = array(
+		parent::loadSerialisedProperties();
 <{foreach from=$model->getSerializedProperties() item=property}>
-			'<{$property->getName()}>' => new PropertyInfo('<{$property->getName()}>', '<{$property->getType()}>', <{$property->getMinOccurs()}>, <{$property->getMaxOccurs()}>, null, null,
-				false, false, false, <{$model->escapeBoolean($property->isArray())}>, <{$model->escapeBoolean($property->isDocument())}>, <{$model->escapeString($property->getDefaultValue())}>, <{$model->escapeString($property->getConstraints())}>, <{$model->escapeBoolean($property->isLocalized())}>, <{$model->escapeBoolean($property->isIndexed())}>, <{$model->escapeBoolean($property->hasSpecificIndex())}>, <{$model->escapeString($property->getFromList())}>),
+		$p = new PropertyInfo(<{$model->escapeString($property->getName())}>);
+		$p->setType(<{$model->escapeString($property->getType())}>)<{if ($property->getMinOccurs() != 0)}>->setMinOccurs(<{$property->getMinOccurs()}>)<{/if}>
+<{if ($property->getMaxOccurs() != 1)}>->setMaxOccurs(<{$property->getMaxOccurs()}>)<{/if}>
+<{if ($property->getDefaultValue() != null)}>->setDefaultValue(<{$model->escapeString($property->getDefaultValue())}>)<{/if}>
+<{if ($property->getConstraints() != null)}>->setConstraints(<{$model->escapeString($property->getConstraints())}>)<{/if}>
+<{if ($property->isLocalized())}>->setLocalized(true)<{/if}>
+<{if ($property->getIndexed() != 'none')}>->setIndexed(<{$model->escapeString($property->getIndexed())}>)<{/if}>
+<{if ($property->getFromList() != null)}>->setFromList(<{$model->escapeString($property->getFromList())}>)<{/if}>;
+		$this->m_serialisedproperties[$p->getName()] = $p;
 <{/foreach}>
-		);	
 	}
-	
-	protected final function loadInvertProperties()
+<{/if}>
+
+<{if (count($model->getInverseProperties()))}>		
+	protected function loadInvertProperties()
 	{
-		// These properties are order by "inheritance order": the parent before the child.
-		// This is required in f_persistentdocument_PersistentDocumentModel::findTreePropertiesNamesByType().
-		$this->m_invertProperties = array(
+		parent::loadSerialisedProperties();
 <{foreach from=$model->getInverseProperties() item=property}>
-			'<{$property->getName()}>' => new PropertyInfo('<{$property->getName()}>', '<{$property->getType()}>', <{$property->getMinOccurs()}>, <{$property->getMaxOccurs()}>, '<{$property->getRelationName()}>', '<{$property->getTableName()}>',
-				<{$model->escapeBoolean($property->isPrimaryKey())}>, <{$model->escapeBoolean($property->isCascadeDelete())}>, <{$model->escapeBoolean($property->isTreeNode())}>, <{$model->escapeBoolean($property->isArray())}>, <{$model->escapeBoolean($property->isDocument())}>, <{$model->escapeString($property->getDefaultValue())}>, <{$model->escapeString($property->getConstraints())}>, <{$model->escapeBoolean($property->isLocalized())}>, <{$model->escapeBoolean($property->isIndexed())}>, <{$model->escapeBoolean($property->hasSpecificIndex())}>, <{$model->escapeString($property->getFromList())}>),
+		$p = new PropertyInfo(<{$model->escapeString($property->getName())}>);
+		$p->setDbTable(<{$model->escapeString($model->getTableName())}>)->setDbMapping(<{$model->escapeString($property->getRelationName())}>)<{if ($property->getType() != null)}>->setType(<{$model->escapeString($property->getType())}>)<{/if}>
+<{if ($property->getMinOccurs() != 0)}>->setMinOccurs(<{$property->getMinOccurs()}>)<{/if}>
+<{if ($property->getMaxOccurs() != 1)}>->setMaxOccurs(<{$property->getMaxOccurs()}>)<{/if}>
+<{if ($property->isCascadeDelete())}>->setCascadeDelete(true)<{/if}>
+<{if ($property->isTreeNode())}>->setTreeNode(true)<{/if}>
+<{if ($property->getDefaultValue() != null)}>->setDefaultValue(<{$model->escapeString($property->getDefaultValue())}>)<{/if}>
+<{if ($property->getConstraints() != null)}>->setConstraints(<{$model->escapeString($property->getConstraints())}>)<{/if}>
+<{if ($property->isLocalized())}>->setLocalized(true)<{/if}>
+<{if ($property->getIndexed() != 'none')}>->setIndexed(<{$model->escapeString($property->getIndexed())}>)<{/if}>;
+		$this->m_invertProperties[$p->getName()] = $p;
 <{/foreach}>
-		);
 	}	
-	
-	protected final function loadChildrenProperties()
+<{/if}>
+
+<{if (count($model->getChildrenProperties()))}>	
+	protected function loadChildrenProperties()
 	{
-		$this->m_childrenProperties = array(
+		parent::loadChildrenProperties();
 <{foreach from=$model->getChildrenProperties() item=property}>
-			'<{$property->getName()}>' => new ChildPropertyInfo('<{$property->getName()}>', '<{$property->getType()}>'),
+			$p = new ChildPropertyInfo('<{$property->getName()}>', '<{$property->getType()}>');
+			$this->m_childrenProperties[$p->getName()] = $p;
 <{/foreach}>
-		);
 	}
+<{/if}>
 	
 	/**
 	 * @return String
 	 */
-	public final function getFilePath()
+	public function getFilePath()
 	{
 		return __FILE__;
 	}
@@ -78,25 +107,23 @@ class <{$model->getFinalDocumentClassName()}>model extends f_persistentdocument_
 	/**
 	 * @return String
 	 */
-	public final function getIcon()
+	public function getIcon()
 	{
 		return '<{$model->getIcon()}>';
 	}
 
 	/**
 	 * @return String
-	 * @example modules_generic/folder
 	 */
-	public final function getName()
+	public function getName()
 	{
 		return '<{$model->getFinalName()}>';
 	}
 
 	/**
 	 * @return String
-	 * @example modules_generic/reference or null
 	 */
-	public final function getBaseName()
+	public function getBaseName()
 	{
 		return <{$model->escapeString($model->getBaseName())}>;
 	}
@@ -104,37 +131,28 @@ class <{$model->getFinalDocumentClassName()}>model extends f_persistentdocument_
 	/**
 	 * @return String
 	 */
-	public final function getLabel()
-	{
-		return '&modules.<{$model->getFinalModuleName()}>.document.<{$model->getFinalDocumentName()}>.document-name;';
-	}
-
-	/**
-	 * @return String
-	 */
-	public final function getLabelKey()
+	public function getLabelKey()
 	{
 		return 'm.<{$model->getFinalModuleName()}>.document.<{$model->getFinalDocumentName()}>.document-name';
 	}
 
 	/**
 	 * @return String
-	 * @example generic
 	 */
-	public final function getModuleName()
+	public function getModuleName()
 	{
 		return <{$model->escapeString($model->getFinalModuleName())}>;
 	}
 
 	/**
 	 * @return String
-	 * @example folder
 	 */
-	public final function getDocumentName()
+	public function getDocumentName()
 	{
 		return <{$model->escapeString($model->getFinalDocumentName())}>;
 	}
-
+	
+<{if (!$model->hasFinalParentModel())}>
 	/**
 	 * @return String
 	 */
@@ -142,19 +160,20 @@ class <{$model->getFinalDocumentClassName()}>model extends f_persistentdocument_
 	{
 		return <{$model->escapeString($model->getTableName())}>;
 	}
+<{/if}>
 
 	/**
 	 * @return Boolean
 	 */
-	public final function isLocalized()
+	public function isLocalized()
 	{
 		return <{$model->escapeBoolean($model->isLocalized())}>;
 	}
-
+	
 	/**
 	 * @return Boolean
 	 */
-	public final function isLinkedToRootFolder()
+	public function isLinkedToRootFolder()
 	{
 		return <{$model->escapeBoolean($model->isLinkedToRootModule())}>;
 	}
@@ -162,7 +181,7 @@ class <{$model->getFinalDocumentClassName()}>model extends f_persistentdocument_
 	/**
 	 * @return Boolean
 	 */
-	public final function hasURL()
+	public function hasURL()
 	{
 		return <{$model->escapeBoolean($model->hasURL())}>;
 	}
@@ -170,33 +189,43 @@ class <{$model->getFinalDocumentClassName()}>model extends f_persistentdocument_
 	/**
 	 * @return Boolean
 	 */
-	public final function useRewriteURL()
+	public function useRewriteURL()
 	{
-		return <{$model->escapeBoolean($model->useRewriteURL())}> &&  <{$model->escapeBoolean($model->hasURL())}>;
+<{if ($model->useRewriteURL() && $model->escapeBoolean($model->hasURL()))}>
+		return true;
+<{else}>
+		return false;
+<{/if}>	
 	}
 	
 	/**
 	 * @return Boolean
 	 */
-	public final function isIndexable()
+	public function isIndexable()
 	{
-		return <{$model->escapeBoolean($model->hasURL())}> && <{$model->escapeBoolean($model->isIndexable())}> &&
-		  (!defined('MOD_<{$model->getModuleName()|upper}>_<{$model->getDocumentName()|upper}>_DISABLE_INDEXATION') || !MOD_<{$model->getModuleName()|upper}>_<{$model->getDocumentName()|upper}>_DISABLE_INDEXATION);
+<{if ($model->hasURL() && $model->isIndexable())}>
+		return (!defined('MOD_<{$model->getModuleName()|upper}>_<{$model->getDocumentName()|upper}>_DISABLE_INDEXATION') || !MOD_<{$model->getModuleName()|upper}>_<{$model->getDocumentName()|upper}>_DISABLE_INDEXATION);
+<{else}>
+		return false;
+<{/if}>	
 	}
 	
 	/**
 	 * @return Boolean
 	 */
-	public final function isBackofficeIndexable()
+	public function isBackofficeIndexable()
 	{
-		return <{$model->escapeBoolean($model->isBackofficeIndexable())}> &&
-		  (!defined('MOD_<{$model->getModuleName()|upper}>_<{$model->getDocumentName()|upper}>_DISABLE_BACKOFFICE_INDEXATION') || !MOD_<{$model->getModuleName()|upper}>_<{$model->getDocumentName()|upper}>_DISABLE_BACKOFFICE_INDEXATION);
+<{if ($model->isBackofficeIndexable())}>
+		return (!defined('MOD_<{$model->getModuleName()|upper}>_<{$model->getDocumentName()|upper}>_DISABLE_BACKOFFICE_INDEXATION') || !MOD_<{$model->getModuleName()|upper}>_<{$model->getDocumentName()|upper}>_DISABLE_BACKOFFICE_INDEXATION);
+<{else}>
+		return false;
+<{/if}>	
 	}
 
 	/**
 	 * @return string[]
 	 */
-	public final function getAncestorModelNames()
+	public function getAncestorModelNames()
 	{
 		return array(<{foreach from=$model->getAncestorModels() item=modelName}>'<{$modelName}>',<{/foreach}>);
 	}
@@ -204,7 +233,7 @@ class <{$model->getFinalDocumentClassName()}>model extends f_persistentdocument_
 	/**
 	 * @return String
 	 */
-	public final function getDefaultNewInstanceStatus()
+	public function getDefaultNewInstanceStatus()
 	{
 		return <{$model->escapeString($model->getDefaultStatus())}>;
 	}
@@ -213,32 +242,44 @@ class <{$model->getFinalDocumentClassName()}>model extends f_persistentdocument_
 	 * Return if the document has 2 special properties (correctionid, correctionofid)
 	 * @return Boolean
 	 */
-	public final function useCorrection()
+	public function useCorrection()
 	{
-		return <{$model->escapeBoolean($model->hasCorrection())}> && CHANGE_USE_CORRECTION;
+<{if ($model->hasCorrection())}>
+		return CHANGE_USE_CORRECTION;
+<{else}>
+		return false;
+<{/if}>	
 	}
 
 	/**
 	 * @return Boolean
 	 */
-	public final function hasWorkflow()
+	public function hasWorkflow()
 	{
-		return <{$model->escapeBoolean($model->hasWorkflow())}> && CHANGE_USE_CORRECTION && CHANGE_USE_WORKFLOW &&
+<{if ($model->hasWorkflow())}>
+		return CHANGE_USE_CORRECTION && CHANGE_USE_WORKFLOW &&
 		  (!defined('MOD_<{$model->getModuleName()|upper}>_DISABLE_WORKFLOW') || !MOD_<{$model->getModuleName()|upper}>_DISABLE_WORKFLOW);
+<{else}>
+		return false;
+<{/if}>	
 	}
 
 	/**
 	 * @return String
 	 */
-	public final function getWorkflowStartTask()
+	public function getWorkflowStartTask()
 	{
+<{if ($model->hasWorkflow() && $model->getWorkflowStartTask())}>
 		return $this->hasWorkflow() ? <{$model->escapeString($model->getWorkflowStartTask())}> : null;
+<{else}>
+		return null;
+<{/if}>	
 	}
 
 	/**
 	 * @return array<String, String>
 	 */
-	public final function getWorkflowParameters()
+	public function getWorkflowParameters()
 	{
 		return <{$model->getSerializedWorkflowParameters()}>;
 	}
@@ -246,7 +287,7 @@ class <{$model->getFinalDocumentClassName()}>model extends f_persistentdocument_
 	/**
 	 * @return Boolean
 	 */
-	public final function publishOnDayChange()
+	public function publishOnDayChange()
 	{
 		return <{$model->escapeBoolean($model->hasPublishOnDayChange())}>;
 	}

@@ -190,11 +190,29 @@
 			<entry name="enabled">false</entry>
 		</bench>
 		
-	    <indexer>
-	      <SolrManager>
+	    <solr>
 	        <entry name="schemaVersion">3.0.3</entry>
-	      </SolrManager>
-	    </indexer>
+	        
+	        <!-- SOLR_INDEXER_CLIENT -->
+	        <entry name="clientId">change4</entry>
+	        
+	        <!-- SOLR_INDEXER_URL -->
+	        <entry name="url">http://127.0.0.1:8983/solr</entry>
+	        
+	        <!-- SOLR_INDEXER_DISABLE_BATCH_MODE -->
+	        <entry name="batch_mode">true</entry>
+	        
+	        <!-- SOLR_INDEXER_DISABLE_DOCUMENTCACHE -->
+	        
+	        <!-- SOLR_USE_POST_QUERIES -->
+	        <entry name="request_method">GET</entry>
+	        
+	        <!-- SOLR_INDEXER_DISABLE_COMMIT -->
+	        <entry name="disable_commit">false</entry>
+	        
+	        <!-- SOLR_INDEXER_DISABLE_DOCUMENTCACHE -->
+	        <entry name="disable_document_cache">false</entry>
+	    </solr>
 	    
 		<!-- Web browsers compatibility -->
 		<browsers>

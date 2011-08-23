@@ -56,31 +56,17 @@ class indexer_SuggestionSolrSearch
 	 */
 	public function getQueryString()
 	{
-		$clientFilter = '';
-		
+		$clientFilter = '';		
 		if (!f_util_StringUtils::isEmpty($this->clientId))
 		{
 			$clientFilter = 'client=' . $this->clientId . '&';
 		}
-		
 		$schemaVersion = indexer_SolrManager::getSchemaVersion();
-		if ($schemaVersion == "2.0.4")
+		$queryString = $clientFilter . '&q=*:*&rows=0&spellcheck=true&spellcheck.q='.$this->query.'&qt=/spellchecker_' . $this->lang.'&spellcheck.count='.$this->suggestionCount;
+		if ($this->multiple)
 		{
-			if ($this->multiple)
-			{
-				throw new Exception(__METHOD__.": solr schema 2.0.4 can not deal with multiple words");
-			}
-			$queryString = $clientFilter . 'qt=spellchecker_' . $this->lang . '&q=' . $this->query . '&suggestionCount=' . $this->suggestionCount;	
+			$queryString .= "&spellcheck.collate=true";	
 		}
-		else
-		{
-			$queryString = $clientFilter . '&q=*:*&rows=0&spellcheck=true&spellcheck.q='.$this->query.'&qt=/spellchecker_' . $this->lang.'&spellcheck.count='.$this->suggestionCount;
-			if ($this->multiple)
-			{
-				$queryString .= "&spellcheck.collate=true";	
-			}
-		}
-		
 		return trim($queryString);
 	}
 	

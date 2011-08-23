@@ -10,8 +10,7 @@
 		<define name="DISABLE_DATACACHE">true</define>
 		-->
 		
-		${solrDef}
-		${fakeMailDef}
+		
 		
 		<!-- 
 		<define name="MOD_NOTIFICATION_SENDER">noreply@${serverHost}</define>
@@ -26,6 +25,8 @@
 		<general>
 			<entry name="server-fqdn">${serverFqdn}</entry>
 		</general>
+		
+		${solrDef}
 		
 		<databases>
 			<webapp>

@@ -5,6 +5,7 @@
  */
 abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_BeanModel 
 {
+	private static $publicationStatusArray = array('DRAFT','CORRECTION','ACTIVE','PUBLICATED','DEACTIVATED','FILED','DEPRECATED','TRASH','WORKFLOW');
 	/**
 	 * @var array<BeanPropertyInfo>
 	 */
@@ -16,15 +17,13 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	 * @var array<PropertyInfo>
 	 */
 	protected  $m_properties;
+	protected  $m_invertProperties;
 	protected  $m_serialisedproperties;
+	protected  $m_childrenProperties;
 	
 	protected  $m_propertiesNames;
 	protected  $m_preservedPropertiesNames;
-
-	protected  $m_statuses;
-	protected  $m_formProperties;
-	protected  $m_childrenProperties;
-	protected  $m_invertProperties;
+	
 	/**
 	 * @var String[]
 	 */
@@ -235,9 +234,8 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 		return array();
 	}
 
-	protected function __construct($documentModelname)
+	protected function __construct()
 	{
-
 	}
 	
 	/**
@@ -253,33 +251,37 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	/**
 	 * @return String
 	 */
-	abstract public function getLabel();
+	public function getLabel()
+	{
+		return LocaleService::getInstance()->transFO($this->getLabelKey());
+	}
 
 	/**
 	 * @return String
 	 */
-	public function getLabelKey()
-        {
-           return strtolower(str_replace(array('&modules.', ';'), array('m.', ''), $this->getLabel()));
-        }
+	abstract function getLabelKey();
 
 	/**
 	 * @return String
+	 * @example modules_generic/folder
 	 */
 	abstract public function getName();
 
 	/**
 	 * @return String
+	 * @example modules_generic/folder or null
 	 */
 	abstract public function getBaseName();
 
 	/**
 	 * @return String
+	 * @example generic
 	 */
 	abstract public function getModuleName();
 
 	/**
 	 * @return String
+	 * @example folder
 	 */
 	abstract public function getDocumentName();
 
@@ -317,6 +319,9 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 		return $this->m_parentName;
 	}
 	
+	/**
+	 * @return String
+	 */
 	function getDocumentClassName()
 	{
 		return $this->getModuleName()."_persistentdocument_".$this->getDocumentName();
@@ -385,11 +390,11 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 
 	/**
-	 * @return array<String>
+	 * @return String[] 'DRAFT','CORRECTION','ACTIVE','PUBLICATED','DEACTIVATED','FILED','DEPRECATED','TRASH','WORKFLOW'
 	 */
 	public final function getStatuses()
 	{
-		return array_keys($this->m_statuses);
+		return self::$publicationStatusArray;
 	}
 
 	/**
@@ -398,7 +403,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	 */
 	public final function hasSatutsCode($status)
 	{
-		return array_search($status, $this->m_statuses) !== false;
+		return in_array($status, self::$publicationStatusArray);
 	}
 
 	/**
@@ -410,7 +415,10 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	/**********************************************************/
 	/* Properties Informations                                 */
 	/**********************************************************/
-	protected abstract function loadProperties();
+	protected function loadProperties()
+	{
+		$this->m_properties = array();
+	}
 	
 	/**
 	 * @return array<String, PropertyInfo> ie. <propName, propertyInfo> 
@@ -426,31 +434,23 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	 */
 	private static $systemProperties;
 	
-	public final function getVisiblePropertiesInfos()
+	/**
+	 * @return string[]
+	 */
+	public static function getSystemProperties()
 	{
 		if (self::$systemProperties === null)
 		{
-			self::$systemProperties = array('id' => true, 
-				'model' => true, 
-				'author' => true, 
-				'authorid' => true, 
-				'creationdate' => true, 
-				'modificationdate' => true, 
-				'publicationstatus' => true, 
-				'lang' => true,
-				'metastring' => true,  
-				'modelversion' => true, 
-				'documentversion' => true);
+			self::$systemProperties = array('id', 'model', 'author', 'authorid',
+				'creationdate','modificationdate','publicationstatus',
+				'lang','metastring','modelversion','documentversion');
 		}
-		$properties = array();
-		foreach ($this->getEditablePropertiesInfos() as $propName => $propInfo)
-		{
-			if (!isset(self::$systemProperties[$propName]))
-			{
-				$properties[$propName] = $propInfo;
-			}
-		}
-		return $properties;
+		return self::$systemProperties;
+	}
+	
+	public final function getVisiblePropertiesInfos()
+	{
+		return array_diff_key($this->getEditablePropertiesInfos(), array_flip(self::getSystemProperties()));
 	}
 
 	/**
@@ -467,7 +467,10 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 		return null;
 	}
 	
-	protected abstract function loadSerialisedProperties();
+	protected function loadSerialisedProperties()
+	{
+		$this->m_serialisedproperties = array();
+	}
 	
 	/**
 	 * @return array<String, PropertyInfo> ie. <propName, propertyInfo> 
@@ -502,6 +505,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 		return array_merge($this->m_properties, $this->m_serialisedproperties);
 	}	
 		
+
 	/**
 	 * @param string $propertyName
 	 * @return PropertyInfo
@@ -514,6 +518,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 			return $this->m_properties[$propertyName];
 		} 
 		
+	
 		if ($this->m_serialisedproperties === null) {$this->loadSerialisedProperties();}
 		if (isset($this->m_serialisedproperties[$propertyName]))
 		{
@@ -521,7 +526,24 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 		}
 		
 		return null;
-	}		
+	}	
+
+	/**
+	 * @return PropertyInfo[]
+	 */
+	public final function getIndexedPropertiesInfos()
+	{
+		$result = array();
+		foreach ($this->getEditablePropertiesInfos() as $propertyName => $property) 
+		{
+			/* @var $property PropertyInfo */
+			if ($property->isIndexed())
+			{
+				$result[$propertyName] = $property;
+			}
+		}
+		return $result;
+	}
 
 	/**
 	 * @param string $propertyName
@@ -578,7 +600,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	 */
 	public function getPropertiesNames()
 	{
-		if (is_null($this->m_propertiesNames))
+		if ($this->m_propertiesNames === null)
 		{
 			$this->m_propertiesNames = array();
 			foreach ($this->getPropertiesInfos() as $name => $infos)
@@ -619,7 +641,10 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 		return array_values($componentNames);
 	}
 	
-	protected abstract function loadChildrenProperties();
+	protected function loadChildrenProperties()
+	{
+		$this->m_childrenProperties = array();
+	}
 	
 	/**
 	 * @return array<ChildPropertyInfo>
@@ -662,23 +687,6 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 		return false;
 	}
 
-	/**
-	 * @return array<String> default array(0 => 'id')
-	 */
-	public final function getPrimaryKey()
-	{
-		$keys = array();
-		foreach ($this->getPropertiesInfos() as $name => $info)
-		{
-			if ($info->isPrimaryKey())
-			{
-				$keys[] = $name;
-			}
-		}
-		return $keys;
-	}
-
-
 	public final function hasCascadeDelete()
 	{
 		foreach ($this->getPropertiesInfos() as $name => $info)
@@ -691,16 +699,10 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 		return false;
 	}
 
-	/**
-	 * @return Boolean
-	 */
-	public final function isDocumentIdPrimaryKey()
+	protected function loadInvertProperties()
 	{
-		if ($this->m_properties === null){$this->loadProperties();}
-		return $this->m_properties['id']->isPrimaryKey();
+		$this->m_invertProperties = array();
 	}
-
-	protected abstract function loadInvertProperties();
 
 	/**
 	 * @return array<PropertyInfo>
@@ -891,13 +893,19 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 		switch ($name)
 		{
 			case 'getFormProperty': 
-				Framework::error('Call to deleted ' . get_class($this) . '->getFormProperty method');
+				Framework::error('Call to deleted ' . get_class($this) . '->'. $name .' method');
 				return null;
 				
 			case 'getFormPropertiesInfos':
-				Framework::error('Call to deleted ' . get_class($this) . '->getFormPropertiesInfos method');
+				Framework::error('Call to deleted ' . get_class($this)  . '->'. $name .' method');
 				return array();
-			
+				
+			case 'isDocumentIdPrimaryKey':
+				Framework::error('Call to deleted ' . get_class($this)  . '->'. $name .' method');
+				return true;				
+			case 'getPrimaryKey':
+				Framework::error('Call to deleted ' . get_class($this)  . '->'. $name .' method');
+				return array('id');
 			default: 
 				throw new Exception('No method ' . get_class($this) . '->' . $name);
 		}

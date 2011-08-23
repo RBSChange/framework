@@ -205,31 +205,7 @@ class builder_DocumentGenerator
 			// Add the class path in autoload file. It's necessary to call without regenerate cache_autoload.php
 			ClassResolver::getInstance()->appendToAutoloadFile($this->module .'_persistentdocument_' . $this->name, $filePath);
 		}
-		elseif ($this->modelObject->isIndexable())
-		{
-			$ok = false;
-			$model = $this->modelObject;
-			while ($model)
-			{
-				$parentfilePath = f_util_FileUtils::buildModulesPath($model->getModuleName(), 'persistentdocument', $model->getDocumentName() . '.class.php');
-				if (file_exists($parentfilePath))
-				{
-					$content = file_get_contents($parentfilePath);
-					if (strpos($content, ' indexer_IndexableDocument'))
-					{
-						$ok = true;
-						break;	
-					}
-				}
-				$model = $model->hasParentModel() ? $model->getParentModel() : null;
-			}
-			
-			if (!$ok)
-			{
-				echo "WARNING: $filePath not implement indexer_IndexableDocument interface\n";
-			}
-		}
-
+		
 		//Add import class file
 		$filePath = $this->pathBaseModule . 'persistentdocument' . DIRECTORY_SEPARATOR . 'import' . DIRECTORY_SEPARATOR . ucfirst($this->name) . 'ScriptDocumentElement.class.php';
 		if (!file_exists($filePath))

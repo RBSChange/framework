@@ -8,4 +8,4 @@ CREATE TABLE IF NOT EXISTS `f_relation` (
   `relation_id` int(11) NOT NULL default '0',
   PRIMARY KEY ( `relation_id1` , `relation_id` , `relation_order`),
   INDEX `relation_id2` ( `relation_id2`, `relation_id` )
-) ENGINE=InnoDB CHARACTER SET utf8 COLLATE utf8_bin;
+) ENGINE=InnoDB CHARACTER SET utf8 COLLATE utf8_unicode_ci;

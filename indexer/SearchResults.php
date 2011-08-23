@@ -45,3 +45,64 @@ interface indexer_SearchResults
 	public function getFacetResults();
 }
 
+
+class indexer_EmptySearchResults extends ArrayObject implements indexer_SearchResults
+{
+	/**
+	 * @see indexer_SearchResults::getFacetResult()
+	 */
+	public function getFacetResult($fieldName)
+	{
+		return null;	
+	}
+
+	/**
+	 * @see indexer_SearchResults::getFacetResults()
+	 */
+	public function getFacetResults()
+	{
+		return array();
+	}
+
+	/**
+	 * @see indexer_SearchResults::getFirstHitOffset()
+	 */
+	public function getFirstHitOffset()
+	{
+		return 0;	
+	}
+
+	/**
+	 * @see indexer_SearchResults::getRequestedHitsPerPageCount()
+	 */
+	public function getRequestedHitsPerPageCount()
+	{
+		return 0;	
+	}
+
+	/**
+	 * @see indexer_SearchResults::getReturnedHits()
+	 */
+	public function getReturnedHits()
+	{
+		return array();
+	}
+
+	/**
+	 * @see indexer_SearchResults::getReturnedHitsCount()
+	 */
+	public function getReturnedHitsCount()
+	{
+		return 0;
+	}
+
+	/**
+	 * @see indexer_SearchResults::getTotalHitsCount()
+	 */
+	public function getTotalHitsCount()
+	{
+		return 0;
+		
+	}
+}
+
