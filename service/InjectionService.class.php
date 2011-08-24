@@ -47,7 +47,7 @@ class change_InjectionService
     {
         // Check if injection is up to date
     	$injectionInfos = $this->getInfos();
-    	$injectionConfig = Framework::getConfiguration('injection/class');
+    	$injectionConfig = Framework::getConfigurationValue('injection/class', array());
     	$toRecompile = array();
     	foreach ($injectionInfos as $className => $value) 
     	{
@@ -99,7 +99,7 @@ class change_InjectionService
 		$returnValue = array();
 		if ($toRecompile == null)
 		{
-			$toRecompile = Framework::getConfiguration("injection/class");
+			$toRecompile = Framework::getConfigurationValue('injection/class', array());
 			$newInjectionInfos = array();
 		}
 		else 
