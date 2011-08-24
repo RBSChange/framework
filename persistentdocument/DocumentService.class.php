@@ -1863,6 +1863,10 @@ class f_persistentdocument_DocumentService extends BaseService
 		if ($indexedDocument !== null)
 		{
 			$this->updateIndexDocument($indexedDocument, $document, $indexService);
+			if ($indexedDocument && !$indexedDocument->foIndexable() && !$indexedDocument->boIndexable())
+			{
+				$indexedDocument = null;
+			}
 		}
 		return $indexedDocument;	
 	}

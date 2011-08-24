@@ -10,6 +10,11 @@ class indexer_SolrManager
 	const UPDATE_TASK = "update";
 	const SYNONYMS_TASK = 'admin/synonyms';
 	
+	const BACKOFFICE_SUFFIX = '__backoffice';
+	
+	const SOLR_DATE_FORMAT = 'Y-m-dTH:i:sZ';
+	
+	
 	private $deleteQueue = array();
 	private $updateQueue = array();
 	
@@ -196,6 +201,16 @@ class indexer_SolrManager
 				$values = array($values);
 			}
 			
+			$len = strlen(indexer_Field::DATE);
+			$lendv = strlen(indexer_Field::DATE_VOLATILE);
+			if (substr($name, -$len, $len) === indexer_Field::DATE || substr($name, -$lendv, $lendv) === indexer_Field::DATE_VOLATILE)
+			{
+				for ($i = 0; $i < count($values); $i++) 
+				{
+					$values[$i] = date_Formatter::format($values[$i], self::SOLR_DATE_FORMAT);
+				}
+			}
+			
 			// We append the correct suffix if necessary, given the field names
 			switch ($name)
 			{
@@ -215,6 +230,8 @@ class indexer_SolrManager
 					$this->xmlWriterAdd->writeAttribute('name', 'finalId');
 					$this->xmlWriterAdd->text($this->xmlentities(strval($this->clientId . $values[0])));
 					$this->xmlWriterAdd->endElement();
+					
+					//Framework::fatal('addInternal: ' . $values[0]);				
 					break;
 				case 'lang':
 				case 'documentModel':
@@ -374,6 +391,7 @@ class indexer_SolrManager
 			$this->xmlWriterAdd->endElement();
 			$this->xmlWriterAdd->endDocument();
 			$string = $this->xmlWriterAdd->outputMemory(true);
+			//Framework::fatal($string);
 			$this->xmlWriterAdd = null;
 			$this->sendUpdate($string);
 		}

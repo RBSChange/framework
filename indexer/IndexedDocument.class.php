@@ -27,12 +27,13 @@ class indexer_IndexedDocument
 	/**
 	 * Set the Field named $name to $value and treat it as a simple string 
 	 *
-	 * @param String $name
-	 * @param String $value
+	 * @param string $name
+	 * @param string $value
+	 * @param boolean $multi
 	 */
 	public function setStringField($name, $value, $multi = false)
 	{
-		if (!is_null($value))
+		if ($value !== null)
 		{
 			if ($multi)
 			{
@@ -46,17 +47,22 @@ class indexer_IndexedDocument
 			}
 			$this->fields[$name . $suffix] = array('value' => $value, 'type' => $type);
 		}
+		elseif (!$multi)
+		{
+			unset($this->fields[$name . indexer_Field::STRING]);	
+		}
 	}
 	
 	/**
 	 * Set the Field named $name to $value and treat it as a (non stored) simple string
 	 *
-	 * @param String $name
-	 * @param String $value
+	 * @param string $name
+	 * @param string $value
+	 * @param boolean $multi
 	 */
 	public function setVolatileStringField($name, $value, $multi = false)
 	{
-		if (!is_null($value))
+		if ($value !== null)
 		{
 			if($multi)
 			{
@@ -70,53 +76,64 @@ class indexer_IndexedDocument
 			}
 			$this->fields[$name . $suffix] = array('value' => $value, 'type' => $type);
 		}
+		elseif (!$multi)
+		{
+			unset($this->fields[$name . indexer_Field::STRING_VOLATILE]);	
+		}
 	}
 	
 	/**
 	 * Set Localized field named $name to $value and treat it as a stemmable string 
 	 *
-	 * @param String $name
-	 * @param String $value
+	 * @param string $name
+	 * @param string $value
 	 */
 	public function setLocalizedStringField($name, $value)
 	{
-		if (!is_null($value))
+		$lang = RequestContext::getInstance()->getLang();
+		if ($value !== null)
 		{
-			$lang = RequestContext::getInstance()->getLang();
-			$this->fields[$name . "_$lang"] = array('value' => $value, 'type' => indexer_Field::INDEXED | indexer_Field::STORED | indexer_Field::TOKENIZED);
+			$this->fields[$name . '_' . $lang] = array('value' => $value, 'type' => indexer_Field::INDEXED | indexer_Field::STORED | indexer_Field::TOKENIZED);
+		}
+		else
+		{
+			unset($this->fields[$name . '_' . $lang]);	
 		}
 	}
 	
-	
-	
 	/**
-	 * Set the Field named $name to $date and treat it as a Date 
-	 *
-	 * @param String $name
-	 * @param date_Calendar $date
+	 * @param string $name
+	 * @param string $date
 	 */
 	public function setDateField($name, $date)
 	{
-		if (!is_null($date))
+		if ($date !== null)
 		{
-			$this->fields[$name . indexer_Field::DATE] = array('value' => 
-				date_Formatter::format($date ,indexer_Field::SOLR_DATE_FORMAT), 
-				'type' => indexer_Field::INDEXED | indexer_Field::STORED);
+			$suffix = indexer_Field::DATE;
+			$this->fields[$name . $suffix] = array('value' => $date, 'type' => indexer_Field::INDEXED | indexer_Field::STORED);
+		}
+		else
+		{
+			unset($this->fields[$name . indexer_Field::DATE]);	
 		}
 	}
 	
 	/**
 	 * Set the Field named $name to $date and treat it as a Date (non stored)
 	 *
-	 * @param String $name
-	 * @param date_Calendar $date
+	 * @param string $name
+	 * @param string $date
 	 */
 	public function setVolatileDateField($name, $date)
 	{
-		if (!is_null($date))
+		if ($date !== null)
 		{
 			$suffix = indexer_Field::DATE_VOLATILE;
-			$this->fields[$name . $suffix] = array('value' => date_Formatter::format($date, indexer_Field::SOLR_DATE_FORMAT), 'type' => indexer_Field::INDEXED);
+			$this->fields[$name . $suffix] = array('value' => $date, 'type' => indexer_Field::INDEXED);
+		}
+		else
+		{
+			unset($this->fields[$name . indexer_Field::DATE_VOLATILE]);	
 		}
 	}
 	
@@ -129,7 +146,7 @@ class indexer_IndexedDocument
 	 */
 	public function setIntegerField($name, $int, $multivalued = false)
 	{
-		if (!is_null($int))
+		if ($int !== null)
 		{
 			if($multivalued)
 			{
@@ -143,6 +160,10 @@ class indexer_IndexedDocument
 			}
 			$this->fields[$name . $suffix] = array('value' => $int, 'type' => $type);
 		}
+		elseif (!$multivalued)
+		{
+			unset($this->fields[$name .  indexer_Field::INTEGER]);	
+		}
 	}
 	
 	/**
@@ -154,7 +175,7 @@ class indexer_IndexedDocument
 	 */
 	public function setVolatileIntegerField($name, $int, $multivalued = false)
 	{
-		if (!is_null($int))
+		if ($int !== null)
 		{
 			if ($multivalued)
 			{
@@ -168,6 +189,10 @@ class indexer_IndexedDocument
 			}
 			$this->fields[$name . $suffix] = array('value' => $int, 'type' => $type);
 		}
+		elseif (!$multivalued)
+		{
+			unset($this->fields[$name . indexer_Field::INTEGER_VOLATILE]);	
+		}
 	}
 	
 	/**
@@ -178,9 +203,13 @@ class indexer_IndexedDocument
 	 */
 	public function setFloatField($name, $float)
 	{
-		if (!is_null($float))
+		if ($float !== null)
 		{
 			$this->fields[$name . indexer_Field::FLOAT] = array('value' => $float, 'type' => indexer_Field::INDEXED | indexer_Field::STORED | indexer_Field::TOKENIZED);
+		}
+		else
+		{
+			unset($this->fields[$name . indexer_Field::FLOAT]);	
 		}
 	}
 	
@@ -192,10 +221,14 @@ class indexer_IndexedDocument
 	 */
 	public function setVolatileFloatField($name, $float)
 	{
-		if (!is_null($float))
+		if ($float !== null)
 		{
 			$suffix = indexer_Field::FLOAT_VOLATILE;
 			$this->fields[$name . $suffix] = array('value' => $float, 'type' => indexer_Field::INDEXED | indexer_Field::STORED | indexer_Field::TOKENIZED);
+		}
+		else
+		{
+			unset($this->fields[$name . indexer_Field::FLOAT_VOLATILE]);	
 		}
 	}
 	
@@ -206,7 +239,7 @@ class indexer_IndexedDocument
 	 */
 	public function setLabel($value)
 	{
-		if (!is_null($value))
+		if ($value !== null)
 		{
 			$this->fields['label'] = array('value' => $value, 'type' => indexer_Field::INDEXED | indexer_Field::STORED | indexer_Field::TOKENIZED);
 		}
@@ -271,6 +304,7 @@ class indexer_IndexedDocument
 		if (!is_null($value))
 		{
 			$this->fields['changeId'] = array('value' => $value, 'type' => indexer_Field::IGNORED);
+			unset($this->fields['id']);
 		}
 	}
 	
@@ -284,6 +318,7 @@ class indexer_IndexedDocument
 		if (!is_null($value))
 		{
 			$this->fields['lang'] = array('value' => $value, 'type' => indexer_Field::INDEXED | indexer_Field::STORED);
+			unset($this->fields['id']);
 		}
 	}
 	
@@ -370,6 +405,36 @@ class indexer_IndexedDocument
 	}
 	
 	/**
+	 * @param boolean $indexable
+	 * @return boolean
+	 */
+	public function boIndexable($indexable = null)
+	{
+		$name = 'SEARCHBO' . indexer_Field::INTEGER;
+		$result = isset($this->fields[$name]) && $this->fields[$name]['value'] == 1;
+		if ($indexable !== null)
+		{
+			$this->setIntegerField('SEARCHBO', $indexable ? 1 : null);
+		}
+		return $result;
+	}
+	
+	/**
+	 * @param boolean $indexable
+	 * @return boolean
+	 */
+	public function foIndexable($indexable = null)
+	{
+		$name = 'SEARCHFO' . indexer_Field::INTEGER;
+		$result = isset($this->fields[$name]) && $this->fields[$name]['value'] == 1;
+		if ($indexable !== null)
+		{
+			$this->setIntegerField('SEARCHFO', $indexable ? 1 : null);
+		}
+		return $result;
+	}
+	
+	/**
 	 * Get all the field as an associative array of the type:
 	 * 		Array(name => array('value' => value, 'type' => type)
 	 *
@@ -378,8 +443,7 @@ class indexer_IndexedDocument
 	public function getFields()
 	{
 		if (!array_key_exists('changeId', $this->fields) || !array_key_exists('documentModel', $this->fields) || !array_key_exists('lang', $this->fields) || !array_key_exists('label', $this->fields) || !array_key_exists('text', $this->fields))
-		{
-			
+		{	
 			throw new Exception("IndexedDocument does not provide the required fields " . var_export($this->fields, true));
 		}
 		$this->getUniqueKey();
@@ -457,47 +521,37 @@ class indexer_IndexedDocument
 		$this->fields[$fieldName]['type'] = indexer_Field::INDEXED;
 	}
 	
-	/**
-	 * @deprecated
-	 * @return Boolean
-	 */
-	public function hasParentWebsiteId()
-	{
-		return isset($this->fields[indexer_Field::PARENT_WEBSITE . indexer_Field::INTEGER]);
-	}
 	
 	/**
-	 * @deprecated
-	 * @return Boolean
-	 */
-	public function hasParentTopicId()
-	{
-		return isset($this->fields[indexer_Field::PARENT_TOPIC . indexer_Field::INTEGER]);
-	}
-	
-	/**
-	 * @deprecated
 	 * @param String $name
-	 * @param Integer $int
+	 * @param array $arguments
 	 */
-	public function setParentWebsiteId($int)
+	final function __call($name, $arguments)
 	{
-		if (!is_null($int))
+		switch ($name)
 		{
-			$this->fields[indexer_Field::PARENT_WEBSITE . indexer_Field::INTEGER] = array('value' => $int, 'type' => indexer_Field::INDEXED | indexer_Field::STORED | indexer_Field::TOKENIZED);
-		}
-	}
-	
-	/**
-	 * @deprecated
-	 * @param String $name
-	 * @param Integer $int
-	 */
-	public function setParentTopicId($int)
-	{
-		if ($int !== null)
-		{
-			$this->fields[indexer_Field::PARENT_TOPIC . indexer_Field::INTEGER] = array('value' => $int, 'type' => indexer_Field::INDEXED | indexer_Field::STORED | indexer_Field::TOKENIZED);
+			case 'hasParentWebsiteId': 
+				Framework::error('Call to deleted ' . get_class($this) . '->'.$name.' method');
+				return isset($this->fields['__solrsearch_parentwebsite_id' . indexer_Field::INTEGER]);
+			case 'hasParentTopicId': 
+				Framework::error('Call to deleted ' . get_class($this) . '->'.$name.' method');
+				return isset($this->fields['parentTopicId' . indexer_Field::INTEGER]);
+			case 'setParentWebsiteId': 
+				Framework::error('Call to deleted ' . get_class($this) . '->'.$name.' method');
+				if (!is_null($arguments[0]))
+				{
+					$this->fields['__solrsearch_parentwebsite_id' . indexer_Field::INTEGER] = array('value' => $arguments[0], 'type' => indexer_Field::INDEXED | indexer_Field::STORED | indexer_Field::TOKENIZED);
+				}
+				return;
+			case 'setParentTopicId': 
+				Framework::error('Call to deleted ' . get_class($this) . '->'.$name.' method');
+				if (!is_null($arguments[0]))
+				{
+					$this->fields['parentTopicId' . indexer_Field::INTEGER] = array('value' => $arguments[0], 'type' => indexer_Field::INDEXED | indexer_Field::STORED | indexer_Field::TOKENIZED);
+				}
+				return;
+			default: 
+				throw new Exception('No method ' . get_class($this) . '->' . $name);
 		}
 	}
 }

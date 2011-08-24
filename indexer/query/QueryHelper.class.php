@@ -155,7 +155,7 @@ class indexer_QueryHelper
 	 */
 	public static function dateFieldInstance($name, $value)
 	{
-		return new indexer_TermQuery($name . indexer_Field::DATE, date_Formatter::format($value, indexer_Field::SOLR_DATE_FORMAT));
+		return new indexer_TermQuery($name . indexer_Field::DATE, date_Formatter::format($value, indexer_SolrManager::SOLR_DATE_FORMAT));
 	}
 
 	/**

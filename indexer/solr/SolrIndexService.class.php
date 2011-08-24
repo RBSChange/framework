@@ -1,14 +1,29 @@
 <?php
 class indexer_SolrIndexService extends indexer_IndexService
 {
-	const BACKOFFICE_SUFFIX = '__backoffice';
-	
 	/**
 	 * @var indexer_SolrManager
 	 */
 	private $manager = null;
 	
 	private $config = null;
+	
+	/**
+	 * @var indexer_SolrIndexService
+	 */
+	private static $instance = null;
+	
+	/**
+	 * @return indexer_SolrIndexService
+	 */
+	public static function getInstance()
+	{
+		if (null === self::$instance)
+		{
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
 	
 	/**
 	 * @return indexer_SolrManager
@@ -160,7 +175,7 @@ class indexer_SolrIndexService extends indexer_IndexService
 	{
 		try
 		{
-			$query->addFilterQuery(indexer_QueryHelper::integerFieldInstance('SEARCHFO', 1));
+			$query->addFilterQuery(indexer_QueryHelper::integerFieldInstance('SEARCHBO', 1));
 			$solrSearch = new indexer_StandardSolrSearch($query);
 			$data = $this->getManager()->query($solrSearch);
 			$searchResults = new indexer_SolrSearchResults($data, $solrSearch);

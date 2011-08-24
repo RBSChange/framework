@@ -35,11 +35,9 @@ class indexer_IndexService extends BaseService
 	private $documentIdsToIndex;
 	
 	/**
-	 * Get the service instance.
-	 *
 	 * @return indexer_IndexService
 	 */
-	public final static function getInstance()
+	public static function getInstance()
 	{
 		if (null === self::$instance)
 		{
@@ -388,12 +386,15 @@ class indexer_IndexService extends BaseService
 				->setMaxResults($chunkSize)
 				->addOrder(Order::asc('document_id'));
 		$ids = $query->findColumn('id');	
-		$this->getTransactionManager()->beginTransaction();
+		
+		
 		
 		foreach ($ids as $documentId)
 		{					
 			try
 			{
+				$this->getTransactionManager()->beginTransaction();
+				
 				list($oldStatus, $lastUpdate) = $this->getPersistentProvider()->getIndexingDocumentStatus($documentId);
 				$result = $this->indexDocumentId($documentId);
 				$lastUpdate = date_Calendar::getInstance()->toString();
@@ -416,14 +417,15 @@ class indexer_IndexService extends BaseService
 					$this->getPersistentProvider()->setIndexingDocumentStatus($documentId, self::TO_INDEX, $lastUpdate);
 				}
 				
+				$this->getTransactionManager()->commit();
 			}
 			catch (Exception $e)
 			{
 				Framework::exception($e);
+				$this->getTransactionManager()->rollBack($e);
 			}
 		}
 		
-		$this->getTransactionManager()->commit();
 		return count($ids);
 	}	
 	
@@ -577,7 +579,7 @@ class indexer_IndexService extends BaseService
 					}
 					$userIds = array_unique($userIds);
 				}
-				$indexedDoc->setIntegerField('SEARCHFO', 1);				
+				$indexedDoc->foIndexable(true);				
 				$indexedDoc->setDateField('sortable_date', $document->getModificationdate());
 				$returnIndexedDoc = true;			
 			}
@@ -585,7 +587,7 @@ class indexer_IndexService extends BaseService
 		
 		if ($pm->isBackofficeIndexable() && $document->getPublicationstatus() !== 'DEPRECATED')
 		{
-			$indexedDoc->setIntegerField('SEARCHBO', 1);
+			$indexedDoc->boIndexable(true);
 			$indexedDoc->setStringField('editmodule', uixul_DocumentEditorService::getInstance()->getEditModuleName($document));
 			$indexedDoc->setStringField('documentpath', $document->getDocumentService()->getPathOf($document));
 			$userIds = array_merge($userIds, $this->getBackendAccessorIds($document, $indexedDoc));

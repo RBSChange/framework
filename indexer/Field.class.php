@@ -30,11 +30,6 @@ final class indexer_Field
 	const INTEGER_MULTI_VOLATILE = '_vol_mul_int';
 	const FLOAT_VOLATILE = '_vol_float';
 	
-	const PARENT_WEBSITE = '__solrsearch_parentwebsite_id';
-	const PARENT_TOPIC = 'parentTopicId';
-	
-	const SOLR_DATE_FORMAT = 'Y-m-dTH:i:sZ';
-	
 	/**
 	 * Helper to convert a Y-M-D H:M:S date to a "solr" date
 	 * 
