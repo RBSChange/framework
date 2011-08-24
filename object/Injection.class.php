@@ -1,8 +1,9 @@
 <?php
 
-
 class change_Injection
 {
+    const REPLACED_CLASS_SUFFIX = '_injected';
+    
 	/**
 	 *
 	 * @var array 
@@ -137,7 +138,7 @@ class change_Injection
         {
             throw new Exception('Your autoload seems to be corrupted - please run ' . CHANGE_COMMAND . 'update-autoload');
         }
-		$newClassName = $originalClassName . '_h4x0r3d';
+		$newClassName = $originalClassName . self::REPLACED_CLASS_SUFFIX;
 		$infos = array();
 		// Process the original file
 		$classes = $this->processInjectedFile($originalFileContent, $originalClassName , $newClassName, null, '<?php' . PHP_EOL);
@@ -173,8 +174,11 @@ class change_Injection
 		$classes = $this->processInjectedFile($injectFileContent, $injectClassName , $originalClassName, $newClassName, PHP_EOL);
 		$combinedContent .= $classes[$originalClassName];
 		
+		$combinedContent .= PHP_EOL .'class ' . $injectClassName . ' extends ' . $originalClassName . ' {}';
+		
 		$infos[$injectClassName]['path'] = $injectFileInfo->getPathname();
         $infos[$injectClassName]['mtime'] = $injectFileInfo->getMTime();
+        $infos[$injectClassName]['link'] = f_util_FileUtils::buildProjectPath('build', 'injection', $originalClassName . '.class.php');
 		f_util_FileUtils::writeAndCreateContainer(f_util_FileUtils::buildProjectPath('build', 'injection', $originalClassName . '.class.php'), $combinedContent, f_util_FileUtils::OVERRIDE);
         return $infos;
     }

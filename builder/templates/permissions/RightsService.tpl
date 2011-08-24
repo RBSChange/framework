@@ -1,7 +1,7 @@
 <?php
 class roles_<{$module->name|capitalize}>RoleService implements change_RoleService
 {
-	private static $instance = null;
+	private static $instance;
 	private static $moduleName = '<{$module->name}>';
 
 	private static $roleNames = array(<{foreach from=$module->getRoles() item=role name=roles}>'<{$module->getPrefix()}><{$role->getName()}>'<{if !$smarty.foreach.roles.last}>,<{/if}><{/foreach}>);
@@ -21,7 +21,7 @@ class roles_<{$module->name|capitalize}>RoleService implements change_RoleServic
 	{
 		if (is_null(self::$instance))
 		{
-			self::$instance = new roles_<{$module->name|capitalize}>RoleService();
+			self::$instance = new self();
 		}
 		return self::$instance;
 	}
