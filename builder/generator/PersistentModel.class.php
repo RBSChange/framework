@@ -1473,6 +1473,15 @@ class generator_PersistentModel
 		}
 		return 'f_persistentdocument_PersistentDocumentModel';		
 	}
+	
+	public function getExtendI18nClassName()
+	{
+		if ($this->hasParentModel())
+		{
+			return  'extends ' . $this->getParentModel()->getFinalDocumentClassName() . 'I18n';
+		}
+		return 'implements f_persistentdocument_I18nPersistentDocument';		
+	}
 
 	/**
 	 * @return String
@@ -1764,7 +1773,6 @@ class generator_PersistentModel
 		return $this->initSerializedproperties === true;
 	}
 
-
 	/**
 	 * @return array<generator_PersistentProperty>
 	 */
@@ -1818,42 +1826,6 @@ class generator_PersistentModel
 			return $this->getParentModel()->getModelVersion();
 		}
 		return $this->modelVersion;
-	}
-
-	/**
-	 * @return String
-	 */
-	public function getPhpDefaultI18nValues()
-	{
-		$code = array()	;
-		foreach ($this->getI18nClassMember() as $property)
-		{
-			if ($property->getName() == 'publicationstatus')
-			{
-				$code[] = '		$this->setPublicationstatus(\''. $this->getDefaultStatus() . '\');';
-			}
-			else
-			{
-				$value = $property->getPhpI18nDefaultValue();
-				if (!is_null($value))
-				{
-					$code[] = $value;
-				}
-			}
-		}
-
-		foreach ($this->serializedproperties as $property)
-		{
-			if ($property->isLocalized())
-			{
-				$value = $property->getPhpI18nDefaultValue();
-				if (!is_null($value))
-				{
-					$code[] = $value;
-				}
-			}
-		}
-		return join("\n", $code);
 	}
 
 	/**
@@ -1960,30 +1932,58 @@ class generator_PersistentModel
 	{
 		return count($this->childrenProperties) > 0;
 	}
-
-	public function hasI18nLabelWithDefaultValue()
+	
+	/**
+	 * @return String
+	 */
+	public function getPhpDefaultI18nValues()
 	{
-		$prop = $this->getPropertyByName('label');
-		return !is_null($prop) ? $prop->isLocalized() : false;
-	}
+		$code = array()	;
+		$labelProp = $this->getPropertyByName('label');
+		if (!is_null($labelProp) && $labelProp->isLocalized())
+		{
+			$value = $labelProp->getPhpI18nDefaultValue();
+			if (!is_null($value))
+			{
+				$code[] = $value;
+			}
+		}
+		
+		foreach ($this->getI18nClassMember() as $property)
+		{
+			if ($property->getName() == 'publicationstatus')
+			{
+				$code[] = '		$this->setPublicationstatus(\''. $this->getDefaultStatus() . '\');';
+			}
+			else
+			{
+				$value = $property->getPhpI18nDefaultValue();
+				if (!is_null($value))
+				{
+					$code[] = $value;
+				}
+			}
+		}
 
-	public function getI18nLabelDefaultValue()
-	{
-		return $this->getPropertyByName('label')->getPhpI18nDefaultValue();
+		foreach ($this->serializedproperties as $property)
+		{
+			if ($property->isLocalized())
+			{
+				$value = $property->getPhpI18nDefaultValue();
+				if (!is_null($value))
+				{
+					$code[] = $value;
+				}
+			}
+		}
+		return (count($code)) ? join(PHP_EOL, $code) : '';
 	}
 	/**
 	 * @return array<generator_PersistentProperty>
 	 */
 	public function getI18nClassMember()
 	{
-		if ($this->hasParentModel())
-		{
-			$result = $this->getParentModel()->getI18nClassMember();
-		}
-		else
-		{
-			$result = array();
-		}
+		$result = array();
 		foreach ($this->getClassMember() as $property)
 		{
 			if (!$property->isLocalized())

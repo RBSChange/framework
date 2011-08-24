@@ -682,8 +682,17 @@ class generator_PersistentProperty
 		{
 			return null;
 		}
-		$ret = '		$this->set' . ucfirst($this->name) . '(';
+		
+		if ($this->isSerializedProperty)
+		{
+			$ret = '		$this->setS18sProperty(\''. $this->name . '\', ';
+		}
+		else
+		{
+			$ret = '		$this->set' . ucfirst($this->name) . '(';
+		}
 		$ret .= $this->getPhpValue($this->defaultValue);
+
 		return $ret . ');';
 	}
 	/**
