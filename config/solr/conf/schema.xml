@@ -270,10 +270,10 @@
 		
 		<!-- Text completion : specific aggregateText field and dynamic fields-->
 		<field name="aggregateText_complete" type="text_complete"  indexed="true" stored="false" multiValued="true" />
-		<field name="*_complete" type="text_complete"  indexed="true" stored="false" multiValued="true" />
-		<field name="*_complete4" type="text_complete4"  indexed="true" stored="false" multiValued="true" />
-		<field name="*_complete3" type="text_complete3"  indexed="true" stored="false" multiValued="true" />
-		<field name="*_complete2" type="text_complete2"  indexed="true" stored="false" multiValued="true" />
+		<dynamicField name="*_complete" type="text_complete"  indexed="true" stored="false" multiValued="true" />
+		<dynamicField name="*_complete4" type="text_complete4"  indexed="true" stored="false" multiValued="true" />
+		<dynamicField name="*_complete3" type="text_complete3"  indexed="true" stored="false" multiValued="true" />
+		<dynamicField name="*_complete2" type="text_complete2"  indexed="true" stored="false" multiValued="true" />
 		
 		<!-- Aggregate text, localized -->
 		<field name="fr_aggregateText" type="text_fr_aggr"  indexed="true" stored="false" multiValued="true" />
