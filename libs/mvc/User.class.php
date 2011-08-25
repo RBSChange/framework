@@ -317,7 +317,8 @@ class change_User
 	 */
 	public function isAuthenticated()
 	{
-		return change_Controller::getInstance()->getStorage()->readForUser('framework_isAuthenticated') == true;
+		$data = change_Controller::getInstance()->getStorage()->readForUser('framework_isAuthenticated');
+		return $data == true;
 	}
 	
 	/**
@@ -327,7 +328,7 @@ class change_User
 	{
 		if ($authenticated === true)
 		{
-			return change_Controller::getInstance()->getStorage()->writeForUser('framework_isAuthenticated', $authenticated);
+			change_Controller::getInstance()->getStorage()->writeForUser('framework_isAuthenticated', $authenticated);
 		}
 		else
 		{

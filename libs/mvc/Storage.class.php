@@ -52,7 +52,6 @@ class change_Storage
 	
 	protected function startSession()
 	{
-
 		if (isset($_SERVER["SERVER_ADDR"]))
 		{
 			session_name($this->parameters['session_name']);
@@ -312,7 +311,8 @@ class change_Storage
 	 */
 	public function getUserSessionNamespaceInstance()
 	{
-		return $this->context->getUser()->getUserNamespace() === change_User::BACKEND_NAMESPACE ? $this->backuserSessionNameSpace : $this->frontuserSessionNameSpace;	
+		if ($this->started === null) {$this->startSession();}
+		return $this->context->getUser()->getUserNamespace() === change_User::BACKEND_NAMESPACE ? $this->backuserSessionNameSpace : $this->frontuserSessionNameSpace;
 	}
 	
 	/**

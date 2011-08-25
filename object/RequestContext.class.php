@@ -87,22 +87,12 @@ class RequestContext
 		$this->m_enabled = (count($this->m_supportedLanguages) > 1);
 		$this->m_lang = $this->getDefaultLang();
 		$this->m_ui_supportedLanguages = $ui_supportedLanguages;
-		$uilang = change_Controller::getInstance()->getStorage()->read('uixul_uilang');
-		$this->m_ui_lang = $uilang ? $uilang : $this->getUserAgentLanguage();
+
 		// This "marker" can be overriden especially when behind proxies
 		$httpsMarker = Framework::getConfigurationValue('general/https-request-marker', 'HTTPS');
 		$httpsMarkerValue = Framework::getConfigurationValue('general/https-request-marker-value', 'on');
 		$this->m_inHTTPS = (isset($_SERVER[$httpsMarker]) && ($_SERVER[$httpsMarker] === $httpsMarkerValue));
 		$this->m_pathURI = (isset($_SERVER['REQUEST_URI'])) ? $_SERVER['REQUEST_URI'] : null;
-
-		if (Framework::isDebugEnabled())
-        {
-        	$debug = __METHOD__ . ' -> default lang : ' . var_export($this->m_lang, true);
-        	$debug .= ', default UI lang : ' .var_export($this->m_ui_lang, true);
-        	$debug .= ', HTTPS : ' . var_export($this->m_inHTTPS, true);
-        	$debug .= ', URL : ' . var_export($this->m_pathURI, true);
-            Framework::debug($debug);
-		}
 	}
 
 	/**
@@ -282,6 +272,11 @@ class RequestContext
 	 */
 	public function getUILang()
 	{
+		if ($this->m_ui_lang === null)
+		{
+			$uilang = change_Controller::getInstance()->getStorage()->read('uixul_uilang');
+			$this->m_ui_lang = $uilang ? $uilang : $this->getUserAgentLanguage();
+		}
 		return $this->m_ui_lang;
 	}
 
