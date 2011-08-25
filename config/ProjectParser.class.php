@@ -225,21 +225,6 @@ class config_ProjectParser
 		$configArray['config']['packageversion'] = $configArray['packageversion'];
 		unset($configArray['packageversion']);
 								
-		// Injections
-		$docInjections = $this->searchForDocInjections();
-		if (count($docInjections) > 0)
-		{
-			if (!isset($configArray['config']['injection']))
-			{
-				$configArray['config']['injection'] = array();
-			}
-			if (!isset($configArray['config']['injection']['document']))
-			{
-				$configArray['config']['injection']['document'] = array();
-			}
-			$configArray['config']['injection']['document'] = $docInjections;
-		}		
-		
 		$this->loadXmlConfigFile(PROJECT_HOME . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'project.xml', $configArray);
 		$profilFile = $configDir . DIRECTORY_SEPARATOR . "project.".$currentProfile.".xml";
 		if (is_readable($profilFile))
@@ -565,6 +550,8 @@ class config_ProjectParser
 			}
 		}
 	}
+	
+	
 	
 	private function searchForDocInjections()
 	{
