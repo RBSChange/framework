@@ -5,6 +5,106 @@
  */
 class config_ProjectParser
 {
+	/**
+	 * @param string $path
+	 * @param string $value
+	 * @return string old value
+	 */
+	public static function addProjectConfigurationEntry($path, $value)
+	{
+		$sections = array('config');
+		foreach (explode('/', $path) as $name) 
+		{
+			if (trim($name) != '') {$sections[] = trim($name);}
+		}		
+		if (count($sections) < 3) 
+		{
+			return false;
+		}		
+		if ($value !== null && !is_string($value))
+		{
+			return false;
+		}
+		
+		$entryName = array_pop($sections);
+		$oldValue = null;
+		
+		$configProjectPath = implode(DIRECTORY_SEPARATOR, array(PROJECT_HOME, 'config', 'project.xml'));
+		if (!is_readable($configProjectPath))
+		{
+			return false;
+		}
+		
+		$dom = new DOMDocument('1.0', 'utf-8');
+		$dom->formatOutput = true;
+		$dom->preserveWhiteSpace = false;
+		$dom->load($configProjectPath);
+		$dom->formatOutput = true;
+		if ($dom->documentElement == null)
+		{
+			return false;
+		}
+		$sectionNode = $dom->documentElement;
+		
+		foreach ($sections as $sectionName) 
+		{
+			$childSectionNode = null;
+			foreach ($sectionNode->childNodes as $entryNode) 
+			{
+				if ($entryNode->nodeType === XML_ELEMENT_NODE && $entryNode->nodeName === $sectionName) 
+				{
+					$childSectionNode = $entryNode;
+					break;
+				}
+			}
+			if ($childSectionNode === null)
+			{
+				$childSectionNode = $sectionNode->appendChild($dom->createElement($sectionName));
+			}
+			$sectionNode = $childSectionNode;
+		}
+		
+		foreach ($sectionNode->childNodes as $entryNode) 
+		{
+			if ($entryNode->nodeType === XML_ELEMENT_NODE && $entryNode->getAttribute('name') === $entryName) 
+			{
+				$oldValue = $entryNode->textContent;
+				break;
+			}
+		}
+		if ($oldValue !== $value)
+		{
+			if ($value === null)
+			{
+				$sectionNode->removeChild($entryNode);
+				
+				while (!$sectionNode->hasChildNodes() && $sectionNode->nodeName !== 'config')
+				{
+					$pnode = $sectionNode->parentNode;
+					$pnode->removeChild($sectionNode);
+					$sectionNode = $pnode;
+				}
+			}
+			elseif ($oldValue === null)
+			{
+				$entryNode = $sectionNode->appendChild($dom->createElement('entry'));
+				$entryNode->setAttribute('name', $entryName);
+				$entryNode->appendChild($dom->createTextNode($value));
+			}
+			else
+			{
+				while ($entryNode->hasChildNodes())
+				{
+					$entryNode->removeChild($entryNode->firstChild);
+				}
+				$entryNode->appendChild($dom->createTextNode($value));
+			}
+			$dom->save($configProjectPath);	
+		}
+		
+		return $oldValue;
+	}
+		
 	private function loadXmlConfigFile($xmlPath, &$configArray)
 	{
 		if (is_readable($xmlPath))
