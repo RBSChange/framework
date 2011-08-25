@@ -5,7 +5,7 @@
  */
 class <{$model->getDocumentClassName()}> extends <{$model->getDocumentClassName()}>base
 {
-<{if $model->getFinalDocumentName() == 'preferences'}>
+<{if $model->getDocumentName() == 'preferences'}>
 	/**
 	 * @retrun String
 	 */

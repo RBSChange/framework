@@ -167,7 +167,7 @@ class <{$model->getDocumentClassName()}>I18n <{$model->getExtendI18nClassName()}
 <{else}>
 		parent::setDocumentProperties($propertyBag);
 <{/if}>
-<{if $model->getInitSerializedproperties()}>
+<{if $model->getInitI18nSerializedproperties()}>
 		$this->m_s18sArray = null;
 <{/if}>
 <{if count($model->getI18nClassMember())}>
@@ -204,7 +204,7 @@ class <{$model->getDocumentClassName()}>I18n <{$model->getExtendI18nClassName()}
 <{else}>
 		$propertyBag = parent::getDocumentProperties();
 <{/if}>
-<{if $model->getInitSerializedproperties()}>
+<{if $model->getInitI18nSerializedproperties()}>
 		$this->serializeS18s();
 <{/if}>
 <{if count($model->getI18nClassMember())}>
@@ -218,7 +218,7 @@ class <{$model->getDocumentClassName()}>I18n <{$model->getExtendI18nClassName()}
 <{foreach from=$model->getI18nClassMember() item=property}>
 	private $m_<{$property->getName()}>;
 <{/foreach}>
-<{if $model->getInitSerializedproperties()}>
+<{if $model->getInitI18nSerializedproperties()}>
 
 	private $m_s18sArray;
 	

@@ -247,43 +247,23 @@ class builder_DocumentGenerator
 	{
 		$buildPathPersistentDocuments = f_util_FileUtils::buildChangeBuildPath('modules', $this->module , 'persistentdocument') . DIRECTORY_SEPARATOR;
 		f_util_FileUtils::mkdir($buildPathPersistentDocuments);
-		$filePath = $buildPathPersistentDocuments . $this->name . 'model_and_base.class.php';
-		$fileContent = "<?php\n";
-		if (!$this->modelObject->injected())
-		{
-			if (!$this->modelObject->inject())
-			{
-				$fileContent .= $this->modelObject->generatePhpModel();
-			}
-		}
-		else
-		{
-			$fileContent .= $this->modelObject->getReplacer()->generatePhpModel();
-		}
-		$fileContent .= "\n".$this->modelObject->generatePhpBaseClass();
 		
-		if (!$this->modelObject->inject())
-		{
-			if ($this->modelObject->isLocalized())
-			{
-				$fileContent .= "\n".$this->modelObject->generatePhpI18nClass();
-			}
-		}
-		f_util_FileUtils::write($filePath, $fileContent, f_util_FileUtils::OVERRIDE);	
-			
-		$classResolver = ClassResolver::getInstance();
-		// Add the classes to autoload file. It's necessary to call without regenerate cache_autoload.php
-		if (!$this->modelObject->inject())
-		{
-			$classResolver->appendToAutoloadFile($this->modelObject->getDocumentClassName() . 'model', $filePath);
-		}
-		$classResolver->appendToAutoloadFile($this->module .'_persistentdocument_' . $this->name . 'base', $filePath);
+		$filePath = $buildPathPersistentDocuments . $this->name . 'model_and_base.class.php';
+		$fileContent = array('<?php');
+		$fileContent[] = $this->modelObject->generatePhpModel();
+		$fileContent[] = $this->modelObject->generatePhpBaseClass();
 		if ($this->modelObject->isLocalized())
 		{
-			$classResolver->appendToAutoloadFile($this->module .'_persistentdocument_' . $this->name . 'I18n', $filePath);
+			$fileContent[] = $this->modelObject->generatePhpI18nClass();
 		}
-		
-
+		f_util_FileUtils::write($filePath, implode(PHP_EOL, $fileContent), f_util_FileUtils::OVERRIDE);				
+		$classResolver = ClassResolver::getInstance();
+		$classResolver->appendToAutoloadFile($this->modelObject->getDocumentClassName() . 'model', $filePath);
+		$classResolver->appendToAutoloadFile($this->modelObject->getDocumentClassName() . 'base', $filePath);
+		if ($this->modelObject->isLocalized())
+		{
+			$classResolver->appendToAutoloadFile($this->modelObject->getDocumentClassName() . 'I18n', $filePath);
+		}
 	}
 
 	public function updateRights()

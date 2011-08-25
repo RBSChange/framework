@@ -250,9 +250,8 @@ class generator_PersistentProperty
 	
 	/**
 	 * @param generator_PersistentModel $document
-	 * @param boolean $localized
 	 */
-	public static function generateS18sProperty($model, $localized = false)
+	public static function generateS18sProperty($model)
 	{
 		$property = new generator_PersistentProperty($model);
 		$property->cascadeDelete = false;
@@ -261,7 +260,6 @@ class generator_PersistentProperty
 		$property->maxOccurs = 1;
 		$property->minOccurs = 0;
 		$property->type = f_persistentdocument_PersistentDocument::PROPERTYTYPE_LOB;
-		$property->localized = $localized;
 		return $property;
 	}	
 
@@ -281,9 +279,7 @@ class generator_PersistentProperty
 		$invertProperty->dbMapping = $property->getDbName();
 		$invertProperty->relationName = $property->name;
 		$invertProperty->treeNode = $property->treeNodeInverse;
-
 		$invertProperty->tableName =  $property->model->getTableName();
-
 		return $invertProperty;
 	}
 
@@ -352,11 +348,12 @@ class generator_PersistentProperty
 	}
 
 	/**
+	 * @param boolean $localized
 	 * @return void
 	 */
-	public function setLocalized()
+	public function setLocalized($localized = true)
 	{
-		$this->localized = true;
+		$this->localized = $localized;
 	}
 
 	/**
@@ -429,8 +426,11 @@ class generator_PersistentProperty
 		$this->dbMapping = $parentProperty->dbMapping;
 		$this->treeNode = $parentProperty->treeNode;
 		$this->inverse = $parentProperty->inverse;
+		
+		//defaultValue -> seulement si redefini
+		//preserveOldValue
 	}
-
+	
 	/**
 	 * @return Boolean
 	 */
@@ -477,48 +477,15 @@ class generator_PersistentProperty
 	}
 
 	/**
-	 * @param generator_PersistentProperty $property
-	 */
-	public function override($property)
-	{
-		if (!is_null($property->fromList)) {$this->fromList = $property->fromList;}
-		if (!is_null($property->indexed)) {$this->indexed = $property->indexed;}
-		if (!is_null($property->defaultValue)) {$this->defaultValue = $property->defaultValue;}
-		if (!is_null($property->preserveOldValue)) {$this->preserveOldValue = $property->preserveOldValue;}
-		
-		// TODO: maybe we should check here that the new model extends the the previous one.   
-		if (!is_null($property->type) && ($this->isDocument() && $property->isDocument()))
-		{
-			$this->type = $property->type;
-		}
-		if (!is_null($property->minOccurs) && ($this->minOccurs < $property->minOccurs))
-		{
-			$this->minOccurs = $property->minOccurs;
-		}
-		if (!is_null($property->maxOccurs) && $this->maxOccurs != 1 && $property->maxOccurs != 1)
-		{
-			$this->maxOccurs = $property->maxOccurs;
-		}
-		
-		if (!is_null($property->constraints))
-		{
-			if (is_null($this->constraints))
-			{
-				$this->constraints = $property->constraints;
-			}
-			else
-			{
-				$this->constraints = $this->reduceConstraints($this->constraints . ';' . $property->constraints);
-			}
-		}
-	}
-
-	/**
 	 * @return Integer
 	 */
 	public function getMinOccurs()
 	{
-		return is_null($this->minOccurs) ? 0 : $this->minOccurs;
+		if ($this->minOccurs === null && !is_null($this->parentProperty))
+		{
+			return $this->parentProperty->getMinOccurs();
+		}		
+		return $this->minOccurs === null ? 0 : $this->minOccurs;
 	}
 
 	/**
@@ -526,7 +493,11 @@ class generator_PersistentProperty
 	 */
 	public function getMaxOccurs()
 	{
-		return is_null($this->maxOccurs) ? 1 : $this->maxOccurs;
+		if ($this->maxOccurs === null && !is_null($this->parentProperty))
+		{
+			return $this->parentProperty->getMaxOccurs();
+		}	
+		return $this->maxOccurs === null ? 1 : $this->maxOccurs;
 	}
 
 	/**
@@ -538,7 +509,6 @@ class generator_PersistentProperty
 		$properties = array('dbMapping' => $this->dbMapping, 'name' => $this->name);
 		return $pp->generateFieldName($properties);
 	}
-
 
 	/**
 	 * @return String
@@ -553,7 +523,12 @@ class generator_PersistentProperty
 	 */
 	public function getConstraints()
 	{
-		return $this->constraints;
+		$parentConstraint = $this->parentProperty ? $this->parentProperty->getConstraints() : null;
+		if ($this->constraints !== null && $parentConstraint !== null)
+		{
+			return $this->reduceConstraints($this->constraints . ';' . $parentConstraint);
+		}
+		return $this->constraints !== null ? $this->constraints : $parentConstraint;
 	}
 
 	/**
@@ -590,42 +565,15 @@ class generator_PersistentProperty
 	}
 
 	/**
-	 * @return Boolean
-	 */
-	public function isBackofficeFullTextProperty()
-	{
-		$toSkip = array('author' => true, 'lang' => true , 'model' => true, 'publicationstatus' => true, 'modelversion' =>true);
-		$type =  $this->getType();
-		if ($type == 'String' || $type == 'LongString' || $type == 'XHTMLFragment')
-		{
-			return !array_key_exists($this->getName(), $toSkip);
-		}
-		return false;
-	}
-
-	/**
-	 * TODO: allow a property to be excluded from being indexed
-	 *
-	 * @return Boolean
-	 */
-	public function isBackofficeIndexable()
-	{
-		return true;
-	}
-
-	/**
 	 * @return String
 	 */
 	public function getFromList()
 	{
-		if (is_null($this->fromList) && !is_null($this->parentProperty))
+		if ($this->fromList === null && !is_null($this->parentProperty))
 		{
-			return $this->parentProperty->fromList;
+			return $this->parentProperty->getFromList();
 		}
-		else
-		{
-			return $this->fromList;
-		}
+		return $this->fromList;
 	}
 
 	/**
@@ -639,6 +587,10 @@ class generator_PersistentProperty
 
 	public function getPreserveOldValue()
 	{
+		if ($this->preserveOldValue === null && !is_null($this->parentProperty))
+		{
+			return $this->parentProperty->getPreserveOldValue();
+		}
 		return is_null($this->preserveOldValue) ? false : $this->preserveOldValue;
 	}
 

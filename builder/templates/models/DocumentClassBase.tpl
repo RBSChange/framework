@@ -64,7 +64,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	 */
 	public static function getInstanceById($documentId)
 	{
-		return <{$model->getServiceClassName()}>::getInstance()->getDocumentInstance($documentId, '<{$model->getFinalName()}>');
+		return <{$model->getServiceClassName()}>::getInstance()->getDocumentInstance($documentId, '<{$model->getName()}>');
 	}
 
 	/**
@@ -108,7 +108,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	 */
 	public function getPersistentModel()
 	{
-		return f_persistentdocument_PersistentDocumentModel::getInstance('<{$model->getFinalModuleName()}>', '<{$model->getFinalDocumentName()}>');
+		return f_persistentdocument_PersistentDocumentModel::getInstance('<{$model->getModuleName()}>', '<{$model->getDocumentName()}>');
 	}
 
 	/**
@@ -116,7 +116,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	 */
 	public function getDocumentModelName()
 	{
-		return '<{$model->getFinalName()}>';
+		return '<{$model->getName()}>';
 	}
 
 	/**
@@ -195,7 +195,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	 */
 	public function getDocumentService()
 	{
-		return <{$model->getFinalServiceClassName()}>::getInstance();
+		return <{$model->getServiceClassName()}>::getInstance();
 	}
 
 	/**

@@ -1,27 +1,26 @@
 /**
- * <{if $model->inject()}>This model is not the original <{$model->getFinalDocumentClassName()}> model. It is in realty <{$model->getDocumentClassName()}>'s model that injects it.<{/if}> 
- * <{$model->getFinalDocumentClassName()}>model
- * @package modules.<{$model->getFinalModuleName()}>.persistentdocument
+ * <{$model->getDocumentClassName()}>model
+ * @package modules.<{$model->getModuleName()}>.persistentdocument
  */
-class <{$model->getFinalDocumentClassName()}>model extends <{$model->getBaseModelClassName()}>
+class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClassName()}>
 {
 	/**
-	 * Constructor of <{$model->getFinalDocumentClassName()}>model
+	 * Constructor of <{$model->getDocumentClassName()}>model
 	 */
 	protected function __construct()
 	{
 		parent::__construct();	
-		$this->m_childrenNames = array(		
-<{if ($model->getFinalChildren())}>
-<{foreach from=$model->getFinalChildren() item=children}>
-			'<{$children->getName()}>',
-<{/foreach}>
-<{/if}>);
+<{if (count($model->getChildren()))}>
+		$this->m_childrenNames = array(<{foreach from=$model->getChildren() item=children}>'<{$children->getName()}>',<{/foreach}>);
+<{else}>
+		$this->m_childrenNames = array();
+<{/if}>
 		
-<{if ($model->hasFinalParentModel())}>
-		$this->m_parentName = '<{$model->getFinalParentModelName()}>';
-		$this->m_preservedPropertiesNames = array_merge($this->m_preservedPropertiesNames, 
-			array(<{foreach from=$model->getPreservedPropertiesNames() item=name}>'<{$name}>' => true,<{/foreach}>));
+<{if ($model->hasParentModel())}>
+		$this->m_parentName = '<{$model->getParentModelName()}>';
+<{if (count($model->getPreservedPropertiesNames()))}>
+		$this->m_preservedPropertiesNames = array_merge($this->m_preservedPropertiesNames, array(<{foreach from=$model->getPreservedPropertiesNames() item=name}>'<{$name}>' => true,<{/foreach}>));
+<{/if}>
 <{else}>		
 		$this->m_preservedPropertiesNames = array(<{foreach from=$model->getPreservedPropertiesNames() item=name}>'<{$name}>' => true,<{/foreach}>);
 <{/if}> 
@@ -117,7 +116,7 @@ class <{$model->getFinalDocumentClassName()}>model extends <{$model->getBaseMode
 	 */
 	public function getName()
 	{
-		return '<{$model->getFinalName()}>';
+		return '<{$model->getName()}>';
 	}
 
 	/**
@@ -133,7 +132,7 @@ class <{$model->getFinalDocumentClassName()}>model extends <{$model->getBaseMode
 	 */
 	public function getLabelKey()
 	{
-		return 'm.<{$model->getFinalModuleName()}>.document.<{$model->getFinalDocumentName()}>.document-name';
+		return 'm.<{$model->getModuleName()}>.document.<{$model->getDocumentName()}>.document-name';
 	}
 
 	/**
@@ -141,7 +140,7 @@ class <{$model->getFinalDocumentClassName()}>model extends <{$model->getBaseMode
 	 */
 	public function getModuleName()
 	{
-		return <{$model->escapeString($model->getFinalModuleName())}>;
+		return <{$model->escapeString($model->getModuleName())}>;
 	}
 
 	/**
@@ -149,10 +148,10 @@ class <{$model->getFinalDocumentClassName()}>model extends <{$model->getBaseMode
 	 */
 	public function getDocumentName()
 	{
-		return <{$model->escapeString($model->getFinalDocumentName())}>;
+		return <{$model->escapeString($model->getDocumentName())}>;
 	}
 	
-<{if (!$model->hasFinalParentModel())}>
+<{if (!$model->hasParentModel())}>
 	/**
 	 * @return String
 	 */
@@ -293,10 +292,10 @@ class <{$model->getFinalDocumentClassName()}>model extends <{$model->getBaseMode
 	}
 	
 	/**
-	 * @return <{$model->getFinalServiceClassName()}>
+	 * @return <{$model->getServiceClassName()}>
 	 */
 	public function getDocumentService()
 	{
-		return <{$model->getFinalServiceClassName()}>::getInstance();
+		return <{$model->getServiceClassName()}>::getInstance();
 	}
 }

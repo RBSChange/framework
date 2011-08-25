@@ -18,16 +18,12 @@ class generator_PersistentModel
 	 * @var String
 	 */
 	private $extend;
+	
 	/**
 	 * @var boolean
 	 */
 	private $inject;
 	
-	/**
-	 * @var boolean
-	 */
-	private $injected;
-
 	/**
 	 * children models
 	 * @var generator_PersistentModel[]
@@ -44,7 +40,6 @@ class generator_PersistentModel
 
 	private $tableName;
 
-	private $className;
 	private $useCorrection;
 
 	private $defaultStatus;
@@ -61,10 +56,6 @@ class generator_PersistentModel
 	private $serializedproperties = array();
 	private $childrenProperties = array();
 	private $inverseProperties = array();
-
-	private $initSerializedproperties;
-
-
 
 	/**
 	 * @param String $moduleName
@@ -202,8 +193,9 @@ class generator_PersistentModel
 		$modelsChildren = array();
 		foreach (self::loadModels() as $model)
 		{
+			/* @var $model generator_PersistentModel */
 			$childrenNames = array();
-			foreach ($model->getFinalChildren() as $child)
+			foreach ($model->getChildren() as $child)
 			{
 				$childrenNames[] = $child->getName();
 			}
@@ -223,14 +215,15 @@ class generator_PersistentModel
 		$rc = RequestContext::getInstance();
 		foreach (self::loadModels() as $model)
 		{	
-			if (!$model->hasPublishOnDayChange()) {continue;}
+			/* @var $model generator_PersistentModel */
+			if ($model->inject() || !$model->hasPublishOnDayChange()) {continue;}
 			
 			$modelName = $model->getName();
 			while ($model)
 			{
 				$pubproperty = $model->getPropertyByName('publicationstatus');
 				if ($pubproperty !== null) {break;}
-				$model = $model->getParentModelOrInjected();
+				$model = $model->getParentModel();
 			}
 			
 			if ($pubproperty)
@@ -255,8 +248,10 @@ class generator_PersistentModel
 		$documentPropertyInfos = array();
 		foreach (self::loadModels() as $model)
 		{	
+			/* @var $model generator_PersistentModel */
 			foreach ($model->getProperties() as $property)
 			{
+				/* @var $property generator_PersistentProperty */
 				if ($property->isDocument())
 				{
 					$documentPropertyInfos[$property->getName()] = true;
@@ -272,36 +267,26 @@ class generator_PersistentModel
 		$indexableDocumentInfos = array('fo' => array(), 'bo' => array());
 		foreach (self::loadModels() as $model)
 		{	
-			if ($model instanceof generator_PersistentModel)
+			/* @var $model generator_PersistentModel */
+			if ($model->inject()) {continue;}
+			
+			$moduleName = strtoupper($model->getModuleName());
+			$documentName = strtoupper($model->getDocumentName());
+			$modelName = $model->getName();
+	
+			if ($model->hasURL() &&  $model->isIndexable() 
+					&& !defined('MOD_'. $moduleName .'_'.$documentName .'_DISABLE_INDEXATION'))
 			{
-				if ($model->injected()) {continue;}
-				
-				if ($model->inject())
-				{
-					$moduleName = strtoupper($model->getParentModel()->getModuleName());
-					$documentName = strtoupper($model->getParentModel()->getDocumentName());
-					$modelName = $model->getParentModelName();
-				}
-				else
-				{
-					$moduleName = strtoupper($model->getModuleName());
-					$documentName = strtoupper($model->getDocumentName());
-					$modelName = $model->getName();
-				}
-				
-				if ($model->hasURL() &&  $model->isIndexable() 
-						&& !defined('MOD_'. $moduleName .'_'.$documentName .'_DISABLE_INDEXATION'))
-				{
-					$indexableDocumentInfos['fo'][] = $modelName;
-				}
-				
-				if ($model->isBackofficeIndexable() && 
-					(!defined('MOD_'. $moduleName .'_'.$documentName .'_DISABLE_BACKOFFICE_INDEXATION') 
-						|| !constant('MOD_'. $moduleName .'_'.$documentName .'_DISABLE_BACKOFFICE_INDEXATION')))
-				{
-					$indexableDocumentInfos['bo'][] = $modelName;
-				}
+				$indexableDocumentInfos['fo'][] = $modelName;
 			}
+			
+			if ($model->isBackofficeIndexable() && 
+				(!defined('MOD_'. $moduleName .'_'.$documentName .'_DISABLE_BACKOFFICE_INDEXATION') 
+					|| !constant('MOD_'. $moduleName .'_'.$documentName .'_DISABLE_BACKOFFICE_INDEXATION')))
+			{
+				$indexableDocumentInfos['bo'][] = $modelName;
+			}
+
 		}
 		$compiledFilePath = f_util_FileUtils::buildChangeBuildPath('indexableDocumentInfos.ser');
 		f_util_FileUtils::writeAndCreateContainer($compiledFilePath, serialize($indexableDocumentInfos), f_util_FileUtils::OVERRIDE);		
@@ -312,18 +297,16 @@ class generator_PersistentModel
 		$allowedDocumentInfos = array ('hasUrl' => array(), 'useRewriteUrl' => array());
 		foreach (self::loadModels() as $model)
 		{	
-			if ($model instanceof generator_PersistentModel)
+			/* @var $model generator_PersistentModel */
+			if ($model->inject()) {continue;}
+			
+			if ($model->hasURL())
 			{
-				if ($model->injected()) {continue;}
-				
-				if ($model->hasURL())
+				$modelName = $model->getName();
+				$allowedDocumentInfos['hasUrl'][] = $modelName;
+				if ($model->useRewriteURL())
 				{
-					$modelName = ($model->inject()) ? $model->getParentModelName() : $model->getName();
-					$allowedDocumentInfos['hasUrl'][] = $modelName;
-					if ($model->useRewriteURL())
-					{
-						$allowedDocumentInfos['useRewriteUrl'][] = $modelName;
-					}
+					$allowedDocumentInfos['useRewriteUrl'][] = $modelName;
 				}
 			}
 		}
@@ -354,13 +337,15 @@ class generator_PersistentModel
 	private static function postImportProcess($models)
 	{
 		$inversePropertiesByModel = array();
+		
 		$xmlDoc = self::loadFile(f_util_FileUtils::buildFrameworkPath('persistentdocument','document.xml'));
 		$virtualModel = new generator_PersistentModel($xmlDoc, 'generic', 'Document');
 										
 		// Set common properties.
 		foreach ($models as $model)
 		{
-			if (is_null($model->extend) || $model->extend == self::BASE_MODEL)
+			/* @var $model generator_PersistentModel */
+			if ($model->extend === null || $model->extend == self::BASE_MODEL)
 			{
 				$model->applyGenericDocumentModel($virtualModel);
 			}
@@ -370,7 +355,14 @@ class generator_PersistentModel
 				{
 					throw new Exception("Could not find extended model ".$model->extend);
 				}
-				
+			}
+		}
+		
+		// Check Localisation and correction Constraints
+		foreach ($models as $model)
+		{
+			if ($model->extend !== null)
+			{
 				if ($model->isLocalized() && !$models[$model->extend]->isLocalized())
 				{
 					throw new Exception("Can not render model ".$model->name." localized while ".$models[$model->extend]->name." is not");
@@ -381,22 +373,12 @@ class generator_PersistentModel
 					throw new Exception("Can not activate correction on ".$model->name." while not activated on ".$models[$model->extend]->name);
 				}
 				
-				if ($model->inject)
-				{
-					$models[$model->extend]->injected = true;
-					$models[$model->extend]->replacer = $model;
-				}
-				
-				$model->generateS18sPropertyIfNeeded();
-				
+				/* @var $extendedModel generator_PersistentModel */
 				$extendedModel = $models[$model->extend];
-				while ($extendedModel !== null && $extendedModel->getName() != self::BASE_MODEL)
+				while ($extendedModel !== null)
 				{
 					$extendedModel->children[] = $model;
-					if ($extendedModel->extend === null || $extendedModel->extend === self::BASE_MODEL)
-					{
-						break;
-					}
+					if ($extendedModel->extend === null) {break;}
 					$extendedModel = $models[$extendedModel->extend];
 				}
 			}
@@ -405,17 +387,16 @@ class generator_PersistentModel
 		// Check heritage.
 		foreach ($models as $model)
 		{
-			$model->checkOverrideProperties();
+			$model->checkOverrideProperties();			
+			$model->generateS18sPropertyIfNeeded();
 		}
 
 		// Check constraints and inverse property.
 		foreach ($models as $model)
 		{
 			foreach ($model->getProperties() as $property)
-			{
-			
+			{			
 				$property->applyDefaultConstraints();
-
 				if ($property->isInverse() && $property->isDocument())
 				{
 					$destModel = $property->getType();
@@ -444,36 +425,44 @@ class generator_PersistentModel
 		return array($models, $inversePropertiesByModel);
 	}
 	
-	public function generateS18sPropertyIfNeeded()
+	private function generateS18sPropertyIfNeeded()
 	{
-		if (count($this->serializedproperties) > 0 && $this->getPropertyByName("s18s") === null)
+		if (count($this->serializedproperties) > 0)
 		{
-			$parent = $this->getParentModel();
-			$notFounded = true;
-			while ($parent !== null && $notFounded)
+			$localized = false;
+			foreach ($this->serializedproperties as $property)
 			{
-				 $notFounded = $parent->getPropertyByName("s18s") === null;
-				 $parent = $parent->getParentModel();
-			}
-			if ($notFounded)
-			{
-				$this->initSerializedproperties = true;
-				$localized = false;
-				foreach ($this->serializedproperties as $property)
+				if ($property->isLocalized())
 				{
-					if ($property->isLocalized())
+					if (!$this->localized)
+					{
+						$property->setLocalized(false);
+						self::addMessage('Unable to localize serialized property ' . $property->getName() . ' on non localized document ' . $this->getName());
+					}
+					else
 					{
 						$localized = true;
 						break;
 					}
 				}
-				if (!$this->localized && $localized)
+			}
+			
+			$prop = $this->getPropertyByName('s18s');
+			if ($prop === null) 
+			{
+				$ancestor = $this->getAncestorPropertyByName('s18s');
+				if ($ancestor === null)
 				{
-					$this->setLocalized();
+					$prop = generator_PersistentProperty::generateS18sProperty($this);
+					$prop->setLocalized($localized);
+					$this->addProperty($prop);
 				}
-				
-				$property = generator_PersistentProperty::generateS18sProperty($this, $localized);
-				$this->addProperty($property);
+				elseif (!$ancestor->isLocalized() && $localized)
+				{
+					$prop = generator_PersistentProperty::generateS18sProperty($this);
+					$prop->setParentProperty($ancestor);
+					$prop->setLocalized($localized);
+				}
 			}
 		}
 	}
@@ -630,59 +619,25 @@ class generator_PersistentModel
 		return false;
 	}
 	
-	function injected()
-	{
-		return $this->injected === true;
-	}
-	
 	function inject()
 	{
-			return $this->inject === true;
+		return $this->inject === true;
 	}
 	
-	/**
-	 * @var generator_PersistentModel
-	 */
-	private $replacer;
-	
-	/**
-	 * @return generator_PersistentModel
-	 */
-	function getReplacer()
-	{
-		return $this->replacer;
-	}
-
 	/**
 	 * @return Boolean
 	 */
 	public function hasParentModel()
 	{
-		return (!is_null($this->extend));
+		return ($this->extend !== null);
 	}
 	
-	/**
-	 * @return Boolean
-	 */
-	public function hasFinalParentModel()
-	{
-		if ($this->inject())
-		{
-			return $this->getParentModel()->hasParentModel();
-		}
-		return $this->hasParentModel();
-	}
-
 	/**
 	 * @return generator_PersistentModel
 	 */
 	public function getParentModel()
 	{
-		if (!is_null($this->extend))
-		{
-			return self::$m_models[$this->extend];
-		}
-		return null;
+		return ($this->extend !== null) ? self::$m_models[$this->extend] : null; 
 	}
 	
 	/**
@@ -694,59 +649,13 @@ class generator_PersistentModel
 		return $parentModel !== null && $parentModel->isBackofficeIndexable();
 	}
 	
-	/**
-	 * @return generator_PersistentModel
-	 */
-	public function getParentModelOrInjected()
-	{
-		if ($this->inject())
-		{
-			return $this->getParentModel();
-		}
-		$parent = $this->getParentModel();
-		if ($parent === null)
-		{
-			return null;
-		}
-		//if ($parent->injected() && $parent->getReplacer()->name != $this->name)
-		if ($parent->injected())
-		{
-			return $parent->getReplacer();
-		}
-		return $parent;
-	}
-	
-	/**
-	 * @return generator_PersistentModel
-	 */
-	public function getFinalParentModel()
-	{
-		if ($this->inject())
-		{
-			return $this->getParentModel()->getFinalParentModel();
-		}
-		return $this->getParentModel();
-	}
 
 	public function getParentModelName()
 	{
-		if ($this->extend === null)
-		{
-			return null;
-		}
-		return $this->getParentModel()->getName();
+		$parentModel = $this->getParentModel();
+		return $parentModel !== null ? $parentModel->getName() : null;
 	}
 	
-	public function getFinalParentModelName()
-	{
-		if (!$this->hasFinalParentModel())
-		{
-			return null;
-		}
-			
-		return $this->getFinalParentModel()->getName();
-	}
-
 	/**
 	 * @return String
 	 */
@@ -771,67 +680,14 @@ class generator_PersistentModel
 		return $this->documentName;
 	}
 
-	function getFinalModuleName()
-	{
-		if ($this->inject)
-		{
-			$matches = null;
-			if (preg_match('/^modules_(.*)\/(.*)$/', $this->extend, $matches))
-			{
-				return $matches[1];
-			}
-			throw new Exception("Unable to parse ".$this->extend);
-		}
-		return $this->moduleName;
-	}
-	
+	/**
+	 * @return true
+	 */
 	function useDocumentEditor()
 	{
-		$path = f_util_FileUtils::buildModulesPath($this->getFinalModuleName(), 'config', 'perspective.xml');
-		return file_exists($path);
+		return true;
 	}
 	
-	function getFinalDocumentName()
-	{
-		if ($this->inject)
-		{
-			$matches = null;
-			if (preg_match('/^modules_(.*)\/(.*)$/', $this->extend, $matches))
-			{
-				return $matches[2];
-			}
-			throw new Exception("Unable to parse ".$this->extend);
-		}
-		return $this->documentName;
-	}
-
-	function getFinalName()
-	{
-		if ($this->inject)
-		{
-			if (preg_match('/^modules_(.*)\/(.*)$/', $this->extend))
-			{
-				return $this->extend;
-			}
-			throw new Exception("Unable to parse ".$this->extend);
-		}
-		return $this->name;
-	}
-
-	function getFinalDocumentClassName()
-	{
-		if ($this->inject)
-		{
-			$matches = null;
-			if (preg_match('/^modules_(.*)\/(.*)$/', $this->extend, $matches))
-			{
-				return $matches[1]."_persistentdocument_".$matches[2];
-			}
-			throw new Exception("Unable to parse ".$this->extend);
-		}
-		return $this->getDocumentClassName();
-	}
-
 	/**
 	 * @param String[] $models
 	 * @return String[]
@@ -840,14 +696,13 @@ class generator_PersistentModel
 	{
 		if (is_null($models))
 		{
-			$models = array("*", self::BASE_MODEL);
+			$models = array(self::BASE_MODEL);
 		}
 		if (!is_null($this->extend))
 		{
 			$models =  self::getModelByName($this->extend)->getCompatibleModel($models);
 		}
 		$models[] = $this->getName();
-
 		return $models;
 	}
 
@@ -881,48 +736,28 @@ class generator_PersistentModel
 	}
 	
 	/**
-	 * @return String[]
-	 */
-	function getFinalChildren()
-	{
-		if ($this->inject())
-		{
-			$children = self::$m_models[$this->extend]->children;
-			if ($children !== null)
-			{
-				$newChildren = array();
-				foreach ($children as $key => $child)
-				{
-					if ($child->name != $this->name && !$child->inject())
-					{
-						$newChildren[] = $child;
-					}
-				}
-				if (count($newChildren) > 0)
-				{
-					return $newChildren;
-				}
-				return null;
-			}
-		}
-		return $this->children;
-	}
-
-	/**
 	 * @param String $name
 	 * @return generator_PersistentProperty
 	 */
 	function getPropertyByName($name)
 	{
-		foreach ($this->properties as $property)
+		return (isset($this->properties[$name])) ? $this->properties[$name] : null;
+	}
+	
+	/**
+	 * @param String $name
+	 * @return generator_PersistentProperty
+	 */
+	function getAncestorPropertyByName($name)
+	{
+		$pm = $this->getParentModel();
+		while ($pm !== null)
 		{
-			if ($property->getName() == $name)
-			{
-				return $property;
-			}
+			if (isset($pm->properties[$name])) {return $pm->properties[$name];}
+			$pm = $pm->getParentModel();
 		}
 		return null;
-	}
+	}	
 
 	/**
 	 * @param String $name
@@ -930,15 +765,24 @@ class generator_PersistentModel
 	 */
 	private function getChildrenPropertyByName($name)
 	{
-		foreach ($this->childrenProperties as $property)
+		return (isset($this->childrenProperties[$name])) ? $this->childrenProperties[$name] : null;
+	}
+	
+	/**
+	 * @param String $name
+	 * @return generator_ChildrenProperty
+	 */
+	function getAncestorChildrenPropertyByName($name)
+	{
+		$pm = $this->getParentModel();
+		while ($pm !== null)
 		{
-			if ($property->getName() == $name)
-			{
-				return $property;
-			}
+			if (isset($pm->childrenProperties[$name])) {return $pm->childrenProperties[$name];}
+			$pm = $pm->getParentModel();
 		}
 		return null;
-	}
+	}	
+	
 
 	/**
 	 * @param String $name
@@ -946,15 +790,23 @@ class generator_PersistentModel
 	 */
 	private function getSerializedPropertyByName($name)
 	{
-		foreach ($this->serializedproperties as $property)
+		return (isset($this->serializedproperties[$name])) ? $this->serializedproperties[$name] : null;
+	}
+	
+	/**
+	 * @param String $name
+	 * @return generator_PersistentProperty
+	 */
+	function getAncestorSerializedPropertyByName($name)
+	{
+		$pm = $this->getParentModel();
+		while ($pm !== null)
 		{
-			if ($property->getName() == $name)
-			{
-				return $property;
-			}
+			if (isset($pm->serializedproperties[$name])) {return $pm->serializedproperties[$name];}
+			$pm = $pm->getParentModel();
 		}
 		return null;
-	}
+	}	
 
 	/**
 	 * @param String $name
@@ -978,35 +830,44 @@ class generator_PersistentModel
 	private function applyGenericDocumentModel($baseDocument)
 	{
 		$this->extend = null;
+		
 		$pp = f_persistentdocument_PersistentProvider::getInstance();
-		$properties = array('tableName' => $this->tableName, 'moduleName' => $this->moduleName, 'documentName' => $this->documentName);
+		$properties = array('tableName' => $this->tableName, 
+			'moduleName' => $this->moduleName, 'documentName' => $this->documentName);
 		$this->tableName = $pp->generateTableName($properties);
-
-		foreach (array_reverse($baseDocument->properties) as $property)
+		
+		$props = $this->properties;
+		
+		$this->properties = array();		
+		foreach ($baseDocument->properties as $propertyName => $property)
 		{
-			$propertyName = $property->getName();
-			$newProperty = $this->getPropertyByName($propertyName);
-			if (is_null($newProperty))
+			/* @var $property generator_PersistentProperty */
+			if (isset($props[$propertyName]))
 			{
-				$newProperty = clone($property);
-				$newProperty->setModel($this);
-				// Use this to preserve the generic > specific order of the properties
-				$props = array_reverse($this->properties, true);
-				$props[$newProperty->getName()] = $newProperty;
-				$this->properties = array_reverse($props, true);
+				/* @var $newProperty generator_PersistentProperty */
+				$newProperty = $props[$propertyName];
+				$newProperty->mergeGeneric($property);
+				unset($props[$propertyName]);
 			}
 			else
 			{
-				$newProperty->mergeGeneric($property);
+				$newProperty = clone($property);
+				$newProperty->setModel($this);
 			}
+			$this->properties[$propertyName] = $newProperty;
 		}
+		foreach ($props as $propertyName => $property) 
+		{
+			$this->properties[$propertyName] = $property;
+		}
+		$props = null;
 
 		if ($this->defaultStatus === null)
 		{
 			$this->defaultStatus = $baseDocument->defaultStatus;
 		}
 
-		if (is_null($this->backofficeIndexable))
+		if ($this->backofficeIndexable === null)
 		{
 			$this->backofficeIndexable = $baseDocument->backofficeIndexable;
 		}
@@ -1057,18 +918,12 @@ class generator_PersistentModel
 				break;
 			}
 		}
-		
-		if ($this->localized)
-		{
-			$this->getPropertyByName("publicationstatus")->setLocalized();
-		}
 
 		/**
 		 * Serialized Properties
 		 */
 		if (count($this->serializedproperties) > 0)
 		{
-			$this->initSerializedproperties = true;
 			$localized = false;
 			foreach ($this->serializedproperties as $property)
 			{
@@ -1082,7 +937,8 @@ class generator_PersistentModel
 			{
 				$this->setLocalized();
 			}
-			$property = generator_PersistentProperty::generateS18sProperty($this, $localized);
+			$property = generator_PersistentProperty::generateS18sProperty($this);
+			$property->setLocalized($localized);
 			$this->addProperty($property);
 		}
 	}
@@ -1104,79 +960,41 @@ class generator_PersistentModel
 
 	private function checkOverrideProperties()
 	{
-		//echo "CheckOverrideProperties ".$this->name."\n";
-		$parentModel = $this->getParentModelOrInjected();
-		if (is_null($parentModel))
-		{
-			//echo "END ***\n";
-			return;
-		}
-		
-		//echo $parentModel->getName()."\n";
-
+		$parentModel = $this->getParentModel();
+		if ($parentModel === null) {return;}
 		$parentModel->checkOverrideProperties();
 
 		$this->tableName = $parentModel->tableName;
 		$this->localized = $parentModel->localized;
-
-		if ($this->useCorrection)
+		$this->useCorrection = $parentModel->useCorrection;
+				
+		foreach ($this->properties as $name => $property)
 		{
-			$property = generator_PersistentProperty::generateCorrectionIdProperty($this);
-			$this->addProperty($property);
+			$parentProperty = $this->getAncestorPropertyByName($name);
+			if ($parentProperty !== null)
+			{
+				$property->setParentProperty($parentProperty);
+			}
+		}
 
-			$property = generator_PersistentProperty::generateCorrectionOfIdProperty($this);
-			$this->addProperty($property);
+		foreach ($this->childrenProperties as $name => $property)
+		{
+			$parentProperty = $this->getAncestorChildrenPropertyByName($name);
+			if ($parentProperty !== null)
+			{
+				$property->setParentProperty($parentProperty);
+			}
 		}
 		
-		foreach ($this->properties as $property)
+		foreach ($this->serializedproperties as $name => $property)
 		{
-			$parentProperty = $parentModel->getPropertyByName($property->getName());
-			if (!is_null($parentProperty))
+			$parentProperty = $this->getAncestorSerializedPropertyByName($name);
+			if ($parentProperty !== null)
 			{
 				$property->setParentProperty($parentProperty);
 			}
 		}
-
-		foreach ($this->childrenProperties as $property)
-		{
-			$parentProperty = $parentModel->getChildrenPropertyByName($property->getName());
-			if (!is_null($parentProperty))
-			{
-				$property->setParentProperty($parentProperty);
-			}
-		}
-		if (count($this->serializedproperties))
-		{
-			foreach ($this->serializedproperties as $property)
-			{
-				$parentProperty = $parentModel->getSerializedPropertyByName($property->getName());
-				if (!is_null($parentProperty))
-				{
-					$property->setParentProperty($parentProperty);
-				}
-			}
-		}
 	}
-
-
-	/**
-	 * @param String $name
-	 * @return generator_PersistentProperty
-	 */
-	public function getBaseProperty($name)
-	{
-		$property = $this->getPropertyByName($name);
-		if (!is_null($property))
-		{
-			return $property;
-		}
-		else if ($this->hasParentModel())
-		{
-			return $this->getParentModel()->getBaseProperty($name);
-		}
-		return null;
-	}
-
 
 	/**
 	 * @return Boolean
@@ -1272,7 +1090,7 @@ class generator_PersistentModel
 	 */
 	public function isLinkedToRootModule()
 	{
-		if (is_null($this->linkedToRootModule) && $this->hasParentModel())
+		if ($this->linkedToRootModule === null && $this->hasParentModel())
 		{
 			return $this->getParentModel()->isLinkedToRootModule();
 		}
@@ -1287,7 +1105,7 @@ class generator_PersistentModel
 	 */
 	public function getDefaultStatus()
 	{
-		if (is_null($this->defaultStatus) && $this->hasParentModel())
+		if ($this->defaultStatus === null && $this->hasParentModel())
 		{
 			return $this->getParentModel()->getDefaultStatus();
 		}
@@ -1302,7 +1120,7 @@ class generator_PersistentModel
 	 */
 	public function hasCorrection()
 	{
-		if (is_null($this->useCorrection) && $this->hasParentModel())
+		if ($this->useCorrection === null && $this->hasParentModel())
 		{
 			return $this->getParentModel()->hasCorrection();
 		}
@@ -1314,7 +1132,7 @@ class generator_PersistentModel
 	 */
 	public function hasPublishOnDayChange()
 	{
-		if (is_null($this->publishOnDayChange) && $this->hasParentModel())
+		if ($this->publishOnDayChange === null && $this->hasParentModel())
 		{
 			return $this->getParentModel()->hasPublishOnDayChange();
 		}
@@ -1329,7 +1147,7 @@ class generator_PersistentModel
 	 */
 	private function getWorkflow()
 	{
-		if (is_null($this->workflow) && $this->hasParentModel())
+		if ($this->workflow === null && $this->hasParentModel())
 		{
 			return $this->getParentModel()->getWorkflow();
 		}
@@ -1377,21 +1195,6 @@ class generator_PersistentModel
 			return var_export($this->getWorkflow()->getParameters(), true);
 		}
 		return 'array()';
-	}
-
-	/**
-	 * @return String
-	 */
-	public function getComponentClassName()
-	{
-		if (is_null($this->className) && $this->hasParentModel())
-		{
-			return $this->getParentModel()->getComponentClassName();
-		}
-		else
-		{
-			return $this->className;
-		}
 	}
 
 	/**
@@ -1469,7 +1272,7 @@ class generator_PersistentModel
 	{
 		if ($this->hasParentModel())
 		{
-			return $this->getParentModel()->getFinalDocumentClassName() . 'model';
+			return $this->getParentModel()->getDocumentClassName() . 'model';
 		}
 		return 'f_persistentdocument_PersistentDocumentModel';		
 	}
@@ -1478,7 +1281,7 @@ class generator_PersistentModel
 	{
 		if ($this->hasParentModel())
 		{
-			return  'extends ' . $this->getParentModel()->getFinalDocumentClassName() . 'I18n';
+			return  'extends ' . $this->getParentModel()->getDocumentClassName() . 'I18n';
 		}
 		return 'implements f_persistentdocument_I18nPersistentDocument';		
 	}
@@ -1504,14 +1307,6 @@ class generator_PersistentModel
 		return $this->getModuleName() . '_'. ucfirst($this->getDocumentName()) .'Service';
 	}
 	
-	/**
-	 * @return String
-	 */
-	public function getFinalServiceClassName()
-	{
-		return $this->getFinalModuleName() . '_'. ucfirst($this->getFinalDocumentName()) .'Service';
-	}
-
 	/**
 	 * @return String
 	 */
@@ -1550,115 +1345,6 @@ class generator_PersistentModel
 		$generator->assign_by_ref('model', $this);
 		$result = $generator->fetch('DocumentModel.tpl');
 		return $result;
-		
-		$model = clone($this);
-
-		$model->properties = array();
-		$model->childrenProperties = array();
-
-		$modelsList = array();
-		$currentModel = $this;
-
-		while (!is_null($currentModel))
-		{
-			array_unshift($modelsList, $currentModel);
-			$currentModel = $currentModel->getParentModelOrInjected(); 
-		}
-
-		foreach ($modelsList as $currentModel)
-		{
-			foreach ($currentModel->getProperties() as $property)
-			{
-				$newproperty = $model->getPropertyByName($property->getName());
-				if (is_null($newproperty))
-				{
-					$newproperty = clone($property);
-					$newproperty->setModel($model);
-					$model->properties[] = $newproperty;
-				}
-				else
-				{
-					$newproperty->override($property);
-				}
-			}
-
-			foreach ($currentModel->getChildrenProperties() as $property)
-			{
-				$newproperty = $model->getChildrenPropertyByName($property->getName());
-				if (is_null($newproperty))
-				{
-					$newproperty = clone($property);
-					$model->childrenProperties[] = $newproperty;
-				}
-				else
-				{
-					$newproperty->override($property);
-				}
-			}
-
-			foreach ($currentModel->getInverseProperties() as $property)
-			{
-				$newproperty = $model->getInversePropertyByName($property->getName());
-				if (is_null($newproperty))
-				{
-					$newproperty = clone($property);
-					$model->inverseProperties[] = $newproperty;
-				}
-				else
-				{
-					$newproperty->override($property);
-				}
-			}
-		}
-
-		// Sort inverse properties in order to always have a parent model before its descendants.
-		usort($model->inverseProperties, array('generator_PersistentModel', 'compareInverseProperties'));
-
-		$generator->assign_by_ref('model', $model);
-		$result = $generator->fetch('DocumentModel.tpl');
-		return $result;
-	}
-
-	/**
-	 * @param generator_PersistentProperty $property1
-	 * @param generator_PersistentProperty $property2
-	 */
-	private static function compareInverseProperties($property1, $property2)
-	{
-		$model1 = $property1->getTypeModel();
-		$model2 = $property2->getTypeModel();
-
-		// If one of the models is null, there is an error: an inverse property
-		// must have document type.
-		if ($model1 === null || $model2 === null)
-		{
-			throw new Exception('An inverse property must have document type!');
-		}
-
-		// If model1 extends model2, property1 > property2.
-		$tempModel = $model1;
-		while ($tempModel->hasParentModel())
-		{
-			$tempModel = $tempModel->getParentModel();
-			if ($tempModel->getName() == $model2->getName())
-			{
-				return 1;
-			}
-		}
-
-		// If model2 extends model1, property1 < property2.
-		$tempModel = $model1;
-		while ($tempModel->hasParentModel())
-		{
-			$tempModel = $tempModel->getParentModel();
-			if ($tempModel->getName() == $model2->getName())
-			{
-				return -1;
-			}
-		}
-
-		// If there is no ineritance relation, the two properties are 'equals'.
-		return 0;
 	}
 
 	/**
@@ -1731,16 +1417,6 @@ class generator_PersistentModel
 		{
 			$result[] = $property;
 		}
-		if ($this->injected)
-		{
-			foreach ($this->replacer->getProperties() as $property)
-			{
-				if (!$property->isOverride())
-				{
-					$result[] = $property;
-				}
-			}
-		}
 		return $result;
 	}
 
@@ -1768,10 +1444,23 @@ class generator_PersistentModel
 		return count($this->serializedproperties) > 0;
 	}
 
+	/**
+	 * @return boolean
+	 */
 	public function getInitSerializedproperties()
 	{
-		return $this->initSerializedproperties === true;
+		$prop = $this->getPropertyByName('s18s');
+		return ($prop !== null && !$prop->isOverride());
 	}
+	
+	/**
+	 * @return boolean
+	 */
+	public function getInitI18nSerializedproperties()
+	{
+		$prop = $this->getPropertyByName('s18s');
+		return ($prop !== null && $prop->isLocalized());
+	}	
 
 	/**
 	 * @return array<generator_PersistentProperty>
@@ -1786,7 +1475,6 @@ class generator_PersistentModel
 	 */
 	public function hasI18NSerialisedProperties()
 	{
-
 		foreach ($this->serializedproperties as $property)
 		{
 			if ($property->isLocalized())
@@ -1838,8 +1526,9 @@ class generator_PersistentModel
 		{
 			$code[] = '		parent::setDefaultValues();';
 			if ($this->getParentModel()->getDefaultStatus() != $this->getDefaultStatus())
-			{
-				$property = $this->getBaseProperty('publicationstatus');
+			{	
+				$property = $this->getPropertyByName('publicationstatus');
+				if ($property === null) {$property = $this->getAncestorPropertyByName('publicationstatus');}
 				if (!$property->isLocalized())
 				{
 					$code[] = '		$this->setPublicationstatusInternal(\''. $this->getDefaultStatus() . '\');';
@@ -2114,7 +1803,7 @@ class generator_PersistentModel
 			switch ($name)
 			{
 				case "extend":
-					$this->extend = $value;
+					$this->extend = (trim($value) !== '') ? trim($value) : null;
 					break;
 				case "localized":
 					$this->localized = self::getBoolean($value);
@@ -2142,9 +1831,6 @@ class generator_PersistentModel
 					break;
 				case "table-name":
 					$this->tableName = $value;
-					break;
-				case "classname":
-					$this->className = $value;
 					break;
 				case "use-correction":
 					$this->useCorrection = self::getBoolean($value);
@@ -2242,7 +1928,7 @@ class generator_PersistentModel
 				{
 					$property = new generator_ChildrenProperty($this);
 					$property->initialize($xmlProperty);
-					$this->childrenProperties[] = $property;
+					$this->childrenProperties[$property->getName()] = $property;
 				}
 			}
 		}
