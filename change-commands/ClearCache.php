@@ -30,14 +30,12 @@ class commands_ClearCache extends commands_AbstractChangeCommand
 	function _execute($params, $options)
 	{
 		$this->message("== Clear cache ==");
-
-		$profile = $this->getProfile();
 		if (!defined('PROJECT_HOME')) {define('PROJECT_HOME', realpath('.'));}
 
-		$cacheProfileDirectory = PROJECT_HOME . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . $profile;
+		$cacheProfileDirectory = PROJECT_HOME . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'project';
 		$wwwCache = PROJECT_HOME . DIRECTORY_SEPARATOR .  'cache' . DIRECTORY_SEPARATOR . 'www';
 		// Test if the cache directory of selected profile exist
-		if ( is_dir( $cacheProfileDirectory ) )
+		if (is_dir($cacheProfileDirectory))
 		{
 			f_util_FileUtils::rmdir($cacheProfileDirectory, true);
 			if (is_dir($wwwCache))
@@ -49,6 +47,6 @@ class commands_ClearCache extends commands_AbstractChangeCommand
 		
 		$parent = $this->getParent();
 		$parent->executeCommand("clearDatacache");
-		return $this->quitError("The profile $profile does not exists");
+		return $this->quitOk("Cache cleared");
 	}
 }

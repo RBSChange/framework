@@ -202,8 +202,6 @@
 	        <!-- SOLR_INDEXER_DISABLE_BATCH_MODE -->
 	        <entry name="batch_mode">true</entry>
 	        
-	        <!-- SOLR_INDEXER_DISABLE_DOCUMENTCACHE -->
-	        
 	        <!-- SOLR_USE_POST_QUERIES -->
 	        <entry name="request_method">GET</entry>
 	        
