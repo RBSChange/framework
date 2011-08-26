@@ -10,14 +10,17 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 	protected function __construct()
 	{
 		parent::__construct();	
+<{if (!$model->inject()) }> 		
 <{if (count($model->getChildren()))}>
 		$this->m_childrenNames = array(<{foreach from=$model->getChildren() item=children}>'<{$children->getName()}>',<{/foreach}>);
 <{else}>
 		$this->m_childrenNames = array();
 <{/if}>
-		
+<{/if}>		
 <{if ($model->hasParentModel())}>
+<{if (!$model->inject()) }> 
 		$this->m_parentName = '<{$model->getParentModelName()}>';
+<{/if}>		
 <{if (count($model->getPreservedPropertiesNames()))}>
 		$this->m_preservedPropertiesNames = array_merge($this->m_preservedPropertiesNames, array(<{foreach from=$model->getPreservedPropertiesNames() item=name}>'<{$name}>' => true,<{/foreach}>));
 <{/if}>
@@ -110,7 +113,7 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 	{
 		return '<{$model->getIcon()}>';
 	}
-
+<{if (!$model->inject()) }> 
 	/**
 	 * @return String
 	 */
@@ -119,20 +122,13 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 		return '<{$model->getName()}>';
 	}
 
+
 	/**
 	 * @return String
 	 */
 	public function getBaseName()
 	{
 		return <{$model->escapeString($model->getBaseName())}>;
-	}
-
-	/**
-	 * @return String
-	 */
-	public function getLabelKey()
-	{
-		return 'm.<{$model->getModuleName()}>.document.<{$model->getDocumentName()}>.document-name';
 	}
 
 	/**
@@ -149,6 +145,31 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 	public function getDocumentName()
 	{
 		return <{$model->escapeString($model->getDocumentName())}>;
+	}
+	
+	/**
+	 * @return string[]
+	 */
+	public function getAncestorModelNames()
+	{
+		return array(<{foreach from=$model->getAncestorModels() item=modelName}>'<{$modelName}>',<{/foreach}>);
+	}
+	
+	/**
+	 * @return <{$model->getServiceClassName()}>
+	 */
+	public function getDocumentService()
+	{
+		return <{$model->getServiceClassName()}>::getInstance();
+	}
+<{/if}>	
+
+	/**
+	 * @return String
+	 */
+	public function getLabelKey()
+	{
+		return 'm.<{$model->getModuleName()}>.document.<{$model->getDocumentName()}>.document-name';
 	}
 	
 <{if (!$model->hasParentModel())}>
@@ -222,14 +243,6 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 	}
 
 	/**
-	 * @return string[]
-	 */
-	public function getAncestorModelNames()
-	{
-		return array(<{foreach from=$model->getAncestorModels() item=modelName}>'<{$modelName}>',<{/foreach}>);
-	}
-
-	/**
 	 * @return String
 	 */
 	public function getDefaultNewInstanceStatus()
@@ -289,13 +302,5 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 	public function publishOnDayChange()
 	{
 		return <{$model->escapeBoolean($model->hasPublishOnDayChange())}>;
-	}
-	
-	/**
-	 * @return <{$model->getServiceClassName()}>
-	 */
-	public function getDocumentService()
-	{
-		return <{$model->getServiceClassName()}>::getInstance();
 	}
 }

@@ -50,7 +50,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 <{/if}>
 <{/foreach}>
 	}
-    
+<{if (!$model->inject()) }>     
 	/**
 	 * @return <{$model->getDocumentClassName()}>
 	 */
@@ -66,7 +66,31 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	{
 		return <{$model->getServiceClassName()}>::getInstance()->getDocumentInstance($documentId, '<{$model->getName()}>');
 	}
+		
+	/**
+	 * @return <{$model->getDocumentClassName()}>model
+	 */
+	public function getPersistentModel()
+	{
+		return f_persistentdocument_PersistentDocumentModel::getInstance('<{$model->getModuleName()}>', '<{$model->getDocumentName()}>');
+	}
 
+	/**
+	 * @return String constant '<{$model->getName()}>'
+	 */
+	public function getDocumentModelName()
+	{
+		return '<{$model->getName()}>';
+	}
+	
+	/**
+	 * @return <{$model->getServiceClassName()}>
+	 */
+	public function getDocumentService()
+	{
+		return <{$model->getServiceClassName()}>::getInstance();
+	}
+<{/if}>
 	/**
 	 * Constructor
 	 * @internal For framework internal usage only
@@ -101,22 +125,6 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	protected function setDefaultValues()
 	{
 <{$model->getPhpDefaultValues()}>
-	}
-
-	/**
-	 * @return <{$model->getDocumentClassName()}>model
-	 */
-	public function getPersistentModel()
-	{
-		return f_persistentdocument_PersistentDocumentModel::getInstance('<{$model->getModuleName()}>', '<{$model->getDocumentName()}>');
-	}
-
-	/**
-	 * @return String constant '<{$model->getName()}>'
-	 */
-	public function getDocumentModelName()
-	{
-		return '<{$model->getName()}>';
 	}
 
 	/**
@@ -188,14 +196,6 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 <{/foreach}>
 			}
 		}
-	}
-
-	/**
-	 * @return <{$model->getServiceClassName()}>
-	 */
-	public function getDocumentService()
-	{
-		return <{$model->getServiceClassName()}>::getInstance();
 	}
 
 	/**

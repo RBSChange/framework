@@ -43,31 +43,32 @@ class change_InjectionService
         return $this->infos; 
     }
     
+    /**
+     * This method will update the injection only if needed. If you want to force update, you should call compile (or first restore and compile).
+     */
     public function update()
     {
         // Check if injection is up to date
     	$injectionInfos = $this->getInfos();
     	$injectionConfig = Framework::getConfigurationValue('injection/class', array());
-    	$toRecompile = array();
+    	$recompile = false;
     	foreach ($injectionInfos as $className => $value) 
     	{
-    		$fileInfo = new SplFileInfo($value['path']);
-    		
-    		if ($fileInfo->getMTime() != $value['mtime'])
+    		if (isset($value['checkmtime']))
     		{
-    			if (isset($injectionConfig[$className]))
-    			{
-    				$toRecompile[$className] = $injectionConfig[$className];
-    			}
-    			else if (($key = array_search($className, $injectionConfig)) !== false)
-    			{
-    				$toRecompile[$key] = $injectionConfig[$key];
-    			}
+	    		$fileInfo = new SplFileInfo($value['path']);
+	    		if ($fileInfo->getMTime() != $value['mtime'])
+	    		{
+	    			$recompile = true;
+	    			break;
+	    		}
     		}
     	}
-    	if (count($toRecompile))
+    	if ($recompile)
     	{
-    		$this->compile($toRecompile, false);
+    		Framework::info('Injections are not up-to-date : recompiling informations');
+    		$this->restore();
+    		$this->compile(false);
     	}
     }
 	
@@ -86,7 +87,15 @@ class change_InjectionService
 	
 	public function restore()
 	{
-		
+		foreach ($this->getInfos() as $className => $info)
+		{
+		    $autoloadClassPath = ClassResolver::getInstance()->getPath($className);
+		    if (isset($info['path']))
+		    {
+				@unlink($autoloadClassPath);
+		        f_util_FileUtils::symlink($info['path'], $autoloadClassPath);
+		    }  
+		}
 	}
 	
 	/**
@@ -94,21 +103,12 @@ class change_InjectionService
 	 * @param boolean $checkValidity
 	 * @return array 
 	 */
-	public function compile($toRecompile = null, $checkValidity = true)
+	public function compile($checkValidity = true)
 	{
 		$returnValue = array();
-		if ($toRecompile == null)
-		{
-			$toRecompile = Framework::getConfigurationValue('injection/class', array());
-			$newInjectionInfos = array();
-		}
-		else 
-		{
-			$newInjectionInfos = $this->getInfos();
-		}
-		
-		
-		foreach ($toRecompile as $originalClassName => $className)
+		$newInjectionInfos = array();
+
+		foreach (Framework::getConfigurationValue('injection/class', array()) as $originalClassName => $className)
 		{
 			$originalClassInfo = $this->buildClassInfo($originalClassName);
 			$replacingClassInfo = $this->buildClassInfo($className);
@@ -120,19 +120,29 @@ class change_InjectionService
 				$returnValue[$originalClassName] = $className; 
 			}
 		}
+
+		foreach (Framework::getConfigurationValue('injection/document', array()) as $originalModelName => $replacingModelName)
+		{
+			$docInject = new change_DocumentInjection($originalModelName, $replacingModelName);
+			if (!$checkValidity || ($checkValidity && $docInject->isValid()))
+			{
+				$newInjectionInfos = array_merge($newInjectionInfos, $docInject->generate());
+				$returnValue[$originalModelName] = $replacingModelName; 
+			}
+		}
+		
 		$this->setInfos($newInjectionInfos);
 		
 		foreach ($newInjectionInfos as $className => $info)
 		{
 		    $autoloadClassPath = ClassResolver::getInstance()->getPath($className);
-			
 		    if (isset($info['link']))
 		    {
 				@unlink($autoloadClassPath);
 		        f_util_FileUtils::symlink($info['link'], $autoloadClassPath);
 		    }  
 		}
-
+	
 		return $returnValue;
 	}
 	

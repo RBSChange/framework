@@ -37,29 +37,41 @@ class f_persistentdocument_DocumentService extends BaseService
 		}
 		return self::$instance;
 	}
-		
-	/**
-	 * @var f_persistentdocument_PersistentProvider
-	 */
-	protected $pp = null;
-
-	/**
-	 * @var f_persistentdocument_TransactionManager
-	 */
-	protected $tm = null;
-
+	
+	public function __get ($name)
+	{
+		switch ($name)
+		{
+			case 'pp':
+				return $this->getPersistentProvider();
+				break;
+			case 'tm':
+				return $this->getTransactionManager();
+				break;
+		}
+		return null;
+	}
+	
+	public function __call ($name, $args)
+	{
+		switch ($name)
+		{
+			case 'getProvider':
+				Framework::error('Call to deleted ' . get_class($this) . '->' . $name . 'method');
+				return $this->getPersistentProvider();
+			case 'setPersistentProvider':
+				Framework::error('Call to deleted ' . get_class($this) . '->' . $name . 'method');
+				return;
+			case 'setTransactionManager':
+				Framework::error('Call to deleted ' . get_class($this) . '->' . $name . 'method');
+				return;
+			default:
+				throw new Exception('No method ' . get_class($this) . '->' . $name);
+		}
+	}
+	
 	protected function __construct()
 	{
-		$this->pp = $this->getPersistentProvider();
-		$this->tm = $this->getTransactionManager();
-	}
-
-	/**
-	 * @return f_persistentdocument_PersistentProvider
-	 */
-	public function getProvider()
-	{
-		return $this->pp;
 	}
 	
 	/**
@@ -135,16 +147,18 @@ class f_persistentdocument_DocumentService extends BaseService
 		$document->applyMetas();
 		if ($document->isPropertyModified("metastring"))
 		{
+		    $tm = $this->getTransactionManager();
+		    $pp = $this->getPersistentProvider();
 			try
 			{
-				$this->tm->beginTransaction();
-				$this->pp->updateDocument($document);
-				$this->tm->commit();
+				$tm->beginTransaction();
+				$pp->updateDocument($document);
+				$tm->commit();
 				return true;
 			}
 			catch (Exception $e)
 			{
-				$this->tm->rollBack($e);
+				$tm->rollBack($e);
 				throw $e;
 			}
 		}
@@ -169,7 +183,7 @@ class f_persistentdocument_DocumentService extends BaseService
 	 */
 	public function getContainers($document)
 	{
-		return $this->pp->getChildRelationBySlaveDocumentId($document->getId());
+		return $this->getPersistentProvider()->getChildRelationBySlaveDocumentId($document->getId());
 	}
 
 	/**
@@ -232,9 +246,11 @@ class f_persistentdocument_DocumentService extends BaseService
 	 */
 	private function insert($document, $parentNodeId = null)
 	{
+	    $tm = $this->getTransactionManager();
+		$pp = $this->getPersistentProvider();
 		try
 		{
-			$this->tm->beginTransaction();
+			$tm->beginTransaction();
 			$this->preSave($document, $parentNodeId);
 			$this->preInsert($document, $parentNodeId);
 
@@ -297,7 +313,7 @@ class f_persistentdocument_DocumentService extends BaseService
 
 			$this->validateDocument($document);
 
-			$this->pp->insertDocument($document);
+			$pp->insertDocument($document);
 			$document->saveDocumentsInverse();
 
 			if ($parentDocument !== null)
@@ -316,11 +332,11 @@ class f_persistentdocument_DocumentService extends BaseService
 			$this->setToIndexIfNeeded($document, 'Insert');
 			$document->setModifiedPropertyNames();
 						
-			$this->tm->commit();
+			$tm->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->tm->rollBack($e);
+			$tm->rollBack($e);
 			throw $e;
 		}
 
@@ -414,10 +430,11 @@ class f_persistentdocument_DocumentService extends BaseService
 		{
 			Framework::debug("updateDocument (". $document->getId() .") ". get_class($document));
 		}
-
+        $tm = $this->getTransactionManager();
+        $pp = $this->getPersistentProvider();
 		try
 		{
-			$this->tm->beginTransaction();
+			$tm->beginTransaction();
 
 			$this->preSave($document, $parentNodeId);
 			$this->preUpdate($document, $parentNodeId);
@@ -462,7 +479,7 @@ class f_persistentdocument_DocumentService extends BaseService
 
 			$this->validateDocument($document);
 
-			$this->pp->updateDocument($document);
+			$pp->updateDocument($document);
 			$document->saveDocumentsInverse();
 
 			if ($parentDocument !== null)
@@ -484,11 +501,11 @@ class f_persistentdocument_DocumentService extends BaseService
 			$document->setOldValues();
 			$document->setModifiedPropertyNames();
 
-			$this->tm->commit();
+			$tm->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->tm->rollBack($e);
+			$tm->rollBack($e);
 			$this->revertDocumentVersion($document);
 			throw $e;
 		}
@@ -526,10 +543,11 @@ class f_persistentdocument_DocumentService extends BaseService
 			}
 			return;
 		}
-
+        $tm = $this->getTransactionManager();
+        $pp = $this->getPersistentProvider();
 		try
 		{
-			$this->tm->beginTransaction();
+			$tm->beginTransaction();
 
 			$this->unpublishDocument($document, array("cause" => "delete"));
 
@@ -571,11 +589,11 @@ class f_persistentdocument_DocumentService extends BaseService
 				{
 					Framework::debug('Effacement relations child  du document '.$document->getId());
 				}
-				$relations = $this->pp->getChildRelationBySlaveDocumentId($document->getId());
+				$relations = $pp->getChildRelationBySlaveDocumentId($document->getId());
 				$rc = RequestContext::getInstance();
 				foreach ($relations as $relation)
 				{
-					$doc = $this->pp->getDocumentInstance($relation->getDocumentId1());
+					$doc = $pp->getDocumentInstance($relation->getDocumentId1());
 					if ($doc->isDeleted()) {continue;}
 					try 
 					{
@@ -608,7 +626,7 @@ class f_persistentdocument_DocumentService extends BaseService
 
 			$this->deleteCorrection($document);
 
-			$this->pp->deleteDocument($document);
+			$pp->deleteDocument($document);
 
 			if ($completeDelete)
 			{
@@ -621,11 +639,11 @@ class f_persistentdocument_DocumentService extends BaseService
 			
 			$this->setToIndexIfNeeded($document, 'Delete');
 
-			$this->tm->commit();
+			$tm->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->tm->rollBack($e);
+			$tm->rollBack($e);
 			if ($e instanceof TransactionCancelledException)
 			{
 				throw $e->getSourceException();
@@ -662,6 +680,7 @@ class f_persistentdocument_DocumentService extends BaseService
 	 */
 	private function deleteCorrection($persistentDocument)
 	{
+        $pp = $this->getPersistentProvider();
 		$documentModel = $persistentDocument->getPersistentModel();
 		if ($documentModel->useCorrection())
 		{
@@ -680,7 +699,7 @@ class f_persistentdocument_DocumentService extends BaseService
 					$original->setCorrectionid(null);
 					
 					$this->setToIndexIfNeeded($original, 'Update');
-					$this->pp->updateDocument($original);
+					$pp->updateDocument($original);
 					RequestContext::getInstance()->endI18nWork();
 				}
 				catch (Exception $e)
@@ -693,7 +712,7 @@ class f_persistentdocument_DocumentService extends BaseService
 			{
 				//Effacement du document principal
 				$lang = RequestContext::getInstance()->getLang();
-				$query = $this->pp->createQuery($documentModel->getName());
+				$query = $pp->createQuery($documentModel->getName());
 				$query->add(Restrictions::eq('lang', $lang));
 				$query->add(Restrictions::eq('correctionofid', $persistentDocument->getId()));
 				$results = $query->find();
@@ -720,7 +739,7 @@ class f_persistentdocument_DocumentService extends BaseService
 	 */
 	public final function getDocumentInstance($documentId, $modelName = null)
 	{
-		return $this->pp->getDocumentInstance($documentId, $modelName);
+		return $this->getPersistentProvider()->getDocumentInstance($documentId, $modelName);
 	}
 
 
@@ -741,26 +760,8 @@ class f_persistentdocument_DocumentService extends BaseService
 	 */
 	protected final function getNewDocumentInstanceByModelName($documentModelName)
 	{
-		return $this->pp->getNewDocumentInstance($documentModelName);
+		return $this->getPersistentProvider()->getNewDocumentInstance($documentModelName);
 	}
-
-	/**
-	 * @param f_persistentdocument_TransactionManager $tm
-	 */
-	public final function setTransactionManager($tm)
-	{
-		$this->tm = $tm;
-	}
-
-
-	/**
-	 * @param f_persistentdocument_PersistentProvider $pp
-	 */
-	public final function setPersistentProvider($pp)
-	{
-		$this->pp = $pp;
-	}
-
 
 	///////////////////////////////////////////////////////////////////////////
 	//                                                                       //
@@ -1028,9 +1029,10 @@ class f_persistentdocument_DocumentService extends BaseService
 
 		$newContainerId = null;
 		$oldContainerId = null;
+		$tm = $this->getTransactionManager();
 		try
 		{
-			$this->tm->beginTransaction();
+			$tm->beginTransaction();
 			// Pre move
 			$this->onMoveToStart($document, $destId);
 			// Move it!
@@ -1152,11 +1154,11 @@ class f_persistentdocument_DocumentService extends BaseService
 				// We can not determine wich tree-node property to use
 				throw new Exception("Invalid parent node : " . $destId);
 			}
-			$this->tm->commit();
+			$tm->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->tm->rollBack($e);
+			$tm->rollBack($e);
 			throw $e;
 		}
 
@@ -1173,9 +1175,10 @@ class f_persistentdocument_DocumentService extends BaseService
 
 		$eventParams = array("document" => $document, 'newparentId' => $destId);
 		f_event_EventManager::dispatchEvent('persistentDocumentMoved', $this, $eventParams);
+		$tm = $this->getTransactionManager();
 		try
 		{
-			$this->tm->beginTransaction();
+			$tm->beginTransaction();
 			if ($oldContainerId !== null)
 			{
 				// we mark the origin container modified
@@ -1186,11 +1189,11 @@ class f_persistentdocument_DocumentService extends BaseService
 				// we mark the destination container modified
 				$this->touch($newContainerId);
 			}
-			$this->tm->commit();
+			$tm->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->tm->rollBack($e);
+			$tm->rollBack($e);
 			throw $e;
 		}
 	}
@@ -1543,10 +1546,12 @@ class f_persistentdocument_DocumentService extends BaseService
 		$eventName = null;
 		$extraEventParams = array();
 		$callbacks = array();
-
+		
+		$tm = $this->getTransactionManager();
+		$pp = $this->getPersistentProvider();
 		try
 		{
-			$this->tm->beginTransaction();
+			$tm->beginTransaction();
 
 			if ($documentModel->useCorrection())
 			{
@@ -1572,7 +1577,7 @@ class f_persistentdocument_DocumentService extends BaseService
 						$document->setCorrectionofid($correctionOfId);
 						$document->setCorrectionid(null);
 						$document->setPublicationstatus('DEPRECATED');
-						$this->pp->updateDocument($document);
+						$pp->updateDocument($document);
 						
 						//Correction deprecated
 						$this->setToIndexIfNeeded($document, 'UpdateStatus');
@@ -1586,7 +1591,7 @@ class f_persistentdocument_DocumentService extends BaseService
 						$masterDocument->setCorrectionofid(null);
 						$masterDocument->setCorrectionid(null);
 						$masterDocument->setPublicationstatus('ACTIVE');
-						$this->pp->updateDocument($masterDocument);
+						$pp->updateDocument($masterDocument);
 						$eventName = 'persistentDocumentActivated';
 						$document = $masterDocument;
 
@@ -1601,7 +1606,7 @@ class f_persistentdocument_DocumentService extends BaseService
 				{
 					//DRAFT WORKFLOW -> ACTIVE
 					$document->setPublicationstatus('ACTIVE');
-					$this->pp->updateDocument($document);
+					$pp->updateDocument($document);
 					$eventName = 'persistentDocumentActivated';
 				}
 			}
@@ -1609,15 +1614,15 @@ class f_persistentdocument_DocumentService extends BaseService
 			{
 				//DRAFT WORKFLOW -> ACTIVE
 				$document->setPublicationstatus('ACTIVE');
-				$this->pp->updateDocument($document);
+				$pp->updateDocument($document);
 				$eventName = 'persistentDocumentActivated';
 			}
 			$this->setToIndexIfNeeded($document, 'UpdateStatus');
-			$this->tm->commit();
+			$tm->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->tm->rollBack($e);
+			$tm->rollBack($e);
 		}
 
 		foreach ($callbacks as $callback)
@@ -1736,17 +1741,18 @@ class f_persistentdocument_DocumentService extends BaseService
 
 		$eventName = null;
 		$published = null;
-
+		$tm = $this->getTransactionManager();
+		$pp = $this->getPersistentProvider();
 		try
 		{
-			$this->tm->beginTransaction();
+			$tm->beginTransaction();
 			if ($document->getDocumentService()->isPublishable($document))
 			{
 				if ($currentStatus == 'ACTIVE')
 				{
 					$document->setPublicationstatus('PUBLICATED');
 					$this->removeActivePublicationStatusInfo($document);
-					$this->pp->updateDocument($document);					
+					$pp->updateDocument($document);					
 					$this->setToIndexIfNeeded($document, 'UpdateStatus');
 					$eventName = 'persistentDocumentPublished';
 					$published = true;
@@ -1755,18 +1761,18 @@ class f_persistentdocument_DocumentService extends BaseService
 			else if ($currentStatus == 'PUBLICATED')
 			{
 				$document->setPublicationstatus('ACTIVE');
-				$this->pp->updateDocument($document);
+				$pp->updateDocument($document);
 				
 				$this->setToIndexIfNeeded($document, 'UpdateStatus');
 				$eventName = 'persistentDocumentUnpublished';
 				$published = false;
 			}
 			$this->saveMeta($document);
-			$this->tm->commit();
+			$tm->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->tm->rollBack($e);
+			$tm->rollBack($e);
 			$published = null;
 		}
 
@@ -1782,10 +1788,11 @@ class f_persistentdocument_DocumentService extends BaseService
 	 */
 	private function unpublishDocument($document, $extraEventParams = null)
 	{
+		$pp = $this->getPersistentProvider();
 		if ($document->getPublicationstatus() == 'PUBLICATED')
 		{
 			$document->setPublicationstatus('ACTIVE');
-			$this->pp->updateDocument($document);
+			$pp->updateDocument($document);
 			$this->setToIndexIfNeeded($document, 'UpdateStatus');
 			$this->dispatchPublicationStatusChanged($document, 'PUBLICATED', 'persistentDocumentUnpublished', $extraEventParams);
 		}
@@ -1985,24 +1992,25 @@ class f_persistentdocument_DocumentService extends BaseService
 		}
 
 		$eventName = null;
-
+		$tm = $this->getTransactionManager();
+		$pp = $this->getPersistentProvider();
 		try
 		{
-			$this->tm->beginTransaction();
+			$tm->beginTransaction();
 
 			$this->unpublishDocument($document, array("cause" => "deactivate"));
 			$document->setPublicationstatus('DEACTIVATED');
 			$this->removeActivePublicationStatusInfo($document);
-			$this->pp->updateDocument($document);
+			$pp->updateDocument($document);
 			$this->saveMeta($document);
 			$eventName = 'persistentDocumentDeactivated';
 			
 			$this->setToIndexIfNeeded($document, 'UpdateStatus');
-			$this->tm->commit();
+			$tm->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->tm->rollBack($e);
+			$tm->rollBack($e);
 		}
 
 		if (!is_null($eventName))
@@ -2037,26 +2045,27 @@ class f_persistentdocument_DocumentService extends BaseService
 		}
 
 		$eventName = null;
-
+		$tm = $this->getTransactionManager();
+		$pp = $this->getPersistentProvider();
 		try
 		{
-			$this->tm->beginTransaction();
+			$tm->beginTransaction();
 
 			$this->unpublishDocument($document, array("cause" => "file"));
 			$document->setPublicationstatus('FILED');
 			$this->removeActivePublicationStatusInfo($document);
-			$this->pp->updateDocument($document);
+			$pp->updateDocument($document);
 			
 			$this->saveMeta($document);
 			
 			$this->setToIndexIfNeeded($document, 'UpdateStatus');
 			$eventName = 'persistentDocumentFiled';
 
-			$this->tm->commit();
+			$tm->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->tm->rollBack($e);
+			$tm->rollBack($e);
 		}
 
 		if (!is_null($eventName))
@@ -2093,23 +2102,24 @@ class f_persistentdocument_DocumentService extends BaseService
 		}
 
 		$eventName = null;
-
+        $tm = $this->getTransactionManager();
+        $pp = $this->getPersistentProvider();
 		try
 		{
-			$this->tm->beginTransaction();
+			$tm->beginTransaction();
 
 			$this->unpublishDocument($document, array("cause" => "putInTrash"));
 			$document->setPublicationstatus('TRASH');
 			$this->removeActivePublicationStatusInfo($document);
-			$this->pp->updateDocument($document);
+			$pp->updateDocument($document);
 			$this->saveMeta($document);
 			$eventName = 'persistentDocumentInTrash';
 
-			$this->tm->commit();
+			$tm->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->tm->rollBack($e);
+			$tm->rollBack($e);
 		}
 
 		if (!is_null($eventName))
@@ -2146,10 +2156,11 @@ class f_persistentdocument_DocumentService extends BaseService
 		$eventName = null;
 
 		$documentModel = $document->getPersistentModel();
-
+        $tm = $this->getTransactionManager();
+        $pp = $this->getPersistentProvider();
 		try
 		{
-			$this->tm->beginTransaction();
+			$tm->beginTransaction();
 
 			if ($documentModel->useCorrection())
 			{
@@ -2170,17 +2181,17 @@ class f_persistentdocument_DocumentService extends BaseService
 				$document->setPublicationstatus('DRAFT');
 			}
 
-			$this->pp->updateDocument($document);
+			$pp->updateDocument($document);
 			
 			$this->setToIndexIfNeeded($document, 'UpdateStatus');
 			
 			$eventName = 'persistentDocumentWorkflowCanceled';
 
-			$this->tm->commit();
+			$tm->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->tm->rollBack($e);
+			$tm->rollBack($e);
 		}
 
 		if (!is_null($eventName))
@@ -2195,9 +2206,11 @@ class f_persistentdocument_DocumentService extends BaseService
 	 */
 	public final function createDocumentCorrection($document)
 	{
+		$tm = $this->getTransactionManager();
+        $pp = $this->getPersistentProvider();
 		try
 		{
-			$this->tm->beginTransaction();
+			$tm->beginTransaction();
 
 			if (!$this->correctionNeeded($document))
 			{
@@ -2222,7 +2235,7 @@ class f_persistentdocument_DocumentService extends BaseService
 			//Set the correct revision.
 			$correction->setDocumentversion($document->getDocumentversion());
 			$correction->setPublicationstatus('CORRECTION');
-			$this->pp->insertDocument($correction);
+			$pp->insertDocument($correction);
 			
 			$this->setToIndexIfNeeded($document, 'Insert');
 			$correctionId = $correction->getId();
@@ -2253,7 +2266,7 @@ class f_persistentdocument_DocumentService extends BaseService
 			{
 				//echo "Is internationalized";
 				$lang = RequestContext::getInstance()->getLang();
-				$i18nDoc = $this->pp->getI18nDocument($document, $lang, $document->getLang() == $lang);
+				$i18nDoc = $pp->getI18nDocument($document, $lang, $document->getLang() == $lang);
 				if ($i18nDoc->isModified())
 				{
 					$i18nModifiedProperties = $i18nDoc->getModifiedProperties();
@@ -2262,7 +2275,7 @@ class f_persistentdocument_DocumentService extends BaseService
 			}
 			$document->setCorrectionid($correctionId);
 				
-			$this->pp->updateDocument($document);
+			$pp->updateDocument($document);
 			if ($modifiedProperties !== null)
 			{
 				$document->setModifiedPropertyNames($modifiedProperties);
@@ -2273,11 +2286,11 @@ class f_persistentdocument_DocumentService extends BaseService
 			}
 			
 			$this->setToIndexIfNeeded($document, 'Update');
-			$this->tm->commit();
+			$tm->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->tm->rollBack($e);
+			$tm->rollBack($e);
 			throw $e;
 		}
 		
@@ -2339,10 +2352,11 @@ class f_persistentdocument_DocumentService extends BaseService
 
 		$eventName = null;
 		$caseId = null;
-
+        $tm = $this->getTransactionManager();
+        $pp = $this->getPersistentProvider();
 		try
 		{
-			$this->tm->beginTransaction();
+			$tm->beginTransaction();
 
 			$case =  workflow_WorkflowEngineService::getInstance()->initWorkflowInstance($documentId, $documentModel->getWorkflowStartTask(), $startParameters);
 			if ($case !== null)
@@ -2356,17 +2370,17 @@ class f_persistentdocument_DocumentService extends BaseService
 				if ($document->getPublicationstatus() == $currentStatus)
 				{
 					$document->setPublicationstatus('WORKFLOW');
-					$this->pp->updateDocument($document);
+					$pp->updateDocument($document);
 					$this->setToIndexIfNeeded($document, 'UpdateStatus');
 					$eventName = 'persistentDocumentWorkflowInstanceCreated';
 				}
 			}
 
-			$this->tm->commit();
+			$tm->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->tm->rollBack($e);
+			$tm->rollBack($e);
 			throw $e;
 		}
 
@@ -2404,10 +2418,10 @@ class f_persistentdocument_DocumentService extends BaseService
 		$newDocument = $this->getNewDocumentInstance();
 		$documentModel = $newDocument->getPersistentModel();
 		$documentUseCorrection = $documentModel->useCorrection();
-
+		$tm = $this->getTransactionManager();
 		try
 		{
-			$this->tm->beginTransaction();
+			$tm->beginTransaction();
 
 			$vo = $originalDocument->getLang();
 			$labelSize  = $documentModel->getProperty('label')->getMaxSize();
@@ -2481,11 +2495,11 @@ class f_persistentdocument_DocumentService extends BaseService
 
 			$this->postDuplicate($newDocument, $originalDocument, $parentNodeId);
 
-			$this->tm->commit();
+			$tm->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->tm->rollBack($e);
+			$tm->rollBack($e);
 			throw $e;
 		}
 	}
@@ -2573,22 +2587,24 @@ class f_persistentdocument_DocumentService extends BaseService
 	 */
 	public final function transform($document, $destModelName, $transformer = null)
 	{
+		$tm = $this->getTransactionManager();
+        $pp = $this->getPersistentProvider();
 		try
 		{
-			$this->tm->beginTransaction();
-			$destDocument = $this->pp->getNewDocumentInstance($destModelName);
+			$tm->beginTransaction();
+			$destDocument = $pp->getNewDocumentInstance($destModelName);
 			if ($transformer === null)
 			{
 				$transfomer = Transformers::getInstance($document->getPersistentModel(), $destDocument->getPersistentModel());
 				$transfomer->transform($document, $destDocument);
 			}
-			$this->pp->mutate($document, $destDocument);
-			$this->tm->commit();
+			$pp->mutate($document, $destDocument);
+			$tm->commit();
 			return $destDocument;
 		}
 		catch (Exception $e)
 		{
-			$this->tm->rollBack($e);
+			$tm->rollBack($e);
 		}
 		return null;
 	}
@@ -2601,7 +2617,7 @@ class f_persistentdocument_DocumentService extends BaseService
 	{
 		if ($document instanceof f_persistentdocument_PersistentDocument)
 		{
-			return count($this->pp->getChildRelationBySlaveDocumentId($document->getId()));
+			return count($this->getPersistentProvider()->getChildRelationBySlaveDocumentId($document->getId()));
 		}
 		return -1;
 	}
@@ -2627,7 +2643,7 @@ class f_persistentdocument_DocumentService extends BaseService
 
 		if ($document->getTreeId() && $document->getTreeId() == ModuleService::getInstance()->getRootFolderId('website'))
 		{
-			$row = $this->pp->createQuery('modules_website/website')
+			$row = $this->getPersistentProvider()->createQuery('modules_website/website')
 				->add(Restrictions::ancestorOf($document->getId()))
 				->setProjection(Projections::property('id', 'id'))->find();
 			return count($row) == 1 ? $row[0]['id'] : null;
@@ -2832,7 +2848,7 @@ class f_persistentdocument_DocumentService extends BaseService
 				{
 					if (isset($data['infos']['correctionofid']))
 					{
-						$original = $this->pp->getDocumentInstance($data['infos']['correctionofid']);
+						$original = $this->getPersistentProvider()->getDocumentInstance($data['infos']['correctionofid']);
 						$info = $original->getI18nInfo();
 					}
 					else
@@ -2925,4 +2941,6 @@ class f_persistentdocument_DocumentService extends BaseService
 		$attributes['href'] = LinkHelper::getDocumentUrl($document, $lang);
 		return f_util_HtmlUtils::buildLink($attributes, $content);
 	}
+	
+	
 }

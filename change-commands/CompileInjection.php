@@ -31,6 +31,7 @@ class commands_CompileInjection extends commands_AbstractChangeCommand
 	{
 		$this->message("== Compile Injection ==");
 		$this->loadFramework();
+		change_InjectionService::getInstance()->restore();
 		change_InjectionService::getInstance()->compile();
 		$this->quitOk("Injection compiled");
 	}

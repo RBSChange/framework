@@ -54,10 +54,6 @@ class commands_CompileDocuments extends commands_AbstractChangeCommand
 		// For the list of models generate persistent.
 		foreach ($models as $model)
 		{
-			if ($model->inject())
-			{
-				$docInjections[$model->getFinalModuleName()."/".$model->getFinalDocumentName()] = $model->getModuleName()."/".$model->getDocumentName();
-			}
 			
 			// Get a document Generator.
 			$documentGenerator = new builder_DocumentGenerator($model->getModuleName(), $model->getDocumentName(), false);

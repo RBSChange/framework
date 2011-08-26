@@ -821,7 +821,7 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 	 */
 	public function getProvider()
 	{
-		return $this->getDocumentService()->getProvider();
+		return f_persistentdocument_PersistentProvider::getInstance();
 	}
 	
 	/**

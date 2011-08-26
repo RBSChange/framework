@@ -157,8 +157,6 @@ abstract class change_Action
 		if (is_null($this->ds))
 		{
 			$this->ds = f_persistentdocument_DocumentService::getInstance();
-			$this->ds->setPersistentProvider($this->getPersistentProvider());
-			$this->ds->setTransactionManager($this->getTransactionManager());
 		}
 		return $this->ds;
 	}
