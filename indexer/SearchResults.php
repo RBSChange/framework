@@ -43,6 +43,11 @@ interface indexer_SearchResults
 	 * @return indexer_FacetResult[]
 	 */
 	public function getFacetResults();
+	
+	/**
+	 * @return string
+	 */
+	public function getSuggestion();
 }
 
 
@@ -102,7 +107,14 @@ class indexer_EmptySearchResults extends ArrayObject implements indexer_SearchRe
 	public function getTotalHitsCount()
 	{
 		return 0;
-		
+	}
+	
+	/**
+	 * @see indexer_SearchResults::getSuggestion()
+	 */
+	public function getSuggestion()
+	{
+		return null;
 	}
 }
 

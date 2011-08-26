@@ -568,16 +568,21 @@ class indexer_IndexService extends BaseService
 			$websiteIds = $document->getDocumentService()->getWebsiteIds($document);
 			if (!is_array($websiteIds) || count($websiteIds) > 0)
 			{
-				$indexedDoc->setWebsiteIds($websiteIds);
+				
 				$userIds[] = self::PUBLIC_DOCUMENT_ACCESSOR_ID;				
 				if (is_array($websiteIds))
 				{
+					$indexedDoc->setWebsiteIds($websiteIds);
 					foreach (DocumentHelper::getDocumentArrayFromIdArray($websiteIds) as $website) 
 					{
 						website_WebsiteModuleService::getInstance()->setCurrentWebsite($website);
 						$userIds = array_merge($this->getFrontendAccessorIds($document), $userIds);
 					}
 					$userIds = array_unique($userIds);
+				}
+				else
+				{
+					$indexedDoc->setWebsiteIds(array(0));
 				}
 				$indexedDoc->foIndexable(true);				
 				$indexedDoc->setDateField('sortable_date', $document->getModificationdate());
