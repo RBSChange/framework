@@ -100,57 +100,56 @@ class generator_PersistentModel
 			$hasModelParam = true;
 		}
 		
+		$injectionConfig = Framework::getConfigurationValue('injection/document', array());	
 		foreach (ModuleService::getInstance()->getPackageNames() as $packageName)
 		{
-			$dirs = FileResolver::getInstance()->setPackageName($packageName)->getPaths("persistentdocument");
-			if (is_null($dirs))
-			{
-				//self::addMessage("No persistent document for package : $packageName");
-				continue;
-			}
+			list ( , $moduleName) = explode('_', $packageName);
 			
-			foreach ($dirs as $dir)
+			$dir = f_util_FileUtils::buildModulesPath($moduleName, 'persistentdocument');
+			if (!is_dir($dir)) {continue;}
+			
+			$dh = opendir($dir);
+			while (($fileName = readdir($dh)) !== false)
 			{
-				$dh = opendir($dir);
-				while (($fileName = readdir($dh)) !== false)
+				$pathinfo = pathinfo($fileName);
+				if (isset($pathinfo['extension']))
 				{
-					$pathinfo = pathinfo($fileName);
-					if (isset($pathinfo['extension']))
+					$extension = $pathinfo['extension'];
+					$filePath = $dir.DIRECTORY_SEPARATOR.$fileName;
+					if (is_file($filePath) && $extension === "xml")
 					{
-						$extension = $pathinfo['extension'];
-						$filePath = $dir.DIRECTORY_SEPARATOR.$fileName;
-						if (is_file($filePath) && $extension === "xml")
+						try
 						{
-							try
+							$documentName = basename($pathinfo['basename'], ".xml");
+							if (!isset($models[$packageName.'/'.$documentName]))
 							{
-								$module = explode("_",$packageName);
-								if ($module[0] != "modules") continue;
-
-								$moduleName = $module[1];
-								$documentName = basename($pathinfo['basename'], ".xml");
-								if (!isset($models[$packageName.'/'.$documentName]))
+								$xmlDoc = self::loadFile($filePath);
+								if ($xmlDoc !== null)
 								{
-									$xmlDoc = self::loadFile($filePath);
-									if ($xmlDoc !== null)
+									$document = new generator_PersistentModel($xmlDoc, $moduleName, $documentName);
+									if ($document->canBeCompile($injectionConfig))
 									{
-										$document = new generator_PersistentModel($xmlDoc, $moduleName, $documentName);
 										$models[$document->getName()] = $document;
+									}
+									else 
+									{
+										self::addMessage("Document $moduleName / $documentName not valid for compilation");
 									}
 								}
 							}
-							catch (BaseException $e)
+						}
+						catch (BaseException $e)
+						{
+							if ($e->getMessage() != "document-type-does-not-exists")
 							{
-								if ($e->getMessage() != "document-type-does-not-exists")
-								{
-									closedir($dh);
-									throw $e;
-								}
+								closedir($dh);
+								throw $e;
 							}
 						}
 					}
 				}
-				closedir($dh);
 			}
+			closedir($dh);
 		}
 
 		list($modelResult, $inverseProperties) = self::postImportProcess($models);
@@ -173,6 +172,9 @@ class generator_PersistentModel
 		$modelsByModule = array();
 		foreach (self::loadModels() as $model)
 		{
+			/* @var $model generator_PersistentModel */
+			if ($model->inject()) {continue;}
+			
 			$moduleName = $model->getModuleName();
 			if (!isset($modelsByModule[$moduleName]))
 			{
@@ -194,6 +196,8 @@ class generator_PersistentModel
 		foreach (self::loadModels() as $model)
 		{
 			/* @var $model generator_PersistentModel */
+			if ($model->inject()) {continue;}
+		
 			$childrenNames = array();
 			foreach ($model->getChildren() as $child)
 			{
@@ -586,6 +590,30 @@ class generator_PersistentModel
 		$this->importPublicationStatus($xml);
 
 		$this->importWorkflow($xml);
+	}
+	
+	public function canBeCompile($config)
+	{
+		$finalClassPath = f_util_FileUtils::buildModulesPath($this->moduleName, 'persistentdocument', $this->documentName . '.class.php');
+		if (!file_exists($finalClassPath))
+		{
+			return false;
+		}
+		$serviceClassPath = f_util_FileUtils::buildModulesPath($this->moduleName, 'lib', 'services', ucfirst($this->documentName) . 'Service.class.php');
+		if (!file_exists($serviceClassPath))
+		{
+			return false;
+		}
+		
+		if ($this->inject())
+		{
+			$original = $this->extend;
+			if (!$original || !isset($config[$original]) || $config[$original] != $this->name)
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**

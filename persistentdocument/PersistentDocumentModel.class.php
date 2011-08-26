@@ -366,11 +366,9 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	{
 		switch ($modelName)
 		{
-			case '*':
 			case 'modules_generic/Document':
 			case $this->getName():
-				return true;
-			
+				return true;			
 			default: 
 				return in_array($modelName, $this->getAncestorModelNames());
 		}
