@@ -270,10 +270,9 @@ class change_Controller
 		catch (Exception $e)
 		{
 			Framework::exception($e);
-			if (Framework::inDevelopmentMode())
-			{
-				echo $e->getTraceAsString();
-			}
+			f_web_http_Header::setStatus('500');
+			$r = new exception_HtmlRenderer();
+			$r->printStackTrace($e);
 			$this->shutdown();
 			exit(-1);
 		}		

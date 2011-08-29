@@ -22,8 +22,7 @@ class exception_HtmlRenderer extends exception_Renderer
 		$class   = (isset($traceData[0]["class"])) ? $traceData[0]["class"] : 'N/A';
 
 		$trace   = array();
-
-		if (count($traceData) > 0)
+		if (Framework::inDevelopmentMode())
 		{
 			// format the stack trace
 			for ($i = 0, $z = count($traceData); $i < $z; $i++)
@@ -33,19 +32,8 @@ class exception_HtmlRenderer extends exception_Renderer
 				    // no file key exists, skip this index
 				    continue;
 				}
-
-				$filename = basename($tFile);
-				$pattern = '/(.*?)\.(class|interface)\.php/i';
-				$match = null;
-				if (preg_match($pattern, $filename, $match))
-				{
-					$tClass = $match[1];
-				}
-				else
-				{
-					$tClass = null;
-				}
-
+				
+				$tClass   = (isset($traceData[$i]["class"])) ? $traceData[$i]["class"] : null;
 				$tFile      = $traceData[$i]['file'];
 				$tFunction  = $traceData[$i]['function'];
 				$tLine      = $traceData[$i]['line'];
@@ -65,19 +53,19 @@ class exception_HtmlRenderer extends exception_Renderer
 				$trace[] = $data;
 			}
 		}
+		else if ($file !== 'N/A')
+		{
+			$file = basename($file);
+		}
 		
 		$name = $message;
 
 		$html = array();
-		$html[] = '<!DOCTYPE html
-	      PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-	      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-	      <html xmlns="http://www.w3.org/1999/xhtml"
-			    xml:lang="en" lang="en">
+		$html[] = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+	      <html xmlns="http://www.w3.org/1999/xhtml">
 	      <head>
-	      <meta http-equiv="Content-Type"
-			    content="text/html; charset=utf-8"/>
-	      <title>Agavi Exception</title>
+	      <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	      <title>Exception : '.$message.'</title>
 	      <style type="text/css">
 
 	      #exception {
@@ -111,7 +99,7 @@ class exception_HtmlRenderer extends exception_Renderer
 	      }
 
 	      th {
-			  background-color: #750000;
+			  background-color: #AAAAAA;
 			  color:            #FFFFFF;
 			  font-size:        1.2em;
 			  font-weight:      bold;
