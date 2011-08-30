@@ -13,8 +13,8 @@ class ClassResolver implements ResourceResolver
 	 */
 	protected $aop;
 
-	private $keys = array('%AG_LIB_DIR%', '%AG_MODULE_DIR%', '%FRAMEWORK_HOME%', '%PROJECT_OVERRIDE%', '%WEBEDIT_HOME%', '%PROFILE%');
-	private $reps = array(AG_LIB_DIR, AG_MODULE_DIR, FRAMEWORK_HOME, PROJECT_OVERRIDE, WEBEDIT_HOME, PROFILE);
+	private $keys = array('%PEAR_DIR%', '%AG_LIB_DIR%', '%AG_MODULE_DIR%', '%FRAMEWORK_HOME%', '%PROJECT_OVERRIDE%', '%WEBEDIT_HOME%', '%PROFILE%');
+	private $reps = array(PEAR_DIR, AG_LIB_DIR, AG_MODULE_DIR, FRAMEWORK_HOME, PROJECT_OVERRIDE, WEBEDIT_HOME, PROFILE);
 
 	protected function __construct()
 	{

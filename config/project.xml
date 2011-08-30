@@ -202,6 +202,11 @@
 				<!-- Use ; to create an array -->
 				<entry name="exclude">deprecated;doc;module;webapp</entry>
 			</Framework>
+			<Pear>
+				<entry name="name">Pear</entry>
+				<entry name="path">%PEAR_DIR%/*</entry>
+				<entry name="recursive">true</entry>
+			</Pear>
 			<Libs>
 				<entry name="name">Libs</entry>
 				<entry name="path">%AG_LIB_DIR%/*</entry>
