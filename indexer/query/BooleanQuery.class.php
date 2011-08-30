@@ -108,6 +108,14 @@ class indexer_BooleanQuery extends indexer_QueryBase implements indexer_Query
 	{
 		return $this->getSubqueryCount() == 0;
 	}
+	
+	/**
+	 * @return string 
+	 */
+	public function getType()
+	{
+		return $this->type;
+	}
 
 	/**
 	 * @return String

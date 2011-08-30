@@ -170,6 +170,14 @@ class indexer_TermQuery extends indexer_QueryBase implements indexer_Query
 	}
 	
 	/**
+	 * @return String
+	 */	
+	public function getFieldName()
+	{
+		return $this->fieldName;
+	}
+	
+	/**
 	 * @return String[]
 	 */
 	public function getTerms()
