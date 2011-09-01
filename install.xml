@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<install name="framework" version="4.0.0" >
+	<package type="libs" name="phptal" />
+	<package type="libs" name="smarty" />
+	<package type="libs" name="zfminimal" />
+</install>
