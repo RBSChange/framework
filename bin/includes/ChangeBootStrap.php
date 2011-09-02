@@ -250,8 +250,6 @@ class c_ChangeBootStrap
 	public function getComputedDependencies()
 	{
 		$computedDeps = $this->generateComputedChangeComponents();
-		//TODO: For debug only
-		file_put_contents('ComputedDependencies.php', var_export($computedDeps, true));
 		return $computedDeps;
 	}
 	
