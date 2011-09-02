@@ -6,6 +6,7 @@ class PersistentProviderConst
 {
 	const FETCH_ASSOC = 'FETCH_ASSOC';
 	const FETCH_NUM = 'FETCH_NUM';
+	const FETCH_COLUMN = 'FETCH_COL';
 
 	const PARAM_INT = 'PARAM_INT';
 	const PARAM_NUM = 'PARAM_NUM';
@@ -347,16 +348,6 @@ abstract class f_persistentdocument_PersistentProvider
 	 */
 	public abstract function executeSQLSelect($script);
 
-	private function compareRows($row1, $row2)
-	{
-		return (int)$row1["id"] - (int)$row2["id"];
-	}
-
-	private function getIdFromRow($row)
-	{
-		return $row["id"];
-	}
-	
 	/**
 	 * @return array<string, string>
 	 * return[0] => allowed file Extension
@@ -410,8 +401,9 @@ abstract class f_persistentdocument_PersistentProvider
 		{
 			throw new Exception("Error while executing :[$queryStr]" . " ". var_export($params, true) .':' . join(', ', $statement->errorInfo()));
 		}
-		$rows = $statement->fetchAll(PersistentProviderConst::FETCH_ASSOC);
+		
 		//Framework::debug("FIND from : ".f_util_ProcessUtils::getBackTrace());
+		$rows = $statement->fetchAll(PersistentProviderConst::FETCH_ASSOC);
 		if (!$query->hasProjectionDeep())
 		{
 			$docs = array();
@@ -450,13 +442,10 @@ abstract class f_persistentdocument_PersistentProvider
 
 			return $docs;
 		}
-		else
-		{
-			return $this->fetchProjection($rows, $query);
-		}
+		
+		return $this->fetchProjection($rows, $query);
 	}
-
-
+	
 	/**
 	 * If the query has some projection, retrieve one of them into a dedicated array
 	 * @param f_persistentdocument_criteria_Query $query
@@ -469,7 +458,38 @@ abstract class f_persistentdocument_PersistentProvider
 		{
 			throw new Exception("Could not find column if there is no projection");
 		}
-		$rows = $this->find($query);
+		
+		if ($query->hasHavingCriterion() && !$query->hasProjection())
+		{
+			// implicit this projection
+			$query->setProjection(Projections::this());
+		}
+		
+		$projection = $this->findProjection($query, $columnName);
+		if ($projection === null)
+		{
+			throw new Exception("Unknown projection ".$columnName);
+		}
+		$projection->inFirstPosition = true;
+		
+		$params = array();
+		$queryStr = $this->buildQueryString($query, $params);
+		
+		$statement = $this->prepareStatement($queryStr);
+		// N.B.: we must check if errorCode is a real error code since execute()
+		// can return false for correct executions !
+		if ($statement->execute($params) === false && $statement->errorCode() !== '00000')
+		{
+			throw new Exception("Error while executing :[$queryStr]" . " ". var_export($params, true) .':' . join(', ', $statement->errorInfo()));
+		}
+		
+		if ($this->handleProjectionsFirstPosition() && !in_array($columnName, $query->getDocumentProjections()))
+		{
+			return $statement->fetchAll(PersistentProviderConst::FETCH_COLUMN);
+		}
+		
+		$sqlRows = $statement->fetchAll(PersistentProviderConst::FETCH_ASSOC);
+		$rows = $this->fetchProjection($sqlRows, $query);
 		if (count($rows) == 0)
 		{
 			return $rows;
@@ -484,6 +504,48 @@ abstract class f_persistentdocument_PersistentProvider
 			$result[] = $row[$columnName];
 		}
 		return $result;
+	}
+	
+	/**
+	 * Return true if you know what Projection->inFirstPosition means
+	 * @return boolean
+	 */
+	protected function handleProjectionsFirstPosition()
+	{
+		return false;
+	}
+	
+	/**
+	 * @param f_persistentdocument_criteria_Query $query
+	 * @param string $columnName
+	 * @return f_persistentdocument_criteria_Projection
+	 */
+	protected function findProjection($query, $columnName)
+	{
+		if (count($query->getProjection()) > 0)
+		{
+			foreach ($query->getProjection() as $projection)
+			{
+				if ($projection->getAs() == $columnName)
+				{
+					return $projection;
+				}
+			}
+		}
+		
+		if ($query->hasCriterias())
+		{
+			foreach ($query->getCriterias() as $propertyName => $criteria)
+			{
+				$projection = $this->findProjection($criteria, $columnName);
+				if ($projection !== null)
+				{
+					return $projection;
+				}
+			}
+		}
+		
+		return null;
 	}
 
 	/**
@@ -506,26 +568,17 @@ abstract class f_persistentdocument_PersistentProvider
 	 */
 	public function findIntersectionIds($intersection)
 	{
-		// TODO: merge queries that are "mergeable"
-		// TODO: here we may have queries on different compatible models. Restrict queries to
-		//		 the most specific model to reduce the number of returned ids to intersect?
 		$idRows = null;
 		foreach ($intersection->getQueries() as $groupedQuery)
 		{
 			if (f_util_ClassUtils::methodExists($groupedQuery, "getIds"))
 			{
-				$ids = $groupedQuery->getIds();
-				$result = array();
-				foreach ($ids as $id)
-				{
-					$result[] = array("id" => $id);
-				}
+				$result = $groupedQuery->getIds();
 			}
 			else
 			{
 				$this->addIdProjectionIfNeeded($groupedQuery);
-				//$result = $this->find($groupedQuery);
-				$result = $groupedQuery->find();
+				$result = $groupedQuery->findColumn("id");
 			}
 			if ($idRows === null)
 			{
@@ -533,17 +586,17 @@ abstract class f_persistentdocument_PersistentProvider
 			}
 			else
 			{
-				$idRows = array_uintersect($idRows, $result, array($this, "compareRows"));
+				$idRows = array_intersect($idRows, $result);
 			}
 		}
 		
 		/* TODO: uncomment when order implemented
 		if ($intersection->getMaxResults() > 0)
 		{
-			return array_slice(array_map(array($this, "getIdFromRow"), $idRows), 0 , $intersection->getMaxResults());
+			return array_slice($idRows, 0 , $intersection->getMaxResults());
 		}
 		*/
-		return array_map(array($this, "getIdFromRow"), $idRows);
+		return $idRows;
 	}
 	
 	protected function addIdProjectionIfNeeded($groupedQuery)
@@ -604,23 +657,17 @@ abstract class f_persistentdocument_PersistentProvider
 		{
 			if (f_util_ClassUtils::methodExists($groupedQuery, "getIds"))
 			{
-				$ids = $groupedQuery->getIds();
-				$newIdRows = array();
-				foreach ($ids as $id)
-				{
-					$newIdRows[] = array("id" => $id);
-				}
+				$newIdRows = $groupedQuery->getIds();
 			}
 			else
 			{
 				$this->addIdProjectionIfNeeded($groupedQuery);
-				//$newIdRows = $this->find($groupedQuery);
-				$newIdRows = $groupedQuery->find();
+				$newIdRows = $groupedQuery->findColumn("id");
 			}
 			$idRows = array_merge($idRows, $newIdRows);
 		}
 		
-		return array_unique(array_map(array($this, "getIdFromRow"), $idRows));
+		return array_unique($idRows);
 	}
 	
 	/**
