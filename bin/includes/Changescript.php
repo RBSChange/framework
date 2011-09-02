@@ -195,7 +195,7 @@ class c_Changescript
 		{
 			foreach (spl_autoload_functions() as $fct) 
 			{
-				if (is_array($fct) && ($fct[0] instanceof cboot_ClassDirAnalyzer))
+				if (is_array($fct) && ($fct[0] instanceof c_ChangeBootStrap))
 				{
 					spl_autoload_unregister($fct);
 				}

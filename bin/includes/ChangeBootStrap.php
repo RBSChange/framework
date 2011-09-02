@@ -12,65 +12,79 @@ class c_ChangeBootStrap
 	 * PROJECT_HOME
 	 * @var String
 	 */
-	private $wd;
+	private $projectHomePath;
+	
+	
+	private $tmpPath;
 	
 	/**
 	 * @var String
 	 */
 	private $name = "change";
-	
-	/**
-	 * @var String
-	 */
-	private $descriptor = "change.xml";
-	
-	/**
-	 * @var String
-	 */
-	private $descriptorPath;
-	
-	/**
-	 * @var array<String, Boolean>
-	 */
-	private $localRepositories;
-	
-	/**
-	 * @var String[]
-	 */
-	private $remoteRepositories;
-	
+		
 	/**
 	 * @var cboot_Properties
 	 */
 	private $properties;
-	
-	/**
-	 * @var c_ChangeBootStrap
-	 */
-	private static $instance;
-	
+		
 	/**
 	 * @var cboot_Configuration
 	 */
 	private $configuration;
 	
 	/**
+	 * @var string
+	 */
+	private $instanceProjectKey = null;
+	
+	/**
+	 * @var c_Package
+	 */	
+	private $frameworkPackage;
+	
+	/**
+	 * @var c_Package[]
+	 */
+	private $projectDependencies;
+	
+
+	/**
+	 * @var array
+	 */
+	private $pearInfos;
+	
+	/**
+	 * @var string
+	 */
+	private $autoloadPath;
+	/**
+	 * @var string[]
+	 */	
+	private $autoloaded = array();
+	/**
+	 * @var boolean
+	 */
+	private $autoloadRegistered = false;
+	
+	/**
+	 * @var boolean
+	 */
+	private $refreshAutoload = false;
+	
+	/**
+	 * @var XMLDocument[]	
+	 */
+	private $releaseDocuments = array();
+	
+	/**
 	 * @param String $path
 	 */
 	function __construct($path)
 	{
-		$this->wd = $path;
-		self::$instance = $this;
+		$this->projectHomePath = $path;
 	}
 	
-	/**
-	 * @return c_ChangeBootStrap
-	 */
-	static function getInstance()
-	{
-		return self::$instance;
-	}
-	
+	// CONFIGURATION
 	/**
 	 * @return cboot_Configuration
 	 */
@@ -79,7 +93,7 @@ class c_ChangeBootStrap
 		if ($this->configuration === null)
 		{
 			$this->configuration = cboot_Configuration::getInstance($this->getName());
-			$this->configuration->addLocation($this->wd);
+			$this->configuration->addLocation($this->projectHomePath);
 		}
 		return $this->configuration;
 	}
@@ -101,6 +115,9 @@ class c_ChangeBootStrap
 		$this->name = $name;
 	}
 	
+	
+	// AUTOLOAD
+		
 	/**
 	 * @param String $path
 	 */
@@ -109,111 +126,137 @@ class c_ChangeBootStrap
 		$this->getConfiguration()->addLocation($path);
 	}
 	
-	/**
-	 * @param String $descriptor
-	 * @return c_ChangeBootStrap
-	 */
-	function setDescriptor($descriptor = "change.xml")
+	function setAutoloadPath($autoloadPath)
 	{
-		$this->descriptor = $descriptor;
-		return $this;
+		$this->autoloadPath = $autoloadPath;
+	}
+	
+	private function getAutoloadPath()
+	{
+		if ($this->autoloadPath === null)
+		{
+			$this->autoloadPath = $this->projectHomePath . "/cache/autoload";
+		}
+		return $this->autoloadPath;
+	}
+	
+	function setRefreshAutoload($refresh)
+	{
+		$this->refreshAutoload = $refresh;
 	}
 	
 	/**
-	 * @return array unserialized content of .computedChangeComponents.ser
+	 * @param string $className
+	 * @return boolean
+	 */
+	function autoload($className)
+	{
+		try
+		{
+			require_once(ClassResolver::getInstance()->getPath($className));
+			return true;
+		}
+		catch (Exception $e)
+		{
+			return false;
+		}
+	}
+	
+	/**
+	 * @param string $componentPath
+	 */
+	function appendToAutoload($componentPath)
+	{	
+		$autoloadPath = $this->getAutoloadPath();
+		$autoloadedFlag = $autoloadPath . "/" . md5($componentPath) . ".autoloaded";
+		
+		if (!$this->autoloadRegistered)
+		{
+			spl_autoload_register(array($this, "autoload"));
+			$this->autoloadRegistered = true;
+		}
+		
+		if (isset($this->autoloaded[$componentPath]) || (!$this->refreshAutoload && file_exists($autoloadedFlag)))
+		{
+			$this->autoloaded[$componentPath] = true;
+			return;
+		}
+		
+		if (file_exists($autoloadedFlag))
+		{
+			unlink($autoloadedFlag);
+		}
+		ClassResolver::getInstance()->appendRealDir($componentPath);
+		$this->autoloaded[$componentPath] = true;
+		touch($autoloadedFlag);
+	}
+	
+	
+	/**
+	 * @return string
+	 */
+	public function getInstanceProjectKey()
+	{
+		if ($this->instanceProjectKey === null)
+		{
+			$license = $this->getProperties()->getProperty("PROJECT_LICENSE");
+			if (empty($license)) {$license = "OS";}			
+			$pId = '-';  
+			$fqdn='-';
+			$release = $this->getRelease();				
+			$profilePath = $this->projectHomePath . '/profile';
+			$profile = (is_readable($profilePath)) ? trim(file_get_contents($profilePath)) : 'default';
+		
+			$configPath = $this->projectHomePath . '/config/project.'. $profile .'.xml';
+			if (is_readable($configPath))
+			{
+				$projectXMLDoc = f_util_DOMUtils::fromPath($configPath);
+				$pIdNode = $projectXMLDoc->findUnique('defines/define[@name="PROJECT_ID"]');
+				$pId = $pIdNode ? $pIdNode->textContent : '-';
+				$fqdnNode = $projectXMLDoc->findUnique('config/general/entry[@name="server-fqdn"]');
+				$fqdn = $fqdnNode ? $fqdnNode->textContent : '-';
+			}
+			$this->instanceProjectKey = 'Change/' . $release . ';License/' . $license. ';Profile/' . $profile . ';PId/' . $pId. ';FQDN/'. $fqdn;
+		}
+		return $this->instanceProjectKey;
+	}
+	
+	/**
+	 * @return c_Package
+	 */
+	public function getFrameworkPackage()
+	{
+		if ($this->frameworkPackage === null)
+		{
+			$frameworkPackagePath = $this->projectHomePath . '/framework/install.xml';
+			$installXMLDoc = f_util_DOMUtils::fromPath($frameworkPackagePath);		
+			$this->frameworkPackage = c_Package::getInstanceFromPackageElement($installXMLDoc->documentElement, 
+				$this->projectHomePath);
+		}
+		return $this->frameworkPackage;
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getRelease()
+	{
+		return $this->getFrameworkPackage()->getVersion();
+	}
+	
+	/**
+	 * @return array
 	 */
 	public function getComputedDependencies()
 	{
-		$descComputedPath = $this->wd . "/.computedChangeComponents.ser";
-		if (is_file($descComputedPath))
-		{
-			$computedDeps = unserialize(file_get_contents($descComputedPath));
-		}
-		else
-		{
-			$computedDeps = $this->generateComputedChangeComponents(null);
-			file_put_contents($descComputedPath, serialize($computedDeps));
-		}	
+		$computedDeps = $this->generateComputedChangeComponents();
+		//TODO: For debug only
+		file_put_contents('ComputedDependencies.php', var_export($computedDeps, true));
 		return $computedDeps;
-	}
-	
-	/**
-	 * @param string $target
-	 */
-	function dispatch($target = null)
-	{
-		// Check change.xml existence
-		$descPath = $this->getDescriptorPath();
-		
-		if (! is_file($descPath))
-		{
-			throw new Exception("Could not find $descPath");
-		}
-		
-		if ($target != "")
-		{
-			$scriptPath = null;
-			if (f_util_StringUtils::beginsWith($target, "dep:"))
-			{
-				list (, $component, $relativePath) = explode(":", $target);
-				//TODO Component path check
-				$scriptPath = $this->wd . "/" . $component . "/" . $relativePath;
-			}
-			elseif (f_util_StringUtils::beginsWith($target, "func:"))
-			{
-				list (, $scriptFunction) = explode(":", $target);
-				if (! function_exists($scriptFunction))
-				{
-					throw new Exception("Function $scriptFunction does not exists");
-				}
-			}
-			else
-			{
-				$scriptPath = $target;
-			}
-			
-			if ($scriptPath === null && $scriptFunction === null)
-			{
-				throw new Exception("Unable to find $target");
-			}
-			if ($scriptPath !== null && ! file_exists($scriptPath))
-			{
-				throw new Exception("Unable to find $target (location should be '$scriptPath')");
-			}
-			
-			$computedDeps = $this->getComputedDependencies();
-			
-			if (! isset($_SERVER["argv"]) || ! is_array($_SERVER["argv"]))
-			{
-				$_SERVER["argv"] = array();
-			}
-			else
-			{
-				array_shift($_SERVER["argv"]);
-			}
-			
-			if ($scriptPath !== null)
-			{
-				array_walk($_SERVER["argv"], array($this, "escapeArg"));
-				$returnCode = 0;
-				$cmd = "php $scriptPath " . join(" ", $_SERVER["argv"]);
-				passthru($cmd, $returnCode);
-				exit($returnCode);
-			}
-			else
-			{
-				$scriptFunction($_SERVER["argv"], $computedDeps);
-			}
-		}
 	}
 	
 	public function cleanDependenciesCache()
 	{
-		$descComputedPath = $this->wd . "/.computedChangeComponents.ser";
-		if (file_exists($descComputedPath))
-		{
-			unlink($descComputedPath);
-		}
 		$autoloadPath = $this->getAutoloadPath();
 		$cacheKey = $autoloadPath . "/*.autoloaded";
 		$files = glob($cacheKey);
@@ -226,20 +269,12 @@ class c_ChangeBootStrap
 		}
 	}
 	
-	private function generateComputedChangeComponents($components)
+	private function generateComputedChangeComponents()
 	{
-		$this->loadPearInfo();
-		if ($components === null)
-		{
-			$components = $this->loadDependencies();
-		}
-		$computedComponents = array();
-		$localRepo = $this->getWriteRepository();
-		$computedComponents["PEAR_DIR"] = $this->pearInfos['include_path'];
-		$computedComponents["USE_CHANGE_PEAR_LIB"] = $this->useChangePearLib();
-		$computedComponents["PEAR_WRITEABLE"] = $this->pearInfos['writeable'];
+		$pearInfos = $this->loadPearInfo();
+		$computedComponents = array('dependencies' => $this->getProjectDependencies());
+		$computedComponents["PEAR_DIR"] = $pearInfos['include_path'];
 		$computedComponents["ZEND_FRAMEWORK_PATH"] = $this->getProperties()->getProperty('ZEND_FRAMEWORK_PATH');
-		$computedComponents["LOCAL_REPOSITORY"] = $localRepo;
 		$computedComponents["WWW_GROUP"] = $this->getProperties()->getProperty('WWW_GROUP');
 		$computedComponents["DEVELOPMENT_MODE"] = $this->getProperties()->getProperty('DEVELOPMENT_MODE', false) == true;
 		$computedComponents["PHP_CLI_PATH"] = $this->getProperties()->getProperty('PHP_CLI_PATH', '');
@@ -247,8 +282,8 @@ class c_ChangeBootStrap
 		$computedComponents["TMP_PATH"] = $this->getProperties()->getProperty('TMP_PATH');
 		
 		$computedComponents["CHANGE_COMMAND"] = $this->getProperties()->getProperty('CHANGE_COMMAND', 'framework/bin/change.php');
-		$computedComponents["PROJECT_HOME"] = $this->getProperties()->getProperty('PROJECT_HOME', $this->wd);
-		$computedComponents["DOCUMENT_ROOT"] = $this->getProperties()->getProperty('DOCUMENT_ROOT', $this->wd);
+		$computedComponents["PROJECT_HOME"] = $this->getProperties()->getProperty('PROJECT_HOME', $this->projectHomePath);
+		$computedComponents["DOCUMENT_ROOT"] = $this->getProperties()->getProperty('DOCUMENT_ROOT', $this->projectHomePath);
 		$computedComponents["PROJECT_LICENSE"] = $this->getProperties()->getProperty('PROJECT_LICENSE', 'OS');
 		$computedComponents["FAKE_EMAIL"] = $this->getProperties()->getProperty('FAKE_EMAIL');
 		
@@ -263,107 +298,16 @@ class c_ChangeBootStrap
 			$computedComponents["OUTGOING_HTTP_PROXY_HOST"] = $proxyInfo[0];
 			$computedComponents["OUTGOING_HTTP_PROXY_PORT"] = $proxyInfo[1];
 		}
-		
-		$computedComponents['change-lib'] = $components['framework'];
-		$computedComponents['lib-pear'] = isset($components['pearlibs']) ? $components['pearlibs'] : array();
-		$computedComponents['extension'] = array();
-		$computedComponents['lib'] = $components['libs'];
-		$computedComponents['module'] = $components['modules'];
-		foreach (array('change-lib', 'lib-pear', 'extension', 'lib', 'module') as $depType)
-		{
-			foreach ($computedComponents[$depType] as $depname => $infos)
-			{
-				$computedComponents[$depType][$depname]['path'] = $localRepo . $infos["repoRelativePath"];
-			}
-		}
-		
 		return $computedComponents;
 	}
-	
-	private $autoloadPath;
-	private $autoloaded = array();
-	private $autoloadRegistered = false;
-	private $refreshAutoload = false;
-	
-	function isPathAbsolute($path)
-	{
-		return $path[0] === '/' || $path[0] === '\\' || (strlen($path) > 3 && ctype_alpha($path[0]) && $path[1] === ':' && ($path[2] === '\\' || $path[2] === '/'));
-	}
-	
-	function setAutoloadPath($autoloadPath = "cache/autoload")
-	{
-		if (! $this->isPathAbsolute($autoloadPath))
-		{
-			$this->autoloadPath = $this->wd . "/" . $autoloadPath;
-		}
-		else
-		{
-			$this->autoloadPath = $autoloadPath;
-		}
-	}
-	
-	private function getAutoloadPath()
-	{
-		if ($this->autoloadPath === null)
-		{
-			$this->setAutoloadPath();
-		}
-		return $this->autoloadPath;
-	}
-	
-	function setRefreshAutoload($refresh)
-	{
-		$this->refreshAutoload = $refresh;
-	}
-	
-	function appendToAutoload($componentPath)
-	{
 		
-		$autoloadPath = $this->getAutoloadPath();
-		$autoloadedFlag = $autoloadPath . "/" . md5($componentPath) . ".autoloaded";
-		
-		$analyzer = cboot_ClassDirAnalyzer::getInstance();
-		if (! $this->autoloadRegistered)
-		{
-			spl_autoload_register(array($analyzer, "autoload"));
-			$this->autoloadRegistered = true;
-		}
-		
-		if (isset($this->autoloaded[$componentPath]) || (! $this->refreshAutoload && file_exists(
-				$autoloadedFlag)))
-		{
-			$this->autoloaded[$componentPath] = true;
-			return;
-		}
-		
-		if (file_exists($autoloadedFlag))
-		{
-			unlink($autoloadedFlag);
-		}
-		
-		$analyzer->appendRealDir($componentPath);
-		$this->autoloaded[$componentPath] = true;
-		touch($autoloadedFlag);
-	}
-	
 	/**
-	 * Return the path of project change.xml
+	 * Return the path of project install.xml
 	 * @return String
 	 */
 	public function getDescriptorPath()
 	{
-		if ($this->descriptorPath === null)
-		{
-			if ($this->isPathAbsolute($this->descriptor))
-			{
-				$this->descriptorPath = $this->descriptor;
-			}
-			else
-			{
-				$this->descriptorPath = $this->wd . "/" . $this->descriptor;
-			}
-		}
-		return $this->descriptorPath;
+		return $this->projectHomePath . '/install.xml';
 	}
 	
 	/**
@@ -379,544 +323,175 @@ class c_ChangeBootStrap
 	 */
 	public function getRemoteRepositories()
 	{
-		if ($this->remoteRepositories === null)
-		{
-			$this->remoteRepositories = array_unique(
-					explode(",", $this->getProperties()->getProperty("REMOTE_REPOSITORIES", "http://osrepo.rbschange.fr")));
-		}
-		return $this->remoteRepositories;
+		return array("http://osrepo.rbschange.fr");
 	}
-	
-	private $instanceProjectKey = null;
 	
 	/**
 	 * @return string
 	 */
-	public function getInstanceProjectKey()
+	public function getReleaseRepository()
 	{
-		if ($this->instanceProjectKey === null)
-		{
-			$license = $this->getProperties()->getProperty("PROJECT_LICENSE");
-			if (empty($license)) {$license = "OS";}
-			$version = '-'; $profile = '-'; $pId = '-';  $fqdn='-';
-			$versionPath = $this->wd . '/framework/change.xml';
-			if (is_readable($versionPath))
-			{
-				$changeXMLDoc = f_util_DOMUtils::fromPath($versionPath);
-				$changeXMLDoc->registerNamespace("cc", "http://www.rbs.fr/schema/change-component/1.0");
-				$node = $changeXMLDoc->findUnique("cc:version");
-				$version = $node ? $node->textContent : '-';
-			}
-			
-			$profilePath = $this->wd . '/profile';
-			if (is_readable($profilePath))
-			{
-				$profile = trim(file_get_contents($profilePath));
-				$configPath = $this->wd . '/config/project.'. $profile .'.xml';
-				if (is_readable($configPath))
-				{
-					$changeXMLDoc = f_util_DOMUtils::fromPath($configPath);
-					$pIdNode = $changeXMLDoc->findUnique('defines/define[@name="PROJECT_ID"]');
-					$pId = $pIdNode ? $pIdNode->textContent : '-';
-					$fqdnNode = $changeXMLDoc->findUnique('config/general/entry[@name="server-fqdn"]');
-					$fqdn = $fqdnNode ? $fqdnNode->textContent : '-';
-				}
-			}
-			$this->instanceProjectKey = 'Change/' . $version . ';License/' . $license. ';Profile/' . $profile . ';PId/' . $pId. ';FQDN/'. $fqdn;
-		}
-		return $this->instanceProjectKey;
+		return 'http://repo.ssxb-wf-inthause.fr';
 	}
 	
 	/**
-	 * @param String $path
-	 * @return String
+	 * @return c_Package[]
 	 */
-	private function expandLocalPath($path)
-	{
-		if ($path !== null)
+	public function getProjectDependencies()
+	{ 
+		if ($this->projectDependencies === null)
 		{
-			if (! strncmp($path, "~/", 2))
+			$this->projectDependencies = array();		
+			$installXMLDoc = f_util_DOMUtils::fromPath($this->getDescriptorPath());
+			foreach ($installXMLDoc->getElementsByTagName('package') as $package) 
 			{
-				die("Invalid relative local path ($path). Please ubpdate configuration file");
+				/* @var $package DOMElement */
+				$infos = c_Package::getInstanceFromPackageElement($package, $this->projectHomePath);
+				$this->projectDependencies[$infos->getKey()] = $infos;
 			}
 		}
-		return $path;
+		return $this->projectDependencies;
 	}
 	
 	/**
-	 * @return array<String, Boolean> path => writeable
+	 * @param c_Package $updatedPackage
 	 */
-	public function getLocalRepositories()
+	public function updateProjectPackage($updatedPackage)
 	{
-		if ($this->localRepositories === null)
-		{
-			// Local repositories
-			$this->localRepositories = array();
-			foreach (array_unique(explode(",", $this->getProperties()->getProperty("LOCAL_REPOSITORY", $this->wd . "/repository"))) 
-				as $localRepoPath)
-			{
-				$localRepoPath = $this->expandLocalPath($localRepoPath);
-				if (! file_exists($localRepoPath) && ! is_writable(dirname($localRepoPath)))
-				{
-					continue;
-				}
-				if (is_file($localRepoPath))
-				{
-					c_warning("$localRepoPath exists and is not a directory");
-					continue;
-				}
-				if (! is_dir($localRepoPath) && ! @mkdir($localRepoPath, 0777, true))
-				{
-					throw new Exception("Could not create $localRepoPath");
-				}
-				$this->localRepositories[realpath($localRepoPath)] = is_writeable($localRepoPath);
-			}
-		}
-		return $this->localRepositories;
-	}
+		$isModified = false;
+		$toAdd = true;
+		$installXMLDoc = f_util_DOMUtils::fromPath($this->getDescriptorPath());
 
-	/**
-	 * @param integer $depType
-	 * @return string
-	 */
-	public function convertToCategory($depType)
-	{
-		switch ($depType)
+		foreach ($installXMLDoc->getElementsByTagName('package') as $node) 
 		{
-			case self::$DEP_FRAMEWORK:
-			case "change-lib":
-			case "framework":
-				return 'framework';
-				
-			case self::$DEP_MODULE;
-			case "modules":
-			case "module":
-				return 'modules';
-
-			case self::$DEP_LIB:
-			case "libs":
-			case "lib":
-				return 'libs';
-				
-			case self::$DEP_PEAR:
-			case "lib-pear":
-			case "pearlibs":
-			case "pear":
-				return 'pearlibs';
-
-			case self::$DEP_THEME:
-			case "themes":
-			case "theme":
-				return 'themes';
-				
-		}
-		return "";		
-	}
-	
-	/**
-	 * @param mixed $typeStr
-	 * @return integer
-	 */
-	private function convertToValidType($typeStr)
-	{
-		switch ($typeStr)
-		{
-			case "modules":
-			case "module":
-				return self::$DEP_MODULE;
-				
-			case "change-lib":
-			case "framework":
-				return self::$DEP_FRAMEWORK;
-				
-			case "libs":
-			case "lib":
-				return self::$DEP_LIB;
-				
-			case "lib-pear":
-			case "pearlibs":
-			case "pear":
-				return self::$DEP_PEAR;
-				
-			case "themes":
-			case "theme":
-				return self::$DEP_THEME;
-							
-			case self::$DEP_MODULE:
-			case self::$DEP_FRAMEWORK:
-			case self::$DEP_LIB:
-			case self::$DEP_PEAR:	
-				return intval($typeStr);
-		}
-		return self::$DEP_UNKNOWN;
-	}
-	
-	/**
-	 * @param integer $depType
-	 * @param string $componentName
-	 * @param string $version
-	 * @param integer $hotFix
-	 * @return string
-	 */
-	private function buildLocalRepositoryPath($depType, $componentName, $version, $hotFix = null)
-	{
-		$path = '/';
-		switch ($depType) {
-			case self::$DEP_FRAMEWORK:
-				$path .= 'framework/';
-				break;
-			case self::$DEP_MODULE:
-				$path .= 'modules/' . $componentName . '/';
-				break;
-			case self::$DEP_LIB:
-				$path .= 'libs/' . $componentName . '/';
-				break;
-			case self::$DEP_PEAR:
-				$path .= 'pearlibs/' . $componentName . '/';
-				break;
-			case self::$DEP_THEME:
-				$path .= 'themes/' . $componentName . '/';
-				break;
-		}
-		return $path . $componentName . '-' . $version . ($hotFix ? '-' . $hotFix : '');
-	}
-	
-	/**
-	 * @param integer $depType
-	 * @param string $componentName
-	 * @return string
-	 */
-	private function buildProjectPath($depType, $componentName)
-	{
-		$path = $this->wd . '/';
-		switch ($depType) {
-			case self::$DEP_FRAMEWORK:
-				$path .= 'framework';
-				break;
-			case self::$DEP_MODULE:
-				$path .= 'modules/' . $componentName;
-				break;
-			case self::$DEP_LIB:
-				$path .= 'libs/' . $componentName;
-				break;
-			case self::$DEP_PEAR:
-				$path .= 'libs/pearlibs/' . $componentName;
-				break;
-			case self::$DEP_THEME:
-				$path .= 'themes/' . $componentName;
-				break;
-		}
-		return $path;
-	}	
-	
-	/**
-	 * @param string $repositoryPath
-	 * @return array[$depType, $componentName, $version, $hotFix]
-	 */
-	public function explodeRepositoryPath($repositoryPath)
-	{
-		$result = array(self::$DEP_UNKNOWN, null, null, null);
-		$parts = explode('/', $repositoryPath);
-		$result[0] = $this->convertToValidType($parts[1]);
-		if ($result[0] === self::$DEP_UNKNOWN) {return $result;}
-		if ($result[0] == self::$DEP_FRAMEWORK)
-		{
-			$result[1] = 'framework';
-			$versionParts = explode('-', $parts[2]);
-		}
-		else
-		{
-			$result[1] = $parts[2];
-			$versionParts = explode('-', $parts[3]);
-		}
-		$result[2] = $versionParts[1];
-		if (count($versionParts) == 3)
-		{
-			$result[3] = $versionParts[2];
-		}
-		return $result;
-	}
-	
-	/**
-	 * @return string
-	 */
-	private function getWriteRepository()
-	{
-		foreach ($this->getLocalRepositories() as $localRepoPath => $writable)
-		{
-			if ($writable)
+			/* @var $node DOMElement */
+			$infos = c_Package::getInstanceFromPackageElement($node, $this->projectHomePath);
+			if ($infos->getKey() == $updatedPackage->getKey())
 			{
-				return $localRepoPath;
-			}
-		}
-		return null;
-	}
-	
-	
-	private function escapeArg(&$value, $key)
-	{
-		$value = '"' . str_replace('"', '\"', $value) . '"';
-	}
-	
-	public function loadDependencies()
-	{
-		$localRepo = $this->getWriteRepository();
-		$dependencies = array();
-		$changeXMLDoc = f_util_DOMUtils::fromPath($this->getDescriptorPath());
-		$changeXMLDoc->registerNamespace("c", "http://www.rbs.fr/schema/change-project/1.0");
-		$infos = array('localy' => FALSE, 'linked' => false, 'version' => '', 'hotfix' => array(), 
-				'repoRelativePath' => null);
-		$dependencies['framework'] = array('framework' => $infos);
-		$frameworkElem = $changeXMLDoc->findUnique("c:dependencies/c:framework");
-		if ($frameworkElem !== null)
-		{
-			$infos['version'] = $frameworkElem->textContent;
-			$infos['hotfix'] = $this->extractHotFix($frameworkElem->getAttribute("hotfixes"));
-			$repoRelativePath = '/framework/framework-' . $infos['version'];
-			if (count($infos['hotfix']))
-			{
-				$repoRelativePath .= '-' . max($infos['hotfix']);
-			}
-			$infos['repoRelativePath'] = $repoRelativePath;
-			$infos['path'] = $localRepo . $repoRelativePath;
-			$infos['link'] = $this->wd . '/framework';
-			
-			$infos['localy'] = is_dir($infos['path']);
-			$infos['linked'] = $infos['localy'] && file_exists($infos['link']) && realpath(
-					$infos['path']) == realpath($infos['link']);
-			$dependencies['framework']['framework'] = $infos;
-		}
-		$dependencies['modules'] = array();
-		foreach ($changeXMLDoc->find("c:dependencies/c:modules/c:module") as $moduleElem)
-		{
-			$infos = array('localy' => FALSE, 'linked' => false, 'version' => '', 
-					'hotfix' => array(), 'repoRelativePath' => null);
-			$matches = array();
-			if (! preg_match('/^(.*?)-([0-9].*)$/', $moduleElem->textContent, $matches))
-			{
-				$moduleName = $moduleElem->textContent;
-			}
-			else
-			{
-				$moduleName = $matches[1];
-				$infos['version'] = $matches[2];
-				$infos['hotfix'] = $this->extractHotFix($moduleElem->getAttribute("hotfixes"));
-				
-				$repoRelativePath = '/modules/' . $moduleName . '/' . $moduleName . '-' . $infos['version'];
-				if (count($infos['hotfix']))
+				$toAdd = false;
+				if ($infos->getHotfixedVersion() != $updatedPackage->getHotfixedVersion())
 				{
-					$repoRelativePath .= '-' . max($infos['hotfix']);
+					$isModified = true;
+					$updatedPackage->populateNode($node);
 				}
-				$infos['repoRelativePath'] = $repoRelativePath;
-				$infos['path'] = $localRepo . $repoRelativePath;
-				$infos['link'] = $this->wd . '/modules/' . $moduleName;
-				
-				$infos['localy'] = is_dir($infos['path']);
-				$infos['linked'] = $infos['localy'] && file_exists($infos['link']) && realpath(
-						$infos['path']) == realpath($infos['link']);
+				break;
 			}
-			$dependencies['modules'][$moduleName] = $infos;
 		}
 		
-		$dependencies['libs'] = array();
-		foreach ($changeXMLDoc->find("c:dependencies/c:libs/c:lib") as $libElem)
+		if ($toAdd)
 		{
-			$infos = array('localy' => FALSE, 'linked' => false, 'version' => '', 
-					'hotfix' => array(), 'repoRelativePath' => null);
-			$matches = array();
-			if (! preg_match('/^(.*?)-([0-9].*)$/', $libElem->textContent, $matches))
-			{
-				$libName = $libElem->textContent;
-			}
-			else
-			{
-				$libName = $matches[1];
-				$infos['version'] = $matches[2];
-				$repoRelativePath = '/libs/' . $libName . '/' . $libName . '-' . $infos['version'];
-				$infos['repoRelativePath'] = $repoRelativePath;
-				$infos['path'] = $localRepo . $repoRelativePath;
-				$infos['link'] = $this->wd . '/libs/' . $libName;
-				
-				$infos['localy'] = is_dir($infos['path']);
-				$infos['linked'] = $infos['localy'] && file_exists($infos['link']) && realpath(
-						$infos['path']) == realpath($infos['link']);
-			}
-			$dependencies['libs'][$libName] = $infos;
+			$isModified = true;
+			$node = $installXMLDoc->documentElement->appendChild($installXMLDoc->createElement('package'));
+			$updatedPackage->populateNode($node);
 		}
-		$this->loadImplicitDependencies($dependencies);
-		return $dependencies;
-	
-	}
-	
-	private function loadImplicitDependencies(&$dependencies)
-	{
-		$localRepo = $this->getWriteRepository();
-		foreach ($dependencies as $parentDepTypeKey => $parentDeps)
+		
+		if ($isModified)
 		{
-			foreach ($parentDeps as $parentDepName => $parentInfos)
-			{
-				if ($parentInfos['localy'] && ! isset($parentInfos['implicitdependencies']))
-				{
-					$dependencies[$parentDepTypeKey][$parentDepName]['implicitdependencies'] = true;
-					$filePath = $localRepo . $parentInfos['repoRelativePath'] . '/change.xml';
-					if (! is_file($filePath))
-					{
-						c_warning($filePath . ' not found');
-						continue;
-					}
-					
-					$changeXMLDoc = f_util_DOMUtils::fromPath($filePath);
-					$decDeps = $this->loadDependenciesFromXML($changeXMLDoc);
-					foreach ($decDeps as $depTypeKey => $deps)
-					{
-						if (! isset($dependencies[$depTypeKey]))
-						{
-							$dependencies[$depTypeKey] = array();
-						}
-						foreach ($deps as $depName => $infos)
-						{
-							if (! isset($dependencies[$depTypeKey][$depName]))
-							{
-								$infos['depfor'] = $parentDepName;
-								$dependencies[$depTypeKey][$depName] = $infos;
-							}
-							else if ($infos['version'] != $dependencies[$depTypeKey][$depName]['version'])
-							{
-								c_warning(
-										$parentDepName . ' Invalid ' . $depName . '-' . $infos['version'] . ' version expected : ' . $dependencies[$depTypeKey][$depName]['version']);
-							}
-						}
-					}
-				}
-			}
+			$installXMLDoc->save($this->getDescriptorPath());
+			$this->projectDependencies = null;
 		}
 	}
-	
-	private function extractHotFix($string)
-	{
-		$hotFix = array();
-		if (empty($string))
-		{
-			return $hotFix;
-		}
-		$strHotfixes = explode(",", str_replace(" ", "", $string));
-		foreach ($strHotfixes as $value)
-		{
-			if (intval($value) > 0)
-			{
-				$hotFix[] = intval($value);
-			}
-		}
-		sort($hotFix, SORT_NUMERIC);
-		return $hotFix;
-	}
-	
+		
 	/**
-	 * @param f_util_DOMDocument $changeXMLDoc
-	 * @return array
+	 * @param c_Package $removedPackage
 	 */
-	private function loadDependenciesFromXML($changeXMLDoc)
+	public function removeProjectDependency($removedPackage)
 	{
-		$localRepo = $this->getWriteRepository();
-		$declaredDeps = array();
-		$changeXMLDoc->registerNamespace("cc", "http://www.rbs.fr/schema/change-component/1.0");
-		foreach ($changeXMLDoc->find("cc:dependencies/cc:dependency") as $dep)
+		$isModified = false;
+		$installXMLDoc = f_util_DOMUtils::fromPath($this->getDescriptorPath());
+
+		foreach ($installXMLDoc->getElementsByTagName('package') as $node) 
 		{
-			if ($dep->hasAttribute("optionnal") && $dep->getAttribute("optionnal") == "true")
+			/* @var $node DOMElement */
+			$infos = c_Package::getInstanceFromPackageElement($node, $this->projectHomePath);
+			if ($infos->getKey() == $removedPackage->getKey())
 			{
-				continue;
+				$isModified = true;
+				$installXMLDoc->documentElement->removeChild($node);
+				break;
 			}
-			$name = $changeXMLDoc->findUnique("cc:name", $dep);
-			if ($name == null)
-			{
-				continue;
-			}
-			if ($name->textContent == 'framework')
-			{
-				$depType = 'framework';
-				$depName = 'framework';
-			}
-			else
-			{
-				$matches = null;
-				if (!preg_match('/^([^\/]*)\/(.*)$/', $name->textContent, $matches))
-				{
-					c_warning("Invalid component name " . $name->textContent);
-					continue;
-				}
-				$depType = $matches[1];
-				$depName = $matches[2];
-			}
+		}
+		if ($isModified)
+		{
+			$installXMLDoc->save($this->getDescriptorPath());
+			$this->projectDependencies = null;
+		}
+	}
 			
-			$depTypeKey = null;
-			$repoRelativePath = null;
-			$link = null;
-			switch ($depType)
-			{
-				case "change-lib" :
-				case "framework" :
-					if ($depName == "framework")
-					{
-						$depTypeKey = 'framework';
-						$repoRelativePath = '/framework/framework-';
-						$link = $this->wd . '/framework';
-					}
-					break;
-				case "lib" :
-					$depTypeKey = 'libs';
-					$repoRelativePath = '/libs/' . $depName . '/' . $depName . '-';
-					$link = $this->wd . '/libs/' . $depName;
-					break;
-				case "module" :
-				case "change-module" :
-					$depTypeKey = 'modules';
-					$repoRelativePath = '/modules/' . $depName . '/' . $depName . '-';
-					$link = $this->wd . '/modules/' . $depName;
-					break;
-				case "pear" :
-				case "lib-pear" :
-					$depTypeKey = 'pearlibs';
-					$repoRelativePath = '/pearlibs/' . $depName . '/' . $depName . '-';
-					$link = $this->wd . '/libs/pearlibs/' . $depName;
-					break;
-				case "theme" :
-				case "themes" :
-					$depTypeKey = 'themes';
-					$repoRelativePath = '/themes/' . $depName . '/' . $depName . '-';
-					$link = $this->wd . '/themes/' . $depName;
-					break;
-			}
-			
-			if ($depTypeKey === null)
-			{
-				continue;
-			}
-			
-			if (! isset($declaredDeps[$depTypeKey]))
-			{
-				$declaredDeps[$depTypeKey] = array();
-			}
-			
-			$infos = array('localy' => FALSE, 'linked' => false, 'version' => '', 
-					'hotfix' => array(), 'repoRelativePath' => null);
-			
-			foreach ($changeXMLDoc->find("cc:versions/cc:version", $dep) as $versionElem)
-			{
-				$infos['version'] = $versionElem->textContent;
-			}
-			
-			$repoRelativePath .= $infos['version'];
-			$infos['repoRelativePath'] = $repoRelativePath;
-			$infos['path'] = $localRepo . $repoRelativePath;
-			$infos['link'] = $link;
-			$infos['localy'] = is_dir($infos['path']);
-			$infos['linked'] = $infos['localy'] && file_exists($infos['link']) && realpath(
-					$infos['path']) == realpath($infos['link']);
-			$declaredDeps[$depTypeKey][$depName] = $infos;
+	/**
+	 * @param f_util_DOMDocument $installXMLDoc
+	 * @return c_Package[]
+	 */
+	public function getDependenciesFromXML($installXMLDoc)
+	{
+		$declaredDeps = array();
+		foreach ($installXMLDoc->getElementsByTagName('package') as $package) 
+		{
+			/* @var $package DOMElement */
+			$infos = c_Package::getInstanceFromPackageElement($package, $this->projectHomePath);
+			$declaredDeps[$infos->getKey()] = $infos;
 		}
 		return $declaredDeps;
 	}
 	
+	/**
+	 * @param f_util_DOMDocument $installXMLDoc
+	 * @return c_Package
+	 */
+	public function getPackageFromXML($installXMLDoc)
+	{
+		if ($installXMLDoc && $installXMLDoc->documentElement)
+		{
+			return c_Package::getInstanceFromPackageElement($installXMLDoc->documentElement, $this->projectHomePath);
+		}
+		return null;
+	}
+	
+	/**
+	 * @param string $releaseURL
+	 */
+	public function getReleasePackages($releaseURL)
+	{
+		if (!array_key_exists($releaseURL, $this->releaseDocuments))
+		{
+			$this->releaseDocuments[$releaseURL] = null;
+			$url = $releaseURL . '/release-'.$this->getRelease().'.xml';
+			$destFile = null;
+			$result = $this->downloadFile($url, $destFile);
+			if ($result === true)
+			{
+				$doc = f_util_DOMUtils::fromPath($destFile);
+				if ($doc && $doc->documentElement)
+				{
+					$this->releaseDocuments[$releaseURL] = array();
+					foreach ($doc->getElementsByTagName('package') as $node) 
+					{
+						$package = c_Package::getInstanceFromPackageElement($node, $this->projectHomePath);
+						if ($package->getTypeAsInt() != self::$DEP_UNKNOWN)
+						{
+							if ($package->getDownloadURL() == null)
+							{
+								$downloadURL = $releaseURL . $package->getRelativeReleasePath() . '.zip';
+								$package->setDownloadURL($downloadURL);
+							}
+							$this->releaseDocuments[$releaseURL][$package->getKey()] = $package;
+						}
+					}
+				}
+				else
+				{
+					echo 'Invlid XML document : ', $destFile, ' ', $url, PHP_EOL;
+				}
+				unlink($destFile);
+			}
+			else
+			{
+				echo $result, PHP_EOL;
+			}
+		}
+		return $this->releaseDocuments[$releaseURL];
+	}
+		
 	/**
 	 * @return String
 	 */
@@ -925,27 +500,40 @@ class c_ChangeBootStrap
 		return $this->getProperties()->getProperty("PROXY");
 	}
 	
+	public function getTmpPath()
+	{
+		if ($this->tmpPath === null)
+		{
+			$tmpPath = $this->getProperties()->getProperty('TMP_PATH');
+			if (empty($tmpPath))
+			{
+				throw new Exception('Invalid TMP_PATH configuration value');
+			}
+			$testTempFile = @tempnam($tmpPath, 'tmp');
+			if ($testTempFile === false)
+			{
+				throw new Exception('Invalid TMP_PATH configuration value not writable');
+			}
+			unlink($testTempFile);
+			$this->tmpPath = $tmpPath;
+		}
+		return $this->tmpPath;
+	}
+	
 	/**
-	 * 
 	 * @param string $url
 	 * @param string $destFile
+	 * @return true or error string
 	 */
-	private function downloadFile($url, &$destFile)
+	public function downloadFile($url, &$destFile)
 	{
-		if (!$destFile)
-		{
-			$tmpDir = $this->getWriteRepository() . '/tmp';
-			if (!file_exists($tmpDir) && !mkdir($tmpDir, 0777, true))
-			{
-				return "Can not create tmp directory $tmpDir";
-			}
-			$destFile = tempnam($tmpDir, 'tmp');
-		}
+		if (!$destFile) {$destFile = tempnam($this->getTmpPath(), 'tmp');}
 		
 		if (($ch = curl_init($url)) == false)
 		{
-			return "curl_init error for url $url.";
+			return "Error on curl initialize for url $url.";
 		}
+		
 		curl_setopt($ch, CURLOPT_USERAGENT, $this->getInstanceProjectKey());
 		curl_setopt($ch, CURLOPT_AUTOREFERER, true);
 		curl_setopt($ch, CURLOPT_COOKIEFILE, '');
@@ -960,17 +548,18 @@ class c_ChangeBootStrap
 		if (($fp = fopen($destFile, "wb")) === false)
 		{
 			curl_close($ch);
-			return "fopen error for filename $destFile";
+			return "Could not open file $destFile in write mode";
 		}
 		
 		curl_setopt($ch, CURLOPT_FILE, $fp);
 		curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
 		if (curl_exec($ch) === false)
 		{
+			$curlErr = curl_errno($ch) . ':' . curl_error($ch);
 			fclose($fp);
 			unlink($destFile);
 			curl_close($ch);
-			return "curl_exec error for url $url in $destFile";
+			return "Error ($curlErr) for url $url in $destFile";
 		}
 		fclose($fp);
 		$info = curl_getinfo($ch);
@@ -983,527 +572,38 @@ class c_ChangeBootStrap
 		return true;
 	}
 	
-	public function compareVersion($version1, $version2)
-	{
-		if ($version1 == $version2)
-		{
-			return 0;
-		}
-		
-		$matches1 = explode('.', str_replace('-', '.', $version1));
-		$matches2 = explode('.', str_replace('-', '.', $version2));	
-			
-		$matches1Count = count($matches1);
-		$matches2Count = count($matches2);
-		
-		$count = min($matches1Count, $matches2Count);
-		for($i = 0; $i < $count; $i ++)
-		{
-			//Componant name
-			if (!is_numeric($matches1[$i]))
-			{
-				continue;
-			}
-			
-			if (intval($matches1[$i]) < intval($matches2[$i]))
-			{
-				return - 1;
-			}
-			elseif (intval($matches2[$i]) < intval($matches1[$i]))
-			{
-				return 1;
-			}
-		}
-		if ($matches1Count > $matches2Count)
-		{
-			return 1;
-		}
-		return - 1;
-	}
-	
-    public function getRemoteModules($releaseName)
-	{
-		$modules = array();	
-		if ($releaseName === null)
-		{
-			return $modules;
-		}
-		
-		foreach ($this->getRemoteRepositories() as $repository)
-		{
-			$url =  $repository . "/release-index.xml";
-			$relaseIndexPath = null;
-			$result = $this->downloadFile($url, $relaseIndexPath);
-			if ($result !== true)
-			{
-				continue;
-			}
-			$doc = f_util_DOMUtils::fromPath($relaseIndexPath);
-			unlink($relaseIndexPath);
-			$releaseElem = $doc->findUnique("release[@name = '$releaseName']");
-			if ($releaseElem === null)
-			{
-				continue;	
-			}
-			$releaseFile = ($releaseElem->getAttribute("pending") == "true" ? "pendingrelease" : "release") . "-" . $releaseElem->getAttribute(
-							"name") . ".xml";
-			$url = $repository . "/" . $releaseFile;
-			$releaseFilePath = null;
-			$result = $this->downloadFile($url, $releaseFilePath);
-			if ($result !== true)
-			{
-				continue;
-			}
-			$releaseDom = f_util_DOMUtils::fromPath($releaseFilePath);
-			unlink($releaseFilePath);
-			foreach ($releaseDom->find("module[@available='true']") as $moduleElem) 
-			{
-				$moduleName = $moduleElem->getAttribute("name") .'-'. $moduleElem->getAttribute("version");
-				$hotFix = null;
-				foreach ($releaseDom->find("hotfix[not(@pending)]", $moduleElem) as $hotFixNode) 
-				{
-					$hfn = intval($hotFixNode->getAttribute('number'));
-					if ($hotFix === null || $hfn > $hotFix)
-					{
-						$hotFix = $hfn;
-					}
-				}
-				$modules[] = $moduleName . ($hotFix ? '-' . $hotFix : '');
-			}
-		}		
-		$modules = array_unique($modules);
-		sort($modules);
-		return $modules;
-	}
-	
 	/**
-	 * @param integer $depType
-	 * @param string $componentName
-	 * @param string $version
-	 * @param string $hotfix
-	 * @return array
+	 * @param string $zipPath
+	 * @param string $tmpPath
+	 * @return c_Package or null
 	 */
-	private function getLocalComponentPaths($depType, $componentName, $version)
+	public function unzipPackage($zipPath, $tmpPath)
 	{
-		$basePath = $this->getWriteRepository();
-		switch ($depType) 
+		$package = null;
+		if (class_exists('ZipArchive'))
 		{
-			case self::$DEP_MODULE:
-				$basePath .= "/modules/$componentName";
-				break;
-			case self::$DEP_FRAMEWORK:
-				$basePath .= "/framework";
-				break;
-			case self::$DEP_LIB:
-				$basePath .= "/libs/$componentName";
-				break;
-			case self::$DEP_PEAR:
-				$basePath .= "/pearlibs/$componentName";
-				break;
-			case self::$DEP_THEME:
-				$basePath .= "/themes/$componentName";
-				break;
-		}
-		$result = array();
-		var_export($basePath);
-		$chekDir = $componentName.'-'.$version;
-		foreach (scandir($basePath) as $dir) 
-		{
-			if (strpos($dir, $chekDir) === 0 && is_dir($basePath . '/'. $dir))
-			{
-				$result[$basePath . '/'. $dir] = $dir;
-			}
-		}
-		uasort($result, array($this, 'compareVersion'));
-		return array_keys($result);
-	}
-	
-	private function getLocalComponentPath($depType, $componentName, $version, $hotfix = null)
-	{
-		$basePath = $this->getWriteRepository();
-		switch ($depType) 
-		{
-			case self::$DEP_MODULE:
-				$basePath .= "/modules/$componentName";
-				break;
-			case self::$DEP_FRAMEWORK:
-				$basePath .= "/framework";
-				break;
-			case self::$DEP_LIB:
-				$basePath .= "/libs/$componentName";
-				break;
-			case self::$DEP_PEAR:
-				$basePath .= "/pearlibs/$componentName";
-				break;
-			case self::$DEP_THEME:
-				$basePath .= "/themes/$componentName";
-				break;
-		}
-		$basePath .= '/'.$componentName.'-'.$version . ($hotfix ? '-' . $hotfix : '');
-		if (is_dir($basePath))
-		{
-			return $basePath;
-		}
-		return null;	
-	}
-	
-	private $repositoryContents = array();
-	
-	private function getRemoteRepositoryContent($repository)
-	{
-		if (!isset($this->repositoryContents[$repository]))
-		{
-			$this->repositoryContents[$repository] = array();
-			$url =  $repository . "/repository.xml";
-			$destFile = null;
-			$result = $this->downloadFile($url, $destFile);	
-			if ($result === true)
-			{
-				$components = array();
-				$doc = f_util_DOMUtils::fromPath($destFile);
-				unlink($destFile);
-				foreach ($doc->find("//element[@url]") as $elementNode) 
-				{
-					$depType = self::$DEP_UNKNOWN;
-					$elementName = $elementNode->getAttribute("url");
-					if ($elementName == "framework")
+			$zip = new ZipArchive();		
+			if ($zip->open($zipPath) === true) 
+			{		
+				if (is_dir($tmpPath)) {f_util_FileUtils::rmdir($tmpPath);}		
+			    for($i = 0; $i < $zip->numFiles; $i++) 
+			    {
+					$name = $zip->getNameIndex($i);
+					$zip->extractTo($tmpPath, array($name));
+					if ($name === 'install.xml')
 					{
-						$depType = $this->convertToValidType($elementName);
-						$componentName = $elementName;
-						$repositoryPath = "/framework/framework";
-					}
-					else
-					{
-						$elementInfo = explode("/", $elementName);
-						if (count($elementInfo) == 2)
-						{
-							$categorie = $elementInfo[0];
-							$depType =  $this->convertToValidType($categorie);
-							$componentName = $elementInfo[1];
-							$repositoryPath = "/".$categorie . "/" . $componentName . "/" . $componentName;
-						}
-						else if ($elementNode->parentNode->nodeName == 'elements')
-						{
-							$categorie = $elementNode->parentNode->getAttribute('type');
-							$depType =  $this->convertToValidType($categorie);
-							$componentName = $elementName;
-							$repositoryPath = "/". $categorie . "/" .$componentName. "/" . $componentName;
-						}
-					}
-					
-					if ($depType != self::$DEP_UNKNOWN)
-					{
-						foreach ($doc->find("versions/version", $elementNode) as $versionNode) 
-						{
-							$fullVersion = $versionNode->textContent;
-							$components[$repositoryPath . '-' . $fullVersion] = array(
-								"md5" => $versionNode->getAttribute("md5"), 
-								"sha1" => $versionNode->getAttribute("sha1"));
-						}
-					}
-				}
-				$this->repositoryContents[$repository] = $components;
-			}	
-		}
-		return $this->repositoryContents[$repository];
-	}
-	
-	public function getHotfixes($releaseName)
-	{
-		$hotfixes = array();
-		foreach ($this->getRemoteRepositories() as $repository)
-		{
-			$url =  $repository . "/release-index.xml";
-			$relaseIndexPath = null;
-			$result = $this->downloadFile($url, $relaseIndexPath);
-			if ($result !== true)
-			{
-				continue;
-			}
-			$doc = f_util_DOMUtils::fromPath($relaseIndexPath);
-			unlink($relaseIndexPath);
-			$releaseElem = $doc->findUnique("release[@name = '$releaseName']");
-			if ($releaseElem === null)
-			{
-				continue;	
-			}
-			$releaseFile = ($releaseElem->getAttribute("pending") == "true" ? "pendingrelease" : "release") . "-" . $releaseElem->getAttribute(
-							"name") . ".xml";
-			$url = $repository . "/" . $releaseFile;
-			$releaseFilePath = null;
-			$result = $this->downloadFile($url, $releaseFilePath);
-			if ($result !== true)
-			{
-				continue;
-			}
-			$releaseDom = f_util_DOMUtils::fromPath($releaseFilePath);
-			unlink($releaseFilePath);
-			foreach ($releaseDom->find("//hotfix[not(@pending)]") as $hotfixElem) 
-			{
-				$moduleElem = $hotfixElem->parentNode;
-				$category = $this->convertToCategory($moduleElem->tagName);			
-				$componentName = $moduleElem->getAttribute("name");
-				$version = $moduleElem->getAttribute("version");
-				$hotFix = $hotfixElem->getAttribute("number");
-				$repositoryPath = $this->buildLocalRepositoryPath($this->convertToValidType($category), $componentName, $version, $hotFix);
-				$hotfixes[$repositoryPath] = true;
+						$xmlDoc = f_util_DOMUtils::fromPath($tmpPath . '/' . $name);
+						$package = $this->getPackageFromXML($xmlDoc);
+						if ($package) {$package->setTemporaryPath($tmpPath);}
+					}          
+			    }             
+			    $zip->close();
 			}
 		}
-		return array_keys($hotfixes);
-	}
-	
-	/**
-	 * @param mixed $componentType
-	 * @param string $componentName
-	 * @param string $version
-	 * @return string 
-	 */
-	public function installComponent($componentType, $componentName, $version, $hotfix = null)
-	{
-		$depType = $this->convertToValidType($componentType);
-		if (!$hotfix && strpos($version, '-'))
-		{
-			list ($version, $hotfix) = explode('-', $version);
-		}		
-		$localPath = $this->getLocalComponentPath($depType, $componentName, $version, $hotfix);
-		if ($localPath)
-		{
-			return $localPath;
-		}
-		$path = null;
-		$repositoryPath = $this->buildLocalRepositoryPath($depType, $componentName, $version, $hotfix);
-		foreach ($this->getRemoteRepositories() as $repository) 
-		{
-			$contents = $this->getRemoteRepositoryContent($repository);
-			if (isset($contents[$repositoryPath]))
-			{
-				$url = $repository . $repositoryPath . '.zip';
-				$destFile = null;
-				$result = $this->downloadFile($url, $destFile);
-				if ($result === true)
-				{
-					if (md5_file($destFile) != $contents[$repositoryPath]["md5"] ||
-							sha1_file($destFile) != $contents[$repositoryPath]["sha1"])
-					{
-						unlink($destFile);
-						c_warning("Checksum of $destFile failed");
-					}
-					else
-					{
-						$path = $this->getWriteRepository() . $repositoryPath;
-						cboot_Zip::unzip($destFile, dirname($path));
-						unlink($destFile);
-						return $path;
-					}
-				}
-				else
-				{
-					c_warning("downloadFile ->  $result");
-				}
-			}
-		}
-		return $path;
+		return $package;
 	}
 	
 	
-	
-	/**
-	 * @param String $dir
-	 * @return multitype:NULL
-	 */
-	public function getDependencies($localPath)
-	{
-		$filePath = $localPath . '/change.xml';
-		var_export($filePath);	
-		if (!is_file($filePath))
-		{
-			return array();
-		}
-		
-		$changeXMLDoc = f_util_DOMUtils::fromPath($filePath);
-		$decDeps = $this->loadDependenciesFromXML($changeXMLDoc);
-		return $decDeps;
-	}
-	
-	/** 
-	 * @param string $componentType
-	 * @param string $componentName
-	 * @param string $version
-	 * @param integer $hotfix
-	 * @return boolean;
-	 */
-	public function linkToProject($componentType, $componentName, $version, $hotfix = null)
-	{
-		$depType = $this->convertToValidType($componentType);
-		$localPath = $this->getLocalComponentPath($depType, $componentName, $version, $hotfix);
-		if ($localPath === null)
-		{
-			return false;
-		}
-		
-		$projectPath = $this->buildProjectPath($depType, $componentName);
-		if (!is_dir(dirname($projectPath)) && !@mkdir(dirname($projectPath), 0777, true))
-		{
-			return false;
-		}
-		
-		if (file_exists($projectPath) && !@unlink($projectPath))
-		{
-			return false;
-		}
-		if (!@symlink($localPath, $projectPath))
-		{
-			return false;
-		}
-		
-		$this->cleanDependenciesCache();
-		if ($depType == self::$DEP_PEAR)
-		{
-			$pearInfo = $this->loadPearInfo();
-			if ($pearInfo['writeable'])
-			{
-				$incPath = $pearInfo['include_path'];
-				$projectPath = $incPath .'/'. basename($localPath);
-				
-				f_util_FileUtils::cp($localPath, $incPath, f_util_FileUtils::OVERRIDE + f_util_FileUtils::APPEND);
-				
-				$analyzer = cboot_ClassDirAnalyzer::getInstance();
-				foreach (scandir($localPath) as $newPearFile)
-				{
-					if ($newPearFile == "." || $newPearFile == "..")
-					{
-						continue;
-					}
-					
-					$toAutoload = $incPath.'/'.$newPearFile;
-					if (is_file($toAutoload))
-					{
-						$analyzer->appendFile($toAutoload);
-					}
-					else if (is_dir($toAutoload))
-					{
-						$analyzer->appendRealDir($toAutoload);
-					}
-				}
-				return true;
-			}
-			return false;
-		}
-		$this->appendToAutoload($projectPath);
-		return true;
-	}
-	
-	public function updateProjectDependencies($componentType, $componentName, $version, $hotfix = null)
-	{
-		$changeXMLDoc = f_util_DOMUtils::fromPath($this->getDescriptorPath());
-		$changeXMLDoc->registerNamespace("c", "http://www.rbs.fr/schema/change-project/1.0");
-		$depType = $this->convertToValidType($componentType);
-		$depNode = null;
-		switch ($depType) 
-		{
-			case self::$DEP_FRAMEWORK:
-				$depNode = $changeXMLDoc->findUnique("c:dependencies/c:framework");
-				if ($depNode === null)
-				{
-					$depNode = $changeXMLDoc->createElement("framework", $version);
-					$changeXMLDoc->findUnique("c:dependencies")->appendChild($depNode);
-				}
-				else
-				{
-					while ($depNode->hasChildNodes()){$depNode->removeChild($depNode->lastChild);}
-					$depNode->appendChild($changeXMLDoc->createTextNode($version));
-				}
-				break;
-				
-			case self::$DEP_MODULE:
-				$modulesNode = $changeXMLDoc->findUnique("c:dependencies/c:modules");
-				foreach ($changeXMLDoc->findUnique("c:module", $modulesNode) as $moduleNode) 
-				{
-					list($nmn, ) = explode('-', $moduleNode->textContent);
-					if ($nmn == $componentName)
-					{
-						$depNode = $moduleNode;
-						while ($depNode->hasChildNodes()){$depNode->removeChild($depNode->lastChild);}
-						$depNode->appendChild($changeXMLDoc->createTextNode($componentName .'-'.$version));
-						break;
-					}
-				}
-				if ($depNode === null)
-				{
-					$depNode = $changeXMLDoc->createElement("module", $componentName .'-'.$version);
-					$modulesNode->appendChild($depNode);
-				}		
-				break;	
-			case self::$DEP_LIB:
-				$libsNode = $changeXMLDoc->findUnique("c:dependencies/c:libs");
-				if ($libsNode === null)
-				{
-					$libsNode = $changeXMLDoc->createElement('libs');
-					$changeXMLDoc->findUnique("c:dependencies")->appendChild($libsNode);
-				}
-				
-				foreach ($changeXMLDoc->findUnique("c:lib", $libsNode) as $libNode) 
-				{
-					list($nmn, ) = explode('-', $libNode->textContent);
-					if ($nmn == $componentName)
-					{
-						$depNode = $libNode;
-						while ($depNode->hasChildNodes()){$depNode->removeChild($depNode->lastChild);}
-						$depNode->appendChild($changeXMLDoc->createTextNode($componentName .'-'.$version));
-						break;
-					}
-				}
-				if ($depNode === null)
-				{
-					$depNode = $changeXMLDoc->createElement("lib", $componentName .'-'.$version);
-					$libsNode->appendChild($depNode);
-				}		
-				break;
-		}
-		
-		if (!$depNode)
-		{
-			return false;
-		}
-		
-		if ($hotfix)
-		{
-			$hotfixAttr = array();
-			if ($depNode->hasAttribute("hotfixes"))
-			{
-				foreach (explode(',', $depNode->getAttribute("hotfixes")) as $str) 
-				{
-					$hotfixNumber = intval(trim($str));
-					if ($hotfixNumber) {$hotfixAttr[] = $hotfixNumber;}
-				}
-			}
-			$hotfixNumber = intval($hotfix);
-			if (!in_array($hotfixNumber, $hotfixAttr))
-			{
-				$hotfixAttr[] = $hotfixNumber;
-			}
-			sort($hotfixAttr, SORT_NUMERIC);
-			$depNode->setAttribute("hotfixes", join(",", $hotfixAttr));
-		}
-		
-		try 
-		{
-			f_util_DOMUtils::save($changeXMLDoc, $this->getDescriptorPath());
-		}
-		catch (Exception $e)
-		{
-			return false;
-		}
-		
-		return true;
-	}
-
-	//PEAR INSTALLATION
-
-	/**
-	 * @var array
-	 */
-	private $pearInfos;
 	
 	/**
 	 * @return array
@@ -1512,67 +612,13 @@ class c_ChangeBootStrap
 	{
 		if ($this->pearInfos === null)
 		{
-			$pearDir = $this->expandLocalPath($this->getProperties()->getProperty("PEAR_DIR"));
-			$pearCmd = $this->expandLocalPath($this->getProperties()->getProperty("PEAR_CMD"));
-			$pearConf = $this->expandLocalPath($this->getProperties()->getProperty("PEAR_CONF"));
-			$include_path = $this->expandLocalPath($this->getProperties()->getProperty("PEAR_INCLUDE_PATH"));
-			
-			if ($pearDir !== null && $pearCmd === null && $pearConf === null && $include_path === null)
-			{
-				//Previous config
-				$pearCmd = $pearDir . '/bin/pear';
-				$pearConf = $pearDir . '/pear.conf';
-				if (! file_exists($pearConf))
-				{
-					$pearConf = null;
-				}
-			}
-			
-			if ($pearCmd !== null)
-			{
-				if (! file_exists($pearCmd))
-				{
-					$pearDir = null;
-					$pearCmd = null;
-					$pearConf = null;
-				}
-			}
-			if ($pearConf !== null && ! file_exists($pearConf))
-			{
-				$pearConf = null;
-			}
-			
-			if ($include_path === null && $pearDir === null)
-			{
-				$include_path = $this->wd . "/pear";
-			}
-			
+			$include_path = $this->getProperties()->getProperty("PEAR_INCLUDE_PATH");
 			if ($include_path === null)
 			{
-				$include_path = $pearDir . '/PEAR';
+				$include_path = $this->projectHomePath . "/pear";
 			}
-			
-			if (! file_exists($include_path) && ! @mkdir($include_path, 0777, true))
-			{
-				$writeable = false;
-			}
-			else
-			{
-				$writeable = is_writeable($include_path);
-			}
-			
-			$this->pearInfos = array("include_path" => $include_path, "writeable" => $writeable, 
-					"path" => $pearDir, "command" => $pearCmd, "conf" => $pearConf);
+			$this->pearInfos = array("include_path" => $include_path);
 		}
 		return $this->pearInfos;
-	}
-	
-	/**
-	 * @return boolean
-	 */
-	private function useChangePearLib()
-	{
-		$this->loadPearInfo();
-		return true;
 	}
 }

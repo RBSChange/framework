@@ -91,24 +91,24 @@ class ClassResolver implements ResourceResolver
 	{
 		 
 		$result = array(
-				array('path' => '%PROJECT_HOME%/framework/', 'recursive' => 'true', 
-						'exclude' => array('deprecated', 'doc', 'module', 'webapp', 'patch')), 
-				array('path' => '%PROJECT_HOME%/libs/', 'recursive' => 'true',
+				array('path' => '%PROJECT_HOME%/framework', 'recursive' => 'true', 
+						'exclude' => array('deprecated', 'doc', 'module', 'home', 'patch')), 
+				array('path' => '%PROJECT_HOME%/libs', 'recursive' => 'true',
 					'exclude' => array('fckeditor', 'icons', 'pearlibs', 'zfminimal')),
-				array('path' => '%PROJECT_HOME%/build/project/', 'recursive' => 'true'), 
+				array('path' => '%PROJECT_HOME%/build/project', 'recursive' => 'true'), 
 				array('path' => '%PROJECT_HOME%/modules/*/actions'), 
 				array('path' => '%PROJECT_HOME%/modules/*/change-commands', 'recursive' => 'true'), 
 				array('path' => '%PROJECT_HOME%/modules/*/changedev-commands', 'recursive' => 'true'), 
-				array('path' => '%PROJECT_HOME%/modules/*/lib/', 'recursive' => 'true'), 
-				array('path' => '%PROJECT_HOME%/modules/*/views/'), 
-				array('path' => '%PROJECT_HOME%/modules/*/persistentdocument/', 'recursive' => 'true'), 
+				array('path' => '%PROJECT_HOME%/modules/*/lib', 'recursive' => 'true'), 
+				array('path' => '%PROJECT_HOME%/modules/*/views'), 
+				array('path' => '%PROJECT_HOME%/modules/*/persistentdocument', 'recursive' => 'true'), 
 				array('path' => '%PROJECT_HOME%/override/modules/*/actions'), 
-				array('path' => '%PROJECT_HOME%/override/modules/*/lib/', 'recursive' => 'true'), 
-				array('path' => '%PROJECT_HOME%/override/modules/*/views/'));
+				array('path' => '%PROJECT_HOME%/override/modules/*/lib', 'recursive' => 'true'), 
+				array('path' => '%PROJECT_HOME%/override/modules/*/views'));
 				
 		if (defined('PEAR_DIR'))
 		{
-			array_unshift($result, array('path' => PEAR_DIR . '/', 'recursive' => 'true'));
+			array_unshift($result, array('path' => PEAR_DIR, 'recursive' => 'true'));
 		}
 		return $result;
 	}
@@ -118,104 +118,86 @@ class ClassResolver implements ResourceResolver
 	 */
 	public function initialize()
 	{
-		$ini = $this->getPathsToAnalyse();
-		// we automatically add our php classes
-		require_once (PROJECT_HOME . '/framework/util/Finder.class.php');
-		$ext = '.php';
-		
+		$ini = $this->getPathsToAnalyse();		
 		// let's do our fancy work
 		foreach ($ini as $entry)
 		{
 			// directory mapping
-			$path = $this->replaceConstants($entry['path']);
-			$finder = f_util_Finder::type('file')->ignore_version_control()->name('*' . $ext);
-			$finder->follow_link();
+			$path = $this->replaceConstants($entry['path']);			
 			
-			// recursive mapping?
-			$recursive = ((isset($entry['recursive'])) ? $entry['recursive'] : false);
-			
-			if (!$recursive)
+			$exclude = array();
+			if (isset($entry['exclude']) && is_array($entry['exclude']))
 			{
-				$finder->maxdepth(0);
+				$exclude = $entry['exclude'];
 			}
 			
-			// exclude files or directories?
-			if (isset($entry['exclude']))
+			$recursive = ((isset($entry['recursive'])) ? $entry['recursive'] : false);			
+			if ($recursive)
 			{
-				if (! is_array($entry['exclude']))
+				$exclude = array_merge($exclude, array('.git', '.svn'));
+			}
+			foreach ($this->glob($path) as $phpPath) 
+			{
+				$files = $this->findFile($phpPath, $recursive, $exclude);
+				if (Framework::isInfoEnabled())
 				{
-					$entry['exclude'] = explode(',', $entry['exclude']);
+					Framework::info('Scanning'. ($recursive ? ' recursive: ' : ': ') . $phpPath . ' -> ' . count($files) . ' files');
 				}
-				$finder->prune($entry['exclude'])->discard($entry['exclude']);
-			}
-			
-			$matches = $this->glob($path);
-			$files = $finder->in($path);
-			if ($matches)
-			{
-				$files = $finder->in($matches);
 				$this->constructClassList($files);
-			}			
+			}		
 		}
-	}
-	
-	private function glob($path)
-	{
-		if (strpos($path, '*') !== false && basename($path) !== '*')
-		{
-			$result = glob($path);
-			return (is_array($result) && count($result) > 0) ? $result : false;
-		}
-		return array($path);
 	}
 	
 	/**
-	 * @param String $basePattern
-	 * @return String[]
-	 * @example getClassNames() return all available classes name
-	 * @example getCLassNames("web") return all available classes that the name starts with "web"
+	 * @param string $path
+	 * @return string[]
 	 */
-	function getClassNames($basePattern = null)
+	private function glob($path)
 	{
-		$classNames = array();
-		$path = PROJECT_HOME . '/cache/autoload';
-		$pathLength = strlen($path) + 1;
-		
-		if ($basePattern !== null)
+		if (strpos($path, '*') !== false)
 		{
-			$patternDirs = explode("_", $basePattern);
+			$result = glob($path);
+			return (is_array($result)) ? $result : array();
+		}
+		elseif (is_dir($path))
+		{
+			return array($path);
+		}
+		return array();
+	}
+	
+	/**
+	 * @param string $phpPath
+	 * @param boolean $recursive
+	 * @param string[] $exclude
+	 */
+	private function findFile($phpPath, $recursive, $exclude)
+	{
+		$files = array();
+		if (is_dir($phpPath))
+		{
+			$dh = opendir($phpPath);
+			$bp = $phpPath. DIRECTORY_SEPARATOR;
 			
-			$lastPatternPart = $patternDirs[count($patternDirs) - 1];
-			unset($patternDirs[count($patternDirs) - 1]);
-			if (count($patternDirs) > 0)
-			{
-				$path .= "/" . join("/", $patternDirs);
-			}
+	        while ($fileName = readdir($dh))
+	        {
+	            if ($fileName === '.' || $fileName === '..') {continue;}
+
+                if (is_file($bp . $fileName))
+                {
+                    if (substr($fileName, -4) === '.php')
+                    {
+                    	$files[] = realpath($bp .$fileName);
+                    }
+                }
+                elseif (is_dir($bp .$fileName) && $recursive && !in_array($fileName, $exclude))
+                {
+                  	$files = array_merge($files, $this->findFile($bp .$fileName, $recursive, $exclude));
+                }
+	        }
+	        closedir($dh);
 		}
-		else
-		{
-			$lastPatternPart = '';
-		}
-		if ($lastPatternPart != '')
-		{
-			foreach (glob($path . "/" . $lastPatternPart . "*", 
-					GLOB_MARK | GLOB_ONLYDIR | GLOB_NOSORT) as $subPath)
-			{
-				foreach (f_util_FileUtils::find("to_include", $subPath) as $toIncludePath)
-				{
-					$classNames[] = substr(str_replace("/", "_", dirname($toIncludePath)), 
-							$pathLength);
-				}
-			}
-		}
-		else
-		{
-			foreach (f_util_FileUtils::find("to_include", $path) as $toIncludePath)
-			{
-				$classNames[] = substr(str_replace("/", "_", dirname($toIncludePath)), $pathLength);
-			}
-		}
-		return $classNames;
+		return $files;
 	}
 	
 	/**
@@ -265,12 +247,9 @@ class ClassResolver implements ResourceResolver
 	public function appendToAutoloadFile($class, $filePath, $override = false)
 	{
 		$cacheFile = $this->getCachePath($class, $this->cacheDir);
-		if (! file_exists($cacheFile))
+		if (!file_exists($cacheFile))
 		{
-			if (is_link($cacheFile))
-			{
-				@unlink($cacheFile);
-			}
+			if (is_link($cacheFile)) {@unlink($cacheFile);}
 			f_util_FileUtils::mkdir(dirname($cacheFile));
 			symlink($filePath, $cacheFile);
 		}
@@ -281,17 +260,7 @@ class ClassResolver implements ResourceResolver
 		}
 		return $cacheFile;
 	}
-	
-	/**
-	 * Returns an array containing all the defined and autoloaded classes.
-	 *
-	 * @return array<string>
-	 */
-	public final function getDefinedClasses()
-	{
-		throw new Exception("ClassResolver->getDefinedClasses() is not implemented ; please do it");
-	}
-	
+		
 	/**
 	 * @param String $filePath
 	 * @param Boolean $override
@@ -304,10 +273,7 @@ class ClassResolver implements ResourceResolver
 	
 	public function appendRealDir($dirPath)
 	{
-		foreach (f_util_FileUtils::find("*.php", $dirPath) as $filePath)
-		{
-			$this->appendFile($filePath, true);
-		}		
+		$this->appendDir($dirPath, true);	
 	}
 	
 	/**
@@ -317,53 +283,46 @@ class ClassResolver implements ResourceResolver
 	public function appendDir($dirPath, $override = false)
 	{
 		$ini = $this->getPathsToAnalyse();
-		// we automatically add our php classes
-		require_once (PROJECT_HOME . '/framework/util/Finder.class.php');
-		$ext = '.php';		
+		
 		// let's do our fancy work
 		foreach ($ini as $entry)
 		{
 			// directory mapping
-			$path = $this->replaceConstants($entry['path']);
-			$finder = f_util_Finder::type('file')->ignore_version_control()->name('*' . $ext);
-			$finder->follow_link();
-			
-			// recursive mapping?
-			$recursive = ((isset($entry['recursive'])) ? $entry['recursive'] : false);
-			
-			if (!$recursive)
+			$path = $this->replaceConstants($entry['path']);			
+			$exclude = array();
+			if (isset($entry['exclude']) && is_array($entry['exclude']))
 			{
-				$finder->maxdepth(0);
+				$exclude = $entry['exclude'];
 			}
 			
-			// exclude files or directories?
-			if (isset($entry['exclude']))
+			$recursive = ((isset($entry['recursive'])) ? $entry['recursive'] : false);			
+			if ($recursive)
 			{
-				if (! is_array($entry['exclude']))
-				{
-					$entry['exclude'] = explode(',', $entry['exclude']);
+				$exclude = array_merge($exclude, array('.git', '.svn'));
+			}
+			
+			$realDirPath = realpath($dirPath);
+			
+			foreach ($this->glob($path) as $searchPath) 
+			{
+				$realSearchPath = realpath($searchPath);
+								
+				if (strpos($realSearchPath, $realDirPath) === 0)
+				{	
+					$files = $this->findFile($searchPath, $recursive, $exclude);
+					$this->constructClassList($files);
 				}
-				$finder->prune($entry['exclude'])->discard($entry['exclude']);
-			}
-			
-			$matches = $this->glob($path);
-			if ($matches)
-			{
-				foreach ($matches as $path) 
+				else if (strpos($realDirPath, $realSearchPath) === 0 && $recursive)
 				{
-					if (strpos($path, $dirPath) === 0)
-					{
-						$files = $finder->in(array($path));
-						$this->constructClassList($files);
-					}
-					else if (strpos($dirPath, $path) === 0 && $recursive)
-					{
-						$files = $finder->in(array($dirPath));
+					if (!in_array(basename($dirPath), $exclude))
+					{	
+						$files = $this->findFile($dirPath, $recursive, $exclude);
 						$this->constructClassList($files);	
-						return;			
 					}
+					return;			
 				}
 			}
+
 		}
 	}
 	

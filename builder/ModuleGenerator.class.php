@@ -162,7 +162,7 @@ class builder_ModuleGenerator
 		$crs = ClassResolver::getInstance();
 		
 		// Generate configuration files
-		f_util_FileUtils::write(f_util_FileUtils::buildModulesPath($this->name, 'change.xml'), $this->generateFile('change.xml'));
+		f_util_FileUtils::write(f_util_FileUtils::buildModulesPath($this->name, 'install.xml'), $this->generateFile('install.xml'));
 		f_util_FileUtils::write(f_util_FileUtils::buildModulesPath($this->name, 'config', 'module.xml'), $this->generateFile('config_module.xml'));
 		f_util_FileUtils::write(f_util_FileUtils::buildModulesPath($this->name, 'config', 'actions.xml'), $this->generateFile('config_actions.xml'));
 		f_util_FileUtils::write(f_util_FileUtils::buildModulesPath($this->name, 'config', 'rights.xml'), $this->generateFile('config_rights.xml'));

@@ -54,7 +54,12 @@ class commands_AddModule extends commands_AbstractChangedevCommand
 		$moduleGenerator->setTitle(ucfirst($moduleName) . ' module');
 		$moduleGenerator->setIcon($icon);
 		$moduleGenerator->generateAllFile();
-
+		
+		$p = c_Package::getNewInstance('modules', $moduleName, PROJECT_HOME);
+		$p->setDownloadURL('none');
+		$p->setVersion(FRAMEWORK_VERSION);
+		$this->getParent()->getBootStrap()->updateProjectPackage($p);
+		
 		// Generate locale for new module
 		LocaleService::getInstance()->regenerateLocalesForModule($moduleName);
 

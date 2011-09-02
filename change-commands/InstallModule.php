@@ -34,7 +34,7 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 	 */
 	function getParameters($completeParamCount, $params, $options, $current)
 	{
-		$bootStrap = c_ChangeBootStrap::getInstance();
+		$bootStrap = $this->getParent()->getBootStrap();
 		$remoteModules = $bootStrap->getRemoteModules(Framework::getVersion());
 		$moduleService = ModuleService::getInstance();
 		foreach ($remoteModules as $key => $module)

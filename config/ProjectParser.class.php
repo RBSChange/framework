@@ -147,7 +147,7 @@ class config_ProjectParser
 	 * @return array old and current configuration
 	 */
 	public function execute($computedDeps)
-	{
+	{	
 		// Config dir.
 		$configDir = PROJECT_HOME . DIRECTORY_SEPARATOR . 'config';
 		if (!is_dir($configDir))
@@ -214,17 +214,25 @@ class config_ProjectParser
 		$configArray = array();
 		$this->loadXmlConfigFile(PROJECT_HOME . DIRECTORY_SEPARATOR . 'framework' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'project.xml', $configArray);
 				
-		$fDeps = $computedDeps['change-lib']['framework'];
-		$this->addConstant($configArray['defines'], "FRAMEWORK_VERSION", $fDeps['version']);
-		$fHotfix = (count($fDeps['hotfix']) > 0) ?  end($fDeps['hotfix']) : null;
-		$this->addConstant($configArray['defines'], "FRAMEWORK_HOTFIX", $fHotfix);
-
-		// -- Modules informations.
-		$configArray['packageversion'] = $this->compilePackageVersion();
-		$this->compileModulesConfig($configArray, $computedDeps['module']);
+		foreach ($computedDeps['dependencies'] as $package) 
+		{
+			/* @var $package c_Package */
+			if ($package->isFramework())
+			{
+				$this->addConstant($configArray['defines'], "FRAMEWORK_VERSION", $package->getVersion());
+				$this->addConstant($configArray['defines'], "FRAMEWORK_HOTFIX", $package->getHotfix());
+			}
+			elseif ($package->isModule())
+			{
+				// -- Modules informations.
+				$configArray['packageversion']['modules_' . $package->getName()] = array('VERSION' => $package->getVersion(), 'HOTFIX' => $package->getHotfix());
+			}
+		}
+		
+		$this->compileModulesConfig($configArray);
 		$configArray['config']['packageversion'] = $configArray['packageversion'];
 		unset($configArray['packageversion']);
-								
+							
 		$this->loadXmlConfigFile(PROJECT_HOME . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'project.xml', $configArray);
 		$profilFile = $configDir . DIRECTORY_SEPARATOR . "project.".$currentProfile.".xml";
 		if (is_readable($profilFile))
@@ -237,7 +245,7 @@ class config_ProjectParser
 		}
 		
 		// -- Global constants.
-		foreach (array('PEAR_DIR', 'ZEND_FRAMEWORK_PATH', 'LOCAL_REPOSITORY', 'WWW_GROUP', 'TMP_PATH', 
+		foreach (array('PEAR_DIR', 'ZEND_FRAMEWORK_PATH', 'WWW_GROUP', 'TMP_PATH', 
 			'CHANGE_COMMAND', 'DOCUMENT_ROOT', 'PROJECT_LICENSE', 'FAKE_EMAIL', 
 			'PHP_CLI_PATH', 'DEVELOPMENT_MODE') as $constName) 
 		{
@@ -418,51 +426,9 @@ class config_ProjectParser
 	}
 
 	/**
-	 * @return Array<String, String>
-	 */
-	private function compilePackageVersion()
-	{
-		$packagesVersion = array();
-		$files = glob(PROJECT_HOME . '/modules/*/change.xml');
-		if (!is_array($files) || count($files) == 0)
-		{
-			return $packagesVersion;
-		}
-		foreach ($files as $changeXmlFile)
-		{
-			$doc = new DOMDocument('1.0', 'utf-8');
-			$doc->load($changeXmlFile);
-			if ($doc->documentElement)
-			{
-				$name = null; 
-				$version =null;
-				
-				foreach ($doc->documentElement->childNodes as $node) 
-				{
-					if ($node->nodeName == 'name')
-					{
-						$name = trim($node->textContent);
-					}
-					elseif ($node->nodeName == 'version')
-					{
-						$version = trim($node->textContent);
-					}
-				}
-				if ($name && $version)
-				{
-					$packagesVersion['modules_' . $name] = $version;	
-				}
-				continue;
-			}
-			$packagesVersion['modules_' . basename(dirname($changeXmlFile))] = null;			
-		}
-		return $packagesVersion;
-	}
-
-	/**
 	 * @param array $configArray
 	 */
-	private function compileModulesConfig(&$configArray, $computedModulesDeps)
+	private function compileModulesConfig(&$configArray)
 	{
 		$constants = array();
 		$moduleXmlFiles = array();		
@@ -486,20 +452,8 @@ class config_ProjectParser
 				if (isset($moduleConfig['module']))
 				{
 					$pname = 'modules_'.$moduleName;
-					$version = isset($configArray['packageversion'][$pname]) ? $configArray['packageversion'][$pname] : null;	
-					$configArray['packageversion'][$pname] = array('ENABLED' => true, 'VISIBLE' => true, 'CATEGORY' => null, 
-						'ICON' => 'package', 'USETOPIC' => false, 'VERSION' => $version, 'HOTFIX' => null);
-					
-					if (isset($computedModulesDeps[$moduleName]))
-					{
-						
-						$hotFixes = $computedModulesDeps[$moduleName]['hotfix'];
-						$hotFixCount  = count($hotFixes);
-						if ($hotFixCount > 0)
-						{
-							$configArray['packageversion'][$pname]['HOTFIX'] = $hotFixes[$hotFixCount - 1];
-						}
-					}	
+					$configArray['packageversion'][$pname] = array_merge($configArray['packageversion'][$pname], 
+						array('ENABLED' => true, 'VISIBLE' => true, 'CATEGORY' => null, 'ICON' => 'package', 'USETOPIC' => false));	
 									
 					foreach ($moduleConfig['module'] as $key => $value)
 					{

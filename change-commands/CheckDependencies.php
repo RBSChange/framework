@@ -44,58 +44,70 @@ class commands_CheckDependencies extends commands_AbstractChangeCommand
 		}
 		$this->message("== Check project dependencies ==");
 		$bootstrap = $this->getParent()->getBootStrap();
+		$cpDeps = $bootstrap->getComputedDependencies();	
+		$this->okMessage('Release Repo (' . $bootstrap->getRelease() . ') :' . $bootstrap->getReleaseRepository());
+		
+		$pearInfo = $bootstrap->loadPearInfo();
+		$this->okMessage("External depencendies:");
+		$this->okMessage(" - Pear Include Path: " . $cpDeps['PEAR_DIR']);
+		$this->okMessage(" - Zend Include Path: " . $cpDeps['ZEND_FRAMEWORK_PATH']);
 		
 		$changeXmlPath = $bootstrap->getDescriptorPath();
-		foreach ($bootstrap->getRemoteRepositories() as $path) 
-		{
-			$this->okMessage('Remote Repo: ' . $path);
-		}
+		$this->okMessage('Project depencendies: ' .$changeXmlPath);
 		
-		$this->okMessage('Project depencendies :' .$changeXmlPath);
-		
-		foreach ($bootstrap->getLocalRepositories() as $path => $writable) 
+		$dependencies = $cpDeps['dependencies'];
+		foreach ($dependencies as $package) 
 		{
-			$this->okMessage('Local Repo: ' . $path . ($writable ? ' w' : 'r'));
-		}
-
-		$pearInfo = $bootstrap->loadPearInfo();
-		$this->okMessage("Pear Informations:");
-		$this->okMessage(" - Include Path: " . $pearInfo['include_path']);
-		$this->okMessage(" - Writable: " . $pearInfo['writeable'] ? 'yes' : 'non');
-		foreach ($pearInfo as $key => $data) 
-		{
-			if (isset($options['verbose']))
-			$this->okMessage("Pear $key: $data");
-		}
-		$dependencies = $bootstrap->loadDependencies();
-		
-		foreach ($dependencies as $debType => $debs) 
-		{
-			foreach ($debs as $debName => $infos)
+			/* @var $package c_Package */
+			$msg =  'Dependency: ' . $package->getKey() . ' version ' . $package->getHotfixedVersion();
+			if 	(!$package->isInProject())
 			{
-				$msg =  (isset($infos['depfor'])) ?  'Implicit dependency ' : 'Dependency ';
-				$msg .= $debType . '/' . $debName . ' version ' . $infos['version'];
-				if (count($infos['hotfix']))
-				{
-					$msg .= '-' . max($infos['hotfix']);
-				}
-				
-				if (!$infos['localy'])
-				{
-					$msg .= ': Not localy';
+					$msg .= ': Not present in project';
 					$this->warnMessage($msg);
-				}
-				elseif (!$infos['linked'])
+					continue;
+			}
+			else
+			{
+				$installXMLDoc = $package->getInstallDocument();
+				if ($installXMLDoc === null)
 				{
-					$msg .= ': Not linked in project';
+					$msg .= ': install.xml not found';
 					$this->warnMessage($msg);
+					continue;
 				}
-				else if (isset($options['verbose']))
+				$reallyPackage = $bootstrap->getPackageFromXML($installXMLDoc);
+				if ($reallyPackage->getKey() != $package->getKey())
 				{
-					$msg .= ': Ok';
-					$this->okMessage($msg);
+					$msg .= ': invalid install package ' . $reallyPackage->getKey();
+					$this->warnMessage($msg);
+					continue;
 				}
-			} 
+				elseif ($reallyPackage->getHotfixedVersion() != $package->getHotfixedVersion())
+				{
+					$msg .= ': invalid install version ' . $reallyPackage->getHotfixedVersion();
+					$this->warnMessage($msg);
+					continue;
+				}
+				else
+				{
+					$error = false;
+					foreach ($bootstrap->getDependenciesFromXML($installXMLDoc) as $package) 
+					{
+						if (!isset($dependencies[$package->getKey()]))
+						{
+							$error = true;
+							$this->warnMessage($msg . ' Implicite dependency not found ' . $package->getKey());
+						}
+					}
+					if ($error) {continue;}
+				}
+			}
+			
+			if (isset($options['verbose']))
+			{
+				$msg .= ': Ok';
+				$this->okMessage($msg);
+			}
 		}
 		
 		return $this->quitOk('Project Checked successfully.');
@@ -104,25 +116,24 @@ class commands_CheckDependencies extends commands_AbstractChangeCommand
 	function executeXml($params)
 	{
 		$domDoc = new DOMDocument("1.0", "UTF-8");
-		$domDoc->loadXml('<dependencies></dependencies>');
-		// <dependency type="module" name="website" version="3.5.0" hotfix="1" />
-		$bootstrap = $this->getParent()->getBootStrap();
+		$domDoc->formatOutput = true;
+		$domDoc->preserveWhiteSpace = false;
+		$domDoc->loadXml('<?xml version="1.0" encoding="UTF-8"?><dependencies></dependencies>');
 
-		
-		$dependencies = $bootstrap->loadDependencies();
-
-		foreach ($dependencies as $debType => $debs)
+		$cpDeps = $this->getComputedDeps();
+		$dependencies = $cpDeps['dependencies'];
+		foreach ($dependencies as $package) 
 		{
-			foreach ($debs as $debName => $infos)
+			/* @var $package c_Package */
+			if ($package->isFramework()) {continue;}
+			
+			$depNode = $domDoc->documentElement->appendChild($domDoc->createElement('dependency'));
+			$depNode->setAttribute('type', $package->getType());
+			$depNode->setAttribute('name', $package->getName());
+			$depNode->setAttribute('version', $package->getVersion());
+			if ($package->getHotfix())
 			{
-				$depNode = $domDoc->documentElement->appendChild($domDoc->createElement('dependency'));
-				$depNode->setAttribute('type', $debType);
-				$depNode->setAttribute('name', $debName);
-				$depNode->setAttribute('version', $infos['version']);
-				if (count($infos['hotfix']))
-				{
-					$depNode->setAttribute('hotfix', max($infos['hotfix']));
-				}
+				$depNode->setAttribute('hotfix', $package->getHotfix());
 			}
 		}
 

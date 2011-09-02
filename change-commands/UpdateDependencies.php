@@ -31,83 +31,183 @@ class commands_UpdateDependencies extends commands_AbstractChangeCommand
 	{
 		$this->message("== Update project dependencies ==");
 		$bootstrap = $this->getParent()->getBootStrap();
+		$dependencies = $bootstrap->getProjectDependencies();
 		
-		do 
+		$modulePaths =  glob(PROJECT_HOME . '/modules/*/install.xml');
+		foreach ($modulePaths as $path) 
 		{
-			$dependencies = $bootstrap->loadDependencies();
-			$downloads = $this->getDepsToDownload($dependencies);
-			foreach ($downloads as $repositoryPath) 
+			$name = basename(dirname($path));
+			$doc = new DOMDocument('1.0', 'UTF-8');
+			$doc->load($path);
+			if ($doc->documentElement)
 			{
-				list($debType, $componentName, $version, $hotfix) = $bootstrap->explodeRepositoryPath($repositoryPath);
-				$this->message("Download $componentName-$version ($hotfix)...");
-				$result = $bootstrap->installComponent($debType, $componentName, $version, $hotfix);
-				if ($result === null)
+				$p = c_Package::getInstanceFromPackageElement($doc->documentElement, PROJECT_HOME);
+				if ($p->getType() === 'modules' && $p->getName() === $name && $p->getVersion())
 				{
-					return $this->quitError('Unable to download : ' . $repositoryPath . ' in local repository.');
+					if (!isset($dependencies[$p->getKey()]))
+					{
+						$this->log('Add module ' . $p->__toString() . ' in project install.xml');
+						$bootstrap->updateProjectPackage($p);
+						$dependencies[$p->getKey()] = $p;
+					}
+					continue;
 				}
 			}
-		} 
-		while (count($downloads) > 0);
-		
-
-		$dependencies = $bootstrap->loadDependencies();
-		$linkeds = $this->getDepsToLink($dependencies);
-		foreach ($linkeds as $repositoryPath) 
+			$this->warnMessage("Invalid Module signature in: " . $path);
+		}
+		$updateAutoload = false;
+		$checked = array();
+		while (true)
 		{
-			list($debType, $componentName, $version, $hotfix) = $bootstrap->explodeRepositoryPath($repositoryPath);
-			$this->message("linking $componentName-$version ($hotfix)...");
-			if (!$bootstrap->linkToProject($debType, $componentName, $version, $hotfix))
+			$newDeps = array();
+			foreach ($dependencies as $package) 
 			{
-				return $this->quitError('Unable to link : ' . $repositoryPath . ' in project.');
+				if (isset($checked[$package->getKey()])) {continue;}		
+				$checked[$package->getKey()] = true;
+				$updateAutoload = $updateAutoload || $this->updateDependency($package);
+				
+				$installDoc = $package->getInstallDocument();
+				if ($installDoc)
+				{
+					foreach ($bootstrap->getDependenciesFromXML($installDoc) as $depPackage) 
+					{
+						if (!isset($dependencies[$depPackage->getKey()]))
+						{
+							$newDeps[$depPackage->getKey()] = $depPackage;
+						}
+					}
+				}
 			}
+			if (count($newDeps) == 0) {break;}
 			
-			if ($debType == c_ChangeBootStrap::$DEP_MODULE)
+			foreach ($newDeps as $depPackage) 
 			{
-				$moduleName = $componentName;
-				if (is_dir("modules/$moduleName/change-commands"))
-				{
-					$this->getParent()->addCommandDir("modules/$moduleName/change-commands", "$moduleName|Module $moduleName commands");
-				}
-				if (is_dir("modules/$moduleName/changedev-commands"))
-				{
-					$this->getParent()->addGhostCommandDir("modules/$moduleName/changedev-commands", "$moduleName|Module $moduleName commands");
-				}
+				$dependencies[$depPackage->getKey()] = $depPackage;
 			}
 		}
-	
-		$bootstrap->cleanDependenciesCache();
-		return $this->quitOk('Update Checked successfully.');
+		
+		if ($updateAutoload)
+		{
+			$this->log('Update autoload...');
+			$this->getParent()->executeCommand('update-autoload');
+		}
 	}
 	
-	private function getDepsToDownload($dependencies)
+	/**
+	 * @param c_Package $package
+	 * @return boolean Project files updated
+	 */
+	protected function updateDependency($package)
 	{
-		$result = array();
-		foreach ($dependencies as $debType => $debs) 
+		$bootstrap = $this->getParent()->getBootStrap();
+		$currentXML = $package->getInstallDocument();
+		$tmpPackage = $bootstrap->getPackageFromXML($currentXML);
+		
+		if ($tmpPackage === null) //Package not exist in project
 		{
-			foreach ($debs as $debName => $infos)
+			if ($package->isStandalone()) //Nothing
 			{
-				if (!$infos['localy'])
-				{
-					$result[] = $infos['repoRelativePath'];
-				}
-			} 
-		}	
-		return $result;	
+				$bootstrap->removeProjectDependency($package);
+				$this->warnMessage("Remove standalone " . $package->getKey() . " from project install.xml");
+				return false;
+			}
+			
+			$downloadPackage = $this->downloadPackage($package, $package->getVersion() != null);
+			if ($downloadPackage === null) //Package not Downloaded
+			{
+				$this->warnMessage("Invalid " . $package->getKey() . " in project install.xml");
+				return false;
+			}
+			
+			if ($package->getVersion() == null) //Update version from download
+			{
+				$package->setVersion($downloadPackage->getVersion());
+				$package->setHotfix($downloadPackage->getHotfix());	
+				$bootstrap->updateProjectPackage($package);
+				$this->message("Update version of " . $package->getKey() . " in project install.xml");
+			}
+			
+			f_util_FileUtils::rmdir($package->getPath());
+			f_util_FileUtils::cp($downloadPackage->getTemporaryPath(), $package->getPath());
+			f_util_FileUtils::rmdir($downloadPackage->getTemporaryPath());
+			
+			return true;
+		}
+		
+		if ($package->getHotfixedVersion() !== $tmpPackage->getHotfixedVersion())
+		{		
+			$package->setVersion($tmpPackage->getVersion());
+			$package->setHotfix($tmpPackage->getHotfix());	
+			$bootstrap->updateProjectPackage($package);
+			$this->message("Update version of " . $package->getKey() . " in project install.xml");
+		}
+		
+		return false;
 	}
 	
-	private function getDepsToLink($dependencies)
+	/**
+	 * @param c_Package $package
+	 * @param boolean $usePackageVersion
+	 * @return c_Package or null
+	 */
+	protected function downloadPackage($package, $usePackageVersion = false)
 	{
-		$result = array();
-		foreach ($dependencies as $debType => $debs) 
+		$bootstrap = $this->getParent()->getBootStrap();	
+		$downloadURL = $package->getDownloadURL();
+		if ($downloadURL === null)
 		{
-			foreach ($debs as $debName => $infos)
+			$releaseURL = $package->getReleaseURL() == null ? $bootstrap->getReleaseRepository() : $package->getReleaseURL();
+			$releasePackages = $bootstrap->getReleasePackages($releaseURL);
+			if (!is_array($releasePackages))
 			{
-				if (!$infos['linked'])
-				{
-					$result[] = $infos['repoRelativePath'];
-				}
-			} 
-		}	
-		return $result;	
-	}	
+				$this->warnMessage('Inavlid releaseURL: ' . $releaseURL);
+				return null;
+			}
+			if (!isset($releasePackages[$package->getKey()]))
+			{
+				$this->warnMessage('Inavlid package: ' . $package->getKey() . ' in ' . $releaseURL);
+				return null;
+			}
+			
+			if ($usePackageVersion)
+			{
+				$downloadURL = $releaseURL . $package->getRelativeReleasePath() . '.zip';
+			}
+			else
+			{
+				$downloadURL = $releasePackages[$package->getKey()]->getDownloadURL();
+			}
+		}
+		
+		$this->message('Download '. $downloadURL . '...');		
+		$tmpFile = null;
+		$dr = $bootstrap->downloadFile($downloadURL, $tmpFile);
+		if ($dr !== true)
+		{
+			$this->warnMessage($dr);
+			return null;
+		}
+		
+		$tmpPath = $tmpFile . '.unzip';
+		$tmpPackage = $bootstrap->unzipPackage($tmpFile, $tmpPath);
+		if ($tmpPackage === null)
+		{
+			$this->warnMessage('Invalid zip archive: ' . $tmpFile);
+			return null;
+		}
+		elseif ($tmpPackage->getKey() != $package->getKey())
+		{
+			$this->warnMessage('Invalid package : ' . $tmpPackage->getKey());
+			f_util_FileUtils::rmdir($tmpPackage->getTemporaryPath());
+			return null;
+		}
+		elseif ($usePackageVersion && $tmpPackage->getHotfixedVersion() != $package->getHotfixedVersion())
+		{
+			$this->warnMessage('Invalid package version: ' . $tmpPackage->getHotfixedVersion());
+			f_util_FileUtils::rmdir($tmpPackage->getTemporaryPath());
+			return null;
+		}
+		
+		return $tmpPackage;		
+	}
 }

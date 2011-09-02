@@ -263,15 +263,7 @@ abstract class f_util_FileUtils
 		return DIRECTORY_SEPARATOR.join(DIRECTORY_SEPARATOR, $args);
 	}
 
-	/**
-	 * @return String
-	 */
-	static function buildRepositoryPath()
-	{
-		$args = func_get_args();
-		array_unshift($args, LOCAL_REPOSITORY);
-		return self::buildAbsolutePathFromArray($args);
-	}
+
 	
 	/**
 	 * @example f_util_FileUtils::buildProjectPath('libs', 'icons')
@@ -1112,5 +1104,14 @@ abstract class f_util_FileUtils
 		$args = func_get_args();
 		array_unshift($args, PROJECT_HOME, 'cache' , 'project');
 		return self::buildAbsolutePathFromArray($args);
+	}
+	
+	/**
+	 * @deprecated
+	 * @return String
+	 */
+	static function buildRepositoryPath()
+	{
+		throw new Exception("Deprecated method with no replacement");
 	}
 }

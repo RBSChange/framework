@@ -32,12 +32,11 @@ Where options in:
 	public function _execute($params, $options)
 	{
 		$this->message("== Compile config ==");
-		
 		$this->getParent()->getBootStrap()->cleanDependenciesCache();
+		$cd = $this->getComputedDeps();
 		
 		$projectParser = new config_ProjectParser();
-		$oldAndCurrent = $projectParser->execute($this->getComputedDeps());
-		$this->getParent()->setEnvVar("commands_CompileConfig_oldAndCurrent", $oldAndCurrent);
+		$oldAndCurrent = $projectParser->execute($cd);
 		
 		if (class_exists('Framework', false))
 		{
