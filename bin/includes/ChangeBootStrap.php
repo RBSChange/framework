@@ -771,11 +771,6 @@ class c_ChangeBootStrap
 								$infos['depfor'] = $parentDepName;
 								$dependencies[$depTypeKey][$depName] = $infos;
 							}
-							else if ($infos['version'] != $dependencies[$depTypeKey][$depName]['version'])
-							{
-								c_warning(
-										$parentDepName . ' Invalid ' . $depName . '-' . $infos['version'] . ' version expected : ' . $dependencies[$depTypeKey][$depName]['version']);
-							}
 						}
 					}
 				}
