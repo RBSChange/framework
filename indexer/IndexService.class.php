@@ -749,32 +749,13 @@ class indexer_IndexService extends BaseService
 				->setMaxResults($chunkSize)
 				->addOrder(Order::asc('document_id'));
 		$ids = $query->findColumn('id');	
-		$this->getTransactionManager()->beginTransaction();
+		
 		foreach ($ids as $documentId)
-		{
-			if ($delayed)
-			{
-				try 
-				{
-					$document = DocumentHelper::getDocumentInstance($documentId);
-					if ($this->getIndexerMode() === self::INDEXER_MODE_BACKOFFICE)
-					{
-						$this->addBackoffice($document);
-					}
-					else
-					{
-						$this->add($document);
-					}	
-				}
-				catch (Exception $ed)
-				{
-					Framework::exception($ed);
-				}
-				continue;
-			}	
-								
+		{						
 			try
 			{
+				$this->getTransactionManager()->beginTransaction();
+				
 				list($oldStatus, $lastUpdate) = $this->getPersistentProvider()->getIndexingDocumentStatus($documentId, $this->getIndexerMode());
 				$result = $this->indexDocumentId($documentId);
 				if ($result === self::INDEXED)
@@ -796,15 +777,17 @@ class indexer_IndexService extends BaseService
 					$this->getPersistentProvider()->setIndexingDocumentStatus($documentId, $this->getIndexerMode(), self::TO_INDEX);
 				}
 				
+				$this->getTransactionManager()->commit();
+				
 			}
 			catch (Exception $e)
 			{
 				Framework::exception($e);
+				$this->getTransactionManager()->rollBack($e);
 			}
 		}
 		
 		$this->manager->commit();
-		$this->getTransactionManager()->commit();
 		
 		$this->endIndexerMode();
 		return count($ids);
@@ -822,12 +805,14 @@ class indexer_IndexService extends BaseService
 		{
 			return -1;
 		}		
-		try 
+
+		$this->beginIndexerMode($indexingMode);
+		foreach ($documentIds as $documentId) 
 		{
-			$this->getTransactionManager()->beginTransaction();
-			$this->beginIndexerMode($indexingMode);
-			foreach ($documentIds as $documentId) 
+			try 
 			{
+				$this->getTransactionManager()->beginTransaction();
+				
 				$result = $this->indexDocumentId($documentId);
 				if ($result === self::INDEXED)
 				{
@@ -837,14 +822,15 @@ class indexer_IndexService extends BaseService
 				{
 					$this->getPersistentProvider()->deleteIndexingDocumentStatus($documentId, $indexingMode);
 				}
+				
+				$this->getTransactionManager()->commit();
 			}
-			$this->manager->commit();
-			$this->getTransactionManager()->commit();
+			catch (Exception $e)
+			{
+				$this->getTransactionManager()->rollBack($e);
+			}
 		}
-		catch (Exception $e)
-		{
-			$this->getTransactionManager()->rollBack($e);
-		}
+		$this->manager->commit();
 		
 		if (count($documentIds) < $chunkSize)
 		{

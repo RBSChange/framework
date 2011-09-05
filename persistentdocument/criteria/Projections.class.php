@@ -176,4 +176,9 @@ class f_persistentdocument_criteria_PropertyProjection extends f_persistentdocum
 class f_persistentdocument_criteria_ThisProjection implements f_persistentdocument_criteria_Projection
 {
 	const NAME = "this";
+	
+	public function getAs()
+	{
+		return self::NAME;
+	}
 }

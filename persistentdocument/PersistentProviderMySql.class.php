@@ -1364,8 +1364,18 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 				return $propName->getOperation() . '(' . $columnName .')';
 			}
 		}
+		
+		/**
+		 * @return boolean
+		 */
+		protected function handleProjectionsFirstPosition()
+		{
+			return true;
+		}
 
 		/**
+		 * WARN: if you introduce a new kind of projection, be aware of "Projection->inFirstPosition".
+		 * Cf. PersistentProvider.findColumn()
 		 * @param f_persistentdocument_criteria_ExecutableQuery $query
 		 * @param f_persistentdocument_DocumentQueryBuilder $qBuilder
 		 */
@@ -1402,17 +1412,17 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 			{
 				if ($projection instanceof f_persistentdocument_criteria_RowCountProjection)
 				{
-					$qBuilder->addField('count(distinct '.$qBuilder->getTableAlias().'.document_id) as ' . $projection->getAs());
+					$qBuilder->addFieldForProjection('count(distinct '.$qBuilder->getTableAlias().'.document_id) as ' . $projection->getAs(), $projection);
 				}
 				else if ($projection instanceof f_persistentdocument_criteria_DistinctCountProjection)
 				{
 					$columnName = $qBuilder->getQualifiedColumnName($projection->getPropertyName());
-					$qBuilder->addField('count(distinct ' . $columnName .') as ' . $projection->getAs());
+					$qBuilder->addFieldForProjection('count(distinct ' . $columnName .') as ' . $projection->getAs(), $projection);
 				}
 				else if ($projection instanceof f_persistentdocument_criteria_OperationProjection)
 				{
 					$columnName = $qBuilder->getQualifiedColumnName($projection->getPropertyName());
-					$qBuilder->addField($projection->getOperation() . '(' . $columnName .') as ' . $projection->getAs());
+					$qBuilder->addFieldForProjection($projection->getOperation() . '(' . $columnName .') as ' . $projection->getAs(), $projection);
 				}
 				else if ($projection instanceof f_persistentdocument_criteria_ThisProjection)
 				{
@@ -1511,7 +1521,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 					else
 					{
 						$columnName = $qBuilder->getQualifiedColumnName($projection->getPropertyName());
-						$qBuilder->addField($columnName .' as ' . $projection->getAs());
+						$qBuilder->addFieldForProjection($columnName .' as ' . $projection->getAs(), $projection);
 						if ($projection->getGroup())
 						{
 							$qBuilder->addGroupBy($columnName);
@@ -2046,6 +2056,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 class f_persistentdocument_DocumentQueryBuilder
 {
 	private $fields = array();
+	private $toEndFields = array();
 	private $distinctNeeded = false;
 	private $params = array();
 
@@ -2206,6 +2217,49 @@ class f_persistentdocument_DocumentQueryBuilder
 		// avoid duplicate field using $field as key
 		$this->fields[$field] = $field;
 	}
+	
+	/**
+	 * @param String $field
+	 * @param $projection
+	 */
+	public function addFieldForProjection($field, $projection)
+	{
+		if (isset($projection->inFirstPosition))
+		{
+			$this->setFirstField($field);
+		}
+		else
+		{
+			// avoid duplicate field using $field as key
+			$this->fields[$field] = $field;
+		}
+	}
+	
+	/**
+	 * @var string
+	 */
+	protected $firstField;
+	public function setFirstField($field)
+	{
+		if ($this->firstField !== null)
+		{
+			throw new Exception("only one first field");
+		}
+		$this->firstField = $field;
+	}
+	
+	/**
+	 * @return string[]
+	 */
+	protected function getFields()
+	{
+		if ($this->firstField !== null)
+		{
+			array_unshift($this->fields, $this->firstField);
+			$this->firstField = null;
+		}
+		return $this->fields;
+	}
 
 	/**
 	 * @param String $from
@@ -2352,7 +2406,7 @@ class f_persistentdocument_DocumentQueryBuilder
 	 */
 	public function getQueryString()
 	{
-		$query = 'select '.(($this->distinctNeeded)?'distinct ':''). implode(', ', $this->fields).
+		$query = 'select '.(($this->distinctNeeded)?'distinct ':''). implode(', ', $this->getFields()).
 		' from '.join(' ', $this->from);
 		if ($this->treeTableName !== null && empty($this->order) && $this->maxResults != 2)
 		{
@@ -2642,6 +2696,8 @@ class MysqlStatment
 		{
 			case PersistentProviderConst::FETCH_NUM:
 				return PDO::FETCH_NUM;
+			case PersistentProviderConst::FETCH_COLUMN:
+				return PDO::FETCH_COLUMN;
 			default:
 				return PDO::FETCH_ASSOC;
 		}

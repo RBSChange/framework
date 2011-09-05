@@ -20,6 +20,10 @@ final class indexer_Field
 	const INTEGER = '_idx_int';
 	const INTEGER_MULTI = '_idx_mul_int';
 	const FLOAT = '_idx_float';
+	const COMPLETE = '_complete';
+	const COMPLETE4 = '_complete4';
+	const COMPLETE3 = '_complete3';
+	const COMPLETE2 = '_complete2';
 	
 	// Dynamic (non stored) fields.
 	// WARN: this only works with schema >= 3.5
@@ -161,13 +165,49 @@ final class indexer_Field
 	}
 	
 	/**
+	 * @param string $baseName
+	 * @return string
+	 */
+	static function getCompleteFieldName($baseName)
+	{
+		return $baseName . self::COMPLETE;
+	}
+	
+	/**
+	 * @param string $baseName
+	 * @return string
+	 */
+	static function getComplete4FieldName($baseName)
+	{
+		return $baseName . self::COMPLETE4;
+	}
+	
+	/**
+	 * @param string $baseName
+	 * @return string
+	 */
+	static function getComplete3FieldName($baseName)
+	{
+		return $baseName . self::COMPLETE3;
+	}
+	
+	/**
+	 * @param string $baseName
+	 * @return string
+	 */
+	static function getComplete2FieldName($baseName)
+	{
+		return $baseName . self::COMPLETE2;
+	}
+	
+	/**
 	 * @param String $fieldName
 	 * @return String
 	 */
 	static function getSimpleFieldName($fieldName)
 	{
 		$matches = null;
-		if (preg_match('/^(.*)_(idx|vol)_(str|mul_str|float|int|mul_int|dt)$/', $fieldName, $matches))
+		if (preg_match('/^(.*)_(((idx|vol)_(str|mul_str|float|int|mul_int|dt))|(complete(4|3|2)?))$/', $fieldName, $matches))
 		{
 			return $matches[1];
 		}
@@ -354,6 +394,46 @@ class indexer_IndexedDocument
 	}
 	
 	/**
+	 * @param string $name
+	 * @param string[] $float
+	 */
+	public function setCompleteField($name, $values)
+	{
+		$type = indexer_Field::INDEXED | indexer_Field::MULTIVALUED;
+		$this->fields[indexer_Field::getCompleteFieldName($name)] = array('value' => $values, 'type' => $type);
+	}
+	
+	/**
+	 * @param string $name
+	 * @param string[] $float
+	 */
+	public function setComplete4Field($name, $values)
+	{
+		$type = indexer_Field::INDEXED | indexer_Field::MULTIVALUED;
+		$this->fields[indexer_Field::getComplete4FieldName($name)] = array('value' => $values, 'type' => $type);
+	}
+	
+	/**
+	 * @param string $name
+	 * @param string[] $float
+	 */
+	public function setComplete3Field($name, $values)
+	{
+		$type = indexer_Field::INDEXED | indexer_Field::MULTIVALUED;
+		$this->fields[indexer_Field::getComplete3FieldName($name)] = array('value' => $values, 'type' => $type);
+	}
+	
+	/**
+	 * @param string $name
+	 * @param string[] $float
+	 */
+	public function setComplete2Field($name, $values)
+	{
+		$type = indexer_Field::INDEXED | indexer_Field::MULTIVALUED;
+		$this->fields[indexer_Field::getComplete2FieldName($name)] = array('value' => $values, 'type' => $type);
+	}
+	
+	/**
 	 * Label setter
 	 *
 	 * @param String $value
@@ -499,6 +579,14 @@ class indexer_IndexedDocument
 		}
 		$this->getUniqueKey();
 		return $this->fields;
+	}
+	
+	/**
+	 * @param $fields
+	 */
+	protected function setFields($fields)
+	{
+		$this->fields = $fields;
 	}
 	
 	/**

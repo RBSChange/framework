@@ -475,11 +475,18 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 	/**
 	 * "private" use of QueryBuilder
 	 *
-	 * @param unknown_type $name
+	 * @param string $name
 	 */
 	public function addDocumentProjection($name)
 	{
-		$this->documentProjections[] = $name;
+		if ($this->hasParent())
+		{
+			$this->getParentQuery()->addDocumentProjection($name);
+		}
+		else
+		{
+			$this->documentProjections[] = $name;
+		}
 	}
 
 	/**
