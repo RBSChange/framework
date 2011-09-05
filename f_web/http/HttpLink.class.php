@@ -91,4 +91,39 @@ abstract class f_web_HttpLink implements f_web_Link
 			foreach ($queryParamerters as &$subSet) {if (is_array($subSet)) {ksort($subSet);}}
 		}
 	}
+
+	/**
+	 * Transforms an multi-dimensonnial query parameter array into a flat array
+	 * 
+	 * @param array $array
+	 * @param String $key
+	 * @return array 
+	 */
+	public static function flattenArray($array, $key = null)
+	{
+		$result = array();
+		foreach ($array as $index => $value)
+		{
+			if ($value === null)
+			{
+				continue;
+			}
+			if (! is_array($value))
+			{
+				if ($key === null)
+				{
+					$result[$index] = $value;
+				}
+				else
+				{
+					$result[$key . '[' . $index . ']'] = $value;
+				}
+			}
+			else
+			{
+				$result = array_merge($result, self::flattenArray($value, $key ? $key . '[' . $index . ']' : $index));
+			}
+		}
+		return $result;
+	}
 }
