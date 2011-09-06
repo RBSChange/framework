@@ -994,7 +994,8 @@ class generator_PersistentModel
 
 		$this->tableName = $parentModel->tableName;
 		$this->localized = $parentModel->localized;
-		$this->useCorrection = $parentModel->useCorrection;
+		
+		//$this->useCorrection = $parentModel->useCorrection;
 				
 		foreach ($this->properties as $name => $property)
 		{
