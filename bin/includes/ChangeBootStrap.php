@@ -817,15 +817,21 @@ class c_ChangeBootStrap
 				case "getParameters":
 					$this->_executeCommand('usage', $args);
 					break;
-				default:
-					
+				default:	
 					$this->_executeCommand($cmdName, array_slice($args, 1));
 					break;
 			}
 		}
 		catch (Exception $e)
 		{
-			$message =  "Error line ". $e->getLine()." (".$e->getFile()."): ".$e->getMessage();
+			if ($e->getFile() != __FILE__)
+			{
+				$message =  "Error line ". $e->getLine()." (".$e->getFile()."): ".$e->getMessage();
+			}
+			else
+			{
+				$message =  $e->getMessage();
+			}
 			if (defined('HTTP_MODE'))
 			{
 				echo "<span class=\"row_31\">", nl2br(htmlspecialchars($message)), "</span>";

@@ -401,6 +401,7 @@ abstract class c_ChangescriptCommand
 	{
 		if (!$this->validateArgs($params, $options))
 		{
+			$this->errorMessage('Inavlid argrument for command: ' . $this->callName);
 			return false;
 		}
 		$this->reachedPointCuts = array();

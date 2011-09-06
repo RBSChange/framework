@@ -317,7 +317,7 @@ class ClassResolver implements ResourceResolver
 					if (!in_array(basename($dirPath), $exclude))
 					{	
 						$files = $this->findFile($dirPath, $recursive, $exclude);
-						$this->constructClassList($files);	
+						$this->constructClassList($files, $override);	
 					}
 					return;			
 				}
