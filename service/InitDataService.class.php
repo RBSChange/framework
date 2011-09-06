@@ -261,7 +261,7 @@ class InitDataService extends BaseService
 	{
 		if (!is_null($this->logger))
 		{
-			$this->logger->log($message, "");
+			$this->logger->log($message);
 		}
 	}
 }

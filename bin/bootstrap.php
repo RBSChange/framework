@@ -18,8 +18,6 @@ $binpath = dirname(__FILE__);
 require_once $binpath .'/includes/ChangePackage.php';
 require_once $binpath .'/includes/ChangeBootStrap.php';
 require_once $binpath .'/includes/Configuration.php';
-require_once $binpath .'/includes/Changescript.php';
-require_once $binpath .'/includes/Changescripthttp.php';
 require_once $binpath .'/includes/ChangescriptCommand.php';
 
 $frameworkPath = dirname($binpath);

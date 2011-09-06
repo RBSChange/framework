@@ -1,27 +1,52 @@
 <?php
-abstract class  c_ChangescriptCommand
+abstract class c_ChangescriptCommand
 {
-
+	
+	const FG_RED = 31;
+	const FG_GREEN = 32;
+	const FG_MAGENTA = 35;
+	
+	/**
+	 * @var c_ChangeBootStrap
+	 */	
+	private $bootStrap;
+	
+	
 	/**
 	 * @var Boolean
 	 */
-	private $autoYes = false;
-
-	/**
-	 * @var c_ChangeScript
-	 */
-	private $parent;
-
-	/**
-	 * @var Boolean
-	 */
-	private $embeded;
+	private $devMode = false;
 	
 	/**
 	 * @var String
 	 */
 	private $callName;
-
+	
+	/**
+	 * @var String
+	 */
+	private $sectionName;	
+	
+	/**
+	 * @var Boolean
+	 */
+	private $httpOutput  = false;
+	
+	/**
+	 * @param c_ChangeBootStrap $bootStrap
+	 * @param string $sectionName
+	 * @param boolean $devMode
+	 */
+	public function __construct($bootStrap, $sectionName, $devMode)
+	{
+		$this->httpOutput = defined('HTTP_MODE');
+		$this->bootStrap = $bootStrap;
+		$this->sectionName = $sectionName;
+		$cmdNamePrefix = ($sectionName === 'framework') ? '' : $sectionName . '.'; 
+		$this->callName = $cmdNamePrefix . $this->getName();
+		$this->devMode = $devMode;
+	}
+		
 	/**
 	 * @return String
 	 */
@@ -31,33 +56,19 @@ abstract class  c_ChangescriptCommand
 		return strtolower($shortClassName[0].preg_replace('/([A-Z])/', '-${0}', substr($shortClassName, 1)));
 	}
 	
-	function getFullName()
+	/**
+	 * @return Boolean default false
+	 */
+	function httpOutput($httpOutput = null)
 	{
-		$class = new ReflectionClass($this);
-		$fileName = $class->getFileName();
-		$defineDir = dirname($fileName);
-		if (basename($defineDir) == "default")
+		$result = $this->httpOutput;
+		if ($httpOutput !== null)
 		{
-			$dir = $defineDir."/../..";
-			return $this->getName();
+			$this->httpOutput = ($httpOutput == true);
 		}
-		else
-		{
-			$dir = $defineDir."/..";
-		}
-		$prefixDir = basename(realpath($dir));
-		$matches = null;
-		if (preg_match('/^(.*?)-[0-9].*$/', $prefixDir, $matches))
-		{
-			$prefixDir = $matches[1]; 
-		}
-		if ($prefixDir == "framework")
-		{
-			return $this->getName();
-		}
-		return $prefixDir.".".$this->getName();
+		return $result;
 	}
-	
+		
 	/**
 	 * @return Boolean default false
 	 */
@@ -71,19 +82,15 @@ abstract class  c_ChangescriptCommand
 	 */
 	function getCallName()
 	{
-		if ($this->callName === null)
-		{
-			return $this->getName();
-		}
 		return $this->callName;
 	}
 	
 	/**
-	 * @param String $callName
+	 * @return string
 	 */
-	function setCallName($callName)
+	public function getSectionName()
 	{
-		$this->callName = $callName;
+		return $this->sectionName;
 	}
 
 	/**
@@ -94,11 +101,29 @@ abstract class  c_ChangescriptCommand
 		return null;
 	}
 	
-	function getCategory()
+	
+	/**
+	 * @param boolean $devMode
+	 * @return boolean
+	 */
+	function devMode($devMode = null)
 	{
-		return null;
+		$result = $this->devMode;
+		if ($devMode !== null)
+		{
+			$this->devMode = ($devMode == true);
+		}
+		return $result;
 	}
-
+	
+	/**
+	 * @return c_ChangeBootStrap
+	 */
+	protected function getBootStrap()
+	{
+		return $this->bootStrap;
+	}
+	
 	/**
 	 * @return String
 	 */
@@ -112,44 +137,6 @@ abstract class  c_ChangescriptCommand
 		return null;
 	}
 
-	/**
-	 * @param c_Changescript $parent
-	 */
-	function setParent($parent)
-	{
-		$this->parent = $parent;
-	}
-
-	/**
-	 * @return c_Changescript
-	 */
-	protected final function getParent()
-	{
-		return $this->parent;
-	}
-
-	/**
-	 * @param String $env
-	 * @return mixed
-	 */
-	protected final function getEnvVar($name)
-	{
-		return $this->getParent()->getEnvVar($name);
-	}
-
-	/**
-	 * executes a command (getParent()->executeCommand()) and returns the command output
-	 * @param String $cmdName
-	 * @param String[] $args
-	 * @return String the command output
-	 */
-	protected final function forward($cmdName, $args)
-	{
-		ob_start();
-		$this->getParent()->executeCommand($cmdName, $args);
-		return trim(ob_get_clean());
-	}
-	
 	private $listeners;
 	
 	/**
@@ -173,10 +160,9 @@ abstract class  c_ChangescriptCommand
 		if (isset($this->listeners[$pointcut]) && !isset($this->reachedPointCuts[$pointcut]))
 		{
 			$this->reachedPointCuts[$pointcut] = true;
-			$parent = $this->getParent();
 			foreach ($this->listeners[$pointcut] as $commandName)
 			{
-				$parent->executeCommand($commandName);
+				$this->executeCommand($commandName);
 			}
 		}
 	}
@@ -197,21 +183,18 @@ abstract class  c_ChangescriptCommand
 	}
 
 	/**
-	 * @param Boolean $embeded
+	 * @return string
 	 */
-	function setEmbeded($embeded)
+	protected function getChangeCmdName()
 	{
-		$this->embeded = $embeded;
+		if ($this->httpOutput)
+		{
+			return '';
+		}
+		return $this->getBootStrap()->getProperties()->getProperty("CHANGE_COMMAND", 'change.php');
 	}
 
-	/**
-	 * @return Boolean
-	 */
-	protected function isEmbeded()
-	{
-		return $this->embeded;
-	}
-
+	
 	/**
 	 * @param Integer $completeParamCount the parameters that are already complete in the command line
 	 * @param String[] $params
@@ -223,74 +206,101 @@ abstract class  c_ChangescriptCommand
 	{
 		return null;
 	}
-
-	function log($message, $type = "info")
+	
+	
+	/**
+	 * @param string $message
+	 * @param integer $color FG_GREEN = 32 FG_MAGENTA = 35  FG_RED = 31;
+	 */
+	protected function echoMessage($message, $color = null)
+	{
+		if ($this->httpOutput)
+		{
+			if ($color === -1)
+			{
+				echo $message;				
+			}
+			else
+			{
+				$class = ($color === null) ? "row_std" : "row_" . $color;
+				echo "<span class=\"$class\">", nl2br(htmlspecialchars($message)), "</span>";	
+			}			
+		}
+		else
+		{
+			if ($color === null || $color === -1)
+			{
+				echo $message;
+			}
+			else
+			{
+				echo "\x1b[" , 2 . ';', $color, 'm' . $message. "\x1b[m";
+			}
+		}
+	}
+	
+	/**
+	 * @param string $message
+	 * @param string $type
+	 */
+	public function log($message, $type = "info")
 	{
 		switch ($type)
 		{
 			case "error":
-				$this->errorMessage($message);
+				$this->echoMessage($message . PHP_EOL, 31);
+				break;
+			case "warn":
+				$this->echoMessage($message . PHP_EOL, 35);
+				break;
+			case "validation":
+				$this->echoMessage($message . PHP_EOL, 32);
+				break;
+			case "raw":
+				$this->echoMessage($message, -1);
 				break;
 			default:
-				$this->message($message);
+				$this->echoMessage($message . PHP_EOL);
 		}
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function commandUsage()
+	{
+		$description = $this->getDescription();
+		if ($description !== null)
+		{
+			$this->log(ucfirst($this->getCallName()).": ".$description);
+		}
+		$this->log("Usage: ".basename($this->getChangeCmdName())." ".$this->getCallName()." ".$this->getUsage());
 	}
 
 	/**
 	 * @param String $message
-	 * @param const $color one of the FG_XXX constants, optional
+	 * @param const $color one of the constants, optional
 	 */
 	protected function message($message, $color = null)
 	{
-		$this->getParent()->message($message, $color);
+		switch ($color) 
+		{
+
+			case 31:
+			case 32:
+			case 35:
+				$this->echoMessage($message . PHP_EOL, $color);
+				break;
+			case -1:
+				$this->echoMessage($message, $color);
+				break;	
+			default:
+				$this->echoMessage($message . PHP_EOL);
+				break;
+		}
 	}
 	
 	private $errorCount = 0;
-
-	/**
-	 * print colorized message (red)
-	 * @param String $message
-	 */
-	protected function errorMessage($message, $increment = true)
-	{
-		if ($increment)
-		{
-			$this->errorCount = $this->errorCount +1;
-		}
-		$this->getParent()->errorMessage($message);
-	}
-	
-	protected function debugMessage($message)
-	{
-		$this->getParent()->debugMessage($message);
-	}
-	
-	/**
-	 * print colorized message (magenta)
-	 * @param String $message
-	 */
-	protected function warnMessage($message)
-	{
-		$this->getParent()->warnMessage($message);
-	}
-	
-	/**
-	 * print colorized message (green)
-	 * @param String $message
-	 */
-	protected function okMessage($message)
-	{
-		$this->getParent()->okMessage($message);
-	}
-	
-	/**
-	 * print colorized message (green)
-	 * @param String $message
-	 */
-	protected function rawMessage($message)
-	{
-		$this->getParent()->okMessage($message);
-	}
 	
 	protected function hasError()
 	{
@@ -301,16 +311,52 @@ abstract class  c_ChangescriptCommand
 	{
 		return $this->errorCount;
 	}
-
+	
 	/**
-	 * @param String $relativePath
-	 * @return String
+	 * print colorized message (red)
+	 * @param String $message
 	 */
-	protected function getResourcePath($relativePath)
+	protected function errorMessage($message, $increment = true)
 	{
-		return realpath($this->getParent()->getBaseDir()."/resources/".$relativePath);
+		if ($increment)
+		{
+			$this->errorCount = $this->errorCount +1;
+		}
+		$this->log($message, 'error');
 	}
-
+	
+	protected function debugMessage($message)
+	{
+		$this->log($message);
+	}
+	
+	/**
+	 * print colorized message (magenta)
+	 * @param String $message
+	 */
+	protected function warnMessage($message)
+	{
+		$this->log($message, 'warn');
+	}
+	
+	/**
+	 * print colorized message (green)
+	 * @param String $message
+	 */
+	protected function okMessage($message)
+	{
+		$this->log($message, 'validation');
+	}
+	
+	/**
+	 * print colorized message (green)
+	 * @param String $message
+	 */
+	protected function rawMessage($message)
+	{
+		$this->log($message, 'raw');
+	}
+	
 	/**
 	 * @param String[] $params
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
@@ -339,22 +385,12 @@ abstract class  c_ChangescriptCommand
 	}
 
 	/**
-	 * @param Boolean $auto
-	 * @return c_ChangescriptCommand
-	 */
-	function setAutoYes($auto)
-	{
-		$this->autoYes = $auto;
-		return $this;
-	}
-
-	/**
 	 * @param String $question
 	 * @return Boolean true if setAutoY or if the user entered y
 	 */
 	protected final function yesNo($question)
 	{
-		return $this->autoYes || $this->question($question." (y/N)", "n") == "y";
+		return $this->question($question." (y/N)", "n") == "y";
 	}
 
 	/**
@@ -379,26 +415,11 @@ abstract class  c_ChangescriptCommand
 	}
 
 	/**
-	 * Execute an external command
-	 * @param String $cmd the command
-	 * @return String the output of the command
-	 * @throws Exception if the command did not runned correctly (exit code != 0)
-	 */
-	protected function systemExec($cmd, $msg = null)
-	{
-		return $this->getParent()->systemExec($cmd, $msg);
-	}
-
-	/**
 	 * @return null
 	 */
 	protected function quit($msg = "Exiting...")
 	{
-		if (!$this->embeded)
-		{
-			$msg = "=> ".$msg;
-		}
-		$this->message("$msg\n");
+		$this->message("=> ".$msg . PHP_EOL);
 		return null;
 	}
 
@@ -408,11 +429,7 @@ abstract class  c_ChangescriptCommand
 	protected final function quitOk($msg = "Exiting...")
 	{
 		$this->startPointCut("after");
-		if (!$this->embeded)
-		{
-			$msg = "=> ".$msg;
-		}
-		$this->okMessage("$msg\n");
+		$this->okMessage("=> ".$msg . PHP_EOL);
 		return null;
 	}
 
@@ -421,11 +438,7 @@ abstract class  c_ChangescriptCommand
 	 */
 	protected final function quitError($msg)
 	{
-		if (!$this->embeded)
-		{
-			$msg = "=> ".$msg;
-		}
-		$this->errorMessage("$msg\n");
+		$this->errorMessage("=> ".$msg . PHP_EOL);
 		return false;
 	}
 
@@ -434,11 +447,146 @@ abstract class  c_ChangescriptCommand
 	 */
 	protected final function quitWarn($msg)
 	{
-		if (!$this->embeded)
-		{
-			$msg = "=> ".$msg;
-		}
-		$this->warnMessage("$msg\n");
+		$this->warnMessage("=> ".$msg . PHP_EOL);
 		return null;
+	}
+
+	/**
+	 * @return String
+	 */
+	protected function getAuthor()
+	{
+		$user = getenv("USER");
+		if (empty($user))
+		{
+			return null;
+		}
+		return $user;
+	}
+
+	/**
+	 * @return String
+	 */
+	protected function getUser()
+	{
+		return $this->getAuthor();
+	}
+
+	/**
+	 * @return String
+	 */
+	protected function getApacheGroup()
+	{
+		$cdeps = $this->getComputedDeps();
+		return $cdeps["WWW_GROUP"];
+	}
+
+	/**
+	 * @return array
+	 */
+	protected function getComputedDeps()
+	{
+		return $this->getBootStrap()->getComputedDependencies();
+	}
+
+	/**
+	 * @return void
+	 */
+	protected function loadFramework()
+	{
+		if (!class_exists("Framework", false))
+		{
+			foreach (spl_autoload_functions() as $fct) 
+			{
+				if (is_array($fct) && ($fct[0] instanceof c_ChangeBootStrap))
+				{
+					spl_autoload_unregister($fct);
+				}
+			}
+			require_once(realpath(PROJECT_HOME."/framework/Framework.php"));
+		}
+	}
+
+	/**
+	 * @return String
+	 */
+	protected function getProfile()
+	{
+		if (file_exists("profile"))
+		{
+			return trim(f_util_FileUtils::read("profile"));
+		}
+		// Define profile
+		$profile = trim($this->getAuthor());
+		$this->warnMessage("No profile file, using user name as profile (".$profile.")");
+		f_util_FileUtils::write("profile", $profile);
+		return $profile;
+	}
+
+	/**
+	 * @return util_Properties
+	 */
+	protected function getProperties()
+	{
+		return $this->getBootStrap()->getProperties("change");
+	}
+	
+	
+	/**
+	 * Public executeCommand for other commands using
+	 * @param String $cmdName
+	 * @param String[] $args
+	 */
+	protected function executeCommand($cmdName, $args = array())
+	{
+		ob_start();
+	    $this->loadFramework();
+	    $fixedCommandName = strtolower($cmdName[0].preg_replace('/([A-Z])/', '-${0}', substr($cmdName, 1)));
+	    echo f_util_System::execChangeCommand($fixedCommandName, $args);
+	    $this->rawMessage(trim(ob_get_clean()));
+	}
+	
+
+	/**
+	 * @deprecated use $this
+	 * @return c_ChangescriptCommand
+	 */
+	protected final function getParent()
+	{
+		return $this;
+	}
+	
+	/**
+	 * @deprecated use executeCommand
+	 */
+	protected final function forward($cmdName, $args)
+	{
+		$this->executeCommand($cmdName, $args);
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	protected function systemExec($cmd, $msg = null)
+	{
+		ob_start();
+		echo f_util_System::exec($cmd, $msg);
+		$this->rawMessage(trim(ob_get_clean()));
+	}
+}
+
+abstract class commands_AbstractChangeCommand extends c_ChangescriptCommand
+{
+	
+}
+
+abstract class commands_AbstractChangedevCommand extends c_ChangescriptCommand
+{
+	/**
+	 * @deprecated use executeCommand
+	 */
+	protected function changecmd($cmdName, $params = array())
+	{
+		$this->executeCommand($cmdName, $params);
 	}
 }

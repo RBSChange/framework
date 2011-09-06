@@ -13,6 +13,16 @@ require_once dirname(__FILE__) . '/bootstrap.php';
 umask(0002);
 $bootStrap = new c_ChangeBootStrap(PROJECT_HOME);
 $bootStrap->setAutoloadPath(PROJECT_HOME."/cache/autoload");
+
 $argv = array_slice($_SERVER['argv'], 1);
-$script = new c_Changescript(__FILE__, PROJECT_HOME . DIRECTORY_SEPARATOR . 'framework', 'change');
-require("change_script.inc");
+
+$clearKey = array_search('--clear', $argv);
+if ($clearKey !== false)
+{
+	unset($argv[$clearKey]);
+	$argv = array_values($argv);
+	$bootStrap->cleanDependenciesCache();
+}
+
+$bootStrap->initCommands();
+$bootStrap->execute($argv);

@@ -13,6 +13,14 @@ class commands_DropDatabase extends commands_AbstractChangeCommand
 	{
 		return "ddb";
 	}
+	
+	/**
+	 * @return String[]
+	 */
+	function getOptions()
+	{
+		return array('force');
+	}
 
 	/**
 	 * @return String
@@ -21,6 +29,8 @@ class commands_DropDatabase extends commands_AbstractChangeCommand
 	{
 		return "drop database";
 	}
+	
+
 
 	/**
 	 * @param String[] $params
@@ -32,23 +42,25 @@ class commands_DropDatabase extends commands_AbstractChangeCommand
 		$this->message("== Drop database ==");
 		
 		$this->loadFramework();
-		$pp = f_persistentdocument_PersistentProvider::getInstance();
-		$dbInfos = $pp->getConnectionInfos();
-		if (!$this->isEmbeded())
+		if (!Framework::inDevelopmentMode())
 		{
-			if (!Framework::inDevelopmentMode())
-			{
-				$this->errorMessage("This operation is only available in development mode.");
-				return false;
-			}
+			return $this->quitError("This operation is only available in development mode.");
+		}
 
-			if (!$this->yesNo("*All* tables contained ".$dbInfos["database"]."@".$dbInfos["host"]." in will be deleted. Are you sure you want to drop the database ?"))
+		$pp = f_persistentdocument_PersistentProvider::getInstance();
+		if (!isset($options['force']))
+		{
+			$dbInfos = $pp->getConnectionInfos();
+			if (!$this->isEmbeded())
 			{
-				return $this->quit("Task cancelled. No changes were performed in database.");
+				if (!$this->yesNo("*All* tables contained ".$dbInfos["database"]."@".$dbInfos["host"]." in will be deleted. Are you sure you want to drop the database ?"))
+				{
+					return $this->quitOk("Task cancelled. No changes were performed in database.");
+				}
 			}
 		}
-		$pp->clearDB();
 		
+		$pp->clearDB();	
 		return $this->quitOk("Database cleared successFully");
 	}
 }

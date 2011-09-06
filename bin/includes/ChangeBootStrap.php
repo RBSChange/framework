@@ -339,13 +339,33 @@ class c_ChangeBootStrap
 	{ 
 		if ($this->projectDependencies === null)
 		{
-			$this->projectDependencies = array();		
-			$installXMLDoc = f_util_DOMUtils::fromPath($this->getDescriptorPath());
-			foreach ($installXMLDoc->getElementsByTagName('package') as $package) 
+			$this->projectDependencies = array();	
+			if (is_readable($this->getDescriptorPath()))
+			{	
+				$installXMLDoc = f_util_DOMUtils::fromPath($this->getDescriptorPath());
+				foreach ($installXMLDoc->getElementsByTagName('package') as $package) 
+				{
+					/* @var $package DOMElement */
+					$infos = c_Package::getInstanceFromPackageElement($package, $this->projectHomePath);
+					$this->projectDependencies[$infos->getKey()] = $infos;
+				}
+			}
+			else
 			{
-				/* @var $package DOMElement */
-				$infos = c_Package::getInstanceFromPackageElement($package, $this->projectHomePath);
-				$this->projectDependencies[$infos->getKey()] = $infos;
+				
+				//Build Temporary dependencies List for framework and modules
+				$p = $this->getFrameworkPackage();
+				$this->projectDependencies[$p->getKey()] = $p;
+				$paths = glob($this->projectHomePath . '/modules/*/install.xml');
+				if (is_array($paths));
+				{
+					foreach ($paths as $path) 
+					{
+						$installXMLDoc = f_util_DOMUtils::fromPath($path);
+						$p = c_Package::getInstanceFromPackageElement($installXMLDoc->documentElement, $this->projectHomePath);
+						$this->projectDependencies[$p->getKey()] = $p;
+					}
+				}
 			}
 		}
 		return $this->projectDependencies;
@@ -618,5 +638,286 @@ class c_ChangeBootStrap
 			$this->pearInfos = array("include_path" => $include_path);
 		}
 		return $this->pearInfos;
+	}
+	
+	
+	//COMMAND Manager
+	/**
+	 * @var String[]
+	 */
+	private $commands;
+
+	/**
+	 * @var array<String, String[]>
+	 */
+	private $commandSections = array('PROD' => array(), 'DEV' => array());
+	
+	
+	public function initCommands()
+	{
+		$addDevCmds = $this->getProperties()->getProperty('DEVELOPMENT_MODE') == true;
+		$dependencies = $this->getProjectDependencies();
+		foreach ($dependencies as $dependency) 
+		{
+			/* @var $dependency c_Package */
+			if ($dependency->isFramework() || $dependency->isModule())
+			{
+				$section = $dependency->getName();
+				$cmdPath  = $dependency->getPath() . '/change-commands';
+				if (is_dir($cmdPath))
+				{
+					$this->appendToAutoload($cmdPath);
+					$this->addCommandDir($cmdPath, $section, false);
+				}
+				
+				$devPath = $dependency->getPath() .'/changedev-commands';
+				if ($addDevCmds && is_dir($devPath))
+				{
+					$this->appendToAutoload($devPath);
+					$this->addCommandDir($devPath, $section, true);
+				}
+			}
+		}	
+	}
+	
+	/**
+	 * @param String $path
+	 * @param String $sectionName
+	 * @param Boolean $devCommand
+	 */
+	private function addCommandDir($path, $sectionName, $devCommand)
+	{
+		$part = $devCommand ? 'DEV' : 'PROD';
+		if (!isset($this->commandSections[$part][$sectionName]))
+		{
+			$this->commandSections[$part][$sectionName] = array();
+		}
+		$this->commandSections[$part][$sectionName][] = $path;
+		
+		if (is_dir($path."/default"))
+		{
+			$this->addCommandDir($path."/default", 'framework', $devCommand);
+		}
+	}
+	
+	/**
+	 * @param string $className
+	 * @param string $callName
+	 * @param string $sectionName
+	 * @param boolean $devMode
+	 * @throws Exception
+	 * @return c_ChangescriptCommand
+	 */
+	private function getCommandByClassName($className, $sectionName, $devMode)
+	{
+		$commandClassName = "commands_".$className;
+		if (!class_exists($commandClassName))
+		{
+			throw new Exception("Command class not found $commandClassName");
+		}
+		$command = new $commandClassName($this, $sectionName, $devMode);
+		if (!($command instanceof c_ChangescriptCommand))
+		{
+			throw new Exception("$commandClassName is not a c_ChangescriptCommand class");
+		}
+		return $command;
+	}
+	
+	/**
+	 * 
+	 * @param string[] $commandDirs
+	 * @param string $sectionName
+	 * @param boolean $devMode
+	 */
+	private function getCommandByDirs($commandDirs, $sectionName, $devMode = false)
+	{
+		$cmdNamePrefix = ($sectionName == "framework") ? '' : $sectionName . '.'; 
+		$commands = array();
+		foreach ($commandDirs as $cmdDir)
+		{
+			foreach (scandir($cmdDir) as $file)
+			{
+				$matches = array();
+				if (!preg_match('/^([a-zA-Z0-9_]+)\.php$/', $file, $matches))
+				{
+					continue;
+				}
+
+				$commandName = $matches[1];				
+				$command = $this->getCommandByClassName($commandName, $sectionName, $devMode);
+				$commands[] = $command;
+			}
+		}
+		return $commands;
+	}
+	
+	/**
+	 * @return c_ChangescriptCommand[]
+	 */
+	public function getCommands()
+	{
+		if ($this->commands === null)
+		{
+			$this->commands = array();			
+			foreach ($this->commandSections as $devStr => $data)
+			{
+				$devMode = ($devStr === 'DEV');
+				foreach ($data as $sectionName => $commandDirs)
+				{
+					$this->commands  = array_merge($this->commands,  $this->getCommandByDirs($commandDirs, $sectionName, $devMode));
+				}
+			}
+		}
+		return $this->commands;
+	}
+	
+	/**
+	 * @param String $commandName
+	 * @return c_ChangescriptCommand
+	 */
+	public function getCommand($commandName)
+	{
+		foreach ($this->getCommands() as $cmd)
+		{
+			/* @var $cmd c_ChangescriptCommand */
+			if ($commandName === $cmd->getCallName() || $commandName === $cmd->getAlias())
+			{	
+				return $cmd;
+			}
+		}
+		throw new Exception("Unable to find command $commandName");
+	}
+		
+	/**
+	 * @param String[] $args
+	 */
+	function execute($args)
+	{
+		try
+		{
+			if (count($args) == 0 || $args[0][0] == "-")
+			{
+				$args = array('usage');
+			}
+			elseif (in_array("-h", $args) || in_array("--help", $args))
+			{
+				
+				$this->_executeCommand('usage', array_merge(array('getUsage'), $args));
+				return;
+			}
+			$cmdName = $args[0];
+			switch ($cmdName)
+			{
+				case "getCommands":
+					$this->_executeCommand('usage', $args);
+					break;
+				case "getOptions":
+					$this->_executeCommand('usage', $args);
+					break;
+				case "getParameters":
+					$this->_executeCommand('usage', $args);
+					break;
+				default:
+					
+					$this->_executeCommand($cmdName, array_slice($args, 1));
+					break;
+			}
+		}
+		catch (Exception $e)
+		{
+			$message =  "Error line ". $e->getLine()." (".$e->getFile()."): ".$e->getMessage();
+			if (defined('HTTP_MODE'))
+			{
+				echo "<span class=\"row_31\">", nl2br(htmlspecialchars($message)), "</span>";
+			}
+			else
+			{
+				echo $message;
+			}
+		}
+	}
+		
+	/**
+	 * @param String $cmdName
+	 * @param String[] $args
+	 */
+	protected function _executeCommand($cmdName, $args = array())
+	{
+		$command = $this->getCommand($cmdName);
+		$command->setListeners($this->getListeners($command->getCallName()));
+		$parsedArgs = $this->parseArgs($args);
+		if (!$command->execute($parsedArgs['params'], $parsedArgs['options']))
+		{
+			throw new Exception("Error on execute $cmdName");
+		}
+	}
+	
+	/**
+	 * Get the value of options (--<optionName>[=value])
+	 * @param String[] $args
+	 * @return array("options" => array<String, String>, "params" => String[]) where the option array key is the option name, the potential option value or true
+	 */
+	public function parseArgs($args)
+	{
+		$options = array();
+		$params = array();
+		foreach ($args as $key => $arg)
+		{
+			if (preg_match("/^--([^=]*)(=(.*)){0,1}$/", $arg, $matches) > 0)
+			{
+				if (isset($matches[3]))
+				{
+					$optValue = $matches[3];
+				}
+				else
+				{
+					$optValue = true;
+				}
+				$options[$matches[1]] = $optValue;
+			}
+			else
+			{
+				$params[] = $arg;
+			}
+		}
+		return array("options" => $options, "params" => $params);
+	}
+
+	/**
+	 * @param string $commandName
+	 * @return array<String, String[]> pointcut => commandNames
+	 */
+	private function getListeners($commandName)
+	{
+		$listeners = array();
+		foreach ($this->commandSections as $dev => $data)
+		{
+			foreach ($data as $sectionName => $paths) 
+			{
+				foreach ($paths as $path)
+				{
+					$configFile = $path."/".$commandName."-listeners.xml";
+					//echo "Test $configFile\n";
+					if (file_exists($configFile))
+					{
+						$doc = new DOMDocument();
+						if (!$doc->load($configFile))
+						{
+							throw new Exception("Could not load $configFile");
+						}
+						foreach ($doc->documentElement->getElementsByTagName("listener") as $listenerElem)
+						{
+							$pointcut = $listenerElem->getAttribute("pointcut");
+							if (!isset($listeners[$pointcut]))
+							{
+								$listeners[$pointcut] = array();
+							}
+							$listeners[$pointcut][] = $listenerElem->getAttribute("command");
+						}
+					}
+				}
+			}
+		}
+		return $listeners;
 	}
 }

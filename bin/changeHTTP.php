@@ -12,12 +12,22 @@ if (!defined("PROJECT_HOME"))
 		exit(-1);
 	}
 }
+define("HTTP_MODE", true);
 
 require_once dirname(__FILE__) . '/bootstrap.php';
 umask(0002);
 $bootStrap = new c_ChangeBootStrap(PROJECT_HOME);
 $bootStrap->setAutoloadPath(PROJECT_HOME."/cache/autoload");
 
-$argv = $_POST['argv'];
-$script = new c_Changescripthttp(__FILE__, PROJECT_HOME . DIRECTORY_SEPARATOR . 'framework', 'change');
-require("change_script.inc");
+$argv = isset($_POST['argv']) ? $_POST['argv'] : array();
+
+$clearKey = array_search('--clear', $argv);
+if ($clearKey !== false)
+{
+	unset($argv[$clearKey]);
+	$argv = array_values($argv);
+	$bootStrap->cleanDependenciesCache();
+}
+
+$bootStrap->initCommands();
+$bootStrap->execute($argv);

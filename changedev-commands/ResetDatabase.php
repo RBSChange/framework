@@ -13,6 +13,14 @@ class commands_ResetDatabase extends commands_AbstractChangeCommand
 	{
 		return "rdb";
 	}
+	
+	/**
+	 * @return String[]
+	 */
+	function getOptions()
+	{
+		return array('force');
+	}
 
 	/**
 	 * @return String
@@ -36,31 +44,32 @@ class commands_ResetDatabase extends commands_AbstractChangeCommand
 		{
 			return $this->quitError("This operation is only available in development mode.");
 		}
-		
-		$dbInfos = f_persistentdocument_PersistentProvider::getInstance()->getConnectionInfos();
-		if (!$this->yesNo("*All* tables contained ".$dbInfos["database"]."@".$dbInfos["host"]." in will be deleted. Are you sure you want to reset the database ?"))
+		if (!isset($options['force']))
 		{
-			return $this->quitOk("Task cancelled. No changes were performed in database.");
+			$dbInfos = f_persistentdocument_PersistentProvider::getInstance()->getConnectionInfos();
+			if (!$this->yesNo("*All* tables contained ".$dbInfos["database"]."@".$dbInfos["host"]." in will be deleted. Are you sure you want to reset the database ?"))
+			{
+				return $this->quitOk("Task cancelled. No changes were performed in database.");
+			}
 		}
 		
-		$parent = $this->getParent();
-		
 		//disable site bo and cron
-		$parent->executeCommand("disableSite");
+		$this->executeCommand("disableSite");
 		
 		//If document cache not stored in f_cache
-		$parent->executeCommand("clearDocumentscache");
+		$this->executeCommand("clearDocumentscache");
 		
-		$parent->executeCommand("dropDatabase");
-		$parent->executeCommand("compileDocuments");
-		$parent->executeCommand("generateDatabase");
-		$parent->executeCommand("clearDatacache");
-		$parent->executeCommand("compileAll");
-		$parent->executeCommand("importInitData");
-		$parent->executeCommand("initPatchDb");
+		$this->executeCommand("dropDatabase" , array('--force'));
+		$this->executeCommand("compileDocuments");
+		$this->executeCommand("generateDatabase");
+		$this->executeCommand("clearDatacache");
+		$this->executeCommand("compileAll");
+		$this->executeCommand("importInitData");
+		$this->executeCommand("initPatchDb");
 		
 		//enable bo and cron
-		$parent->executeCommand("enableSite");
+		$this->executeCommand("enableSite");
+		
 		return $this->quitOk("You now need to disconnect from the backoffice and reconnect.");
 	}
 }
