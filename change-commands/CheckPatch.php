@@ -42,7 +42,7 @@ class commands_CheckPatch extends commands_AbstractChangeCommand
 				$module = str_replace('modules_', '', $packageName);
 				foreach ($patchList as $patchName)
 				{
-					$this->log('  ' . CHANGE_COMMAND . ' apply-patch ' . $module . ' ' . $patchName);
+					$this->log($this->getChangeCmdName() . ' apply-patch ' . $module . ' ' . $patchName);
 				}
 			}
 		}

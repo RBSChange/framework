@@ -281,11 +281,9 @@ class ClassResolver implements ResourceResolver
 	 * @param Boolean $override
 	 */
 	public function appendDir($dirPath, $override = false)
-	{
-		$ini = $this->getPathsToAnalyse();
-		
+	{		
 		// let's do our fancy work
-		foreach ($ini as $entry)
+		foreach ($this->getPathsToAnalyse() as $entry)
 		{
 			// directory mapping
 			$path = $this->replaceConstants($entry['path']);			
@@ -322,7 +320,6 @@ class ClassResolver implements ResourceResolver
 					return;			
 				}
 			}
-
 		}
 	}
 	

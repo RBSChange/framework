@@ -37,16 +37,16 @@ class commands_ApplyHotfix extends commands_CheckHotfix
 		$patches = PatchService::getInstance()->check();
 		if (count($patches) > 0)
 		{
-			$errStr = "Your project must apply the following patches before to apply any hotfix:\n";
+			$errStr = array("Your project must apply the following patches before to apply any hotfix:");
 			foreach ($patches as $packageName => $patchList)
 			{
 				$module = str_replace('modules_', '', $packageName);
 				foreach ($patchList as $patchName)
 				{
-					$errStr .= '  ' . CHANGE_COMMAND . ' apply-patch ' . $module . ' ' . $patchName."\n";
+					$errStr[]= $this->getChangeCmdName() . ' apply-patch ' . $module . ' ' . $patchName;
 				}
 			}
-			return $this->quitError($errStr);
+			return $this->quitError(implode(PHP_EOL, $errStr));
 		}
 		
 		$hotfix = $params[0];
@@ -64,37 +64,55 @@ class commands_ApplyHotfix extends commands_CheckHotfix
 			$hotfixNumber = intval($matches[2]);
 		}
 		
-		$hotfixes = $this->getHotfixes();
-		if (!isset($hotfixes[$hotfixNumber]))
+		$allHotFix = $this->getHotfixes();
+		if (count($allHotFix) == 0)
 		{
-			return $this->quitError("Hotfix $hotfixNumber is not available for your project");
+			return $this->quitError("No hotfix to apply. See check-hotfix");
 		}
 		
-		$firstHotfixName = f_util_ArrayUtils::firstElement($hotfixes);
-		list ($category, $componentName, $version, $hotfix) = explode('/', str_replace('-', '/', $firstHotfixName));
-		if ($hotfix != $hotfixNumber)
+		
+		/* @var $hotfixPackage c_Package */
+		$hotfixPackage = f_util_ArrayUtils::firstElement($allHotFix);
+		if ($hotfixPackage->getHotfix() != $hotfixNumber)
 		{
+			$hotFix = $hotfixPackage->getHotfix();
+			$firstHotfixName = $hotfixPackage->__toString();
 			return $this->quitError("You must first apply hotfix number $hotfix ($firstHotfixName). See check-hotfix");
 		}
 		
-		$bootStrap = $this->getParent()->getBootStrap();
-		$hotfixPath = $bootStrap->installComponent($category, $componentName, $version, $hotfix);
-		if ($hotfixPath === null)
+		$bootStrap = $this->getBootStrap();
+		$tmpFile = null;
+		$dr = $bootStrap->downloadFile($hotfixPackage->getDownloadURL(), $tmpFile);
+		if ($dr !== true)
 		{
-			return $this->quitError("Unable to download hotfix $firstHotfixName");
+			return $this->quitError($dr);
+		}
+		$tmpPath = $tmpFile . '.unzip';
+		$tmpPackage = $bootStrap->unzipPackage($tmpFile, $tmpPath);
+		if ($tmpPackage === null || 
+			$tmpPackage->getKey() != $hotfixPackage->getKey() || 
+			$tmpPackage->getHotfixedVersion() != $hotfixPackage->getHotfixedVersion())
+		{
+			$this->warnMessage('Invalid zip archive: ' . $tmpFile);
+			return null;
 		}
 		
-		$this->getParent()->executeCommand("disable-site");
+		$projPackages = $bootStrap->getProjectDependencies();
 		
-		if (!$bootStrap->linkToProject($category, $componentName, $version, $hotfix))
-		{
-			return $this->quitError("Unable to link '$firstHotfixName' in project");
-		}
+		$package = $projPackages[$tmpPackage->getKey()];
 		
-		if (!$bootStrap->updateProjectDependencies($category, $componentName, $version, $hotfix))
-		{
-			return $this->quitError("Unable to update file project dependencies change.xml");
-		}		
+		/* @var $package c_Package */
+		$package->setVersion($tmpPackage->getVersion());
+		$package->setHotfix($tmpPackage->getHotfix());
+		$bootStrap->updateProjectPackage($package);
+		
+		$this->executeCommand("disable-site");
+		
+		f_util_FileUtils::rmdir($tmpPackage->getPath());
+		f_util_FileUtils::cp($tmpPackage->getTemporaryPath(), $tmpPackage->getPath());
+		f_util_FileUtils::rmdir($tmpPackage->getTemporaryPath());
+		
+		$this->executeCommand("update-autoload" , array(substr($tmpPackage->getRelativePath(), 1)));
 		
 		$patches = PatchService::resetInstance()->check();
 		foreach ($patches as $packageName => $patchList)
@@ -102,11 +120,12 @@ class commands_ApplyHotfix extends commands_CheckHotfix
 			$module = str_replace('modules_', '', $packageName);
 			foreach ($patchList as $patchName)
 			{
-				$this->getParent()->executeCommand("apply-patch", array($module, $patchName));
+				$this->executeCommand("apply-patch", array($module, $patchName));
 			}
 		}
 
-		$this->getParent()->executeCommand("enable-site");		
+		$this->getParent()->executeCommand("enable-site");	
+			
 		return $this->quitOK("hotfix ".$hotfix." applied successfully");
 	}
 }

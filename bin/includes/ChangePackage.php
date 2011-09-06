@@ -454,6 +454,17 @@ class c_Package
 	}
 	
 	/**
+	 * @return string
+	 */
+	public function populateDefaultDownloadUrl()
+	{
+		$downloadURL = $this->getReleaseURL() . $this->getRelativeReleasePath() . '.zip';
+		$this->setDownloadURL($downloadURL);
+		$this->setReleaseURL(null);
+		return $downloadURL;
+	}
+	
+	/**
 	 * @return f_util_DOMDocument
 	 */
 	public function getInstallDocument()

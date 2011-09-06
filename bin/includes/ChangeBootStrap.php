@@ -317,14 +317,6 @@ class c_ChangeBootStrap
 	}
 	
 	/**
-	 * @return String[]
-	 */
-	public function getRemoteRepositories()
-	{
-		return array("http://osrepo.rbschange.fr");
-	}
-	
-	/**
 	 * @return string
 	 */
 	public function getReleaseRepository()
@@ -489,8 +481,8 @@ class c_ChangeBootStrap
 						{
 							if ($package->getDownloadURL() == null)
 							{
-								$downloadURL = $releaseURL . $package->getRelativeReleasePath() . '.zip';
-								$package->setDownloadURL($downloadURL);
+								$package->setReleaseURL($releaseURL);
+								$package->populateDefaultDownloadUrl();
 							}
 							$this->releaseDocuments[$releaseURL][$package->getKey()] = $package;
 						}
@@ -826,11 +818,11 @@ class c_ChangeBootStrap
 		{
 			if ($e->getFile() != __FILE__)
 			{
-				$message =  "Error line ". $e->getLine()." (".$e->getFile()."): ".$e->getMessage();
+				$message =  "Error line ". $e->getLine()." (".$e->getFile()."): ".$e->getMessage() . PHP_EOL;
 			}
 			else
 			{
-				$message =  $e->getMessage();
+				$message =  $e->getMessage() . PHP_EOL;
 			}
 			if (defined('HTTP_MODE'))
 			{
