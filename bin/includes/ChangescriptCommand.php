@@ -228,14 +228,7 @@ abstract class c_ChangescriptCommand
 		}
 		else
 		{
-			if ($color === null || $color === -1)
-			{
-				echo $message;
-			}
-			else
-			{
-				echo "\x1b[" , 2 . ';', $color, 'm' . $message. "\x1b[m";
-			}
+			echo $message;
 		}
 	}
 	
