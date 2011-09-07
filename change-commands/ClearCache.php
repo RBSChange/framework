@@ -45,8 +45,7 @@ class commands_ClearCache extends commands_AbstractChangeCommand
 			return $this->quitOk("Cache cleared");
 		}
 		
-		$parent = $this->getParent();
-		$parent->executeCommand("clearDatacache");
+		$this->executeCommand("clearDatacache");
 		return $this->quitOk("Cache cleared");
 	}
 }

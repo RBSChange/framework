@@ -63,8 +63,8 @@ class commands_CompileLocales extends commands_AbstractChangeCommand
 		if ( f_util_ArrayUtils::isEmpty($params))
 		{
 			$ls->regenerateLocales();
-			$this->getParent()->executeCommand('clear-webapp-cache');
-			$this->getParent()->executeCommand('clear-template-cache');
+			$this->executeCommand('clear-webapp-cache');
+			$this->executeCommand('clear-template-cache');
 			return $this->quitOk('All locales compiled successfully.');
 		}
 
@@ -97,8 +97,8 @@ class commands_CompileLocales extends commands_AbstractChangeCommand
 		{
 			return $this->quitError("All locales could not be compiled: ".$this->getErrorCount()." errors");
 		}
-		$this->getParent()->executeCommand('clear-webapp-cache');
-		$this->getParent()->executeCommand('clear-template-cache');
+		$this->executeCommand('clear-webapp-cache');
+		$this->executeCommand('clear-template-cache');
 		return $this->quitOk("Locales successfully compiled");
 	}
 }

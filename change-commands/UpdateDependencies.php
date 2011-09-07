@@ -30,7 +30,7 @@ class commands_UpdateDependencies extends commands_AbstractChangeCommand
 	function _execute($params, $options)
 	{
 		$this->message("== Update project dependencies ==");
-		$bootstrap = $this->getParent()->getBootStrap();
+		$bootstrap = $this->getBootStrap();
 		$dependencies = $bootstrap->getProjectDependencies();
 		
 		$modulePaths =  glob(PROJECT_HOME . '/modules/*/install.xml');
@@ -112,7 +112,7 @@ class commands_UpdateDependencies extends commands_AbstractChangeCommand
 	 */
 	protected function updateDependency($package)
 	{
-		$bootstrap = $this->getParent()->getBootStrap();
+		$bootstrap = $this->getBootStrap();
 		$currentXML = $package->getInstallDocument();
 		$tmpPackage = $bootstrap->getPackageFromXML($currentXML);
 		
@@ -166,7 +166,7 @@ class commands_UpdateDependencies extends commands_AbstractChangeCommand
 	 */
 	protected function downloadPackage($package, $usePackageVersion = false)
 	{
-		$bootstrap = $this->getParent()->getBootStrap();	
+		$bootstrap = $this->getBootStrap();	
 		$downloadURL = $package->getDownloadURL();
 		if ($downloadURL === null)
 		{

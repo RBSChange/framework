@@ -34,7 +34,7 @@ class commands_CompilePhptal extends commands_AbstractChangeCommand
 		$this->loadFramework();
 		PHPTALService::getInstance()->compileAttributes();
 		
-		$this->getParent()->executeCommand("clearWebappCache");
+		$this->executeCommand("clearWebappCache");
 
 		$this->quitOk("PHPTal extensions compiled successfully");
 	}

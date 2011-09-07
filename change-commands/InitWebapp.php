@@ -31,7 +31,7 @@ class commands_InitWebapp extends commands_AbstractChangeCommand
 	{
 		$this->message("== Init webapp ==");
 
-		$this->getParent()->executeCommand("compileConfig");
+		$this->executeCommand("compileConfig");
 
 		// Copy files
 		$this->loadFramework();
@@ -120,7 +120,7 @@ class commands_InitWebapp extends commands_AbstractChangeCommand
 		}
 		
 		// Apply file policy
-		$this->getParent()->executeCommand("applyWebappPolicy");
+		$this->executeCommand("applyWebappPolicy");
 		
 		$this->quitOk("Webapp initialized");
 	}

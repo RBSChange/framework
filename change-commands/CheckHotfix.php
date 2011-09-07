@@ -44,7 +44,7 @@ class commands_CheckHotfix extends commands_AbstractChangeCommand
 	function getHotfixes()
 	{
 		$hotfixesFiltered = array();
-		$bootStrap = $this->getParent()->getBootStrap();
+		$bootStrap = $this->getBootStrap();
 		
 		foreach ($bootStrap->getProjectDependencies() as $package) 
 		{

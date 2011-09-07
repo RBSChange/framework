@@ -73,7 +73,7 @@ class commands_ManageDataCache extends commands_AbstractChangeCommand
 						return $this->quitError("Could not update config");
 					}
 				}
-				$this->getParent()->executeCommand("compile-config");
+				$this->executeCommand("compile-config");
 				
 				$this->loadFramework();
 				f_DataCacheService::getInstance()->clearCommand();
@@ -117,7 +117,7 @@ class commands_ManageDataCache extends commands_AbstractChangeCommand
 						return $this->quitError("Could not update config");
 					}
 				}
-				$this->getParent()->executeCommand("compile-config");
+				$this->executeCommand("compile-config");
 				$this->quitOk("Data cache disabled");
 				break;
 		}

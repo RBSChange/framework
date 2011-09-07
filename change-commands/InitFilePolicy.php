@@ -33,9 +33,8 @@ class commands_InitFilePolicy extends commands_AbstractChangeCommand
 	{
 		$this->message("== Init file policy ==");
 		
-		$parent = $this->getParent();
-		$parent->executeCommand("applyProjectPolicy");
-		$parent->executeCommand("applyWebappPolicy");
+		$this->executeCommand("applyProjectPolicy");
+		$this->executeCommand("applyWebappPolicy");
 		
 		$this->quitOk("File policy initiated");
 	}

@@ -35,8 +35,8 @@ class commands_InitProject extends commands_AbstractChangeCommand
 	function _execute($params, $options)
 	{
 		$this->message("== Initializing project ==");
-		$parent = $this->getParent();
-		$parent->executeCommand("updateDependencies");
+
+		$this->executeCommand("updateDependencies");
 		
 		$computedDeps = $this->getComputedDeps();
 		
@@ -89,11 +89,11 @@ class commands_InitProject extends commands_AbstractChangeCommand
 
 		f_util_FileUtils::mkdir("mailbox");
 		
-		$this->getParent()->executeCommand("compileConfig");
+		$this->executeCommand("compileConfig");
 		$this->loadFramework();
 
 		// init-file-policy
-		$this->getParent()->executeCommand("applyProjectPolicy");
+		$this->executeCommand("applyProjectPolicy");
 
 		$this->quitOk("Project initialized");
 	}

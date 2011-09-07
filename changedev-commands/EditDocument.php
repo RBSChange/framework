@@ -251,7 +251,7 @@ class commands_EditDocument extends commands_AbstractChangedevCommand
 
 		// TODO: locales, forms
 
-		$this->getParent()->executeCommand("compile-documents");
+		$this->executeCommand("compile-documents");
 
 		$this->message("Executed SQL:\n".join("\n", $sqls)."
 
@@ -299,10 +299,10 @@ f_persistentdocument_PersistentProvider::getInstance()->delProperty('$moduleName
 
 		// TODO: locales, forms
 
-		$this->getParent()->executeCommand("compile-documents");
+		$this->executeCommand("compile-documents");
 		if ($newProp->isDocument())
 		{
-			$this->getParent()->executeCommand("compile-db-schema");
+			$this->executeCommand("compile-db-schema");
 			$compileSchema = '$this->execChangeCommand(\'compile-db-schema\');' . "\n";
 		}
 		
@@ -525,10 +525,10 @@ $compileSchema");
 
 		$this->updateDom($moduleName, $documentName, $doc, false);
 		
-		$this->getParent()->executeCommand("compile-documents");
+		$this->executeCommand("compile-documents");
 		if ($prop->isDocument())
 		{
-			$this->getParent()->executeCommand("compile-db-schema");
+			$this->executeCommand("compile-db-schema");
 			$compileSchema = '$this->execChangeCommand(\'compile-db-schema\');' . "\n";
 		}
 		else

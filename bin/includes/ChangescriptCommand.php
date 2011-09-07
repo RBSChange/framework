@@ -541,7 +541,7 @@ abstract class c_ChangescriptCommand
 	    ob_start();
 	    $fixedCommandName = strtolower($cmdName[0].preg_replace('/([A-Z])/', '-${0}', substr($cmdName, 1)));
 	   	echo f_util_System::execChangeCommand($fixedCommandName, $args);
-	    $this->rawMessage(trim(ob_get_clean()));
+	    $this->rawMessage(trim(ob_get_clean()) . PHP_EOL);
 	}
 
 	/**
@@ -555,7 +555,7 @@ abstract class c_ChangescriptCommand
 		if (!is_array($args)) {$args = array();}
 		array_unshift($args, $fixedCommandName);
 	    $this->getBootStrap()->execute($args);
-	    $this->rawMessage(trim(ob_get_clean()));		
+	    $this->rawMessage(trim(ob_get_clean()) . PHP_EOL);		
 	}
 	
 	/**

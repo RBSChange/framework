@@ -124,7 +124,7 @@ class commands_ApplyHotfix extends commands_CheckHotfix
 			}
 		}
 
-		$this->getParent()->executeCommand("enable-site");	
+		$this->executeCommand("enable-site");	
 			
 		return $this->quitOK("hotfix ".$hotfix." applied successfully");
 	}

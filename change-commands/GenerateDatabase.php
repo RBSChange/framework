@@ -69,7 +69,7 @@ class commands_GenerateDatabase extends commands_AbstractChangeCommand
 			{
 				$host = "localhost";
 			}
-			$props = $this->getParent()->getProperties("dbadmin_".$host);
+			$props = $this->getProperties("dbadmin_".$host);
 			if (!$pp->createDB($props))
 			{
 				return $this->quitError("You must create '".$dbInfos["database"]."@".$dbInfos["host"]."' database and give read/write access to '".$dbInfos["user"]."' user.");

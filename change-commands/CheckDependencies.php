@@ -43,7 +43,7 @@ class commands_CheckDependencies extends commands_AbstractChangeCommand
 			return;
 		}
 		$this->message("== Check project dependencies ==");
-		$bootstrap = $this->getParent()->getBootStrap();
+		$bootstrap = $this->getBootStrap();
 		$cpDeps = $bootstrap->getComputedDependencies();	
 		$this->okMessage('Release Repo (' . $bootstrap->getRelease() . ') :' . $bootstrap->getReleaseRepository());
 		

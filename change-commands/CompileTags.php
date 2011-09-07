@@ -35,7 +35,7 @@ class commands_CompileTags extends commands_AbstractChangeCommand
 		$ts = TagService::getInstance();
 		$ts->regenerateTags();
 		
-		$this->getParent()->executeCommand("clearWebappCache");
+		$this->executeCommand("clearWebappCache");
 		
 		$this->quitOk("Tags compiled successfully");
 	}

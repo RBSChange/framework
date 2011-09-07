@@ -24,15 +24,15 @@ class commands_ClearAll extends commands_AbstractChangeCommand
 	 */
 	function _execute($params, $options)
 	{
-		$this->message("== Clear all ==");
+		$this->message("== Clear all ==");	
+		$this->executeCommand("updateAutoload");
 		
-		$parent = $this->getParent();
-		$parent->executeCommand("updateAutoload");
-		$parent->executeCommand("clearLog");
-		$parent->executeCommand("clearCache");
-		$parent->executeCommand("clearWebappCache");
-		$parent->executeCommand("clearDatacache");
-		$parent->executeCommand("clearDocumentscache");
+		$this->loadFramework();
+		$this->executeCommand("clearLog");
+		$this->executeCommand("clearCache");
+		$this->executeCommand("clearWebappCache");
+		$this->executeCommand("clearDatacache");
+		$this->executeCommand("clearDocumentscache");
 		$this->quitOk("All was cleared");
 	}
 }

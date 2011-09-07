@@ -32,7 +32,7 @@ Where options in:
 	public function _execute($params, $options)
 	{
 		$this->message("== Compile config ==");
-		$this->getParent()->getBootStrap()->cleanDependenciesCache();
+		$this->getBootStrap()->cleanDependenciesCache();
 		$cd = $this->getComputedDeps();
 		
 		$projectParser = new config_ProjectParser();
@@ -88,7 +88,7 @@ Where options in:
 				}
 				else
 				{
-					$this->getParent()->executeCommand("compile-js-dependencies");
+					$this->executeCommand("compile-js-dependencies");
 				}
 			}
 			if ($old["defines"]["SUPPORTED_LANGUAGES"] != $current["defines"]["SUPPORTED_LANGUAGES"])
@@ -100,9 +100,8 @@ Where options in:
 				}
 				else
 				{
-					$parent = $this->getParent();
-					$parent->executeCommand("generate-database");
-					$parent->executeCommand("compile-editors-config"); 	
+					$this->executeCommand("generate-database");
+					$this->executeCommand("compile-editors-config"); 	
 				}
 			}
 			if ($old["defines"]["CHANGE_USE_CORRECTION"] != $current["defines"]["CHANGE_USE_CORRECTION"]
@@ -115,7 +114,7 @@ Where options in:
 				}
 				else
 				{
-					$this->getParent()->executeCommand("compile-documents");	
+					$this->executeCommand("compile-documents");	
 				}
 			}
 			
@@ -136,7 +135,7 @@ Where options in:
 				}	
 			}
 		}
-		$this->getParent()->executeCommand("compile-injection");
+		$this->executeCommand("compile-injection");
 		
 		$this->quitOk("Config compiled");
 	}

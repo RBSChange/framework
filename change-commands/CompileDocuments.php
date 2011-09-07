@@ -125,7 +125,7 @@ class commands_CompileDocuments extends commands_AbstractChangeCommand
 		
 		if ($mustCompileConfig)
 		{
-			$this->getParent()->executeCommand("compile-config");
+			$this->executeCommand("compile-config");
 		}
 		
 		$this->quitOk("Documents compiled");
