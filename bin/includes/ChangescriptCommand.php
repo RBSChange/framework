@@ -534,24 +534,33 @@ abstract class c_ChangescriptCommand
 	
 	
 	/**
-	 * Public executeCommand for other commands using
 	 * @param String $cmdName
 	 * @param String[] $args
 	 */
 	protected function executeCommand($cmdName, $args = array())
-	{
-		ob_start();
-	    $this->loadFramework();
+	{	
+	    if (!class_exists("Framework", false))
+	    {
+	    	$this->executeCommandInProcess($cmdName, $args);
+	    	return;
+	    }
+	    
+	    ob_start();
 	    $fixedCommandName = strtolower($cmdName[0].preg_replace('/([A-Z])/', '-${0}', substr($cmdName, 1)));
-	    echo f_util_System::execChangeCommand($fixedCommandName, $args);
+	   	echo f_util_System::execChangeCommand($fixedCommandName, $args);
 	    $this->rawMessage(trim(ob_get_clean()));
 	}
-	
+
+	/**
+	 * @param String $cmdName
+	 * @param String[] $args
+	 */
 	protected function executeCommandInProcess($cmdName, $args = array())
 	{
 		ob_start();
+		$fixedCommandName = strtolower($cmdName[0].preg_replace('/([A-Z])/', '-${0}', substr($cmdName, 1)));
 		if (!is_array($args)) {$args = array();}
-		array_unshift($args, $cmdName);
+		array_unshift($args, $fixedCommandName);
 	    $this->getBootStrap()->execute($args);
 	    $this->rawMessage(trim(ob_get_clean()));		
 	}
