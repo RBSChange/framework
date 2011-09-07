@@ -62,9 +62,11 @@ class commands_UpdateDependencies extends commands_AbstractChangeCommand
 			$newDeps = array();
 			foreach ($dependencies as $package) 
 			{
-				if (isset($checked[$package->getKey()])) {continue;}		
+				/* @var $package c_Package */
+				if (isset($checked[$package->getKey()])) {continue;}
+				
 				$checked[$package->getKey()] = true;
-				$updateAutoload = $updateAutoload || $this->updateDependency($package);
+				if ($this->updateDependency($package)) {$updateAutoload = true;}
 				
 				$installDoc = $package->getInstallDocument();
 				if ($installDoc)
@@ -89,7 +91,7 @@ class commands_UpdateDependencies extends commands_AbstractChangeCommand
 		if ($updateAutoload)
 		{
 			$this->log('Update autoload...');
-			$this->getParent()->executeCommand('update-autoload');
+			$this->executeCommand('update-autoload');
 		}
 	}
 	
@@ -127,6 +129,7 @@ class commands_UpdateDependencies extends commands_AbstractChangeCommand
 				$this->message("Update version of " . $package->getKey() . " in project install.xml");
 			}
 			
+			$this->message('Copy ' . $package->getKey() . '-' . $package->getHotfixedVersion() . ' in project...');
 			f_util_FileUtils::rmdir($package->getPath());
 			f_util_FileUtils::cp($downloadPackage->getTemporaryPath(), $package->getPath());
 			f_util_FileUtils::rmdir($downloadPackage->getTemporaryPath());

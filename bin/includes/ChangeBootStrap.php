@@ -435,11 +435,14 @@ class c_ChangeBootStrap
 	public function getDependenciesFromXML($installXMLDoc)
 	{
 		$declaredDeps = array();
-		foreach ($installXMLDoc->getElementsByTagName('package') as $package) 
+		if ($installXMLDoc && $installXMLDoc->documentElement)
 		{
-			/* @var $package DOMElement */
-			$infos = c_Package::getInstanceFromPackageElement($package, $this->projectHomePath);
-			$declaredDeps[$infos->getKey()] = $infos;
+			foreach ($installXMLDoc->getElementsByTagName('package') as $package) 
+			{
+				/* @var $package DOMElement */
+				$infos = c_Package::getInstanceFromPackageElement($package, $this->projectHomePath);
+				$declaredDeps[$infos->getKey()] = $infos;
+			}
 		}
 		return $declaredDeps;
 	}

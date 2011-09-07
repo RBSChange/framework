@@ -71,7 +71,7 @@ class ClassResolver implements ResourceResolver
 	
 	protected function validateClassName($className)
 	{
-		if (! preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $className))
+		if (!preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $className))
 		{
 			if (Framework::inDevelopmentMode())
 			{
@@ -139,10 +139,6 @@ class ClassResolver implements ResourceResolver
 			foreach ($this->glob($path) as $phpPath) 
 			{
 				$files = $this->findFile($phpPath, $recursive, $exclude);
-				if (Framework::isInfoEnabled())
-				{
-					Framework::info('Scanning'. ($recursive ? ' recursive: ' : ': ') . $phpPath . ' -> ' . count($files) . ' files');
-				}
 				$this->constructClassList($files);
 			}		
 		}
