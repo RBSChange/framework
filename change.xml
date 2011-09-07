@@ -16,148 +16,21 @@
 				<version>1.9.0</version>
 			</versions>
 		</dependency>
-		
+
 		<dependency>
 			<name>pear/Date</name>
 			<versions>
 				<version>1.4.7</version>
 			</versions>
 		</dependency>
-		
-		<!-- For pdf text extraction -->
-		<dependency optionnal="true">
-			<name>bin/pdftotext</name>
-			<versions>
-				<version>3.01</version>
-			</versions>
-		</dependency>
-		
-		<!-- media & uixul modules. TODO: add FileUtils::getMime() that uses FileInfo and refactor -->
-		<dependency>
-			<name>extension/SimpleXML</name>
-			<versions>
-				<version>unknown</version>
-			</versions>
-			<description>
-			Starting (?) from revision 1.151.2.22, it should work
-			</description>
-		</dependency>
-						
-		<dependency>
-			<name>extension/dom</name>
-			<versions>
-				<version>unknown</version>
-			</versions>
-			<description>
-			DOM/XML API Version => 20031129
-			libxml Version => 2.6.24
-			</description>
-		</dependency>
-		
-		<dependency optionnal="true">
-			<name>extension/gd</name>
-			<versions>
-				<version>2.0</version>
-			</versions>
-			<description>
-			FreeType Support => enabled
-			FreeType Linkage => with freetype
-			FreeType Version => 2.1.10
-			T1Lib Support => enabled
-			GIF Read Support => enabled
-			GIF Create Support => enabled
-			JPG Support => enabled
-			PNG Support => enabled
-			WBMP Support => enabled
-			</description>
-		</dependency>
-		
-		
-		<dependency>
-			<name>extension/xsl</name>
-			<versions>
-				<version>unknown</version>	
-			</versions>
-			<description>
-				XSL => enabled
-				libxslt Version => 1.1.15
-				libxslt compiled against libxml Version => 2.6.24
-				EXSLT => enabled
-				libexslt Version => 1.1.15
-			</description>
-		</dependency>
-		
-		<dependency>
-			<name>extension/curl</name>
-			<versions>
-				<version>7.15.1</version>
-			</versions>
-			<description>
-			CURL support => enabled
-			CURL Information => libcurl/7.15.1 OpenSSL/0.9.8a zlib/1.2.3 libidn/0.5.18	
-			</description>
-		</dependency>
-		
-		<dependency>
-			<name>extension/date</name>
-			<versions>
-				<version>unknown</version>
-			</versions>
-			<description>
-			date/time support => enabled
-			</description>
-		</dependency>
-		
-		<dependency>
-			<name>extension/mbstring</name>
-			<versions>
-			   <version>3.7.1</version>
-			</versions>
-		</dependency>
-		
-		<dependency>
-			<name>extension/pdo_mysql</name>
-			<versions>
-				<!-- do not know what version to put here -->	
-				<version>5.0.22</version>
-			</versions>
-		</dependency>
-		
-		<dependency>
-			<name>extension/reflection</name>
-			<versions>
-			   <version>unknown</version>
-			</versions>
-		</dependency>
-		
-		<dependency>
-			<name>extension/SPL</name>
-			<versions>
-			   <version>unknown</version>
-			</versions>
-		</dependency>
-		
-		<dependency>
-			<name>extension/json</name>
-			<versions>
-			   <version>unknown</version>
-			</versions>
-		</dependency>
-		
-		<dependency>
-			<name>extension/iconv</name>
-			<versions>
-			   <version>unknown</version>
-			</versions>
-		</dependency>
-		
+
 		<dependency>
 			<name>pear/Mail</name>
-			<versions>	
+			<versions>
 				<version>1.2.0</version>
 			</versions>
 		</dependency>
-		
+
 		<dependency>
 			<name>pear/Net_SMTP</name>
 			<versions>
@@ -167,7 +40,7 @@
 			Used by MailService 
 			</description>
 		</dependency>
-		
+
 		<dependency>
 			<name>pear/Auth_SASL</name>
 			<versions>
@@ -177,62 +50,209 @@
 			Used by MailService 
 			</description>
 		</dependency>
-		
-		<dependency optionnal="true">
-			<name>pear/pear.phpunit.de/PHPUnit</name>
+
+		<dependency>
+			<name>lib/icons</name>
 			<versions>
-				<version>3.1.9</version>
-			</versions>
-			<description>
-			Used by change test
-			</description>
-		</dependency>
-		
-		<dependency optionnal="true">
-			<name>extension/oci8</name>
-			<versions>
-				<version>1.2.3</version>
-			</versions>
-			<description>
-			Only required if you want to use Oracle DB engine.
-			</description>
-		</dependency>
-		
-		<dependency optionnal="true">
-			<name>pear/PhpDocumentor</name>
-			<versions>
-				<version>1.4.0RC1</version>
-			</versions>
-			<description>
-			Used by change generate-doc
-			</description>
-		</dependency>
-		
-		<dependency optionnal="true">
-			<name>extension/memcache</name>
-			<description>
-			   Only required if you make the use of f_persistentdocument_MemcachedCacheService for document cache
-			</description>
-			<versions>
-				<version>2.2.5</version>
+				<version>3.5</version>
 			</versions>
 		</dependency>
-		
-		<dependency optionnal="true">
-			<name>extension/APC</name>
-			<description>
-			   For best performance, use APC
-			</description>
+
+		<dependency>
+			<name>lib/fckeditor</name>
 			<versions>
-				<version>3.0.19</version>
+				<version>2.6.3</version>
 			</versions>
 		</dependency>
-		
+
 		<dependency>
 			<name>lib/smarty</name>
 			<versions>
 				<version>2.6</version>
 			</versions>
 		</dependency>
+
+		<dependency>
+			<name>change-module/webservices</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+
+		<dependency>
+			<name>change-module/mailbox</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+
+		<dependency>
+			<name>change-module/contactcard</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+
+		<dependency>
+			<name>change-module/filter</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+
+		<dependency>
+			<name>change-module/form</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+
+		<dependency>
+			<name>change-module/markergas</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+
+		<dependency>
+			<name>change-module/skin</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+
+		<dependency>
+			<name>change-module/useractionlogger</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+
+		<dependency>
+			<name>change-module/uixul</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+
+		<dependency>
+			<name>change-module/list</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+
+		<dependency>
+			<name>change-module/media</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+
+		<dependency>
+			<name>change-module/notification</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+
+		<dependency>
+			<name>change-module/generic</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+
+		<dependency>
+			<name>change-module/preferences</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+
+		<dependency>
+			<name>change-module/mysqlindexer</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+
+		<dependency>
+			<name>change-module/solrsearch</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+
+		<dependency>
+			<name>change-module/rss</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+
+		<dependency>
+			<name>change-module/seo</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+
+		<dependency>
+			<name>change-module/dashboard</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+
+		<dependency>
+			<name>change-module/task</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+		
+		<dependency>
+			<name>change-module/theme</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+
+		<dependency>
+			<name>change-module/i18n</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+
+		<dependency>
+			<name>change-module/users</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+
+		<dependency>
+			<name>change-module/website</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+
+		<dependency>
+			<name>change-module/workflow</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+		
+		<dependency>
+			<name>change-module/zone</name>
+			<versions>
+				<version>3.5.0</version>
+			</versions>
+		</dependency>
+
 	</dependencies>
 </change>
