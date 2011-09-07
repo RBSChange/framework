@@ -5,6 +5,17 @@
  */
 class config_ProjectParser
 {
+	
+	/**
+	 * @return boolean
+	 */
+	public static function isCompiled()
+	{
+		$cacheConfigDir = PROJECT_HOME . DIRECTORY_SEPARATOR . 'build' . DIRECTORY_SEPARATOR . 'config';
+		$cacheFile = $cacheConfigDir."/project.php";
+		return is_readable($cacheFile);
+	}
+	
 	/**
 	 * @param string $path
 	 * @param string $value

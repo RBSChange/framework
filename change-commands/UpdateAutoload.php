@@ -57,7 +57,7 @@ class commands_UpdateAutoload extends commands_AbstractChangeCommand
 			}
 		}
 		
-		$this->executeCommand("compile-injection");
+		$this->executeCommand('compile-injection');
 		
 		if ($this->hasError())
 		{

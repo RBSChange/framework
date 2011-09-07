@@ -90,9 +90,20 @@ class commands_UpdateDependencies extends commands_AbstractChangeCommand
 		
 		if ($updateAutoload)
 		{
-			$this->log('Update autoload...');
-			$this->executeCommand('update-autoload');
+			require_once PROJECT_HOME . '/framework/config/ProjectParser.class.php';
+			if (config_ProjectParser::isCompiled())
+			{
+				$this->log('Update autoload...');
+				$this->executeCommand('update-autoload');
+			}
+			else
+			{
+				$this->log('Update autoload. Please wait: this can be long.');
+				ClassResolver::getInstance()->update();
+				$this->rawMessage('Please execute: ' . $this->getChangeCmdName() . ' compile-config');
+			}
 		}
+		return $this->quitOk("== project dependencies updated ==");
 	}
 	
 	/**

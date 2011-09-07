@@ -274,7 +274,7 @@ abstract class c_ChangescriptCommand
 		{
 			$this->log(ucfirst($this->getCallName()).": ".$description);
 		}
-		$this->log("Usage: ".basename($this->getChangeCmdName())." ".$this->getCallName()." ".$this->getUsage());
+		$this->log("Usage: ".$this->getChangeCmdName()." ".$this->getCallName()." ".$this->getUsage());
 	}
 
 	/**
@@ -496,14 +496,14 @@ abstract class c_ChangescriptCommand
 	protected function loadFramework()
 	{
 		if (!class_exists("Framework", false))
-		{
+		{			
 			foreach (spl_autoload_functions() as $fct) 
 			{
 				if (is_array($fct) && ($fct[0] instanceof c_ChangeBootStrap))
 				{
 					spl_autoload_unregister($fct);
 				}
-			}
+			}	
 			require_once(realpath(PROJECT_HOME."/framework/Framework.php"));
 		}
 	}
@@ -547,7 +547,15 @@ abstract class c_ChangescriptCommand
 	    $this->rawMessage(trim(ob_get_clean()));
 	}
 	
-
+	protected function executeCommandInProcess($cmdName, $args = array())
+	{
+		ob_start();
+		if (!is_array($args)) {$args = array();}
+		array_unshift($args, $cmdName);
+	    $this->getBootStrap()->execute($args);
+	    $this->rawMessage(trim(ob_get_clean()));		
+	}
+	
 	/**
 	 * @deprecated use $this
 	 * @return c_ChangescriptCommand
