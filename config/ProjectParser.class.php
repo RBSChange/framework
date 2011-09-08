@@ -464,7 +464,7 @@ class config_ProjectParser
 				{
 					$pname = 'modules_'.$moduleName;
 					$configArray['packageversion'][$pname] = array_merge($configArray['packageversion'][$pname], 
-						array('ENABLED' => true, 'VISIBLE' => true, 'CATEGORY' => null, 'ICON' => 'package', 'USETOPIC' => false));	
+						array('VISIBLE' => true, 'CATEGORY' => null, 'ICON' => 'package', 'USETOPIC' => false));	
 									
 					foreach ($moduleConfig['module'] as $key => $value)
 					{

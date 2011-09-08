@@ -6,10 +6,15 @@ class commands_AddModule extends commands_AbstractChangedevCommand
 	 */
 	public function getUsage()
 	{
-		$usage = "<moduleName> [icon]";
+		$usage = "<moduleName> [--icon=<iconName>] [--hidden] [--category=<e-commerce|admin>]";
 		return $usage;
 	}
 
+	public function getOptions()
+	{
+		return array('icon', 'hidden', 'category');
+	}
+	
 	/**
 	 * @return String
 	 */
@@ -24,7 +29,27 @@ class commands_AddModule extends commands_AbstractChangedevCommand
 	 */
 	protected function validateArgs($params, $options)
 	{
-		return count($params) >= 1;
+		if (count($params) != 1)
+		{
+			return false;
+		}
+		$moduleName = $params[0];
+		if (!preg_match('/^[a-z][a-z0-9]+$/', $moduleName))
+		{
+			$this->errorMessage("Invalid module name ([a-z][a-z0-9]+): " . $moduleName);
+			return false;
+		}
+		if (isset($options['icon']) && !is_string($options['icon']))
+		{
+			$this->errorMessage("Invalid icon name : " . $options['icon']);
+			return false;			
+		}
+		if (isset($options['category']) && !in_array($options['category'], array('e-commerce', 'admin')))
+		{
+			$this->errorMessage("Invalid category (e-commerce, admin): " . $options['category']);
+			return false;			
+		}
+		return true;
 	}
 
 	/**
@@ -37,14 +62,21 @@ class commands_AddModule extends commands_AbstractChangedevCommand
 		$this->message("== Add module ==");
 
 		$moduleName = $params[0];
-		$icon = isset($params[1]) ? $params[1] : "package";
-		
+		$icon = (isset($options['icon'])) ? $options['icon'] : 'package';
+		$hidden = (isset($options['hidden']) && $options['hidden'] == true);
+		$category = null;
+		if (isset($options['category']))
+		{
+			$category = $options['category'];
+		}
+
 		$this->loadFramework();
 		$modulePath = f_util_FileUtils::buildModulesPath($moduleName);
 		if (file_exists($modulePath))
 		{
 			return $this->quitError("Module $moduleName already exists");
 		}
+		$this->log('Create module dir: ' . $modulePath);
 		f_util_FileUtils::mkdir($modulePath);
 
 		// Make auto generated file
@@ -53,6 +85,8 @@ class commands_AddModule extends commands_AbstractChangedevCommand
 		$moduleGenerator->setVersion(FRAMEWORK_VERSION);
 		$moduleGenerator->setTitle(ucfirst($moduleName) . ' module');
 		$moduleGenerator->setIcon($icon);
+		$moduleGenerator->setCategory($category);
+		$moduleGenerator->setVisibility(!$hidden);
 		$moduleGenerator->generateAllFile();
 		
 		$p = c_Package::getNewInstance('modules', $moduleName, PROJECT_HOME);
@@ -63,11 +97,11 @@ class commands_AddModule extends commands_AbstractChangedevCommand
 		// Generate locale for new module
 		LocaleService::getInstance()->regenerateLocalesForModule($moduleName);
 
-		$this->changecmd("clear-webapp-cache");
-		$this->changecmd("compile-config");
-		$this->changecmd("compile-documents");
-		$this->changecmd("compile-editors-config");
-		$this->changecmd("compile-roles");
+		$this->executeCommand("clear-webapp-cache");
+		$this->executeCommand("compile-config");
+		$this->executeCommand("compile-documents");
+		$this->executeCommand("compile-editors-config");
+		$this->executeCommand("compile-roles");
 		 
 		return $this->quitOk('Module ' . $moduleName . ' ready');
 	}

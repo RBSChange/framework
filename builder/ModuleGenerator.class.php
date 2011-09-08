@@ -8,43 +8,48 @@ class builder_ModuleGenerator
 	 * Module name
 	 * @var string
 	 */
-	protected $name = null;
+	protected $name;
 
 	/**
 	 * Module author. Is used in header of generated file
 	 * @var string
 	 */
-	private $author = null;
+	private $author;
 
 	/**
 	 * Module version
 	 * @var string
 	 */
-	private $version = null;
+	private $version;
 
 	/**
 	 * Module title. Save in module.xml
 	 * @var string
 	 */
-	private $title = null;
+	private $title;
 
 	/**
 	 * Current date. This date is write in header of generated file.
 	 * @var string
 	 */
-	private $date = null;
+	private $date;
 
 	/**
 	 * Icon name
 	 * @var string
 	 */
-	private $icon = null;
+	private $icon;
 	
 	/**
 	 * Category (emplacement) of the module in the menu bar
 	 * @var string
 	 */
 	private $category;
+	
+	/**
+	 * @var boolean
+	 */
+	private $visibility = true;
 
 	/**
 	 * Constructor of builder_ModuleGenerator
@@ -115,6 +120,16 @@ class builder_ModuleGenerator
 		$this->category = $category;
 		return $this;
 	}
+	
+	/**
+	 * @param boolean $visibility
+	 * @return builder_ModuleGenerator
+	 */
+	public function setVisibility($visibility)
+	{
+		$this->visibility = $visibility;
+		return $this;
+	}
 
 	/**
 	 * Generate all module files. Used when a new module added to generate over writable or not files.
@@ -122,8 +137,7 @@ class builder_ModuleGenerator
 	 */
 	public function generateAllFile()
 	{
-		$this->generateDirectories();
-		
+		$this->generateDirectories();	
 		// Launch the generation of over writable files
 		$this->generateOnce();
 		$this->addConfiguration();
@@ -136,19 +150,24 @@ class builder_ModuleGenerator
 	{
 		$pathBase = f_util_FileUtils::buildModulesPath($this->name);
 		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase,  'config'));
-		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'forms', 'editor', 'rootfolder'));	
 		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'lib', 'services'));
 		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'persistentdocument', 'import'));
 		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'setup'));
 		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'style'));
-		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'templates', 'perspectives'));
-		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'forms', 'editor', 'rootfolder'));
-		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'forms', 'editor', 'folder'));
+		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'templates'));
+		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'forms', 'editor'));
+				
+		if ($this->visibility)
+		{
+			f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'templates', 'perspectives'));
+			f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'forms', 'editor', 'rootfolder'));
+			f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'forms', 'editor', 'folder'));
+		}
 	}
 	
 	private function addConfiguration()
 	{
-		$info = array('ENABLED' => true, 'VISIBLE' => true, 'CATEGORY' => $this->category, 'ICON' => $this->icon);
+		$info = array('VISIBLE' => $this->visibility, 'CATEGORY' => $this->category, 'ICON' => $this->icon);
 		Framework::addPackageConfiguration('modules_' . $this->name, $info);
 		ModuleService::clearInstance();
 	}
@@ -164,9 +183,13 @@ class builder_ModuleGenerator
 		// Generate configuration files
 		f_util_FileUtils::write(f_util_FileUtils::buildModulesPath($this->name, 'install.xml'), $this->generateFile('install.xml'));
 		f_util_FileUtils::write(f_util_FileUtils::buildModulesPath($this->name, 'config', 'module.xml'), $this->generateFile('config_module.xml'));
-		f_util_FileUtils::write(f_util_FileUtils::buildModulesPath($this->name, 'config', 'actions.xml'), $this->generateFile('config_actions.xml'));
-		f_util_FileUtils::write(f_util_FileUtils::buildModulesPath($this->name, 'config', 'rights.xml'), $this->generateFile('config_rights.xml'));
-		f_util_FileUtils::write(f_util_FileUtils::buildModulesPath($this->name, 'config', 'perspective.xml'), $this->generateFile('config_perspective.xml'));
+		
+		if ($this->visibility)
+		{
+			f_util_FileUtils::write(f_util_FileUtils::buildModulesPath($this->name, 'config', 'actions.xml'), $this->generateFile('config_actions.xml'));
+			f_util_FileUtils::write(f_util_FileUtils::buildModulesPath($this->name, 'config', 'rights.xml'), $this->generateFile('config_rights.xml'));
+			f_util_FileUtils::write(f_util_FileUtils::buildModulesPath($this->name, 'config', 'perspective.xml'), $this->generateFile('config_perspective.xml'));
+		}
 
 		// Generate localisation files		
 		$this->generateGeneralLocales();
@@ -181,20 +204,25 @@ class builder_ModuleGenerator
 		f_util_FileUtils::write($path, $this->generateFile('ModuleService.class.php'));
 		$crs->appendToAutoloadFile($this->name . '_ModuleService', $path);
 
-		// Generate perspectives file
-		$path = f_util_FileUtils::buildModulesPath($this->name, 'templates', 'perspectives', 'default.all.all.xul');
-		f_util_FileUtils::write($path, $this->generateFile('default.all.all.xul'));
-
 		// Generate persistentdocument/import file
 		$path = f_util_FileUtils::buildModulesPath($this->name, 'persistentdocument', 'import', $this->name . '_binding.xml');
 		f_util_FileUtils::write($path, $this->generateFile('import_binding.xml'));
 		
-		// Generate editor for rootfolder
-		$path = f_util_FileUtils::buildModulesPath($this->name, 'forms', 'editor', 'rootfolder',  'empty.txt');
 		
-		// Generate editor for folders
-		$path = f_util_FileUtils::buildModulesPath($this->name, 'forms', 'editor', 'folder',  'empty.txt');
-		f_util_FileUtils::write($path, '');
+		if ($this->visibility)
+		{
+			// Generate perspectives file
+			$path = f_util_FileUtils::buildModulesPath($this->name, 'templates', 'perspectives', 'default.all.all.xul');
+			f_util_FileUtils::write($path, $this->generateFile('default.all.all.xul'));
+			
+			// Generate editor for rootfolder
+			$path = f_util_FileUtils::buildModulesPath($this->name, 'forms', 'editor', 'rootfolder',  'empty.txt');
+			f_util_FileUtils::write($path, '');
+					
+			// Generate editor for folders
+			$path = f_util_FileUtils::buildModulesPath($this->name, 'forms', 'editor', 'folder',  'empty.txt');
+			f_util_FileUtils::write($path, '');
+		}
 		
 		// return the current object
 		return $this;
@@ -212,17 +240,20 @@ class builder_ModuleGenerator
 		$baseKey = 'm.' . $this->name . '.bo.general';
 		$ls->updatePackage($baseKey, $keysInfos, false, true);
 		
-		$keysInfos[$ls->getLCID('fr')] = array('create_' => 'créer');
-		$keysInfos[$ls->getLCID('en')] = array('create_' => 'create');
-		$keysInfos[$ls->getLCID('de')] = array('create_' => 'neu');
-		$baseKey = 'm.' . $this->name . '.bo.actions';
-		$ls->updatePackage($baseKey, $keysInfos, false, true);
-		
-		$keysInfos[$ls->getLCID('fr')] = array();
-		$keysInfos[$ls->getLCID('en')] = array();
-		$keysInfos[$ls->getLCID('de')] = array();
-		$baseKey = 'm.' . $this->name . '.document.permission';
-		$ls->updatePackage($baseKey, $keysInfos, false, true, 'm.generic.document.permission');			
+		if ($this->visibility)
+		{
+			$keysInfos[$ls->getLCID('fr')] = array('create_' => 'créer');
+			$keysInfos[$ls->getLCID('en')] = array('create_' => 'create');
+			$keysInfos[$ls->getLCID('de')] = array('create_' => 'neu');
+			$baseKey = 'm.' . $this->name . '.bo.actions';
+			$ls->updatePackage($baseKey, $keysInfos, false, true);
+			
+			$keysInfos[$ls->getLCID('fr')] = array();
+			$keysInfos[$ls->getLCID('en')] = array();
+			$keysInfos[$ls->getLCID('de')] = array();
+			$baseKey = 'm.' . $this->name . '.document.permission';
+			$ls->updatePackage($baseKey, $keysInfos, false, true, 'm.generic.document.permission');		
+		}	
 	}
 
 	/**
@@ -238,13 +269,11 @@ class builder_ModuleGenerator
 
 		// Assign all necessary variable
 		$generator->assign('name', $this->name);
-		$generator->assign('date', $this->date);
-		$generator->assign('author', $this->author);
 		$generator->assign('title', $this->getTitle());
 		$generator->assign('version', $this->version);
-		$generator->assign('frameworkVersion', Framework::getVersion());
 		$generator->assign('icon', $this->icon);
 		$generator->assign('category', $this->category);
+		$generator->assign('visibility', $this->visibility ? 'true' : 'false');
 		
 		// Execute template and return result
 		$result = $generator->fetch($templateName .'.tpl');

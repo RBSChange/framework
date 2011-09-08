@@ -768,15 +768,6 @@ class c_Module
 	{
 		return realpath(f_util_FileUtils::buildModulesPath($this->name));
 	}
-
-	/**
-	 * @return Boolean
-	 */
-	function isEnabled()
-	{
-		return isset($this->infos['ENABLED']) ? $this->infos['ENABLED'] : false;
-	}
-	
 	
 	/**
 	 * @return Boolean
@@ -785,15 +776,7 @@ class c_Module
 	{
 		return isset($this->infos['VISIBLE']) ? $this->infos['VISIBLE'] : false;
 	}
-	
-	/**
-	 * @return Boolean
-	 */
-	function isTopicBased()
-	{
-		return isset($this->infos['USETOPIC']) ? $this->infos['USETOPIC'] : false;
-	}
-	
+		
 	/**
 	 * @return Boolean
 	 */
@@ -851,5 +834,23 @@ class c_Module
 	function getRootFolderId()
 	{
 		return ModuleService::getInstance()->getRootFolderId($this->name);
+	}
+	
+	/**
+	 * @return true
+	 * @deprecated
+	 */
+	function isEnabled()
+	{
+		return true;
+	}
+	
+	/**
+	 * @return Boolean
+	 * @deprecated
+	 */
+	function isTopicBased()
+	{
+		return isset($this->infos['USETOPIC']) ? $this->infos['USETOPIC'] : false;
 	}
 }
