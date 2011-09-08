@@ -6,7 +6,7 @@ class commands_ImportInitData extends commands_AbstractChangeCommand
 	 */
 	function getUsage()
 	{
-		return "[moduleName1 moduleName2 ... moduleNameN]";
+		return "[moduleName1 moduleName2 ... moduleNameN [--force]]";
 	}
 
 	function getAlias()
@@ -49,11 +49,8 @@ class commands_ImportInitData extends commands_AbstractChangeCommand
 	 */
 	function _execute($params, $options)
 	{
-		$this->message("== Import init data from modules ==");
-
+		$this->message("== Import init data ==");	
 		$this->loadFramework();
-
-		f_event_EventManager::unregister('f_listener_BackofficeIndexListener');
 
 		$ids = InitDataService::getInstance();
 		$ids->setLogger($this);
@@ -63,74 +60,41 @@ class commands_ImportInitData extends commands_AbstractChangeCommand
 			foreach ($params as $moduleName)
 			{
 				$packageName = 'modules_'.$moduleName;
-				if ($this->checkImport($packageName))
+				
+				$importedDate = $ids->getImportedDate($packageName);
+				if ($importedDate === null)
 				{
-					$setImport = true;
 					$ids->import($packageName);
-					foreach ($ids->getMessages() as $message)
-					{
-						$type = !is_null($message[1]) ? $message[1] : "error";
-						if ($type == "error")
-						{
-							$setImport = false;
-						}
-						$this->log($message[0], $type);
-					}
-					if ($setImport)
-					{
-						$this->setImport($packageName);
-					}
 				}
-			}
-		}
-		else
-		{
-			$modules = ModuleService::getInstance()->getPackageNames();
-			foreach ($modules as $module)
-			{
-				if ($this->checkImport($module))
+				elseif (isset($options['force']))
 				{
-					$setImport = true;
-					$ids->import($module);
-					foreach ($ids->getMessages() as $message)
-					{
-						$type = !is_null($message[1]) ? $message[1] : "error";
-						if ($type == "error")
-						{
-							$setImport = false;
-						}
-						$this->log($message[0], $type);
-					}
-					if ($setImport)
-					{
-						$this->setImport($module);
-					}
+					$this->log('Re-initialize Package ' . $packageName . ' initialized on ' . $importedDate);
+					$ids->clearImportedDate($packageName);
+					$ids->import($packageName);
+				}
+				else
+				{
+					$this->log('Package ' . $packageName . ' initialized on ' . $importedDate);
 				}
 			}
 		}
-
-		$this->quitOk("Init data imported");
-	}
-
-	private function checkImport($packageName)
-	{
-		$pp = f_persistentdocument_PersistentProvider::getInstance();
-		$initData = $pp->getSettingValue($packageName, 'init-data');
-		if (empty($initData))
-		{
-			return true;
-		}
 		else
 		{
-			$this->warnMessage('Package ' . $packageName . ' already initialized  : ' . $initData);
-			return false;
+			$packageNames = ModuleService::getInstance()->getPackageNames();
+			foreach ($packageNames as $packageName)
+			{
+				$importedDate = $ids->getImportedDate($packageName);
+				if ($importedDate === null)
+				{
+					$moduleName = ModuleService::getInstance()->getShortModuleName($packageName);
+					$this->executeCommand('import-init-data', array($moduleName));
+				}
+				else
+				{
+					$this->log('Package ' . $packageName . ' initialized on ' . $importedDate);
+				}
+			}
 		}
-	}
-
-	private function setImport($packageName)
-	{
-		$pp = f_persistentdocument_PersistentProvider::getInstance();
-		$initData = date_Formatter::format(date_Calendar::now());
-		$pp->setSettingValue($packageName, 'init-data', $initData);
+		$this->quitOk("Init data imported");
 	}
 }

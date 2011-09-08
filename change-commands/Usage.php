@@ -6,7 +6,7 @@ class commands_Usage extends commands_AbstractChangeCommand
 	 */
 	function getUsage()
 	{
-		return "";
+		return "[--dev] [--prod]";
 	}
 	
 	/**
@@ -17,7 +17,6 @@ class commands_Usage extends commands_AbstractChangeCommand
 		return "usage";
 	}
 	
-
 	/**
 	 * @see c_ChangescriptCommand::isHidden()
 	 */
@@ -33,6 +32,17 @@ class commands_Usage extends commands_AbstractChangeCommand
 	 */
 	function _execute($params, $options)
 	{
+		if (isset($options['dev']) || isset($options['prod']))
+		{
+			$devCmds = isset($options['dev']);
+			$prodCmds = isset($options['prod']);
+		}
+		else
+		{
+			$devCmds = true;
+			$prodCmds = true;
+		}
+		
 		$cmdName = isset($params[0]) ? $params[0] : '';
 		if ($this->httpOutput())
 		{
@@ -73,13 +83,13 @@ class commands_Usage extends commands_AbstractChangeCommand
 					$this->executeGetOptions($params);
 					break;		
 				default:
-					$this->executeUsage();
+					$this->executeUsage($prodCmds, $devCmds);
 					break;
 			}
 		}
 	}
 	
-	protected function executeUsage()
+	protected function executeUsage($prodCmds, $devCmds)
 	{	
 		$this->log("Usage: ".$this->getChangeCmdName()." <commandName> [-h]");
 		$this->log(" where <commandName> in: ");
@@ -91,7 +101,7 @@ class commands_Usage extends commands_AbstractChangeCommand
 		foreach ($commands as $command)
 		{
 			/* @var $command c_ChangescriptCommand */
-			if ($command->isHidden()) {continue;}
+			if ($command->isHidden() || ($command->devMode() && !$devCmds) || (!$command->devMode() && !$prodCmds)) {continue;}
 			if ($command->devMode() !== $devMode)
 			{
 				$devMode = $command->devMode();

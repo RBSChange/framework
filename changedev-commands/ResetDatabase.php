@@ -40,16 +40,18 @@ class commands_ResetDatabase extends commands_AbstractChangeCommand
 		$this->message("== Reset database ==");
 		
 		$this->loadFramework();
+		
 		if (!Framework::inDevelopmentMode())
 		{
 			return $this->quitError("This operation is only available in development mode.");
 		}
+		
 		if (!isset($options['force']))
 		{
 			$dbInfos = f_persistentdocument_PersistentProvider::getInstance()->getConnectionInfos();
 			if (!$this->yesNo("*All* tables contained ".$dbInfos["database"]."@".$dbInfos["host"]." in will be deleted. Are you sure you want to reset the database ?"))
 			{
-				return $this->quitOk("Task cancelled. No changes were performed in database.");
+				 return $this->quitWarn("Task cancelled. No changes were performed in database.");
 			}
 		}
 		

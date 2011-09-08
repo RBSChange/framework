@@ -796,7 +796,6 @@ class c_ChangeBootStrap
 			}
 			elseif (in_array("-h", $args) || in_array("--help", $args))
 			{
-				
 				$this->_executeCommand('usage', array_merge(array('getUsage'), $args));
 				return;
 			}
@@ -841,16 +840,14 @@ class c_ChangeBootStrap
 	/**
 	 * @param String $cmdName
 	 * @param String[] $args
+	 * @return boolean
 	 */
 	protected function _executeCommand($cmdName, $args = array())
 	{
 		$command = $this->getCommand($cmdName);
 		$command->setListeners($this->getListeners($command->getCallName()));
 		$parsedArgs = $this->parseArgs($args);
-		if (!$command->execute($parsedArgs['params'], $parsedArgs['options']))
-		{
-			throw new Exception("Error on execute $cmdName");
-		}
+		return $command->execute($parsedArgs['params'], $parsedArgs['options']);
 	}
 	
 	/**

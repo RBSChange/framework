@@ -2711,7 +2711,7 @@ abstract class f_persistentdocument_PersistentProvider
 
 	protected abstract function getUserSettingQuery();
 
-	protected abstract function getTruncateTableQuery($tableName);
+
 
 	public function getSettingValue($packageName, $settingName)
 	{
@@ -2755,12 +2755,15 @@ abstract class f_persistentdocument_PersistentProvider
 		$stmt->bindValue(':userid', $userId, PersistentProviderConst::PARAM_INT);
 		$this->executeStatement($stmt);
 
-		$stmt = $this->prepareStatement($this->getSaveUserSettingQuery());
-		$stmt->bindValue(':package', $packageName, PersistentProviderConst::PARAM_STR);
-		$stmt->bindValue(':name', $settingName, PersistentProviderConst::PARAM_STR);
-		$stmt->bindValue(':userid', $userId, PersistentProviderConst::PARAM_INT);
-		$stmt->bindValue(':value', $value, PersistentProviderConst::PARAM_STR);
-		$this->executeStatement($stmt);
+		if ($value !== null)
+		{
+			$stmt = $this->prepareStatement($this->getSaveUserSettingQuery());
+			$stmt->bindValue(':package', $packageName, PersistentProviderConst::PARAM_STR);
+			$stmt->bindValue(':name', $settingName, PersistentProviderConst::PARAM_STR);
+			$stmt->bindValue(':userid', $userId, PersistentProviderConst::PARAM_INT);
+			$stmt->bindValue(':value', $value, PersistentProviderConst::PARAM_STR);
+			$this->executeStatement($stmt);
+		}
 	}
 
 
@@ -3775,11 +3778,14 @@ abstract class f_persistentdocument_PersistentProvider
 		return $result;
 	}
 
+	protected abstract function getTruncateTableQuery($tableName);
+	
 	public function clearAllPermissions()
 	{
 		$stmt = $this->prepareStatement($this->getTruncateTableQuery('f_permission_compiled'));
 		$this->executeStatement($stmt);
 	}
+	
 	/**
 	 * @param array<Integer> $accessors
 	 * @return String

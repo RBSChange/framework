@@ -394,13 +394,15 @@ abstract class c_ChangescriptCommand
 	{
 		if (!$this->validateArgs($params, $options))
 		{
-			$this->errorMessage('Inavlid argrument for command: ' . $this->callName);
-			return false;
+			return $this->quitError('Inavlid argrument for command: ' . $this->callName);
 		}
+		
 		$this->reachedPointCuts = array();
 		$this->startPointCut("before");
-		$ret = $this->_execute($params, $options);
+		
+		$ret = $this->_execute($params, $options);		
 		$res = ($ret === null || $ret === true);
+		
 		if ($res)
 		{
 			$this->startPointCut("after");
@@ -409,6 +411,7 @@ abstract class c_ChangescriptCommand
 	}
 
 	/**
+	 * @param string $msg
 	 * @return null
 	 */
 	protected function quit($msg = "Exiting...")
@@ -418,16 +421,17 @@ abstract class c_ChangescriptCommand
 	}
 
 	/**
+	 * @param string $msg
 	 * @return null
 	 */
 	protected final function quitOk($msg = "Exiting...")
 	{
-		$this->startPointCut("after");
 		$this->okMessage("=> ".$msg . PHP_EOL);
 		return null;
 	}
 
 	/**
+	 * @param string $msg
 	 * @return false
 	 */
 	protected final function quitError($msg)
@@ -437,12 +441,13 @@ abstract class c_ChangescriptCommand
 	}
 
 	/**
+	 * @param string $msg
 	 * @return false
 	 */
 	protected final function quitWarn($msg)
 	{
 		$this->warnMessage("=> ".$msg . PHP_EOL);
-		return null;
+		return false;
 	}
 
 	/**

@@ -27,12 +27,11 @@ abstract class object_InitDataSetup
 	}
 
 	/**
-	 * @param String $databaseName
 	 * @return f_persistentdocument_PersistentProvider
 	 */
-	protected function getPersistentProvider($databaseName = 'default')
+	protected function getPersistentProvider()
 	{
-		return f_persistentdocument_PersistentProvider::getInstance($databaseName);
+		return f_persistentdocument_PersistentProvider::getInstance();
 	}
 
 	/**
@@ -52,8 +51,8 @@ abstract class object_InitDataSetup
 	/**
 	 * Registers a message to log.
 	 *
-	 * @param String $message
-	 * @param Integer $level [Project::MSG_INFO | Project::MSG_WARN | Project::MSG_ERR]
+	 * @param string $message
+	 * @param string $level [info | warn | error]
 	 */
 	protected final function log($message, $level = "info")
 	{
@@ -64,7 +63,7 @@ abstract class object_InitDataSetup
 	 * Registers a message to log.
 	 *
 	 * @param String $message
-	 * @param integer $level  [Project::MSG_INFO | Project::MSG_WARN | Project::MSG_ERR]
+	 * @param string $level [info | warn | error]
 	 */
 	protected function addMessage($message, $level = null)
 	{
