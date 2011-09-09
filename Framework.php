@@ -256,7 +256,7 @@ class Framework
 	 */
 	public static function getVersion()
 	{
-		return "4.0.0";
+		return FRAMEWORK_VERSION;
 	}
 
 	/**
@@ -326,22 +326,8 @@ class Framework
 	 */
 	public static function getUIDefaultHost()
 	{
-		if (!defined('AG_WEBAPP_HOST'))
-		{
-
-			$middlewareIni = Framework::getConfiguration('general');
-
-			if ( isset($middlewareIni['server-fqdn']) )
-			{
-				define('AG_WEBAPP_HOST', $middlewareIni['server-fqdn']);
-			}
-			else
-			{
-				define('AG_WEBAPP_HOST', $_SERVER['HTTP_HOST']);
-			}
-
-		}
-		return AG_WEBAPP_HOST;
+		$general = self::$config['general'];
+		return isset($general['server-fqdn']) ? $general['server-fqdn'] : $_SERVER['HTTP_HOST'];
 	}
 
 	/**
