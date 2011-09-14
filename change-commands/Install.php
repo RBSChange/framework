@@ -94,8 +94,7 @@ class commands_Install extends commands_AbstractChangedevCommand
 		$name = $params[1];
 		$p = c_Package::getNewInstance($type, $name, PROJECT_HOME);
 		
-		$this->message("== Install " . $p->getKey(). " ==");
-		
+		$this->message("== Install " . $p->getKey(). " ==");		
 		$src = isset($params[2]) ? $params[2] : null;
 		$downloadURL = null;
 		$zipPath = null;
@@ -120,6 +119,14 @@ class commands_Install extends commands_AbstractChangedevCommand
 					$p->setReleaseURL($src);
 					$downloadURL = $packages[$p->getKey()]->getDownloadURL();
 				}
+			}
+		}
+		else
+		{
+			$packages = $bootstrap->getReleasePackages($this->getBootStrap()->getReleaseRepository());
+			if (is_array($packages) && isset($packages[$p->getKey()]))
+			{
+				$downloadURL = $packages[$p->getKey()]->getDownloadURL();
 			}
 		}
 		

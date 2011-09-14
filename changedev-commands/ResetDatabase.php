@@ -56,10 +56,10 @@ class commands_ResetDatabase extends commands_AbstractChangeCommand
 		}
 		
 		//disable site bo and cron
-		$this->executeCommand("disableSite");
+		$this->executeCommand("disable-site");
 		
 		//If document cache not stored in f_cache
-		$this->executeCommand("clearDocumentscache");
+		$this->executeCommand("clear-documentscache");
 
 		$this->log("Delete media...");
 		
@@ -72,16 +72,16 @@ class commands_ResetDatabase extends commands_AbstractChangeCommand
 		$path = f_util_FileUtils::buildProjectPath('securemedia','original');
 		f_util_FileUtils::rmdir($path, true);
 		
-		$this->executeCommand("dropDatabase" , array('--force'));
-		$this->executeCommand("compileDocuments");
-		$this->executeCommand("generateDatabase");
-		$this->executeCommand("clearDatacache");
-		$this->executeCommand("compileAll");
-		$this->executeCommand("importInitData");
-		$this->executeCommand("initPatchDb");
+		$this->executeCommand("drop-database" , array('--force'));
+		$this->executeCommand("compile-documents");
+		$this->executeCommand("generate-database");
+		$this->executeCommand("clear-datacache");
+		$this->executeCommand("compile-all");
+		$this->executeCommand("import-init-data");
+		$this->executeCommand("init-patch-db");
 		
 		//enable bo and cron
-		$this->executeCommand("enableSite");
+		$this->executeCommand("enable-site");
 		
 		return $this->quitOk("You now need to disconnect from the backoffice and reconnect.");
 	}

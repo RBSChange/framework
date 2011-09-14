@@ -33,7 +33,8 @@ class commands_ApplyWebappPolicy extends commands_AbstractChangeCommand
 		$apacheGroup = $this->getApacheGroup();
 		$user = $this->getUser();
 		$dirs = array(f_util_FileUtils::buildOverridePath(), 
-			f_util_FileUtils::buildProjectPath("cache"), 
+			f_util_FileUtils::buildProjectPath("cache", "project"), 
+			f_util_FileUtils::buildProjectPath("cache", "www"), 
 			f_util_FileUtils::buildProjectPath("media"), 
 			f_util_FileUtils::buildProjectPath("securemedia"));
 		
