@@ -37,14 +37,8 @@ class commands_ApplyHotfix extends commands_CheckHotfix
 		$patches = PatchService::getInstance()->check();
 		if (count($patches) > 0)
 		{
-			$errStr = array("Your project must apply the following patches before to apply any hotfix:");
-			foreach ($patches as $module => $patchList)
-			{
-				foreach ($patchList as $patchName)
-				{
-					$errStr[]= $this->getChangeCmdName() . ' apply-patch ' . $module . ' ' . $patchName;
-				}
-			}
+			$errStr = array("Your project must apply all patches before to apply any hotfix:");
+			$errStr[]= $this->getChangeCmdName() . ' apply-patch --all';
 			return $this->quitError(implode(PHP_EOL, $errStr));
 		}
 		

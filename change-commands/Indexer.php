@@ -10,12 +10,7 @@ class commands_Indexer extends commands_AbstractChangeCommand
 	 */
 	function getUsage()
 	{
-		$usage = "<action>\nWhere action in:\n"; 
-		foreach ($this->actions as $action)
-		{
-			$usage.= "- ".$action."\n";
-		}
-		return $usage; 
+		return '<' . implode('|', $this->actions) . '>';
 	}
 	
 	function getDescription()

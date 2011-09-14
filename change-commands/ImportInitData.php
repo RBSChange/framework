@@ -14,6 +14,11 @@ class commands_ImportInitData extends commands_AbstractChangeCommand
 		return "iid";
 	}
 
+	function getOptions()
+	{
+		return array('force');
+	}
+	
 	/**
 	 * @return String
 	 */
@@ -30,16 +35,16 @@ class commands_ImportInitData extends commands_AbstractChangeCommand
 	 */
 	function getParameters($completeParamCount, $params, $options, $current)
 	{
-		if ($completeParamCount == 0)
+		$components = array();
+		foreach ($this->getBootStrap()->getProjectDependencies() as $package) 
 		{
-			$modules = array();
-			foreach (glob("modules/*/setup", GLOB_ONLYDIR) as $path)
+			/* @var $package c_Package */
+			if ($package->isModule() && is_readable(f_util_FileUtils::buildPath($package->getPath(), 'setup', 'initData.php')))
 			{
-				$modules[] = basename(dirname($path));
+				$components[] = $package->getKey();
 			}
-			return $modules;
 		}
-		return null;
+		return array_diff($components, $params);
 	}
 
 	/**
@@ -57,41 +62,47 @@ class commands_ImportInitData extends commands_AbstractChangeCommand
 
 		if (!f_util_ArrayUtils::isEmpty($params))
 		{
-			foreach ($params as $moduleName)
+			foreach ($params as $componentName)
 			{
-				$packageName = 'modules_'.$moduleName;
-				
-				$importedDate = $ids->getImportedDate($packageName);
-				if ($importedDate === null)
+				$package = $this->getPackageByName($componentName);
+				if ($package->isModule() && $package->isInProject())
 				{
-					$ids->import($packageName);
-				}
-				elseif (isset($options['force']))
-				{
-					$this->log('Re-initialize Package ' . $packageName . ' initialized on ' . $importedDate);
-					$ids->clearImportedDate($packageName);
-					$ids->import($packageName);
-				}
-				else
-				{
-					$this->log('Package ' . $packageName . ' initialized on ' . $importedDate);
+					$packageName = 'modules_'.$package->getName();					
+					$importedDate = $ids->getImportedDate($packageName);
+					if ($importedDate === null)
+					{
+						$ids->import($packageName);
+					}
+					elseif (isset($options['force']))
+					{
+						$this->log('Re-initialize Module ' . $package->getName() . ' initialized on ' . $importedDate);
+						$ids->clearImportedDate($packageName);
+						$ids->import($packageName);
+					}
+					else
+					{
+						$this->log('Module ' . $package->getName() . ' initialized on ' . $importedDate);
+					}
 				}
 			}
 		}
 		else
 		{
-			$packageNames = ModuleService::getInstance()->getPackageNames();
-			foreach ($packageNames as $packageName)
+			foreach ($this->getBootStrap()->getProjectDependencies() as $package) 
 			{
-				$importedDate = $ids->getImportedDate($packageName);
-				if ($importedDate === null)
+				/* @var $package c_Package */
+				if ($package->isModule())
 				{
-					$moduleName = ModuleService::getInstance()->getShortModuleName($packageName);
-					$this->executeCommand('import-init-data', array($moduleName));
-				}
-				else
-				{
-					$this->log('Package ' . $packageName . ' initialized on ' . $importedDate);
+					$packageName = 'modules_'.$package->getName();
+					$importedDate = $ids->getImportedDate($packageName);
+					if ($importedDate === null)
+					{
+						$this->executeCommand('import-init-data', array($package->getKey()));
+					}
+					else
+					{
+						$this->log('Module ' . $package->getName() . ' initialized on ' . $importedDate);
+					}
 				}
 			}
 		}

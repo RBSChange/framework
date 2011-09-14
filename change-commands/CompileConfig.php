@@ -6,14 +6,17 @@ class commands_CompileConfig extends commands_AbstractChangeCommand
 	 */
 	public function getUsage()
 	{
-		return "[options]
-Where options in:
-  --no-auto-changes: do not launch other commands on configuration changes";
+		return "[--no-auto-changes]";
 	}
 	
 	public function getAlias()
 	{
 		return "cconf";
+	}
+	
+	public function getOptions()
+	{
+		return array('no-auto-changes');
 	}
 
 	/**

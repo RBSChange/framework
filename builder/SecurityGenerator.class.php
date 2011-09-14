@@ -49,6 +49,7 @@ class builder_SecurityGenerator
 			$this->logs[] = "Module $shortModuleName OK";
 		}
 
+		if ($this->quiet) {return array();}
 		return $this->logs;
 	}
 	

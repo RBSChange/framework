@@ -6,7 +6,7 @@ class commands_CheckDependencies extends commands_AbstractChangeCommand
 	 */
 	function getUsage()
 	{
-		return "";
+		return "[--verbose] [--xml]";
 	}
 	
 	function getAlias()

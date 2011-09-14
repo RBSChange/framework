@@ -6,7 +6,7 @@ class commands_PatchInfo extends commands_AbstractChangeCommand
 	 */
 	function getUsage()
 	{
-		return "<moduleName|framework> <patchNumber>";
+		return "<framework|[modules/]moduleName> <patchNumber>";
 	}
 	
 	function getAlias()
@@ -22,16 +22,6 @@ class commands_PatchInfo extends commands_AbstractChangeCommand
 		return "Displays informations about a patch";
 	}
 	
-	
-	
-	/**
-	 * @see c_ChangescriptCommand::validateArgs()
-	 */
-	protected function validateArgs($params, $options)
-	{
-		return count($params) == 2;
-	}
-
 	/**
 	 * @param Integer $completeParamCount the parameters that are already complete in the command line
 	 * @param String[] $params
@@ -46,24 +36,46 @@ class commands_PatchInfo extends commands_AbstractChangeCommand
 			foreach ($this->getBootStrap()->getProjectDependencies() as $package)
 			{
 				/* @var $package c_Package */
-				if (($package->isFramework() || $package->isModule()) && is_dir(f_util_FileUtils::buildPath($package->getPath(), 'patch')))
+				if (is_readable(f_util_FileUtils::buildPath($package->getPath(), 'patch', 'lastpatch')))
 				{
-					$components[] = $package->getName();
+					$components[] = $package->getKey();
 				}
 			}
 			return $components;
 		}
 		elseif ($completeParamCount == 1)
 		{
-			$patches = PatchService::getInstance()->getPatchList($params[0]);
-			if (count($patches)) 
+			$package = $this->getPackageByName($params[0]);
+			if ($package)
 			{
-				return $patches;
+				$patches = PatchService::getInstance()->getPatchList($package->getName());
+				if (count($patches)) 
+				{
+					return $patches;
+				}
 			}
 		}
 		return null;
 	}
 
+	/**
+	 * @see c_ChangescriptCommand::validateArgs()
+	 */
+	protected function validateArgs($params, $options)
+	{
+		if (count($params) == 2)
+		{
+			$package = $this->getPackageByName($params[0]);	
+			if ($package->isValid() && $package->isInProject() && ($package->isFramework() || $package->isModule()))
+			{
+				return true;
+			}
+			$this->errorMessage('Invalid package: ' . $params[0]);
+		}
+		return false;
+	}
+	
+	
 	/**
 	 * @param String[] $params
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
@@ -73,7 +85,8 @@ class commands_PatchInfo extends commands_AbstractChangeCommand
 	{
 		$this->message("== Patch information ==");
 		$this->loadFramework();	
-		$moduleName = $params[0];
+		$package = $this->getPackageByName($params[0]);	
+		$moduleName = $package->getName();
 		$patchNumber = $params[1];
 		$this->message(PatchService::getInstance()->patchInfo($moduleName, $patchNumber));
 	}

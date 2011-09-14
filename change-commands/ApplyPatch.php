@@ -6,12 +6,17 @@ class commands_ApplyPatch extends commands_AbstractChangeCommand
 	 */
 	function getUsage()
 	{
-		return "[--all] [--ignorecommands] <moduleName|framework> <patchNumber> ";
+		return "[--all] [--ignorecommands] <framework|[modules/]moduleName> <patchNumber> ";
 	}
 
 	function getAlias()
 	{
 		return "ap";
+	}
+	
+	function getOptions()
+	{
+		return array('all', 'ignorecommands');
 	}
 
 	/**
@@ -20,15 +25,6 @@ class commands_ApplyPatch extends commands_AbstractChangeCommand
 	function getDescription()
 	{
 		return "Applies a patch";
-	}
-	
-	/**
-	 * @param String[] $params
-	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
-	 */
-	protected function validateArgs($params, $options)
-	{
-		return count($params) == 2 || isset($options['all']);
 	}
 
 	/**
@@ -39,30 +35,52 @@ class commands_ApplyPatch extends commands_AbstractChangeCommand
 	 */
 	function getParameters($completeParamCount, $params, $options, $current)
 	{
-		if ($completeParamCount > 1)
-		{
-			return null;
-		}
-		
 		$list = PatchService::getInstance()->check();
 		if (f_util_ArrayUtils::isEmpty($list))
 		{
 			return null;
 		}
-		
 		if ($completeParamCount == 0)
 		{
-			$components = array_keys($list);
+			$components = array();
+			foreach (array_keys($list) as $name) 
+			{
+				$components[] = $this->getPackageByName($name)->getKey();
+			}	
 			return $components;
-		}
-		elseif (isset($list[$params[0]]))
+		}		
+		if ($completeParamCount == 1)
 		{
-			return $list[$params[0]];
+			$package = $this->getPackageByName($params[0]);
+			if ($package && isset($list[$package->getName()]))
+			{
+				return $list[$package->getName()];
+			}
 		}
 		return null;
 	}
 
-
+	/**
+	 * @param String[] $params
+	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
+	 */
+	protected function validateArgs($params, $options)
+	{
+		if (isset($options['all']))
+		{
+			return count($params) === 0;
+		}
+		else if (count($params) == 2)
+		{
+			$package = $this->getPackageByName($params[0]);	
+			if ($package->isValid() && $package->isInProject() && ($package->isFramework() || $package->isModule()))
+			{
+				return true;
+			}
+			$this->errorMessage('Invalid package: ' . $package->getName());			
+		}
+		return false;
+	}
 
 	/**
 	 * @param String[] $params
@@ -74,7 +92,9 @@ class commands_ApplyPatch extends commands_AbstractChangeCommand
 		{
 			return $this->_executeAll($params, $options);
 		}
-		$moduleName = $params[0];
+		$package = $this->getPackageByName($params[0]);	
+		
+		$moduleName = $package->getName();
 		$patchNumber = $params[1];
 
 		$this->message("== Apply patch $moduleName/$patchNumber ==");

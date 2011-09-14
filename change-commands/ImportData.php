@@ -23,15 +23,6 @@ class commands_ImportData extends commands_AbstractChangeCommand
 	}
 
 	/**
-	 * @param String[] $params
-	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
-	 */
-	protected function validateArgs($params, $options)
-	{
-		return count($params) == 2;
-	}
-
-	/**
 	 * @param Integer $completeParamCount the parameters that are already complete in the command line
 	 * @param String[] $params
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
@@ -47,12 +38,9 @@ class commands_ImportData extends commands_AbstractChangeCommand
 				/* @var $package c_Package */
 				if ($package->isModule() || $package->isTheme())
 				{
-					if (is_dir($package->getPath() . '/setup'))
+					if (count($this->getXmlFileNames($package->getPath() . '/setup')))
 					{
-						if (count($this->getXmlFileNames($package->getPath() . '/setup')))
-						{
-							$components[] = $package->getName();
-						}
+						$components[] = $package->getKey();
 					}
 				}
 			}
@@ -60,13 +48,11 @@ class commands_ImportData extends commands_AbstractChangeCommand
 		}
 		elseif ($completeParamCount == 1)
 		{
-			$scripts = array();
-			$moduleName = $params[0];
-			foreach (glob("modules/$moduleName/setup/*.xml") as $script)
+			$package = $this->getPackageByName($params[0]);
+			if ($package->isValid())
 			{
-				$scripts[] = basename($script);
+				return $this->getXmlFileNames($package->getPath() . '/setup');
 			}
-			return $scripts;
 		}
 		return null;
 	}
@@ -74,14 +60,38 @@ class commands_ImportData extends commands_AbstractChangeCommand
 	private function getXmlFileNames($path)
 	{
 		$names = array();
-		foreach (scandir($path) as $pathfile) 
+		if (is_dir($path))
 		{
-			if (substr($pathfile, -4) === '.xml')
+			foreach (scandir($path) as $pathfile) 
 			{
-				$names = basename($pathfile);
+				if (substr($pathfile, -4) === '.xml')
+				{
+					$n = basename($pathfile);
+					if (!in_array($n, array('init.xml', 'useractionlogger.xml')))
+					{
+						$names[] = basename($pathfile);
+					}
+				}
 			}
 		}
 		return $names;
+	}
+	
+	/**
+	 * @param String[] $params
+	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
+	 */
+	protected function validateArgs($params, $options)
+	{
+		if (count($params) == 2)
+		{
+			$package = $this->getPackageByName($params[0]);
+			if ($package->isValid() && ($package->isModule() || $package->isTheme()))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/**
@@ -91,15 +101,22 @@ class commands_ImportData extends commands_AbstractChangeCommand
 	 */
 	function _execute($params, $options)
 	{
-		$moduleName = $params[0];
+		$package = $this->getPackageByName($params[0]);
 		$scriptName = $params[1];
-		$this->message("== Import data $moduleName/$scriptName ==");
+		$this->message("== Import data ".$package->getKey()." : $scriptName ==");
 
 		$this->loadFramework();
 
 		$scriptReader = import_ScriptReader::getInstance();
-		$scriptReader->executeModuleScript($moduleName, $scriptName);
-
-		$this->quitOk("$moduleName/$scriptName imported");
+		if ($package->isModule())
+		{
+			$scriptReader->executeModuleScript($package->getName(), $scriptName);
+		}
+		else
+		{
+			$scriptReader->executeThemeScript($package->getName(), $scriptName);
+		}
+	
+		$this->quitOk($package->getKey() . ": " . $scriptName ." imported");
 	}
 }

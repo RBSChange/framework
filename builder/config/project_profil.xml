@@ -31,8 +31,8 @@
 		<databases>
 			<webapp>
 				<entry name="class">PDODatabase</entry>
-				<entry name="user">admin-webedit</entry>
-				<entry name="password">admin-webedit</entry>
+				<entry name="user">root</entry>
+				<entry name="password"></entry>
 				<entry name="database">${database}</entry>
 				<entry name="host">${database_host}</entry>
 				<entry name="protocol">mysql</entry>

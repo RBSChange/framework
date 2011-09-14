@@ -6,7 +6,7 @@ class commands_CompileRoles extends commands_AbstractChangeCommand
 	 */
 	function getUsage()
 	{
-		return "";
+		return "[--verbose]";
 	}
 	
 	function getAlias()
@@ -20,6 +20,11 @@ class commands_CompileRoles extends commands_AbstractChangeCommand
 	function getDescription()
 	{
 		return "compile user roles";
+	}
+	
+	function getOptions()
+	{
+		return array('verbose');
 	}
 
 	/**

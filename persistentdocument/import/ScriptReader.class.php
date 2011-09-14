@@ -74,7 +74,31 @@ class import_ScriptReader extends BaseService
 		
 		$this->execute($path, $attributes);
 	}
-
+	
+	/**
+	 * @param String $themeName ex : developer
+	 * @param String $scriptName ex : init.xml
+	 * @param array $attributes
+	 */
+	public function executeThemeScript($themeName, $scriptName, $attributes = array())
+	{
+		$path = FileResolver::getInstance()->setPackageName('themes_' . $themeName)->setDirectory('setup')->getPath($scriptName);
+		if ($path === null)
+		{
+			throw new Exception("Could not find any script named $scriptName for theme $themeName");
+		}
+		
+		// Set default values of tempalte and templateHome attributes.
+		if (!isset($attributes['template']))
+		{
+			$attributes['template'] = Framework::getConfigurationValue('modules/website/sample/defaultPageTemplate');
+		}
+		if (!isset($attributes['templateHome']))
+		{
+			$attributes['templateHome'] = Framework::getConfigurationValue('modules/website/sample/defaultHomeTemplate');
+		}		
+		$this->execute($path, $attributes);		
+	}
 	/**
 	 * @param String $fileName
 	 * @param attay $attributes

@@ -6,7 +6,7 @@ class commands_GenerateDatabase extends commands_AbstractChangeCommand
 	 */
 	function getUsage()
 	{
-		return "[moduleName1 moduleName2 ... moduleNameN]";
+		return "[package1 package2 ... packageN]";
 	}
 	
 	/**
@@ -33,16 +33,17 @@ class commands_GenerateDatabase extends commands_AbstractChangeCommand
 	 */
 	function getParameters($completeParamCount, $params, $options, $current)
 	{
-		if ($completeParamCount == 0)
+		$components = array();
+		foreach ($this->getBootStrap()->getProjectDependencies() as $p) 
 		{
-			$modules = array();
-			foreach (glob("modules/*/persistentdocument", GLOB_ONLYDIR) as $path)
+			/* @var $p c_Package */
+			if (is_dir(f_util_FileUtils::buildPath($p->getPath(), 'dataobject')) || 
+				is_dir(f_util_FileUtils::buildPath($p->getPath(), 'persistentdocument')))
 			{
-				$modules[] = basename(dirname($path));
+				$components[] = $p->getKey();
 			}
-			return $modules;
-		}
-		return null;
+		}	
+		return array_diff($components, $params);
 	}
 
 	/**
@@ -61,19 +62,7 @@ class commands_GenerateDatabase extends commands_AbstractChangeCommand
 		if (!$pp->checkConnection())
 		{
 			$dbInfos = $pp->getConnectionInfos();
-			if (isset($dbInfos["host"]))
-			{
-				$host = $dbInfos["host"];
-			}
-			else
-			{
-				$host = "localhost";
-			}
-			$props = $this->getProperties("dbadmin_".$host);
-			if (!$pp->createDB($props))
-			{
-				return $this->quitError("You must create '".$dbInfos["database"]."@".$dbInfos["host"]."' database and give read/write access to '".$dbInfos["user"]."' user.");
-			}
+			return $this->quitError("You must create '".$dbInfos["database"]."@".$dbInfos["host"]."' database and give read/write access to '".$dbInfos["user"]."' user.");
 		}
 		
 		// Populate the database.
@@ -97,31 +86,36 @@ class commands_GenerateDatabase extends commands_AbstractChangeCommand
 		$scripts = array();
 		$array = array();
 		
-		$packages = array();
 		if (f_util_ArrayUtils::isNotEmpty($modules))
 		{
 			foreach ($modules as $module)
 			{
-				if ($module == 'framework')
+				$p = $this->getPackageByName($module);
+				
+				if ($p->isFramework())
 				{
 					$array[] = f_util_FileUtils::buildFrameworkPath('dataobject');
 				}
-				else 
+				elseif ($p->isModule())
 				{
-					$packages[] = 'modules_' . $module;
+					$array[] = f_util_FileUtils::buildChangeBuildPath($p->getType(), $p->getName(), 'dataobject');
+					$array[] = f_util_FileUtils::buildModulesPath($p->getName(), 'dataobject');
 				}
 			}
 		}
 		else 
 		{
-			$packages = ModuleService::getInstance()->getPackageNames();
 			$array[] = f_util_FileUtils::buildFrameworkPath('dataobject');
-		}
-		
-		foreach ($packages as $module)
-		{
-			$array[] = f_util_FileUtils::buildChangeBuildPath(str_replace('_', DIRECTORY_SEPARATOR, $module), 'dataobject');
-			$array[] = f_util_FileUtils::buildProjectPath(str_replace('_', DIRECTORY_SEPARATOR, $module), 'dataobject');
+			foreach ($this->getBootStrap()->getProjectDependencies() as $p) 
+			{
+				/* @var $p c_Package */
+				if ($p->isModule())
+				{
+					$array[] = f_util_FileUtils::buildChangeBuildPath($p->getType(), $p->getName(), 'dataobject');
+					$array[] = f_util_FileUtils::buildModulesPath($p->getName(), 'dataobject');
+				}
+				
+			}
 		}
 			
 		foreach ($array as $dir)
@@ -130,9 +124,7 @@ class commands_GenerateDatabase extends commands_AbstractChangeCommand
 			{
 				continue;
 			}
-
 			$dataobjectList = scandir($dir);
-
 			foreach ($dataobjectList as $fileName)
 			{
 				$filePath = $dir . DIRECTORY_SEPARATOR. $fileName;

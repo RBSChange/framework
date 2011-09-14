@@ -30,7 +30,6 @@ class commands_ClearCache extends commands_AbstractChangeCommand
 	function _execute($params, $options)
 	{
 		$this->message("== Clear cache ==");
-		if (!defined('PROJECT_HOME')) {define('PROJECT_HOME', realpath('.'));}
 
 		$cacheProfileDirectory = PROJECT_HOME . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'project';
 		$wwwCache = PROJECT_HOME . DIRECTORY_SEPARATOR .  'cache' . DIRECTORY_SEPARATOR . 'www';
@@ -45,7 +44,7 @@ class commands_ClearCache extends commands_AbstractChangeCommand
 			return $this->quitOk("Cache cleared");
 		}
 		
-		$this->executeCommand("clearDatacache");
+		$this->executeCommand("clear-datacache");
 		return $this->quitOk("Cache cleared");
 	}
 }

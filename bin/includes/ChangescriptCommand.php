@@ -1,11 +1,6 @@
 <?php
 abstract class c_ChangescriptCommand
 {
-	
-	const FG_RED = 31;
-	const FG_GREEN = 32;
-	const FG_MAGENTA = 35;
-	
 	/**
 	 * @var c_ChangeBootStrap
 	 */	
@@ -299,6 +294,38 @@ abstract class c_ChangescriptCommand
 				$this->echoMessage($message . PHP_EOL);
 				break;
 		}
+	}
+	
+	/**
+	 * @param string $componentName
+	 * @return c_Package
+	 */
+	protected function getPackageByName($componentName)
+	{
+		$parts = explode('/', $componentName);
+		if (count($parts) === 1)
+		{
+			if ($parts[0] === 'framework')
+			{
+				$parts = array(null, 'framework');
+			}
+			else
+			{
+				$parts = array('modules', $parts[0]);
+			}
+		}
+		elseif (count($parts) !== 2 || !in_array($parts[0], array('modules', 'themes', 'libs')))
+		{
+			return c_Package::getNewInstance(null, $componentName, PROJECT_HOME);
+		}
+		
+		$package = c_Package::getNewInstance($parts[0], $parts[1], PROJECT_HOME);
+		$projectDependencies = $this->getBootStrap()->getProjectDependencies();
+		if (isset($projectDependencies[$package->getKey()]))
+		{
+			return $projectDependencies[$package->getKey()];
+		}
+		return $package;
 	}
 	
 	private $errorCount = 0;

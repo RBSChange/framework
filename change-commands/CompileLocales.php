@@ -31,21 +31,14 @@ class commands_CompileLocales extends commands_AbstractChangeCommand
 	function getParameters($completeParamCount, $params, $options, $current)
 	{
 		$components = array();
-		if (is_dir("framework"))
+		foreach ($this->getBootStrap()->getProjectDependencies() as $p) 
 		{
-			$components[] = "framework";
-		}
-		foreach (glob("modules/*/i18n", GLOB_ONLYDIR) as $path)
-		{
-			$module = dirname($path);
-			$components[] = basename($module);
-		}
-		foreach (glob("themes/*/i18n", GLOB_ONLYDIR) as $path)
-		{
-			$module = dirname($path);
-			$components[] = "themes/" . basename($module);
-		}		
-		
+			/* @var $p c_Package */
+			if (is_dir(f_util_FileUtils::buildPath($p->getPath(), 'i18n')))
+			{
+				$components[] = $p->getKey();
+			}
+		}	
 		return array_diff($components, $params);
 	}
 
@@ -70,35 +63,48 @@ class commands_CompileLocales extends commands_AbstractChangeCommand
 
 		foreach ($params as $componentName)
 		{
-			if ($componentName == 'framework')
+			$package = $this->getPackageByName($componentName);
+			if (!$package->isValid() || !$package->isInProject()) 
+			{
+				$this->errorMessage("Invalid package: " . $package->getName());
+				continue;
+			}
+			elseif ($package->isFramework())
 			{
 				$ls->regenerateLocalesForFramework();
-				$this->okMessage('Framework locales compiled');
+				$this->okMessage('Framework compiled');
 			}
-			else if (strpos($componentName, 'themes/') === 0)
+			elseif ($package->isTheme())
 			{
-				$ls->regenerateLocalesForTheme(str_replace('themes/', '', $componentName));
+				$ls->regenerateLocalesForTheme($package->getName());
+				$this->message("Theme ".$package->getName()." compiled");
 			}
-			else
+			elseif ($package->isModule())
 			{
-				if (is_dir(f_util_FileUtils::buildModulesPath($componentName, 'i18n')))
+				if (is_dir(f_util_FileUtils::buildPath($package->getPath(), 'i18n')))
 				{
 					$ls->regenerateLocalesForModule($componentName);
-					$this->message("$componentName module locales compiled");
+					$this->message("Module ".$package->getName()." compiled");
 				}
 				else
 				{
-					$this->errorMessage("Module $componentName does not exist or has no locale.");
+					$this->warnMessage("Module " . $package->getName() ." has no locale.");
 				}
 			}
+			else
+			{
+				$this->errorMessage("Unknow package: " . $package->getKey());
+			}
 		}
-			
+
+		$this->executeCommand('clear-webapp-cache');
+		$this->executeCommand('clear-template-cache');
+		
 		if ($this->hasError())
 		{
 			return $this->quitError("All locales could not be compiled: ".$this->getErrorCount()." errors");
 		}
-		$this->executeCommand('clear-webapp-cache');
-		$this->executeCommand('clear-template-cache');
+		
 		return $this->quitOk("Locales successfully compiled");
 	}
 }

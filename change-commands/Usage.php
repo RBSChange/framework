@@ -16,6 +16,11 @@ class commands_Usage extends commands_AbstractChangeCommand
 	{
 		return true;
 	}
+	
+	function getOptions()
+	{
+		return array('dev', 'prod');
+	}
 
 	/**
 	 * @param String[] $params
@@ -53,7 +58,7 @@ class commands_Usage extends commands_AbstractChangeCommand
 					$this->executeGetOptions($params);
 					break;		
 				default:
-					$this->executeUsageHTTP();
+					$this->executeUsageHTTP($prodCmds, $devCmds);
 					break;
 			}
 		}
@@ -126,7 +131,7 @@ class commands_Usage extends commands_AbstractChangeCommand
 	 * @see c_Changescript::usage()
 	 *
 	 */
-	protected function executeUsageHTTP()
+	protected function executeUsageHTTP($prodCmds, $devCmds)
 	{
 		$this->message("Commands list:");
 		$commands = $this->getBootStrap()->getCommands();
@@ -137,7 +142,7 @@ class commands_Usage extends commands_AbstractChangeCommand
 		foreach ($commands as $command)
 		{
 			/* @var $command c_ChangescriptCommand */
-			if ($command->isHidden()) {continue;}
+			if ($command->isHidden() || ($command->devMode() && !$devCmds) || (!$command->devMode() && !$prodCmds)) {continue;}
 			if ($command->devMode() !== $devMode)
 			{
 				$devMode = $command->devMode();

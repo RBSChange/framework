@@ -37,9 +37,7 @@ class commands_InitProject extends commands_AbstractChangeCommand
 		$this->message("== Initializing project ==");
 
 		$this->executeCommand("updateDependencies");
-		
-		$computedDeps = $this->getComputedDeps();
-		
+				
 		// config directory: generate default config files
 		$builderResourcePath = f_util_FileUtils::buildFrameworkPath("builder");
 		f_util_FileUtils::mkdir("config");
@@ -49,9 +47,7 @@ class commands_InitProject extends commands_AbstractChangeCommand
 		{
 			$this->message("Create $fileName");
 			$baseProject = f_util_FileUtils::read("$builderResourcePath/config/project.xml");
-			$baseSubstitutions = array("project" => $this->getProjectName(),
-				"author" => $this->getAuthor(), "serverHost" => $this->getServerHost(),
-				"serverFqdn" => $this->getServerFqdn());
+			$baseSubstitutions = array("project" => $this->getProjectName(), "author" => $this->getAuthor(),);
 			f_util_FileUtils::write($fileName, $this->substitueVars($baseProject, $baseSubstitutions), f_util_FileUtils::OVERRIDE);
 		}
 		else
@@ -65,8 +61,8 @@ class commands_InitProject extends commands_AbstractChangeCommand
 		{
 			$this->message("Create $fileName");
 			$profilProject = f_util_FileUtils::read("$builderResourcePath/config/project_profil.xml");
-			$profilSubstitutions = array("project" => $this->getProjectName(),
-				"author" => $this->getAuthor(), "serverHost" => $this->getServerHost(),
+			$profilSubstitutions = array("project" => $this->getProjectName(), "author" => $this->getAuthor(), 
+				"serverHost" => $this->getServerHost(),
 				"database" => str_replace(".", "_", "C4_".$this->getAuthor()."_".$this->getProjectName()),
 				"database_host" => $this->getDatabaseHost(),
 				"serverFqdn" => $this->getServerFqdn(),
@@ -105,12 +101,9 @@ class commands_InitProject extends commands_AbstractChangeCommand
 
 	private function getServerHost()
 	{
-		foreach (array(getenv("HOME")."/.change/host", "/etc/change/host") as $file)
+		if (isset($_SERVER['SERVER_NAME']))
 		{
-			if (file_exists($file))
-			{
-				return f_util_FileUtils::read($file);
-			}
+			return $_SERVER['SERVER_NAME'];
 		}
 		return null;
 	}
@@ -143,8 +136,8 @@ class commands_InitProject extends commands_AbstractChangeCommand
 			$url = 'http://127.0.0.1:8983/solr';
 		}
 		$solr = '<solr>
-			<entry name="clientId">'.$url.'</entry>
-			<entry name="url">'.$this->getAuthor().'.'.$this->getProjectName().'</entry>
+			<entry name="clientId">'.$this->getAuthor().'.'.$this->getProjectName().'</entry>
+			<entry name="url">'.$url.'</entry>
 		</solr>';
 		
 		if ($props->hasProperty("SOLR_SHARED"))

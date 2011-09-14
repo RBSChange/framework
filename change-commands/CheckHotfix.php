@@ -24,6 +24,14 @@ class commands_CheckHotfix extends commands_AbstractChangeCommand
 	 */
 	function _execute($params, $options)
 	{
+		$patches = PatchService::getInstance()->check();
+		if (count($patches) > 0)
+		{
+			$str = array("Your project must apply all patches before to apply any hotfix:");
+			$str[]= $this->getChangeCmdName() . ' apply-patch --all';
+			$this->warnMessage(implode(PHP_EOL, $str));
+		}
+		
 		$hotfixes = $this->getHotfixes();		
 		if (count($hotfixes) == 0)
 		{

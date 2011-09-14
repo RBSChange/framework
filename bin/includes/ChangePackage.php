@@ -394,6 +394,14 @@ class c_Package
 	
 	/**
 	 * @return boolean
+	 */	
+	public function isValid()
+	{
+		return $this->getTypeAsInt() !== c_ChangeBootStrap::$DEP_UNKNOWN;
+	}
+	
+	/**
+	 * @return boolean
 	 */
 	public function isModule()
 	{
