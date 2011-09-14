@@ -302,33 +302,53 @@ abstract class f_persistentdocument_PersistentProvider
 	protected abstract function getConnection($connectionInfos);
 
 	/**
-	 * @param c_Properties $props
-	 * @throws Exception on error
-	 * @return Boolean true if database was created
+	 * @return string[]
 	 */
-	abstract function createDB($props);
-
+	abstract function getTables();	
+	
+	/**
+	 * @param string $tableName
+	 */
+	abstract function getTableFields($tableName);
+	
 	/**
 	 * @throws Exception on error
 	 */
 	abstract function clearDB();
 
 	/**
-	 * @param String $moduleName
-	 * @param String $documentName
+	 * @param string $moduleName
+	 * @param string $documentName
+	 * @param generator_PersistentProperty $property
+	 * @return string[] the SQL statements that where executed
+	 */
+	abstract function dropModelTables($moduleName, $documentName);
+	
+	/**
+	 * @param string $moduleName
+	 * @param string $documentName
 	 * @param generator_PersistentProperty $oldProperty
-	 * @return String[] the SQL statements that where executed
+	 * @return string[] the SQL statements that where executed
 	 */
 	abstract function delProperty($moduleName, $documentName, $oldProperty);
 
 	/**
-	 * @param String $moduleName
-	 * @param String $documentName
+	 * @param string $moduleName
+	 * @param string $documentName
 	 * @param generator_PersistentProperty $oldProperty
 	 * @param generator_PersistentProperty $newProperty
-	 * @return String[] the SQL statements that where executed
+	 * @return string[] the SQL statements that where executed
 	 */
 	abstract function renameProperty($moduleName, $documentName, $oldProperty, $newProperty);
+
+	/**
+	 * @param string $moduleName
+	 * @param string $documentName
+	 * @param generator_PersistentProperty $property
+	 * @return string[] the SQL statements that where executed
+	 */
+	abstract function addProperty($moduleName, $documentName, $property);	
+	
 
 	public abstract function closeConnection();
 
@@ -368,7 +388,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 	
 	/**
-	 * @param array<tableName=>string, moduleName=>string, documentName=>string, tableNameOci=>string> $properties
+	 * @param array<tableName=>string, moduleName=>string, documentName=>string> $properties
 	 * @return string
 	 */
 	public function generateTableName($properties)
@@ -381,7 +401,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @param array<dbMapping=>string, name=>string, dbMappingOci=>string> $properties
+	 * @param array<dbMapping=>string, name=>string> $properties
 	 * @return string
 	 */
 	public function generateFieldName($properties)
@@ -2054,6 +2074,12 @@ abstract class f_persistentdocument_PersistentProvider
 		$this->executeStatement($stmt);
 
 		$stmt = $this->prepareStatement($this->createTreeTableQuery($treeId));
+		$this->executeStatement($stmt);
+	}
+	
+	public function dropTreeTable($treeId)
+	{
+		$stmt = $this->prepareStatement($this->dropTreeTableQuery($treeId));
 		$this->executeStatement($stmt);
 	}
 

@@ -193,7 +193,7 @@ class commands_Install extends commands_AbstractChangedevCommand
 	protected function postInstallModules($p, $recursive)
 	{
 		$this->executeCommand("update-autoload" , array('modules/' . $p->getName()));
-		$this->executeCommand("init-patch-db", array("modules_" . $p->getName()));
+		$this->executeCommand("init-patch-db", array($p->getName()));
 		
 		$xml = $p->getInstallDocument();
 		$projDeps = $this->getBootStrap()->getProjectDependencies();

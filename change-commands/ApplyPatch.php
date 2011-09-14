@@ -6,7 +6,7 @@ class commands_ApplyPatch extends commands_AbstractChangeCommand
 	 */
 	function getUsage()
 	{
-		return "<moduleName> <patchNumber>";
+		return "[--all] [--ignorecommands] <moduleName|framework> <patchNumber> ";
 	}
 
 	function getAlias()
@@ -20,6 +20,15 @@ class commands_ApplyPatch extends commands_AbstractChangeCommand
 	function getDescription()
 	{
 		return "Applies a patch";
+	}
+	
+	/**
+	 * @param String[] $params
+	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
+	 */
+	protected function validateArgs($params, $options)
+	{
+		return count($params) == 2 || isset($options['all']);
 	}
 
 	/**
@@ -43,83 +52,92 @@ class commands_ApplyPatch extends commands_AbstractChangeCommand
 		
 		if ($completeParamCount == 0)
 		{
-			$components = array();
-			foreach (array_keys($list) as $packageName)
-			{
-				$components[] = str_replace('modules_', '', $packageName);
-			}
+			$components = array_keys($list);
 			return $components;
 		}
-		
-		$packageName = $params[0];
-		if ($packageName != "framework")
+		elseif (isset($list[$params[0]]))
 		{
-			$packageName = "modules_".$packageName;
-		}
-		
-		if (isset($list[$packageName]))
-		{
-			return $list[$packageName];
+			return $list[$params[0]];
 		}
 		return null;
 	}
 
-	/**
-	 * @param String[] $params
-	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
-	 */
-	protected function validateArgs($params, $options)
-	{
-		return count($params) == 2;
-	}
+
 
 	/**
 	 * @param String[] $params
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
-	 * @see c_ChangescriptCommand::parseArgs($args)
 	 */
 	function _execute($params, $options)
 	{
+		if (isset($options['all']))
+		{
+			return $this->_executeAll($params, $options);
+		}
 		$moduleName = $params[0];
 		$patchNumber = $params[1];
 
 		$this->message("== Apply patch $moduleName/$patchNumber ==");
 		$this->loadFramework();
+		
+		
+		$postCommands = array();
 
 		try
 		{
+			$lists = PatchService::getInstance()->getPatchList($moduleName);
+			if (!in_array($patchNumber, $lists))
+			{
+				return $this->quitError('The patch '.$moduleName.'/'.$patchNumber.' cannot be found.');
+			}
+			
 			// Get a instance of class
-			$className = $moduleName . '_patch_' . $patchNumber;
-			if ($moduleName == "framework")
+			$className = PatchService::getInstance()->getPHPClassPatch($moduleName, $patchNumber);
+			if ($className === null)
 			{
-				$patchPathBase = "framework"; 	
-			}
-			else
-			{
-				$patchPathBase = "modules/".$moduleName;
+				return $this->quitError('The patch '.$moduleName.'/'.$patchNumber.' cannot be loaded.');
 			}
 			
-			$patchPath = realpath($patchPathBase."/patch/".$patchNumber."/install.php");
-			if ($patchPath === false)
+			$patchInstance = new $className($this);
+			if (!($patchInstance instanceof change_Patch)) 
 			{
-				throw new Exception("Could not find patch $patchNumber in component $moduleName");
+				return $this->quitError('The patch '.$moduleName.'/'.$patchNumber.' is not à valid patch.');
 			}
 			
-			require_once($patchPath);
-			if (!class_exists($className, false))
+			if (!isset($options['ignorecommands']))
 			{
-				throw new ClassNotFoundException($className);
+				$commands = $patchInstance->getPreCommandList();
+				if (is_array($commands))
+				{
+					foreach ($commands as $commandInfo) 
+					{
+						if (is_array($commandInfo))
+						{
+							$cmdName = array_shift($commandInfo);
+							$this->executeCommand($cmdName, $commandInfo);
+						}
+					}
+				}
 			}
-			$patch = new $className($this);
-			$patch->executePatch();
-			PatchService::getInstance()->patchApply($moduleName, $patchNumber, $patch->isCodePatch());
 			
-		}
-		catch (ClassNotFoundException $e)
-		{
-			return $this->quitError("The patch \"".$moduleName.'/'.$patchNumber."\" cannot be applied automatically.
-You may need to execute the following command before: change update-autoload.\n
-Please check the README file to know how to apply this patch.");
+			$patchInstance->executePatch();
+			PatchService::getInstance()->patchApply($patchInstance);
+
+			if (!isset($options['ignorecommands']))
+			{
+				$commands = $patchInstance->getPostCommandList();
+				if (is_array($commands))
+				{
+					foreach ($commands as $commandInfo) 
+					{
+						if (is_array($commandInfo))
+						{
+							$cmdName = array_shift($commandInfo);
+							$this->executeCommand($cmdName, $commandInfo);
+						}
+					}
+				}
+			}			
 		}
 		catch (Exception $e)
 		{
@@ -127,5 +145,97 @@ Please check the README file to know how to apply this patch.");
 		}
 		
 		return $this->quitOk('Patch "' . $moduleName.'/'.$patchNumber . '" successfully applied.');
+	}
+	
+	/**
+	 * @param String[] $params
+	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
+	 */
+	function _executeAll($params, $options)
+	{
+		$this->message("== Apply all patch ==");
+		$this->loadFramework();
+		
+		$ps = PatchService::getInstance();
+		$list =  $ps->check();
+		if (count($list) > 0)
+		{
+			$patches = array();
+			foreach ($list as $module => $patchList)
+			{
+				foreach ($patchList as $patchName)
+				{
+					$className = $ps->getPHPClassPatch($module, $patchName);
+					if ($className)
+					{
+						$patch = new $className($this);
+						$patches[] = $patch;
+					}
+				}
+			}
+			
+			usort($patches, array($ps, 'sortPatchForExecution'));	
+			
+			
+			$preCommands = array();
+			$postCommands = array();
+			
+			if (!isset($options['ignorecommands']))
+			{
+				foreach ($patches as $patch) 
+				{
+					/* @var $patch change_Patch */
+					$commands = $patch->getPreCommandList();
+					if (is_array($commands))
+					{
+						foreach ($commands as $commandInfo) 
+						{
+							if (is_array($commandInfo) && count($commandInfo) >= 1)
+							{
+								$key = md5(implode(' ', $commandInfo));
+								if (isset($preCommands[$key])) {unset($preCommands[$key]);}
+								$preCommands[$key] = $commandInfo;
+							}
+						}
+					}
+					
+					$commands = $patch->getPostCommandList();
+					if (is_array($commands))
+					{
+						foreach ($commands as $commandInfo) 
+						{
+							if (is_array($commandInfo) && count($commandInfo) >= 1)
+							{
+								$key = md5(implode(' ', $commandInfo));
+								if (isset($postCommands[$key])) {unset($postCommands[$key]);}
+								$postCommands[$key] = $commandInfo;
+							}
+						}
+					}
+				}
+			}
+			
+			foreach ($preCommands as $commandInfo) 
+			{
+				$cmdName = array_shift($commandInfo);
+				$this->executeCommand($cmdName, $commandInfo);
+			}
+			
+			foreach ($patches as $patch) 
+			{
+				$this->executeCommand('apply-patch', array($patch->getModuleName(), $patch->getNumber(), '--ignorecommands'));
+			}
+			
+		
+			foreach ($postCommands as $commandInfo) 
+			{
+				$cmdName = array_shift($commandInfo);
+				$this->executeCommand($cmdName, $commandInfo);
+			}
+		}
+		else
+		{
+			return $this->quitOk('Your project is up to date.');
+		}
 	}
 }

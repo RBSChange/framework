@@ -32,18 +32,32 @@ class commands_CheckPatch extends commands_AbstractChangeCommand
 		$this->message("== Check for patch to apply ==");
 		
 		$this->loadFramework();
-
-		$list =  PatchService::getInstance()->check();
+		$ps = PatchService::getInstance();
+		
+		$list =  $ps->check();
 		if (count($list) > 0)
 		{
+			$patches = array();
 			$this->log('New available patch list :');
-			foreach ($list as $packageName => $patchList)
+			foreach ($list as $module => $patchList)
 			{
-				$module = str_replace('modules_', '', $packageName);
 				foreach ($patchList as $patchName)
 				{
-					$this->log($this->getChangeCmdName() . ' apply-patch ' . $module . ' ' . $patchName);
+					$className = $ps->getPHPClassPatch($module, $patchName);
+					if ($className)
+					{
+						$patch = new $className($this);
+						$patches[] = $patch;
+					}
 				}
+			}
+			
+			usort($patches, array($ps, 'sortPatchForExecution'));
+				
+			foreach ($patches as $patch) 
+			{
+				/* @var $patch change_Patch */
+				$this->log($this->getChangeCmdName() . ' apply-patch ' . $patch->getModuleName() . ' ' . $patch->getNumber());
 			}
 		}
 		else

@@ -6,7 +6,7 @@ class commands_InitPatchDb extends commands_AbstractChangeCommand
 	 */
 	function getUsage()
 	{
-		return "[component]";
+		return "<moduleName|framework>";
 	}
 	
 	function getAlias()
@@ -23,6 +23,32 @@ class commands_InitPatchDb extends commands_AbstractChangeCommand
 	}
 	
 	/**
+	 * @param String[] $params
+	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
+	 * @return boolean
+	 */
+	protected function validateArgs($params, $options)
+	{
+		if (count($params) === 0)
+		{
+			return true;
+		}
+		elseif (count($params) === 1)
+		{
+			$type = $params[0] === 'framework' ? null : 'modules'; 
+			$package = c_Package::getNewInstance($type, $params[0], PROJECT_HOME);
+			
+			if (!$package->isInProject())
+			{
+				$this->errorMessage('Invalid package name: ' . $params[0]);
+				return false;
+			}			
+			return true;
+		}
+		return false;
+	}
+	
+	/**
 	 * @param Integer $completeParamCount the parameters that are already complete in the command line
 	 * @param String[] $params
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
@@ -32,9 +58,16 @@ class commands_InitPatchDb extends commands_AbstractChangeCommand
 	{
 		if ($completeParamCount == 0)
 		{
-			$components = array("framework", "webapp");
-			$components = array_merge($components, ModuleService::getInstance()->getPackageNames());
-			return $components;
+			$parameters = array();
+			foreach ($this->getBootStrap()->getProjectDependencies() as $package) 
+			{
+				/* @var $package c_Package */
+				if (is_readable(f_util_FileUtils::buildPath($package->getPath(), 'patch', 'lastpatch')))
+				{
+					$parameters[] = $package->getName();
+				}
+			}
+			return $parameters;
 		}
 		return null;
 	}
@@ -48,10 +81,8 @@ class commands_InitPatchDb extends commands_AbstractChangeCommand
 	{
 		$this->message("== Init patch DB ==");
 		$this->loadFramework();
-
-		$targetPackage = isset($params[0]) ? $params[0] : null; 
-		PatchService::getInstance()->updateRepository($targetPackage);
-		
+		$componentName = isset($params[0]) ? $params[0] : null; 
+		PatchService::getInstance()->updateRepository($componentName);	
 		$this->quitOk('Patch repository successfully updated');
 	}
 }

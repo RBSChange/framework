@@ -3,21 +3,54 @@
  * <{$moduleName}>_patch_<{$patchNumber}>
  * @package modules.<{$moduleName}>
  */
-class <{$moduleName}>_patch_<{$patchNumber}> extends patch_BasePatch
+class <{$moduleName}>_patch_<{$patchNumber}> extends change_Patch
 {
-//  by default, isCodePatch() returns false.
-//  decomment the following if your patch modify code instead of the database structure or content.
+	/**
+	 * @return string
+	 */
+	public function getBasePath()
+	{
+		return dirname(__FILE__);
+	}
+	
     /**
-     * Returns true if the patch modify code that is versionned.
-     * If your patch modify code that is versionned AND database structure or content,
-     * you must split it into two different patches.
-     * @return Boolean true if the patch modify code that is versionned.
+     * @return <{$codepatch}>
      */
-//	public function isCodePatch()
-//	{
-//		return true;
-//	}
+	public function isCodePatch()
+	{
+		return <{$codepatch}>;
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getExecutionOrderKey()
+	{
+		return '<{$executionOrderKey}>';
+	}
  
+	/**
+	 * @return array
+	 */
+	public function getPreCommandList()
+	{
+		return array(
+			//array('disable-site'),
+		);
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getPostCommandList()
+	{
+		return array(
+			array('clear-documentscache'),
+			//array('enable-site'),
+		);
+	}	
+	
+	
 	/**
 	 * Entry point of the patch execution.
 	 */

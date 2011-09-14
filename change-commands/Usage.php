@@ -10,14 +10,6 @@ class commands_Usage extends commands_AbstractChangeCommand
 	}
 	
 	/**
-	 * @return String
-	 */
-	function getDescription()
-	{
-		return "usage";
-	}
-	
-	/**
 	 * @see c_ChangescriptCommand::isHidden()
 	 */
 	public function isHidden()
@@ -277,6 +269,15 @@ class commands_Usage extends commands_AbstractChangeCommand
 			$this->message($cmdNameParam . " has no parameter value.");
 		}
 	}
+	
+	/**
+	 * @return string
+	 */
+	public function commandUsage()
+	{
+		$this->log("Usage: ".$this->getChangeCmdName()." ".$this->getUsage());
+	}
+	
 
 	/**
 	 * @param string[] $args
@@ -284,7 +285,14 @@ class commands_Usage extends commands_AbstractChangeCommand
 	protected function executeCommandUsage($args)
 	{
 		$cmdNameParam = $args[1];
-		$command = $this->getBootStrap()->getCommand($cmdNameParam);
+		if ($cmdNameParam === '-h' || $cmdNameParam === '-help')
+		{
+			$command = $this;
+		}
+		else
+		{
+			$command = $this->getBootStrap()->getCommand($cmdNameParam);
+		}
 		$command->commandUsage();
 	}
 	
@@ -294,7 +302,14 @@ class commands_Usage extends commands_AbstractChangeCommand
 	protected function executeCommandUsageHTTP($args)
 	{
 		$cmdNameParam = $args[1];
-		$command = $this->getBootStrap()->getCommand($cmdNameParam);
+		if ($cmdNameParam === '-h' || $cmdNameParam === '-help')
+		{
+			$command = $this;
+		}
+		else
+		{
+			$command = $this->getBootStrap()->getCommand($cmdNameParam);
+		}
 		
 		$description = $command->getDescription();
 		if ($description !== null)

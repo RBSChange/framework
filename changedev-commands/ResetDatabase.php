@@ -60,6 +60,17 @@ class commands_ResetDatabase extends commands_AbstractChangeCommand
 		
 		//If document cache not stored in f_cache
 		$this->executeCommand("clearDocumentscache");
+
+		$this->log("Delete media...");
+		
+		$path = f_util_FileUtils::buildProjectPath('media','formatted');
+		f_util_FileUtils::rmdir($path, true);
+		
+		$path = f_util_FileUtils::buildProjectPath('media','original');
+		f_util_FileUtils::rmdir($path, true);
+		
+		$path = f_util_FileUtils::buildProjectPath('securemedia','original');
+		f_util_FileUtils::rmdir($path, true);
 		
 		$this->executeCommand("dropDatabase" , array('--force'));
 		$this->executeCommand("compileDocuments");

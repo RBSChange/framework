@@ -68,17 +68,66 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 	}
 	
 	/**
+	 * 
+	 * @see f_persistentdocument_PersistentProvider::getTables()
+	 */
+	function getTables()
+	{
+		$tables = array();
+		$stmt = $this->executeSQLSelect("SHOW TABLES");
+		foreach ($stmt->fetchAll() as $table)
+		{
+			$tables[] = $table[0];
+		}
+		return $tables;
+	}
+	
+	function getTableFields($tableName)
+	{
+		$infos = array();
+		foreach ($this->executeSQLSelect('SHOW FULL COLUMNS FROM `'.$tableName. '`')->fetchAll(PDO::FETCH_ASSOC) as $row)
+		{
+			$infos[$row["Field"]] = $row;
+		}
+		return $infos;
+	}
+	
+	/**
 	 * @throws Exception on error
 	 */
 	function clearDB()
 	{
 		$stmt = $this->executeSQLSelect("show tables");
-		foreach ($stmt->fetchAll() as $table)
+		foreach ($this->getTables() as $table)
 		{
-			$this->executeSQLScript("drop table " . $table[0]);
+			$this->executeSQLScript('DROP TABLE `' . $table . '`');
 		}
 	}
 	
+	/**
+	 * @param String $moduleName
+	 * @param String $documentName
+	 * @param generator_PersistentProperty $property
+	 * @return string[] the SQL statements that where executed
+	 */
+	function dropModelTables($moduleName, $documentName)
+	{
+		$documentModel = f_persistentdocument_PersistentDocumentModel::getInstance($moduleName, $documentName);
+		$tableName = $documentModel->getTableName();
+		$sqls = array();
+		$sqls[] = 'DROP TABLE IF EXISTS `' . $tableName . '`';
+		if ($documentModel->isLocalized())
+		{
+			$tableName = $documentModel->getTableName().$this->getI18nSuffix();
+			$sqls[] = 'DROP TABLE IF EXISTS `' . $tableName . '`';
+		}
+		foreach ($sqls as $sql)
+		{
+			$this->executeSQLScript($sql);
+		}
+		return $sqls;
+	}
+
 	/**
 	 * (non-PHPdoc)
 	 * @see persistentdocument/f_persistentdocument_PersistentProvider#delProperty($moduleName, $documentName, $propertyName)
@@ -117,7 +166,6 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 	 * @param generator_PersistentProperty $oldProperty
 	 * @param generator_PersistentProperty $newProperty
 	 * @return String[] the SQL statements that where executed
-	 * @see persistentdocument/f_persistentdocument_PersistentProvider#renameProperty($moduleName, $documentName, $propertyName, $newPropertyName)
 	 */
 	function renameProperty($moduleName, $documentName, $oldProperty, $newProperty)
 	{
@@ -175,9 +223,10 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 	}
 	
 	/**
-	 * @param String $moduleName
-	 * @param String $documentName
+	 * @param string $moduleName
+	 * @param string $documentName
 	 * @param generator_PersistentProperty $property
+	 * @return string[] the SQL statements that where executed
 	 */
 	function addProperty($moduleName, $documentName, $property)
 	{
@@ -186,7 +235,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		
 		$tableName = $documentModel->getTableName();
 		$columnName = $property->getDbName();
-		$infos = $this->getTableInfo($tableName);
+		$infos = $this->getTableFields($tableName);
 		if (!isset($infos[$columnName]))
 		{
 			$sqls[] = "ALTER TABLE `".$tableName."` ADD COLUMN ".$property->generateSql("mysql");	
@@ -197,7 +246,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 		if ($property->isLocalized())
 		{
-			$i18nInfos = $this->getTableInfo($tableName.$this->getI18nSuffix());
+			$i18nInfos = $this->getTableFields($tableName.$this->getI18nSuffix());
 			$i18nColumnName = $property->getDbName().$this->getI18nSuffix();
 			if (!isset($i18nInfos[$i18nColumnName]))
 			{
@@ -214,58 +263,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 		return $sqls;
 	}
-	
-	private function getTableInfo($tableName)
-	{
-		$infos = array();
-		foreach ($this->executeSQLSelect("desc ".$tableName)->fetchAll(PDO::FETCH_ASSOC) as $row)
-		{
-			$infos[$row["Field"]] = $row;
-		}
-		return $infos;
-	}
-	
-	/**
-	 * @param c_Properties $props
-	 * (non-PHPdoc)
-	 * @see persistentdocument/f_persistentdocument_PersistentProvider#createDB($conf)
-	 * @return Boolean true if database was created
-	 */
-	function createDB($props)
-	{
-		$adminInfos = array();
-		$adminInfos['user'] = $props->getProperty("dbAdminUser");
-		$adminInfos['password'] = $props->getProperty("dbAdminPassword"); 
-		$adminInfos['host'] = $props->getProperty("dbAdminHost");
-		$adminInfos['port'] = $props->getProperty("dbAdminPort");
 		
-		if (!isset($adminInfos['user']) || !isset($adminInfos['password']))
-		{
-			return false;
-		}
-		
-		$adminDriver = $this->getConnection($adminInfos);
-		
-		$dbInfos = $this->connectionInfos;
-		if ($adminDriver->exec("create database if not exists `".$dbInfos['database']."`") === false)
-		{
-			throw new Exception("Could not create database ".$dbInfos['database']);
-		}
-		if ($adminInfos['host'] === null || $adminInfos['host'] == 'localhost')
-		{
-			$fromHost = 'localhost';
-		}
-		else
-		{
-			$fromHost = $props->getProperty("dbAdminFromHost");
-		}
-		if ($adminDriver->exec("grant all privileges on `".$dbInfos['database']."`.* to '".$dbInfos['user']."'@'".$fromHost."' identified by '".$dbInfos['password']."'") === false)
-		{
-			throw new Exception("Could not grant privileges on ".$dbInfos['database']." to ".$dbInfos['user']."'@'".$fromHost);
-		}
-		return true;
-	}
-
 	/**
 	 * @return String
 	 */
@@ -292,9 +290,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 		return $previousValue;
 	}
-
-
-
+	
 	/**
 	 * @param array<String, String> $connectionInfos
 	 * @return PDO

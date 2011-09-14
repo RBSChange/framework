@@ -38,9 +38,8 @@ class commands_ApplyHotfix extends commands_CheckHotfix
 		if (count($patches) > 0)
 		{
 			$errStr = array("Your project must apply the following patches before to apply any hotfix:");
-			foreach ($patches as $packageName => $patchList)
+			foreach ($patches as $module => $patchList)
 			{
-				$module = str_replace('modules_', '', $packageName);
 				foreach ($patchList as $patchName)
 				{
 					$errStr[]= $this->getChangeCmdName() . ' apply-patch ' . $module . ' ' . $patchName;
@@ -114,15 +113,7 @@ class commands_ApplyHotfix extends commands_CheckHotfix
 		
 		$this->executeCommand("update-autoload" , array(substr($tmpPackage->getRelativePath(), 1)));
 		
-		$patches = PatchService::resetInstance()->check();
-		foreach ($patches as $packageName => $patchList)
-		{
-			$module = str_replace('modules_', '', $packageName);
-			foreach ($patchList as $patchName)
-			{
-				$this->executeCommand("apply-patch", array($module, $patchName));
-			}
-		}
+		$this->executeCommand("apply-patch", array("--all"));
 
 		$this->executeCommand("enable-site");	
 			

@@ -6,7 +6,7 @@ class commands_PatchInfo extends commands_AbstractChangeCommand
 	 */
 	function getUsage()
 	{
-		return "<componentName> <patchNumber>";
+		return "<moduleName|framework> <patchNumber>";
 	}
 	
 	function getAlias()
@@ -22,6 +22,16 @@ class commands_PatchInfo extends commands_AbstractChangeCommand
 		return "Displays informations about a patch";
 	}
 	
+	
+	
+	/**
+	 * @see c_ChangescriptCommand::validateArgs()
+	 */
+	protected function validateArgs($params, $options)
+	{
+		return count($params) == 2;
+	}
+
 	/**
 	 * @param Integer $completeParamCount the parameters that are already complete in the command line
 	 * @param String[] $params
@@ -33,21 +43,23 @@ class commands_PatchInfo extends commands_AbstractChangeCommand
 		if ($completeParamCount == 0)
 		{
 			$components = array();
-			foreach (glob("modules/*/patch/*", GLOB_ONLYDIR) as $patch)
+			foreach ($this->getBootStrap()->getProjectDependencies() as $package)
 			{
-				$components[] = basename(dirname(dirname($patch)));
+				/* @var $package c_Package */
+				if (($package->isFramework() || $package->isModule()) && is_dir(f_util_FileUtils::buildPath($package->getPath(), 'patch')))
+				{
+					$components[] = $package->getName();
+				}
 			}
-			return array_unique($components);
+			return $components;
 		}
 		elseif ($completeParamCount == 1)
 		{
-			$patches = array();
-			$moduleName = $params[0];
-			foreach (glob("modules/$moduleName/patch/*", GLOB_ONLYDIR) as $patch)
+			$patches = PatchService::getInstance()->getPatchList($params[0]);
+			if (count($patches)) 
 			{
-				$patches[] = basename($patch);
+				return $patches;
 			}
-			return $patches;
 		}
 		return null;
 	}
@@ -60,9 +72,7 @@ class commands_PatchInfo extends commands_AbstractChangeCommand
 	function _execute($params, $options)
 	{
 		$this->message("== Patch information ==");
-		
-		$this->loadFramework();
-		
+		$this->loadFramework();	
 		$moduleName = $params[0];
 		$patchNumber = $params[1];
 		$this->message(PatchService::getInstance()->patchInfo($moduleName, $patchNumber));

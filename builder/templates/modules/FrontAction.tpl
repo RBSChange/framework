@@ -14,4 +14,12 @@ class <{$module}>_<{$name}>Action extends change_Action
 	{
 		return change_View::NONE;
 	}
+	
+	/**
+	 * @return boolean false.
+	 */
+	public function isSecure()
+	{
+		return false;
+	}	
 }

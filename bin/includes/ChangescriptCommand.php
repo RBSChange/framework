@@ -210,7 +210,7 @@ abstract class c_ChangescriptCommand
 	
 	/**
 	 * @param string $message
-	 * @param integer $color FG_GREEN = 32 FG_MAGENTA = 35  FG_RED = 31;
+	 * @param integer $color validation = 32 warn = 35  error = 31;
 	 */
 	protected function echoMessage($message, $color = null)
 	{
@@ -228,6 +228,14 @@ abstract class c_ChangescriptCommand
 		}
 		else
 		{
+			if ($color === 31) 
+			{
+				echo 'ERROR: ';	
+			}
+			elseif ($color === 35)
+			{
+				echo 'WARNING: ';	
+			}
 			echo $message;
 		}
 	}

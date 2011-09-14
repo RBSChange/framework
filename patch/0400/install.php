@@ -3,8 +3,32 @@
  * framework_patch_0400
  * @package modules.framework
  */
-class framework_patch_0400 extends patch_BasePatch
+class framework_patch_0400 extends change_Patch
 {
+	/**
+	 * @return string
+	 */
+	public function getBasePath()
+	{
+		return dirname(__FILE__);
+	}
+	
+    /**
+     * @return false
+     */
+	public function isCodePatch()
+	{
+		return true;
+	}	
+
+	/**
+	 * @return string
+	 */
+	public function getExecutionOrderKey()
+	{
+		return '2011-09-13 10:56:57';
+	}
+	
 	/**
 	 * Entry point of the patch execution.
 	 */

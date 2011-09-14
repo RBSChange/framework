@@ -28,6 +28,10 @@ if ($clearKey !== false)
 	$argv = array_values($argv);
 	$bootStrap->cleanDependenciesCache();
 }
+if (count($argv) === 1 && $argv[0] === '-h')
+{
+	$argv = array();
+}
 
 $bootStrap->initCommands();
 $bootStrap->execute($argv);

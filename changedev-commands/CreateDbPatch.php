@@ -1,17 +1,17 @@
 <?php
-class commands_CreatePatch extends commands_AbstractChangeCommand
+class commands_CreateDbPatch extends commands_AbstractChangedevCommand
 {
 	/**
 	 * @return String
 	 */
 	function getUsage()
 	{
-		return "<moduleName>";
+		return "<moduleName|framework>";
 	}
 
 	function getAlias()
 	{
-		return "cp";
+		return "cdbp";
 	}
 
 	/**
@@ -19,7 +19,7 @@ class commands_CreatePatch extends commands_AbstractChangeCommand
 	 */
 	function getDescription()
 	{
-		return "Creates a new patch";
+		return "Creates a new DB patch";
 	}
 
 	/**
@@ -28,7 +28,19 @@ class commands_CreatePatch extends commands_AbstractChangeCommand
 	 */
 	protected function validateArgs($params, $options)
 	{
-		return count($params) == 1;
+		if (count($params) == 1)
+		{
+			$type = $params[0] === 'framework' ? null : 'modules';
+			$package = c_Package::getNewInstance($type, $params[0], PROJECT_HOME);
+			$packages = $this->getBootStrap()->getProjectDependencies();
+			if (!isset($packages[$package->getKey()]))
+			{
+				$this->errorMessage('invalid param value: ' . $params[0]);
+				return false;
+			}
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -42,17 +54,13 @@ class commands_CreatePatch extends commands_AbstractChangeCommand
 		if ($completeParamCount == 0)
 		{
 			$components = array();
-			if (is_dir("framework"))
+			foreach ($this->getBootStrap()->getProjectDependencies() as $package) 
 			{
-				$components[] = "framework";
-			}
-			if (is_dir("webapp"))
-			{
-				$components[] = "webapp";
-			}
-			foreach (glob("modules/*", GLOB_ONLYDIR) as $module)
-			{
-				$components[] = basename($module);
+				/* @var $package c_Package */
+				if ($package->isFramework() || $package->isModule())
+				{
+					$components[] = $package->getName();
+				}
 			}
 			return $components;
 		}
@@ -66,16 +74,19 @@ class commands_CreatePatch extends commands_AbstractChangeCommand
 	 */
 	function _execute($params, $options)
 	{
-		$this->message("== Create patch ==");
-
+		$this->message("== Create DB patch ==");
 		$this->loadFramework();
 		$componentName = $params[0];
+		
 		if ($componentName !== "framework" && $componentName != "webapp" && !ModuleService::getInstance()->moduleExists($componentName))
 		{
 			return $this->quitError("Component $componentName does not exits");
 		}
-		$patchFolder = patch_BasePatch::createNewPatch($componentName, $this->getAuthor());
-
-		return $this->quitOk("Patch $patchFolder successfully created\nPlease now edit $patchFolder/install.php and $patchFolder/README.");
+	
+		$patchFolder = PatchService::getInstance()->createDBPatch($componentName);	
+		$patchNumber = basename($patchFolder);
+		
+		$this->log("Please now edit $patchFolder/install.php and $patchFolder/README.");		
+		return $this->quitOk("DB patch $componentName $patchNumber successfully created");
 	}
 }

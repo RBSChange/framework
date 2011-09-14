@@ -34,11 +34,31 @@ class commands_AddModule extends commands_AbstractChangedevCommand
 			return false;
 		}
 		$moduleName = $params[0];
-		if (!preg_match('/^[a-z][a-z0-9]+$/', $moduleName))
+		if (!preg_match('/^[a-z][a-z0-9]{1,24}$/', $moduleName))
 		{
-			$this->errorMessage("Invalid module name ([a-z][a-z0-9]+): " . $moduleName);
+			$this->errorMessage("Invalid module name ([a-z][a-z0-9]{1,24}): " . $moduleName);
 			return false;
 		}
+		elseif (in_array($moduleName, array('framework', 'webapp')))
+		{
+			$this->errorMessage("Reserved module name: " . $moduleName);	
+			return false;
+		}
+
+		$package = c_Package::getNewInstance('modules', $moduleName, PROJECT_HOME);
+		if ($package->isInProject())
+		{
+			$this->errorMessage("Module $moduleName already exists");
+			return false;
+		}
+		
+		$packages = $this->getBootStrap()->getReleasePackages($this->getBootStrap()->getReleaseRepository());
+		if (isset($packages[$package->getKey()]))
+		{
+			$this->errorMessage("Reserved standard release module name: " . $moduleName);		
+			return false;
+		}
+		
 		if (isset($options['icon']) && !is_string($options['icon']))
 		{
 			$this->errorMessage("Invalid icon name : " . $options['icon']);
@@ -97,12 +117,14 @@ class commands_AddModule extends commands_AbstractChangedevCommand
 		// Generate locale for new module
 		LocaleService::getInstance()->regenerateLocalesForModule($moduleName);
 
-		$this->executeCommand("clear-webapp-cache");
 		$this->executeCommand("compile-config");
-		$this->executeCommand("compile-documents");
-		$this->executeCommand("compile-editors-config");
-		$this->executeCommand("compile-roles");
-		 
+		
+		if (!$hidden)
+		{
+			$this->executeCommand("clear-webapp-cache");
+			$this->executeCommand("compile-roles");
+		}
+		
 		return $this->quitOk('Module ' . $moduleName . ' ready');
 	}
 }

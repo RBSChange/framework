@@ -1,17 +1,17 @@
 <?php
-class commands_ImportData extends commands_AbstractChangeCommand
+class commands_CreateCodePatch extends commands_AbstractChangedevCommand
 {
 	/**
 	 * @return String
 	 */
 	function getUsage()
 	{
-		return "<moduleName> <scriptName>";
+		return "<moduleName|framework>";
 	}
 
 	function getAlias()
 	{
-		return "id";
+		return "ccop";
 	}
 
 	/**
@@ -19,7 +19,7 @@ class commands_ImportData extends commands_AbstractChangeCommand
 	 */
 	function getDescription()
 	{
-		return "import data";
+		return "Creates a new code patch";
 	}
 
 	/**
@@ -28,7 +28,19 @@ class commands_ImportData extends commands_AbstractChangeCommand
 	 */
 	protected function validateArgs($params, $options)
 	{
-		return count($params) == 2;
+		if (count($params) == 1)
+		{
+			$type = $params[0] === 'framework' ? null : 'modules';
+			$package = c_Package::getNewInstance($type, $params[0], PROJECT_HOME);
+			$packages = $this->getBootStrap()->getProjectDependencies();
+			if (!isset($packages[$package->getKey()]))
+			{
+				$this->errorMessage('invalid param value: ' . $params[0]);
+				return false;
+			}
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -45,45 +57,16 @@ class commands_ImportData extends commands_AbstractChangeCommand
 			foreach ($this->getBootStrap()->getProjectDependencies() as $package) 
 			{
 				/* @var $package c_Package */
-				if ($package->isModule() || $package->isTheme())
+				if ($package->isFramework() || $package->isModule())
 				{
-					if (is_dir($package->getPath() . '/setup'))
-					{
-						if (count($this->getXmlFileNames($package->getPath() . '/setup')))
-						{
-							$components[] = $package->getName();
-						}
-					}
+					$components[] = $package->getName();
 				}
 			}
 			return $components;
 		}
-		elseif ($completeParamCount == 1)
-		{
-			$scripts = array();
-			$moduleName = $params[0];
-			foreach (glob("modules/$moduleName/setup/*.xml") as $script)
-			{
-				$scripts[] = basename($script);
-			}
-			return $scripts;
-		}
 		return null;
 	}
-	
-	private function getXmlFileNames($path)
-	{
-		$names = array();
-		foreach (scandir($path) as $pathfile) 
-		{
-			if (substr($pathfile, -4) === '.xml')
-			{
-				$names = basename($pathfile);
-			}
-		}
-		return $names;
-	}
-	
+
 	/**
 	 * @param String[] $params
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
@@ -91,15 +74,18 @@ class commands_ImportData extends commands_AbstractChangeCommand
 	 */
 	function _execute($params, $options)
 	{
-		$moduleName = $params[0];
-		$scriptName = $params[1];
-		$this->message("== Import data $moduleName/$scriptName ==");
-
+		$this->message("== Create code patch ==");
 		$this->loadFramework();
-
-		$scriptReader = import_ScriptReader::getInstance();
-		$scriptReader->executeModuleScript($moduleName, $scriptName);
-
-		$this->quitOk("$moduleName/$scriptName imported");
+		$componentName = $params[0];
+		
+		if ($componentName !== "framework" && $componentName != "webapp" && !ModuleService::getInstance()->moduleExists($componentName))
+		{
+			return $this->quitError("Component $componentName does not exits");
+		}
+	
+		$patchFolder = PatchService::getInstance()->createCodePatch($componentName);	
+		$patchNumber = basename($patchFolder);
+		$this->log("Please now edit $patchFolder/install.php and $patchFolder/README.");		
+		return $this->quitOk("Code patch $componentName $patchNumber successfully created");
 	}
 }

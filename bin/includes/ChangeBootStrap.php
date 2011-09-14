@@ -790,7 +790,7 @@ class c_ChangeBootStrap
 	{
 		try
 		{
-			if (count($args) == 0 || $args[0][0] == "-")
+			if (count($args) == 0)
 			{
 				$args = array('usage');
 			}
@@ -799,6 +799,11 @@ class c_ChangeBootStrap
 				$this->_executeCommand('usage', array_merge(array('getUsage'), $args));
 				return;
 			}
+			elseif ($args[0][0] == "-")
+			{
+				$args = array('usage', $args[0]);
+			}
+			
 			$cmdName = $args[0];
 			switch ($cmdName)
 			{
