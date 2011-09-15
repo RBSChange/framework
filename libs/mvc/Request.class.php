@@ -432,17 +432,22 @@ class change_Request
 
 	/**
 	 * Set a cookie.
-	 * @param string Cookie key
-	 * @param string Cookie value
+	 * @param string $key Cookie key
+	 * @param string $value Cookie value
+	 * @param string $lifeTime Cookie life time in seconds
 	 */
-	public function setCookie($key, $value)
+	public function setCookie($key, $value, $lifeTime = null)
 	{
-		setcookie($key, $value, time() + 60 * 60 * 24 * 15, '/');
+		if ($lifeTime === null)
+		{
+			$lifeTime = 60 * 60 * 24 * 15;
+		}
+		setcookie($key, $value, time() + $lifeTime, '/');
 	}
 	
 	/**
 	 * Test a cookie availability.
-	 * @param string Cookie key
+	 * @param string $key Cookie key
 	 * @return boolean
 	 */
 	public function hasCookie($key)
@@ -456,8 +461,8 @@ class change_Request
 	
 	/**
 	 * Get a cookie value.
-	 * @param string Cookie key
-	 * @param string Cookie default value
+	 * @param string $key Cookie key
+	 * @param string $defaultValue Cookie default value
 	 * @return string
 	 */
 	public function getCookie($key, $defaultValue = '')
@@ -471,7 +476,7 @@ class change_Request
 	
 	/**
 	 * Remove a cookie.
-	 * @param string Cookie key
+	 * @param string $key Cookie key
 	 */
 	public function removeCookie($key)
 	{
