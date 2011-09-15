@@ -22,11 +22,6 @@ class builder_ModuleGenerator
 	 */
 	private $version;
 
-	/**
-	 * Module title. Save in module.xml
-	 * @var string
-	 */
-	private $title;
 
 	/**
 	 * Current date. This date is write in header of generated file.
@@ -90,17 +85,6 @@ class builder_ModuleGenerator
 	}
 
 	/**
-	 * Title setter
-	 * @param String $value
-	 * @return builder_ModuleGenerator
-	 */
-	public function setTitle($value)
-	{
-		$this->title = $value;
-		return $this;
-	}
-
-	/**
 	 * Icon setter
 	 * @param String $value
 	 * @return builder_ModuleGenerator
@@ -151,11 +135,8 @@ class builder_ModuleGenerator
 		$pathBase = f_util_FileUtils::buildModulesPath($this->name);
 		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase,  'config'));
 		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'lib', 'services'));
-		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'persistentdocument', 'import'));
 		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'setup'));
 		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'style'));
-		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'templates'));
-		f_util_FileUtils::mkdir(f_util_FileUtils::buildAbsolutePath($pathBase, 'forms', 'editor'));
 				
 		if ($this->visibility)
 		{
@@ -204,9 +185,7 @@ class builder_ModuleGenerator
 		f_util_FileUtils::write($path, $this->generateFile('ModuleService.class.php'));
 		$crs->appendToAutoloadFile($this->name . '_ModuleService', $path);
 
-		// Generate persistentdocument/import file
-		$path = f_util_FileUtils::buildModulesPath($this->name, 'persistentdocument', 'import', $this->name . '_binding.xml');
-		f_util_FileUtils::write($path, $this->generateFile('import_binding.xml'));
+
 		
 		
 		if ($this->visibility)
@@ -235,22 +214,16 @@ class builder_ModuleGenerator
 		
 		$keysInfos = array();
 		$keysInfos[$ls->getLCID('fr')] = $ids;
-		$keysInfos[$ls->getLCID('en')] = $ids;
-		$keysInfos[$ls->getLCID('de')] = $ids;
 		$baseKey = 'm.' . $this->name . '.bo.general';
 		$ls->updatePackage($baseKey, $keysInfos, false, true);
 		
 		if ($this->visibility)
 		{
 			$keysInfos[$ls->getLCID('fr')] = array('create_' => 'créer');
-			$keysInfos[$ls->getLCID('en')] = array('create_' => 'create');
-			$keysInfos[$ls->getLCID('de')] = array('create_' => 'neu');
 			$baseKey = 'm.' . $this->name . '.bo.actions';
 			$ls->updatePackage($baseKey, $keysInfos, false, true);
 			
 			$keysInfos[$ls->getLCID('fr')] = array();
-			$keysInfos[$ls->getLCID('en')] = array();
-			$keysInfos[$ls->getLCID('de')] = array();
 			$baseKey = 'm.' . $this->name . '.document.permission';
 			$ls->updatePackage($baseKey, $keysInfos, false, true, 'm.generic.document.permission');		
 		}	
@@ -269,7 +242,6 @@ class builder_ModuleGenerator
 
 		// Assign all necessary variable
 		$generator->assign('name', $this->name);
-		$generator->assign('title', $this->getTitle());
 		$generator->assign('version', $this->version);
 		$generator->assign('icon', $this->icon);
 		$generator->assign('category', $this->category);
@@ -281,19 +253,6 @@ class builder_ModuleGenerator
 
 	}
 
-	/**
-	 * Get the title. Used in internal to get the defined title or a automatly generated title
-	 * @return string
-	 */
-	private function getTitle()
-	{
-		// If no title defined construct it
-		if ( is_null($this->title) )
-		{
-			$this->setTitle( ucfirst( $this->name ) . ' module');
-		}
-		return $this->title;
-	}
 
 	/**
 	 * Generate a service
@@ -322,14 +281,12 @@ class builder_ModuleGenerator
 	public function generateFrontAction($name)
 	{
 		$generator = new builder_Generator('modules');
-		$generator->assign_by_ref('author', $this->author);
-		$generator->assign_by_ref('name', $name);
-		$generator->assign_by_ref('module', $this->name);
-		$generator->assign_by_ref('date', $this->date);
+		$generator->assign('name', $name);
+		$generator->assign('module', $this->name);
 		$result = $generator->fetch('FrontAction.tpl');
 		return $result;
 	}
-
+	
 	/**
 	 * Generate a JSON action
 	 *
@@ -339,10 +296,8 @@ class builder_ModuleGenerator
 	public function generateJSONAction($name)
 	{
 		$generator = new builder_Generator('modules');
-		$generator->assign_by_ref('author', $this->author);
-		$generator->assign_by_ref('name', $name);
-		$generator->assign_by_ref('module', $this->name);
-		$generator->assign_by_ref('date', $this->date);
+		$generator->assign('name', $name);
+		$generator->assign('module', $this->name);
 		$result = $generator->fetch('JSONAction.tpl');
 		return $result;
 	}

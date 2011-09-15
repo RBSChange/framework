@@ -45,7 +45,7 @@ class commands_AddModule extends commands_AbstractChangedevCommand
 			return false;
 		}
 
-		$package = c_Package::getNewInstance('modules', $moduleName, PROJECT_HOME);
+		$package = $this->getPackageByName($moduleName);
 		if ($package->isInProject())
 		{
 			$this->errorMessage("Module $moduleName already exists");
@@ -80,9 +80,16 @@ class commands_AddModule extends commands_AbstractChangedevCommand
 	function _execute($params, $options)
 	{
 		$this->message("== Add module ==");
+		$p = $this->getPackageByName($params[0]);
 
-		$moduleName = $params[0];
 		$icon = (isset($options['icon'])) ? $options['icon'] : 'package';
+		$iconLibPath = f_util_FileUtils::buildProjectPath('libs', 'icons', 'small', $icon . '.png');
+		if (!file_exists($iconLibPath))
+		{
+			$iconLibPath = f_util_FileUtils::buildPath($p->getPath(), 'webapp', 'changeicons', 'small', $icon . '.png');
+			$this->warnMessage('Please add icon in: ' .$iconLibPath);
+		}
+		
 		$hidden = (isset($options['hidden']) && $options['hidden'] == true);
 		$category = null;
 		if (isset($options['category']))
@@ -91,40 +98,34 @@ class commands_AddModule extends commands_AbstractChangedevCommand
 		}
 
 		$this->loadFramework();
-		$modulePath = f_util_FileUtils::buildModulesPath($moduleName);
-		if (file_exists($modulePath))
-		{
-			return $this->quitError("Module $moduleName already exists");
-		}
-		$this->log('Create module dir: ' . $modulePath);
-		f_util_FileUtils::mkdir($modulePath);
+		$this->log('Create module dir: ' . $p->getPath());
+		f_util_FileUtils::mkdir($p->getPath());
 
 		// Make auto generated file
-		$moduleGenerator = new builder_ModuleGenerator($moduleName);
-		$moduleGenerator->setAuthor($this->getAuthor());
+		$moduleGenerator = new builder_ModuleGenerator($p->getName());
 		$moduleGenerator->setVersion(FRAMEWORK_VERSION);
-		$moduleGenerator->setTitle(ucfirst($moduleName) . ' module');
 		$moduleGenerator->setIcon($icon);
 		$moduleGenerator->setCategory($category);
 		$moduleGenerator->setVisibility(!$hidden);
 		$moduleGenerator->generateAllFile();
 		
-		$p = c_Package::getNewInstance('modules', $moduleName, PROJECT_HOME);
+		
 		$p->setDownloadURL('none');
 		$p->setVersion(FRAMEWORK_VERSION);
 		$this->getBootStrap()->updateProjectPackage($p);
 		
 		// Generate locale for new module
-		LocaleService::getInstance()->regenerateLocalesForModule($moduleName);
+		LocaleService::getInstance()->regenerateLocalesForModule($p->getName());
 
 		$this->executeCommand("compile-config");
 		
 		if (!$hidden)
 		{
 			$this->executeCommand("clear-webapp-cache");
+			$this->executeCommand("compile-editors-config");
 			$this->executeCommand("compile-roles");
 		}
 		
-		return $this->quitOk('Module ' . $moduleName . ' ready');
+		return $this->quitOk('Module ' . $p->getName() . ' ready');
 	}
 }

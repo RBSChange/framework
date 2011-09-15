@@ -99,10 +99,7 @@ class commands_ApplyPatch extends commands_AbstractChangeCommand
 
 		$this->message("== Apply patch $moduleName/$patchNumber ==");
 		$this->loadFramework();
-		
-		
-		$postCommands = array();
-
+	
 		try
 		{
 			$lists = PatchService::getInstance()->getPatchList($moduleName);
@@ -123,9 +120,11 @@ class commands_ApplyPatch extends commands_AbstractChangeCommand
 			{
 				return $this->quitError('The patch '.$moduleName.'/'.$patchNumber.' is not à valid patch.');
 			}
-			
+
 			if (!isset($options['ignorecommands']))
 			{
+				$siteDisabled = $this->siteIsDisabled();
+				
 				$commands = $patchInstance->getPreCommandList();
 				if (is_array($commands))
 				{
@@ -134,6 +133,7 @@ class commands_ApplyPatch extends commands_AbstractChangeCommand
 						if (is_array($commandInfo))
 						{
 							$cmdName = array_shift($commandInfo);
+							if ($cmdName === 'disable-site' && $siteDisabled) {continue;}
 							$this->executeCommand($cmdName, $commandInfo);
 						}
 					}
@@ -142,7 +142,7 @@ class commands_ApplyPatch extends commands_AbstractChangeCommand
 			
 			$patchInstance->executePatch();
 			PatchService::getInstance()->patchApply($patchInstance);
-
+			
 			if (!isset($options['ignorecommands']))
 			{
 				$commands = $patchInstance->getPostCommandList();
@@ -153,6 +153,7 @@ class commands_ApplyPatch extends commands_AbstractChangeCommand
 						if (is_array($commandInfo))
 						{
 							$cmdName = array_shift($commandInfo);
+							if ($cmdName === 'enable-site' && $siteDisabled) {continue;}
 							$this->executeCommand($cmdName, $commandInfo);
 						}
 					}
@@ -195,11 +196,10 @@ class commands_ApplyPatch extends commands_AbstractChangeCommand
 			}
 			
 			usort($patches, array($ps, 'sortPatchForExecution'));	
-			
-			
 			$preCommands = array();
 			$postCommands = array();
 			
+				
 			if (!isset($options['ignorecommands']))
 			{
 				foreach ($patches as $patch) 
@@ -213,7 +213,6 @@ class commands_ApplyPatch extends commands_AbstractChangeCommand
 							if (is_array($commandInfo) && count($commandInfo) >= 1)
 							{
 								$key = md5(implode(' ', $commandInfo));
-								if (isset($preCommands[$key])) {unset($preCommands[$key]);}
 								$preCommands[$key] = $commandInfo;
 							}
 						}
@@ -235,9 +234,11 @@ class commands_ApplyPatch extends commands_AbstractChangeCommand
 				}
 			}
 			
+			$siteDisabled = $this->siteIsDisabled();		
 			foreach ($preCommands as $commandInfo) 
 			{
 				$cmdName = array_shift($commandInfo);
+				if ($cmdName === 'disable-site' && $siteDisabled) {continue;}
 				$this->executeCommand($cmdName, $commandInfo);
 			}
 			
@@ -250,6 +251,7 @@ class commands_ApplyPatch extends commands_AbstractChangeCommand
 			foreach ($postCommands as $commandInfo) 
 			{
 				$cmdName = array_shift($commandInfo);
+				if ($cmdName === 'enable-site' && $siteDisabled) {continue;}
 				$this->executeCommand($cmdName, $commandInfo);
 			}
 		}
@@ -257,5 +259,13 @@ class commands_ApplyPatch extends commands_AbstractChangeCommand
 		{
 			return $this->quitOk('Your project is up to date.');
 		}
+	}
+	
+	/**
+	 * @return boolean
+	 */
+	private function siteIsDisabled()
+	{
+		return file_exists('site_is_disabled');
 	}
 }
