@@ -653,6 +653,40 @@ class f_persistentdocument_DocumentService extends BaseService
 
 		f_event_EventManager::dispatchEvent('persistentDocumentDeleted', $this, array("document" => $document));
 	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 */
+	public function purgeDocument($document)
+	{
+		if ($this !== $document->getDocumentService())
+		{
+			$document->getDocumentService()->purgeDocument($document);
+			return;
+		}
+		
+		if (!$document->getPersistentModel()->isLocalized())
+		{
+			$this->delete($document);
+			return;
+		}
+		
+		$requestContext = RequestContext::getInstance();
+		$langs = array_reverse($document->getI18nInfo()->getLangs());
+		foreach ($langs as $lang)
+		{
+			try
+			{
+				$requestContext->beginI18nWork($lang);
+				$this->delete($document);
+				$requestContext->endI18nWork();
+			}
+			catch (Exception $e)
+			{
+				$requestContext->endI18nWork($e);
+			}			
+		}
+	}
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $persistentDocument
