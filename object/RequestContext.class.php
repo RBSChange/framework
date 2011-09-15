@@ -18,7 +18,7 @@ class RequestContext
 	 * @var string (lowercase) Ex: fr
 	 */
 	private $m_lang;
-	
+
 	/**
 	 * @var boolean
 	 */
@@ -57,12 +57,12 @@ class RequestContext
 	 * @var boolean
 	 */
 	private $m_inHTTPS;
-	
+
 	/**
 	 * @var string
 	 */
 	private $m_pathURI;
-	
+
 	/**
 	 * The possible request modes : backoffice or frontoffice
 	 */
@@ -75,7 +75,7 @@ class RequestContext
 	 * @var Integer FRONTOFFICE_MODE or BACKOFFICE_MODE
 	 */
 	private $mode;
-	
+
 	/**
 	 * Constructor of RequestContext
 	 * @param array $supportedLanguages
@@ -95,12 +95,12 @@ class RequestContext
 		$this->m_pathURI = (isset($_SERVER['REQUEST_URI'])) ? $_SERVER['REQUEST_URI'] : null;
 
 		if (Framework::isDebugEnabled())
-        {
-        	$debug = __METHOD__ . ' -> default lang : ' . var_export($this->m_lang, true);
-        	$debug .= ', default UI lang : ' .var_export($this->m_ui_lang, true);
-        	$debug .= ', HTTPS : ' . var_export($this->m_inHTTPS, true);
-        	$debug .= ', URL : ' . var_export($this->m_pathURI, true);
-            Framework::debug($debug);
+		{
+			$debug = __METHOD__ . ' -> default lang : ' . var_export($this->m_lang, true);
+			$debug .= ', default UI lang : ' .var_export($this->m_ui_lang, true);
+			$debug .= ', HTTPS : ' . var_export($this->m_inHTTPS, true);
+			$debug .= ', URL : ' . var_export($this->m_pathURI, true);
+			Framework::debug($debug);
 		}
 	}
 
@@ -149,7 +149,7 @@ class RequestContext
 	{
 		self::$m_instance = null;
 	}
-	
+
 	/**
 	 * @return boolean
 	 */
@@ -157,7 +157,7 @@ class RequestContext
 	{
 		return $this->m_inHTTPS;
 	}
-	
+
 	/**
 	 * @return String (http | https)
 	 */
@@ -169,13 +169,13 @@ class RequestContext
 		}
 		return 'http';
 	}
-	
-	
+
+
 	public function getPathURI()
 	{
 		return $this->m_pathURI;
 	}
-	
+
 	/**
 	 * The current request mode
 	 * @return const FRONTOFFICE_MODE or BACKOFFICE_MODE
@@ -193,7 +193,7 @@ class RequestContext
 	{
 		$this->mode = $mode;
 	}
-	
+
 	/**
 	 * @var Boolean
 	 */
@@ -202,7 +202,7 @@ class RequestContext
 	 * @var String
 	 */
 	private $ajaxFromURL;
-	
+
 	/**
 	 * @param Boolean $ajaxMode
 	 * @param String $fromURL
@@ -221,7 +221,7 @@ class RequestContext
 	{
 		return $this->ajaxMode;
 	}
-	
+
 	/**
 	 * @return String
 	 */
@@ -229,7 +229,7 @@ class RequestContext
 	{
 		return $this->ajaxFromURL;
 	}
-	
+
 	/**
 	 * @return String
 	 */
@@ -250,7 +250,7 @@ class RequestContext
 	{
 		return $this->m_enabled;
 	}
-	
+
 	/**
 	 * @return boolean
 	 */
@@ -258,23 +258,23 @@ class RequestContext
 	{
 		return $this->m_isLangDefined;
 	}
-	
+
 	/**
 	 * @return string current language to lower case Ex: fr
 	 */
 	public function getLang()
 	{
-	    if (count($this->m_workLang) > 0)
+		if (count($this->m_workLang) > 0)
 		{
 			$lang = end($this->m_workLang);
 		}
 		else
 		{
-		    $lang = $this->m_lang;
+			$lang = $this->m_lang;
 		}
 		return $lang;
 	}
-	
+
 	/**
 	 * @exception BadInitializationException if the current UI language is not defined
 	 * @return string current UI language to lower case Ex: fr
@@ -291,21 +291,21 @@ class RequestContext
 	 */
 	public function setLang($lang)
 	{
-	    if (Framework::isDebugEnabled())
-	    {
-	        Framework::debug(__METHOD__ . '(' . $lang . ')');
-	    }
-	    
-	    if (count($this->m_workLang) > 0)
-	    {
-	        throw new BadInitializationException("The current language is already defined to :" . $this->m_lang);
-	    }
-	    
-	    if (in_array($lang, $this->getSupportedLanguages()))
-	    {
-	        $this->m_lang = $lang;
-	        $this->m_isLangDefined = true;
-	    }
+		if (Framework::isDebugEnabled())
+		{
+			Framework::debug(__METHOD__ . '(' . $lang . ')');
+		}
+	  
+		if (count($this->m_workLang) > 0)
+		{
+			throw new BadInitializationException("The current language is already defined to :" . $this->m_lang);
+		}
+	  
+		if (in_array($lang, $this->getSupportedLanguages()))
+		{
+			$this->m_lang = $lang;
+			$this->m_isLangDefined = true;
+		}
 	}
 
 	/**
@@ -323,17 +323,17 @@ class RequestContext
 			throw new IllegalArgumentException($lang);
 		}
 	}
-	
-	
+
+
 	public function setUILangFromParameter($lang)
 	{
-		
+
 		if ($lang && is_string($lang) && in_array($lang, $this->getUISupportedLanguages()))
 		{
 			$this->m_ui_lang = $lang;
 		}
-	}	
-	
+	}
+
 
 	/**
 	 * @return array
@@ -374,9 +374,9 @@ class RequestContext
 	 */
 	public function getUserAgentLanguage()
 	{
-	    $lang = null;
+		$lang = null;
 
-	    if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']))
+		if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']))
 		{
 			$lang = preg_split('/[,;]+/', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
 			$lang = strtolower(substr(trim($lang[0]), 0, 2));
@@ -384,10 +384,10 @@ class RequestContext
 
 		if ($lang === null || !in_array($lang, $this->getUISupportedLanguages()))
 		{
-		    $lang = $this->getUIDefaultLang();
+			$lang = $this->getUIDefaultLang();
 		}
 
-	    return $lang;
+		return $lang;
 	}
 
 	public function beginI18nWork($lang)
@@ -421,19 +421,19 @@ class RequestContext
 		}
 	}
 
-    /**
-     * @return String
-     */
-    public function getTimeZone()
-    {
-        if (NULL === $this->m_timeZone)
-        {
-            $this->m_timeZone = DEFAULT_TIMEZONE;   
-        }
-        
-        return $this->m_timeZone;       
-    }
-    
+	/**
+	 * @return String
+	 */
+	public function getTimeZone()
+	{
+		if (NULL === $this->m_timeZone)
+		{
+			$this->m_timeZone = DEFAULT_TIMEZONE;
+		}
+
+		return $this->m_timeZone;
+	}
+
 	/**
 	 * @var Object
 	 */
@@ -507,7 +507,7 @@ class RequestContext
 			else if (isset($_SERVER['HTTP_USER_AGENT']))
 			{
 				$ua = strtolower($_SERVER['HTTP_USER_AGENT']);
-				
+
 				if (strpos($ua, 'windows') !== false)
 				{
 					$this->m_os = self::OS_WIN;
@@ -581,7 +581,7 @@ class RequestContext
 		}
 		return $this->m_userAgentTypeVersion;
 	}
-	
+
 	/**
 	 * @return String
 	 */
@@ -811,17 +811,19 @@ class RequestContext
 		}
 		return $match;
 	}
-	
+
 	/**
 	 * @return String
 	 */
 	public function getClientIp()
 	{
 		$ip = isset($_SERVER['HTTP_X_FORWARDED_FOR']) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : null;
-		if (f_util_StringUtils::isEmpty($ip))
+		$remoteAddr = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : null;
+		if (!f_util_StringUtils::isEmpty($ip) && !f_util_StringUtils::isEmpty($remoteAddr))
 		{
-			$ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : null;
+			$ip .= ', '; 
 		}
+		$ip .= $remoteAddr;
 		return $ip;
 	}
 }
