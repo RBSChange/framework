@@ -2682,6 +2682,33 @@ class f_persistentdocument_DocumentService extends BaseService
 	}
 	
 	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param change_Request $request
+	 * @return array($module, $action)
+	 */
+	public function getResolveDetail($document, $request)
+	{
+		$page = $this->getDisplayPage($document);
+		if ($page instanceof website_persistentdocument_page)
+		{
+			foreach ($document->getPersistentModel()->getAncestorModelNames() as $modelName)
+			{
+				$parts = f_persistentdocument_PersistentDocumentModel::getModelInfo($modelName);
+				$moduleName = $parts['module'];
+				if (!$request->hasModuleParameter($moduleName, 'cmpref'))
+				{
+					$request->setModuleParameter($moduleName, 'cmpref', $document->getId());
+				}
+			}
+		
+			// Set pageref parameter into the request.
+			$request->setParameter('pageref', $page->getId());
+			return array('website', 'Display');
+		}
+		return array('website', 'Error404');
+	}
+	
+	/**
 	 * @param website_UrlRewritingService $urlRewritingService
 	 * @param f_persistentdocument_PersistentDocument $document
 	 * @param website_persistentdocument_website $website
