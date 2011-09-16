@@ -55,8 +55,7 @@ class change_Storage
 		if (isset($_SERVER["SERVER_ADDR"]))
 		{
 			session_name($this->parameters['session_name']);
-			$options = isset($_SERVER['HTTP_HOST']) ? array('cookie_domain' => $_SERVER['HTTP_HOST']) : false;
-			Zend_Session::start($options);
+			Zend_Session::start();
 			
 			$this->changeSessionNameSpace = new Zend_Session_Namespace('GLOBAL');
 			$this->backuserSessionNameSpace = new Zend_Session_Namespace('BACKOFFICE');
