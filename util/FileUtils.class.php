@@ -362,10 +362,8 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * TODO: this method does NOT returns what it promise to do ...
 	 * remove a directory (and sub-directories) on filesystem
 	 * @param $directoryPath the directory to remove
-	 * @return boolean FALSE if directory cannot be removed
 	 */
 	static public function rmdir($directoryPath, $onlyContent = false)
 	{
@@ -373,19 +371,8 @@ abstract class f_util_FileUtils
 		{
 			foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directoryPath, RecursiveDirectoryIterator::KEY_AS_PATHNAME), RecursiveIteratorIterator::CHILD_FIRST) as $file => $info)
 			{
-				$fileName = $info->getFilename();
-				if ($fileName === '.' || $fileName === '..')
-				{
-					continue;
-				}
-				if ($info->isFile() || self::isLink($info->getPathname()))
-				{
-					unlink($file);
-				}
-				else if ($info->isDir())
-				{
-					rmdir($file);
-				}
+				@unlink($file);
+				if (is_dir($file)) {rmdir($file);}
 			}
 			if (!$onlyContent)
 			{
