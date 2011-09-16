@@ -1,7 +1,14 @@
 <?php
 class paginator_PaginatorItem
 {
+	/**
+	 * @var string
+	 */
 	private $label;
+	
+	/**
+	 * @var string
+	 */
 	private $url;
 	
 	/**
@@ -11,7 +18,6 @@ class paginator_PaginatorItem
 
 	/**
 	 * Get the label of the paginator link
-	 *
 	 * @return String
 	 */
 	public function getLabel()
@@ -21,7 +27,6 @@ class paginator_PaginatorItem
 
 	/**
 	 * Set the label of the paginator link
-	 *
 	 * @param String
 	 * @return paginator_PaginatorItem
 	 */
@@ -33,7 +38,6 @@ class paginator_PaginatorItem
 
 	/**
 	 * Get the url of the paginator link
-	 *
 	 * @return String
 	 */
 	public function getUrl()
@@ -43,7 +47,6 @@ class paginator_PaginatorItem
 
 	/**
 	 * Set the url of the paginator link
-	 *
 	 * @param String
 	 * @return paginator_PaginatorItem
 	 */
@@ -61,12 +64,31 @@ class paginator_Paginator extends ArrayObject
 	 */
 	const PAGEINDEX_PARAMETER_NAME = 'page';
 
+	/**
+	 * paginator_PaginatorItem[]
+	 */
 	private $items = null;
+	
+	/**
+	 * @var integer
+	 */
 	private $currentItemIndex = 0;
+
+	/**
+	 * @var string
+	 */
 	private $templateFileName = 'Website-Default-Paginator';
+	
+	/**
+	 * @var string
+	 */
 	private $templateModuleName = 'website';
 	
+	/**
+	 * @var string
+	 */
 	private $pageIndexParamName = self::PAGEINDEX_PARAMETER_NAME;
+	
 	/**
 	 * Index of the current page of paginator
 	 * @var integer
@@ -85,7 +107,11 @@ class paginator_Paginator extends ArrayObject
 	 */
 	private $moduleName = null;
 
+	/**
+	 * @var array
+	 */
 	private $extraParameters = array();
+	
 	/**
 	 * @var Integer
 	 */
@@ -101,6 +127,12 @@ class paginator_Paginator extends ArrayObject
 	 */
 	private $listName;
 
+	/**
+	 * @param string $moduleName
+	 * @param integer $pageIndex
+	 * @param mixed[] $items
+	 * @param integer $nbItemPerPage
+	 */
 	public function __construct($moduleName, $pageIndex, $items, $nbItemPerPage)
 	{
 		$this->setModuleName($moduleName);
@@ -209,7 +241,6 @@ class paginator_Paginator extends ArrayObject
 
 	/**
 	 * Set the request's extra parameters, besides page.
-	 *
 	 * @param Array<String, Mixed> $value
 	 */
 	public function setExtraParameters($value)
@@ -219,32 +250,252 @@ class paginator_Paginator extends ArrayObject
 
 	/**
 	 * Returns the request's extra parameters, besides page.
-	 *
 	 * @return Array<String, Mixed>
 	 */
 	public function getExtraParameters()
 	{
 		return $this->extraParameters;
 	}
-
+	
+	/**
+	 * @return paginator_PaginatorItem[]
+	 */
 	public function getItems()
 	{
 		$this->load();
 		return $this->items;
 	}
 
+	/**
+	 * @return boolean
+	 */
 	public function shouldRender()
 	{
 		return $this->getPageCount() > 1;
 	}
 	
+	/**
+	 * @var string
+	 */
 	private $anchor;
+	
 	/**
 	 * @param String $anchor the anchor to add to each paginator URL
 	 */
 	public function setAnchor($anchor)
 	{
 		$this->anchor = $anchor;
+	}
+
+	/**
+	 * @var f_web_ParametrizedLink
+	 */
+	private $parametrizedLink;
+	
+	/**
+	 * @param integer $pageIndex
+	 * @return string
+	 */
+	private function getUrlForPage($pageIndex)
+	{
+		$key = $this->getModuleName().'Param';
+		if ($this->parametrizedLink === null)
+		{
+			$rq = RequestContext::getInstance();
+			if ($rq->getAjaxMode())
+			{
+				$requestUri = $rq->getAjaxFromURI();
+			}
+			else
+			{
+				$requestUri = $rq->getPathURI();
+			}
+			$this->setBaseUrl($requestUri);
+		}
+		$this->parametrizedLink->setQueryParameter($key, array($this->pageIndexParamName => $pageIndex > 1 ? $pageIndex : null));
+		$this->parametrizedLink->setFragment($this->anchor);
+		return $this->parametrizedLink->getUrl();
+	}
+	
+	/**
+	 * @param string $baseUrl
+	 */
+	public function setBaseUrl($baseUrl)
+	{
+		$rq = RequestContext::getInstance();
+		$parts = explode('?', $baseUrl);
+		$this->parametrizedLink = new f_web_ParametrizedLink($rq->getProtocol(), $_SERVER['SERVER_NAME'], $parts[0]);
+		if (isset($parts[1]) && $parts[1] != '')
+		{
+			parse_str($parts[1], $queryParameters);
+			foreach ($queryParameters as $name => $value)
+			{
+				if (!in_array($name, $this->excludeParameters))
+				{
+					$this->parametrizedLink->setQueryParameter($name, $value);
+				}
+			}
+		}		
+		if (is_array($this->extraParameters) && count($this->extraParameters))
+		{
+			foreach ($this->extraParameters as $name => $value) 
+			{
+				if (!in_array($name, $this->excludeParameters))
+				{
+					$this->parametrizedLink->setQueryParameter($name, $value);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * @var string[]
+	 */
+	private $excludeParameters = array();
+	
+	/**
+	 * @param string $baseUrl
+	 */
+	public function setExcludeParameters($paramNames)
+	{
+		$this->excludeParameters = $paramNames;
+	}
+
+	/**
+	 * Returns the "Page 1 sur XX" text
+	 * @return String
+	 */
+	public function getLocalizedPageCount()
+	{
+		return LocaleService::getInstance()->transFO('m.website.paginator.detail', array('ucf'), array('currentPage' => $this->getCurrentPageNumber(), 'pageCount' => $this->getPageCount(), 'listName' => $this->getListName()));
+	}
+
+	/**
+	 * @return paginator_PaginatorItem
+	 */
+	public function getFirstPageItem()
+	{
+		$this->load();
+		if ($this->currentItemIndex == 0)
+		{
+			return null;
+		}
+		$newItem = new paginator_PaginatorItem();
+		$newItem->setLabel(1)->setUrl($this->getUrlForPage(1));
+		$newItem->isCurrent = 0 == $this->getPageCount();
+		return $newItem;
+	}
+	
+	/**
+	 * @return paginator_PaginatorItem
+	 */
+	public function getPreviousPageItem()
+	{
+		$this->load();
+		if ($this->currentItemIndex > 0)
+		{
+			$items = $this->getItems();
+			return $items[$this->currentItemIndex-1];
+		}
+		return null;
+
+	}
+	
+	/**
+	 * @return paginator_PaginatorItem
+	 */
+	public function getLastPageItem()
+	{
+		$this->load();
+		$p = $this->getPageCount();
+		if ( $this->getCurrentPageNumber() == $p || $p == 0)
+		{
+			return null;
+		}
+		$newItem = new paginator_PaginatorItem();
+		$newItem->setLabel($p)->setUrl($this->getUrlForPage($p));
+		$newItem->isCurrent = $p == $this->getPageCount();
+		return $newItem;
+	}
+
+	/**
+	 * @return paginator_PaginatorItem
+	 */
+	public function getNextPageItem()
+	{
+		$this->load();
+		if ($this->getCurrentPageNumber() < $this->getPageCount())
+		{
+			$items = $this->getItems();
+			return $items[$this->currentItemIndex+1];
+		}
+		return null;
+	}
+
+	/**
+	 * @param string $fileName
+	 */
+	public final function setTemplateFileName($fileName)
+	{
+		$this->html = null;
+		$this->templateFileName = $fileName;
+	}
+
+	/**
+	 * @param string $moduleName
+	 */
+	public final function setTemplateModuleName($moduleName)
+	{
+		$this->html = null;
+		$this->templateModuleName = $moduleName;
+	}
+
+	/**
+	 * @return TemplateObject
+	 */
+	public final function getTemplate()
+	{
+		$loader = TemplateLoader::getInstance()->setPackageName('modules_' . $this->templateModuleName)->setDirectory('templates')->setMimeContentType('html');
+		$template = $loader->load($this->templateFileName);
+		$template->setAttribute('paginator', $this);
+		return $template;
+	}
+	
+	/**
+	 * @return String
+	 */
+	public final function execute()
+	{
+		if ($this->html !== null)
+		{
+			return $this->html;
+		}
+		$this->html = $this->getTemplate()->execute();
+		return $this->html;
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getListName()
+	{
+		return $this->listName;
+	}
+	
+	/**
+	 * @return string
+	 */
+	function setListName($listName)
+	{
+		$this->listName = $listName;
+	}
+
+	private function load()
+	{
+		if ($this->items === null)
+		{
+			$this->buildItems();
+		}
 	}
 
 	private function buildItems()
@@ -284,288 +535,5 @@ class paginator_Paginator extends ArrayObject
 		{
 			$this->items = array();
 		}
-	}
-
-	/**
-	 * @var f_web_ParametrizedLink
-	 */
-	private $currentUrl;
-	
-	private function getUrlForPage($pageIndex)
-	{
-		$key = $this->getModuleName().'Param';
-		if ($this->currentUrl === null)
-		{
-			$rq = RequestContext::getInstance();
-			if ($rq->getAjaxMode())
-			{
-				$requestUri = $rq->getAjaxFromURI();
-			}
-			else
-			{
-				$requestUri = $rq->getPathURI();
-			}
-			$parts = explode('?', $requestUri);
-			$this->currentUrl = new f_web_ParametrizedLink($rq->getProtocol(), $_SERVER['SERVER_NAME'], $parts[0]);
-			if (isset($parts[1]) && $parts[1] != '')
-			{
-				parse_str($parts[1], $queryParameters);
-				$this->currentUrl->setQueryParameters($queryParameters);
-			}
-			
-			if (is_array($this->extraParameters) && count($this->extraParameters))
-			{
-				foreach ($this->extraParameters as $name => $value) 
-				{
-					$this->currentUrl->setQueryParameter($name, $value);
-				}
-			}
-		}
-		$this->currentUrl->setQueryParameter($key, array($this->pageIndexParamName => $pageIndex > 1 ? $pageIndex : null));
-		$this->currentUrl->setFragment($this->anchor);
-		return $this->currentUrl->getUrl();
-	}
-
-	/**
-	 * Returns the "Page 1 sur XX" text
-	 *
-	 * @return String
-	 */
-	public function getLocalizedPageCount()
-	{
-		return LocaleService::getInstance()->transFO('m.website.paginator.detail', array('ucf'), array('currentPage' => $this->getCurrentPageNumber(), 'pageCount' => $this->getPageCount(), 'listName' => $this->getListName()));
-	}
-
-	public function getFirstPageItem()
-	{
-		$this->load();
-		if ($this->currentItemIndex == 0)
-		{
-			return null;
-		}
-		$newItem = new paginator_PaginatorItem();
-		$newItem->setLabel(1)->setUrl($this->getUrlForPage(1));
-		$newItem->isCurrent = 0 == $this->getPageCount();
-		return $newItem;
-	}
-
-	public function getPreviousPageItem()
-	{
-		$this->load();
-		if ($this->currentItemIndex > 0)
-		{
-			$items = $this->getItems();
-			return $items[$this->currentItemIndex-1];
-		}
-		return null;
-
-	}
-
-	public function getLastPageItem()
-	{
-		$this->load();
-		$p = $this->getPageCount();
-		if ( $this->getCurrentPageNumber() == $p || $p == 0)
-		{
-			return null;
-		}
-		$newItem = new paginator_PaginatorItem();
-		$newItem->setLabel($p)->setUrl($this->getUrlForPage($p));
-		$newItem->isCurrent = $p == $this->getPageCount();
-		return $newItem;
-	}
-
-	public function getNextPageItem()
-	{
-		$this->load();
-		if ($this->getCurrentPageNumber() < $this->getPageCount())
-		{
-			$items = $this->getItems();
-			return $items[$this->currentItemIndex+1];
-		}
-		return null;
-	}
-
-	public final function setTemplateFileName($string)
-	{
-		$this->html = null;
-		$this->templateFileName = $string;
-	}
-
-	public final function setTemplateModuleName($string)
-	{
-		$this->html = null;
-		$this->templateModuleName = $string;
-	}
-
-	public final function getTemplate()
-	{
-		$loader = TemplateLoader::getInstance()->setPackageName('modules_' . $this->templateModuleName)->setDirectory('templates')->setMimeContentType('html');
-		$template = $loader->load($this->templateFileName);
-		$template->setAttribute('paginator', $this);
-		return $template;
-	}
-	
-	/**
-	 * @return String
-	 */
-	public final function execute()
-	{
-		if ($this->html !== null)
-		{
-			return $this->html;
-		}
-		$this->html = $this->getTemplate()->execute();
-		return $this->html;
-	}
-	
-	function getListName()
-	{
-		return $this->listName;
-	}
-	
-	function setListName($listName)
-	{
-		$this->listName = $listName;
-	}
-
-	private function load()
-	{
-		if (is_null($this->items))
-		{
-			$this->buildItems();
-		}
-	}
-}
-
-/**
- * Small url class utility
- */
-class paginator_Url
-{
-	/**
-	 * Returns an instance of paginator_Url initialized with the current Url. If the current
-	 * url is not set and empty string is used.
-	 *
-	 * @return paginator_Url
-	 */
-	public static function getInstanceFromCurrentUrl()
-	{
-		$inst = new paginator_Url();
-		$rq = RequestContext::getInstance();
-		if ($rq->getAjaxMode())
-		{
-			$requestUri = $rq->getAjaxFromURI();
-		}
-		else
-		{
-			$requestUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : "";
-		}
-		$index = strpos($requestUri, '?');
-		$baseUrl = $index ? substr($requestUri, 0, $index) : $requestUri;
-		$inst->baseUrl = $baseUrl;
-		$inst->setQueryParameters($_GET);
-		return $inst;
-	}
-
-	public function removeQueryParameter($name)
-	{
-		$key = urlencode($name);
-		if (isset($this->urlRequestParts[$key]))
-		{
-			unset($this->urlRequestParts[$key]);
-			$this->setNeedsUpdate();
-		}
-	}
-
-	public function setQueryParameter($name, $value)
-	{
-		if (!is_array($value))
-		{
-			$key = urlencode($name);
-			$this->urlRequestParts[$key] =  $key. "=" . urlencode($value);
-		}
-		else
-		{
-			$this->buildRecursivelyWithKeyAndValue($name, $value);
-		}
-		$this->setNeedsUpdate();
-	}
-
-	public function setRequestPart($key, $value)
-	{
-		$this->urlRequestParts[$key] = $value;
-		$this->setNeedsUpdate();
-	}
-
-	public function setQueryParameters($array)
-	{
-		foreach ($array as $key => $val)
-		{
-			$this->buildRecursivelyWithKeyAndValue($key, $val);
-		}
-		$this->setNeedsUpdate();
-	}
-
-	public function setBaseUrl($url)
-	{
-		$this->baseUrl = $url;
-		$this->setNeedsUpdate();
-	}
-
-	public function getStringRepresentation()
-	{
-		if (is_null($this->stringRepresentation))
-		{
-			$this->stringRepresentation = $this->baseUrl;
-			if (count($this->urlRequestParts) > 0)
-			{
-				$this->stringRepresentation .= '?' . implode('&', $this->urlRequestParts);
-			}
-		}
-		return $this->stringRepresentation;
-	}
-
-	public function __toString()
-	{
-		return $this->getStringRepresentation();
-	}
-
-	private $currentPath = array();
-	private $urlRequestParts = array();
-	private $stringRepresentation = null;
-	private $baseUrl = null;
-
-	private function buildRecursivelyWithKeyAndValue($name, $value)
-	{
-		$this->currentPath[] = urlencode(count($this->currentPath) == 0 ? $name : "[$name]");
-		if (is_array($value))
-		{
-			foreach ($value as $k => $v)
-			{
-				$this->buildRecursivelyWithKeyAndValue($k, $v);
-			}
-		}
-		else
-		{
-			$path = implode($this->currentPath);
-			if ($value === null)
-			{
-				if (isset($this->urlRequestParts[$path]))
-				{
-					unset($this->urlRequestParts[$path]);
-				}
-			}
-			else
-			{
-				$this->urlRequestParts[$path] =  $path. "=" . urlencode($value);
-			}
-		}
-		array_pop($this->currentPath);
-	}
-
-	private function setNeedsUpdate()
-	{
-		$this->stringRepresentation = null;
 	}
 }

@@ -5,7 +5,6 @@
  */
 class <{$moduleName}>_patch_<{$patchNumber}> extends change_Patch
 {
-
 	/**
 	 * @return array
 	 */
@@ -24,7 +23,6 @@ class <{$moduleName}>_patch_<{$patchNumber}> extends change_Patch
 		// Implement your patch here.
 	}
 	
-	
 	/**
 	 * @return array
 	 */
@@ -35,7 +33,6 @@ class <{$moduleName}>_patch_<{$patchNumber}> extends change_Patch
 			array('enable-site'),
 		);
 	}
-	
 	
 	/**
 	 * @return string
@@ -60,5 +57,4 @@ class <{$moduleName}>_patch_<{$patchNumber}> extends change_Patch
 	{
 		return <{$codepatch}>;
 	}
-	
 }

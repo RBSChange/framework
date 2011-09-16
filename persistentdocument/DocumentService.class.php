@@ -653,6 +653,40 @@ class f_persistentdocument_DocumentService extends BaseService
 
 		f_event_EventManager::dispatchEvent('persistentDocumentDeleted', $this, array("document" => $document));
 	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 */
+	public function purgeDocument($document)
+	{
+		if ($this !== $document->getDocumentService())
+		{
+			$document->getDocumentService()->purgeDocument($document);
+			return;
+		}
+		
+		if (!$document->getPersistentModel()->isLocalized())
+		{
+			$this->delete($document);
+			return;
+		}
+		
+		$requestContext = RequestContext::getInstance();
+		$langs = array_reverse($document->getI18nInfo()->getLangs());
+		foreach ($langs as $lang)
+		{
+			try
+			{
+				$requestContext->beginI18nWork($lang);
+				$this->delete($document);
+				$requestContext->endI18nWork();
+			}
+			catch (Exception $e)
+			{
+				$requestContext->endI18nWork($e);
+			}			
+		}
+	}
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $persistentDocument
@@ -2679,6 +2713,33 @@ class f_persistentdocument_DocumentService extends BaseService
 			return TagService::getInstance()->getDetailPageForDocument($document);
 		}
 		return null;
+	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param change_Request $request
+	 * @return array($module, $action)
+	 */
+	public function getResolveDetail($document, $request)
+	{
+		$page = $this->getDisplayPage($document);
+		if ($page instanceof website_persistentdocument_page)
+		{
+			foreach ($document->getPersistentModel()->getAncestorModelNames() as $modelName)
+			{
+				$parts = f_persistentdocument_PersistentDocumentModel::getModelInfo($modelName);
+				$moduleName = $parts['module'];
+				if (!$request->hasModuleParameter($moduleName, 'cmpref'))
+				{
+					$request->setModuleParameter($moduleName, 'cmpref', $document->getId());
+				}
+			}
+		
+			// Set pageref parameter into the request.
+			$request->setParameter('pageref', $page->getId());
+			return array('website', 'Display');
+		}
+		return array('website', 'Error404');
 	}
 	
 	/**
