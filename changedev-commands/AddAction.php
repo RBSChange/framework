@@ -1,5 +1,5 @@
 <?php
-class commands_AddAction extends commands_AbstractChangedevCommand
+class commands_AddAction extends c_ChangescriptCommand
 {
 	/**
 	 * @return String
@@ -103,7 +103,7 @@ class commands_AddAction extends commands_AbstractChangedevCommand
 			return $this->quitError('Action "'.$actionName.'" already exists in module '.$moduleName.'".');
 		}
 		
-		$rd = $this->getBootStrap()->getProperties()->getProperty('RELEASE_DEVELOPEMENT', false);
+		$rd = $this->getBootStrap()->inReleaseDevelopement();
 		$override = !$rd && !$package->isStandalone();
 		
 		$actionPath = $override ? $overrideModulePath : $modulePath;

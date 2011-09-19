@@ -1,5 +1,5 @@
 <?php
-class commands_UpdateAutoload extends commands_AbstractChangeCommand
+class commands_UpdateAutoload extends c_ChangescriptCommand
 {
 	/**
 	 * @return String
@@ -56,8 +56,6 @@ class commands_UpdateAutoload extends commands_AbstractChangeCommand
 				ClassResolver::getInstance()->appendFile($path, true);
 			}
 		}
-		
-		$this->executeCommand('compile-injection');
 		
 		if ($this->hasError())
 		{

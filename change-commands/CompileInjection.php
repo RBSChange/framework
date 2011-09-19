@@ -1,5 +1,5 @@
 <?php
-class commands_CompileInjection extends commands_AbstractChangeCommand
+class commands_CompileInjection extends c_ChangescriptCommand
 {
 	/**
 	 * @return String
@@ -21,6 +21,17 @@ class commands_CompileInjection extends commands_AbstractChangeCommand
 	{
 		return "compile injection of classes and documents";
 	}
+	
+	/**
+	 * @see c_ChangescriptCommand::getEvents()
+	 */
+	public function getEvents()
+	{
+		return array(
+			array('target' => 'compile-config'),
+			array('target' => 'update-autoload'),
+		);
+	}	
 
 	/**
 	 * @param String[] $params

@@ -49,9 +49,7 @@ class builder_LocaleFileGenerator
 	}
 
 	/**
-	 * Generate or update document locale file
-	 *
-	 * @return unknown
+	 * @return string $baseKey
 	 */
 	public function updateLocale()
 	{
@@ -111,8 +109,12 @@ class builder_LocaleFileGenerator
 		}
 		
 		$ls->updatePackage($baseKey, $keyInfos, $override, true, $includes);
+		return $baseKey;
 	}
 
+	/**
+	 * @return string $baseKey
+	 */
 	function updateBoLocale()
 	{
 		// Update actions.xml file: add 'createDoc' if needed.
@@ -127,5 +129,6 @@ class builder_LocaleFileGenerator
 			$keysInfos[$ls->getLCID($lang)] = $infos;
 		}	
 		$ls->updatePackage($baseKey, $keysInfos, false, true);
+		return $baseKey;
 	}
 }

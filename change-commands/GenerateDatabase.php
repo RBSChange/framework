@@ -1,5 +1,5 @@
 <?php
-class commands_GenerateDatabase extends commands_AbstractChangeCommand
+class commands_GenerateDatabase extends c_ChangescriptCommand
 {
 	/**
 	 * @return string

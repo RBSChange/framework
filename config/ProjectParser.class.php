@@ -15,7 +15,7 @@ class config_ProjectParser
 		$cacheFile = $cacheConfigDir."/project.php";
 		return is_readable($cacheFile);
 	}
-	
+
 	/**
 	 * @param string $path
 	 * @param string $value
@@ -23,23 +23,41 @@ class config_ProjectParser
 	 */
 	public static function addProjectConfigurationEntry($path, $value)
 	{
+		$sections = array();
+		foreach (explode('/', $path) as $name) 
+		{
+			if (trim($name) != '') {$sections[] = trim($name);}
+		}		
+		if (count($sections) < 2) 
+		{
+			return false;
+		}
+		$entryName = array_pop($sections);
+		return self::addProjectConfigurationNamedEntry(implode('/', $sections), $entryName, $value);
+	}
+	
+	/**
+	 * @param string $path
+	 * @param string $value
+	 * @return string old value
+	 */
+	public static function addProjectConfigurationNamedEntry($path, $entryName, $value)
+	{
+		if (empty($entryName) || ($value !== null && !is_string($value)))
+		{
+			return false;
+		}	
 		$sections = array('config');
 		foreach (explode('/', $path) as $name) 
 		{
 			if (trim($name) != '') {$sections[] = trim($name);}
 		}		
-		if (count($sections) < 3) 
+		if (count($sections) < 2) 
 		{
 			return false;
 		}		
-		if ($value !== null && !is_string($value))
-		{
-			return false;
-		}
-		
-		$entryName = array_pop($sections);
-		$oldValue = null;
-		
+
+		$oldValue = null;	
 		$configProjectPath = implode(DIRECTORY_SEPARATOR, array(PROJECT_HOME, 'config', 'project.xml'));
 		if (!is_readable($configProjectPath))
 		{

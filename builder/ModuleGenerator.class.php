@@ -264,10 +264,8 @@ class builder_ModuleGenerator
 	public function generateService($name, $module)
 	{
 		$generator = new builder_Generator('models');
-		$generator->assign_by_ref('author', $this->author);
-		$generator->assign_by_ref('name', ucfirst($name));
-		$generator->assign_by_ref('module', $module);
-		$generator->assign_by_ref('date', $this->date);
+		$generator->assign('name', ucfirst($name));
+		$generator->assign('module', $module);
 		$result = $generator->fetch('ServiceModel.tpl');
 		return $result;
 	}

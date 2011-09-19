@@ -56,7 +56,7 @@ class builder_DocumentGenerator
 	/**
 	 * Constructor of builder_DocumentGenerator
 	 */
-	public function __construct($module, $name, $checkLink = true)
+	public function __construct($module, $name)
 	{
 		$this->name = $name;
 		$this->module = $module;
@@ -64,12 +64,6 @@ class builder_DocumentGenerator
 		$this->pathBaseModule = f_util_FileUtils::buildModulesPath($module, "");
 		$this->model = 'modules_' . $module . '/' . $name;
 		$this->modelObject = generator_PersistentModel::getModelByName('modules_' . $module . '/' . $name);
-
-		// Test if module directory is a symbolic link
-		if ($checkLink && !is_writable(f_util_FileUtils::buildModulesPath($module)))
-		{
-			throw new IOException('Cannot write in module directory.');
-		}
 	}
 
 	/**
@@ -139,37 +133,6 @@ class builder_DocumentGenerator
 	}
 
 	/**
-	 * Generate the service used by the document and save it
-	 */
-	public function generateDocumentService()
-	{
-		// Define the path to save the file
-		$filePath = $this->pathBaseModule . 'lib/services/' . ucfirst($this->name) . 'Service.class.php';
-
-		echo "Generating $filePath\n";
-		// Generate moduleName_DocumentNameService.class.php and save it in /modules/moduleName/lib/services/moduleName_DocumentNameService.class.php
-		f_util_FileUtils::write($filePath, $this->generateFile('serviceModel', 'documents'));
-
-		// Add the class path in autoload file. It's necessary to call without regenerate cache_autoload.php
-		$class = $this->module . '_' . ucfirst($this->name) . 'Service';
-		ClassResolver::getInstance()->appendToAutoloadFile($class, $filePath);
-	}
-
-	private function getModuleBuilderGenerator($extraparams = array())
-	{
-		$generator = new builder_Generator('modules');
-		$generator->assign_by_ref('name', $this->name);
-		$generator->assign_by_ref('module', $this->module);
-		$generator->assign_by_ref('date', date_Calendar::now()->toString());
-		$generator->assign_by_ref('author', $this->author);
-		foreach ($extraparams as $key => $value)
-		{
-			$generator->assign_by_ref($key, $value);
-		}
-		return $generator;
-	}
-
-	/**
 	 * Generate the locale file.
 	 */
 	public function generateLocaleFile()
@@ -177,7 +140,7 @@ class builder_DocumentGenerator
 		// Get a locale file generator object
 		$localeUpdater = new builder_LocaleFileGenerator($this->modelObject);
 		// Update or create the locale file for the document
-		$localeUpdater->updateLocale();
+		return $localeUpdater->updateLocale();
 	}
 
 	/**
@@ -188,56 +151,7 @@ class builder_DocumentGenerator
 		// Get a locale file generator object
 		$localeUpdater = new builder_LocaleFileGenerator($this->modelObject);
 		// Update or create the locale file for the document
-		$localeUpdater->updateBoLocale();
-	}
-
-	/**
-	 * Generate persistent document files
-	 */
-	public function generateFinalPersistentDocumentFile()
-	{
-		$filePath = $this->pathBaseModule . 'persistentdocument' . DIRECTORY_SEPARATOR . $this->name . '.class.php';
-		// Generate documentName.class.php and save it in /modules/moduleName/persistentdocument/documentName.class.php
-		if (!file_exists($filePath))
-		{
-			echo "Generating $filePath\n";
-			f_util_FileUtils::write($filePath, $this->modelObject->generatePhpOverride());
-			// Add the class path in autoload file. It's necessary to call without regenerate cache_autoload.php
-			ClassResolver::getInstance()->appendToAutoloadFile($this->module .'_persistentdocument_' . $this->name, $filePath);
-		}
-		
-		//Add import class file
-		$filePath = $this->pathBaseModule . 'persistentdocument' . DIRECTORY_SEPARATOR . 'import' . DIRECTORY_SEPARATOR . ucfirst($this->name) . 'ScriptDocumentElement.class.php';
-		if (!file_exists($filePath))
-		{
-
-			f_util_FileUtils::mkdir(dirname($filePath));
-			echo "Generating $filePath\n";
-			f_util_FileUtils::write($filePath, $this->modelObject->generateImportClass());
-			ClassResolver::getInstance()->appendToAutoloadFile($this->modelObject->getImportScriptDocumentClassName(), $filePath);
-			$bindingsPath = $this->pathBaseModule . 'persistentdocument' . DIRECTORY_SEPARATOR . 'import' . DIRECTORY_SEPARATOR . $this->module . '_binding.xml';
-			if (file_exists($bindingsPath))
-			{
-				echo "Updating $bindingsPath\n";
-				$document = f_util_DOMUtils::fromPath($bindingsPath);
-				$script = $document->documentElement;
-			}
-			else
-			{
-				echo "Generating $bindingsPath\n";
-				$document = f_util_DOMUtils::newDocument();
-				$script = $document->createElement('script');
-				$document->appendChild($script);
-				$generic = $document->createElement('binding');
-				$generic->setAttribute('fileName', 'modules/generic/persistentdocument/import/generic_binding.xml');
-				$script->appendChild($generic);
-			}
-			$binding = $document->createElement('binding');
-			$binding->setAttribute('name', $this->name);
-			$binding->setAttribute('className', $this->modelObject->getImportScriptDocumentClassName());
-			$script->appendChild($binding);
-			f_util_DOMUtils::save($document, $bindingsPath);
-		}
+		return $localeUpdater->updateBoLocale();
 	}
 
 	/**
@@ -264,23 +178,6 @@ class builder_DocumentGenerator
 		{
 			$classResolver->appendToAutoloadFile($this->modelObject->getDocumentClassName() . 'I18n', $filePath);
 		}
-	}
-
-	public function updateRights()
-	{
-		$rightsPath = f_util_FileUtils::buildModulesPath($this->module, "config", "rights.xml");
-		$rights = f_util_DOMUtils::fromPath($rightsPath);
-		if ($rights->exists("actions/document[@name = '".$this->name."']"))
-		{
-			echo "$this->name is already declared in $rightsPath\n";
-			return;
-		}
-		$docElem = $rights->createElement("document");
-		$docElem->setAttribute("name", $this->name);
-		$actionsElem = $rights->findUnique("actions");
-		$actionsElem->appendChild($docElem);
-		echo "Add $this->name in $rightsPath\n";
-		f_util_DOMUtils::save($rights, $rightsPath);
 	}
 
 	/**
@@ -338,17 +235,6 @@ class builder_DocumentGenerator
 				$this->saveSql($sqlI18n, $sqlI18nFileName);
 			}
 		}
-	}
-
-	/**
-	 * Add a part in backoffice style file to manage icon of document in tree
-	 */
-	public function addStyleInBackofficeFile()
-	{
-		// Get backoffice style updater
-		$styleUpdater = new builder_BackofficeStyleUpdater($this->model);
-		// Update the file module/moduleName/style/backoffice.xml
-		$styleUpdater->updateXmlDocument();
 	}
 
 	/**
@@ -445,5 +331,136 @@ class builder_DocumentGenerator
 			Framework::debug('[DocumentGenerator] addAndSaveSql : Cannot save sql file.');
 			Framework::exception($e);
 		}
+	}
+	
+	/**
+	 * 
+	 * @param string $moduleName
+	 * @param string $documentName
+	 * @param string $extendModelName
+	 * @param boolean $inject
+	 * @return string path of generated file
+	 */
+	public static function generateDocumentService($moduleName, $documentName, $extendModelName = null, $inject = false)
+	{
+		$filePath = f_util_FileUtils::buildModulesPath($moduleName, 'lib', 'services', ucfirst($documentName) . 'Service.class.php');
+		$generator = new builder_Generator('documents');
+		
+		$className = $moduleName . '_' . ucfirst($documentName) . 'Service';
+		if ($extendModelName)
+		{
+			list($extModule, $extDocument) = explode('/', substr($extendModelName, 8));
+			$extendClass = $extModule . '_' . ucfirst($extDocument) . 'Service';
+		}
+		else
+		{
+			$extendClass = 'f_persistentdocument_DocumentService';
+		}
+		
+		// Assign all necessary variable
+		$generator->assign('moduleName', $moduleName);
+		$generator->assign('moduleUCFirst', ucfirst($moduleName));
+		
+		$generator->assign('documentName', $documentName);
+		$generator->assign('nameUCFirst', ucfirst($documentName));
+		
+		$generator->assign('className', $className);
+		$generator->assign('extendClass', $extendClass);
+		$generator->assign('inject', $inject);
+		$generator->assign('hasParentModel', ($extendModelName !== null));
+
+		// Execute template and return result
+		$result = $generator->fetch('DocumentServiceModel.tpl');
+		f_util_FileUtils::writeAndCreateContainer($filePath, $result, f_util_FileUtils::OVERRIDE);
+		ClassResolver::getInstance()->appendToAutoloadFile($className, $filePath);
+		
+		return $filePath;
+	}
+	
+	/**
+	 * @param string $moduleName
+	 * @param string $documentName
+	 * @param string $extendModelName
+	 * @param boolean $inject
+	 * @return string[] path of generated files
+	 */
+	public static function generateFinalPersistentDocumentFile($moduleName, $documentName, $extendModelName = null, $inject = false)
+	{
+		$files = array();
+		$generator = new builder_Generator('documents');
+		
+		$filePath = f_util_FileUtils::buildModulesPath($moduleName, 'persistentdocument' , $documentName . '.class.php');
+		$files[] = $filePath;
+		$className = $moduleName .'_persistentdocument_' . $documentName;
+		
+		$generator->assign('moduleName', $moduleName);
+		$generator->assign('documentName', $documentName);		
+		$generator->assign('className', $className);
+		
+		$serviceClassName = $moduleName . '_' . ucfirst($documentName) . 'Service';
+		$generator->assign('serviceClassName', $serviceClassName);
+		
+		$result = $generator->fetch('DocumentClass.tpl');
+		f_util_FileUtils::writeAndCreateContainer($filePath, $result, f_util_FileUtils::OVERRIDE);		
+		ClassResolver::getInstance()->appendToAutoloadFile($className, $filePath);
+		
+		if (!$inject)
+		{
+			//Add import class file
+			$filePath = f_util_FileUtils::buildModulesPath($moduleName, 'persistentdocument' , 'import' , ucfirst($documentName) . 'ScriptDocumentElement.class.php');
+			$files[] = $filePath;
+			$importClassName = $moduleName .'_'. ucfirst($documentName) . 'ScriptDocumentElement';
+	
+			$generator->assign('importClassName', $importClassName);
+			$result = $generator->fetch('ImportDocumentClass.tpl');
+			f_util_FileUtils::writeAndCreateContainer($filePath, $result, f_util_FileUtils::OVERRIDE);	
+			ClassResolver::getInstance()->appendToAutoloadFile($importClassName, $filePath);
+			
+			
+			$filePath = f_util_FileUtils::buildModulesPath($moduleName, 'persistentdocument' , 'import' , $moduleName . '_binding.xml');
+			$files[] = $filePath;
+			
+			if (file_exists($filePath))
+			{
+				$document = f_util_DOMUtils::fromPath($filePath);
+				$script = $document->documentElement;
+			}
+			else
+			{
+				$document = f_util_DOMUtils::newDocument();
+				$script = $document->createElement('script');
+				$document->appendChild($script);
+				$generic = $document->createElement('binding');
+				$generic->setAttribute('fileName', 'modules/generic/persistentdocument/import/generic_binding.xml');
+				$script->appendChild($generic);
+			}
+			
+			$binding = $document->createElement('binding');
+			$binding->setAttribute('name', $documentName);
+			$binding->setAttribute('className', $importClassName);
+			$script->appendChild($binding);
+			f_util_DOMUtils::save($document, $filePath);
+		}
+		return $files;
+	}
+		
+	public static function updateRights($moduleName, $documentName, $extendModelName = null, $inject = false)
+	{
+		$rightsPath = f_util_FileUtils::buildModulesPath($moduleName, "config", "rights.xml");
+		if (is_readable($rightsPath))
+		{
+			$rights = f_util_DOMUtils::fromPath($rightsPath);
+			if ($rights->exists("actions/document[@name = '".$documentName."']"))
+			{
+				return null;
+			}
+			$docElem = $rights->createElement("document");
+			$docElem->setAttribute("name", $documentName);
+			$actionsElem = $rights->findUnique("actions");
+			$actionsElem->appendChild($docElem);
+			f_util_DOMUtils::save($rights, $rightsPath);
+			return $rightsPath;	
+		}
+		return null;
 	}
 }

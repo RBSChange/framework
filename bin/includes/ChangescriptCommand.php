@@ -1,11 +1,11 @@
 <?php
 abstract class c_ChangescriptCommand
 {
+	
 	/**
 	 * @var c_ChangeBootStrap
 	 */	
 	private $bootStrap;
-	
 	
 	/**
 	 * @var Boolean
@@ -127,37 +127,42 @@ abstract class c_ChangescriptCommand
 	/**
 	 * @return String
 	 */
-	function getDescription()
+	public function getDescription()
 	{
 		return null;
 	}
+	
+	/**
+	 * @return array<array<name, target>>
+	 */
+	public function getEvents()
+	{
+		return null;
+	}
+	
 
 	private $listeners;
 	
-	/**
-	 * @param array<String, String[]> $listeners pointcut => commandName[]
-	 */
-	function setListeners($listeners)
+	
+	public function addListeners($name, $commandName, $args = array())
 	{
-		$this->listeners = $listeners;	
+		if (!is_array($this->listeners)) {$this->listeners = array();}
+		$this->listeners[$name][] = array('command' => $commandName, 'args' => $args);
 	}
 	
-	/**
-	 * @var array<String, Boolean>
-	 */
-	private $reachedPointCuts;
 	
 	/**
-	 * @param String $pointcut
+	 * @param string $name
+	 * @param array $params
+	 * @param array $options
 	 */
-	protected function startPointCut($pointcut)
+	protected function startPointCut($name, $params, $options)
 	{
-		if (isset($this->listeners[$pointcut]) && !isset($this->reachedPointCuts[$pointcut]))
+		if (is_array($this->listeners) && isset($this->listeners[$name]))
 		{
-			$this->reachedPointCuts[$pointcut] = true;
-			foreach ($this->listeners[$pointcut] as $commandName)
+			foreach ($this->listeners[$name] as $commandInfo)
 			{
-				$this->executeCommand($commandName);
+				$this->executeCommand($commandInfo['command'], $commandInfo['args']);
 			}
 		}
 	}
@@ -432,15 +437,15 @@ abstract class c_ChangescriptCommand
 			return $this->quitError('Inavlid argrument for command: ' . $this->callName);
 		}
 		
-		$this->reachedPointCuts = array();
-		$this->startPointCut("before");
-		
-		$ret = $this->_execute($params, $options);		
+		$this->startPointCut("before", $params, $options);
+
+		$ret = $this->_execute($params, $options);
+				
 		$res = ($ret === null || $ret === true);
 		
 		if ($res)
 		{
-			$this->startPointCut("after");
+			$this->startPointCut("after", $params, $options);
 		}
 		return $res;
 	}
@@ -565,6 +570,14 @@ abstract class c_ChangescriptCommand
 		return $this->getBootStrap()->getProperties("change");
 	}
 	
+	/**
+	 * @param string $cmdName
+	 * @return string
+	 */
+	protected function fixCommandName($cmdName)
+	{
+		return strtolower($cmdName[0].preg_replace('/([A-Z])/', '-${0}', substr($cmdName, 1)));
+	}
 	
 	/**
 	 * @param String $cmdName
@@ -579,7 +592,7 @@ abstract class c_ChangescriptCommand
 	    }
 	    
 	    ob_start();
-	    $fixedCommandName = strtolower($cmdName[0].preg_replace('/([A-Z])/', '-${0}', substr($cmdName, 1)));
+	    $fixedCommandName = $this->fixCommandName($cmdName);
 	   	echo f_util_System::execChangeCommand($fixedCommandName, $args);
 	    $this->rawMessage(trim(ob_get_clean()) . PHP_EOL);
 	}
@@ -591,7 +604,7 @@ abstract class c_ChangescriptCommand
 	protected function executeCommandInProcess($cmdName, $args = array())
 	{
 		ob_start();
-		$fixedCommandName = strtolower($cmdName[0].preg_replace('/([A-Z])/', '-${0}', substr($cmdName, 1)));
+		$fixedCommandName = $this->fixCommandName($cmdName);
 		if (!is_array($args)) {$args = array();}
 		array_unshift($args, $fixedCommandName);
 	    $this->getBootStrap()->execute($args);

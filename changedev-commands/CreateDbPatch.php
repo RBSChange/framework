@@ -1,5 +1,5 @@
 <?php
-class commands_CreateDbPatch extends commands_AbstractChangedevCommand
+class commands_CreateDbPatch extends c_ChangescriptCommand
 {
 	/**
 	 * @return String

@@ -1,5 +1,5 @@
 <?php
-class commands_CompileDocuments extends commands_AbstractChangeCommand
+class commands_CompileDocuments extends c_ChangescriptCommand
 {
 	/**
 	 * @return String
@@ -32,6 +32,8 @@ class commands_CompileDocuments extends commands_AbstractChangeCommand
 		$this->message("== Compile documents ==");
 		
 		$this->loadFramework();
+		
+		
 		// Get the list of model and generate all persistent object.
 		$models = generator_PersistentModel::loadModels();
 		
@@ -49,14 +51,12 @@ class commands_CompileDocuments extends commands_AbstractChangeCommand
 			unlink($path);
 		}
 		
-		$docInjections = array();
-		
 		// For the list of models generate persistent.
 		foreach ($models as $model)
 		{
 			
 			// Get a document Generator.
-			$documentGenerator = new builder_DocumentGenerator($model->getModuleName(), $model->getDocumentName(), false);
+			$documentGenerator = new builder_DocumentGenerator($model->getModuleName(), $model->getDocumentName());
 
 			// Generate persistent document file.
 			$documentGenerator->generatePersistentDocumentFile();
@@ -85,48 +85,9 @@ class commands_CompileDocuments extends commands_AbstractChangeCommand
 		$this->message("== Compile Allowed Document ==");
 		generator_PersistentModel::buildAllowedDocumentInfos();
 		
-		$this->message("== Generate final document class and bo style ==");
-		foreach ($models as $model)
-		{
-			try
-			{
-				// Get a document Generator.
-				$documentGenerator = new builder_DocumentGenerator($model->getModuleName(), $model->getDocumentName(), false);
-				
-				$documentGenerator->generateFinalPersistentDocumentFile();
-				
-				builder_BackofficeStyleUpdater::updateCssByDocument($model);
-
-			}
-			catch (Exception $e)
-			{
-				$this->errorMessage("Update of ".$model->getModuleName()."/style/backoffice.css failed: ".$e->getMessage());
-				$this->debugMessage($e->getTraceAsString());
-			}
-		}
 		
-		$mustCompileConfig = false;
-		$currentDocInjections = Framework::getConfigurationValue("injection/document", array());
-		if (count($currentDocInjections) != count($docInjections))
-		{
-			$mustCompileConfig = true;
-		}
-		else
-		{
-			foreach ($docInjections as $replaced => $replacer)
-			{
-				if (!isset($currentDocInjections[$replaced]) || $currentDocInjections[$replaced] != $replacer)
-				{
-					$mustCompileConfig = true;
-					break;
-				}
-			}
-		}
-		
-		if ($mustCompileConfig)
-		{
-			$this->executeCommand("compile-config");
-		}
+		$this->message("== Compile Icons Document ==");
+		generator_PersistentModel::getCssBoDocumentIcon();
 		
 		$this->quitOk("Documents compiled");
 	}

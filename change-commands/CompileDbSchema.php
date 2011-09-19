@@ -1,5 +1,5 @@
 <?php
-class commands_CompileDbSchema extends commands_AbstractChangeCommand
+class commands_CompileDbSchema extends c_ChangescriptCommand
 {
 	/**
 	 * @return String

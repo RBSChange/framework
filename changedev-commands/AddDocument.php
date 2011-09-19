@@ -1,5 +1,5 @@
 <?php
-class commands_AddDocument extends commands_AbstractChangedevCommand
+class commands_AddDocument extends c_ChangescriptCommand
 {
 	/**
 	 * @return String
@@ -18,15 +18,6 @@ class commands_AddDocument extends commands_AbstractChangedevCommand
 	}
 
 	/**
-	 * @param String[] $params
-	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
-	 */
-	protected function validateArgs($params, $options)
-	{
-		return count($params) == 2;
-	}
-
-	/**
 	 * @param Integer $completeParamCount the parameters that are already complete in the command line
 	 * @param String[] $params
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
@@ -37,34 +28,79 @@ class commands_AddDocument extends commands_AbstractChangedevCommand
 		if ($completeParamCount == 0)
 		{
 			$components = array();
-			foreach (glob("modules/*", GLOB_ONLYDIR) as $module)
+			foreach ($this->getBootStrap()->getProjectDependencies() as $package)
 			{
-				$components[] = basename($module);
+				/* @var $package c_Package */
+				if ($package->isModule())
+				{
+					if (count($this->getNewDocument($package->getPath() .  '/persistentdocument')))
+					{
+						$components[] = $package->getName();
+					}
+				}
 			}
 			return $components;
 		}
 		if ($completeParamCount == 1)
 		{
-			$moduleName = $params[0];
-			$docNames = array();
-			foreach (glob("modules/$moduleName/persistentdocument/*.xml") as $docFile)
-			{
-				$docName = basename($docFile, ".xml");
-				if (!file_exists(dirname($docFile)."/".$docName.".class.php"))
-				{
-					$docNames[] = $docName;	
-				}
-			}
+			$package = $this->getPackageByName($params[0]);
+			$docNames = $this->getNewDocument($package->getPath() .  '/persistentdocument');
 			return $docNames;
 		}
 		return null;
 	}
-
-	function getOptions()
+	
+	/**
+	 * @param string $path
+	 * @return array
+	 */
+	private function getNewDocument($path)
 	{
-		return array("--update");
+		$result = array();
+		if (is_dir($path))
+		{
+			foreach (scandir($path) as $fileName) 
+			{
+				if (substr($fileName, -4) === '.xml')
+				{
+					$docName = substr($fileName,0, -4);
+					if (!file_exists(f_util_FileUtils::buildPath($path, $docName . '.class.php')))
+					{
+						$result[] = $docName;
+					}
+				}
+			}
+		}
+		return $result;
 	}
 
+	/**
+	 * @param String[] $params
+	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
+	 */
+	protected function validateArgs($params, $options)
+	{
+		if (count($params) == 2)
+		{
+			$package = $this->getPackageByName($params[0]);
+			if ($package->isModule() && $package->isInProject())
+			{
+				$docs = $this->getNewDocument($package->getPath() .  '/persistentdocument');
+				if (in_array($params[1], $docs))
+				{
+					return true;
+				}
+				$this->errorMessage('Invalid document name: ' . $params[1]);
+			}
+			else
+			{
+				$this->errorMessage('Invalid module name: ' . $params[0]);
+			}
+		}
+		return false;
+	}
+	
+	
 	/**
 	 * @param String[] $params
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
@@ -72,50 +108,71 @@ class commands_AddDocument extends commands_AbstractChangedevCommand
 	 */
 	function _execute($params, $options)
 	{
-		$this->message("== Add document ==");
-
-		$moduleName = $params[0];
-		$documentName = $params[1];
-		$update = isset($options["update"]);
-
-		if (!file_exists("modules/$moduleName/persistentdocument/$documentName.xml"))
-		{
-			return $this->quitError("Document $moduleName/$documentName does not exists.
-Please create the document using 'create-document $moduleName $documentName'.");
-		}
-
 		$this->loadFramework();
-
-		// Get a document Generator
-		$documentGenerator = new builder_DocumentGenerator($moduleName, $documentName);
-		$documentGenerator->setAuthor($this->getAuthor());
+		$this->message("== Add document ==");
 		
-		$documentGenerator->generatePersistentDocumentFile();
-		$documentGenerator->generateFinalPersistentDocumentFile();
-		$documentGenerator->generateLocaleFile();
-
-		// Generate document service
-		$documentGenerator->generateDocumentService();
 		
-		// Generate SQL files and import it if it's not an update
-		$documentGenerator->generateSqlDocumentFile(!$update);
+		$package = $this->getPackageByName($params[0]);
+		$moduleName = $package->getName();
+		$documentName = $params[1];
 		
-		$documentGenerator->updateRights();
-
-		$this->changecmd("compile-locales", array($moduleName));
-		$this->changecmd("compile-tags");
-		$this->changecmd("compile-documents");
-		$this->changecmd("compile-db-schema");
-		$this->changecmd("compile-config");
+		$modelName = 'modules_' .$moduleName .'/' .$documentName;
+		
+		$xmlPath = f_util_FileUtils::buildPath($package->getPath(), 'persistentdocument', $documentName . '.xml');
+		
+		$xmlDoc = f_util_DOMUtils::fromPath($xmlPath);
+		if ($xmlDoc->documentElement->localName != 'document')
+		{
+			return $this->quitError($xmlPath . ' is not a valid document');
+		}
+		
+		$extendModelName = null;
+		$inject = false;
+		if ($xmlDoc->documentElement->hasAttribute('extend'))
+		{
+			$extendModelName = trim($xmlDoc->documentElement->getAttribute('extend'));
+			if ($xmlDoc->documentElement->getAttribute('inject') === 'true')
+			{
+				$inject = true;
+				config_ProjectParser::addProjectConfigurationNamedEntry('injection/document',$extendModelName, $modelName);
+			}
+		}
+		
+		$path = builder_DocumentGenerator::generateDocumentService($moduleName, $documentName, $extendModelName, $inject);
+		$this->log('Add : ' . $path);
+		
+		
+		$paths = builder_DocumentGenerator::generateFinalPersistentDocumentFile($moduleName, $documentName, $extendModelName, $inject);
+		foreach ($paths as $path) 
+		{
+			$this->log('Add : ' . $path);
+		}
+		
+		$this->executeCommand("compile-config", array('--ignoreListener'));
+		
+		$this->executeCommand("compile-documents");
+		
+		if (!$inject)
+		{
+			$generator = new builder_DocumentGenerator($moduleName, $documentName);
+			$baseKey = $generator->generateLocaleFile();
+			$this->log('Add i18n baseKey: ' . $baseKey);
 			
-		if (!$update)
-		{
-			return $this->quitOk("Document $documentName added in module $moduleName.");
+			$path = builder_DocumentGenerator::updateRights($moduleName, $documentName, $extendModelName, $inject);
+			if ($path)
+			{
+				$this->log('Add : ' . $path);
+			}	
 		}
-		else
-		{
-			$this->warnMessage("The SQL code to build the table may have changed, but it has not been executed. Please check this before going on.");
-			return $this->quitOk("Document $documentName updated in module $moduleName");
-		}
+		
+		$this->executeCommand("generate-database", array($moduleName));
+		
+		$this->executeCommand("compile-db-schema");
+
+		$this->executeCommand("compile-locales", array($moduleName));
+		
+		$this->executeCommand("compile-tags");
+			
+		return $this->quitOk("Document $documentName added in module $moduleName.");
 	}
 }

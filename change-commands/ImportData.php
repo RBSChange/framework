@@ -1,5 +1,5 @@
 <?php
-class commands_ImportData extends commands_AbstractChangeCommand
+class commands_ImportData extends c_ChangescriptCommand
 {
 	/**
 	 * @return String

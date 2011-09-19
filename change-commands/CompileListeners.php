@@ -1,5 +1,5 @@
 <?php
-class commands_CompileListeners extends commands_AbstractChangeCommand
+class commands_CompileListeners extends c_ChangescriptCommand
 {
 	/**
 	 * @return String

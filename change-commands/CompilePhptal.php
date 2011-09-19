@@ -1,5 +1,5 @@
 <?php
-class commands_CompilePhptal extends commands_AbstractChangeCommand
+class commands_CompilePhptal extends c_ChangescriptCommand
 {
 	/**
 	 * @return String
@@ -34,7 +34,7 @@ class commands_CompilePhptal extends commands_AbstractChangeCommand
 		$this->loadFramework();
 		PHPTALService::getInstance()->compileAttributes();
 		
-		$this->executeCommand("clearWebappCache");
+		$this->executeCommand("clear-webapp-cache");
 
 		$this->quitOk("PHPTal extensions compiled successfully");
 	}

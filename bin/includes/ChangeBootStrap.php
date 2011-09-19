@@ -84,6 +84,32 @@ class c_ChangeBootStrap
 		$this->projectHomePath = $path;
 	}
 	
+	/**
+	 * Return the path of project install.xml
+	 * @return String
+	 */
+	public function getDescriptorPath()
+	{
+		return $this->projectHomePath . '/install.xml';
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getReleaseRepository()
+	{
+		return 'http://repo.ssxb-wf-inthause.fr';
+	}
+	
+	/**
+	 * @return boolean
+	 */
+	public function	inReleaseDevelopement()
+	{
+	 	return $this->getProperties()->getProperty('RELEASE_DEVELOPEMENT', false);
+	}
+	
+	
 	// CONFIGURATION
 	/**
 	 * @return cboot_Configuration
@@ -300,15 +326,6 @@ class c_ChangeBootStrap
 	}
 		
 	/**
-	 * Return the path of project install.xml
-	 * @return String
-	 */
-	public function getDescriptorPath()
-	{
-		return $this->projectHomePath . '/install.xml';
-	}
-	
-	/**
 	 * @return cboot_Properties
 	 */
 	function getProperties($fileName = null)
@@ -316,13 +333,7 @@ class c_ChangeBootStrap
 		return $this->getConfiguration()->getProperties($fileName);
 	}
 	
-	/**
-	 * @return string
-	 */
-	public function getReleaseRepository()
-	{
-		return 'http://repo.ssxb-wf-inthause.fr';
-	}
+
 	
 	/**
 	 * @return c_Package[]
@@ -767,10 +778,11 @@ class c_ChangeBootStrap
 	}
 	
 	/**
-	 * @param String $commandName
+	 * @param string $commandName
+	 * @param boolean $throwIfNotFound
 	 * @return c_ChangescriptCommand
 	 */
-	public function getCommand($commandName)
+	public function getCommand($commandName, $throwIfNotFound = true)
 	{
 		foreach ($this->getCommands() as $cmd)
 		{
@@ -780,7 +792,11 @@ class c_ChangeBootStrap
 				return $cmd;
 			}
 		}
-		throw new Exception("Unable to find command $commandName");
+		if ($throwIfNotFound)
+		{
+			throw new Exception("Unable to find command $commandName");
+		}
+		return null;
 	}
 		
 	/**
@@ -849,10 +865,20 @@ class c_ChangeBootStrap
 	 */
 	protected function _executeCommand($cmdName, $args = array())
 	{
-		$command = $this->getCommand($cmdName);
-		$command->setListeners($this->getListeners($command->getCallName()));
 		$parsedArgs = $this->parseArgs($args);
-		return $command->execute($parsedArgs['params'], $parsedArgs['options']);
+		$params = $parsedArgs['params'];
+		$options = $parsedArgs['options'];
+		$command = $this->getCommand($cmdName);
+		
+		if (!isset($options['ignoreListener']))
+		{
+			foreach ($this->getListeners($command->getCallName()) as $listener) 
+			{
+				list($name, $commandName, $args) = $listener;
+				$command->addListeners($name, $commandName, $args);
+			}
+		}
+		return $command->execute($params, $options);
 	}
 	
 	/**
@@ -885,38 +911,33 @@ class c_ChangeBootStrap
 		}
 		return array("options" => $options, "params" => $params);
 	}
+	
 
 	/**
 	 * @param string $commandName
-	 * @return array<String, String[]> pointcut => commandNames
+	 * @return array<string, string, string[]>[]
 	 */
 	private function getListeners($commandName)
 	{
 		$listeners = array();
-		foreach ($this->commandSections as $dev => $data)
+		foreach ($this->getCommands() as $command)
 		{
-			foreach ($data as $sectionName => $paths) 
+			/* @var $command c_ChangescriptCommand */
+			$events = $command->getEvents();
+			if (is_array($events))
 			{
-				foreach ($paths as $path)
+				foreach ($events as $eventData) 
 				{
-					$configFile = $path."/".$commandName."-listeners.xml";
-					//echo "Test $configFile\n";
-					if (file_exists($configFile))
+					if (!isset($eventData['target']) && !isset($eventData['command'])) {continue;}
+					$target = isset($eventData['target']) ? $eventData['target'] : $command->getCallName();
+					if ($target !== $commandName) {continue;}
+
+					$name = isset($eventData['name']) ? $eventData['name'] : 'after';
+					$executeCmd = isset($eventData['command']) ? $this->getCommand($eventData['command'], false) : $command; 
+					if ($executeCmd && in_array($name, array('before', 'after')) && $commandName !== $executeCmd->getCallName())
 					{
-						$doc = new DOMDocument();
-						if (!$doc->load($configFile))
-						{
-							throw new Exception("Could not load $configFile");
-						}
-						foreach ($doc->documentElement->getElementsByTagName("listener") as $listenerElem)
-						{
-							$pointcut = $listenerElem->getAttribute("pointcut");
-							if (!isset($listeners[$pointcut]))
-							{
-								$listeners[$pointcut] = array();
-							}
-							$listeners[$pointcut][] = $listenerElem->getAttribute("command");
-						}
+						$args = isset($eventData['args']) ? $eventData['args'] : array();
+						$listeners[] = array($name, $executeCmd->getCallName(), $args);
 					}
 				}
 			}

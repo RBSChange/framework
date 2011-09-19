@@ -1,5 +1,5 @@
 <?php
-class commands_ClearDocumentscache extends commands_AbstractChangeCommand
+class commands_ClearDocumentscache extends c_ChangescriptCommand
 {
 	/**
 	 * @return String

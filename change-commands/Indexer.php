@@ -1,5 +1,5 @@
 <?php
-class commands_Indexer extends commands_AbstractChangeCommand
+class commands_Indexer extends c_ChangescriptCommand
 {
 	private $actions = array("clear", "clear-backoffice", "clear-frontoffice", "reset",
 	"reset-frontoffice", "reset-backoffice", "rebuild-spell", "optimize", "import",

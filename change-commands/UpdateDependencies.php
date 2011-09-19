@@ -1,5 +1,5 @@
 <?php
-class commands_UpdateDependencies extends commands_AbstractChangeCommand
+class commands_UpdateDependencies extends c_ChangescriptCommand
 {
 	/**
 	 * @return String

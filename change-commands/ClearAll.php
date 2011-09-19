@@ -1,5 +1,5 @@
 <?php
-class commands_ClearAll extends commands_AbstractChangeCommand
+class commands_ClearAll extends c_ChangescriptCommand
 {
 	/**
 	 * @return String
@@ -25,14 +25,15 @@ class commands_ClearAll extends commands_AbstractChangeCommand
 	function _execute($params, $options)
 	{
 		$this->message("== Clear all ==");	
-		$this->executeCommand("updateAutoload");
+		$this->executeCommand("update-autoload");
 		
 		$this->loadFramework();
-		$this->executeCommand("clearLog");
-		$this->executeCommand("clearCache");
-		$this->executeCommand("clearWebappCache");
-		$this->executeCommand("clearDatacache");
-		$this->executeCommand("clearDocumentscache");
+		$this->executeCommand("clear-log");
+		$this->executeCommand("clear-cache");
+		$this->executeCommand("clear-webapp-cache");
+		$this->executeCommand("clear-datacache");
+		$this->executeCommand("clear-template-cache");
+		$this->executeCommand("clear-documentscache");
 		$this->quitOk("All was cleared");
 	}
 }

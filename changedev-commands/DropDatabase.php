@@ -1,5 +1,5 @@
 <?php
-class commands_DropDatabase extends commands_AbstractChangeCommand
+class commands_DropDatabase extends c_ChangescriptCommand
 {
 	/**
 	 * @return String

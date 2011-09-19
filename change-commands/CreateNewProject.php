@@ -27,10 +27,10 @@ class commands_CreateNewProject extends c_ChangescriptCommand
 		$this->message("== Create new project ==");
 		
 		$this->executeCommand("init");
-		$this->executeCommand("generateDatabase");
-		$this->executeCommand("compileAll");
-		$this->executeCommand("importInitData");
-		$this->executeCommand("initPatchDb");
+		$this->executeCommand("generate-database");
+		$this->executeCommand("compile-all");
+		$this->executeCommand("import-init-data");
+		$this->executeCommand("init-patch-db");
 		f_util_System::execScript('changecron.php');
 		$this->quitOk("Project is ready to use");
 	}

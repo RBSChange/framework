@@ -1,5 +1,5 @@
 <?php
-class commands_GenerateDocumentAggregate extends commands_AbstractChangedevCommand
+class commands_GenerateDocumentAggregate extends c_ChangescriptCommand
 {
 	/**
 	 * @return String

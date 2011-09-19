@@ -1,5 +1,5 @@
 <?php
-class commands_CreateProjectModule extends commands_AbstractChangedevCommand
+class commands_CreateProjectModule extends c_ChangescriptCommand
 {
 	/**
 	 * @return String

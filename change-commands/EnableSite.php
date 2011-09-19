@@ -1,5 +1,5 @@
 <?php
-class commands_EnableSite extends commands_AbstractChangeCommand
+class commands_EnableSite extends c_ChangescriptCommand
 {
 	/**
 	 * @return String

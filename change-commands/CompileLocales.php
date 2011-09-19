@@ -1,5 +1,5 @@
 <?php
-class commands_CompileLocales extends commands_AbstractChangeCommand
+class commands_CompileLocales extends c_ChangescriptCommand
 {
 	/**
 	 * @return String

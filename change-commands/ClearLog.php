@@ -1,5 +1,5 @@
 <?php
-class commands_ClearLog extends commands_AbstractChangeCommand
+class commands_ClearLog extends c_ChangescriptCommand
 {
 	/**
 	 * @return String

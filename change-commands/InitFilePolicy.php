@@ -1,5 +1,5 @@
 <?php
-class commands_InitFilePolicy extends commands_AbstractChangeCommand
+class commands_InitFilePolicy extends c_ChangescriptCommand
 {
 	/**
 	 * @return String
@@ -33,8 +33,8 @@ class commands_InitFilePolicy extends commands_AbstractChangeCommand
 	{
 		$this->message("== Init file policy ==");
 		
-		$this->executeCommand("applyProjectPolicy");
-		$this->executeCommand("applyWebappPolicy");
+		$this->executeCommand("apply-project-policy");
+		$this->executeCommand("apply-webapp-policy");
 		
 		$this->quitOk("File policy initiated");
 	}

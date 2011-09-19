@@ -1,5 +1,5 @@
 <?php
-class commands_Install extends commands_AbstractChangedevCommand
+class commands_Install extends c_ChangescriptCommand
 {
 	/**
 	 * @return String

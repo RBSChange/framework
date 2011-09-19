@@ -1,5 +1,5 @@
 <?php
-class commands_InitProject extends commands_AbstractChangeCommand
+class commands_InitProject extends c_ChangescriptCommand
 {
 	/**
 	 * @return String
@@ -36,7 +36,7 @@ class commands_InitProject extends commands_AbstractChangeCommand
 	{
 		$this->message("== Initializing project ==");
 
-		$this->executeCommand("updateDependencies");
+		$this->executeCommand("update-dependencies");
 				
 		// config directory: generate default config files
 		$builderResourcePath = f_util_FileUtils::buildFrameworkPath("builder");
@@ -85,11 +85,11 @@ class commands_InitProject extends commands_AbstractChangeCommand
 
 		f_util_FileUtils::mkdir("mailbox");
 		
-		$this->executeCommand("compileConfig");
+		$this->executeCommand("compile-config");
 		$this->loadFramework();
 
 		// init-file-policy
-		$this->executeCommand("applyProjectPolicy");
+		$this->executeCommand("apply-project-policy");
 
 		$this->quitOk("Project initialized");
 	}

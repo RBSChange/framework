@@ -1,5 +1,5 @@
 <?php
-class commands_EditDocument extends commands_AbstractChangedevCommand
+class commands_EditDocument extends c_ChangescriptCommand
 {
 	private $actions = array("add-property", "del-property", "rename-property", "set-indexable", "set-localized");
 

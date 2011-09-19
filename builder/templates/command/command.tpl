@@ -1,16 +1,10 @@
 <?php
 /**
-<{if $module == 'framework'}>
- * commands_<{$name}>
- * @package framework.command<{$type}>
+ * <{$commandTitle}>
+ * <{$name}>
+ * @package <{$module}>
  */
-class commands_<{$name}> extends commands_AbstractChange<{$type}>Command
-<{else}>
- * commands_<{$module}>_<{$name}>
- * @package modules.<{$module}>.command<{$type}>
- */
-class commands_<{$module}>_<{$name}> extends commands_AbstractChange<{$type}>Command
-<{/if}>
+class <{$className}> extends c_ChangescriptCommand
 {
 	/**
 	 * @return String
@@ -20,15 +14,36 @@ class commands_<{$module}>_<{$name}> extends commands_AbstractChange<{$type}>Com
 	{
 		return "<describe usage here>";
 	}
+	
+	/**
+	 * @param String[] $params
+	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
+	 */
+	public function _execute($params, $options)
+	{
+		$this->message("== <{$commandTitle}> ==");
+
+		// Put your code here!
+
+		$this->quitOk("Command successfully executed");
+	}
 
 	/**
 	 * @return String
 	 * @example "initialize a document"
 	 */
-	public function getDescription()
-	{
-		return "<describe your command here>";
-	}
+//	public function getDescription()
+//	{
+//		return "<{$commandTitle}>";
+//	}
+	
+	/**
+	 * @return String[]
+	 */
+//	public function getOptions()
+//	{
+//		return array('option1');
+//	}
 	
 	/**
 	 * This method is used to handle auto-completion for this command.
@@ -54,25 +69,4 @@ class commands_<{$module}>_<{$name}> extends commands_AbstractChange<{$type}>Com
 //	protected function validateArgs($params, $options)
 //	{
 //	}
-
-	/**
-	 * @return String[]
-	 */
-//	public function getOptions()
-//	{
-//	}
-
-	/**
-	 * @param String[] $params
-	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
-	 * @see c_ChangescriptCommand::parseArgs($args)
-	 */
-	public function _execute($params, $options)
-	{
-		$this->message("== <{$name}> ==");
-
-		// Put your code here!
-
-		$this->quitOk("Command successfully executed");
-	}
 }

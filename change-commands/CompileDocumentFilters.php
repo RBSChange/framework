@@ -1,5 +1,5 @@
 <?php
-class commands_CompileDocumentFilters extends commands_AbstractChangeCommand
+class commands_CompileDocumentFilters extends c_ChangescriptCommand
 {
 	/**
 	 * @return String

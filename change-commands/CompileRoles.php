@@ -1,5 +1,5 @@
 <?php
-class commands_CompileRoles extends commands_AbstractChangeCommand
+class commands_CompileRoles extends c_ChangescriptCommand
 {
 	/**
 	 * @return String

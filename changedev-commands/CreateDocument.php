@@ -1,5 +1,5 @@
 <?php
-class commands_CreateDocument extends commands_AbstractChangedevCommand
+class commands_CreateDocument extends c_ChangescriptCommand
 {
 	/**
 	 * @return String
@@ -18,15 +18,6 @@ class commands_CreateDocument extends commands_AbstractChangedevCommand
 	}
 
 	/**
-	 * @param String[] $params
-	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
-	 */
-	protected function validateArgs($params, $options)
-	{
-		return count($params) == 2;
-	}
-
-	/**
 	 * @param Integer $completeParamCount the parameters that are already complete in the command line
 	 * @param String[] $params
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
@@ -37,13 +28,45 @@ class commands_CreateDocument extends commands_AbstractChangedevCommand
 		if ($completeParamCount == 0)
 		{
 			$components = array();
-			foreach (glob("modules/*", GLOB_ONLYDIR) as $module)
+			foreach ($this->getBootStrap()->getProjectDependencies() as $package)
 			{
-				$components[] = basename($module);
+				/* @var $package c_Package */
+				if ($package->isModule())
+				{
+					$components[] = $package->getName();
+				}
 			}
 			return $components;
 		}
 		return null;
+	}
+	
+	/**
+	 * @param String[] $params
+	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
+	 */
+	protected function validateArgs($params, $options)
+	{
+		if (count($params) == 2)
+		{
+			$package = $this->getPackageByName($params[0]);
+			if ($package->isModule() && $package->isInProject())
+			{
+				if (preg_match('/^[a-z][a-z0-9]{1,49}+$/', $params[1]))
+				{
+					return true;
+				}
+				else
+				{
+					$this->errorMessage('Invalid document name: ' . $params[1]);
+				}
+			}
+			else
+			{
+				$this->errorMessage('Invalid module name: ' . $params[0]);
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -54,8 +77,8 @@ class commands_CreateDocument extends commands_AbstractChangedevCommand
 	function _execute($params, $options)
 	{
 		$this->message("== Create document ==");
-
-		$moduleName = $params[0];
+		$package = $this->getPackageByName($params[0]);
+		$moduleName = $package->getName();
 		$documentName = $params[1];
 		
 		$this->loadFramework();
@@ -68,7 +91,7 @@ class commands_CreateDocument extends commands_AbstractChangedevCommand
 		$from = f_util_FileUtils::buildFrameworkPath("builder", "resources", "base-document.xml");
 		f_util_FileUtils::cp($from, $to);
 			
-		return $this->quitOk("Document $moduleName/$documentName initialized.
-You must now edit $to and later call add-document");
+		$this->log("You must now edit $to and later call add-document.");
+		return $this->quitOk("Document $moduleName/$documentName initialized.");
 	}
 }

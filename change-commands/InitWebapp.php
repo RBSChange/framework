@@ -1,5 +1,5 @@
 <?php
-class commands_InitWebapp extends commands_AbstractChangeCommand
+class commands_InitWebapp extends c_ChangescriptCommand
 {
 	/**
 	 * @return String
@@ -31,7 +31,7 @@ class commands_InitWebapp extends commands_AbstractChangeCommand
 	{
 		$this->message("== Init webapp ==");
 
-		$this->executeCommand("compileConfig");
+		$this->executeCommand("compile-config");
 
 		// Copy files
 		$this->loadFramework();
@@ -120,7 +120,7 @@ class commands_InitWebapp extends commands_AbstractChangeCommand
 		}
 		
 		// Apply file policy
-		$this->executeCommand("applyWebappPolicy");
+		$this->executeCommand("apply-webapp-policy");
 		
 		$this->quitOk("Webapp initialized");
 	}

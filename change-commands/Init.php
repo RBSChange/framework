@@ -1,5 +1,5 @@
 <?php
-class commands_Init extends commands_AbstractChangeCommand
+class commands_Init extends c_ChangescriptCommand
 {
 	/**
 	 * @return String
@@ -25,11 +25,11 @@ class commands_Init extends commands_AbstractChangeCommand
 	function _execute($params, $options)
 	{
 		$this->message("== Init ==");
-		$this->executeCommand("initProject");
+		$this->executeCommand("init-project");
 		
 		$this->loadFramework();
-		$this->executeCommand("initWebapp");
-		$this->executeCommand("compileDocuments");
+		$this->executeCommand("init-webapp");
+		$this->executeCommand("compile-documents");
 		$this->quitOk("Init OK");
 	}
 }

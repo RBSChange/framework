@@ -1,5 +1,5 @@
 <?php
-class commands_ResetDatabase extends commands_AbstractChangeCommand
+class commands_ResetDatabase extends c_ChangescriptCommand
 {
 	/**
 	 * @return String

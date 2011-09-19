@@ -1,17 +1,17 @@
 <?php
 /**
- * <{$module}>_<{$nameUCFirst}>Service
- * @package modules.<{$module}>
+ * <{$className}>
+ * @package modules.<{$moduleName}>
  */
-class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassName()}>
+class <{$className}> extends <{$extendClass}>
 {
 	/**
-	 * @var <{$module}>_<{$nameUCFirst}>Service
+	 * @var <{$className}>
 	 */
 	private static $instance;
 
 	/**
-	 * @return <{$module}>_<{$nameUCFirst}>Service
+	 * @return <{$className}>
 	 */
 	public static function getInstance()
 	{
@@ -22,155 +22,157 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 		return self::$instance;
 	}
 
+<{if !$inject}>	
 	/**
-	 * @return <{$module}>_persistentdocument_<{$name}>
+	 * @return <{$moduleName}>_persistentdocument_<{$documentName}>
 	 */
 	public function getNewDocumentInstance()
 	{
-		return $this->getNewDocumentInstanceByModelName('modules_<{$module}>/<{$name}>');
+		return $this->getNewDocumentInstanceByModelName('modules_<{$moduleName}>/<{$documentName}>');
 	}
 
 	/**
-	 * Create a query based on 'modules_<{$module}>/<{$name}>' model.
-	 * Return document that are instance of modules_<{$module}>/<{$name}>,
+	 * Create a query based on 'modules_<{$moduleName}>/<{$documentName}>' model.
+	 * Return document that are instance of <{$moduleName}>_persistentdocument_<{$documentName}>,
 	 * including potential children.
 	 * @return f_persistentdocument_criteria_Query
 	 */
 	public function createQuery()
 	{
-		return $this->pp->createQuery('modules_<{$module}>/<{$name}>');
+		return $this->pp->createQuery('modules_<{$moduleName}>/<{$documentName}>');
 	}
 	
 	/**
-	 * Create a query based on 'modules_<{$module}>/<{$name}>' model.
-	 * Only documents that are strictly instance of modules_<{$module}>/<{$name}>
+	 * Create a query based on 'modules_<{$moduleName}>/<{$documentName}>' model.
+	 * Only documents that are strictly instance of <{$moduleName}>_persistentdocument_<{$documentName}>
 	 * (not children) will be retrieved
 	 * @return f_persistentdocument_criteria_Query
 	 */
 	public function createStrictQuery()
 	{
-		return $this->pp->createQuery('modules_<{$module}>/<{$name}>', false);
+		return $this->pp->createQuery('modules_<{$moduleName}>/<{$documentName}>', false);
 	}
+<{/if}>
 	
 	/**
-	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $document
 	 * @param Integer $parentNodeId Parent node ID where to save the document (optionnal => can be null !).
 	 * @return void
 	 */
 //	protected function preSave($document, $parentNodeId)
 //	{
-<{if $model->hasParentModel()}>
+<{if $hasParentModel}>
 //		parent::preSave($document, $parentNodeId);
 <{/if}>
 //
 //	}
 
 	/**
-	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $document
 	 * @param Integer $parentNodeId Parent node ID where to save the document.
 	 * @return void
 	 */
 //	protected function preInsert($document, $parentNodeId)
 //	{
-<{if $model->hasParentModel()}>
+<{if $hasParentModel}>
 //		parent::preInsert($document, $parentNodeId);
 <{/if}>
 //	}
 
 	/**
-	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $document
 	 * @param Integer $parentNodeId Parent node ID where to save the document.
 	 * @return void
 	 */
 //	protected function postInsert($document, $parentNodeId)
 //	{
-<{if $model->hasParentModel()}>
+<{if $hasParentModel}>
 //		parent::postInsert($document, $parentNodeId);
 <{/if}>
 //	}
 
 	/**
-	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $document
 	 * @param Integer $parentNodeId Parent node ID where to save the document.
 	 * @return void
 	 */
 //	protected function preUpdate($document, $parentNodeId)
 //	{
-<{if $model->hasParentModel()}>
+<{if $hasParentModel}>
 //		parent::preUpdate($document, $parentNodeId);
 <{/if}>
 //	}
 
 	/**
-	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $document
 	 * @param Integer $parentNodeId Parent node ID where to save the document.
 	 * @return void
 	 */
 //	protected function postUpdate($document, $parentNodeId)
 //	{
-<{if $model->hasParentModel()}>
+<{if $hasParentModel}>
 //		parent::postUpdate($document, $parentNodeId);
 <{/if}>
 //	}
 
 	/**
-	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $document
 	 * @param Integer $parentNodeId Parent node ID where to save the document.
 	 * @return void
 	 */
 //	protected function postSave($document, $parentNodeId)
 //	{
-<{if $model->hasParentModel()}>
+<{if $hasParentModel}>
 //		parent::postSave($document, $parentNodeId);
 <{/if}>
 //	}
 
 	/**
-	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $document
 	 * @return void
 	 */
 //	protected function preDelete($document)
 //	{
-<{if $model->hasParentModel()}>
+<{if $hasParentModel}>
 //		parent::preDelete($document);
 <{/if}>
 //	}
 
 	/**
-	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $document
 	 * @return void
 	 */
 //	protected function preDeleteLocalized($document)
 //	{
-<{if $model->hasParentModel()}>
+<{if $hasParentModel}>
 //		parent::preDeleteLocalized($document);
 <{/if}>
 //	}
 
 	/**
-	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $document
 	 * @return void
 	 */
 //	protected function postDelete($document)
 //	{
-<{if $model->hasParentModel()}>
+<{if $hasParentModel}>
 //		parent::postDelete($document);
 <{/if}>
 //	}
 
 	/**
-	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $document
 	 * @return void
 	 */
 //	protected function postDeleteLocalized($document)
 //	{
-<{if $model->hasParentModel()}>
+<{if $hasParentModel}>
 //		parent::postDeleteLocalized($document);
 <{/if}>
 //	}
 
 	/**
-	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $document
 	 * @return boolean true if the document is publishable, false if it is not.
 	 */
 //	public function isPublishable($document)
@@ -183,14 +185,14 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 	/**
 	 * Methode à surcharger pour effectuer des post traitement apres le changement de status du document
 	 * utiliser $document->getPublicationstatus() pour retrouver le nouveau status du document.
-	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $document
 	 * @param String $oldPublicationStatus
 	 * @param array<"cause" => String, "modifiedPropertyNames" => array, "oldPropertyValues" => array> $params
 	 * @return void
 	 */
 //	protected function publicationStatusChanged($document, $oldPublicationStatus, $params)
 //	{
-<{if $model->hasParentModel()}>
+<{if $hasParentModel}>
 //		parent::publicationStatusChanged($document, $oldPublicationStatus, $params);
 <{/if}>
 //	}
@@ -202,57 +204,57 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 	 */
 //	protected function onCorrectionActivated($document, $args)
 //	{
-<{if $model->hasParentModel()}>
+<{if $hasParentModel}>
 //		parent::onCorrectionActivated($document, $args);
 <{/if}>
 //	}
 
 	/**
-	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $document
 	 * @param String $tag
 	 * @return void
 	 */
 //	public function tagAdded($document, $tag)
 //	{
-<{if $model->hasParentModel()}>
+<{if $hasParentModel}>
 //		parent::tagAdded($document, $tag);
 <{/if}>
 //	}
 
 	/**
-	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $document
 	 * @param String $tag
 	 * @return void
 	 */
 //	public function tagRemoved($document, $tag)
 //	{
-<{if $model->hasParentModel()}>
+<{if $hasParentModel}>
 //		parent::tagRemoved($document, $tag);
 <{/if}>
 //	}
 
 	/**
-	 * @param <{$module}>_persistentdocument_<{$name}> $fromDocument
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $fromDocument
 	 * @param f_persistentdocument_PersistentDocument $toDocument
 	 * @param String $tag
 	 * @return void
 	 */
 //	public function tagMovedFrom($fromDocument, $toDocument, $tag)
 //	{
-<{if $model->hasParentModel()}>
+<{if $hasParentModel}>
 //		parent::tagMovedFrom($fromDocument, $toDocument, $tag);
 <{/if}>
 //	}
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $fromDocument
-	 * @param <{$module}>_persistentdocument_<{$name}> $toDocument
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $toDocument
 	 * @param String $tag
 	 * @return void
 	 */
 //	public function tagMovedTo($fromDocument, $toDocument, $tag)
 //	{
-<{if $model->hasParentModel()}>
+<{if $hasParentModel}>
 //		parent::tagMovedTo($fromDocument, $toDocument, $tag);
 <{/if}>
 //	}
@@ -266,19 +268,19 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 	 */
 //	protected function onMoveToStart($document, $destId)
 //	{
-<{if $model->hasParentModel()}>
+<{if $hasParentModel}>
 //		parent::onMoveToStart($document, $destId);
 <{/if}>
 //	}
 
 	/**
-	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $document
 	 * @param Integer $destId
 	 * @return void
 	 */
 //	protected function onDocumentMoved($document, $destId)
 //	{
-<{if $model->hasParentModel()}>
+<{if $hasParentModel}>
 //		parent::onDocumentMoved($document, $destId);
 <{/if}>
 //	}
@@ -288,8 +290,8 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 	 * If this method not override in the document service, the document isn't duplicable.
 	 * An IllegalOperationException is so launched.
 	 *
-	 * @param <{$module}>_persistentdocument_<{$name}> $newDocument
-	 * @param <{$module}>_persistentdocument_<{$name}> $originalDocument
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $newDocument
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $originalDocument
 	 * @param Integer $parentNodeId
 	 *
 	 * @throws IllegalOperationException
@@ -304,8 +306,8 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 	 * $newDocument has an id affected.
 	 * Traitment of the children of $originalDocument.
 	 *
-	 * @param <{$module}>_persistentdocument_<{$name}> $newDocument
-	 * @param <{$module}>_persistentdocument_<{$name}> $originalDocument
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $newDocument
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $originalDocument
 	 * @param Integer $parentNodeId
 	 *
 	 * @throws IllegalOperationException
@@ -316,7 +318,7 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 
 	/**
 	 * @param website_UrlRewritingService $urlRewritingService
-	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $document
 	 * @param website_persistentdocument_website $website
 	 * @param string $lang
 	 * @param array $parameters
@@ -328,7 +330,7 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 //	}
 
 	/**
-	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $document
 	 * @return integer | null
 	 */
 //	public function getWebsiteId($document)
@@ -337,7 +339,7 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 //	}
 
 	/**
-	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $document
 	 * @return integer[] | null
 	 */
 //	public function getWebsiteIds($document)
@@ -346,7 +348,7 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 //	}
 
 	/**
-	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $document
 	 * @return website_persistentdocument_page | null
 	 */
 //	public function getDisplayPage($document)
@@ -355,7 +357,7 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 //	}
 
 	/**
-	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $document
 	 * @param string $forModuleName
 	 * @param array $allowedSections
 	 * @return array
@@ -367,17 +369,17 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 //	}
 
 	/**
-	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $document
 	 * @param string $bockName
 	 * @return array with entries 'module' and 'template'. 
 	 */
 //	public function getSolrsearchResultItemTemplate($document, $bockName)
 //	{
-//		return array('module' => '<{$module}>', 'template' => '<{$moduleUCFirst}>-Inc-<{$nameUCFirst}>ResultDetail');
+//		return array('module' => '<{$moduleName}>', 'template' => '<{$moduleUCFirst}>-Inc-<{$nameUCFirst}>ResultDetail');
 //	}
 
 	/**
-	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $document
 	 * @param string $moduleName
 	 * @param string $treeType
 	 * @param array<string, string> $nodeAttributes
@@ -387,7 +389,7 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 //	}
 	
 	/**
-	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $document
 	 * @param String[] $propertiesName
 	 * @param Array $datas
 	 */

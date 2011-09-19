@@ -1,5 +1,5 @@
 <?php
-class commands_CompilePermissions extends commands_AbstractChangeCommand
+class commands_CompilePermissions extends c_ChangescriptCommand
 {
 	/**
 	 * @return String
@@ -22,6 +22,16 @@ class commands_CompilePermissions extends commands_AbstractChangeCommand
 		return "compile user permissions";
 	}
 
+	/**
+	 * @see c_ChangescriptCommand::getEvents()
+	 */
+	public function getEvents()
+	{
+		return array(
+			array('target' => 'compile-roles'),
+		);
+	}
+	
 	/**
 	 * @param String[] $params
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true

@@ -1,5 +1,5 @@
 <?php
-class commands_CompileTags extends commands_AbstractChangeCommand
+class commands_CompileTags extends c_ChangescriptCommand
 {
 	/**
 	 * @return String
@@ -35,7 +35,7 @@ class commands_CompileTags extends commands_AbstractChangeCommand
 		$ts = TagService::getInstance();
 		$ts->regenerateTags();
 		
-		$this->executeCommand("clearWebappCache");
+		$this->executeCommand("clear-webapp-cache");
 		
 		$this->quitOk("Tags compiled successfully");
 	}

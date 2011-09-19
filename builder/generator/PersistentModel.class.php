@@ -317,6 +317,35 @@ class generator_PersistentModel
 		$compiledFilePath = f_util_FileUtils::buildChangeBuildPath('allowedDocumentInfos.ser');
 		f_util_FileUtils::writeAndCreateContainer($compiledFilePath, serialize($allowedDocumentInfos), f_util_FileUtils::OVERRIDE);	
 	}
+
+	/**
+	 * Generate build/project/modules/uixul/style/documenticons.css
+	 * 
+	 */
+	public static function getCssBoDocumentIcon()
+	{
+		$iconsCSS = array();
+		foreach (self::loadModels() as $model)
+		{	
+			/* @var $model generator_PersistentModel */
+			if ($model->inject()) 
+			{
+				$moduleName = $model->getParentModel()->getModuleName();	
+				$documentName = $model->getParentModel()->getDocumentName();	
+			}
+			else
+			{
+				$moduleName = $model->getModuleName();	
+				$documentName = $model->getDocumentName();
+			}
+			$iconName = 'small/' . $model->getIcon();
+			$selector = 'treechildren::-moz-tree-image(modules_'.$moduleName.'_'.$documentName.') {list-style-image: url(/changeicons/'.$iconName.'.png);}';
+			$iconsCSS[$moduleName .'/'. $documentName] = $selector;
+
+		}
+		$documentIconsPath = f_util_FileUtils::buildChangeBuildPath('modules', 'uixul', 'style', 'documenticons.css');
+		f_util_FileUtils::writeAndCreateContainer($documentIconsPath, implode(PHP_EOL, $iconsCSS), f_util_FileUtils::OVERRIDE);
+	}
 	
 	/**
 	 * @param String $xml
@@ -933,6 +962,11 @@ class generator_PersistentModel
 		{
 			$this->publishOnDayChange = $baseDocument->publishOnDayChange;
 		}
+		
+		if ($this->icon === null)
+		{
+			$this->icon = $baseDocument->icon;
+		}
 
 		/**
 		 * Check localisation
@@ -1341,7 +1375,7 @@ class generator_PersistentModel
 	 */
 	public function getIcon()
 	{
-		if (is_null($this->icon) && $this->hasParentModel())
+		if (empty($this->icon) && $this->hasParentModel())
 		{
 			return $this->getParentModel()->getIcon();
 		}
@@ -1390,34 +1424,11 @@ class generator_PersistentModel
 	/**
 	 * @return String
 	 */
-	public function generateImportClass()
-	{
-		$generator = new builder_Generator('models');
-		$generator->assign_by_ref('model', $this);
-		$result = $generator->fetch('ImportDocumentClass.tpl');
-		return $result;
-	}
-
-	/**
-	 * @return String
-	 */
 	public function generatePhpI18nClass()
 	{
 		$generator = new builder_Generator('models');
 		$generator->assign_by_ref('model', $this);
 		$result = $generator->fetch('DocumentI18nClass.tpl');
-		return $result;
-	}
-
-
-	/**
-	 * @return String
-	 */
-	public function generatePhpOverride()
-	{
-		$generator = new builder_Generator('models');
-		$generator->assign_by_ref('model', $this);
-		$result = $generator->fetch('DocumentClass.tpl');
 		return $result;
 	}
 

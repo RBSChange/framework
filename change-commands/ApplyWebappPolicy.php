@@ -1,5 +1,5 @@
 <?php
-class commands_ApplyWebappPolicy extends commands_AbstractChangeCommand
+class commands_ApplyWebappPolicy extends c_ChangescriptCommand
 {
 	/**
 	 * @return String

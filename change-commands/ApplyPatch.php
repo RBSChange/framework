@@ -1,5 +1,5 @@
 <?php
-class commands_ApplyPatch extends commands_AbstractChangeCommand
+class commands_ApplyPatch extends c_ChangescriptCommand
 {
 	/**
 	 * @return String

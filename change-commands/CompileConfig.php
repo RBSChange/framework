@@ -1,12 +1,12 @@
 <?php
-class commands_CompileConfig extends commands_AbstractChangeCommand
+class commands_CompileConfig extends c_ChangescriptCommand
 {
 	/**
 	 * @return String
 	 */
 	public function getUsage()
 	{
-		return "[--no-auto-changes]";
+		return "";
 	}
 	
 	public function getAlias()
@@ -14,11 +14,6 @@ class commands_CompileConfig extends commands_AbstractChangeCommand
 		return "cconf";
 	}
 	
-	public function getOptions()
-	{
-		return array('no-auto-changes');
-	}
-
 	/**
 	 * @return String
 	 */
@@ -39,6 +34,7 @@ class commands_CompileConfig extends commands_AbstractChangeCommand
 		$cd = $this->getComputedDeps();
 		
 		$projectParser = new config_ProjectParser();
+		
 		$oldAndCurrent = $projectParser->execute($cd);
 		
 		if (class_exists('Framework', false))
@@ -85,39 +81,27 @@ class commands_CompileConfig extends commands_AbstractChangeCommand
 			if ($old["defines"]["LOGGING_LEVEL"] != $current["defines"]["LOGGING_LEVEL"])
 			{
 				$this->message("LOGGING_LEVEL is now ".$current["defines"]["LOGGING_LEVEL"]);
-				if (isset($options["no-auto-changes"]))
+				if (!isset($options['ignoreListener']))
 				{
-					$this->warnMessage("You must run manually compile-js-dependencies");
-				}
-				else
-				{
-					$this->executeCommand("compile-js-dependencies");
+					$this->addListeners('after', "compile-js-dependencies");
 				}
 			}
 			if ($old["defines"]["SUPPORTED_LANGUAGES"] != $current["defines"]["SUPPORTED_LANGUAGES"])
 			{
 				$this->message("SUPPORTED_LANGUAGES changed");
-				if (isset($options["no-auto-changes"]))
+				if (!isset($options['ignoreListener']))
 				{
-					$this->warnMessage("You must run manually generate-database");
-				}
-				else
-				{
-					$this->executeCommand("generate-database");
-					$this->executeCommand("compile-editors-config"); 	
+					$this->addListeners('after', "generate-database");
+					$this->addListeners('after', "compile-editors-config"); 	
 				}
 			}
 			if ($old["defines"]["CHANGE_USE_CORRECTION"] != $current["defines"]["CHANGE_USE_CORRECTION"]
 			 || $old["defines"]["CHANGE_USE_WORKFLOW"] != $current["defines"]["CHANGE_USE_WORKFLOW"])
 			{
 				$this->message("CHANGE_USE_CORRECTION or CHANGE_USE_WORKFLOW changed");
-				if (isset($options["no-auto-changes"]))
+				if (!isset($options['ignoreListener']))
 				{
-					$this->warnMessage("You must run manually compile-documents");
-				}
-				else
-				{
-					$this->executeCommand("compile-documents");	
+					$this->addListeners('after', "compile-documents");	
 				}
 			}
 			
@@ -125,20 +109,14 @@ class commands_CompileConfig extends commands_AbstractChangeCommand
 			{
 				$this->message("DEVELOPMENT_MODE is now ".$current["defines"]["DEVELOPMENT_MODE"]);
 				
-				if (isset($options["no-auto-changes"]))
+				if (!isset($options['ignoreListener']))
 				{
-					$this->warnMessage("You must run manually manage:
-- webapp cache");
-				}
-				else
-				{
-					$this->loadFramework();
-					CacheService::getInstance()->clearAllWebappCache();
-					$this->okMessage("webapp cache cleared");
+					$this->addListeners('after', "clear-webapp-cache");
 				}	
 			}
 		}
-		$this->executeCommand("compile-injection");
+		
+		$this->loadFramework();
 		
 		$this->quitOk("Config compiled");
 	}
