@@ -30,7 +30,12 @@ class commands_UpdateAutoload extends c_ChangescriptCommand
 	function _execute($params, $options)
 	{
 		$this->message("== Update autoload ==");
-
+		$pearIncludePath = $this->getBootStrap()->getProperties()->getProperty('PEAR_INCLUDE_PATH', null);
+		if ($pearIncludePath !== null)
+		{
+		    define('PEAR_DIR', $pearIncludePath);
+		}
+		
 		if (f_util_ArrayUtils::isEmpty($params))
 		{
 			$this->message("Scanning all the project. Please wait: this can be long.");
