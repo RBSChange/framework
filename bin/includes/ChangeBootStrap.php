@@ -669,14 +669,14 @@ class c_ChangeBootStrap
 			if ($dependency->isFramework() || $dependency->isModule())
 			{
 				$section = $dependency->getName();
-				$cmdPath  = $dependency->getPath() . '/change-commands';
+				$cmdPath  = $dependency->getPath() . '/commands';
 				if (is_dir($cmdPath))
 				{
 					$this->appendToAutoload($cmdPath);
 					$this->addCommandDir($cmdPath, $section, false);
 				}
 				
-				$devPath = $dependency->getPath() .'/changedev-commands';
+				$devPath = $dependency->getPath() .'/commands/dev';
 				if ($addDevCmds && is_dir($devPath))
 				{
 					$this->appendToAutoload($devPath);
@@ -699,11 +699,6 @@ class c_ChangeBootStrap
 			$this->commandSections[$part][$sectionName] = array();
 		}
 		$this->commandSections[$part][$sectionName][] = $path;
-		
-		if (is_dir($path."/default"))
-		{
-			$this->addCommandDir($path."/default", 'framework', $devCommand);
-		}
 	}
 	
 	/**
@@ -749,7 +744,7 @@ class c_ChangeBootStrap
 					continue;
 				}
 
-				$commandName = $matches[1];				
+				$commandName = $matches[1];	
 				$command = $this->getCommandByClassName($commandName, $sectionName, $devMode);
 				$commands[] = $command;
 			}

@@ -30,6 +30,7 @@ class commands_UpdateAutoload extends c_ChangescriptCommand
 	function _execute($params, $options)
 	{
 		$this->message("== Update autoload ==");
+		
 		$pearIncludePath = $this->getBootStrap()->getProperties()->getProperty('PEAR_INCLUDE_PATH', null);
 		if ($pearIncludePath !== null)
 		{

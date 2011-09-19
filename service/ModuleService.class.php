@@ -342,47 +342,6 @@ class ModuleService extends BaseService
 		return $moduleModels;
 	}
 	
-	/**
-	 * @param string $moduleName
-	 * @param string $type
-	 * @return array<string>
-	 */
-	public function getAvailableForms($moduleName, $type = 'xul')
-	{
-		$forms = array();
-		$pathArray = FileResolver::getInstance()->setPackageName('modules_' . $moduleName)->getPaths('forms');
-		if ($pathArray === null)
-		{
-			return $forms;
-		}
-		
-		foreach ($pathArray as $path)
-		{
-			$path .= DIRECTORY_SEPARATOR;
-			$suffix = '_layout.all.all.' . strtolower($type);
-			if (is_dir($path))
-			{
-				$entries = scandir($path);
-				if ($entries && is_array($entries))
-				{
-					foreach ($entries as $entry)
-					{
-						$filePath = $path . $entry;
-						if (is_file($filePath))
-						{
-							if (f_util_StringUtils::endsWith($entry, $suffix))
-							{
-								$forms[] = substr($entry, 0, -strlen($suffix));
-							}
-						}
-					}
-				}
-			}
-		}
-		
-		return array_unique($forms);
-	}
-	
 
 	/**
 	 * Returns the root folder ID of the specified module.
