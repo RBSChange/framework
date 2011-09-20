@@ -762,7 +762,7 @@ class LocaleService extends BaseService
 			
 			if ($content === null)
 			{
-				Framework::info("No translation for $keyPath, $id, $lcid");
+				$this->logKeyNotFound($keyPath.'.'.$id, $lcid);
 			}
 			return $content;
 		}
@@ -908,6 +908,7 @@ class LocaleService extends BaseService
 		list($content, $format) = f_persistentdocument_PersistentProvider::getInstance()->translate($lcid, $id, $keyPath);
 		if ($content === null)
 		{
+			$this->logKeyNotFound($keyPath.'.'.$id, $lcid);
 			return $cleanKey;
 		}
 		
@@ -1043,5 +1044,36 @@ class LocaleService extends BaseService
 			}
 		}
 		return array($key, $formatters, $replacements);
+	}
+	
+	/**
+	 * @var string
+	 */
+	protected $logFilePath;
+	
+	/**
+	 * @param string $key
+	 * @param string $lang
+	 */
+	protected function logKeyNotFound($key, $lang)
+	{
+		if ($this->logFilePath === null)
+		{
+			if (Framework::inDevelopmentMode())
+			{
+				$this->logFilePath = f_util_FileUtils::buildProjectPath('log', 'i18n', 'keynotfound.log');
+				f_util_FileUtils::mkdir(dirname($this->logFilePath));
+			}
+			else
+			{
+				$this->logFilePath = false;
+			}
+		}
+		
+		if ($this->logFilePath !== false)
+		{
+			$mode =  RequestContext::getInstance()->getMode() === RequestContext::FRONTOFFICE_MODE ? 'fo' : 'bo';
+			error_log("\n". gmdate('Y-m-d H:i:s')."\t" . $mode ."\t" .  $lang. "\t" . $key, 3, $this->logFilePath);
+		}
 	}
 }
