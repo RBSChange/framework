@@ -174,7 +174,7 @@ class change_Storage
 	 */
 	public function &read($key)
 	{
-		return $this->readNS($key, $this->changeSessionNameSpace);
+		return $this->readNS($key, $this->getChangeSessionNamespaceInstance());
 	}
 	
 	/**
@@ -205,7 +205,7 @@ class change_Storage
 	 */
 	public function remove($key)
 	{
-		return $this->removeNS($key, $this->changeSessionNameSpace);
+		return $this->removeNS($key, $this->getChangeSessionNamespaceInstance());
 	}
 	
 	/**
@@ -238,7 +238,7 @@ class change_Storage
 	 */
 	public function write($key, &$data)
 	{
-		$this->writeNS($key, $data, $this->changeSessionNameSpace);
+		$this->writeNS($key, $data, $this->getChangeSessionNamespaceInstance());
 	}
 	
 	/**
@@ -269,7 +269,7 @@ class change_Storage
 	 */
 	public function readAll()
 	{
-		return $this->readAllNS($this->changeSessionNameSpace);
+		return $this->readAllNS($this->getChangeSessionNamespaceInstance());
 	}
 		
 	/**
@@ -282,12 +282,14 @@ class change_Storage
 	
 	public function clear()
 	{
-		$this->changeSessionNameSpace->unsetAll();
+		$ns = $this->getChangeSessionNamespaceInstance();
+		if ($this->started) {$ns->unsetAll();}
 	}
 	
 	public function clearForUser()
 	{
-		$this->getUserSessionNamespaceInstance()->unsetAll();
+		$ns = $this->getUserSessionNamespaceInstance();
+		if ($this->started) {$ns->unsetAll();}
 	}
 	
 	public function shutdown ()
@@ -302,6 +304,7 @@ class change_Storage
 	 */
 	public function getChangeSessionNamespaceInstance()
 	{
+		if ($this->started === null) {$this->startSession();}
 		return $this->changeSessionNameSpace;
 	}
 	
@@ -312,8 +315,11 @@ class change_Storage
 	 */
 	public function getUserSessionNamespaceInstance()
 	{
-		if ($this->started === null) {$this->startSession();}
-		return $this->context->getUser()->getUserNamespace() === change_User::BACKEND_NAMESPACE ? $this->backuserSessionNameSpace : $this->frontuserSessionNameSpace;
+		if ($this->context->getUser()->getUserNamespace() === change_User::BACKEND_NAMESPACE)
+		{
+			return $this->getBackofficeSessionNamespaceInstance();
+		}
+		return $this->getFrontofficeSessionNamespaceInstance();
 	}
 	
 	/**
@@ -321,6 +327,7 @@ class change_Storage
 	 */
 	public function getBackofficeSessionNamespaceInstance()
 	{
+		if ($this->started === null) {$this->startSession();}
 		return $this->backuserSessionNameSpace;	
 	}
 	
@@ -329,6 +336,7 @@ class change_Storage
 	 */
 	public function getFrontofficeSessionNamespaceInstance()
 	{
-		return $this->backuserSessionNameSpace;	
+		if ($this->started === null) {$this->startSession();}
+		return $this->frontuserSessionNameSpace;
 	}
 }
