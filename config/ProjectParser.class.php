@@ -209,7 +209,7 @@ class config_ProjectParser
 				foreach ($lines as $lineIndex => $line)
 				{
 					$matches = null;
-					if (preg_match('/^define\(\'(.*)\', (.*)\);$/', $line, $matches))
+					if (preg_match('/define\(\'(.*)\', (.*)\);\}?$/', $line, $matches))
 					{
 						$oldDefines[$matches[1]] = $matches[2];
 					}
@@ -359,7 +359,7 @@ class config_ProjectParser
 			foreach ($defineLines as $defineLine)
 			{
 				$matches = null;
-				if (preg_match('/^define\(\'(.*)\', (.*)\);$/', $defineLine, $matches))
+				if (preg_match('/define\(\'(.*)\', (.*)\);\}?$/', $defineLine, $matches))
 				{
 					$currentDefines[$matches[1]] = $matches[2];
 				}
@@ -437,11 +437,11 @@ class config_ProjectParser
 	{
 		if ($value === true || $value === 'true')
 		{
-			return 'define(\'' . $name . '\', true);';
+			return 'if (!defined(\'' . $name . '\')){define(\'' . $name . '\', true);}';
 		}
 		else if ($value === false || $value === 'false')
 		{
-			return 'define(\'' . $name . '\', false);';
+			return 'if (!defined(\'' . $name . '\')){define(\'' . $name . '\', false);}';
 		}
 		else if (!is_numeric($value))
 		{
@@ -451,7 +451,7 @@ class config_ProjectParser
 				$value = var_export($value, true);
 			}
 		}
-		return 'define(\'' . $name . '\', ' . $value . ');';
+		return 'if (!defined(\'' . $name . '\')){define(\'' . $name . '\', ' . $value . ');}';
 	}
 
 	/**
