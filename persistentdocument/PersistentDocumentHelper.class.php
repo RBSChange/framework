@@ -51,12 +51,12 @@ class DocumentHelper
 		{
 			return false;
 		}
-		
+	
 		if (count($a) === count($b))
 		{
 			for ($i = 0; $i < count($a); $i++) 
 			{
-				if (!self::equals($a[i], $b[i])) {return false;}
+				if (!self::equals($a[$i], $b[$i])) {return false;}
 			}
 			return true;
 		}
