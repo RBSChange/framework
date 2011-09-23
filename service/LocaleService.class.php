@@ -748,6 +748,16 @@ class LocaleService extends BaseService
 	}
 	
 	/**
+	 * @param string $string
+	 * @return boolean
+	 */
+	public function isKey($string)
+	{
+		list($path,) = $this->explodeKey($string);
+		return $path !== false;
+	}
+	
+	/**
 	 * @param string $lang
 	 * @param string $cleanKey
 	 * @return string | null
