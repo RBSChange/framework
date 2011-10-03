@@ -29,7 +29,7 @@ if (defined('NODE_NAME') && ModuleService::getInstance()->moduleExists('clusters
 }
 else
 {
-	$baseURL = Framework::getBaseUrl();
+	$baseURL = Framework::getUIBaseUrl();
 }
 
 
