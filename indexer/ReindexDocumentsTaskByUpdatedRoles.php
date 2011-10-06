@@ -44,7 +44,7 @@ class f_tasks_ReindexDocumentsByUpdatedRolesTask extends task_SimpleSystemTask
 				if (!is_numeric($output))
 				{
 					$progres = false;
-					$chunkInfo = " Error on processsing $modelName at index $documentIndex.";
+					$chunkInfo = " Error on processsing $modelName at index $documentIndex: $output";
 					$errors[] = $chunkInfo;
 				}
 				if (intval($output) == $chunkSize)

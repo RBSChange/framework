@@ -6,7 +6,7 @@ class commands_Install extends c_ChangescriptCommand
 	 */
 	function getUsage()
 	{
-		return "modules|themes|libs name relaseURL|DownloadURL|ArchivePath";
+		return "modules|themes|libs name relaseURL|DownloadURL|ArchivePath [--post-install]";
 	}
 
 	/**
@@ -19,7 +19,7 @@ class commands_Install extends c_ChangescriptCommand
 	
 	function getOptions()
 	{
-		return array('recursive');
+		return array('recursive', 'post-install');
 	}
 
 	/**
@@ -42,7 +42,15 @@ class commands_Install extends c_ChangescriptCommand
 			return false;
 		}
 		$p = c_Package::getNewInstance($params[0], $params[1], PROJECT_HOME);
-		if ($p->isInProject())
+		if (isset($options['post-install']))
+		{
+			if (!$p->isInProject())
+			{
+				$this->errorMessage($p->getKey() . ' Not in project.');
+				return false;
+			}			
+		}
+		elseif ($p->isInProject())
 		{
 			$this->errorMessage($p->getKey() . ' Already in project.');
 			return false;
@@ -94,88 +102,91 @@ class commands_Install extends c_ChangescriptCommand
 		$name = $params[1];
 		$p = c_Package::getNewInstance($type, $name, PROJECT_HOME);
 		
-		$this->message("== Install " . $p->getKey(). " ==");		
-		$src = isset($params[2]) ? $params[2] : null;
-		$downloadURL = null;
-		$zipPath = null;
-		if ($src !== null)
+		$this->message("== Install " . $p->getKey(). " ==");	
+		if (!isset($options['post-install']))
 		{
-			if (substr($src, -4) === '.zip')
+			$src = isset($params[2]) ? $params[2] : null;
+			$downloadURL = null;
+			$zipPath = null;
+			if ($src !== null)
 			{
-				if (substr($src, 0, 7) === 'http://')
+				if (substr($src, -4) === '.zip')
 				{
-					$downloadURL = $src;
+					if (substr($src, 0, 7) === 'http://')
+					{
+						$downloadURL = $src;
+					}
+					else
+					{
+						$zipPath = $src;
+					}
 				}
-				else
+				elseif (substr($src, 0, 7) === 'http://')
 				{
-					$zipPath = $src;
+					$packages = $bootstrap->getReleasePackages($src);
+					if (is_array($packages) && isset($packages[$p->getKey()]))
+					{
+						$p->setReleaseURL($src);
+						$downloadURL = $packages[$p->getKey()]->getDownloadURL();
+					}
 				}
 			}
-			elseif (substr($src, 0, 7) === 'http://')
+			else
 			{
-				$packages = $bootstrap->getReleasePackages($src);
+				$packages = $bootstrap->getReleasePackages($this->getBootStrap()->getReleaseRepository());
 				if (is_array($packages) && isset($packages[$p->getKey()]))
 				{
-					$p->setReleaseURL($src);
 					$downloadURL = $packages[$p->getKey()]->getDownloadURL();
 				}
 			}
-		}
-		else
-		{
-			$packages = $bootstrap->getReleasePackages($this->getBootStrap()->getReleaseRepository());
-			if (is_array($packages) && isset($packages[$p->getKey()]))
+			
+			if ($downloadURL !== null)
 			{
-				$downloadURL = $packages[$p->getKey()]->getDownloadURL();
+				$dr = $bootstrap->downloadFile($downloadURL, $zipPath);
+				if ($dr !== true)
+				{
+					return $this->quitError($dr);
+				}
+				$filesToClean[] = $zipPath;
+				if ($p->getReleaseURL() == null)
+				{
+					$p->setDownloadURL($downloadURL);
+				}
 			}
-		}
-		
-		if ($downloadURL !== null)
-		{
-			$dr = $bootstrap->downloadFile($downloadURL, $zipPath);
-			if ($dr !== true)
+			else
 			{
-				return $this->quitError($dr);
+				$p->setDownloadURL('none');
 			}
-			$filesToClean[] = $zipPath;
-			if ($p->getReleaseURL() == null)
+			
+			if (!is_readable($zipPath))
 			{
-				$p->setDownloadURL($downloadURL);
+				$this->cleanFiles($filesToClean);
+				return $this->quitError('File: ' . $zipPath . ' is not readable');
 			}
-		}
-		else
-		{
-			$p->setDownloadURL('none');
-		}
-		
-		if (!is_readable($zipPath))
-		{
+			
+			$tempName = tempnam($bootstrap->getTmpPath(), 'zip');
+			$filesToClean[] = $tempName;
+			$tmpPath = $tempName . '.unzip';
+			$filesToClean[] = $tmpPath;
+			
+			$tmpPackage = $bootstrap->unzipPackage($zipPath, $tmpPath);
+			if ($tmpPackage === null)
+			{
+				$this->cleanFiles($filesToClean);
+				return $this->quitError('Unable to decompress: ' . $zipPath . ' or is not a valid Package');			
+			}
+			else if ($tmpPackage->getKey() != $p->getKey())
+			{
+				$this->cleanFiles($filesToClean);
+				return $this->quitError('Invalid Package Signature: ' . $tmpPackage->getKey());			
+			}
+			
+			$this->message('Copy ' . $tmpPackage->getTemporaryPath() . ' in ' . $p->getPath() . '...');
+			f_util_FileUtils::cp($tmpPackage->getTemporaryPath(), $p->getPath());
+			
 			$this->cleanFiles($filesToClean);
-			return $this->quitError('File: ' . $zipPath . ' is not readable');
 		}
-		
-		$tempName = tempnam($bootstrap->getTmpPath(), 'zip');
-		$filesToClean[] = $tempName;
-		$tmpPath = $tempName . '.unzip';
-		$filesToClean[] = $tmpPath;
-		
-		$tmpPackage = $bootstrap->unzipPackage($zipPath, $tmpPath);
-		if ($tmpPackage === null)
-		{
-			$this->cleanFiles($filesToClean);
-			return $this->quitError('Unable to decompress: ' . $zipPath . ' or is not a valid Package');			
-		}
-		else if ($tmpPackage->getKey() != $p->getKey())
-		{
-			$this->cleanFiles($filesToClean);
-			return $this->quitError('Invalid Package Signature: ' . $tmpPackage->getKey());			
-		}
-		
-		$this->message('Copy ' . $tmpPackage->getTemporaryPath() . ' in ' . $p->getPath() . '...');
-		f_util_FileUtils::cp($tmpPackage->getTemporaryPath(), $p->getPath());
 		$bootstrap->updateProjectPackage($p);
-		
-		$this->cleanFiles($filesToClean);
 				
 		switch ($type) 
 		{

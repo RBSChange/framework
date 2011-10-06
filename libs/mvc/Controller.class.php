@@ -187,7 +187,7 @@ class change_Controller
 			}
 			else if ($moduleName !== 'website' && $actionName !== 'Error404')
 			{
-				$this->forward('website', 'Error404');
+				return $this->forward('website', 'Error404');
 			}
 			else
 			{

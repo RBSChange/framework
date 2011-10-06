@@ -579,6 +579,16 @@ class RequestContext
 	}
 	
 	/**
+	 * @param string $type
+	 * @param string $version
+	 */
+	public function setCompleteUserAgent($type, $version = 'all')
+	{
+		$this->m_userAgentType = $type;
+		$this->m_userAgentTypeVersion = $version;
+	}
+	
+	/**
 	 * @return String
 	 */
 	public function getCompleteUserAgent()

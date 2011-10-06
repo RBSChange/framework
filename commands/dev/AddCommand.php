@@ -98,13 +98,27 @@ class commands_AddCommand extends c_ChangescriptCommand
 		
 		if ($package->isFramework())
 		{
-			$commandFile = f_util_FileUtils::buildFrameworkPath('change' . $type . '-commands', $commandName . '.php');
+			if ($type == 'dev')
+			{
+				$commandFile = f_util_FileUtils::buildFrameworkPath('commands', 'dev', $commandName . '.php');
+			}
+			else
+			{
+				$commandFile = f_util_FileUtils::buildFrameworkPath('commands', $commandName . '.php');
+			}
 			$className = 'commands_' . $commandName;
 			$commandCallName = $this->fixCommandName($commandName);
 		}
 		else
 		{
-			$commandFile = f_util_FileUtils::buildModulesPath($componentName, 'change' . $type . '-commands', $componentName . '_' . $commandName . '.php');
+			if ($type == 'dev')
+			{
+				$commandFile = f_util_FileUtils::buildModulesPath($componentName, 'commands', 'dev', $componentName . '_' . $commandName . '.php');
+			}
+			else
+			{
+				$commandFile = f_util_FileUtils::buildModulesPath($componentName, 'commands', $componentName . '_' . $commandName . '.php');
+			}
 			$className = 'commands_' . $componentName . '_' . $commandName;
 			$commandCallName = $componentName . '.' .$this->fixCommandName($commandName);
 		}

@@ -337,7 +337,7 @@ class indexer_IndexService extends BaseService
 				try 
 				{
 					$document = DocumentHelper::getDocumentInstance($documentId);
-					$this->toIndexStatus($document);
+					$this->toIndex($document);
 				}
 				catch (Exception $ed)
 				{
