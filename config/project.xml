@@ -94,7 +94,7 @@
 		<injection>
 			<class>
 				<entry name="f_DataCacheService">f_DataCacheFileService</entry>
-				<entry name="f_persistentdocument_CacheService">f_persistentdocument_DatabaseCacheService</entry>
+				<entry name="f_persistentdocument_CacheService">f_persistentdocument_NoopCacheService</entry>
 			</class>
 		</injection>
 		
