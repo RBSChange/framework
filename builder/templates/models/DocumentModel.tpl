@@ -70,10 +70,10 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 <{if (count($model->getInverseProperties()))}>		
 	protected function loadInvertProperties()
 	{
-		parent::loadSerialisedProperties();
+		parent::loadInvertProperties();
 <{foreach from=$model->getInverseProperties() item=property}>
 		$p = new PropertyInfo(<{$model->escapeString($property->getName())}>);
-		$p->setDbTable(<{$model->escapeString($model->getTableName())}>)->setDbMapping(<{$model->escapeString($property->getRelationName())}>)<{if ($property->getType() != null)}>->setType(<{$model->escapeString($property->getType())}>)<{/if}>
+		$p->setDbTable(<{$model->escapeString($property->getTableName())}>)->setDbMapping(<{$model->escapeString($property->getRelationName())}>)<{if ($property->getType() != null)}>->setType(<{$model->escapeString($property->getType())}>)<{/if}>
 <{if ($property->getMinOccurs() != 0)}>->setMinOccurs(<{$property->getMinOccurs()}>)<{/if}>
 <{if ($property->getMaxOccurs() != 1)}>->setMaxOccurs(<{$property->getMaxOccurs()}>)<{/if}>
 <{if ($property->isCascadeDelete())}>->setCascadeDelete(true)<{/if}>
