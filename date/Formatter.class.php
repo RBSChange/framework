@@ -27,6 +27,10 @@ class date_Formatter
     	{
     		return '';
     	}
+	if ($format === 'c')
+	{
+	    return date('c', $date->getTimestamp());
+	}
     	$ls = LocaleService::getInstance();
 		$result = '';
 		$escaped = false;
