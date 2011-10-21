@@ -65,6 +65,7 @@ class Framework
 	public static function sessionStarted($id)
 	{
 		self::$log->setEventItem('sessionId' , '(' . $id . ')');
+		//self::info(__METHOD__);
 	}
 	/**
 	 * @param string $message
@@ -297,7 +298,7 @@ class Framework
 	 */
 	public static function getBaseUrl()
 	{
-		$webSite = website_WebsiteModuleService::getInstance()->getCurrentWebsite();
+		$webSite = website_WebsiteService::getInstance()->getCurrentWebsite();
 		if ($webSite->isContextLangAvailable())
 		{
 			return $webSite->getProtocol() . '://'. $webSite->getDomain();	

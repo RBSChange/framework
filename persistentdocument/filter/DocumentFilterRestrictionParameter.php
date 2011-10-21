@@ -199,8 +199,8 @@ class f_persistentdocument_DocumentFilterRestrictionParameter extends f_persiste
 	/**
 	 * @var Array<String => String[]>
 	 * @example array(
-	 * 		'modules_users/backenduser.email' => array('like', 'ilike'),
-	 *  	'modules_users/backenduser.login' => array('like'))
+	 * 		'modules_users/user.email' => array('like', 'ilike'),
+	 *  	'modules_users/user.login' => array('like'))
 	 */
 	private $allowedRestrictions = array();
 	

@@ -2805,8 +2805,7 @@ class f_persistentdocument_DocumentService extends BaseService
 		$ps = change_PermissionService::getInstance();
 		$defPointId = $ps->getDefinitionPointForPackage($document->getId(), "modules_" . $forModuleName);
 		$allPermissions = $ps->getPermissionsForUserByDefPointNodeId(
-		users_UserService::getInstance()->getCurrentBackEndUser(), $defPointId);
-
+		users_UserService::getInstance()->getAutenticatedUser(), $defPointId);
 		$permissions = array();
 		if (count($allPermissions) === 1 && $allPermissions[0] === change_PermissionService::ALL_PERMISSIONS)
 		{

@@ -58,7 +58,7 @@ class validation_ContraintsParser
 		{
 			if ( ! $this->handleChar($string[$i], $i, $i === $length-1) )
 			{
-				throw new ValidatorException("Malformed validator definition: unexpected character '".$string{$i}."' at position ".$i);
+				throw new Exception("Malformed validator definition: unexpected character '".$string{$i}."' at position ".$i);
 			}
 		}
 	}
@@ -150,43 +150,16 @@ class validation_ContraintsParser
 		$className = 'validation_'.ucfirst($name).'Validator';
 		if (!f_util_ClassUtils::classExists($className))
 		{
-			throw new ValidatorException("Unknown validator: ".$className);
+			throw new Exception("Unknown validator: ".$className);
 		}
 		
 		$validator = new $className();
 		if ( ! $validator instanceof validation_Validator )
 		{
-			throw new ValidatorException("Invalid validator: ".$className."; must be an instance of 'validation_Validator'.");
+			throw new Exception("Invalid validator: ".$className."; must be an instance of 'validation_Validator'.");
 		}
 		
 		$validator->setReverseMode($reversed);
-		/*
-		// build validator parameter
-		if (validation_InListValueParser::matches($value))
-		{
-			$value = validation_InListValueParser::getValidatorParameter($value);
-		}
-		else if (validation_RangeValueParser::matches($value))
-		{
-			$value = validation_RangeValueParser::getValidatorParameter($value);
-		}
-		else if (validation_BooleanValueParser::matches($value))
-		{
-			$value = validation_BooleanValueParser::getValidatorParameter($value);
-		}
-		else if (validation_NumberValueParser::matches($value))
-		{
-			$value = validation_NumberValueParser::getValidatorParameter($value);
-		}
-		else if (validation_NullValueParser::matches($value))
-		{
-			$value = validation_NullValueParser::getValidatorParameter($value);
-		}
-		else if (validation_StringValueParser::matches($value))
-		{
-			$value = validation_StringValueParser::getValidatorParameter($value);
-		}
-		*/
 		// set validator parameter
 		$validator->setParameter($value);
 		

@@ -34,13 +34,14 @@ class commands_CompileDbSchema extends c_ChangescriptCommand
 		$this->loadFramework();
 		
 		$persistentProvider = f_persistentdocument_PersistentProvider::getInstance();
-
+		$sm = $persistentProvider->getSchemaManager();
+		
 		$this->message('=== Update table f_document with supported languages ===');
 
 		//Generate localized label in f_document
 		foreach (RequestContext::getInstance()->getSupportedLanguages() as $lang)
 		{
-			if ($persistentProvider->addLang($lang))
+			if ($sm->addLang($lang))
 			{
 				$this->message("Lang $lang added");
 			}

@@ -7,9 +7,23 @@ require_once PROJECT_HOME . "/framework/Framework.php";
 
 $controller = change_Controller::newInstance('change_Controller');
 $controller->setNoCache();
+
+
 RequestContext::getInstance()->setMode(RequestContext::BACKOFFICE_MODE);
 
-users_UserService::getInstance()->pingBackEndUser();
+$us = users_UserService::getInstance();
+$userbo = $us->getCurrentBackEndUser();
+if ($userbo) 
+{
+	$us->pingUser($userbo);
+}
+
+$userfo = $us->getCurrentFrontEndUser();
+if ($userfo && $userfo !== $userbo)
+{
+	$us->pingUser($userfo);
+}
+
 $ka = change_Controller::getInstance()->getStorage()->read('framework_sessionKeepAlive');
 if (!$ka)
 {

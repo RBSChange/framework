@@ -295,71 +295,128 @@ abstract class f_persistentdocument_PersistentProvider
 		}
 	}
 
+	
 	/**
 	 * @param array<String, String> $connectionInfos
 	 * @return mixed
 	 */
 	protected abstract function getConnection($connectionInfos);
 
-	/**
-	 * @return string[]
-	 */
-	abstract function getTables();	
 	
 	/**
-	 * @param string $tableName
+	 * @return change_SchemaManager
 	 */
-	abstract function getTableFields($tableName);
+	abstract function getSchemaManager();
 	
 	/**
-	 * @throws Exception on error
+	 * @deprecated
 	 */
-	abstract function clearDB();
-
-	/**
-	 * @param string $moduleName
-	 * @param string $documentName
-	 * @param generator_PersistentProperty $property
-	 * @return string[] the SQL statements that where executed
-	 */
-	abstract function dropModelTables($moduleName, $documentName);
+	function getTables()
+	{
+		return $this->getSchemaManager()->getTables();
+	}	
 	
 	/**
-	 * @param string $moduleName
-	 * @param string $documentName
-	 * @param generator_PersistentProperty $oldProperty
-	 * @return string[] the SQL statements that where executed
+	 * @deprecated
 	 */
-	abstract function delProperty($moduleName, $documentName, $oldProperty);
-
-	/**
-	 * @param string $moduleName
-	 * @param string $documentName
-	 * @param generator_PersistentProperty $oldProperty
-	 * @param generator_PersistentProperty $newProperty
-	 * @return string[] the SQL statements that where executed
-	 */
-	abstract function renameProperty($moduleName, $documentName, $oldProperty, $newProperty);
-
-	/**
-	 * @param string $moduleName
-	 * @param string $documentName
-	 * @param generator_PersistentProperty $property
-	 * @return string[] the SQL statements that where executed
-	 */
-	abstract function addProperty($moduleName, $documentName, $property);	
+	function getTableFields($tableName)
+	{
+		return $this->getSchemaManager()->getTableFields($tableName);
+	}
 	
+	/**
+	 * @deprecated
+	 */
+	function clearDB()
+	{
+		return $this->getSchemaManager()->clearDB();
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	function dropModelTables($moduleName, $documentName)
+	{
+		return $this->getSchemaManager()->dropModelTables($moduleName, $documentName);
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	function delProperty($moduleName, $documentName, $oldProperty)
+	{
+		return $this->getSchemaManager()->delProperty($moduleName, $documentName, $oldProperty);
+	}
 
+	/**
+	 * @deprecated
+	 */
+	function renameProperty($moduleName, $documentName, $oldProperty, $newProperty)
+	{
+		return $this->getSchemaManager()->renameProperty($moduleName, $documentName, $oldProperty, $newProperty);
+	}
+
+	/**
+	 * @deprecated
+	 */
+	function addProperty($moduleName, $documentName, $property)
+	{
+		return $this->getSchemaManager()->addProperty($moduleName, $documentName, $property);
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function addLang($lang)
+	{
+		$this->getSchemaManager()->addLang($lang);
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function getScriptFileInfos()
+	{
+		return array(null, null);
+	}
+	
+	/**
+	 * @deprecated;
+	 */
+	public function getSQLScriptSufixName()
+	{
+		return $this->getSchemaManager()->getSQLScriptSufixName();
+	}
+				
+	/**
+	 * @deprecated
+	 */
+	public function executeSQLScript($script)
+	{
+		return $this->getSchemaManager()->execute($script);
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function createTreeTable($treeId)
+	{
+		$this->getSchemaManager()->createTreeTable($treeId);
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function dropTreeTable($treeId)
+	{
+		$this->getSchemaManager()->dropTreeTable($treeId);
+	}
+	
 	public abstract function closeConnection();
 
 	protected abstract function errorCode();
 
 	protected abstract function errorInfo();
-
-	/**
-	 * @param String $script
-	 */
-	public abstract function executeSQLScript($script);
 
 	/**
 	 * @param String $script
@@ -375,38 +432,6 @@ abstract class f_persistentdocument_PersistentProvider
 	private function getIdFromRow($row)
 	{
 		return $row["id"];
-	}
-	
-	/**
-	 * @return array<string, string>
-	 * return[0] => allowed file Extension
-	 * return[1] => sql script Separator
-	 */
-	public function getScriptFileInfos()
-	{
-		return array(null, null);
-	}
-	
-	/**
-	 * @param array<tableName=>string, moduleName=>string, documentName=>string> $properties
-	 * @return string
-	 */
-	public function generateTableName($properties)
-	{
-		if ($properties['tableName'])
-		{
-			return $properties['tableName'];
-		}
-		return strtolower("m_". $properties['moduleName'] ."_doc_" . $properties['documentName']);
-	}
-
-	/**
-	 * @param array<dbMapping=>string, name=>string> $properties
-	 * @return string
-	 */
-	public function generateFieldName($properties)
-	{
-		return (is_null($properties['dbMapping'])) ?  strtolower($properties['name']) : $properties['dbMapping'];
 	}
 
 	/**
@@ -704,8 +729,12 @@ abstract class f_persistentdocument_PersistentProvider
 	 */
 	public final function findUnique($query)
 	{
-		$docs = $this->find($query->setMaxResults(2));
-
+		if ($query->getMaxResults() != 1)
+		{
+			$query->setMaxResults(2);
+		}
+		
+		$docs = $this->find($query);
 		$nbDocs = count($docs);
 		if ($nbDocs > 0)
 		{
@@ -2054,39 +2083,12 @@ abstract class f_persistentdocument_PersistentProvider
 	/**
 	 * @return String
 	 */
-	public function getSQLScriptSufixName()
-	{
-		return '.'.$this->getType().'.sql';
-	}
-
-	/**
-	 * @return String
-	 */
 	public abstract function getType();
 
 	//
 	// Tree Methods à usage du treeService
 	//
-
-	public function createTreeTable($treeId)
-	{
-		$stmt = $this->prepareStatement($this->dropTreeTableQuery($treeId));
-		$this->executeStatement($stmt);
-
-		$stmt = $this->prepareStatement($this->createTreeTableQuery($treeId));
-		$this->executeStatement($stmt);
-	}
 	
-	public function dropTreeTable($treeId)
-	{
-		$stmt = $this->prepareStatement($this->dropTreeTableQuery($treeId));
-		$this->executeStatement($stmt);
-	}
-
-	protected abstract function dropTreeTableQuery($treeId);
-
-	protected abstract function createTreeTableQuery($treeId);
-
 	/**
 	 * @param integer $documentId
 	 * @param integer $treeId
@@ -2257,7 +2259,7 @@ abstract class f_persistentdocument_PersistentProvider
 	 */
 	public function createTree($rootNode)
 	{
-		$this->createTreeTable($rootNode->getId());
+		$this->getSchemaManager()->createTreeTable($rootNode->getId());
 		$this->insertNode($rootNode);
 	}
 
@@ -4169,33 +4171,6 @@ abstract class f_persistentdocument_PersistentProvider
 	 * @return boolean
 	 */
 	abstract public function setAutoCommit($bool);
-
-
-
-	public final function addLang($lang)
-	{
-		if ($this->columnExists("f_document", "label_".$lang))
-		{
-			return false;
-		}
-		$stmt = $this->prepareStatement($this->addLangQuery($lang));
-		$this->executeStatement($stmt);
-		return true;
-	}
-
-	/**
-	 * @param String $tableName
-	 * @param String $fieldName
-	 * @return Boolean
-	 */
-	abstract protected function columnExists($tableName, $fieldName);
-
-
-	/**
-	 * @param string $lang
-	 * @return string sql
-	 */
-	abstract protected function addLangQuery($lang);
 
 	/**
 	 * Enter description here...

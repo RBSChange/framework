@@ -1177,7 +1177,7 @@ class TagService extends BaseService
 		}
 		else
 		{
-			$website = website_WebsiteModuleService::getInstance()->getCurrentWebsite();
+			$website = website_WebsiteService::getInstance()->getCurrentWebsite();
 			if ($website->isNew())
 			{
 				Framework::warn(__METHOD__ . ' ' .$document->__toString() . ' has no WebsiteId');
@@ -1237,7 +1237,7 @@ class TagService extends BaseService
 		}
 		else
 		{
-			$website = website_WebsiteModuleService::getInstance()->getCurrentWebsite();
+			$website = website_WebsiteService::getInstance()->getCurrentWebsite();
 			if ($website->isNew())
 			{
 				Framework::warn(__METHOD__ . ' ' .$document->__toString() . ' has no WebsiteId');

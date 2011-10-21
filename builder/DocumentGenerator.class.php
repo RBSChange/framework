@@ -187,8 +187,9 @@ class builder_DocumentGenerator
 	{
 		$buildPathDataobject = f_util_FileUtils::buildChangeBuildPath('modules' , $this->module , 'dataobject') . DIRECTORY_SEPARATOR;
 		f_util_FileUtils::mkdir($buildPathDataobject);
-		$provider = f_persistentdocument_PersistentProvider::getInstance();
-		$fileExtension = $provider->getSQLScriptSufixName();
+		$sm = f_persistentdocument_PersistentProvider::getInstance()->getSchemaManager();
+		
+		$fileExtension = $sm->getSQLScriptSufixName();
 
 		$tablefilename = $this->modelObject->getTableName();
 		if ($this->modelObject->hasParentModel())
@@ -198,22 +199,12 @@ class builder_DocumentGenerator
 
 		// Create a sql file corresponding to document model
 		$sqlFileName = $buildPathDataobject . $tablefilename . $fileExtension;
-		
-		$sql = $this->modelObject->generateSQLScript($provider->getType());
+		$sql = $sm->generateSQLModel($this->modelObject);
 
-		if ( $add )
-		{
-			// Execute the sql script and save it in file
-			$this->addAndSaveSql($provider, $sql, $sqlFileName);
-		}
-		else
-		{
-			// Save the sql script
-			$this->saveSql($sql, $sqlFileName);
-		}
+		$this->saveSql($sql, $sqlFileName, $add);
 
 		// If document is internationnalized. Excute the same previous action
-		if ( $this->modelObject->isLocalized() )
+		if ($this->modelObject->isLocalized() )
 		{
 			$tablefilename = $this->modelObject->getTableName(). '_i18n';
 			if ($this->modelObject->hasParentModel())
@@ -222,18 +213,9 @@ class builder_DocumentGenerator
 			}
 
 			$sqlI18nFileName = $buildPathDataobject . $tablefilename . $fileExtension;
-			$sqlI18n = $this->modelObject->generateSQLI18nScript($provider->getType());
-
-			if ( $add )
-			{
-				// Execute the sql script and save it in file
-				$this->addAndSaveSql($provider, $sqlI18n, $sqlI18nFileName);
-			}
-			else
-			{
-				// Save the sql script
-				$this->saveSql($sqlI18n, $sqlI18nFileName);
-			}
+			$sqlI18n = $sm->generateSQLI18nModel($this->modelObject);
+			
+			$this->saveSql($sqlI18n, $sqlI18nFileName, $add);
 		}
 	}
 
@@ -282,53 +264,41 @@ class builder_DocumentGenerator
 	}
 
 	/**
-	 * Generate the sql script to add table of document and save it.
-	 *
-	 * @param f_persistentdocument_PersistentProvider $provider
-	 * @param string $sql
-	 * @param string $path
-	 */
-	private function addAndSaveSql($provider, $sql, $path)
-	{
-
-		foreach(explode(";",$sql) as $query)
-		{
-			$query = trim($query);
-			if (empty($query))
-			{
-				continue;
-			}
-			try
-			{
-				$provider->executeSQLScript($query);
-				Framework::debug('[DocumentGenerator] addAndSaveSql : Script execute with success.');
-			}
-			catch (Exception $e)
-			{
-				Framework::exception($e);
-				Framework::debug('[DocumentGenerator] addAndSaveSql : ERROR in execution script ' . $query);
-			}
-		}
-
-		$this->saveSql($sql, $path);
-	}
-
-	/**
 	 * Save the sql script
-	 *
 	 * @param string $sql
 	 * @param string $path
+	 * @param boolean $add
 	 */
-	private function saveSql($sql, $path)
+	private function saveSql($sql, $path, $add = false)
 	{
 		try
 		{
 			// Save file
 			f_util_FileUtils::write($path, $sql, f_util_FileUtils::OVERRIDE);
+			if ($add)
+			{
+				$sm = f_persistentdocument_PersistentProvider::getInstance()->getSchemaManager();
+				foreach(explode(";",$sql) as $query)
+				{
+					$query = trim($query);
+					if (empty($query))
+					{
+						continue;
+					}
+					
+					try
+					{
+						$sm->execute($query);
+					}
+					catch (Exception $dbe)
+					{
+						Framework::exception($dbe);
+					}
+				}				
+			}
 		}
 		catch (IOException $e)
 		{
-			Framework::debug('[DocumentGenerator] addAndSaveSql : Cannot save sql file.');
 			Framework::exception($e);
 		}
 	}

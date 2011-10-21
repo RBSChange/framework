@@ -39,7 +39,7 @@ class <{$className}> extends <{$extendClass}>
 	 */
 	public function createQuery()
 	{
-		return $this->pp->createQuery('modules_<{$moduleName}>/<{$documentName}>');
+		return $this->getPersistentProvider()->createQuery('modules_<{$moduleName}>/<{$documentName}>');
 	}
 	
 	/**
@@ -50,7 +50,7 @@ class <{$className}> extends <{$extendClass}>
 	 */
 	public function createStrictQuery()
 	{
-		return $this->pp->createQuery('modules_<{$moduleName}>/<{$documentName}>', false);
+		return $this->getPersistentProvider()->createQuery('modules_<{$moduleName}>/<{$documentName}>', false);
 	}
 <{/if}>
 	

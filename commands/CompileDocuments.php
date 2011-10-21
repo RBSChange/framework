@@ -6,7 +6,7 @@ class commands_CompileDocuments extends c_ChangescriptCommand
 	 */
 	function getUsage()
 	{
-		return "";
+		return "[--verbose]";
 	}
 	
 	function getAlias()
@@ -20,6 +20,11 @@ class commands_CompileDocuments extends c_ChangescriptCommand
 	function getDescription()
 	{
 		return "compile documents";
+	}
+	
+	function getOptions()
+	{
+		return array('verbose');
 	}
 
 	/**
@@ -36,6 +41,7 @@ class commands_CompileDocuments extends c_ChangescriptCommand
 		
 		// Get the list of model and generate all persistent object.
 		$models = generator_PersistentModel::loadModels();
+		$this->log("== Clean php class ==");
 		
 		//Cleaning dataobject folders
 		$sqlpath = f_util_FileUtils::buildChangeBuildPath('modules', '*', 'dataobject', '*');		
@@ -51,6 +57,8 @@ class commands_CompileDocuments extends c_ChangescriptCommand
 			unlink($path);
 		}
 		
+		$this->log("== Compile php class ==");
+		
 		// For the list of models generate persistent.
 		foreach ($models as $model)
 		{
@@ -63,32 +71,35 @@ class commands_CompileDocuments extends c_ChangescriptCommand
 			
 			// Generate SQL document file.
 			$documentGenerator->generateSqlDocumentFile(false);
-
-			$this->message('Model modules_' . $model->getModuleName() . '/' . $model->getDocumentName() . ' generated.');
+			
+			if (isset($options['verbose']))
+			{
+				$this->log('Model modules_' . $model->getModuleName() . '/' . $model->getDocumentName() . ' generated.');
+			}
 		}
 		
-		$this->message("== Compile Models by Module ==");
+		$this->log("== Compile Models by Module ==");
 		generator_PersistentModel::buildModelsByModuleNameCache();
 		
-		$this->message("== Compile Models children ==");
+		$this->log("== Compile Models children ==");
 		generator_PersistentModel::buildModelsChildrenCache();
 		
-		$this->message("== Compile Publication Infos ==");
+		$this->log("== Compile Publication Infos ==");
 		generator_PersistentModel::buildPublishListenerInfos();
 		
-		$this->message("== Compile Document Property ==");
+		$this->log("== Compile Document Property ==");
 		generator_PersistentModel::buildDocumentPropertyInfos();
 		
-		$this->message("== Compile Indexable Document ==");
+		$this->log("== Compile Indexable Document ==");
 		generator_PersistentModel::buildIndexableDocumentInfos();
 		
-		$this->message("== Compile Allowed Document ==");
+		$this->log("== Compile Allowed Document ==");
 		generator_PersistentModel::buildAllowedDocumentInfos();
 		
 		
-		$this->message("== Compile Icons Document ==");
+		$this->log("== Compile Icons Document ==");
 		generator_PersistentModel::getCssBoDocumentIcon();
 		
-		$this->quitOk("Documents compiled");
+		$this->quitOk(count($models) . " Documents compiled");
 	}
 }

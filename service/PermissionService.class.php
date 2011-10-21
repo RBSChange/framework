@@ -1,5 +1,5 @@
 <?php
-class change_PermissionService extends f_persistentdocument_DocumentService
+class change_PermissionService extends BaseService
 {
 	const ALL_PERMISSIONS = "allpermissions";
 
@@ -73,10 +73,6 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 	public static function getRoleServiceByModuleName($moduleName)
 	{
 		$className = 'roles_' . ucfirst($moduleName) . 'RoleService';
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug(__METHOD__ . "-> $className");
-		}
 		if (f_util_ClassUtils::classExists($className))
 		{
 			return f_util_ClassUtils::callMethod($className, 'getInstance');
@@ -142,12 +138,12 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 		$defPoint = $this->getDefinitionPoint($nodeId);
 		if (!is_null($defPoint))
 		{
-			$userQuery = $this->pp->createQuery('modules_generic/userAcl');
+			$userQuery = $this->getPersistentProvider()->createQuery('modules_generic/userAcl');
 			$userQuery->add(Restrictions::eq('documentId', $defPoint));
-			$groupQuery = $this->pp->createQuery('modules_generic/groupAcl');
+			$groupQuery = $this->getPersistentProvider()->createQuery('modules_generic/groupAcl');
 			$groupQuery->add(Restrictions::eq('documentId', $defPoint));
-			$groupResult = $this->pp->find($groupQuery);
-			$userResult = $this->pp->find($userQuery);
+			$groupResult = $this->getPersistentProvider()->find($groupQuery);
+			$userResult = $this->getPersistentProvider()->find($userQuery);
 		}
 
 		foreach ($userResult as $acl)
@@ -195,8 +191,8 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 			$userQuery->add(Restrictions::eq('documentId', $defPoint));
 			$groupQuery = generic_GroupAclService::getInstance()->createQuery();
 			$groupQuery->add(Restrictions::eq('documentId', $defPoint));
-			$groupResult = $this->pp->find($groupQuery);
-			$userResult = $this->pp->find($userQuery);
+			$groupResult = $this->getPersistentProvider()->find($groupQuery);
+			$userResult = $this->getPersistentProvider()->find($userQuery);
 			return array_merge($userResult, $groupResult);
 		}
 		return array();
@@ -214,7 +210,7 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 	{
 		try
 		{
-			$this->tm->beginTransaction();
+			$this->getTransactionManager()->beginTransaction();
 			foreach ($domain as $nodeId)
 			{
 				if (!$this->userHasRole($user, $roleName, $nodeId))
@@ -230,11 +226,11 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 					Framework::debug(__METHOD__ . ' user '.$user->getId().' has already the role '.$roleName.' on '.$nodeId);
 				}
 			}
-			$this->tm->commit();
+			$this->getTransactionManager()->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->tm->rollBack($e);
+			$this->getTransactionManager()->rollBack($e);
 		}
 	}
 		
@@ -269,7 +265,7 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 	public function removeUserPermission($user, $roleName = null, $domain = null)
 	{
 		$affectedNodes = array();
-		$query = $this->pp->createQuery('modules_generic/userAcl');
+		$query = $this->getPersistentProvider()->createQuery('modules_generic/userAcl');
 		$query->add(Restrictions::eq('user.id', $user->getId()));
 		if (!is_null($roleName))
 		{
@@ -279,20 +275,20 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 				$query->add(Restrictions::in('documentId', $domain));
 			}
 		}
-		$acls = $this->pp->find($query);
+		$acls = $this->getPersistentProvider()->find($query);
 		try
 		{
-			$this->tm->beginTransaction();
+			$this->getTransactionManager()->beginTransaction();
 			foreach ($acls as $acl)
 			{
 				$affectedNodes[$acl->getDocumentId()] = 0;
 				$acl->delete();
 			}
-			$this->tm->commit();
+			$this->getTransactionManager()->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->tm->rollBack($e);
+			$this->getTransactionManager()->rollBack($e);
 		}
 		$this->postRemove($affectedNodes);
 	}
@@ -309,7 +305,7 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 	{
 		try
 		{
-			$this->tm->beginTransaction();
+			$this->getTransactionManager()->beginTransaction();
 			foreach ($domain as $nodeId)
 			{
 				if (!$this->groupHasRole($group, $roleName, $nodeId))
@@ -325,11 +321,11 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 					Framework::debug(__METHOD__ . ' group '.$group->getId().' has already the role '.$roleName.' on '.$nodeId);
 				}
 			}
-			$this->tm->commit();
+			$this->getTransactionManager()->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->tm->rollBack($e);
+			$this->getTransactionManager()->rollBack($e);
 		}
 	}
 	
@@ -361,7 +357,7 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 	public function removeGroupPermission($group, $roleName = null, $domain = null)
 	{
 		$affectedNodes = array();
-		$query = $this->pp->createQuery('modules_generic/groupAcl');
+		$query = $this->getPersistentProvider()->createQuery('modules_generic/groupAcl');
 		$query->add(Restrictions::eq('group.id', $group->getId()));
 		if (!is_null($roleName))
 		{
@@ -372,32 +368,95 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 				$query->add(Restrictions::in('documentId', $domain));
 			}
 		}
-		$acls = $this->pp->find($query);
+		$acls = $this->getPersistentProvider()->find($query);
 		try
 		{
-			$this->tm->beginTransaction();
+			$this->getTransactionManager()->beginTransaction();
 			foreach ($acls as $acl)
 			{
 				$affectedNodes[$acl->getDocumentId()] = 0;
 				$acl->delete();
 			}
-			$this->tm->commit();
+			$this->getTransactionManager()->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->tm->rollBack($e);
+			$this->getTransactionManager()->rollBack($e);
 		}
 		$this->postRemove($affectedNodes);
 	}
+	
+	/**
+	 * @param String $permission
+	 * @param Integer $nodeId
+	 * @param boolean $onMissingPermission returned value if permission does not exist
+	 */
+	public function currentUserHasPermission($permission, $nodeId, $onMissingPermission = true)
+	{
+		$user = users_UserService::getInstance()->getAutenticatedUser();
+		return $this->hasPermission($user, $permission, $nodeId, $onMissingPermission);
+	}
+	
+	/**
+	 * Checks if the user $user has the permission $permission on node $nodeId.
+	 *
+	 * @example hasPermission(users_persistentdocument_user, 'modules_news.edit', $nodeId)
+	 * @param users_persistentdocument_user $user
+	 * @param string $permission
+	 * @param integer $nodeId element of a possible domain
+	 * @param boolean $onMissingPermission returned value if permission does not exist
+	 * @return boolean
+	 */
+	public function hasPermission($user, $permission, $nodeId, $onMissingPermission = true)
+	{
+		$roleservice = $this->getRoleServiceByRole($permission);
+		if ($roleservice === null)
+		{
+			Framework::error('Missing rights.xml configuration file for permission ' . $permission);
+			return $onMissingPermission;
+		}
+		elseif( !$roleservice->hasPermission($permission))
+		{
+			Framework::error('Missing permission ' . $permission . ' in rights.xml configuration file');
+			return $onMissingPermission;
+		}	
+		if ($user === null) {$user = users_AnonymoususerService::getInstance()->getAnonymousUser();}
+		
+		if ($user->getIsroot())
+		{
+			return true;
+		}
+		elseif ($permission == self::ALL_PERMISSIONS)
+		{
+			return false;
+		}
+		
+		$accessors = $this->getAccessorIdsByUser($user);
+		$parts = explode('.', $permission);
+		$def = null;
+		if (count($parts) > 1)
+		{
+			$def = $this->getDefinitionPointForPackage($nodeId, $parts[0]);
+		}
+		if ($def === null)
+		{
+			return false;
+		}
+		else
+		{
+			return $this->getPersistentProvider()->checkCompiledPermission($accessors, $permission, $def);
+		}
+	}	
 
 	/**
 	 * @param users_persistentdocument_user $user
 	 * @param String $permission
 	 * @param Integer $nodeId element of a possible domain
+	 * @param boolean $onMissingPermission returned value if permission does not exist
 	 */
-	public function checkPermission($user, $permission, $nodeId)
+	public function checkPermission($user, $permission, $nodeId, $onMissingPermission = true)
 	{
-		if (!$this->hasPermission($user, $permission, $nodeId) )
+		if (!$this->hasPermission($user, $permission, $nodeId, $onMissingPermission))
 		{
 			$message = str_replace(array('_', '.'), '-', $permission);
 			$data = explode('-', $message);
@@ -414,178 +473,7 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 		}
 	}
 
-	/**
-	 * Checks if the user $user has the permission $permission on node $nodeId.
-	 *
-	 * @example hasPermission(users_persistentdocument_user, 'modules_news.edit', $nodeId)
-	 * @param users_persistentdocument_user $user
-	 * @param String $permission
-	 * @param Integer $nodeId element of a possible domain
-	 * @return boolean
-	 */
-	public function hasPermission($user, $permission, $nodeId)
-	{
-		$roleservice = $this->getRoleServiceByRole($permission);
-		if ($roleservice === null || !$roleservice->hasPermission($permission))
-		{
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug(__METHOD__ .  " unknown permission ($permission)");
-			}
-			return true;
-		}
-		if ($user === null || ($user instanceof users_persistentdocument_frontenduser))
-		{
-			return $this->hasFrontEndPermission($user, $permission, $nodeId);
-		}
-		if (($user instanceof users_persistentdocument_backenduser) && $user->getIsroot())
-		{
-			return true;
-		}
-		else if($permission == self::ALL_PERMISSIONS)
-		{
-			return false;
-		}
-		$accessors = $this->getAccessorIdsByUser($user);
-		$parts = explode('.', $permission);
-		$def = null;
-		if (count($parts) > 1)
-		{
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug(__METHOD__ . " Fetching definition point on $nodeId for package " . $parts[0]);
-			}
-			$def = $this->getDefinitionPointForPackage($nodeId, $parts[0]);
-		}
-		if ($def === null)
-		{
-			return false;
-		}
-		else
-		{
-			return $this->pp->checkCompiledPermission($accessors, $permission, $def);
-		}
-	}
-
-	/**
-	 * @param users_persistentdocument_frontenduser $frontEndUser
-	 * @param String $permission
-	 * @param Integer $nodeId
-	 * @return Boolean
-	 */
-	public function hasFrontEndPermission($frontEndUser, $permission, $nodeId)
-	{
-		$parts = explode('.', $permission);
-		$defPointId = $this->getDefinitionPointForPackage($nodeId, $parts[0]);
-		if ($defPointId === null)
-		{
-			return true;
-		}
-		$accessors = $this->pp->getAccessorsByPermissionForNode($permission, $defPointId);
-		if (count($accessors) == 0)
-		{
-			return true;
-		}
-		else if ($frontEndUser === null)
-		{
-			return false;
-		}
-
-		$accessorlist = $this->getAccessorIdsByUser($frontEndUser);
-
-		return count(array_intersect($accessors, $accessorlist)) > 0;
-	}
 	
-	/**
-	 * Retrieves the current frontenduser and checks the permission on it.
-	 * @param String $permission
-	 * @param Integer $nodeId
-	 * @see hasFrontEndPermission
-	 * @return Boolean
-	 */
-	function currentUserHasFrontEndPermission($permission, $nodeId)
-	{
-		$user = $this->getUserService()->getCurrentFrontEndUser();
-		return $this->hasFrontEndPermission($user, $permission, $nodeId);
-	}
-
-	/**
-	 * @param users_persistentdocument_frontenduser $user
-	 * @param String $permission ex: 'modules_website.AuthenticatedFrontUser'
-	 * @param Integer $nodeId
-	 * @return Boolean
-	 */
-	public function hasExplicitPermission($user, $permission, $nodeId)
-	{
-	    //Check function parameters
-	    if (!($user instanceof users_persistentdocument_user) || empty($nodeId) || empty($permission))
-	    {
-	    	return false;
-	    }
-	    
-	    //Check definition point
-		$parts = explode('.', $permission);
-		$defPointId = $this->getDefinitionPointForPackage($nodeId, $parts[0]);
-		if ($defPointId === null)
-		{
-			return false;
-		}
-		
-		//Get all accessors have the permission
-		$accessors = $this->pp->getAccessorsByPermissionForNode($permission, $defPointId);
-		if (count($accessors) == 0)
-		{
-			return false;
-		}
-		
-		//Get all compatible accessorIds for the user
-		$accessorlist = $this->getAccessorIdsByUser($user);
-		
-		//Check accessor list intersection
-		return count(array_intersect($accessors, $accessorlist)) > 0;
-	}
-	
-	
-	/**
-	 * @param users_persistentdocument_backenduser $backendUser
-	 * @param String $moduleName
-	 * @param String $backOfficeActionName
-	 * @param Integer $nodeId
-	 * @return Boolean
-	 */
-	public function hasAccessToBackofficeAction($backendUser, $moduleName,  $backOfficeActionName, $nodeId)
-	{
-		if (!($backendUser instanceof users_persistentdocument_backenduser))
-		{
-			return false;
-		}
-
-		$roleService = $this->getRoleServiceByModuleName($moduleName);
-		if (is_null($roleService) || $backendUser->getIsroot())
-		{
-			return true;
-		}
-
-		if (is_null($nodeId))
-		{
-			$nodeId = ModuleService::getInstance()->getRootFolderId($moduleName);
-		}
-		
-		foreach ($roleService->getActions() as $action)
-		{
-			if ($roleService->getBackOfficeActionName($action) == $backOfficeActionName)
-			{
-				foreach ($roleService->getPermissionsByAction($action) as $permission)
-				{
-					if (!$this->hasPermission($backendUser, $permission, $nodeId))
-					{
-						return false;
-					}
-				}
-			}
-		}
-		return true;
-	}
 	/**
 	 * Clear all permissions defined on node $nodeId.
 	 *
@@ -596,26 +484,26 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 	public function clearNodePermissions($nodeId, $packageName = null)
 	{
 		// Get all the ACL documents defined for the node...
-		$query = $this->pp->createQuery('modules_generic/userAcl');
+		$query = $this->getPersistentProvider()->createQuery('modules_generic/userAcl');
 		$query->add(Restrictions::eq('documentId', $nodeId));
 		if (!is_null($packageName))
 		{
 			$query->add(Restrictions::like('role', $packageName, MatchMode::START()));
 		}
-		$userAcls = $this->pp->find($query);
-		$query = $this->pp->createQuery('modules_generic/groupAcl');
+		$userAcls = $this->getPersistentProvider()->find($query);
+		$query = $this->getPersistentProvider()->createQuery('modules_generic/groupAcl');
 		$query->add(Restrictions::eq('documentId', $nodeId));
 		if (!is_null($packageName))
 		{
 			$query->add(Restrictions::like('role', $packageName, MatchMode::START()));
 		}
 
-		$groupAcls = $this->pp->find($query);
+		$groupAcls = $this->getPersistentProvider()->find($query);
 		$deletedRoles = array();
 		try
 		{
 			//...and delete them.
-			$this->tm->beginTransaction();
+			$this->getTransactionManager()->beginTransaction();
 			foreach ($userAcls as $acl)
 			{
 				$acl->delete();
@@ -628,13 +516,13 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 				$deletedRoles[] = $acl->getRole();
 			}
 			// We clean compiled entries as well
-			$this->pp->removeACLForNode($nodeId, $packageName);
-			$this->tm->commit();
+			$this->getPersistentProvider()->removeACLForNode($nodeId, $packageName);
+			$this->getTransactionManager()->commit();
 			return array_unique($deletedRoles);
 		}
 		catch (Exception $e)
 		{
-			$this->tm->rollBack($e);
+			$this->getTransactionManager()->rollBack($e);
 		}
 		return array();
 	}
@@ -658,16 +546,16 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 		$defPoint = $this->getDefinitionPoint($nodeId);
 		if (!is_null($defPoint))
 		{
-			$userQuery = $this->pp->createQuery('modules_generic/userAcl');
+			$userQuery = $this->getPersistentProvider()->createQuery('modules_generic/userAcl');
 			$userQuery->add(Restrictions::eq('documentId', $defPoint));
-			$groupQuery = $this->pp->createQuery('modules_generic/groupAcl');
+			$groupQuery = $this->getPersistentProvider()->createQuery('modules_generic/groupAcl');
 			$groupQuery->add(Restrictions::eq('documentId', $defPoint));
-			$groupResult = $this->pp->find($groupQuery);
-			$userResult = $this->pp->find($userQuery);
+			$groupResult = $this->getPersistentProvider()->find($groupQuery);
+			$userResult = $this->getPersistentProvider()->find($userQuery);
 		}
 		try{
 			// Clone corresponding acls.
-			$this->tm->beginTransaction();
+			$this->getTransactionManager()->beginTransaction();
 			foreach ($userResult as $acl)
 			{
 				$derivedAcl = generic_UserAclService::getInstance()->getNewDocumentInstance();
@@ -685,11 +573,11 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 				$derivedAcl->setDocumentId($nodeId);
 				$derivedAcl->save();
 			}
-			$this->tm->commit();
+			$this->getTransactionManager()->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->tm->rollBack($e);
+			$this->getTransactionManager()->rollBack($e);
 		}
 	}
 
@@ -707,17 +595,17 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 	public function getRolesByUser($user, $module = null)
 	{
 		$result = array();
-		$userQuery = $this->pp->createQuery('modules_generic/userAcl');
+		$userQuery = $this->getPersistentProvider()->createQuery('modules_generic/userAcl');
 		$userQuery->add(Restrictions::eq('user.id', $user->getId()));
 		
-		$userResults = $this->pp->find($userQuery);
+		$userResults = $this->getPersistentProvider()->find($userQuery);
 		$groups = $user->getGroupsArray();
 
 		if (count($groups)>0)
 		{
-			$groupQuery = $this->pp->createQuery('modules_generic/groupAcl');
+			$groupQuery = $this->getPersistentProvider()->createQuery('modules_generic/groupAcl');
 			$groupQuery->add(Restrictions::in('group', DocumentHelper::getIdArrayFromDocumentArray($groups)));
-			$groupResults = $this->pp->find($groupQuery);
+			$groupResults = $this->getPersistentProvider()->find($groupQuery);
 		}
 		foreach ($userResults as $acl)
 		{
@@ -772,7 +660,7 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 	 */
 	public function isDefinitionPoint($nodeId)
 	{
-		return $this->pp->hasCompiledPermissions($nodeId);
+		return $this->getPersistentProvider()->hasCompiledPermissions($nodeId);
 	}
 
 	/**
@@ -819,7 +707,7 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 	 */
 	public function isDefinitionPointForPackage($nodeId, $packageName)
 	{
-		return $this->pp->hasCompiledPermissionsForPackage($nodeId, $packageName);
+		return $this->getPersistentProvider()->hasCompiledPermissionsForPackage($nodeId, $packageName);
 	}
 
 	/**
@@ -913,30 +801,30 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 		$defPoint = $this->getDefinitionPoint($nodeId);
 		try
 		{
-			$this->tm->beginTransaction();
+			$this->getTransactionManager()->beginTransaction();
 			if (!is_null($defPoint))
 			{
-				$this->pp->removeACLForNode($defPoint);
-				$userQuery = $this->pp->createQuery('modules_generic/userAcl');
+				$this->getPersistentProvider()->removeACLForNode($defPoint);
+				$userQuery = $this->getPersistentProvider()->createQuery('modules_generic/userAcl');
 				$userQuery->add(Restrictions::eq('documentId', $defPoint));
-				$groupQuery = $this->pp->createQuery('modules_generic/groupAcl');
+				$groupQuery = $this->getPersistentProvider()->createQuery('modules_generic/groupAcl');
 				$groupQuery->add(Restrictions::eq('documentId', $defPoint));
-				$groupResult = $this->pp->find($groupQuery);
-				$userResult = $this->pp->find($userQuery);
+				$groupResult = $this->getPersistentProvider()->find($groupQuery);
+				$userResult = $this->getPersistentProvider()->find($userQuery);
 			}
 			foreach ($userResult as $acl)
 			{
-				$this->pp->compileACL($acl);
+				$this->getPersistentProvider()->compileACL($acl);
 			}
 			foreach ($groupResult as $acl)
 			{
-				$this->pp->compileACL($acl);
+				$this->getPersistentProvider()->compileACL($acl);
 			}
-			$this->tm->commit();
+			$this->getTransactionManager()->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->tm->rollBack($e);
+			$this->getTransactionManager()->rollBack($e);
 		}
 	}
 
@@ -949,16 +837,16 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 	{
 		try
 		{
-			$this->tm->beginTransaction();
+			$this->getTransactionManager()->beginTransaction();
 			foreach (array_keys($affectedNodes) as $id)
 			{
 				$this->compileACLForNode($id);
 			}
-			$this->tm->commit();
+			$this->getTransactionManager()->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->tm->rollBack($e);
+			$this->getTransactionManager()->rollBack($e);
 		}
 	}
 
@@ -976,9 +864,9 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 		if (self::roleExists($roleName))
 		{
 			Framework::info(__METHOD__ ."($roleName)");
-			$userQuery = $this->pp->createQuery('modules_generic/userAcl');
+			$userQuery = $this->getPersistentProvider()->createQuery('modules_generic/userAcl');
 			$userQuery->add(Restrictions::eq('role', $roleName));
-			$groupQuery = $this->pp->createQuery('modules_generic/groupAcl');
+			$groupQuery = $this->getPersistentProvider()->createQuery('modules_generic/groupAcl');
 			$groupQuery->add(Restrictions::eq('role', $roleName));
 			if ($documentId !== null)
 			{
@@ -996,8 +884,8 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 				}
 			}
 
-			$userAcls = $this->pp->find($userQuery);
-			$groupAcls = $this->pp->find($groupQuery);
+			$userAcls = $this->getPersistentProvider()->find($userQuery);
+			$groupAcls = $this->getPersistentProvider()->find($groupQuery);
 
 			foreach ($userAcls as $acl)
 			{
@@ -1037,16 +925,16 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 			{
 				return $result;
 			}
-			$userQuery = $this->pp->createQuery('modules_generic/userAcl');
+			$userQuery = $this->getPersistentProvider()->createQuery('modules_generic/userAcl');
 			$userQuery->add(Restrictions::eq('role', $roleName));
-			$groupQuery = $this->pp->createQuery('modules_generic/groupAcl');
+			$groupQuery = $this->getPersistentProvider()->createQuery('modules_generic/groupAcl');
 			$groupQuery->add(Restrictions::eq('role', $roleName));
 
 			$userQuery->add(Restrictions::eq('documentId', $defPoint));
 			$groupQuery->add(Restrictions::eq('documentId', $defPoint));
 
-			$userAcls = $this->pp->find($userQuery);
-			$groupAcls = $this->pp->find($groupQuery);
+			$userAcls = $this->getPersistentProvider()->find($userQuery);
+			$groupAcls = $this->getPersistentProvider()->find($groupQuery);
 
 			foreach ($userAcls as $acl)
 			{
@@ -1070,7 +958,7 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 	 */
 	public function getAccessorIdsForPermissionAndDocumentId($permissionName, $documentId)
 	{
-		return $this->pp->getAccessorsByPermissionForNode($permissionName, $documentId);
+		return $this->getPersistentProvider()->getAccessorsByPermissionForNode($permissionName, $documentId);
 	}
 	
 
@@ -1100,7 +988,7 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 	/**
 	 * Get the complete list of permissions for user $user on definition point node $node.
 	 *
-	 * @param users_persistentdocument_backenduser $user
+	 * @param users_persistentdocument_user $user
 	 * @param f_persistentdocument_PersistentTreeNode $node
 	 * @return array<String>
 	 */
@@ -1117,7 +1005,7 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 		$accessors = $user->getGroupsArray();
 		$accessors[] = $user;
 
-		return $this->pp->getPermissionsForUserByNode(DocumentHelper::getIdArrayFromDocumentArray($accessors), $nodeId);
+		return $this->getPersistentProvider()->getPermissionsForUserByNode(DocumentHelper::getIdArrayFromDocumentArray($accessors), $nodeId);
 	}
 
 	/**
@@ -1218,5 +1106,30 @@ class change_PermissionService extends f_persistentdocument_DocumentService
 			if ($result['action'] == 'ignore') {$result['action'] = 'update';}
 		}
 		return $result;
+	}
+	
+	/**
+	 * @param String $name
+	 * @param array $arguments
+	 */
+	public function __call($name, $arguments)
+	{
+		switch ($name)
+		{
+			case 'hasFrontEndPermission': 
+				Framework::error('Call to deleted ' . get_class($this) . '->' . $name . ' method');
+				return $this->hasPermission($arguments[0], $arguments[1], $arguments[2]);
+				
+			case 'currentUserHasFrontEndPermission': 
+				Framework::error('Call to deleted ' . get_class($this) . '->' . $name . ' method');	
+				return $this->currentUserHasPermission($arguments[0], $arguments[1]);	
+				
+			case 'hasExplicitPermission': 
+				Framework::error('Call to deleted ' . get_class($this) . '->' . $name . ' method');	
+				return $this->hasPermission($arguments[0], $arguments[1], $arguments[2], false);
+					
+			default: 
+				throw new Exception('No method ' . get_class($this) . '->' . $name);
+		}
 	}
 }

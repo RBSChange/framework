@@ -241,8 +241,10 @@ class commands_EditDocument extends c_ChangescriptCommand
 		$doc = $this->getDom($moduleName, $documentName);
 		$oldModel = generator_PersistentModel::loadModelFromString($doc->saveXML(), $moduleName, $documentName);
 		$oldProp = $oldModel->getPropertyByName($propertyName);
-
-		$sqls = f_persistentdocument_PersistentProvider::getInstance()->delProperty($moduleName, $documentName, $oldProp);
+		
+		$schemaManager = f_persistentdocument_PersistentProvider::getInstance()->getSchemaManager();
+		
+		$script = $schemaManager->delProperty($moduleName, $documentName, $oldProp);
 		$this->okMessage("Database updated");
 
 		$doc->findAndRemove("//c:properties/c:add[@name = '$propertyName']");
@@ -253,15 +255,16 @@ class commands_EditDocument extends c_ChangescriptCommand
 
 		$this->executeCommand("compile-documents");
 
-		$this->message("Executed SQL:\n".join("\n", $sqls)."
+		$this->message("Executed SQL:
+$script
 
 You may create a new patch to handle this modification.
-Use '" . CHANGE_COMMAND . " create-patch $moduleName' to initiate the patch and copy-paste the following:
+Use '" . $this->getChangeCmdName() . " create-patch $moduleName' to initiate the patch and copy-paste the following:
 
 \$archivePath = f_util_FileUtils::buildProjectPath('$archivePath');
 \$oldModel = generator_PersistentModel::loadModelFromString(f_util_FileUtils::read(\$archivePath), '$moduleName', '$documentName');
 \$oldProp = \$oldModel->getPropertyByName('$propertyName');
-f_persistentdocument_PersistentProvider::getInstance()->delProperty('$moduleName', '$documentName', \$oldProp);
+f_persistentdocument_PersistentProvider::getInstance()->getSchemaManager()->('$moduleName', '$documentName', \$oldProp);
 ");
 
 		return $this->quitOk("Property $moduleName/$documentName.$propertyName deleted");
@@ -291,7 +294,9 @@ f_persistentdocument_PersistentProvider::getInstance()->delProperty('$moduleName
 		$newModel = generator_PersistentModel::loadModelFromString($doc->saveXML(), $moduleName, $documentName);
 		$newProp = $newModel->getPropertyByName($newPropertyName);
 
-		$sqls = f_persistentdocument_PersistentProvider::getInstance()->renameProperty($moduleName, $documentName, $oldProp, $newProp);
+		$schemaManager = f_persistentdocument_PersistentProvider::getInstance()->getSchemaManager();
+		
+		$script = $schemaManager->renameProperty($moduleName, $documentName, $oldProp, $newProp);
 		$this->okMessage("Database updated");
 
 		$archivePath = $this->updateDom($moduleName, $documentName, $doc);
@@ -307,10 +312,11 @@ f_persistentdocument_PersistentProvider::getInstance()->delProperty('$moduleName
 		}
 		
 		$newPath = "modules/$moduleName/persistentdocument/$documentName.xml";
-		$this->message("Executed SQL:\n".join("\n", $sqls)."
+		$this->message("Executed SQL:
+$script.
 
 You may create a new patch to handle this modification.
-Use '" . CHANGE_COMMAND . " create-patch $moduleName' to initiate the patch and copy-paste the following:
+Use '" . $this->getChangeCmdName() . " create-patch $moduleName' to initiate the patch and copy-paste the following:
 
 \$archivePath = f_util_FileUtils::buildProjectPath('$archivePath');
 \$newPath = f_util_FileUtils::buildProjectPath('$newPath');
@@ -318,7 +324,7 @@ Use '" . CHANGE_COMMAND . " create-patch $moduleName' to initiate the patch and 
 \$oldProp = \$oldModel->getPropertyByName('$propertyName');
 \$newModel = generator_PersistentModel::loadModelFromString(f_util_FileUtils::read(\$newPath), '$moduleName', '$documentName');
 \$newProp = \$newModel->getPropertyByName('$newPropertyName');
-f_persistentdocument_PersistentProvider::getInstance()->renameProperty('$moduleName', '$documentName', \$oldProp, \$newProp);
+f_persistentdocument_PersistentProvider::getInstance()->getSchemaManager()->renameProperty('$moduleName', '$documentName', \$oldProp, \$newProp);
 $compileSchema");
 
 		$this->warnMessage("Do not forget to rename any method call to ".$beanProperty->getSetterName()."() or ".$beanProperty->getGetterName()."() methods in PHP or template code.");
@@ -367,6 +373,7 @@ $compileSchema");
 		$defaultValues = array("min-occurs" => "0", "db-mapping" => strtolower($propertyName),
 			 "max-occurs" => "1", "tree-node" => "false", "cascade-delete" => "false",
 			 "inverse" => "false", "localized" => "false");
+		
 		if ($propertyType == "Boolean")
 		{
 			$defaultValues["default-value"] = "false";
@@ -521,7 +528,10 @@ $compileSchema");
 
 		$model = generator_PersistentModel::loadModelFromString($doc->saveXML(), $moduleName, $documentName);
 		$prop = $model->getPropertyByName($propertyName);
-		$sqls = f_persistentdocument_PersistentProvider::getInstance()->addProperty($moduleName, $documentName, $prop);
+		
+		$schemaManager = f_persistentdocument_PersistentProvider::getInstance()->getSchemaManager();
+				
+		$script = $schemaManager->addProperty($moduleName, $documentName, $prop);
 
 		$this->updateDom($moduleName, $documentName, $doc, false);
 		
@@ -537,15 +547,16 @@ $compileSchema");
 		}
 		
 		$newPath = "modules/$moduleName/persistentdocument/$documentName.xml";
-		$this->message("Executed SQL:\n".join("\n", $sqls)."
+		$this->message("Executed SQL:
+$script
 
 You may create a new patch to handle this modification.
-Use '" . CHANGE_COMMAND . " create-patch $moduleName' to initiate the patch and copy-paste the following:
+Use '" . $this->getChangeCmdName() . " create-patch $moduleName' to initiate the patch and copy-paste the following:
 
 \$newPath = f_util_FileUtils::buildProjectPath('$newPath');
 \$newModel = generator_PersistentModel::loadModelFromString(f_util_FileUtils::read(\$newPath), '$moduleName', '$documentName');
 \$newProp = \$newModel->getPropertyByName('$propertyName');
-f_persistentdocument_PersistentProvider::getInstance()->addProperty('$moduleName', '$documentName', \$newProp);
+f_persistentdocument_PersistentProvider::getInstance()->getSchemaManager()->addProperty('$moduleName', '$documentName', \$newProp);
 $compileSchema");
 		return null;
 	}

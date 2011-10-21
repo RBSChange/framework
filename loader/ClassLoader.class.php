@@ -48,8 +48,12 @@ class ClassLoader implements ResourceLoader
 	 */
 	public function load($className)
 	{
-		require_once($this->resolver->getPath($className));
-		return true;
+		$path = $this->resolver->getPath($className);
+		if (is_readable($path))
+		{
+			require_once($path);
+			return class_exists($className, false);
+		}
 	}
 
 	/**
@@ -60,8 +64,12 @@ class ClassLoader implements ResourceLoader
 	{
 		try
 		{
-			require_once($this->resolver->getPath($className));
-			return true;
+			$path = $this->resolver->getPath($className);
+			if (is_readable($path))
+			{
+				require_once($path);
+				return class_exists($className, false);
+			}
 		}
 		catch (Exception $e)
 		{
@@ -80,8 +88,9 @@ class ClassLoader implements ResourceLoader
 				fwrite($rc, $trace);
 				fclose($rc);
 			}
-			return false;
+			
 		}
+		return false;
 	}
 
 	/**

@@ -386,9 +386,7 @@ class change_Controller
 		{
 			header('Location: ' . $url);
 		}
-		$echo = '<html><head><meta http-equiv="refresh" content="%d;url=%s"/></head></html>';	
-		$echo = sprintf($echo, $delay, $url);		
-		echo $echo;		
+		echo '<html><head><meta http-equiv="refresh" content="',$delay,';url=', $url, '"/></head></html>';		
 		exit();	
 	}
 	

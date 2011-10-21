@@ -389,10 +389,6 @@ abstract class change_Action
 	 */
 	private function checkPermissions()
 	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug(__METHOD__);
-		}
 		$moduleName = $this->getModuleName();
 		$roleService = change_PermissionService::getRoleServiceByModuleName($moduleName);
 		if ($roleService !== null)
@@ -405,27 +401,26 @@ abstract class change_Action
 				$nodeIds[] = $defaultNodeId;
 			}
 			
-			$user = false;
+			$user = null;
 			foreach ($nodeIds as $nodeId)
 			{
 				$action  = $this->getSecureActionName($nodeId);
 				if ($roleService->hasAction($action))
 				{
 					$permissions = $roleService->getPermissionsByAction($action);
-					foreach ($permissions as $permission)
+					if (count($permissions))
 					{
-						if ($user === false) 
+						if ($user === null) {$user = users_UserService::getInstance()->getAutenticatedUser();}
+						
+						foreach ($permissions as $permission)
 						{
-							$user = users_UserService::getInstance()->getCurrentUser();
+							if (!$permissionService->hasPermission($user, $permission, $nodeId))
+							{
+								$this->onMissingPermission($user->getLogin(), $permission, $nodeId);
+								return false;
+							}
 						}
-						$ok = $permissionService->hasPermission($user, $permission, $nodeId);
-						if (!$ok)
-						{
-							$this->onMissingPermission($user === null ? null :  $user->getLogin(), $permission, $nodeId);
-							return false;
-						}
-
-					}
+					}	
 				}
 			}
 		}
@@ -445,10 +440,6 @@ abstract class change_Action
 		if ($this->isDocumentAction())
 		{
 			$secureAction .= '.' . DocumentHelper::getDocumentInstance($documentId)->getPersistentModel()->getDocumentName();
-		}
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug(__METHOD__ . "($documentId) -> $secureAction");
 		}
 		return $secureAction;
 	}

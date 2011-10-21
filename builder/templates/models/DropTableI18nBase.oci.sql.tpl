@@ -1,1 +1,0 @@
-DROP TABLE "<{$model->getTableName()}>_i18n" cascade constraints

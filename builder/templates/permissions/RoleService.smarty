@@ -1,0 +1,96 @@
+<?php
+class roles_<{$module->name|capitalize}>RoleService implements change_RoleService
+{
+	private static $instance;
+	
+	private $moduleName = '<{$module->name}>';
+
+	private $roleNames = array(<{foreach from=$module->getRoles() item=role name=roles}>'<{$module->getPrefix()}><{$role->getName()}>'<{if !$smarty.foreach.roles.last}>,<{/if}><{/foreach}>);
+
+	private $actionNames = array(<{foreach from=$module->getActions() item=action name=actions}>'<{$module->getPrefix()}><{$action->getFullName()}>'<{if !$smarty.foreach.actions.last}>,<{/if}><{/foreach}>);
+
+	private $permissions = array(<{foreach from=$module->getPermissions() item=permission name=permissions}>'<{$module->getPrefix()}><{$permission->getName()}>'<{if !$smarty.foreach.permissions.last}>,<{/if}><{/foreach}>);
+
+	/**
+	 * @return roles_<{$module->name|capitalize}>RoleService
+	 */
+	public static function getInstance()
+	{
+		if (is_null(self::$instance))
+		{
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+
+	public final function getRoles()
+	{
+		return $this->roleNames;
+	}
+	
+	public final function hasRole($roleName)
+	{
+		return in_array($roleName, $this->roleNames);
+	}
+	
+	public final function getActions()
+	{
+		return $this->actionNames;
+	}
+	
+	public final function hasAction($actionName)
+	{
+		return in_array($actionName, $this->actionNames);
+	}
+
+	public final function getPermissions()
+	{
+		return $this->permissions;
+	}
+		
+	public final function hasPermission($permissionName)
+	{
+		return in_array($permissionName, $this->permissions);
+	}
+
+	public final function getPermissionsByRole($roleName)
+	{
+		switch($roleName)
+		{
+			<{foreach from=$module->getRoles() item=role name=roles}>case '<{$module->getPrefix()}><{$role->getName()}>': return array(<{foreach from=$role->getPermissions() item=perm name=permissions}>'<{$module->getPrefix()}><{$perm->getName()}>'<{if !$smarty.foreach.permissions.last}>,<{/if}><{/foreach}>);
+			<{/foreach}>
+		}
+		return array();
+	}
+
+	public final function getRoleLabelKey($roleName)
+	{
+		return 'm.<{$module->name}>.document.permission.' . strtolower($roleName);
+	}
+
+	public final function getPermissionsByAction($actionName)
+	{
+		switch($actionName)
+		{
+			<{foreach from=$module->getActions() item=action name=actions}>case '<{$module->getPrefix()}><{$action->getFullName()}>': return array(<{foreach from=$action->getPermissions() item=perm name=permissions}>'<{$module->getPrefix()}><{$perm->getName()}>', <{/foreach}>);
+			<{/foreach}>
+		}
+		return array();
+	}
+
+	public final function getActionsByPermissions($permissions)
+	{
+		$result = array();
+		foreach ($this->actionNames as $actionName)
+		{
+			$reqPermissions = $this->getPermissionsByAction($actionName);
+			$perms = array_intersect($reqPermissions, $permissions);
+			if (count($reqPermissions) == count($perms))
+			{
+				$result[] = $actionName;
+			}
+		}
+
+		return $result;
+	}
+}

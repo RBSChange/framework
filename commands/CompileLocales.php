@@ -83,7 +83,7 @@ class commands_CompileLocales extends c_ChangescriptCommand
 			{
 				if (is_dir(f_util_FileUtils::buildPath($package->getPath(), 'i18n')))
 				{
-					$ls->regenerateLocalesForModule($componentName);
+					$ls->regenerateLocalesForModule($package->getName());
 					$this->message("Module ".$package->getName()." compiled");
 				}
 				else

@@ -11,25 +11,18 @@ class builder_SecurityGenerator
 
 	private $logs = array();
 	
-	private $classBackList;
-	private $classFrontList;
 
 	/**
 	 * @var ModuleRoles
 	 */
 	private $baseModuleAction;
 
-	private $baseBackOfficeAction;
-
-	
 	public function buildSecurity()
 	{
 		$this->loadBaseAction();
 
 		$moduleService = ModuleService::getInstance();
-		$this->initClassBackList();
-		$this->initClassFrontList();
-		
+
 		foreach ($moduleService->getPackageNames() as $moduleName)
 		{
 			$shortModuleName = $moduleService->getShortModuleName($moduleName);
@@ -75,98 +68,6 @@ class builder_SecurityGenerator
 
 	/**
 	 * @param string $moduleName
-	 * @return array
-	 */
-	public function getRolesFields($moduleName)
-	{
-		$baseRightsPath = f_util_FileUtils::buildModulesPath($moduleName, self::CONFIG_DIR_NAME, self::ROLE_DEF_FILE_NAME);
-		if (!file_exists($baseRightsPath)) {$baseRightsPath = null;}
-		$overrideRightsPath = f_util_FileUtils::buildOverridePath('modules', $moduleName, self::CONFIG_DIR_NAME, self::ROLE_DEF_FILE_NAME);
-		if (!file_exists($overrideRightsPath)) {$overrideRightsPath = null;}
-		
-		if ($baseRightsPath === null  && $overrideRightsPath === null)
-		{
-			return array();	
-		}
-		
-		$module = $this->loadModuleRoles($moduleName, $baseRightsPath, $overrideRightsPath);
-		$rolesFields = array();
-		if (count($module->getPermissions()) > 0)
-		{	
-			$this->initClassBackList();
-			$this->initClassFrontList();
-		
-			$roles = $module->getRoles();			
-			foreach ($roles as $role) 
-			{
-				if ($role->isFrontEnd())
-				{
-					$rolesFields[$role->getName()] = 
-						array('type' => 'front', 'class' => $this->classFrontList);
-				}
-				else
-				{
-					$rolesFields[$role->getName()] = 
-						array('type' => 'back', 'class' => $this->classBackList);
-				}
-			}
-		}
-		return $rolesFields;
-	}
-	
-	private function initClassBackList()
-	{	
-		if ($this->classBackList === null)
-		{
-			$list = array(str_replace('/', '_', 'modules_users/backenduser'), str_replace('/', '_', 'modules_users/backendgroup'));
-			$boUser = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName('modules_users/backenduser');
-			if ($boUser->hasChildren())
-			{
-				foreach ($boUser->getChildrenNames() as $childrenName) 
-				{
-					$list[] = str_replace('/', '_', $childrenName);
-				}
-			}
-			$boGroup = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName('modules_users/backendgroup');
-			if ($boGroup->hasChildren())
-			{
-				foreach ($boGroup->getChildrenNames() as $childrenName) 
-				{
-					$list[] = str_replace('/', '_', $childrenName);
-				}
-			}
-			$this->classBackList = implode(',', $list);	
-		}
-	}
-	
-	private function initClassFrontList()
-	{
-		if ($this->classFrontList === null)
-		{
-			$list = array('modules_users_frontenduser', 'modules_users_frontendgroup');
-			$feUser = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName('modules_users/frontenduser');
-			if ($feUser->hasChildren())
-			{
-				foreach ($feUser->getChildrenNames() as $childrenName) 
-				{
-					$list[] = str_replace('/', '_', $childrenName);
-				}
-			}
-	
-			$feGroup = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName('modules_users/frontendgroup');
-			if ($feGroup->hasChildren())
-			{
-				foreach ($feGroup->getChildrenNames() as $childrenName) 
-				{
-					$list[] = str_replace('/', '_', $childrenName);
-				}
-			}
-			$this->classFrontList = implode(',', $list);
-		}
-	}
-	
-	/**
-	 * @param string $moduleName
 	 * @param string $baseRightsPath
 	 * @param string $overrideRightsPath
 	 * @return ModuleRoles
@@ -174,8 +75,7 @@ class builder_SecurityGenerator
 	private function loadModuleRoles($moduleName, $baseRightsPath, $overrideRightsPath)
 	{
 		$module = new ModuleRoles($baseRightsPath, $moduleName);
-		$module->classBackList = $this->classBackList;
-		$module->classFrontList = $this->classFrontList;
+
 		
 		if ($overrideRightsPath !== null)
 		{
@@ -229,30 +129,11 @@ class builder_SecurityGenerator
 		
 		if (count($module->getPermissions()) > 0)
 		{
-			$backOfficeActions = array_merge($this->baseBackOfficeAction, $this->getBackOfficeActionsName($moduleName));
-			foreach ($module->actions as $action)
-			{
-				if (array_key_exists($action->getBackOfficeName(), $backOfficeActions))
-				{
-					unset($backOfficeActions[$action->getBackOfficeName()]);
-				}
-			}
-
-			$module->backOfficeActions = $backOfficeActions;
 			$className = ucfirst($moduleName) . 'RoleService';
 			$filePath = f_util_FileUtils::buildChangeBuildPath('modules', $moduleName, 'roles', $className . '.class.php');
-			f_util_FileUtils::writeAndCreateContainer($filePath, $this->generateFile('RightsService' , 'permissions' , $module), f_util_FileUtils::OVERRIDE );
+			f_util_FileUtils::writeAndCreateContainer($filePath, $this->generateFile('RoleService' , 'permissions' , $module), 
+				f_util_FileUtils::OVERRIDE );
 			ClassResolver::getInstance()->appendToAutoloadFile('roles_'.$className, $filePath);
-
-			if (!uixul_ModuleBindingService::getInstance()->hasConfigFile($moduleName))
-			{
-				$buildForm = f_util_FileUtils::buildChangeBuildPath('modules', $module->name, 'forms');
-				$filePath = f_util_FileUtils::buildPath($buildForm, "permission_layout.all.all.xul");
-				f_util_FileUtils::writeAndCreateContainer($filePath, $this->generateFile('PermissionForm', 'permissions' , $module), f_util_FileUtils::OVERRIDE );
-				$implFile = f_util_FileUtils::buildFrameworkPath('builder', 'templates', 'permissions', 'permission_impl.js');
-				$filePath = f_util_FileUtils::buildPath($buildForm, 'permission_impl.js');			
-				copy($implFile, $filePath);
-			}
 		}
 	}
 
@@ -260,7 +141,7 @@ class builder_SecurityGenerator
 	{
 		$generator = new builder_Generator($directory);
 		$generator->assign('module', $module);
-		$result = $generator->fetch($templateName .'.tpl');
+		$result = $generator->fetch($templateName .'.smarty');
 		return $result;
 	}
 
@@ -271,26 +152,6 @@ class builder_SecurityGenerator
 		$baseModule = new ModuleRoles($path, 'base');
 		$baseModule->loadXml($domDoc->documentElement);
 		$this->baseModuleAction = $baseModule;
-		$this->baseBackOfficeAction = $this->getBackOfficeActionsName('uixul');
-	}
-	
-	private function getBackOfficeActionsName($moduleName)
-	{
-		$backOfficeActions = array();
-		$path = FileResolver::getInstance()
-			->setPackageName('modules_'.$moduleName)
-			->setDirectory(self::CONFIG_DIR_NAME)
-			->getPath('actions.xml');		
-		if ($path !== null)
-		{
-			$domDoc = f_util_DOMUtils::fromPath($path);
-			foreach ($domDoc->getElementsByTagName('action') as $actionNode)
-			{
-				$name = $actionNode->getAttribute('name');
-				$backOfficeActions[$name] = $name;
-			}
-		}
-		return $backOfficeActions;
 	}
 }
 
@@ -298,9 +159,6 @@ class ModuleRoles
 {
 	public $filePath;
 	public $name;
-	public $backOfficeActions;
-	public $classBackList;
-	public $classFrontList;
 
 	public $documents = array();
 
@@ -333,8 +191,7 @@ class ModuleRoles
 	{
 		foreach ($actions as $action)
 		{
-			$newAction = $this->getActionInfo($action->getShortName(), $documentName);
-			$newAction->setBackOfficeName($action->getBackOfficeName());
+			$this->getActionInfo($action->getShortName(), $documentName);
 		}
 	}
 
@@ -423,13 +280,12 @@ class ModuleRoles
 		{
 			switch ($node->nodeName)
 			{
-				case 'rootrole':
 				case 'role':
 				case 'frontendrole':
 					$role = $this->getRoleByName($node->getAttribute('name'));
 					if ($role === null)
 					{
-						$role = new RoleInfo($node->nodeName);
+						$role = new RoleInfo();
 						$this->roles[] = $role;
 					}
 					$role->loadXmlRole($node);
@@ -486,14 +342,7 @@ class ModuleRoles
 	public static function strtoboolean($string)
 	{
 		$string = strtolower($string);
-		if ($string == 'true' || $string == '1' || $string == 'yes')
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+		return ($string == 'true' || $string == '1' || $string == 'yes');
 	}
 
 	public function generateImplicitePermission()
@@ -520,8 +369,6 @@ class ModuleRoles
 	public function extendVirtualRolePermission()
 	{
 		$this->permissions = $this->getActionPermissions();
-		$frontEndPermissions = $this->getFrontEndPermissions();
-
 		foreach ($this->roles as $role)
 		{
 			foreach ($role->getPermissions() as $permission)
@@ -529,7 +376,7 @@ class ModuleRoles
 				$permissionName = $permission->getName();
 				if ($permission->isVirtual())
 				{
-					$permissions = $this->getActionsPermissions($permissionName, $frontEndPermissions);
+					$permissions = $this->getActionsPermissions($permissionName);
 					foreach ($permissions as $actperm)
 					{
 						$role->addPermission($actperm);
@@ -549,24 +396,12 @@ class ModuleRoles
 	}
 
 
-	private function getActionsPermissions($name, $frontEndPermissions)
+	private function getActionsPermissions($name)
 	{
 		$result = array();
 		if ($name == '*')
 		{
-			if (count($frontEndPermissions) == 0)
-			{
-				return $this->permissions;
-			}
-			foreach ($this->permissions as $name => $permission)
-			{
-
-				if (!array_key_exists($name, $frontEndPermissions))
-				{
-					$result[$name] = $permission;
-				}
-			}
-			return $result;
+			return $this->permissions;
 		}
 
 		$partName = explode('.', $name);
@@ -597,36 +432,12 @@ class ModuleRoles
 
 	public function getRoles()
 	{
-		$result = array();
-		foreach ($this->roles as $role)
-		{
-			if (!$role->isRoot())
-			{
-				$result[] = $role;
-			}
-		}
-		return $result;
+		return $this->roles;
 	}
 
 	public function getActions()
 	{
 		return $this->actions;
-	}
-
-	public function getFrontEndPermissions()
-	{
-		$result = array();
-		foreach ($this->roles as $role)
-		{
-			foreach ($role->getPermissions() as $permission)
-			{
-				if ($permission->isFrontEnd())
-				{
-					$result[$permission->getName()] = $permission;
-				}
-			}
-		}
-		return $result;
 	}
 
 	public function extendRole()
@@ -653,35 +464,16 @@ class ModuleRoles
 		$this->permissions = $this->getActionPermissions();
 
 		$roles = array();
-		$rootRole = null;
 		foreach ($this->roles as $role)
 		{
 			$role->cleanNotDefinedPermission($this->permissions);
 			if (count($role->getPermissions()) != 0)
 			{
-				if ($role->isRoot())
-				{
-					$rootRole = $role;
-				}
 				$roles[] = $role;
 			}
 		}
 
 		$this->roles = $roles;
-
-		if (!is_null($rootRole))
-		{
-			$roles = array();
-			foreach ($this->roles as $role)
-			{
-				$role->removeRootPermission($rootRole);
-				if (count($role->getPermissions()) != 0)
-				{
-					$roles[] = $role;
-				}
-			}
-			$this->roles = $roles;
-		}
 	}
 
 	public function getPermissions()
@@ -723,7 +515,7 @@ class ActionInfo
 {
 	private $name;
 	private $documentName;
-	private $backOfficeName;
+
 	private $inheritPermissions = false;
 
 	private $permissions = array();
@@ -759,23 +551,6 @@ class ActionInfo
 		return $this->name;
 	}
 
-	public function setBackOfficeName($backName)
-	{
-		if (is_null($this->backOfficeName))
-		{
-			$this->backOfficeName = $backName;
-		}
-	}
-
-	public function getBackOfficeName()
-	{
-		if (is_null($this->backOfficeName))
-		{
-			return strtolower(substr($this->name, 0 , 1)).substr($this->name, 1);;
-		}
-		return $this->backOfficeName;
-	}
-
 	/**
 	 * @param DOMElement $element
 	 */
@@ -783,10 +558,6 @@ class ActionInfo
 	{
 		$this->name = $element->getAttribute('name');
 
-		if ($element->hasAttribute('back-office-name'))
-		{
-			$this->backOfficeName = $element->getAttribute('back-office-name');
-		}
 
 		if ($element->hasAttribute('inherit-permissions') || ModuleRoles::strtoboolean($element->getAttribute('inherit-permissions')))
 		{
@@ -858,24 +629,8 @@ class RoleInfo
 {
 	private $name;
 	private $permissions = array();
-
-	private $frontEnd = false;
-	private $rootRole = false;
-
+	
 	private $extendRole;
-
-	public function __construct($roleType)
-	{
-		switch ($roleType)
-		{
-			case 'rootrole':
-				$this->rootRole = true;
-				break;
-			case 'frontendrole':
-				$this->frontEnd = true;
-				break;
-		}
-	}
 
 	public function generateExtendRole($moduleRoles)
 	{
@@ -897,10 +652,6 @@ class RoleInfo
 	public function isDefined()
 	{
 		$isDefined = false;
-		if ($this->rootRole)
-		{
-			return $isDefined;
-		}
 		foreach ($this->permissions as $permission)
 		{
 			$isDefined = $isDefined || $permission->isDefined();
@@ -929,10 +680,6 @@ class RoleInfo
 			{
 				$name = $permissionNode->getAttribute('name');
 				$permission = new PermissionInfo($name);
-				if ($this->isFrontEnd())
-				{
-					$permission->setFrontEnd();
-				}
 				$permission->setInRole();
 				$this->permissions[] = $permission;
 			}
@@ -954,21 +701,6 @@ class RoleInfo
 		return $this->name;
 	}
 
-	/**
-	 * @param RoleInfo $rootRole
-	 */
-	public function removeRootPermission($rootRole)
-	{
-		if ($this == $rootRole) {return;}
-		foreach ($rootRole->permissions as $name => $permissions)
-		{
-			if (array_key_exists($name, $this->permissions))
-			{
-				unset($this->permissions[$name]);
-			}
-		}
-	}
-
 	public function cleanNotDefinedPermission($permissions)
 	{
 		$result = array();
@@ -979,33 +711,12 @@ class RoleInfo
 				$result[$permission->getName()] = $permissions[$permission->getName()];
 			}
 		}
-
-		if ($this->isFrontEnd())
-		{
-			foreach ($result as $permission)
-			{
-				$permission->setFrontEnd();
-			}
-		}
-
 		$this->permissions = $result;
-	}
-
-	public function isFrontEnd()
-	{
-		return $this->frontEnd;
-	}
-
-	public function isRoot()
-	{
-		return $this->rootRole;
 	}
 
 	public function __toString()
 	{
-		$string .= '	Role:' . $this->name;
-		if ($this->frontEnd) { $string .= " (FrontEnd)";}
-		$string .= "\n";
+		$string .= '	Role:' . $this->name . PHP_EOL;
 		foreach ($this->permissions as $permissions)
 		{
 			$string .= $permissions->__toString();
@@ -1017,7 +728,6 @@ class RoleInfo
 class PermissionInfo
 {
 	private $name;
-	private $frontEnd = false;
 	private $virtual = false;
 	private $hasRole = false;
 	private $hasAction = false;
@@ -1028,7 +738,6 @@ class PermissionInfo
 		$this->name = $name;
 		$this->virtual = (strpos($name, '*') !== false);
 	}
-
 
 	public function getName()
 	{
@@ -1045,11 +754,6 @@ class PermissionInfo
 		$this->hasAction = true;
 	}
 
-	public function setFrontEnd()
-	{
-		$this->frontEnd = true;
-	}
-
 	public function isDefined()
 	{
 		return $this->hasRole && $this->hasAction && !$this->virtual;
@@ -1060,16 +764,10 @@ class PermissionInfo
 		return $this->virtual;
 	}
 
-	public function isFrontEnd()
-	{
-		return $this->frontEnd;
-	}
-
 	public function __toString()
 	{
 		$string = '		P:'.$this->name;
 		if ($this->isDefined()) {$string .= " (Defined)";}
-		$string .= "\n";
-		return $string;
+		return $string . PHP_EOL;
 	}
 }

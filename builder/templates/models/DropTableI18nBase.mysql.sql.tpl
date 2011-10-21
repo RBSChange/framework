@@ -1,1 +1,0 @@
-DROP TABLE IF EXISTS `<{$model->getTableName()}>_i18n`;

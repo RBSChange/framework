@@ -68,203 +68,6 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 	}
 	
 	/**
-	 * 
-	 * @see f_persistentdocument_PersistentProvider::getTables()
-	 */
-	function getTables()
-	{
-		$tables = array();
-		$stmt = $this->executeSQLSelect("SHOW TABLES");
-		foreach ($stmt->fetchAll() as $table)
-		{
-			$tables[] = $table[0];
-		}
-		return $tables;
-	}
-	
-	function getTableFields($tableName)
-	{
-		$infos = array();
-		foreach ($this->executeSQLSelect('SHOW FULL COLUMNS FROM `'.$tableName. '`')->fetchAll(PDO::FETCH_ASSOC) as $row)
-		{
-			$infos[$row["Field"]] = $row;
-		}
-		return $infos;
-	}
-	
-	/**
-	 * @throws Exception on error
-	 */
-	function clearDB()
-	{
-		$stmt = $this->executeSQLSelect("show tables");
-		foreach ($this->getTables() as $table)
-		{
-			$this->executeSQLScript('DROP TABLE `' . $table . '`');
-		}
-	}
-	
-	/**
-	 * @param String $moduleName
-	 * @param String $documentName
-	 * @param generator_PersistentProperty $property
-	 * @return string[] the SQL statements that where executed
-	 */
-	function dropModelTables($moduleName, $documentName)
-	{
-		$documentModel = f_persistentdocument_PersistentDocumentModel::getInstance($moduleName, $documentName);
-		$tableName = $documentModel->getTableName();
-		$sqls = array();
-		$sqls[] = 'DROP TABLE IF EXISTS `' . $tableName . '`';
-		if ($documentModel->isLocalized())
-		{
-			$tableName = $documentModel->getTableName().$this->getI18nSuffix();
-			$sqls[] = 'DROP TABLE IF EXISTS `' . $tableName . '`';
-		}
-		foreach ($sqls as $sql)
-		{
-			$this->executeSQLScript($sql);
-		}
-		return $sqls;
-	}
-
-	/**
-	 * (non-PHPdoc)
-	 * @see persistentdocument/f_persistentdocument_PersistentProvider#delProperty($moduleName, $documentName, $propertyName)
-	 */
-	function delProperty($moduleName, $documentName, $oldProperty)
-	{
-		$documentModel = f_persistentdocument_PersistentDocumentModel::getInstance($moduleName, $documentName);
-		$sqls = array();
-		$sqls[] = "ALTER TABLE `".$documentModel->getTableName()."` DROP COLUMN `".$oldProperty->getDbName()."`";
-		if ($oldProperty->isLocalized())
-		{
-			$sqls[] = "ALTER TABLE `".$documentModel->getTableName().$this->getI18nSuffix()."` DROP COLUMN `".$oldProperty->getDbName().$this->getI18nSuffix()."`";
-		}
-		if ($oldProperty->isDocument())
-		{
-			$modelNames = array("'".$documentModel->getName()."'");
-			if ($documentModel->hasChildren())
-			{
-				foreach ($documentModel->getChildrenNames() as $childName)
-				{
-					$modelNames = "'".$childName."'";	
-				}
-			}
-			$sqls[] = "DELETE FROM `f_relation` WHERE relation_name = '".$oldProperty->getName()."' AND document_model_id1 IN (".join(",", $modelNames).")";
-		}
-		foreach ($sqls as $sql)
-		{
-			$this->executeSQLScript($sql);
-		}
-		return $sqls;
-	}
-	
-	/**
-	 * @param String $moduleName
-	 * @param String $documentName
-	 * @param generator_PersistentProperty $oldProperty
-	 * @param generator_PersistentProperty $newProperty
-	 * @return String[] the SQL statements that where executed
-	 */
-	function renameProperty($moduleName, $documentName, $oldProperty, $newProperty)
-	{
-		$documentModel = f_persistentdocument_PersistentDocumentModel::getInstance($moduleName, $documentName);
-		$sqls = array();
-		$oldDbMapping = $oldProperty->getDbName();
-		$oldPropertyName = $oldProperty->getName();
-		$sqls[] = "ALTER TABLE `".$documentModel->getTableName()."` CHANGE COLUMN `".$oldDbMapping."` ".$newProperty->generateSql("mysql");
-		if ($oldProperty->isLocalized())
-		{
-			$sqls[] = "ALTER TABLE `".$documentModel->getTableName().$this->getI18nSuffix()."` CHANGE COLUMN `".$oldDbMapping.$this->getI18nSuffix()."` ".$newProperty->generateSql("mysql", true);
-		}
-		if ($oldProperty->isDocument())
-		{
-			$modelNames = array("'".$documentModel->getName()."'");
-			if ($documentModel->hasChildren())
-			{
-				foreach ($documentModel->getChildrenNames() as $childName)
-				{
-					$modelNames[] = "'".$childName."'";	
-				}
-			}
-			
-			$models = f_persistentdocument_PersistentDocumentModel::getDocumentModels();
-			$mustUpdateRelationId = false;
-			foreach ($models as $model)
-			{
-				if ($model->getName() == $documentModel->getName())
-				{
-					continue;
-				}
-				foreach ($model->getPropertiesInfos() as $name => $info) 
-				{
-					if ($name == $oldPropertyName && $info->isDocument())
-					{
-						$mustUpdateRelationId = true;
-						break 2;
-					}
-				}
-			}
-			$sql = "UPDATE `f_relation` SET relation_name = '".$newProperty->getName()."'";
-			if ($mustUpdateRelationId)
-			{
-				$newRelationId = $this->getRelationId($newProperty->getName());
-				$sql .= ", relation_id = $newRelationId";
-			}
-			$sql .= " WHERE document_model_id1 IN (".implode(",", $modelNames).") AND relation_name = '$oldPropertyName'";
-			$sqls[] = $sql;
-		}
-		foreach ($sqls as $sql)
-		{
-			$this->executeSQLScript($sql);
-		}
-		return $sqls;
-	}
-	
-	/**
-	 * @param string $moduleName
-	 * @param string $documentName
-	 * @param generator_PersistentProperty $property
-	 * @return string[] the SQL statements that where executed
-	 */
-	function addProperty($moduleName, $documentName, $property)
-	{
-		$documentModel = f_persistentdocument_PersistentDocumentModel::getInstance($moduleName, $documentName);
-		$sqls = array();
-		
-		$tableName = $documentModel->getTableName();
-		$columnName = $property->getDbName();
-		$infos = $this->getTableFields($tableName);
-		if (!isset($infos[$columnName]))
-		{
-			$sqls[] = "ALTER TABLE `".$tableName."` ADD COLUMN ".$property->generateSql("mysql");	
-		}
-		else
-		{
-			$sqls[] = "ALTER TABLE `".$tableName."` MODIFY COLUMN ".$property->generateSql("mysql");
-		}
-		if ($property->isLocalized())
-		{
-			$i18nInfos = $this->getTableFields($tableName.$this->getI18nSuffix());
-			$i18nColumnName = $property->getDbName().$this->getI18nSuffix();
-			if (!isset($i18nInfos[$i18nColumnName]))
-			{
-				$sqls[] = "ALTER TABLE `".$tableName.$this->getI18nSuffix()."` ADD COLUMN ".$property->generateSql("mysql", true);
-			}
-			else
-			{
-				$sqls[] = "ALTER TABLE `".$tableName.$this->getI18nSuffix()."` MODIFY ".$property->generateSql("mysql", true);
-			}
-		}
-		foreach ($sqls as $sql)
-		{
-			$this->executeSQLScript($sql);
-		}
-		return $sqls;
-	}
-		
-	/**
 	 * @return String
 	 */
 	public function getType()
@@ -351,46 +154,27 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		$this->setDriver(null);
 	}
 	
-
-	/**
-	 * @return array<".mysql.sql", ";">
-	 */
-	public function getScriptFileInfos()
-	{
-		return array(".mysql.sql", ";");
-	}
 	
 	protected function escapeFieldName($fieldName)
 	{
 		return '`' . $fieldName . '`';
 	}
+	
+	private $schemaManager = null;
 
 	/**
-	 * @param String $script
-	 * @return Integer the number of affected rows
+	 * @return change_SchemaManager
 	 */
-	public function executeSQLScript($script)
+	public function getSchemaManager()
 	{
-		if (Framework::isDebugEnabled())
+		if ($this->schemaManager === null)
 		{
-			Framework::debug('executeSQLScript :' .$script);
+			$this->schemaManager = new change_SchemaManagerMySql();
 		}
-		$result = $this->getDriver()->exec($script);
-		$errcode = $this->errorCode();
-		if ($result === false)
-		{
-			if ($errcode == '00000')
-			{
-				return 0;
-			}
-			
-			$e = new BaseException("Unable to execute SQL: ".$this->errorCode().": ".$this->errorInfo()."\n".$script, "framework.persistentprovider.mysql.sql-error", $this->getErrorParameters());
-			$e->setAttribute("sql", $script);
-			throw $e;
-		}		
-		return $result;
+		return $this->schemaManager;
 	}
-
+	
+	
 	/**
 	 * @param String $script
 	 * @return PDOStatement
@@ -422,11 +206,6 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 				else if (is_long($value))
 				{
 					$statement->bindValue($name, date("Y-m-d H:i:s", $value), PersistentProviderConst::PARAM_STR);
-				}
-				else if ($value instanceof Date)
-				{
-
-					$statement->bindValue($name, $value->format("%Y-%m-%d %T"), PersistentProviderConst::PARAM_STR);
 				}
 				else
 				{
@@ -667,25 +446,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 
 	/// TREE QUERIES
-	protected function dropTreeTableQuery($treeId)
-	{
-		return 'DROP TABLE IF EXISTS `f_tree_'. $treeId .'`';
-	}
-	
-	protected function createTreeTableQuery($treeId)
-	{
-		return 'CREATE TABLE IF NOT EXISTS `f_tree_'. $treeId .'` ('
-		. ' `document_id` int(11) NOT NULL default \'0\','
-		. ' `parent_id` int(11) NOT NULL default \'0\','
-		. ' `node_order` int(11) NOT NULL default \'0\','
-		. ' `node_level` int(11) NOT NULL default \'0\','
-		. ' `node_path` varchar(255) collate latin1_general_ci NOT NULL default \'/\','
-        . ' `children_count` int(11) NOT NULL default \'0\','
-        . ' PRIMARY KEY (`document_id`),'
-        . ' UNIQUE KEY `tree_node` (`parent_id`, `node_order`),'
-        . ' UNIQUE KEY `descendant` (`node_level`,`node_order`,`node_path`)'
-        . ' ) ENGINE=InnoDB CHARACTER SET latin1 COLLATE latin1_general_ci';
-	}
+
 		
 	protected function getNodeInfoQuery($treeId)
 	{
@@ -1995,23 +1756,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 				$qBuilder->addOrder($order);
 			}
 		}
-
-		/**
-		 * @see f_persistentdocument_PersistentProvider::addLangQuery()
-		 *
-		 * @param string $lang
-		 * @return string
-		 */
-		protected function addLangQuery($lang)
-		{
-			return "ALTER TABLE `f_document` ADD `label_$lang` VARCHAR( 255 ) NULL";
-		}
 		
-		protected function columnExists($tableName, $colName)
-		{
-			return f_util_ArrayUtils::isNotEmpty($this->executeSQLSelect("show columns from $tableName where field = '$colName'")->fetchAll());
-		}
-
 		/**
 		 * @return string
 		 */

@@ -49,11 +49,6 @@ class RequestContext
 	private $m_ui_supportedLanguages = array();
 
 	/**
-	 * @var string
-	 */
-	private $m_timeZone;
-
-	/**
 	 * @var boolean
 	 */
 	private $m_inHTTPS;
@@ -77,6 +72,11 @@ class RequestContext
 	private $mode;
 	
 	/**
+	 * @var array
+	 */
+	private $profile;
+	
+	/**
 	 * Constructor of RequestContext
 	 * @param array $supportedLanguages
 	 * @param array $ui_supportedLanguages
@@ -93,8 +93,9 @@ class RequestContext
 		$httpsMarkerValue = Framework::getConfigurationValue('general/https-request-marker-value', 'on');
 		$this->m_inHTTPS = (isset($_SERVER[$httpsMarker]) && ($_SERVER[$httpsMarker] === $httpsMarkerValue));
 		$this->m_pathURI = (isset($_SERVER['REQUEST_URI'])) ? $_SERVER['REQUEST_URI'] : null;
+		$this->resetProfile();
 	}
-
+	
 	/**
 	 * @param string $supportedLanguages
 	 * @param string $ui_supportedLanguages
@@ -416,18 +417,78 @@ class RequestContext
 			throw $exception;
 		}
 	}
+	
+	public function resetProfile()
+	{
+		$this->profile = array('date' => array(), 'datetime' => array(), 'timezone' => null);
+	}
+	
+	protected function getProfileValues()
+	{
+		$pref = change_Controller::getInstance()->getStorage()->readForUser('profilesvalues');
+		return is_array($pref) ? $pref : null;
+	}
+	
+	/**
+	 * @param string $lang
+	 * @return string
+	 */
+	public function getDateTimeFormat($lang)
+	{
+		if (!isset($this->profile['datetime'][$lang]))
+		{
+			$prefs = $this->getProfileValues();
+			if ($prefs !== null && isset($prefs['datetimeformat']))
+			{
+				$this->profile['datetime'][$lang] = $prefs['datetimeformat'];
+			}
+			else
+			{
+				$this->profile['datetime'][$lang] = LocaleService::getInstance()->formatKey($lang, 'f.date.date.default-datetime-format');
+			}
+		}
+	 	return $this->profile['datetime'][$lang];
+	}	
 
+	/**
+	 * @param string $lang
+	 * @return string
+	 */
+	public function getDateFormat($lang)
+	{
+		if (!isset($this->profile['date'][$lang]))
+		{
+			$prefs = $this->getProfileValues();
+			if ($prefs !== null && isset($prefs['dateformat']))
+			{
+				$this->profile['date'][$lang] = $prefs['dateformat'];
+			}
+			else
+			{
+				$this->profile['date'][$lang] = LocaleService::getInstance()->formatKey($lang, 'f.date.date.default-date-format');
+			}
+		}
+	 	return $this->profile['date'][$lang];
+	}
+	
     /**
      * @return String
      */
     public function getTimeZone()
     {
-        if (NULL === $this->m_timeZone)
+        if (!isset($this->profile['timezone']))
         {
-            $this->m_timeZone = DEFAULT_TIMEZONE;   
+        	$prefs = $this->getProfileValues();
+			if ($prefs !== null && isset($prefs['timezone']) && !empty($prefs['timezone']))
+			{
+				$this->profile['timezone'] = $prefs['timezone'];
+			}
+        	else
+        	{
+        	    $this->profile['timezone'] = DEFAULT_TIMEZONE;
+        	}   
         }
-        
-        return $this->m_timeZone;       
+        return $this->profile['timezone'];       
     }
     
 	/**

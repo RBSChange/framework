@@ -157,9 +157,9 @@ class ModuleService extends BaseService
 	}
 	
 	/**
-	 * Get the list of modules visible (enabled) for the backenduser $user.
+	 * Get the list of modules visible (enabled) for the $user.
 	 *
-	 * @param users_persistentdocument_backenduser $user
+	 * @param users_persistentdocument_user $user
 	 * @return array<c_Module>
 	 */
 	public function getVisibleModulesForUser($user)
@@ -187,14 +187,14 @@ class ModuleService extends BaseService
 	}
 	
 	/**
-	 * Get the list of modules visible (enabled) for the current backenduser.
+	 * Get the list of modules visible (enabled) for the current user.
 	 *
-	 * @param users_persistentdocument_backenduser $user
+	 * @param users_persistentdocument_user $user
 	 * @return array<c_Module>
 	 */
 	public function getVisibleModulesForCurrentUser()
 	{
-		return $this->getVisibleModulesForUser(users_UserService::getInstance()->getCurrentBackEndUser());
+		return $this->getVisibleModulesForUser(users_UserService::getInstance()->getAutenticatedUser());
 	}
 		
 	/**

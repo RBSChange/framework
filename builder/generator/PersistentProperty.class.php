@@ -16,6 +16,7 @@ class generator_PersistentProperty
 	private $typeModel; // Used for inverse properties sorting and set only for them.
 	private $minOccurs;
 	private $maxOccurs;
+	private $dbName;
 	private $dbMapping;
 	private $dbSize;
 
@@ -111,7 +112,7 @@ class generator_PersistentProperty
 					$this->dbMapping = $value;
 					break;
 				case "db-size":
-					$this->dbSize = intval($value);
+					$this->dbSize = $value;
 					break;
 				case "tree-node":
 					//$this->treeNode = generator_PersistentModel::getBoolean($value);
@@ -453,8 +454,14 @@ class generator_PersistentProperty
 
 		if ($this->type == f_persistentdocument_PersistentDocument::PROPERTYTYPE_STRING)
 		{
-			if (is_null($this->dbSize)) {$this->dbSize = 255;}
-			$constraints[] = "maxSize:".$this->dbSize;
+			if (intval($this->dbSize) <= 0 || intval($this->dbSize) > 255) 
+			{
+				$constraints[] = "maxSize:255";
+			}
+			else
+			{
+				$constraints[] = "maxSize:".$this->dbSize;
+			}
 		}
 
 		if (!is_null($this->constraints))
@@ -505,9 +512,12 @@ class generator_PersistentProperty
 	 */
 	public function getDbName()
 	{
-		$pp = f_persistentdocument_PersistentProvider::getInstance();
-		$properties = array('dbMapping' => $this->dbMapping, 'name' => $this->name);
-		return $pp->generateFieldName($properties);
+		if ($this->dbName === null)
+		{
+			$this->dbName = f_persistentdocument_PersistentProvider::getInstance()
+				->getSchemaManager()->generateSQLModelFieldName($this->name, $this->dbMapping);
+		}
+		return $this->dbName;
 	}
 
 	/**
@@ -933,107 +943,10 @@ class generator_PersistentProperty
 	}
 
 	/**
-	 * @return Integer
+	 * @return string
 	 */
-	private function getDbSize()
+	public function getDbSize()
 	{
-		return is_null($this->dbSize) ? 255 : $this->dbSize;
-	}
-
-	/**
-	 * @return String
-	 */
-	public function generateSql($type, $localized = false)
-	{
-		if ($type == 'mysql')
-		{
-			$localizedSuffix = $localized ? '_i18n' : '';
-			$field = '  `' . $this->getDbName() . $localizedSuffix . '`';
-			if ($this->getDbName() === 'document_publicationstatus')
-			{
-				return $field . " ENUM('DRAFT', 'CORRECTION', 'ACTIVE', 'PUBLICATED', 'DEACTIVATED', 'FILED', 'DEPRECATED', 'TRASH', 'WORKFLOW') NULL DEFAULT NULL";
-			}
-			
-			if ($this->isDocument())
-			{
-				if ($this->isArray())
-				{
-					$field .= ' int(11) default \'0\'';
-				}
-				else
-				{
-					$field .= ' int(11) default NULL';
-				}
-				return $field;
-			}
-			switch ($this->type)
-			{
-				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_STRING:
-					$field .= " varchar(". $this->getDbSize() .")";
-					break;
-				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_LONGSTRING:
-					$field .= " text";
-					break;
-				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_XHTMLFRAGMENT:
-				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_LOB:
-					$field .= " mediumtext";
-					break;
-				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_BOOLEAN:
-					$field .= " tinyint(1) NOT NULL default '0'";
-					break;
-				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_DATETIME:
-					$field .= " datetime";
-					break;
-				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_DOUBLE:
-					$field .= " double";
-					break;
-				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER:
-					$field .= " int(11)";
-					break;
-			}
-			return $field;
-		}
-		else if ($type == 'oci')
-		{
-			$localizedSuffix = $localized ? '_i18n' : '';
-			$field = '  "' . $this->getDbName() . $localizedSuffix . '"';
-			if ($this->isDocument())
-			{
-				if ($this->isArray())
-				{
-					$field .= ' NUMBER(11) default(0)';
-				}
-				else
-				{
-					$field .= ' NUMBER(11)';
-				}
-				return $field;
-			}
-			switch ($this->type)
-			{
-				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_STRING:
-					$field .= " VARCHAR2(". $this->getDbSize() .")";
-					break;
-				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_LOB:
-				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_LONGSTRING:
-				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_XHTMLFRAGMENT:
-					$field .= " CLOB DEFAULT(EMPTY_CLOB())";
-					break;
-				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_BOOLEAN:
-					$field .= " NUMBER(1) default(0)";
-					break;
-				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_DATETIME:
-					$field .= " CHAR(19)";
-					break;
-				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_DOUBLE:
-					$field .= " NUMBER(13,2)";
-					break;
-				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER:
-					$field .= " NUMBER(11)";
-					break;
-			}
-			return $field;
-		}
-		return '';
+		return $this->dbSize;
 	}
 }

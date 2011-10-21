@@ -187,7 +187,7 @@ class FileResolver implements ResourceResolver
 	 */
 	public function addCurrentWebsiteToPotentialDirectories()
 	{
-		$currentWebsite = website_WebsiteModuleService::getInstance()->getCurrentWebsite();
+		$currentWebsite = website_WebsiteService::getInstance()->getCurrentWebsite();
 		if (!is_null($currentWebsite))
 		{
 			$directory = f_util_FileUtils::buildOverridePath('hostspecificresources', $currentWebsite->getDomain());

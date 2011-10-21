@@ -65,17 +65,16 @@ class f_TalesDate implements PHPTAL_Tales
 		if (count($params) > 0)
 		{
 			$format = self::evalExpr(implode(',', $params));
+			return "date_Formatter::format($dateValue, $format)";
 		}
 		else if ($mode == 'date')
 		{
-			$format = var_export(date_Formatter::getDefaultDateFormat(RequestContext::getInstance()->getLang()), true);
+			return "date_Formatter::toDefaultDate($dateValue)";
 		}
 		else
 		{
-			$format = var_export(date_Formatter::getDefaultDateTimeFormat(RequestContext::getInstance()->getLang()), true);
+			return "date_Formatter::toDefaultDateTime($dateValue)";
 		}
-		
-		return "date_Formatter::format($dateValue, $format)";
 	}
 	
 	/**

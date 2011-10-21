@@ -46,7 +46,7 @@ class TemplateLoader extends FileLoader implements ResourceLoader
 	 */
 	public function load($filename)
 	{
-		$currentPageId = website_WebsiteModuleService::getInstance()->getCurrentPageId();
+		$currentPageId = website_PageService::getInstance()->getCurrentPageId();
 		if ($currentPageId)
 		{
 			$currentPage = DocumentHelper::getDocumentInstance($currentPageId, "modules_website/page");

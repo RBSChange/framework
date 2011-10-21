@@ -39,6 +39,8 @@ class generator_PersistentModel
 	private $modelVersion;
 
 	private $tableName;
+	
+	private $dbMapping;
 
 	private $useCorrection;
 
@@ -340,7 +342,10 @@ class generator_PersistentModel
 			}
 			$iconName = 'small/' . $model->getIcon();
 			$selector = 'treechildren::-moz-tree-image(modules_'.$moduleName.'_'.$documentName.') {list-style-image: url(/changeicons/'.$iconName.'.png);}';
-			$iconsCSS[$moduleName .'/'. $documentName] = $selector;
+			if ($model->inject() || !isset($iconsCSS[$moduleName .'/'. $documentName]))
+			{
+				$iconsCSS[$moduleName .'/'. $documentName] = $selector;
+			}
 
 		}
 		$documentIconsPath = f_util_FileUtils::buildChangeBuildPath('modules', 'uixul', 'style', 'documenticons.css');
@@ -888,11 +893,8 @@ class generator_PersistentModel
 	{
 		$this->extend = null;
 		
-		$pp = f_persistentdocument_PersistentProvider::getInstance();
-		$properties = array('tableName' => $this->tableName, 
-			'moduleName' => $this->moduleName, 'documentName' => $this->documentName);
-		$this->tableName = $pp->generateTableName($properties);
-		
+		$this->tableName = f_persistentdocument_PersistentProvider::getInstance()
+			->getSchemaManager()->generateSQLModelTableName($this->moduleName, $this->documentName, $this->dbMapping);		
 		$props = $this->properties;
 		
 		$this->properties = array();		
@@ -1725,40 +1727,6 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @param String $extension
-	 * @return String
-	 */
-	public function generateSQLScript($extension)
-	{
-		$generator = new builder_Generator('models');
-		$generator->assign_by_ref('model', $this);
-		if ($this->hasParentModel())
-		{
-			$result = $generator->fetch("TableExtend.".$extension.".sql.tpl");
-		}
-		else
-		{
-			$result = $generator->fetch("TableBase.".$extension.".sql.tpl");
-		}
-		return $result;
-	}
-
-	/**
-	 * @param String $extension
-	 * @return String
-	 */
-	public function generateDeleteSQLScript($extension)
-	{
-		if ($this->hasParentModel())
-		{
-			return null;
-		}
-		$generator = new builder_Generator('models');
-		$generator->assign_by_ref('model', $this);
-		return $generator->fetch("DropTableBase.".$extension.".sql.tpl");
-	}
-
-	/**
 	 * @return array<generator_PersistentProperty>
 	 */
 	public function getTableField()
@@ -1775,40 +1743,6 @@ class generator_PersistentModel
 		}
 
 		return $result;
-	}
-
-	/**
-	 * @param String $extension
-	 * @return String
-	 */
-	public function generateSQLI18nScript($extension)
-	{
-		$generator = new builder_Generator('models');
-		$generator->assign_by_ref('model', $this);
-		if ($this->hasParentModel())
-		{
-			$result = $generator->fetch("TableI18nExtend.".$extension.".sql.tpl");
-		}
-		else
-		{
-			$result = $generator->fetch("TableI18nBase.".$extension.".sql.tpl");
-		}
-		return $result;
-	}
-
-	/**
-	 * @param String $extension
-	 * @return String
-	 */
-	public function generateDeleteSQLI18nScript($extension)
-	{
-		if ($this->hasParentModel())
-		{
-			return null;
-		}
-		$generator = new builder_Generator('models');
-		$generator->assign_by_ref('model', $this);
-		return $generator->fetch("DropTableI18nBase.".$extension.".sql.tpl");
 	}
 
 	/**
@@ -1870,7 +1804,7 @@ class generator_PersistentModel
 					$this->modelVersion = $value;
 					break;
 				case "table-name":
-					$this->tableName = $value;
+					$this->dbMapping = $value;
 					break;
 				case "use-correction":
 					$this->useCorrection = self::getBoolean($value);

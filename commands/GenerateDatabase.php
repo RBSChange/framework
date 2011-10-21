@@ -58,30 +58,30 @@ class commands_GenerateDatabase extends c_ChangescriptCommand
 		$this->loadFramework();
 		
 		// Create if needed.
-		$pp = f_persistentdocument_PersistentProvider::getInstance(); 
-		if (!$pp->checkConnection())
+		$sm = f_persistentdocument_PersistentProvider::getInstance()->getSchemaManager();
+		
+		if (!$sm->check())
 		{
-			$dbInfos = $pp->getConnectionInfos();
+			$dbInfos = f_persistentdocument_PersistentProvider::getInstance()->getConnectionInfos();
 			return $this->quitError("You must create '".$dbInfos["database"]."@".$dbInfos["host"]."' database and give read/write access to '".$dbInfos["user"]."' user.");
 		}
 		
 		// Populate the database.
-		list($allowedExtension, $sqlSeparator) = $pp->getScriptFileInfos();
+		$allowedExtension = $sm->getSQLScriptSufixName();
 		if ($allowedExtension === null)
 		{
-			return $this->quitError("Can not generate database for using ".get_class($pp)." for driver");
+			return $this->quitError("Can not generate database for using ".get_class($sm)." for driver");
 		}
-		$this->setupDatabase($pp, $allowedExtension, $sqlSeparator, $params);
+		$this->setupDatabase($sm, $allowedExtension, $params);
 		return null;
 	}
 
 	/**
-	 * @param f_persistentdocument_PersistentProvider $persistentProvider
+	 * @param change_SchemaManager $schemaManager
 	 * @param string $allowedExtension
-	 * @param string $sqlSeparator
 	 * @param array $modules
 	 */
-	private function setupDatabase($persistentProvider, $allowedExtension, $sqlSeparator, $modules = array())
+	private function setupDatabase($schemaManager, $allowedExtension, $modules = array())
 	{
 		$scripts = array();
 		$array = array();
@@ -117,7 +117,9 @@ class commands_GenerateDatabase extends c_ChangescriptCommand
 				
 			}
 		}
-			
+		
+		$extensionLength = strlen($allowedExtension);
+		
 		foreach ($array as $dir)
 		{
 			if (!is_dir($dir))
@@ -130,15 +132,14 @@ class commands_GenerateDatabase extends c_ChangescriptCommand
 				$filePath = $dir . DIRECTORY_SEPARATOR. $fileName;
 				if (!is_dir($filePath))
 				{
-					$extension = f_util_FileUtils::getFileExtension($fileName, true, 2);
-					if ($extension == $allowedExtension)
+					if (substr($fileName, -$extensionLength) === $allowedExtension)
 					{
 						$scripts[$fileName] = $filePath;
 					}
 				}
 			}
 		}
-
+		
 		if (count($scripts) != 0)
 		{
 			ksort($scripts);
@@ -146,29 +147,13 @@ class commands_GenerateDatabase extends c_ChangescriptCommand
 			{
 				$this->message('Execute SQL Script : '. $fileName);
 				$sql = file_get_contents($fileName);
-
-				foreach(explode($sqlSeparator, $sql) as $query)
+				try
 				{
-					$query = trim($query);
-					if (empty($query))
-					{
-						continue;
-					}
-					try
-					{
-						$persistentProvider->executeSQLScript($query);
-					}
-					catch (BaseException $e)
-					{
-						if ($e->getAttribute('errorcode') != 1060)
-						{
-							$this->errorMessage(__METHOD__ . ' ERROR : ' . $e->getMessage());
-						}
-					}
-					catch (Exception $e)
-					{
-						$this->errorMessage(__METHOD__ . ' ERROR : ' . $e->getMessage());
-					}
+					$schemaManager->executeBatch($sql, true);
+				}
+				catch (Exception $e)
+				{
+					$this->errorMessage('Execution error on ' . $fileName . ': ' . $e->getCode() . ' ...' . $e->getMessage());
 				}
 			}
 		}
@@ -177,14 +162,7 @@ class commands_GenerateDatabase extends c_ChangescriptCommand
 		$this->message('Update table f_document with supported languages ...');
 		foreach (RequestContext::getInstance()->getSupportedLanguages() as $lang) 
 		{
-			try 
-			{
-				$persistentProvider->addLang($lang);
-			}
-			catch (Exception $e)
-			{
-				Framework::warn($e->getMessage());
-			}
+			$schemaManager->addLang($lang);
 		}
 		
 		// Generate relation_Id.
@@ -192,7 +170,7 @@ class commands_GenerateDatabase extends c_ChangescriptCommand
 		RelationService::getInstance()->compile();
 		
 		$this->message("Cleaning Framework cache (f_cache) ...");
-		$persistentProvider->clearFrameworkCache();
+		f_persistentdocument_PersistentProvider::getInstance()->clearFrameworkCache();
 		
 		$this->quitOk("Database generated");
 	}

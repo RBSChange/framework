@@ -249,7 +249,7 @@ abstract class indexer_QueryBase
 	private function getAccessorFilterQuery()
 	{
 		$currentUser = users_UserService::getInstance()->getCurrentUser();
-		if (($currentUser instanceof users_persistentdocument_backenduser) && $currentUser->getIsroot())
+		if ($currentUser && $currentUser->getIsroot())
 		{
 			return null;
 		}

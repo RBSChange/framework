@@ -1,13 +1,13 @@
 <rights>
 <!-- module generic -->
 <!--
-	Il est possible d'appliquer un attribut front-end sur une role module.action.model
+	
 	Une permission est definie si elle existe dans au moins une action et au moins un role.
 	L'utilisation du caractère "*" dans les permissions ne definie pas les permissions.
 	Une action est permissionée si elle possede au moin une permission définie
 	pour une action toutes les permissions doivent etre acordé à l'utilisateur et le noeud pour etre executé.
 	pour les roles il et possible d'utilisé le caractère "*" pour affecter des permissions par lot.
-	Sur les documents les actions de bases sont automatiquements importées.
+	Sur les documents les actions de bases sont automatiquements importées sauf si l'attribut ignore-base vaut true.
 -->
 	<actions>
 		<document name="basedocument">
@@ -17,40 +17,37 @@
 			<action name="Activate"/>
 			<action name="Cancel" />
 			<action name="CreateCorrection" />
-			<action name="CreateWorkflowInstance" back-office-name="startValidation"/>
+			<action name="CreateWorkflowInstance" />
 			<action name="Deactivated" />
-			<action name="ReActivate" back-office-name="reactivate"/>
+			<action name="ReActivate" />
 			<action name="Delete" />
 			<action name="File" />
 			<action name="PutInTrash" />
 
 			<action name="Move" />
-			<action name="Rename" />
+
 			<action name="Remove"/>
 			
-			<action name="Load" back-office-name="edit"/>
-		    <action name="LoadForTranslation" back-office-name="translateFrom"/>
+			<action name="Load" />
+		    <action name="LoadForTranslation" />
 			
 			<action name="Save" />
 			<action name="Insert" />
 			<action name="Update" />
+			<action name="Duplicate" />
 			<action name="UpdateTranslation" />
 
-			<action name="LoadPermissions" back-office-name="editPermissions" />
+			<action name="LoadPermissions" />
 			<action name="SavePermissions" />
 
 			<action name="ViewList" />
 			<action name="ViewDetail" />
-
-			<action name="PreviewBackoffice" back-office-name="viewInformation" />
-
-			<action name="ExportCsv" />
 		</document>
 
 		<action name="Enabled"/>
-		<action name="GetPreferencesDocument" back-office-name="editPreferences"/>
-		<action name="Order" back-office-name="openOrderChildren"/>
-		<action name="LoadTags" back-office-name="openTags"/>
+		<action name="GetPreferencesDocument" />
+		<action name="Order" />
+		<action name="LoadTags" />
 		
 		<action name="SaveRedirectInfo" />
 		<action name="LoadRedirectInfo" />

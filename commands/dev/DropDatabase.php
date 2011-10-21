@@ -60,7 +60,7 @@ class commands_DropDatabase extends c_ChangescriptCommand
 			}
 		}
 		
-		$pp->clearDB();	
+		$pp->getSchemaManager()->clearDB();	
 		return $this->quitOk("Database cleared successFully");
 	}
 }

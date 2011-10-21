@@ -575,7 +575,7 @@ class indexer_IndexService extends BaseService
 					$indexedDoc->setWebsiteIds($websiteIds);
 					foreach (DocumentHelper::getDocumentArrayFromIdArray($websiteIds) as $website) 
 					{
-						website_WebsiteModuleService::getInstance()->setCurrentWebsite($website);
+						website_WebsiteService::getInstance()->setCurrentWebsite($website);
 						$userIds = array_merge($this->getFrontendAccessorIds($document), $userIds);
 					}
 					$userIds = array_unique($userIds);
@@ -752,7 +752,7 @@ class indexer_IndexService extends BaseService
 		}
 		
 		$definitionPointId = $ps->getDefinitionPointForPackage($document->getId(), $packageName);
-		$permissionName = $packageName . '.Update.' . $model->getDocumentName();
+		$permissionName = $packageName . '.List.' . $model->getDocumentName();
 		return $ps->getAccessorIdsForPermissionAndDocumentId($permissionName, $definitionPointId);
 	}
 
@@ -908,23 +908,29 @@ class indexer_IndexService extends BaseService
 	{
 		$result = array();
 		$roleService = change_PermissionService::getRoleServiceByRole($roleName);
-		if ($roleService->isBackEndRole($roleName))
+		if ($roleService->hasRole($roleName))
 		{
-			$modelNames = ModuleService::getInstance()->getDefinedDocumentModelNames(change_PermissionService::getModuleNameByRole($roleName));
-			foreach ($modelNames as $modelName)
+			$perms = $roleService->getPermissionsByRole($roleName);
+			foreach ($perms as $permsname) 
 			{
-				if (in_array($modelName, $this->getBackOfficeModelsName()))
+				if ($permsname === 'modules_website.AuthenticatedFrontUser')
 				{
-					$result[$modelName] = $modelName;
+					foreach ($this->getFrontOfficeModelsName() as $modelName) 
+					{
+						$result[$modelName] = $modelName;
+					}
 				}
-			}
-		}
-
-		if ($roleService->isFrontEndRole($roleName))
-		{
-			foreach ($this->getFrontOfficeModelsName() as $modelName) 
-			{
-				$result[$modelName] = $modelName;
+				elseif (strpos($permsname, '.List.'))
+				{
+					$modelNames = ModuleService::getInstance()->getDefinedDocumentModelNames(change_PermissionService::getModuleNameByRole($roleName));
+					foreach ($modelNames as $modelName)
+					{
+						if (in_array($modelName, $this->getBackOfficeModelsName()))
+						{
+							$result[$modelName] = $modelName;
+						}
+					}
+				}
 			}
 		}
 		return array_values($result);

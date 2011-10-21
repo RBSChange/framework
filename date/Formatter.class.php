@@ -209,12 +209,16 @@ class date_Formatter
 	 */
 	public static function getDefaultDateFormat($lang)
 	{
-		$lang = $lang === null ? RequestContext::getInstance()->getLang() : $lang;
-		if (!isset(self::$default['date'][$lang]))
-		{
-			self::$default['date'][$lang] = LocaleService::getInstance()->formatKey($lang, 'f.date.date.default-date-format');
-		}
-	 	return self::$default['date'][$lang];
+		return RequestContext::getInstance()->getDateFormat($lang);
+	}
+	
+	/**
+	 * @param string $lang
+	 * @return string
+	 */	
+	public static function getDefaultDateTimeFormat($lang)
+	{
+		return RequestContext::getInstance()->getDateTimeFormat($lang);
 	}
 	
 	/**
@@ -235,19 +239,7 @@ class date_Formatter
 		return self::formatBO($date, self::getDefaultDateFormat(RequestContext::getInstance()->getUILang()));
 	}
 	
-	/**
-	 * @param string $lang
-	 * @return string
-	 */	
-	public static function getDefaultDateTimeFormat($lang)
-	{
-		$lang = $lang === null ? RequestContext::getInstance()->getLang() : $lang;
-		if (!isset(self::$default['datetime'][$lang]))
-		{
-			self::$default['datetime'][$lang] = LocaleService::getInstance()->formatKey($lang, 'f.date.date.default-datetime-format');
-		}
-	 	return self::$default['datetime'][$lang];	
-	}
+
 	
 	/**
 	 * @param date_Calendar $date or string
@@ -268,7 +260,7 @@ class date_Formatter
 	}
 	
 	
-	private static $default = array('date' => array(), 'datetime' => array());
+
 	
 	/**
 	 * @var string[]

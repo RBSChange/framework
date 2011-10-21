@@ -83,7 +83,7 @@ class commands_CompileConfig extends c_ChangescriptCommand
 				$this->message("LOGGING_LEVEL is now ".$current["defines"]["LOGGING_LEVEL"]);
 				if (!isset($options['ignoreListener']))
 				{
-					$this->addListeners('after', "compile-js-dependencies");
+					$this->addListeners('after', "website.compile-js-dependencies");
 				}
 			}
 			if ($old["defines"]["SUPPORTED_LANGUAGES"] != $current["defines"]["SUPPORTED_LANGUAGES"])
@@ -92,7 +92,7 @@ class commands_CompileConfig extends c_ChangescriptCommand
 				if (!isset($options['ignoreListener']))
 				{
 					$this->addListeners('after', "generate-database");
-					$this->addListeners('after', "compile-editors-config"); 	
+					$this->addListeners('after', "uixul.compile-editors-config"); 	
 				}
 			}
 			if ($old["defines"]["CHANGE_USE_CORRECTION"] != $current["defines"]["CHANGE_USE_CORRECTION"]

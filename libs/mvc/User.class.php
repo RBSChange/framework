@@ -132,25 +132,17 @@ class change_User
 	
 	/**
 	 * Initializes the FrameworkSecurityUser using a modules_users/user.
-	 *	
 	 * @param users_persistentdocument_user $user
-	 * @throws IllegalArgumentException
 	 */
 	public function setUser($user)
 	{
-		
-		if ($user instanceof users_persistentdocument_backenduser)
+		if ($user instanceof users_persistentdocument_user) 
 		{
 			$isRoot = $user->getIsroot();
+			change_Controller::getInstance()->getStorage()->writeForUser('framework_isRoot', $isRoot);
+			$this->setLogin($user->getLogin());
+			$this->setId($user->getId());
 		}
-		else
-		{
-			$isRoot = false;
-		}
-		
-		change_Controller::getInstance()->getStorage()->writeForUser('framework_isRoot', $isRoot);
-		$this->setLogin($user->getLogin());
-		$this->setId($user->getId());
 	}
 	
 	/**
