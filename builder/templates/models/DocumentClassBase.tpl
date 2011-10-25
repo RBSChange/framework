@@ -33,11 +33,11 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 <{if $property->isDocument()}>
 		if ($this->m_<{$property->getName()}> !== null && !is_numeric($this->m_<{$property->getName()}>))
 		{
-			$<{$property->getName()}>Count = $this->m_<{$property->getName()}>->count(); 
-			if ($<{$property->getName()}>Count > 0)
+			$valCount = $this->m_<{$property->getName()}>->count(); 
+			if ($valCount > 0)
 			{
 <{if $property->isArray()}>
-				$this->m_<{$property->getName()}> = $<{$property->getName()}>Count;
+				$this->m_<{$property->getName()}> = $valCount;
 <{else}>			
 				$this->m_<{$property->getName()}> = $this->m_<{$property->getName()}>[0]->getId();
 <{/if}>
@@ -106,19 +106,14 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 
     public function __destruct()
     {
-    	$this->resetDocumentProperties();
-        parent::__destruct();
-    }
-    
-    protected function resetDocumentProperties()
-    {
 <{foreach from=$model->getPrivateClassMember() item=property}>
 <{if $property->isDocument()}>
 		$this->m_<{$property->getName()}> = null;
 <{/if}>
 <{/foreach}>
+        parent::__destruct();
     }
-
+    
 	/**
 	 * @return void
 	 */
@@ -188,7 +183,11 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
                 case '<{$property->getName()}>' : $this->m_<{$property->getName()}> = (bool)$propertyValue; break;
 <{elseif $property->getType() == "Integer"}>
                 case '<{$property->getName()}>' : $this->m_<{$property->getName()}> = (null === $propertyValue) ? null : intval($propertyValue); break;
+<{elseif $property->getType() == "DocumentId"}>
+                case '<{$property->getName()}>' : $this->m_<{$property->getName()}> = (null === $propertyValue) ? null : intval($propertyValue); break;
 <{elseif $property->getType() == "Double"}>
+                case '<{$property->getName()}>' : $this->m_<{$property->getName()}> = (null === $propertyValue) ? null : floatval($propertyValue); break;
+<{elseif $property->getType() == "Decimal"}>
                 case '<{$property->getName()}>' : $this->m_<{$property->getName()}> = (null === $propertyValue) ? null : floatval($propertyValue); break;
 <{else}>
 				case '<{$property->getName()}>' : $this->m_<{$property->getName()}> = $propertyValue; break;
@@ -197,7 +196,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 			}
 		}
 	}
-
+<{if $model->hasValidatesProperties()}>
 	/**
 	 * @return boolean
 	 */
@@ -208,89 +207,25 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		&& $this->is<{$property->getPhpName()}>Valid()
 <{/foreach}>;
 	}
+<{/if}>
 
 <{foreach from=$model->getPropertiesComplete() item=property}><{$property->phpPropertyValidationMethod()}>
 <{/foreach}>
 
-<{foreach from=$model->getClassI18nMember() item=property}>
-
-	/**
-	 * @param <{$property->getCommentaryType()}> $<{$property->getName()}>
-	 * @return void
-	 */
-	public function set<{$property->getPhpName()}>($<{$property->getName()}>)
-	{
-		$this->checkLoaded();
-		if ($this->set<{$property->getPhpName()}>Internal($<{$property->getName()}>))
-		{
-			$this->propertyUpdated('<{$property->getName()}>');
-		}
-	}
-	
-<{if $property->getType() == "DateTime"}>
-	/**
-	 * @param <{$property->getCommentaryType()}> $<{$property->getName()}>
-	 * @return void
-	 */
-	public function setUI<{$property->getPhpName()}>($<{$property->getName()}>)
-	{
-		$this->set<{$property->getPhpName()}>(date_Converter::convertDateToGMT($<{$property->getName()}>));
-	}
-	
-	/**
-	 * @return <{$property->getCommentaryType()}>
-	 */
-	public function getUI<{$property->getPhpName()}>()
-	{
-		return date_Converter::convertDateToLocal($this->get<{$property->getPhpName()}>());
-	}	
-<{/if}>
-
-	/**
-	 * @param <{$property->getCommentaryType()}> $<{$property->getName()}>
-	 * @return boolean true if modified
-	 */
-	protected function set<{$property->getPhpName()}>Internal($<{$property->getName()}>)
-	{
-<{if $property->getType() == "DateTime"}>
-		if ($<{$property->getName()}> instanceof date_Calendar)
-		{
-			$<{$property->getName()}> = date_Formatter::format($<{$property->getName()}>, date_Formatter::SQL_DATE_FORMAT);
-		}
-		else if (is_long($<{$property->getName()}>))
-		{
-			$<{$property->getName()}> = date(date_Formatter::SQL_DATE_FORMAT, $<{$property->getName()}>);
-		}
-<{elseif $property->getType() == "Boolean"}>
-		$<{$property->getName()}> = (bool) $<{$property->getName()}>;
-<{elseif $property->getType() == "Integer"}>
-		$<{$property->getName()}> = (null === $<{$property->getName()}>) ? null : intval($<{$property->getName()}>);
-<{elseif $property->getType() == "Double"}>
-		$<{$property->getName()}> = (null === $<{$property->getName()}>) ? null : floatval($<{$property->getName()}>);
-<{/if}>
-
-<{if $property->getPreserveOldValue()}>
-		$i18nObject = $this->getI18nObject();
-		$result = $i18nObject->set<{$property->getName()}>($<{$property->getName()}>);
-		if ($result)
-		{
-			$this->setOldValue('<{$property->getName()}>', $i18nObject->get<{$property->getPhpName()}>OldValue(), $i18nObject->getLang());
-		}
-		return $result;
-<{else}>
-		return $this->getI18nObject()->set<{$property->getName()}>($<{$property->getName()}>);
-<{/if}>
-	}
-
+<{foreach from=$model->getScalarClassMember() item=property}>
 	/**
 	 * @return <{$property->getCommentaryType()}>
 	 */
 	public function get<{$property->getPhpName()}>()
 	{
 		$this->checkLoaded();
+<{if $property->isLocalized()}>
 		return $this->getI18nObject()->get<{$property->getPhpName()}>();
+<{else}>
+		return $this->m_<{$property->getName()}>;
+<{/if}>
 	}
-
+<{if $property->isLocalized()}>
 	/**
 	 * @return <{$property->getCommentaryType()}>
 	 */
@@ -308,66 +243,112 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	{
 		$this->checkLoaded();
 		return $this->getI18nObject($lang)->get<{$property->getPhpName()}>();
-	}
-<{if $property->getType() == 'XHTMLFragment'}>
-
-	/**
-	 * @return <{$property->getCommentaryType()}>
-	 */
-	public function get<{$property->getPhpName()}>AsHtml()
-	{
-		return f_util_HtmlUtils::renderHtmlFragment($this->get<{$property->getPhpName()}>());
-	}
-<{/if}>
-<{if $property->getType() == 'LongString' || $property->getType() == 'String'}>
-
-	/**
-	 * @return <{$property->getCommentaryType()}>
-	 */
-	public function get<{$property->getPhpName()}>AsHtml()
-	{
-		return f_util_HtmlUtils::textToHtml($this->get<{$property->getPhpName()}>());
-	}
-<{/if}>
+	}	
+<{/if}>	
 <{if $property->getPreserveOldValue()}>
-
 	/**
 	 * @return <{$property->getCommentaryType()}> or null
 	 */
 	public function get<{$property->getPhpName()}>OldValue()
 	{
+<{if $property->isLocalized()}>
 		return $this->getOldValue('<{$property->getName()}>', $this->getI18nObject()->getLang());
+<{else}>
+		return $this->getOldValue('<{$property->getName()}>');
+<{/if}>
 	}
 <{/if}>
-
-<{/foreach}>
-<{foreach from=$model->getPrivateClassMember() item=property}>
-<{if !$property->isDocument()}>
-
 	/**
-	 * @param <{$property->getCommentaryType()}> $<{$property->getName()}>
+	 * @param <{$property->getCommentaryType()}> $val
 	 * @return void
 	 */
-	public function set<{$property->getPhpName()}>($<{$property->getName()}>)
+	public function set<{$property->getPhpName()}>($val)
 	{
 		$this->checkLoaded();
 <{if $property->getName() == "s18s"}>
 	$this->m_s18sArray = null;
 <{/if}>
-		if ($this->set<{$property->getPhpName()}>Internal($<{$property->getName()}>))
+		if ($this->set<{$property->getPhpName()}>Internal($val))
 		{
 			$this->propertyUpdated('<{$property->getName()}>');
 		}
 	}
-
+	
+	/**
+	 * @param <{$property->getCommentaryType()}> $val
+	 * @return boolean true if modified
+	 */
+	protected function set<{$property->getPhpName()}>Internal($val)
+	{	
+<{if $property->getType() == "DateTime"}>
+		if ($val instanceof date_Calendar)
+		{
+			$val = date_Formatter::format($val, date_Formatter::SQL_DATE_FORMAT);
+		}
+		else if (is_long($val))
+		{
+			$val = date(date_Formatter::SQL_DATE_FORMAT, $val);
+		}
+<{elseif $property->getType() == "Boolean"}>
+		$val = (bool) $val;
+<{elseif $property->getType() == "Integer"}>
+		$val = (null === $val) ? null : intval($val);
+<{elseif $property->getType() == "Double" || $property->getType() == "Decimal"}>
+		$val = (null === $val) ? null : floatval($val);
+<{elseif $property->getType() == "JSON"}>
+		$val = (null === $val || is_string($val)) ? $val : JsonService::getInstance()->encode($val);
+<{elseif $property->getType() == "Object"}>
+		$val = (null === $val || is_string($val)) ? $val : serialize($val);
+<{elseif $property->getType() == "DocumentId"}>
+		$val = ($val instanceof f_persistentdocument_PersistentDocument) ? $val->getId() : intval($val);
+		if ($val < 0) {Framework::error(__METHOD__ . ' Invalid documentId');}
+		if ($val <= 0) {$val = null;}
+<{/if}>
+<{if $property->isLocalized()}>
+<{if $property->getPreserveOldValue()}>
+		$i18nObject = $this->getI18nObject();
+		$result = $i18nObject->set<{$property->getName()}>($val);
+		if ($result)
+		{
+			$this->setOldValue('<{$property->getName()}>', $i18nObject->get<{$property->getPhpName()}>OldValue(), $i18nObject->getLang());
+		}
+		return $result;
+<{else}>
+		return $this->getI18nObject()->set<{$property->getName()}>($val);
+<{/if}>
+<{else}>
+<{if $property->getType() == "Double" || $property->getType() == "Decimal"}>
+		$modified = false;
+		if ($this->m_<{$property->getName()}> === null || $val === null)
+		{
+			$modified = ($this->m_<{$property->getName()}> !== $val);
+		}
+		else
+		{
+			$modified = (abs($this->m_<{$property->getName()}> - $val) > 0.0001);
+		}
+<{else}>
+		$modified = $this->m_<{$property->getName()}> !== $val;
+<{/if}>
+		if ($modified)
+		{
+<{if $property->getPreserveOldValue()}>
+			$this->setOldValue('<{$property->getName()}>', $this->m_<{$property->getName()}>);
+<{/if}>
+			$this->m_<{$property->getName()}> = $val;
+			return true;
+		}
+		return false;
+<{/if}>
+	}
 <{if $property->getType() == "DateTime"}>
 	/**
-	 * @param <{$property->getCommentaryType()}> $<{$property->getName()}>
+	 * @param <{$property->getCommentaryType()}> $val
 	 * @return void
 	 */
-	public function setUI<{$property->getPhpName()}>($<{$property->getName()}>)
+	public function setUI<{$property->getPhpName()}>($val)
 	{
-		$this->set<{$property->getPhpName()}>(date_Converter::convertDateToGMT($<{$property->getName()}>));
+		$this->set<{$property->getPhpName()}>(date_Converter::convertDateToGMT($val));
 	}
 	
 	/**
@@ -376,79 +357,9 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	public function getUI<{$property->getPhpName()}>()
 	{
 		return date_Converter::convertDateToLocal($this->get<{$property->getPhpName()}>());
-	}	
-<{/if}>
-
-
-<{if $property->getType() == "Double"}>
-	/**
-	 * @param <{$property->getCommentaryType()}> $<{$property->getName()}>
-	 * @return Boolean
-	 */
-	protected function set<{$property->getPhpName()}>Internal($<{$property->getName()}>)
-	{
-		$<{$property->getName()}> = $<{$property->getName()}> !== null ? floatval($<{$property->getName()}>) : null;
-		$modified = false;
-		if ($this->m_<{$property->getName()}> === null || $<{$property->getName()}> === null)
-		{
-			$modified = ($this->m_<{$property->getName()}> !== $<{$property->getName()}>);
-		}
-		else
-		{
-			$modified = (abs($this->m_<{$property->getName()}> - $<{$property->getName()}>) > 0.0001);
-		}
-		if ($modified)
-		{
-<{if $property->getPreserveOldValue()}>
-			$this->setOldValue('<{$property->getName()}>', $this->m_<{$property->getName()}>);
-<{/if}>
-			$this->m_<{$property->getName()}> = $<{$property->getName()}>;
-		}
-		return $modified;
-	}
-<{else}>
-	/**
-	 * @param <{$property->getCommentaryType()}> $<{$property->getName()}>
-	 * @return Boolean
-	 */
-	protected function set<{$property->getPhpName()}>Internal($<{$property->getName()}>)
-	{
-<{if $property->getType() == "DateTime"}>
-		if ($<{$property->getName()}> instanceof date_Calendar)
-		{
-			$<{$property->getName()}> = date_Formatter::format($<{$property->getName()}>, date_Formatter::SQL_DATE_FORMAT);
-		}
-		else if (is_long($<{$property->getName()}>))
-		{
-			$<{$property->getName()}> = date(date_Formatter::SQL_DATE_FORMAT, $<{$property->getName()}>);
-		}
-<{elseif $property->getType() == "Boolean"}>
-		$<{$property->getName()}> = (bool) $<{$property->getName()}>;
-<{elseif $property->getType() == "Integer"}>
-		$<{$property->getName()}> = (null === $<{$property->getName()}>) ? null : intval($<{$property->getName()}>);
-<{/if}>
-		if ($this->m_<{$property->getName()}> !== $<{$property->getName()}>)
-		{
-<{if $property->getPreserveOldValue()}>
-			$this->setOldValue('<{$property->getName()}>', $this->m_<{$property->getName()}>);
-<{/if}>
-			$this->m_<{$property->getName()}> = $<{$property->getName()}>;
-			return true;
-		}
-		return false;
 	}
 <{/if}>
-
-	/**
-	 * @return <{$property->getCommentaryType()}>
-	 */
-	public function get<{$property->getPhpName()}>()
-	{
-		$this->checkLoaded();
-		return $this->m_<{$property->getName()}>;
-	}
 <{if $property->getType() == 'XHTMLFragment'}>
-
 	/**
 	 * @return <{$property->getCommentaryType()}>
 	 */
@@ -458,7 +369,6 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 <{/if}>
 <{if $property->getType() == 'LongString' || $property->getType() == 'String'}>
-
 	/**
 	 * @return <{$property->getCommentaryType()}>
 	 */
@@ -467,14 +377,71 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		return f_util_HtmlUtils::textToHtml($this->get<{$property->getPhpName()}>());
 	}
 <{/if}>
-<{if $property->getPreserveOldValue()}>
-
+<{if $property->getType() == "BBCode"}>
 	/**
-	 * @return <{$property->getCommentaryType()}> or null
+	 * @param <{$property->getCommentaryType()}> $val
+	 * @return void
 	 */
-	public function get<{$property->getPhpName()}>OldValue()
+	public function set<{$property->getPhpName()}>AsBBCode($val)
 	{
-		return $this->getOldValue('<{$property->getName()}>');
+		$parser = new website_BBCodeParser();
+		$this->set<{$property->getPhpName()}>($parser->convertBBCodeToXml($val, $parser->getModuleProfile('<{$model->getModuleName()}>')));
+	}
+	
+	/**
+	 * @return <{$property->getCommentaryType()}>
+	 */
+	public function get<{$property->getPhpName()}>AsBBCode()
+	{
+		$parser = new website_BBCodeParser();
+		return $parser->convertXmlToBBCode($this->get<{$property->getPhpName()}>());
+	}	
+	
+	/**
+	 * @return <{$property->getCommentaryType()}>
+	 */
+	public function get<{$property->getPhpName()}>AsHtml()
+	{
+		$parser = new website_BBCodeParser();
+		return $parser->convertXmlToHtml($this->get<{$property->getPhpName()}>());
+	}
+<{/if}>
+<{if $property->getType() == "JSON"}>
+	/**
+	 * @return <{$property->getCommentaryType()}>
+	 */
+	public function getDecoded<{$property->getPhpName()}>()
+	{
+		$val = $this->get<{$property->getPhpName()}>();
+		return $val === null ? $val : JsonService::getInstance()->decode($val);
+	}	
+<{/if}>
+<{if $property->getType() == "Object"}>
+	/**
+	 * @return <{$property->getCommentaryType()}>
+	 */
+	public function getDecoded<{$property->getPhpName()}>()
+	{
+		$val = $this->get<{$property->getPhpName()}>();
+		return $val === null ? $val : unserialize($val);
+	}
+<{/if}>
+<{if $property->getType() == "DocumentId"}>
+	/**
+	 * @return f_persistentdocument_PersistentDocument
+	 */
+	public function get<{$property->getPhpName()}>Instance()
+	{
+		$val = $this->get<{$property->getPhpName()}>();
+		if ($val !== null)
+		{
+			$m = f_persistentdocument_PersistentProvider::getInstance()->getDocumentModelName($val);
+			if ($m !== null)
+			{
+				f_persistentdocument_PersistentProvider::getInstance()->getDocumentInstance($val, $m);
+			}
+		}
+		return null;
 	}
 <{/if}>
 <{if $property->getFromList() && $property->getMaxOccurs() == 1}>
@@ -496,7 +463,10 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		return f_util_HtmlUtils::textToHtml($listItem->getLabel());
 	}
 <{/if}>
-<{elseif  $property->isDocument() && !$property->isArray()}>
+<{/foreach}>
+
+<{foreach from=$model->getDocumentClassMember() item=property}>
+<{if !$property->isArray()}>
 
 	private function checkLoaded<{$property->getName()}>()
 	{
@@ -558,8 +528,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		return null;
 	}
 <{/if}>
-
-<{elseif  $property->isDocument() && $property->isArray()}>
+<{else}>
 
 	private function checkLoaded<{$property->getPhpName()}>()
 	{
@@ -684,8 +653,6 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 			$this->propertyUpdated('<{$property->getName()}>');
 		}
 	}
-
-
 
 	/**
 	 * @return void
@@ -853,12 +820,12 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 <{if !$property->isDocument()}>
 <{if $property->getType() == "DateTime"}>
 	/**
-	 * @param <{$property->getCommentaryType()}> $<{$property->getName()}>
+	 * @param <{$property->getCommentaryType()}> $val
 	 * @return void
 	 */
-	public function setUI<{$property->getPhpName()}>($<{$property->getName()}>)
+	public function setUI<{$property->getPhpName()}>($val)
 	{
-		$this->set<{$property->getPhpName()}>(date_Converter::convertDateToGMT($<{$property->getName()}>));
+		$this->set<{$property->getPhpName()}>(date_Converter::convertDateToGMT($val));
 	}
 	
 	/**
@@ -871,41 +838,41 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	
 <{/if}>
 	/**
-	 * @param <{$property->getCommentaryType()}> $<{$property->getName()}>
+	 * @param <{$property->getCommentaryType()}> $val
 	 * @return void
 	 */
-	public function set<{$property->getPhpName()}>($<{$property->getName()}>)
+	public function set<{$property->getPhpName()}>($val)
 	{
 <{if $property->getType() == "Double"}>
-		$<{$property->getName()}> = $<{$property->getName()}> !== null ? floatval($<{$property->getName()}>) : null;	
+		$val = $val !== null ? floatval($val) : null;	
 <{elseif $property->getType() == "DateTime"}>
-		if ($<{$property->getName()}> instanceof date_Calendar)
+		if ($val instanceof date_Calendar)
 		{
-			$<{$property->getName()}> = date_Formatter::format($<{$property->getName()}>, date_Formatter::SQL_DATE_FORMAT);
+			$val = date_Formatter::format($val, date_Formatter::SQL_DATE_FORMAT);
 		}
-		else if (is_long($<{$property->getName()}>))
+		else if (is_long($val))
 		{
-			$<{$property->getName()}> = date(date_Formatter::SQL_DATE_FORMAT, $<{$property->getName()}>);
+			$val = date(date_Formatter::SQL_DATE_FORMAT, $val);
 		}
-		else if (null === $<{$property->getName()}>)
+		else if (null === $val)
 		{
-			$<{$property->getName()}> = null;
+			$val = null;
 		}
 		else
 		{
-			$<{$property->getName()}> = strval($<{$property->getName()}>);
+			$val = strval($val);
 		}
 <{elseif $property->getType() == "Boolean"}>
-		$<{$property->getName()}> = (bool)$<{$property->getName()}>;
+		$val = (bool)$val;
 <{elseif $property->getType() == "Integer"}>
-		$<{$property->getName()}> = (null === $<{$property->getName()}>) ? null : intval($<{$property->getName()}>);
+		$val = (null === $val) ? null : intval($val);
 <{else}>	
-		$<{$property->getName()}> = (null === $<{$property->getName()}>) ? null : strval($<{$property->getName()}>);
+		$val = (null === $val) ? null : strval($val);
 <{/if}>
 <{if $property->isLocalized()}>
-		$this->setI18NS18sProperty('<{$property->getName()}>', $<{$property->getName()}>);
+		$this->setI18NS18sProperty('<{$property->getName()}>', $val);
 <{else}>
-		$this->setS18sProperty('<{$property->getName()}>', $<{$property->getName()}>);
+		$this->setS18sProperty('<{$property->getName()}>', $val);
 <{/if}>
 	}
 
@@ -1210,8 +1177,8 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 <{foreach from=$model->getClassMember() item=property}>
 <{if $property->hasCascadeDelete()}>
 <{if $property->isArray()}>
-		$<{$property->getName()}> = $this->get<{$property->getPhpName()}>Array();
-		foreach ($<{$property->getName()}> as $item)
+		$val = $this->get<{$property->getPhpName()}>Array();
+		foreach ($val as $item)
 		{
 			$item->delete();
 		}

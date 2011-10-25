@@ -1440,9 +1440,10 @@ class generator_PersistentModel
 	public function getClassMember()
 	{
 		$result = array();
+		$exp =  array('id', 'model', 'lang', 'label');
 		foreach ($this->getPropertiesComplete() as $property)
 		{
-			if (array_search($property->getName(), array('id', 'model', 'lang', 'label')) !== false || $property->isOverride())
+			if (in_array($property->getName(), $exp) || $property->isOverride())
 			{
 				continue;
 			}
@@ -1450,6 +1451,40 @@ class generator_PersistentModel
 			$result[] = $property;
 		}
 		return $result;
+	}
+	/**
+	 * @return array<generator_PersistentProperty>
+	 */
+	public function getScalarClassMember()
+	{
+		$result = array();
+		$exp =  array('id', 'model', 'lang', 'label');
+		foreach ($this->getPropertiesComplete() as $property)
+		{
+			if (in_array($property->getName(), $exp) || $property->isOverride() || $property->isDocument())
+			{
+				continue;
+			}	
+			$result[] = $property;
+		}
+		return $result;		
+	}
+	
+	/**
+	 * @return array<generator_PersistentProperty>
+	 */
+	public function getDocumentClassMember()
+	{
+		$result = array();
+		foreach ($this->getPropertiesComplete() as $property)
+		{
+			if ($property->isOverride() || !$property->isDocument())
+			{
+				continue;
+			}	
+			$result[] = $property;
+		}
+		return $result;		
 	}
 	
 	public function getPropertiesComplete()
@@ -1620,12 +1655,6 @@ class generator_PersistentModel
 		$result = array();
 		$properties = $this->getClassMember();
 		$labelProperty = $this->getPropertyByName("label");
-		$currentModel = $this;
-		while ($currentModel !== null && $labelProperty === null)
-		{
-			$labelProperty = $currentModel->getPropertyByName("label");
-			$currentModel = $currentModel->getParentModel();
-		}
 		if ($labelProperty !== null)
 		{
 			$properties[] = $labelProperty;
@@ -1639,6 +1668,14 @@ class generator_PersistentModel
 			$result[] = $property;
 		}
 		return $result;
+	}
+	
+	/**
+	 * @return boolean
+	 */
+	public function hasValidatesProperties()
+	{
+		return count($this->getValidatesProperties()) > 0;
 	}
 
 	/**

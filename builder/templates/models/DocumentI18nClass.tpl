@@ -264,57 +264,30 @@ class <{$model->getDocumentClassName()}>I18n <{$model->getExtendI18nClassName()}
 <{/if}>
 <{foreach from=$model->getI18nClassMember() item=property}>
 
-<{if $property->getType() == "Double"}>
 	/**
-	 * @param <{$property->getCommentaryType()}> $<{$property->getName()}>
+	 * @param <{$property->getCommentaryType()}> $val
 	 * @return Boolean
 	 */
-	public final function set<{$property->getPhpName()}>($<{$property->getName()}>)
+	public final function set<{$property->getPhpName()}>($val)
 	{
-		$<{$property->getName()}> = $<{$property->getName()}> !== null ? floatval($<{$property->getName()}>) : null;
+<{if $property->getType() == "Double" || $property->getType() == "Decimal"}>
+		$val = $val !== null ? floatval($val) : null;
 		$modified = false;
-		if ($this->m_<{$property->getName()}> === null || $<{$property->getName()}> === null)
+		if ($this->m_<{$property->getName()}> === null || $val === null)
 		{
-			$modified = ($this->m_<{$property->getName()}> !== $<{$property->getName()}>);
+			$modified = ($this->m_<{$property->getName()}> !== $val);
 		}
 		else
 		{
-			$modified = (abs($this->m_<{$property->getName()}> - $<{$property->getName()}>) > 0.0001);
+			$modified = (abs($this->m_<{$property->getName()}> - $val) > 0.0001);
 		}
-
-		if ($modified)
-		{
-			$this->m_<{$property->getName()}> = $<{$property->getName()}>;
-			if (!array_key_exists('<{$property->getName()}>', $this->modifiedProperties))
-			{
-				$this->modifiedProperties['<{$property->getName()}>'] = null;
-			}
-			$this->m_modified = true;
-		}
-
-		return $modified;
-	}
 <{else}>
-	/**
-	 * @param <{$property->getCommentaryType()}> $<{$property->getName()}>
-	 * @return Boolean
-	 */
-	public final function set<{$property->getPhpName()}>($<{$property->getName()}>)
-	{
 <{if $property->getName() == "s18s"}>
 	$this->m_s18sArray = null;
 <{/if}>
-<{if $property->getType() == "DateTime"}>
-		if ($<{$property->getName()}> instanceof date_Calendar)
-		{
-			$<{$property->getName()}> = date_Formatter::format($<{$property->getName()}>, date_Formatter::SQL_DATE_FORMAT);
-		}
-		else if (is_long($<{$property->getName()}>))
-		{
-			$<{$property->getName()}> = date(date_Formatter::SQL_DATE_FORMAT, $<{$property->getName()}>);
-		}
+		$modified = $this->m_<{$property->getName()}> !== $val;
 <{/if}>
-		if ($this->m_<{$property->getName()}> !== $<{$property->getName()}>)
+		if ($modified)
 		{
 			if (!array_key_exists('<{$property->getName()}>', $this->modifiedProperties))
 			{
@@ -324,13 +297,13 @@ class <{$model->getDocumentClassName()}>I18n <{$model->getExtendI18nClassName()}
 				$this->modifiedProperties['<{$property->getName()}>'] = null;
 <{/if}>
 			}
-			$this->m_<{$property->getName()}> = $<{$property->getName()}>;
+			$this->m_<{$property->getName()}> = $val;
 			$this->m_modified = true;
 			return true;
 		}
 		return false;
 	}
-<{/if}>
+
 
 	/**
 	 * @return <{$property->getCommentaryType()}>

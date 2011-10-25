@@ -673,7 +673,8 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 				throw new Exception('Can not create criteria on unknown property '.$propertyName);
 			}
 		}
-		if ($property->getType() !== f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER)
+		if ($property->getType() !== f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER && 
+			$property->getType() !== f_persistentdocument_PersistentDocument::PROPERTYTYPE_DOCUMENTID)
 		{
 			throw new Exception('Can not create criteria on none INTEGER property '.$propertyName);
 		}
@@ -705,9 +706,9 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 			$property = $subModel->getProperty($propertyName);
 			if ($property !== null)
 			{
-				if ($property->getType() === f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER
-					|| ($property->isDocument() && !$property->isArray())
-					)
+				if ($property->getType() === f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER ||
+					$property->getType() === f_persistentdocument_PersistentDocument::PROPERTYTYPE_DOCUMENTID || 
+					($property->isDocument() && !$property->isArray()))
 				{
 					$c->inverseQuery = true;
 				}
@@ -731,7 +732,9 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 				$c->inverseQuery = true;		
 			}
 			
-			if ($property->getType() !== f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER && !$property->isDocument())
+			if ($property->getType() !== f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER && 
+				$property->getType() !== f_persistentdocument_PersistentDocument::PROPERTYTYPE_DOCUMENTID && 
+				!$property->isDocument())
 			{
 				throw new Exception('Property '.$propertyName . ' has no valid type ' . $property->getType());
 			}
@@ -748,7 +751,9 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 					throw new Exception('Property '.$propertyName . ' has no valid type ' . $property->getType());
 				}
 			}
-			if ($property->getType() !== f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER && !$property->isDocument())
+			if ($property->getType() !== f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER && 
+				$property->getType() !== f_persistentdocument_PersistentDocument::PROPERTYTYPE_DOCUMENTID &&
+				!$property->isDocument())
 			{
 				throw new Exception('Property '.$propertyName . ' has no valid type ' . $property->getType());
 			}

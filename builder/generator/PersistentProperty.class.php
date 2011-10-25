@@ -738,7 +738,7 @@ class generator_PersistentProperty
 						$parameter = $validator->getParameter();
 						if (!is_object($parameter))
 						{
-							$parameter = self::buildPhpDecl($parameter);
+							$parameter = $this->buildPhpDecl($parameter);
 						}
 						$validatorScript[] = '			$v->setParameter(' . $parameter . ');';
 						if ($validator->usesReverseMode())
@@ -825,11 +825,11 @@ class generator_PersistentProperty
 				$parameter = $validator->getParameter();
 				if ($parameter instanceof validation_Range)
 				{
-					$parameter = 'new validation_Range('.self::buildPhpDecl($parameter->getMin()).', '.self::buildPhpDecl($parameter->getMax()).')';
+					$parameter = 'new validation_Range('.$this->buildPhpDecl($parameter->getMin()).', '.$this->buildPhpDecl($parameter->getMax()).')';
 				}
 				else if (!is_object($parameter))
 				{
-					$parameter = self::buildPhpDecl($parameter);
+					$parameter = $this->buildPhpDecl($parameter);
 				}
 				$php[] = '			$v->setParameter(' . $parameter . ');';
 				if ($validator->usesReverseMode())
@@ -870,7 +870,7 @@ class generator_PersistentProperty
 	}
 
 
-	private static function buildPhpDecl($value)
+	private function buildPhpDecl($value)
 	{
 		if (is_string($value))
 		{
@@ -923,13 +923,15 @@ class generator_PersistentProperty
 			switch ($this->getType())
 			{
 				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_BOOLEAN :
-					return 'Boolean';
+					return 'boolean';
 				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_DOUBLE :
-					return 'Double';
+				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_DECIMAL :
+					return 'float';
 				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER :
-					return 'Integer';
+				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_DOCUMENTID :
+					return 'integer';
 				default:
-					return 'String';
+					return 'string';
 			}
 		}
 	}

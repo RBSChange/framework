@@ -22,6 +22,12 @@ interface f_persistentdocument_PersistentDocument
 	const PROPERTYTYPE_XHTMLFRAGMENT = 'XHTMLFragment';
 	const PROPERTYTYPE_DOCUMENT = 'Document';
 	
+	const PROPERTYTYPE_DECIMAL = 'Decimal';
+	const PROPERTYTYPE_JSON = 'JSON';
+	const PROPERTYTYPE_BBCODE = 'BBCode';
+	const PROPERTYTYPE_OBJECT = 'Object';
+	const PROPERTYTYPE_DOCUMENTID = 'DocumentId';
+	
 	const PROPERTYTYPE_STRING_DEAFULT_MAX_LENGTH = 255;
 	
 	const STATUS_DRAFT = 'DRAFT';

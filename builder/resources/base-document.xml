@@ -26,14 +26,14 @@
 			* Attributs autorisés :
 			
 			name="propertyName"
-			type="[String] | Boolean | Integer | Double | DateTime | LongString | Lob | XHTMLFragment | modules_xxxxx/yyyyy"
+			type="[String] | Boolean | Integer | Double | Decimal | DateTime | LongString | Lob | XHTMLFragment | BBCode | JSON | Object | DocumentId | modules_xxxxx/yyyyy"
 			cascade-delete="true | [false]"
 			min-occurs="[0]..n"
 			max-occurs="[1]..n | -1"
 			from-list="xxxxxxxx"
 			
 			db-mapping="fieldName"
-			db-size="fieldStringSize";
+			db-size="StringSize | DecimalPrecision,Scale";
 			tree-node="true | [false]"
 			localized="true | [false]"
 			inverse="true | [false]"

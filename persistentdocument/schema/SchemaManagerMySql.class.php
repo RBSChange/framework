@@ -428,9 +428,12 @@ class change_SchemaManagerMySql implements change_SchemaManager
 					$fp[] = "TEXT";
 					break;
 				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_XHTMLFRAGMENT :
+				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_BBCODE :
+				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_JSON :
 					$fp[] = "MEDIUMTEXT";
 					break;
 				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_LOB :
+				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_OBJECT :
 					$fp[] = "MEDIUMBLOB";
 					break;
 				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_BOOLEAN :
@@ -442,7 +445,19 @@ class change_SchemaManagerMySql implements change_SchemaManager
 				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_DOUBLE :
 					$fp[] = "DOUBLE";
 					break;
+				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_DECIMAL :
+					$dbSize = $buildProperty->getDbSize();
+					if (!empty($dbSize) && strpos($dbSize, ','))
+					{
+						$fp[] = "DECIMAL(" . $dbSize . ")";
+					}
+					else
+					{
+						$fp[] = "DECIMAL(13,4)";
+					}
+					break;
 				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER :
+				case f_persistentdocument_PersistentDocument::PROPERTYTYPE_DOCUMENTID :
 					$fp[] = "INT(11)";
 					break;
 			}

@@ -13,13 +13,13 @@
 		<xs:annotation>
 			<xs:documentation source="version">1.0</xs:documentation>
 			<xs:documentation source="description">
-				A property type : String | Boolean | Integer | Double |
-				DateTime | LongString | XHTMLFragment | Lob |
-				modules_xxxxx/yyyyy
+				A property type : String | Boolean | Integer | Double | Decimal |
+				DateTime | LongString | XHTMLFragment | Lob | BBCode | JSON | Object
+				DocumentId | modules_xxxxx/yyyyy
 			</xs:documentation>
 		</xs:annotation>
 		<xs:restriction base="xs:string">
-			<xs:pattern value="String|Boolean|Integer|Double|DateTime|LongString|XHTMLFragment|Lob|modules_[a-z]+/[A-Za-z]+" />
+			<xs:pattern value="String|Boolean|Integer|Double|Decimal|DateTime|LongString|XHTMLFragment|Lob|BBCode|JSON|Object|DocumentId|modules_[a-z]+/[A-Za-z]+" />
 		</xs:restriction>
 	</xs:simpleType>
 
@@ -83,7 +83,7 @@
 									<xs:attribute name="max-occurs" type="xs:int" default="1" />
 									<xs:attribute name="from-list" type="xs:string" />				
 									<xs:attribute name="db-mapping" type="xs:string" />
-									<xs:attribute name="db-size" type="xs:positiveInteger" />
+									<xs:attribute name="db-size" type="xs:string" />
 									<xs:attribute name="tree-node" default="false">
 										<xs:simpleType>
 											<xs:restriction base="xs:NMTOKEN">

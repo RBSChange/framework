@@ -197,6 +197,9 @@ class PropertyInfo
 		switch ($this->type)
 		{
 			case f_persistentdocument_PersistentDocument::PROPERTYTYPE_LOB:
+			case f_persistentdocument_PersistentDocument::PROPERTYTYPE_BBCODE:
+			case f_persistentdocument_PersistentDocument::PROPERTYTYPE_JSON:
+			case f_persistentdocument_PersistentDocument::PROPERTYTYPE_OBJECT:
 			case f_persistentdocument_PersistentDocument::PROPERTYTYPE_LONGSTRING:
 			case f_persistentdocument_PersistentDocument::PROPERTYTYPE_XHTMLFRAGMENT:
 				return true;
