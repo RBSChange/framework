@@ -129,11 +129,11 @@ class indexer_SearchResult
 	{
 		if (!array_key_exists('highlighting', $this->fields))
 		{
-			$result = substr($this->getProperty($name),0,256);
+			$result = f_util_StringUtils::shortenString($this->getProperty($name));
 		}
 		elseif (!array_key_exists($name, $this->fields['highlighting']))
 		{
-			$result = substr($this->getProperty($name),0,256);
+			$result = f_util_StringUtils::shortenString($this->getProperty($name));
 		}
 		else 
 		{
