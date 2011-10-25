@@ -843,8 +843,6 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 		return $this->getDocumentPersistentState() != self::PERSISTENTSTATE_INITIALIZED;
 	}
 	
-	abstract protected function resetDocumentProperties();
-
 	/**
 	 * @param String $name
 	 * @param mixed $value
