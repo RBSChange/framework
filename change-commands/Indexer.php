@@ -104,7 +104,7 @@ class commands_Indexer extends commands_AbstractChangeCommand
 				indexer_IndexService::getInstance()->clearFrontofficeIndex();
 				$this->indexFrontofficeDocuments();
 				$this->rebuildSpell();
-				$this->optimizeIndex();				
+				$this->optimizeIndex();
 				break;
 			case 'rebuild-spell':
 				$this->rebuildSpell();			
@@ -186,9 +186,9 @@ class commands_Indexer extends commands_AbstractChangeCommand
 				if (!is_numeric($output))
 				{
 					$progres = false;
-					$chunkInfo = "* Error on processsing $modelName at index $documentIndex.";
+					$chunkInfo = "* Error on processsing $modelName at index $documentIndex. Output: $output";
 				}
-				if (intval($output) == $chunkSize)
+				elseif (intval($output) == $chunkSize)
 				{
 					$documentIndex += $chunkSize; 
 					$totalDocumentCount += $chunkSize; 
