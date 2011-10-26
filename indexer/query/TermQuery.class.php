@@ -176,6 +176,14 @@ class indexer_TermQuery extends indexer_QueryBase implements indexer_Query
 	{
 		return array($this->value);
 	}
+	
+	/**
+	 * @return String
+	 */	
+	public function getFieldName()
+	{
+		return $this->fieldName;
+	}	
 }
 
 class indexer_StringTermQuery extends indexer_TermQuery

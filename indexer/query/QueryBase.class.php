@@ -221,11 +221,8 @@ abstract class indexer_QueryBase
 		{
 			$boolQuery->add(new indexer_TermQuery('client', $this->clientId));
 		}
-		$accessorFilterQuery = $this->getAccessorFilterQuery();
-		if ($accessorFilterQuery !== null)
-		{
-			$boolQuery->add($accessorFilterQuery);
-		}
+		$this->addAccessorFilterQuery($boolQuery);
+
 		if ($boolQuery->getSubqueryCount() > 0)
 		{
 			return $boolQuery;
@@ -243,10 +240,9 @@ abstract class indexer_QueryBase
 
 	/**
 	 * Get the OR'ed query that will filter results on all document a user has the right to view
-	 *
-	 * @return indexer_Query or null if no accessor filter has to be made
+	 * @param indexer_BooleanQuery $boolQuery
 	 */
-	private function getAccessorFilterQuery()
+	private function addAccessorFilterQuery($boolQuery)
 	{
 		$userService = users_UserService::getInstance();
 		if (indexer_IndexService::getInstance()->getIndexerMode() == indexer_IndexService::INDEXER_MODE_BACKOFFICE)
@@ -261,18 +257,48 @@ abstract class indexer_QueryBase
 		{
 			$currentUser = $userService->getCurrentFrontEndUser();
 		}
-		$res = indexer_QueryHelper::orInstance();
-		$res->add(new indexer_TermQuery('document_accessor', indexer_IndexService::PUBLIC_DOCUMENT_ACCESSOR_ID));
+		$res = $this->findAccesorBooleanQuery($boolQuery);
+		if ($res === null)
+		{
+			$res = indexer_QueryHelper::orInstance();
+			$res->add(new indexer_TermQuery('document_accessor', indexer_IndexService::PUBLIC_DOCUMENT_ACCESSOR_ID));
+			$boolQuery->add($res);
+		}	
 		if ($currentUser !== null)
 		{
 			$ps = f_permission_PermissionService::getInstance();
-
 			foreach ($ps->getAccessorIdsByUser($currentUser) as $id )
 			{
 				$res->add(new indexer_TermQuery('document_accessor', $id));
 			}
 		}
-		return $res;
+	}
+	
+	/**
+	 * @param indexer_BooleanQuery $query
+	 * @return indexer_BooleanQuery
+	 */
+	private function findAccesorBooleanQuery($query)
+	{
+		foreach ($query->getSubqueries() as $subQuery) 
+		{
+			if ($subQuery instanceof indexer_TermQuery) 
+			{
+				if ($subQuery->getFieldName() == 'document_accessor')
+				{
+					return $query;
+				}
+			}
+			elseif ($subQuery instanceof indexer_BooleanQuery)
+			{
+				$res = $this->findAccesorBooleanQuery($subQuery);
+				if ($res) 
+				{
+					return $res;
+				}
+			}
+		}
+		return null;
 	}
 
 	public function setFirstHitOffset($offset)
