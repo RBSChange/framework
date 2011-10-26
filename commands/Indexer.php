@@ -211,9 +211,9 @@ class commands_Indexer extends c_ChangescriptCommand
 			if (!is_numeric($output))
 			{
 				$progres = false;
-				$chunkInfo = "* Error on processsing $modelName at index $documentIndex.";
+				$chunkInfo = "* Error on processsing $modelName at index $documentIndex. Output: $output";
 			}
-			if (intval($output) == $chunkSize)
+			elseif (intval($output) == $chunkSize)
 			{
 				$documentIndex += $chunkSize; 
 				$chunkInfo = "* $modelName processed: " . $documentIndex;
