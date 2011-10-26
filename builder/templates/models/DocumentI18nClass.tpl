@@ -304,7 +304,6 @@ class <{$model->getDocumentClassName()}>I18n <{$model->getExtendI18nClassName()}
 		return false;
 	}
 
-
 	/**
 	 * @return <{$property->getCommentaryType()}>
 	 */
@@ -312,8 +311,8 @@ class <{$model->getDocumentClassName()}>I18n <{$model->getExtendI18nClassName()}
 	{
 		return $this->m_<{$property->getName()}>;
 	}
-
 <{if $property->getPreserveOldValue()}>
+
 	/**
 	 * @return <{$property->getCommentaryType()}>
 	 */

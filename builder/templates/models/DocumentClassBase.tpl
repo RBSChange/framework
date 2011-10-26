@@ -207,10 +207,10 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		&& $this->is<{$property->getPhpName()}>Valid()
 <{/foreach}>;
 	}
-<{/if}>
-
-<{foreach from=$model->getPropertiesComplete() item=property}><{$property->phpPropertyValidationMethod()}>
+	
+<{foreach from=$model->getValidatesProperties() item=property}><{$property->phpPropertyValidationMethod()}>
 <{/foreach}>
+<{/if}>
 
 <{foreach from=$model->getScalarClassMember() item=property}>
 	/**
@@ -438,7 +438,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 			$m = f_persistentdocument_PersistentProvider::getInstance()->getDocumentModelName($val);
 			if ($m !== null)
 			{
-				f_persistentdocument_PersistentProvider::getInstance()->getDocumentInstance($val, $m);
+				return f_persistentdocument_PersistentProvider::getInstance()->getDocumentInstance($val, $m);
 			}
 		}
 		return null;

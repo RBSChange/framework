@@ -40,7 +40,7 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 <{if ($property->isCascadeDelete())}>->setCascadeDelete(true)<{/if}>
 <{if ($property->isTreeNode())}>->setTreeNode(true)<{/if}>
 <{if ($property->getDefaultValue() != null)}>->setDefaultValue(<{$model->escapeString($property->getDefaultValue())}>)<{/if}>
-<{if ($property->getConstraints() != null)}>->setConstraints(<{$model->escapeString($property->getConstraints())}>)<{/if}>
+<{if ($property->getConstraintArray() != null)}>->setConstraints(<{$property->buildPhpConstraintArray()}>)<{/if}>
 <{if ($property->isLocalized())}>->setLocalized(true)<{/if}>
 <{if ($property->getIndexed() != 'none')}>->setIndexed(<{$model->escapeString($property->getIndexed())}>)<{/if}>
 <{if ($property->getFromList() != null)}>->setFromList(<{$model->escapeString($property->getFromList())}>)<{/if}>;
@@ -58,7 +58,7 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 		$p->setType(<{$model->escapeString($property->getType())}>)<{if ($property->getMinOccurs() != 0)}>->setMinOccurs(<{$property->getMinOccurs()}>)<{/if}>
 <{if ($property->getMaxOccurs() != 1)}>->setMaxOccurs(<{$property->getMaxOccurs()}>)<{/if}>
 <{if ($property->getDefaultValue() != null)}>->setDefaultValue(<{$model->escapeString($property->getDefaultValue())}>)<{/if}>
-<{if ($property->getConstraints() != null)}>->setConstraints(<{$model->escapeString($property->getConstraints())}>)<{/if}>
+<{if ($property->getConstraintArray() != null)}>->setConstraints(<{$property->buildPhpConstraintArray()}>)<{/if}>
 <{if ($property->isLocalized())}>->setLocalized(true)<{/if}>
 <{if ($property->getIndexed() != 'none')}>->setIndexed(<{$model->escapeString($property->getIndexed())}>)<{/if}>
 <{if ($property->getFromList() != null)}>->setFromList(<{$model->escapeString($property->getFromList())}>)<{/if}>;
@@ -79,7 +79,7 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 <{if ($property->isCascadeDelete())}>->setCascadeDelete(true)<{/if}>
 <{if ($property->isTreeNode())}>->setTreeNode(true)<{/if}>
 <{if ($property->getDefaultValue() != null)}>->setDefaultValue(<{$model->escapeString($property->getDefaultValue())}>)<{/if}>
-<{if ($property->getConstraints() != null)}>->setConstraints(<{$model->escapeString($property->getConstraints())}>)<{/if}>
+<{if ($property->getConstraintArray() != null)}>->setConstraints(<{$property->buildPhpConstraintArray()}>)<{/if}>
 <{if ($property->isLocalized())}>->setLocalized(true)<{/if}>
 <{if ($property->getIndexed() != 'none')}>->setIndexed(<{$model->escapeString($property->getIndexed())}>)<{/if}>;
 		$this->m_invertProperties[$p->getName()] = $p;

@@ -14,7 +14,7 @@ class PropertyInfo
 	private $treeNode = false;
 	private $isDocument = false;
 	private $defaultValue;
-	private $constraints;
+	private $constraintArray;
 	private $localized = false;
 	private $indexed = 'none'; //none, property, description
 	private $fromList;
@@ -293,7 +293,27 @@ class PropertyInfo
 	 */
 	public function getConstraints()
 	{
-		return $this->constraints;
+		if (is_array($this->constraintArray))
+		{
+			$const = array();
+			foreach ($this->constraintArray as $name => $params) 
+			{
+				if (isset($params['reversed'])) {$name = '!' . $name;}
+				$const[] = $name . ':' . (isset($params['parameter']) ? $params['parameter'] : 'true');
+			}
+			return count($const) ? implode(';', $const) : null;
+		}
+		return $this->constraintArray;
+	}
+	
+	/**	
+	 * Returns the constraints defined for the property.
+	 *
+	 * @return array
+	 */
+	public function getConstraintArray()
+	{
+		return $this->constraintArray;
 	}
 
 	/**
@@ -301,14 +321,9 @@ class PropertyInfo
 	 */
 	public function getMaxSize()
 	{
-		if ($this->constraints !== null && $this->isString())
+		if ($this->isString() && is_array($this->constraintArray) && isset($this->constraintArray['maxSize']))
 		{
-			$match = array();
-			preg_match("/maxSize:([0-9]+)/", $this->constraints, $match);
-			if (isset($match[1]))
-			{
-				return intval($match[1]);
-			}
+			return intval($this->constraintArray['maxSize']['parameter']);
 		}
 		return -1;
 	}
@@ -385,12 +400,31 @@ class PropertyInfo
 	}
 
 	/**
-	 * @param string $value
+	 * @param mixed $value
 	 * @return PropertyInfo
 	 */
 	public function setConstraints($constraints)
 	{
-		$this->constraints = $constraints;
+		if ($constraints === null || is_array($constraints))
+		{
+			$this->constraintArray = $constraints;
+		}
+		elseif (is_string($constraints))
+		{
+			$cp = new validation_ContraintsParser();
+			$defs = $cp->getConstraintArrayFromDefinition($constraints);
+			foreach ($defs as $name => $parameter) 
+			{
+				$params = array('parameter' => $parameter);
+				if ($this->constraintArray === null) {$this->constraintArray = array();}
+				if ($name{0} === '!')
+				{
+					$name = substr($name, 1);
+					$params['reversed'] = true;
+				}
+				$this->constraintArray[$name] = $params;
+			}
+		}
 		return $this;
 	}
 	

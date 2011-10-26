@@ -26,7 +26,8 @@ class generator_PersistentProperty
 	private $defaultValue;
 	private $inverse;
 
-	private $constraints;
+	private $constraintArray;
+	
 	private $treeNode;
 	private $treeNodeInverse;
 	private $localized;
@@ -177,9 +178,43 @@ class generator_PersistentProperty
 
 		foreach ($xmlElement->childNodes as $node)
 		{
-			if ($node->nodeName == 'constraints')
+			/* @var $node DOMElement */
+			if ($node->nodeName == 'constraint')
 			{
-				$this->constraints = strval($node->nodeValue);
+				$params = array();
+				$name = null;
+				foreach ($node->attributes as $attr) 
+				{
+					if ($attr->name === 'name')
+					{
+						$name = $attr->value;
+					}
+					else
+					{
+						$params[$attr->name] = $attr->value;
+					}
+				}
+				if ($name)
+				{
+					if ($this->constraintArray === null) {$this->constraintArray = array();}
+					$this->constraintArray[$name] = $params;
+				}
+			}
+			elseif ($node->nodeName == 'constraints')
+			{
+				$cp = new validation_ContraintsParser();
+				$defs = $cp->getConstraintArrayFromDefinition(strval($node->nodeValue));
+				foreach ($defs as $name => $parameter) 
+				{
+					$params = array('parameter' => $parameter);
+					if ($this->constraintArray === null) {$this->constraintArray = array();}
+					if ($name{0} == '!')
+					{
+						$name = substr($name, 1);
+						$params['reversed'] = true;
+					}
+					$this->constraintArray[$name] = $params;
+				}
 			}
 		}
 	}
@@ -303,36 +338,6 @@ class generator_PersistentProperty
 	}
 	
 	/**
-	 * @param String $constraints
-	 * @return String
-	 */
-	private function reduceConstraints($constraints)
-	{
-		if (is_null($constraints) || $constraints == '')
-		{
-			return null;
-		}
-
-		$constraints = explode(';', $constraints);
-		$newconstraints = array();
-		foreach ($constraints as $constraint)
-		{
-			$pos = strpos($constraint, ':');
-			if ($pos === false)
-			{
-				continue;
-			}
-			$name = substr($constraint, 0, $pos);
-			$newconstraints[$name] = $constraint;
-		}
-		if (count($newconstraints) > 0)
-		{
-			return join(';', $newconstraints);
-		}
-		return null;
-	}
-
-	/**
 	 * @return Boolean
 	 */
 	public function isDocument()
@@ -441,37 +446,23 @@ class generator_PersistentProperty
 	}
 
 	public function applyDefaultConstraints()
-	{
-
-		if ($this->isOverride() && f_util_StringUtils::isNotEmpty($this->parentProperty->getConstraints()))
-		{
-			$constraints = explode(';', $this->parentProperty->getConstraints());
-		}
-		else 
-		{
-			$constraints = array();
-		}
-
+	{		
 		if ($this->type == f_persistentdocument_PersistentDocument::PROPERTYTYPE_STRING)
 		{
 			if (intval($this->dbSize) <= 0 || intval($this->dbSize) > 255) 
 			{
-				$constraints[] = "maxSize:255";
+				$params = array('parameter' => '255');
 			}
 			else
 			{
-				$constraints[] = "maxSize:".$this->dbSize;
+				$params = array('parameter' => $this->dbSize);
 			}
-		}
-
-		if (!is_null($this->constraints))
-		{
-			$constraints[] = $this->constraints;
-		}
-
-		if (count($constraints) != 0)
-		{
-			$this->constraints = $this->reduceConstraints(implode(';', $constraints));
+			
+			if ($this->constraintArray === null) {$this->constraintArray = array();}
+			if (!isset($this->constraintArray['maxSize']))
+			{
+				$this->constraintArray['maxSize'] = $params;
+			} 
 		}
 	}
 
@@ -527,20 +518,44 @@ class generator_PersistentProperty
 	{
 		return $this->defaultValue;
 	}
-
+	
 	/**
-	 * @return String
+	 * @return array
 	 */
-	public function getConstraints()
+	public function getConstraintArray()
 	{
-		$parentConstraint = $this->parentProperty ? $this->parentProperty->getConstraints() : null;
-		if ($this->constraints !== null && $parentConstraint !== null)
+		$parentConstraint = $this->parentProperty ? $this->parentProperty->getConstraintArray() : null;
+		if (is_array($this->constraintArray) && is_array($parentConstraint))
 		{
-			return $this->reduceConstraints($this->constraints . ';' . $parentConstraint);
+			return array_merge($parentConstraint, $this->constraintArray);
 		}
-		return $this->constraints !== null ? $this->constraints : $parentConstraint;
-	}
-
+		return is_array($this->constraintArray) ? $this->constraintArray : $parentConstraint;
+	}	
+	
+	/**
+	 * @return string
+	 */
+	public function buildPhpConstraintArray()
+	{
+		$cs = $this->getConstraintArray();
+		if (is_array($cs) && count($cs))
+		{
+			$php = array();
+			foreach ($cs as $name => $params) 
+			{
+				$c = var_export($name, true) . " => array(";
+				foreach ($params as $pn => $pv)
+				{
+					$c .= var_export($pn, true) . " => " . var_export($pv, true) . ', ';
+				} 
+				$php[] = $c. ')';
+			}
+			
+			return 'array(' . implode(', ', $php) . ')';
+		}
+		return 'null';
+	}	
+	
 	/**
 	 * @return Boolean
 	 */
@@ -572,6 +587,14 @@ class generator_PersistentProperty
 	public function isArray()
 	{
 		return $this->getMaxOccurs() != 1 && $this->isDocument();
+	}
+	
+	/**
+	 * @return Boolean
+	 */
+	public function isRequired()
+	{
+		return $this->getMinOccurs() > 0;
 	}
 
 	/**
@@ -701,127 +724,141 @@ class generator_PersistentProperty
 	{
 		$phpScript = array();
 		$name = $this->name;
-		$uName = ucfirst($name);
-		if (is_null($this->constraints) || in_array($name, array('id', 'model', 'lang')))
+		if (in_array($name, array('id', 'model', 'lang'))) {return;}
+		$constraintArray = $this->getConstraintArray();
+		$required = $this->isRequired();		
+		if (!is_array($constraintArray) && !$required && $this->getMaxOccurs() <= 1)
 		{
 			return;
 		}
 		
-		if ($this->isOverride() && $this->constraints == $this->parentProperty->constraints)
-		{
-			return;
-		}
-		
+		$uName = ucfirst($name);	
 		$phpScript[] = '	protected function is' . $uName .'Valid()';
 		$phpScript[] = '	{';
 		if ($this->isDocument())
 		{
-
-			$phpScript[] = '		$uniqueValidatorResult = true;';
-
-			if ( ! $this->isArray() )
+			$phpScript[] = '		$this->checkLoaded' . $uName .'();';
+			if ($this->isArray())
 			{
-				$str = $this->constraints;
-
-				$constraintsParser = new validation_ContraintsParser();
-				$validators = $constraintsParser->getValidatorsFromDefinition($str);
-
+				if (is_array($constraintArray))
+				{
+					throw new Exception("Invalid constraints for document property " . $this->model->getName() . '/' . $name);
+				}
+				
+				$if = array();
+				if ($required) {$if[] =  $this->getMinOccurs() .' > $count';}
+				if ($this->getMaxOccurs() > 1 ) {$if[] =  $this->getMaxOccurs() .' < $count';}			
+				$phpScript[] = '		$count = $this->get'.$uName .'Count();';
+				$phpScript[] = '		if ('. implode(' || ', $if) .')';
+				$phpScript[] = '		{';	
+				$phpScript[] = '			$args = array("minOccurs" => '. $this->getMinOccurs() .', "maxOccurs" => '. $this->getMaxOccurs() .', "count" => $count);';
+				$phpScript[] = '			$this->validationErrors->rejectValue("'.$name.'", "&framework.validation.validator.persisentdocumentarray;", $args);';
+				$phpScript[] = '			return false;';
+				$phpScript[] = '		}';			
+			}
+			elseif ($this->getMinOccurs() > 0)
+			{
+				$phpScript[] = '		if ($this->get'.$uName .'() === null)';	
+				$phpScript[] = '		{';	
+				$phpScript[] = '			$this->validationErrors->rejectValue("'.$name.'", "&framework.validation.validator.blank.message;");';
+				$phpScript[] = '			return false;';
+				$phpScript[] = '		}';				
+			}
+			
+			if (is_array($constraintArray))
+			{
 				$validatorScript = array();
-				foreach ($validators as $validator)
+				foreach ($constraintArray as $constraintName => $params)
 				{
-					if ($validator instanceof validation_UniqueValidator)
+					$className = 'validation_'.ucfirst($constraintName).'Validator';
+					if (f_util_ClassUtils::classExists($className))
 					{
-						$validatorScript[] = '			$errCount = $this->validationErrors->count();';
-						$validatorScript[] = '			$v = new '.get_class($validator).'();';
-						$validatorScript[] = '			$v->setDocument($this);';
-						$validatorScript[] = '			$v->setDocumentPropertyName("'.$this->name.'");';
-						$parameter = $validator->getParameter();
-						if (!is_object($parameter))
+						$validator = new $className();
+						if ($validator instanceof validation_UniqueValidator)
 						{
-							$parameter = $this->buildPhpDecl($parameter);
+							if (isset($params['parameter'])) {$validator->setParameter($params['parameter']);}
+							
+							if (!$required)
+							{
+								$phpScript[] = '		if ($this->get'.$uName.'() === null) {return true;}';
+							}
+							$phpScript[] = '		$errCount = $this->validationErrors->count();';
+							$phpScript[] = '		$v = new '.$className.'();';
+							$phpScript[] = '		$v->setDocument($this);';
+							$phpScript[] = '		$v->setDocumentPropertyName("'.$this->name.'");';
+							$parameter = $this->buildPhpDecl($validator->getParameter());
+							$phpScript[] = '		$v->setParameter(' . $parameter . ');';
+							$phpScript[] = '		$property = new validation_Property("'.$name.'", $this->get'.$uName.'()->getId());';
+							$phpScript[] = '		$v->validate($property, $this->validationErrors);';
+							$phpScript[] = '		return $this->validationErrors->count() == $errCount;';
+							break;
 						}
-						$validatorScript[] = '			$v->setParameter(' . $parameter . ');';
-						if ($validator->usesReverseMode())
-						{
-							$validatorScript[] = '			$v->setReverseMode(true);';
-						}
-						$validatorScript[] = '			$property = new validation_Property("'.$name.'", $this->get'.$uName.'()->getId());';
-						$validatorScript[] = '			$v->validate($property, $this->validationErrors);';
-						$validatorScript[] = '        	$uniqueValidatorResult = $this->validationErrors->count() == $errCount;';
 					}
+					throw new Exception("Invalid constraint  $constraintName for document property " . $this->model->getName() . '/' . $name);
 				}
-
-				if (!empty($validatorScript))
-				{
-					$phpScript[] = '		if (!is_null($this->get'.$uName.'()))';
-					$phpScript[] = '		{';
-					$phpScript = array_merge($phpScript, $validatorScript);
-					$phpScript[] = '		}';
-
-				}
-
-				if ($this->getMinOccurs() > 0)
-				{
-					$phpScript[] = '		if ($this->m_' . $name.' !== null && is_numeric($this->m_' . $name.')) return $uniqueValidatorResult;';
-				}
-				else
-				{
-					$phpScript[] = '		if ($this->m_' . $name.' === null || is_numeric($this->m_' . $name.')) return $uniqueValidatorResult;';
-				}
-				$phpScript[] = '		$this->checkLoaded' . $uName .'();';
-				$phpScript[] = '		return $this->m_' . $name .'->isValid('. $this->getMinOccurs() .', '. $this->getMaxOccurs() .', \''.$this->type.'\') && $uniqueValidatorResult;';
 			}
 			else
 			{
-				$phpScript[] = '		$this->checkLoaded' . $uName .'();';
-				$phpScript[] = '		return $this->m_' . $name .'->isValid('. $this->getMinOccurs() .', '. $this->getMaxOccurs() .', \''.$this->type.'\') && $uniqueValidatorResult;';
+				$phpScript[] = '		return true;';
 			}
 		}
-		else if (!is_null($this->constraints))
+		else if (is_array($this->constraintArray) || $required)
 		{
-			$phpScript[] = $this->generatePhpValidators($this->constraints);
+			$phpScript[] = $this->generatePhpValidators($this->constraintArray);
 		}
 		else
 		{
 			$phpScript[] = '		return true;';
 		}
 		$phpScript[] = '	}';
-
-		return join("\n", $phpScript);
+		$phpScript[] = '';
+		return join(PHP_EOL, $phpScript);
 	}
 
-	private function generatePhpValidators()
+	private function generatePhpValidators($constraintsArray)
 	{
-		$str = $this->constraints;
-
+		$required = $this->isRequired();
 		$name = $this->getName();
 		$uName = ucfirst($name);
 		$php = array();
-		$constraintsParser = new validation_ContraintsParser();
-		$validators = $constraintsParser->getValidatorsFromDefinition($str);
-
-		$blankValidatorFound = false;
-		foreach ($validators as $validator)
+		$php[] = '		$value = $this->get'.$uName.'();';
+		if ($required)
 		{
-			$validateCall = '		$v->validate($property, $this->validationErrors);';
-
-			// BlankValidator should be executed first!
-			if ($validator instanceof validation_BlankValidator && $validator->getParameter() === false)
+			$php[] = '		if ($value === null || $value === \'\')';	
+			$php[] = '		{';	
+			$php[] = '			$this->validationErrors->rejectValue("'.$name.'", "&framework.validation.validator.blank.message;");';
+			$php[] = '			return false;';
+			$php[] = '		}';
+		}
+		
+		if (!is_array($constraintsArray))
+		{
+			$php[] = '		return true;';
+			return join("\n", $php);
+		}
+		
+		if (!$required)
+		{
+			$php[] = '		if ($value === null || $value === \'\')';	
+			$php[] = '		{';	
+			$php[] = '			return true;';
+			$php[] = '		}';			
+		}
+		
+		$php[] = '		$errCount = $this->validationErrors->count();';
+		$php[] = '		$property = new validation_Property("'.$name.'", $value);';
+		
+		foreach ($constraintsArray as $constraintName => $params) 
+		{
+			$className = 'validation_'.ucfirst($constraintName).'Validator';
+			if (!f_util_ClassUtils::classExists($className)) {continue;}
+			$validator = new $className();
+			if (isset($params['parameter'])) {$validator->setParameter($params['parameter']);}			
+			if (isset($params['reversed'])) {$validator->setReverseMode(true);}
+			
+			if (!($validator instanceof validation_BlankValidator))
 			{
-				// be careful with array_unshift: order is reversed!
-				if (count($validators) > 1)
-				{
-					array_unshift($php, '		{');
-					array_unshift($php, '		if ( ! empty($propertyValue) )');
-				}
-				array_unshift($php, $validateCall);
-				array_unshift($php, '		$v->setParameter(false);');
-				array_unshift($php, '		$v = new '.get_class($validator).'();');
-				$blankValidatorFound = true;
-			}
-			else
-			{
-				$php[] = '			$v = new '.get_class($validator).'();';
+				$php[] = '		$v = new '.$className.'();';
 				$parameter = $validator->getParameter();
 				if ($parameter instanceof validation_Range)
 				{
@@ -831,42 +868,23 @@ class generator_PersistentProperty
 				{
 					$parameter = $this->buildPhpDecl($parameter);
 				}
-				$php[] = '			$v->setParameter(' . $parameter . ');';
+				$php[] = '		$v->setParameter(' . $parameter . ');';
+				
 				if ($validator->usesReverseMode())
 				{
-					$php[] = '			$v->setReverseMode(true);';
+					$php[] = '		$v->setReverseMode(true);';
 				}
 				if ($validator instanceof validation_UniqueValidator)
 				{
-					$php[] = '			// Specifically for UniqueValidator:';
-					$php[] = '			$v->setDocument($this);';
-					$php[] = '			$v->setDocumentPropertyName("'.$this->name.'");';
+					$php[] = '		$v->setDocument($this);';
+					$php[] = '		$v->setDocumentPropertyName("'.$this->name.'");';
 				}
 
-				$php[] = '	' . $validateCall;
+				$php[] = '		$v->validate($property, $this->validationErrors);';
 			}
-		}
-
-		if ( (! $blankValidatorFound && count($validators) >= 1) || ($blankValidatorFound && count($validators) > 1) )
-		{
-			if ( ! $blankValidatorFound )
-			{
-				// be careful with array_unshift: order is reversed!
-				array_unshift($php, '		{');
-				array_unshift($php, '		if ( ! empty($propertyValue) )');
-			}
-			$php[] = '		}';
-		}
-
-		$override = $this->isOverride() ? ' && parent::is' . $uName .'Valid();' : ';';
-		$php[] = '		return $this->validationErrors->count() == $errCount' . $override;
-
-		// be careful with array_unshift: order is reversed!
-		array_unshift($php, '		$property = new validation_Property("'.$name.'", $propertyValue);');
-		array_unshift($php, '		$propertyValue = $this->get'.$uName.'();');
-		array_unshift($php, '		$errCount = $this->validationErrors->count();');
-
-		return join("\n", $php);
+		}	
+		$php[] = '		return $this->validationErrors->count() === $errCount;';
+		return join(PHP_EOL, $php);
 	}
 
 

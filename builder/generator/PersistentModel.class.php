@@ -1661,7 +1661,7 @@ class generator_PersistentModel
 		}
 		foreach ($properties as $property)
 		{
-			if (is_null($property->getConstraints()))
+			if (!is_array($property->getConstraintArray()) && !$property->isRequired() && $property->getMaxOccurs() <= 1)
 			{
 				continue;
 			}
@@ -1868,15 +1868,11 @@ class generator_PersistentModel
 	private function importProperties($xmlElement)
 	{
 		$nodeList = $xmlElement->getElementsByTagName('properties');
-		if ($nodeList->length == 0)
-		{
-			$nodeList = $xmlElement->getElementsByTagName('components');
-		}
 		if ($nodeList->length > 0)
 		{
 			foreach ($nodeList->item(0)->childNodes as $xmlProperty)
 			{
-				if ($xmlProperty->nodeName == "add")
+				if ($xmlProperty->nodeName == "property" || $xmlProperty->nodeName == "add")
 				{
 					$property = new generator_PersistentProperty($this);
 					$property->initialize($xmlProperty);
@@ -1905,7 +1901,7 @@ class generator_PersistentModel
 		{
 			foreach ($nodeList->item(0)->childNodes as $xmlProperty)
 			{
-				if ($xmlProperty->nodeName == "add")
+				if ($xmlProperty->nodeName == "property" || $xmlProperty->nodeName == "add")
 				{
 					$property = new generator_PersistentProperty($this);
 					$property->setSerializedProperty(true);

@@ -215,10 +215,12 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 	public function __destruct()
 	{
 		$this->m_i18nInfo = null;
+		$this->i18nVoObject = null;
 		$this->validationErrors = null;
 		$this->modifiedProperties = null;
 		$this->modifiedPropertyValues = null;
 		$this->m_documentInverse = null;
+		$this->m_metas = null;
 	}
 
 	/**
