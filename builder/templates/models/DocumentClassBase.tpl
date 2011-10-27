@@ -50,7 +50,8 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 <{/if}>
 <{/foreach}>
 	}
-<{if (!$model->inject()) }>     
+<{if (!$model->inject()) }>  
+   
 	/**
 	 * @return <{$model->getDocumentClassName()}>
 	 */
@@ -91,13 +92,13 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		return <{$model->getServiceClassName()}>::getInstance();
 	}
 <{/if}>
+
 	/**
-	 * Constructor
 	 * @internal For framework internal usage only
 	 *
-	 * @param Integer $id
+	 * @param integer $id
 	 * @param I18nInfo $i18nInfo
-	 * @param Integer $treeId
+	 * @param integer $treeId
 	 */
 	public function __construct($id = 0, $i18nInfo = null, $treeId = null)
 	{
@@ -147,7 +148,6 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		$propertyBag['<{$property->getName()}>'] = $voObject->get<{$property->getPhpName()}>();
 <{/foreach}>
 <{/if}>
-
 <{foreach from=$model->getPrivateClassMember() item=property}>
 <{if $property->isDocument()}>
         if ($loadAll)
@@ -197,22 +197,21 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		}
 	}
 <{if $model->hasValidatesProperties()}>
+
 	/**
 	 * @return boolean
 	 */
 	public function isValid()
 	{
-		return parent::isValid()
-<{foreach from=$model->getValidatesProperties() item=property}>
-		&& $this->is<{$property->getPhpName()}>Valid()
-<{/foreach}>;
+		return parent::isValid()<{foreach from=$model->getValidatesProperties() item=property}> && $this->is<{$property->getPhpName()}>Valid()<{/foreach}>;
 	}
-	
-<{foreach from=$model->getValidatesProperties() item=property}><{$property->phpPropertyValidationMethod()}>
+<{foreach from=$model->getValidatesProperties() item=property}>
+
+<{$property->phpPropertyValidationMethod()}>
 <{/foreach}>
 <{/if}>
-
 <{foreach from=$model->getScalarClassMember() item=property}>
+
 	/**
 	 * @return <{$property->getCommentaryType()}>
 	 */
@@ -226,6 +225,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 <{/if}>
 	}
 <{if $property->isLocalized()}>
+
 	/**
 	 * @return <{$property->getCommentaryType()}>
 	 */
@@ -236,7 +236,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 
 	/**
-	 * @param String $lang
+	 * @param string $lang
 	 * @return <{$property->getCommentaryType()}>
 	 */
 	public function get<{$property->getPhpName()}>ForLang($lang)
@@ -246,6 +246,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}	
 <{/if}>	
 <{if $property->getPreserveOldValue()}>
+
 	/**
 	 * @return <{$property->getCommentaryType()}> or null
 	 */
@@ -258,9 +259,9 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 <{/if}>
 	}
 <{/if}>
+
 	/**
 	 * @param <{$property->getCommentaryType()}> $val
-	 * @return void
 	 */
 	public function set<{$property->getPhpName()}>($val)
 	{
@@ -342,6 +343,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 <{/if}>
 	}
 <{if $property->getType() == "DateTime"}>
+
 	/**
 	 * @param <{$property->getCommentaryType()}> $val
 	 * @return void
@@ -360,6 +362,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 <{/if}>
 <{if $property->getType() == 'XHTMLFragment'}>
+
 	/**
 	 * @return <{$property->getCommentaryType()}>
 	 */
@@ -369,6 +372,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 <{/if}>
 <{if $property->getType() == 'LongString' || $property->getType() == 'String'}>
+
 	/**
 	 * @return <{$property->getCommentaryType()}>
 	 */
@@ -378,6 +382,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 <{/if}>
 <{if $property->getType() == "BBCode"}>
+
 	/**
 	 * @param <{$property->getCommentaryType()}> $val
 	 * @return void
@@ -407,6 +412,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 <{/if}>
 <{if $property->getType() == "JSON"}>
+
 	/**
 	 * @return <{$property->getCommentaryType()}>
 	 */
@@ -417,6 +423,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}	
 <{/if}>
 <{if $property->getType() == "Object"}>
+
 	/**
 	 * @return <{$property->getCommentaryType()}>
 	 */
@@ -427,6 +434,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 <{/if}>
 <{if $property->getType() == "DocumentId"}>
+
 	/**
 	 * @return f_persistentdocument_PersistentDocument
 	 */
@@ -444,7 +452,8 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		return null;
 	}
 <{/if}>
-<{if $property->getFromList() && $property->getMaxOccurs() == 1}>
+<{if $property->getFromList()}>
+
 	/**
 	 * @return String
 	 */
@@ -464,7 +473,6 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 <{/if}>
 <{/foreach}>
-
 <{foreach from=$model->getDocumentClassMember() item=property}>
 <{if !$property->isArray()}>
 
@@ -481,13 +489,12 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 
 	/**
 	 * @param <{$property->getCommentaryType()}> $newValue
-	 * @return void
 	 */
 	public function set<{$property->getPhpName()}>($newValue)
 	{
 		$this->checkLoaded<{$property->getPhpName()}>();
-		$old<{$property->getPhpName()}> = (count($this->m_<{$property->getName()}>) == 1) ? $this->m_<{$property->getName()}>[0] : null;
-		if (!DocumentHelper::equals($old<{$property->getPhpName()}>, $newValue))
+		$oldValue = (count($this->m_<{$property->getName()}>) == 1) ? $this->m_<{$property->getName()}>[0] : null;
+		if (!DocumentHelper::equals($oldValue, $newValue))
 		{
 			if ($newValue == null)
 			{
@@ -505,6 +512,23 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 
 	/**
+	 * @return integer
+	 */
+	public function get<{$property->getPhpName()}>Id()
+	{
+		$this->checkLoaded();
+		if ((null === $this->m_<{$property->getName()}>) || is_numeric($this->m_<{$property->getName()}>))
+		{
+			return $this->m_<{$property->getName()}>;
+		}
+		else
+		{
+			$ids = $this->m_<{$property->getName()}>->getIds();
+			return count($ids) ? $ids[0] : null;
+		}
+	}
+	
+	/**
 	 * @return <{$property->getCommentaryType()}>
 	 */
 	public function get<{$property->getPhpName()}>()
@@ -516,7 +540,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 <{if $property->getPreserveOldValue()}>
 
 	/**
-	 * @return Integer or null
+	 * @return integer or null
 	 */
 	public function get<{$property->getPhpName()}>OldValueId()
 	{
@@ -544,9 +568,8 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 
 	/**
-	 * @param Integer $index
+	 * @param integer $index
 	 * @param <{$property->getCommentaryType()}> $newValue Can't not be null
-	 * @return void
 	 */
 	public function set<{$property->getPhpName()}>($index, $newValue)
 	{
@@ -566,8 +589,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 
 	/**
-	 * @param array<<{$property->getCommentaryType()}>> $newValueArray Can't not be null
-	 * @return void
+	 * @param <{$property->getCommentaryType()}>[] $newValueArray Can't not be null
 	 */
 	public function set<{$property->getPhpName()}>Array($newValueArray)
 	{
@@ -585,7 +607,6 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 
 	/**
 	 * @param <{$property->getCommentaryType()}> $newValue  Can't not be null
-	 * @return void
 	 */
 	public function add<{$property->getPhpName()}>($newValue)
 	{
@@ -603,28 +624,28 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 
 	/**
 	 * @param <{$property->getCommentaryType()}> $value
-	 * @return void
 	 */
 	public function remove<{$property->getPhpName()}>($value)
 	{
 		$this->checkLoaded<{$property->getPhpName()}>();
-		if (is_numeric($value))
+		if ($value instanceof f_persistentdocument_PersistentDocument)
 		{
-			if (isset($this->m_<{$property->getName()}>[$value]))
+			$index = $this->m_<{$property->getName()}>->indexOf($value);
+			if ($index != -1)
 			{
-				unset($this->m_<{$property->getName()}>[$value]);
+				unset($this->m_<{$property->getName()}>[$index]);
 <{if $property->getPreserveOldValue()}>
 				$this->setOldValue('<{$property->getName()}>', $this->m_<{$property->getName()}>->getOldValues());
 <{/if}>
 				$this->propertyUpdated('<{$property->getName()}>');
 			}
 		}
-		elseif ($value instanceof f_persistentdocument_PersistentDocument)
+		elseif (is_numeric($value))
 		{
-			$index = $this->m_<{$property->getName()}>->indexOf($value);
-			if ($index != -1)
+			Framework::error('Deprecated call of ' . __METHOD__ . ' use ' . __METHOD__ . 'ByIndex');
+			if (isset($this->m_<{$property->getName()}>[$value]))
 			{
-				unset($this->m_<{$property->getName()}>[$index]);
+				unset($this->m_<{$property->getName()}>[$value]);
 <{if $property->getPreserveOldValue()}>
 				$this->setOldValue('<{$property->getName()}>', $this->m_<{$property->getName()}>->getOldValues());
 <{/if}>
@@ -638,8 +659,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 
 	/**
-	 * @param Integer $index
-	 * @return void
+	 * @param integer $index
 	 */
 	public function remove<{$property->getPhpName()}>ByIndex($index)
 	{
@@ -654,9 +674,6 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		}
 	}
 
-	/**
-	 * @return void
-	 */
 	public function removeAll<{$property->getPhpName()}>()
 	{
 		$this->checkLoaded<{$property->getPhpName()}>();
@@ -671,7 +688,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 
 	/**
-	 * @param Integer $index
+	 * @param integer $index
 	 * @return <{$property->getCommentaryType()}>
 	 */
 	public function get<{$property->getPhpName()}>($index)
@@ -679,9 +696,18 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		$this->checkLoaded<{$property->getPhpName()}>();
 		return $this->m_<{$property->getName()}>[$index];
 	}
+	
+	/**
+	 * @return integer[]
+	 */
+	public function get<{$property->getPhpName()}>Ids()
+	{
+		$this->checkLoaded<{$property->getPhpName()}>();
+		return $this->m_<{$property->getName()}>->getIds();
+	}
 
 	/**
-	 * @return array<<{$property->getCommentaryType()}>>
+	 * @return <{$property->getCommentaryType()}>[]
 	 */
 	public function get<{$property->getPhpName()}>Array()
 	{
@@ -690,7 +716,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 
 	/**
-	 * @return array<<{$property->getCommentaryType()}>>
+	 * @return <{$property->getCommentaryType()}>[]
 	 */
 	public function getPublished<{$property->getPhpName()}>Array()
 	{
@@ -708,7 +734,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 <{if $property->getPreserveOldValue()}>
 
 	/**
-	 * @return array<Integer>
+	 * @return integer[]
 	 */
 	public function get<{$property->getPhpName()}>OldValueIds()
 	{
@@ -722,7 +748,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 <{/if}>
 
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function get<{$property->getPhpName()}>Count()
 	{
@@ -738,7 +764,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getPublished<{$property->getPhpName()}>Count()
 	{
@@ -747,7 +773,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 
 	/**
 	 * @param <{$property->getCommentaryType()}> $value
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getIndexof<{$property->getPhpName()}>($value)
 	{
@@ -799,29 +825,81 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		$this->m_s18sArray[$name] = $value;
 		$this->propertyUpdated('s18s');
 	}
-	
-<{if $model->isLocalized()}>
-	protected function getI18NS18sProperty($name)
-	{
-		if ($this->m_s18sArray === null) {$this->unserializeS18s();}
-		return $this->getI18nObject()->getS18sProperty($name);
-	}
-	
-	protected function setI18NS18sProperty($name, $value)
-	{
-		if ($this->m_s18sArray === null) {$this->unserializeS18s();}
-		$this->getI18nObject()->setS18sProperty($name, $value);
-		$this->propertyUpdated('s18s');
-	}
-	
-<{/if}>
 <{/if}>
 <{foreach from=$model->getSerializedClassMember() item=property}>
-<{if !$property->isDocument()}>
-<{if $property->getType() == "DateTime"}>
+
+	/**
+	 * @return <{$property->getCommentaryType()}>
+	 */
+	public function get<{$property->getPhpName()}>()
+	{
+<{if $property->isLocalized()}>
+		return $this->getI18nObject()->getS18sProperty('<{$property->getName()}>');
+<{else}>
+		return $this->getS18sProperty('<{$property->getName()}>');
+<{/if}>
+	}
+<{if $property->isLocalized()}>
+
+	/**
+	 * @return <{$property->getCommentaryType()}>
+	 */
+	public function getVo<{$property->getPhpName()}>()
+	{
+		return $this->getI18nVoObject()->getS18sProperty('<{$property->getName()}>');
+	}
+
+	/**
+	 * @param string $lang
+	 * @return <{$property->getCommentaryType()}>
+	 */
+	public function get<{$property->getPhpName()}>ForLang($lang)
+	{
+		return $this->getI18nObject($lang)->getS18sProperty('<{$property->getName()}>');
+	}	
+<{/if}>
+
 	/**
 	 * @param <{$property->getCommentaryType()}> $val
-	 * @return void
+	 */
+	public function set<{$property->getPhpName()}>($val)
+	{
+		$this->checkLoaded();
+<{if $property->getType() == "DateTime"}>
+		if ($val instanceof date_Calendar)
+		{
+			$val = date_Formatter::format($val, date_Formatter::SQL_DATE_FORMAT);
+		}
+		else if (is_long($val))
+		{
+			$val = date(date_Formatter::SQL_DATE_FORMAT, $val);
+		}
+<{elseif $property->getType() == "Boolean"}>
+		$val = (bool) $val;
+<{elseif $property->getType() == "Integer"}>
+		$val = (null === $val) ? null : intval($val);
+<{elseif $property->getType() == "Double" || $property->getType() == "Decimal"}>
+		$val = (null === $val) ? null : floatval($val);
+<{elseif $property->getType() == "JSON"}>
+		$val = (null === $val || is_string($val)) ? $val : JsonService::getInstance()->encode($val);
+<{elseif $property->getType() == "Object"}>
+		$val = (null === $val || is_string($val)) ? $val : serialize($val);
+<{elseif $property->getType() == "DocumentId"}>
+		$val = ($val instanceof f_persistentdocument_PersistentDocument) ? $val->getId() : intval($val);
+		if ($val < 0) {Framework::error(__METHOD__ . ' Invalid documentId');}
+		if ($val <= 0) {$val = null;}
+<{/if}>
+<{if $property->isLocalized()}>
+		$this->getI18nObject()->setS18sProperty('<{$property->getName()}>', $val);
+		$this->propertyUpdated('s18s');
+<{else}>
+		$this->setS18sProperty('<{$property->getName()}>', $val);
+<{/if}>
+	}
+<{if $property->getType() == "DateTime"}>
+
+	/**
+	 * @param <{$property->getCommentaryType()}> $val
 	 */
 	public function setUI<{$property->getPhpName()}>($val)
 	{
@@ -835,58 +913,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	{
 		return date_Converter::convertDateToLocal($this->get<{$property->getPhpName()}>());
 	}
-	
 <{/if}>
-	/**
-	 * @param <{$property->getCommentaryType()}> $val
-	 * @return void
-	 */
-	public function set<{$property->getPhpName()}>($val)
-	{
-<{if $property->getType() == "Double"}>
-		$val = $val !== null ? floatval($val) : null;	
-<{elseif $property->getType() == "DateTime"}>
-		if ($val instanceof date_Calendar)
-		{
-			$val = date_Formatter::format($val, date_Formatter::SQL_DATE_FORMAT);
-		}
-		else if (is_long($val))
-		{
-			$val = date(date_Formatter::SQL_DATE_FORMAT, $val);
-		}
-		else if (null === $val)
-		{
-			$val = null;
-		}
-		else
-		{
-			$val = strval($val);
-		}
-<{elseif $property->getType() == "Boolean"}>
-		$val = (bool)$val;
-<{elseif $property->getType() == "Integer"}>
-		$val = (null === $val) ? null : intval($val);
-<{else}>	
-		$val = (null === $val) ? null : strval($val);
-<{/if}>
-<{if $property->isLocalized()}>
-		$this->setI18NS18sProperty('<{$property->getName()}>', $val);
-<{else}>
-		$this->setS18sProperty('<{$property->getName()}>', $val);
-<{/if}>
-	}
-
-	/**
-	 * @return <{$property->getCommentaryType()}>
-	 */
-	public function get<{$property->getPhpName()}>()
-	{
-<{if $property->isLocalized()}>
-		return $this->getI18NS18sProperty('<{$property->getName()}>');
-<{else}>
-		return $this->getS18sProperty('<{$property->getName()}>');
-<{/if}>
-	}
 <{if $property->getType() == 'XHTMLFragment'}>
 
 	/**
@@ -907,19 +934,102 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		return f_util_HtmlUtils::textToHtml($this->get<{$property->getPhpName()}>());
 	}
 <{/if}>
-<{elseif $property->isDocument() && !$property->isArray()}>
+<{if $property->getType() == "BBCode"}>
+
+	/**
+	 * @param <{$property->getCommentaryType()}> $val
+	 * @return void
+	 */
+	public function set<{$property->getPhpName()}>AsBBCode($val)
+	{
+		$parser = new website_BBCodeParser();
+		$this->set<{$property->getPhpName()}>($parser->convertBBCodeToXml($val, $parser->getModuleProfile('<{$model->getModuleName()}>')));
+	}
+	
+	/**
+	 * @return <{$property->getCommentaryType()}>
+	 */
+	public function get<{$property->getPhpName()}>AsBBCode()
+	{
+		$parser = new website_BBCodeParser();
+		return $parser->convertXmlToBBCode($this->get<{$property->getPhpName()}>());
+	}	
+	
+	/**
+	 * @return <{$property->getCommentaryType()}>
+	 */
+	public function get<{$property->getPhpName()}>AsHtml()
+	{
+		$parser = new website_BBCodeParser();
+		return $parser->convertXmlToHtml($this->get<{$property->getPhpName()}>());
+	}
+<{/if}>
+<{if $property->getType() == "JSON"}>
+
+	/**
+	 * @return <{$property->getCommentaryType()}>
+	 */
+	public function getDecoded<{$property->getPhpName()}>()
+	{
+		$val = $this->get<{$property->getPhpName()}>();
+		return $val === null ? $val : JsonService::getInstance()->decode($val);
+	}	
+<{/if}>
+<{if $property->getType() == "Object"}>
+
+	/**
+	 * @return <{$property->getCommentaryType()}>
+	 */
+	public function getDecoded<{$property->getPhpName()}>()
+	{
+		$val = $this->get<{$property->getPhpName()}>();
+		return $val === null ? $val : unserialize($val);
+	}
+<{/if}>
+<{if $property->getType() == "DocumentId"}>
+
+	/**
+	 * @return f_persistentdocument_PersistentDocument
+	 */
+	public function get<{$property->getPhpName()}>Instance()
+	{
+		$val = $this->get<{$property->getPhpName()}>();
+		if ($val !== null)
+		{
+			$m = f_persistentdocument_PersistentProvider::getInstance()->getDocumentModelName($val);
+			if ($m !== null)
+			{
+				return f_persistentdocument_PersistentProvider::getInstance()->getDocumentInstance($val, $m);
+			}
+		}
+		return null;
+	}
+<{/if}>
+<{if $property->getFromList()}>
+
+	/**
+	 * @return String
+	 */
+	public function get<{$property->getPhpName()}>LabelAsHtml()
+	{
+		$list = list_ListService::getInstance()->getByListId('<{$property->getFromList()}>');
+		if ($list === null)
+		{
+			return null;
+		}
+		$listItem = $list->getItemByValue($this->get<{$property->getPhpName()}>());
+		if ($listItem === null)
+		{
+			return null;
+		}
+		return f_util_HtmlUtils::textToHtml($listItem->getLabel());
+	}
+<{/if}>
+<{/foreach}>
+<{foreach from=$model->getSerializedDocumentClassMember() item=property}>
 
 	private $m_<{$property->getName()}>;
-	
-	private function checkLoaded<{$property->getName()}>()
-	{
-		$id = intval($this->getS18sProperty('<{$property->getName()}>'));
-		if (null === $this->m_<{$property->getName()}>)
-		{
-			$this->m_<{$property->getName()}> = new f_persistentdocument_PersistentDocumentArray($this, '<{$property->getName()}>', '', '', <{$model->escapeBoolean($property->getPreserveOldValue())}>);
-			if ($id > 0) { $this->m_<{$property->getName()}>->loadDocumentId($id);}
-		}
-	}
+<{if !$property->isArray()}>
 
 	/**
 	 * @return integer or null
@@ -930,13 +1040,23 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		return $id > 0 ? $id : null;
 	}
 	
+	private function checkLoaded<{$property->getName()}>()
+	{
+		$id = $this->get<{$property->getPhpName()}>Id();
+		if (null === $this->m_<{$property->getName()}>)
+		{
+			$this->m_<{$property->getName()}> = new f_persistentdocument_PersistentDocumentArray($this, '<{$property->getName()}>', '', '', false);
+			if ($id !== null) { $this->m_<{$property->getName()}>->loadDocumentId($id);}
+		}
+	}
+
 	/**
 	 * @return <{$property->getCommentaryType()}>
 	 */
 	public function get<{$property->getPhpName()}>()
 	{
 		$this->checkLoaded<{$property->getPhpName()}>();
-		return (count($this->m_<{$property->getName()}>) == 1) ? $this->m_<{$property->getName()}>[0] : null;
+		return (count($this->m_<{$property->getName()}>) === 1) ? $this->m_<{$property->getName()}>[0] : null;
 	}
 	
 	/**
@@ -946,32 +1066,39 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	public function set<{$property->getPhpName()}>($newValue)
 	{
 		$this->checkLoaded<{$property->getPhpName()}>();
-		$old<{$property->getPhpName()}> = (count($this->m_<{$property->getName()}>) == 1) ? $this->m_<{$property->getName()}>[0] : null;
-		if (!DocumentHelper::equals($old<{$property->getPhpName()}>, $newValue))
+		$oldValue = (count($this->m_<{$property->getName()}>) == 1) ? $this->m_<{$property->getName()}>[0] : null;
+		if (!DocumentHelper::equals($oldValue, $newValue))
 		{
-			if ($newValue === null)
-			{
-				if (count($this->m_<{$property->getName()}>) == 1) $this->m_<{$property->getName()}>->offsetUnset(0);
-				$this->setS18sProperty('<{$property->getName()}>', $newValue);
-			}
-			else
+			if ($newValue instanceof f_persistentdocument_PersistentDocument)
 			{
 				$this->m_<{$property->getName()}>[0] = $newValue;
 				$this->setS18sProperty('<{$property->getName()}>', $newValue->getId());
 			}
+			else
+			{
+				if (count($this->m_<{$property->getName()}>) == 1) $this->m_<{$property->getName()}>->offsetUnset(0);
+				$this->setS18sProperty('<{$property->getName()}>', null);
+			}
 		}
 	}
-<{elseif  $property->isDocument() && $property->isArray()}>
+<{else}>
 
-	private $m_<{$property->getName()}>;
+	/**
+	 * @return integer[]
+	 */
+	public function get<{$property->getPhpName()}>Ids()
+	{
+		$ids = $this->getS18sProperty('<{$property->getName()}>');
+		return is_array($ids) ? $ids : array();
+	}
 	
 	private function checkLoaded<{$property->getPhpName()}>()
 	{
-		$ids = $this->getS18sProperty('<{$property->getName()}>');
+		$ids = $this->get<{$property->getPhpName()}>Ids();
 		if (null === $this->m_<{$property->getName()}>)
 		{
-			$this->m_<{$property->getName()}> = new f_persistentdocument_PersistentDocumentArray($this, '<{$property->getName()}>', '', '', <{$model->escapeBoolean($property->getPreserveOldValue())}>);
-			if (is_array($ids)) 
+			$this->m_<{$property->getName()}> = new f_persistentdocument_PersistentDocumentArray($this, '<{$property->getName()}>', '', '', false);
+			if (count($ids)) 
 			{
 				$this->m_<{$property->getName()}>->loadSerializedDocumentIds($ids);
 			}
@@ -989,7 +1116,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 
 	/**
-	 * @return array<<{$property->getCommentaryType()}>>
+	 * @return <{$property->getCommentaryType()}>[]
 	 */
 	public function get<{$property->getPhpName()}>Array()
 	{
@@ -998,7 +1125,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 
 	/**
-	 * @return array<<{$property->getCommentaryType()}>>
+	 * @return <{$property->getCommentaryType()}>[]
 	 */
 	public function getPublished<{$property->getPhpName()}>Array()
 	{
@@ -1021,7 +1148,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		$this->checkLoaded();
 		return $this->m_<{$property->getName()}>->count();
 	}
-
+	
 	/**
 	 * @return integer
 	 */
@@ -1042,18 +1169,8 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 	
 	/**
-	 * @return integer[]
-	 */
-	public function get<{$property->getPhpName()}>Ids()
-	{
-		$ids = $this->getS18sProperty('<{$property->getName()}>');
-		return is_array($ids) ? $ids : array();
-	}
-	
-	/**
-	 * @param Integer $index
+	 * @param integer $index
 	 * @param <{$property->getCommentaryType()}> $newValue Can't not be null
-	 * @return void
 	 */
 	public function set<{$property->getPhpName()}>($index, $newValue)
 	{
@@ -1064,15 +1181,14 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 			if ($this->m_<{$property->getName()}>->indexOf($newValue) == - 1)
 			{			
 				$this->m_<{$property->getName()}>[$index] = $newValue;
-				$ids = DocumentHelper::getIdArrayFromDocumentArray($this->m_<{$property->getName()}>);
+				$ids = $this->m_<{$property->getName()}>->getIds();
 				$this->setS18sProperty('<{$property->getName()}>', $ids);
 			}
 		}
 	}
 
 	/**
-	 * @param array<<{$property->getCommentaryType()}>> $newValueArray Can't not be null
-	 * @return void
+	 * @param <{$property->getCommentaryType()}>[] $newValueArray Can't not be null
 	 */
 	public function set<{$property->getPhpName()}>Array($newValueArray)
 	{
@@ -1081,14 +1197,13 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		if ($this->m_<{$property->getName()}>->getArrayCopy() != $newValueArray)
 		{
 			$this->m_<{$property->getName()}>->exchangeArray($newValueArray);
-			$ids = DocumentHelper::getIdArrayFromDocumentArray($newValueArray);
+			$ids = $this->m_<{$property->getName()}>->getIds();
 			$this->setS18sProperty('<{$property->getName()}>', $ids);
 		}			
 	}
 
 	/**
 	 * @param <{$property->getCommentaryType()}> $newValue  Can't not be null
-	 * @return void
 	 */
 	public function add<{$property->getPhpName()}>($newValue)
 	{
@@ -1097,14 +1212,13 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		if ($this->m_<{$property->getName()}>->indexOf($newValue) == - 1)
 		{
 			$this->m_<{$property->getName()}>[] = $newValue;
-			$ids = DocumentHelper::getIdArrayFromDocumentArray($this->m_<{$property->getName()}>);
+			$ids = $this->m_<{$property->getName()}>->getIds();
 			$this->setS18sProperty('<{$property->getName()}>', $ids);
 		}
 	}
 
 	/**
 	 * @param <{$property->getCommentaryType()}> $value
-	 * @return void
 	 */
 	public function remove<{$property->getPhpName()}>($value)
 	{
@@ -1115,7 +1229,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 			if ($index != -1)
 			{
 				unset($this->m_<{$property->getName()}>[$index]);
-				$ids = DocumentHelper::getIdArrayFromDocumentArray($this->m_<{$property->getName()}>);
+				$ids = $this->m_<{$property->getName()}>->getIds();
 				$this->setS18sProperty('<{$property->getName()}>', $ids);
 			}
 		}
@@ -1126,8 +1240,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 
 	/**
-	 * @param Integer $index
-	 * @return void
+	 * @param integer $index
 	 */
 	public function remove<{$property->getPhpName()}>ByIndex($index)
 	{
@@ -1135,14 +1248,11 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		if (isset($this->m_<{$property->getName()}>[$index]))
 		{
 			unset($this->m_<{$property->getName()}>[$index]);
-			$ids = DocumentHelper::getIdArrayFromDocumentArray($this->m_<{$property->getName()}>);
+			$ids = $this->m_<{$property->getName()}>->getIds();
 			$this->setS18sProperty('<{$property->getName()}>', $ids);
 		}
 	}
 
-	/**
-	 * @return void
-	 */
 	public function removeAll<{$property->getPhpName()}>()
 	{
 		$this->checkLoaded<{$property->getPhpName()}>();
@@ -1154,8 +1264,8 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 <{/if}>
 <{/foreach}>
-
 <{if $model->hasCascadeDelete()}>
+
 	/**
 	 * @internal For framework internal usage only
 	 */
@@ -1194,10 +1304,6 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		parent::postCascadeDelete();
 	}
 <{/if}>
-
-
-
-
 <{if $model->hasChildrenProperties()}>
 
 	/**
@@ -1213,8 +1319,8 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 
 	/**
-	 * @param array<f_persistentdocument_PersistentTreeNode> $nodes
-	 * @return array<f_persistentdocument_PersistentDocument>
+	 * @param f_persistentdocument_PersistentTreeNode[] $nodes
+	 * @return f_persistentdocument_PersistentDocument[]
 	 */
 	protected function convertNodesToDocuments($nodes)
 	{
@@ -1227,7 +1333,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 
 	/**
-	 * @return array<f_persistentdocument_PersistentDocument>
+	 * @return f_persistentdocument_PersistentDocument[]
 	 */
 	public function getChildren()
 	{
@@ -1264,7 +1370,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 <{foreach from=$model->getChildrenProperties() item=property}>
 
 	/**
-	 * @return array<<{$property->getCommentaryType()}>>
+	 * @return <{$property->getCommentaryType()}>[]
 	 */
 	public function getChildren<{$property->getPhpName()}>()
 	{
@@ -1274,7 +1380,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 
 	/**
-	 * @return array<<{$property->getCommentaryType()}>>
+	 * @return <{$property->getCommentaryType()}>[]
 	 */
 	public function getChildrenPublished<{$property->getPhpName()}>()
 	{
@@ -1286,8 +1392,9 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 <{/foreach}>
 <{/if}>
 <{foreach from=$model->getInverseProperties() item=property}>
+
 	/**
-	 * @return array<<{$property->getCommentaryType()}>>
+	 * @return <{$property->getCommentaryType()}>[]
 	 */
 	public function get<{$property->getPhpName()}>ArrayInverse($offset = 0, $nbDocuments = -1)
 	{
@@ -1301,7 +1408,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 
 	/**
-	 * @return array<<{$property->getCommentaryType()}>>
+	 * @return <{$property->getCommentaryType()}>[]
 	 */
 	public function getPublished<{$property->getPhpName()}>ArrayInverse($offset = 0, $nbDocuments = -1)
 	{
@@ -1315,7 +1422,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function get<{$property->getPhpName()}>CountInverse()
 	{
@@ -1329,7 +1436,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 	
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getPublished<{$property->getPhpName()}>CountInverse()
 	{
@@ -1343,6 +1450,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		return intval($result[0]['rows']);
 	}
 <{if $property->isArray()}>
+
 	/**
 	 * @param <{$property->getCommentaryType()}> $value
 	 */
@@ -1351,7 +1459,6 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		$value->add<{$property->getRelationName()|capitalize}>($this);
 		$this->addDocumentInverse($value);
 	}
-
 
 	/**
 	 * @param <{$property->getCommentaryType()}> $value
@@ -1375,6 +1482,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		}
 	}
 <{else}>
+
 	/**
 	 * @param <{$property->getCommentaryType()}> $value
 	 */

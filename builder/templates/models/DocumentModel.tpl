@@ -10,26 +10,26 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 	protected function __construct()
 	{
 		parent::__construct();	
-<{if (!$model->inject()) }> 		
+<{if (!$model->inject()) }>
 <{if (count($model->getChildren()))}>
 		$this->m_childrenNames = array(<{foreach from=$model->getChildren() item=children}>'<{$children->getName()}>',<{/foreach}>);
 <{else}>
 		$this->m_childrenNames = array();
 <{/if}>
-<{/if}>		
+<{/if}>
 <{if ($model->hasParentModel())}>
-<{if (!$model->inject()) }> 
+<{if (!$model->inject()) }>
 		$this->m_parentName = '<{$model->getParentModelName()}>';
-<{/if}>		
+<{/if}>
 <{if (count($model->getPreservedPropertiesNames()))}>
 		$this->m_preservedPropertiesNames = array_merge($this->m_preservedPropertiesNames, array(<{foreach from=$model->getPreservedPropertiesNames() item=name}>'<{$name}>' => true,<{/foreach}>));
 <{/if}>
-<{else}>		
+<{else}>
 		$this->m_preservedPropertiesNames = array(<{foreach from=$model->getPreservedPropertiesNames() item=name}>'<{$name}>' => true,<{/foreach}>);
-<{/if}> 
+<{/if}>
 	}
+<{if (count($model->getProperties()))}>
 
-<{if (count($model->getProperties()))}>	
 	protected function loadProperties()
 	{
 		parent::loadProperties();
@@ -48,8 +48,8 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 <{/foreach}>
 	}
 <{/if}>
+<{if (count($model->getSerializedProperties()))}>
 
-<{if (count($model->getSerializedProperties()))}>		
 	protected function loadSerialisedProperties()
 	{
 		parent::loadSerialisedProperties();
@@ -66,8 +66,8 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 <{/foreach}>
 	}
 <{/if}>
+<{if (count($model->getInverseProperties()))}>
 
-<{if (count($model->getInverseProperties()))}>		
 	protected function loadInvertProperties()
 	{
 		parent::loadInvertProperties();
@@ -86,8 +86,8 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 <{/foreach}>
 	}	
 <{/if}>
+<{if (count($model->getChildrenProperties()))}>
 
-<{if (count($model->getChildrenProperties()))}>	
 	protected function loadChildrenProperties()
 	{
 		parent::loadChildrenProperties();
@@ -99,7 +99,7 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 <{/if}>
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getFilePath()
 	{
@@ -107,24 +107,24 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getIcon()
 	{
 		return '<{$model->getIcon()}>';
 	}
-<{if (!$model->inject()) }> 
+<{if (!$model->inject()) }>
+
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getName()
 	{
 		return '<{$model->getName()}>';
 	}
 
-
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getBaseName()
 	{
@@ -132,7 +132,7 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getModuleName()
 	{
@@ -140,7 +140,7 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getDocumentName()
 	{
@@ -165,16 +165,16 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 <{/if}>	
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getLabelKey()
 	{
 		return 'm.<{$model->getModuleName()}>.document.<{$model->getDocumentName()}>.document-name';
 	}
-	
 <{if (!$model->hasParentModel())}>
+
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public final function getTableName()
 	{
@@ -183,7 +183,7 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 <{/if}>
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isLocalized()
 	{
@@ -191,7 +191,7 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isLinkedToRootFolder()
 	{
@@ -199,7 +199,7 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function hasURL()
 	{
@@ -207,7 +207,7 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function useRewriteURL()
 	{
@@ -219,7 +219,7 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isIndexable()
 	{
@@ -231,7 +231,7 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isBackofficeIndexable()
 	{
@@ -243,7 +243,7 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getDefaultNewInstanceStatus()
 	{
@@ -252,7 +252,7 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 
 	/**
 	 * Return if the document has 2 special properties (correctionid, correctionofid)
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function useCorrection()
 	{
@@ -264,7 +264,7 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function hasWorkflow()
 	{
@@ -277,7 +277,7 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getWorkflowStartTask()
 	{

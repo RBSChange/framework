@@ -1544,7 +1544,29 @@ class generator_PersistentModel
 	 */
 	public function getSerializedClassMember()
 	{
-		return $this->serializedproperties;
+		$result = array();
+		foreach ($this->serializedproperties as $property) 
+		{
+			if ($property->isDocument()) {continue;}
+			$result[] = $property; 
+		}
+		return $result;
+	}
+	
+	/**
+	 * @return array<generator_PersistentProperty>
+	 */
+	public function getSerializedDocumentClassMember()
+	{
+		$result = array();
+		foreach ($this->serializedproperties as $property) 
+		{
+			if ($property->isDocument())
+			{
+				$result[] = $property; 
+			}
+		}
+		return $result;
 	}
 
 	/**

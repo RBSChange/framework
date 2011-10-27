@@ -313,6 +313,21 @@ class f_persistentdocument_PersistentDocumentArray extends ArrayObject
 		}
 		return null;
 	}
+	
+	/**
+	 * @return integer[]
+	 */
+	public function getIds()
+	{
+		$ids = array();
+		$iterator = parent::getIterator();
+		while ($iterator->valid())
+		{
+			$ids[] = $this->getIdValue($iterator->current());
+			$iterator->next();
+		}
+		return $ids;
+	}
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document the document to search
