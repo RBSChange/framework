@@ -275,7 +275,7 @@ class RequestContext
 	{
 		if ($this->m_ui_lang === null)
 		{
-			$uilang = change_Controller::getInstance()->getStorage()->read('uixul_uilang');
+			$uilang = change_Controller::getInstance()->getStorage()->readForUser('uilang');
 			$this->m_ui_lang = $uilang ? $uilang : $this->getUserAgentLanguage();
 		}
 		return $this->m_ui_lang;

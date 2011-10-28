@@ -179,6 +179,7 @@
 		<tal>
 			<prefix>
 				<entry name="trans">f_TalesI18n</entry>
+				<entry name="transdata">f_TalesI18n</entry>
 				<entry name="transui">f_TalesI18n</entry>
 				<entry name="date">f_TalesDate</entry>
 				<entry name="datetime">f_TalesDate</entry>

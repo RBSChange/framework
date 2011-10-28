@@ -9,7 +9,7 @@ class f_TalesI18n implements PHPTAL_Tales
 	 */
 	static public function trans($src, $nothrow)
 	{
-		return self::translate($src, RequestContext::getInstance()->getLang());
+		return self::translate($src, RequestContext::getInstance()->getUILang());
 	}
 		
 	/**
@@ -21,6 +21,17 @@ class f_TalesI18n implements PHPTAL_Tales
 	static public function transui($src, $nothrow)
 	{
 		return self::translate($src, RequestContext::getInstance()->getUILang());
+	}
+	
+	/**
+	 * transdata: modifier.
+	 *
+	 * Returns the code required to localize a key
+	 * <?php echo phptal_escape(RETURN_VALUE, ENT_QUOTES, 'UTF-8');?>
+	 */
+	static public function transdata($src, $nothrow)
+	{
+		return self::translate($src, RequestContext::getInstance()->getLang());
 	}
 
 	/**

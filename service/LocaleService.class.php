@@ -58,7 +58,24 @@ class LocaleService extends BaseService
 		return $this->LCID_BY_LANG[$langCode];
 	}
 	
-	
+	/**
+	 * @param string $lcid
+	 * @return string
+	 */
+	public function getCode($lcid)
+	{
+		if ($this->LCID_BY_LANG === null)
+		{
+			$this->LCID_BY_LANG = Framework::getConfiguration('i18n');
+		}
+		$code = array_search($lcid, $this->LCID_BY_LANG);
+		if ($code === false)
+		{
+			return substr($lcid, 0, 2);
+		}
+		return $code;
+	}
+		
 	public function importOverride($name = null)
 	{
 		if ($name === null || $name === 'framework')
@@ -848,33 +865,31 @@ class LocaleService extends BaseService
 		
 		return $formatters;
 	}
-	
+
 	/**
-	 * @example transFO('f.boolean.true')
+	 * @example transData('f.boolean.true')
 	 * @param string $cleanKey
 	 * @param array $formatters value in array lab, lc, uc, ucf, js, html, attr
 	 * @param array $replacements
 	 * @return string | $cleanKey
 	 */
-	public function transFO($cleanKey, $formatters = array(), $replacements = array())
+	public function transData($cleanKey, $formatters = array(), $replacements = array())
 	{
-		return $this->formatKey(RequestContext::getInstance()->getLang(), $cleanKey, $formatters, 
-				$replacements);
+		return $this->formatKey(RequestContext::getInstance()->getLang(), $cleanKey, $formatters, $replacements);
 	}
 	
 	/**
-	 * @example transBO('f.boolean.true')
+	 * @example trans('f.boolean.true')
 	 * @param string $cleanKey
 	 * @param array $formatters value in array lab, lc, uc, ucf, js, html, attr
 	 * @param array $replacements
 	 * @return string | $cleanKey
 	 */
-	public function transBO($cleanKey, $formatters = array(), $replacements = array())
+	public function trans($cleanKey, $formatters = array(), $replacements = array())
 	{
-		return $this->formatKey(RequestContext::getInstance()->getUILang(), $cleanKey, $formatters, 
-				$replacements);
+		return $this->formatKey(RequestContext::getInstance()->getUILang(), $cleanKey, $formatters, $replacements);
 	}
-	
+			
 	/**
 	 * @param string $text
 	 * @return string
@@ -1085,5 +1100,22 @@ class LocaleService extends BaseService
 			$mode =  RequestContext::getInstance()->getMode() === RequestContext::FRONTOFFICE_MODE ? 'fo' : 'bo';
 			error_log("\n". gmdate('Y-m-d H:i:s')."\t" . $mode ."\t" .  $lang. "\t" . $key, 3, $this->logFilePath);
 		}
+	}
+	
+	
+	/**
+	 * @deprecated use trans
+	 */
+	public function transFO($cleanKey, $formatters = array(), $replacements = array())
+	{
+		return $this->formatKey(RequestContext::getInstance()->getLang(), $cleanKey, $formatters, $replacements);
+	}
+	
+	/**
+	 * @deprecated use trans
+	 */
+	public function transBO($cleanKey, $formatters = array(), $replacements = array())
+	{
+		return $this->formatKey(RequestContext::getInstance()->getUILang(), $cleanKey, $formatters, $replacements);
 	}
 }
