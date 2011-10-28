@@ -82,18 +82,4 @@ abstract class validation_ValidatorHelper
 		$constraints = $property->getConstraints();
 		return validation_ContraintsParser::getValidatorsFromDefinition($constraints);
 	}
-
-
-	public static function generateXULFormConstraints($documentModelName, $propertyName)
-	{
-		$model = f_component_DocumentModel::getInstanceFromDocumentType($documentModelName);
-		$parser = new validation_ContraintsParser();
-		$constraintArray = $parser->getConstraintArrayFromDefinition($model->getComponentConstraints($propertyName));
-		$xml = array();
-		foreach ($constraintArray as $name => $constraint)
-		{
-			$xml[] = '<constraint name="'.$name.'">'.$constraint.'</constraint>';
-		}
-		return join("\n", $xml);
-	}
 }
