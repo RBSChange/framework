@@ -94,6 +94,15 @@ class BeanAggregatePropertyInfo implements BeanPropertyInfo
 	{
 		return $this->wrappedBeanPropertyInfo->getDocumentType();
 	}
+	
+	/**
+	 * If the property type if DOCUMENT, BEAN or CLASS
+	 * @return String
+	 */
+	public function getClassName()
+	{
+		return $this->wrappedBeanPropertyInfo->getClassName();
+	}
 
 	/**
 	 * @return String
