@@ -928,7 +928,7 @@ class indexer_IndexService extends BaseService
 		}
 		
 		$definitionPointId = $ps->getDefinitionPointForPackage($document->getId(), $packageName);
-		$permissionName = $packageName . '.Update.' . $model->getDocumentName();
+		$permissionName = $packageName . '.List.' . $model->getDocumentName();
 		return $ps->getAccessorIdsForPermissionAndDocumentId($permissionName, $definitionPointId);
 	}
 
