@@ -26,10 +26,7 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 	 */
 	private $m_i18nInfo;
 
-	/**
-	 * @var array
-	 */
-	protected $validationErrors;
+
 
 	/**
 	 * @var array
@@ -616,6 +613,7 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 	 */
 	protected function setLabelInternal($label)
 	{
+		$label = $label === null ? null : strval($label);
 		if ($this->isLocalized())
 		{
 			$update = $this->getI18nObject()->setLabel($label);
@@ -776,24 +774,77 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 		$this->getDocumentService()->activate($this->getId());
 	}
 
+	private $propertiesErrors;
+	
 	/**
 	 * validate document and return boolean result
 	 * @return boolean
 	 */
 	public function isValid()
 	{
-		$this->validationErrors = new validation_Errors();
+		$this->propertiesErrors = null;
 		return true;
 	}
 
 	/**
-	 * @param String $message
+	 * @return boolean
 	 */
-	public function addValidationError($message)
+	public function hasPropertiesErrors()
 	{
-		$this->validationErrors[] = $message;
+		return is_array($this->propertiesErrors) && count($this->propertiesErrors);
 	}
-
+	
+	/**
+	 * @return array<propertyName => string[]>
+	 */
+	public function getPropertiesErrors()
+	{
+		if ($this->hasPropertiesErrors())
+		{
+			return $this->propertiesErrors;
+		}
+		return array();
+	}
+	
+	/**
+	 * @param string $propertyName
+	 * @param string[] $errors
+	 */
+	public function addPropertyErrors($propertyName, $errors)
+	{
+		if (is_string($errors))
+		{
+			$errors = array($errors);
+		}
+		if (is_array($errors) && count($errors))
+		{
+			if (!$this->hasPropertiesErrors())
+			{
+				$this->propertiesErrors = array($propertyName => $errors);
+			}
+			elseif (isset($this->propertiesErrors[$propertyName]))
+			{
+				$this->propertiesErrors[$propertyName] = array_merge($this->propertiesErrors[$propertyName], $errors);
+			}
+			else
+			{
+				$this->propertiesErrors[$propertyName] = $errors;
+			}
+		}
+	}	
+	
+	public function clearPropertyErrors($propertyName = null)
+	{
+		if ($propertyName === null)
+		{
+			$this->propertiesErrors = null;
+		}
+		elseif (is_array($this->propertiesErrors) && isset($this->propertiesErrors[$propertyName]))
+		{
+			unset($this->propertiesErrors[$propertyName]);
+		}
+	}
+	
 	/**
 	 * delete PersistentDocument in Database
 	 */
@@ -1000,14 +1051,6 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 	public function isDeleted()
 	{
 		return self::PERSISTENTSTATE_DELETED === $this->m_persistentState;
-	}
-
-	/**
-	 * @return validation_Errors
-	 */
-	public function getValidationErrors()
-	{
-		return $this->validationErrors;
 	}
 
 	/**
@@ -1365,6 +1408,41 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 			{
 				$this->m_metas = array();
 			}
+		}
+	}
+	
+	// DEPRECATED
+	/**
+	* @param string $property Nom de la propriété à atteindre
+	* @return mixed|null
+	*/
+	public function __get($property)
+	{
+		if ($property === 'validationErrors')
+		{
+			Framework::error('Call to deleted ' . get_class($this) . '->' . $property . ' property');
+			$v = new validation_Errors();
+			$v->setDocument($this);
+			return $v;
+		}
+		return null;
+	}
+
+	public function __call ($name, $args)
+	{
+		switch ($name)
+		{
+			case 'addValidationError':
+				Framework::error('Call to deleted ' . get_class($this) . '->' . $name . ' method');
+				$this->addPropertyErrors('unknow', $args[0]);
+				return;
+			case 'getValidationErrors':
+				Framework::error('Call to deleted ' . get_class($this) . '->' . $name . ' method');
+				$v = new validation_Errors();
+				$v->setDocument($this);
+				return $v;
+			default:
+				throw new Exception('No method ' . get_class($this) . '->' . $name . ' method');
 		}
 	}
 }

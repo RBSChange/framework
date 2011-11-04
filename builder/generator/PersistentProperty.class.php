@@ -4,6 +4,9 @@
  */
 class generator_PersistentProperty
 {
+	const PROPERTY = 1;
+	const SERIALISED_PROPERTY = 2;
+	
 	/**
 	 * @var generator_PersistentModel
 	 */
@@ -37,6 +40,8 @@ class generator_PersistentProperty
 	private $relationName;
 	private $tableName;
 	
+	private $modelPart = self::PROPERTY;
+	
 	
 	/**
 	 * @var generator_PersistentProperty
@@ -52,7 +57,15 @@ class generator_PersistentProperty
 	{
 		$this->setModel($model);
 	}
-
+	
+	/**
+	 * @param generator_PersistentModel $model
+	 */
+	public function setModelPart($modelPart)
+	{
+		$this->modelPart = ($modelPart === self::SERIALISED_PROPERTY) ? $modelPart : self::SERIALISED_PROPERTY;
+	}
+	
 	/**
 	 * @param generator_PersistentModel $model
 	 */
@@ -191,7 +204,9 @@ class generator_PersistentProperty
 					}
 					else
 					{
-						$params[$attr->name] = $attr->value;
+						$v = $attr->value;
+						if ($v === 'true') {$v = true;} elseif ($v === 'false') {$v = false;}
+						$params[$attr->name] = $v;
 					}
 				}
 				if ($name)
@@ -206,7 +221,22 @@ class generator_PersistentProperty
 				$defs = $cp->getConstraintArrayFromDefinition(strval($node->nodeValue));
 				foreach ($defs as $name => $parameter) 
 				{
-					$params = array('parameter' => $parameter);
+					switch ($name) {
+						case "min":
+						case "max":
+							$params = array($name => $parameter);
+							break;
+						case "maxSize":
+							$params = array("max" => $parameter);
+							break;
+						case "unique":
+							$params = array("propertyName" => $this->name, "modelName" => $this->model->getName());
+							break;
+						default:
+							$params = array('parameter' => $parameter);
+							break;
+					}
+					
 					if ($this->constraintArray === null) {$this->constraintArray = array();}
 					if ($name{0} == '!')
 					{
@@ -442,8 +472,16 @@ class generator_PersistentProperty
 	 */
 	public function isOverride()
 	{
-		return !is_null($this->parentProperty);
+		return $this->parentProperty !== null;
 	}
+	
+	/**
+	 * @return generator_PersistentProperty
+	 */
+	public function getParentProperty()
+	{
+		return $this->parentProperty;
+	}	
 
 	public function applyDefaultConstraints()
 	{		
@@ -451,11 +489,11 @@ class generator_PersistentProperty
 		{
 			if (intval($this->dbSize) <= 0 || intval($this->dbSize) > 255) 
 			{
-				$params = array('parameter' => '255');
+				$params = array('max' => '255');
 			}
 			else
 			{
-				$params = array('parameter' => $this->dbSize);
+				$params = array('max' => $this->dbSize);
 			}
 			
 			if ($this->constraintArray === null) {$this->constraintArray = array();}
@@ -517,6 +555,28 @@ class generator_PersistentProperty
 	public function getDefaultValue()
 	{
 		return $this->defaultValue;
+	}
+	
+	/**
+	 * @return boolean
+	 */
+	public function hasDefinedConstraints()
+	{
+		return is_array($this->constraintArray);
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function hasAncestorsConstraints()
+	{
+		$pProp = $this->parentProperty;
+		while ($pProp)
+		{
+			if (is_array($pProp->constraintArray)) {return true;}
+			$pProp = $pProp->parentProperty;
+		}
+		return false;
 	}
 	
 	/**
@@ -749,58 +809,33 @@ class generator_PersistentProperty
 				if ($required) {$if[] =  $this->getMinOccurs() .' > $count';}
 				if ($this->getMaxOccurs() > 1 ) {$if[] =  $this->getMaxOccurs() .' < $count';}			
 				$phpScript[] = '		$count = $this->get'.$uName .'Count();';
-				$phpScript[] = '		if ('. implode(' || ', $if) .')';
-				$phpScript[] = '		{';	
-				$phpScript[] = '			$args = array("minOccurs" => '. $this->getMinOccurs() .', "maxOccurs" => '. $this->getMaxOccurs() .', "count" => $count);';
-				$phpScript[] = '			$this->validationErrors->rejectValue("'.$name.'", "&framework.validation.validator.persisentdocumentarray;", $args);';
+				$phpScript[] = '		if ('. implode(' || ', $if) .') {';	
+				$phpScript[] = '			$args = array(\'minOccurs\' => '. $this->getMinOccurs() .', \'maxOccurs\' => '. $this->getMaxOccurs() .', \'count\' => $count);';
+				$phpScript[] = '			$this->addPropertyErrors(\''.$name.'\', LocaleService::getInstance()->trans(\'f.constraints.notbetweendocumentarray\', array(\'ucf\'), array($args)));';
 				$phpScript[] = '			return false;';
 				$phpScript[] = '		}';			
 			}
 			elseif ($this->getMinOccurs() > 0)
 			{
-				$phpScript[] = '		if ($this->get'.$uName .'() === null)';	
-				$phpScript[] = '		{';	
-				$phpScript[] = '			$this->validationErrors->rejectValue("'.$name.'", "&framework.validation.validator.blank.message;");';
+				$phpScript[] = '		if ($this->get'.$uName .'() === null) {';	
+				$phpScript[] = '			$this->addPropertyErrors(\''.$name.'\', LocaleService::getInstance()->trans(\'f.constraints.isempty\', array(\'ucf\')));';
 				$phpScript[] = '			return false;';
 				$phpScript[] = '		}';				
 			}
 			
 			if (is_array($constraintArray))
-			{
-				$validatorScript = array();
-				foreach ($constraintArray as $constraintName => $params)
-				{
-					$className = 'validation_'.ucfirst($constraintName).'Validator';
-					if (f_util_ClassUtils::classExists($className))
-					{
-						$validator = new $className();
-						if ($validator instanceof validation_UniqueValidator)
-						{
-							if (isset($params['parameter'])) {$validator->setParameter($params['parameter']);}
-							
-							if (!$required)
-							{
-								$phpScript[] = '		if ($this->get'.$uName.'() === null) {return true;}';
-							}
-							$phpScript[] = '		$errCount = $this->validationErrors->count();';
-							$phpScript[] = '		$v = new '.$className.'();';
-							$phpScript[] = '		$v->setDocument($this);';
-							$phpScript[] = '		$v->setDocumentPropertyName("'.$this->name.'");';
-							$parameter = $this->buildPhpDecl($validator->getParameter());
-							$phpScript[] = '		$v->setParameter(' . $parameter . ');';
-							$phpScript[] = '		$property = new validation_Property("'.$name.'", $this->get'.$uName.'()->getId());';
-							$phpScript[] = '		$v->validate($property, $this->validationErrors);';
-							$phpScript[] = '		return $this->validationErrors->count() == $errCount;';
-							break;
-						}
-					}
-					throw new Exception("Invalid constraint  $constraintName for document property " . $this->model->getName() . '/' . $name);
-				}
+			{	
+				$phpScript[] = '		$constraints = $this->getPersistentModel()->'.$this->generatePhpPropertyModelGetter().'->getConstraintArray();';		
+				$phpScript[] = '		foreach ($constraints as $name => $params) {';
+				$phpScript[] = '			$params += array(\'documentId\' => $this->getId());';	
+				$phpScript[] = '			$c = change_Constraints::getByName($name, $params);';		
+				$phpScript[] = '			if (!$c->isValid($this->get'.$uName .'())) {';		
+				$phpScript[] = '				$this->addPropertyErrors(\''.$name.'\', change_Constraints::formatMessages($c));';		
+				$phpScript[] = '				return false;';		
+				$phpScript[] = '			}';		
+				$phpScript[] = '		}';		
 			}
-			else
-			{
-				$phpScript[] = '		return true;';
-			}
+			$phpScript[] = '		return true;';
 		}
 		else if (is_array($this->constraintArray) || $required)
 		{
@@ -814,6 +849,15 @@ class generator_PersistentProperty
 		$phpScript[] = '';
 		return join(PHP_EOL, $phpScript);
 	}
+	
+	private function generatePhpPropertyModelGetter()
+	{
+		if ($this->modelPart === self::PROPERTY)
+		{
+			return 'getProperty("'.$this->name.'")';
+		}
+		return 'getSerializedProperty("'.$this->name.'")';
+	}
 
 	private function generatePhpValidators($constraintsArray)
 	{
@@ -822,68 +866,25 @@ class generator_PersistentProperty
 		$uName = ucfirst($name);
 		$php = array();
 		$php[] = '		$value = $this->get'.$uName.'();';
-		if ($required)
-		{
-			$php[] = '		if ($value === null || $value === \'\')';	
-			$php[] = '		{';	
-			$php[] = '			$this->validationErrors->rejectValue("'.$name.'", "&framework.validation.validator.blank.message;");';
-			$php[] = '			return false;';
-			$php[] = '		}';
-		}
-		
-		if (!is_array($constraintsArray))
-		{
-			$php[] = '		return true;';
-			return join("\n", $php);
-		}
-		
-		if (!$required)
-		{
-			$php[] = '		if ($value === null || $value === \'\')';	
-			$php[] = '		{';	
-			$php[] = '			return true;';
-			$php[] = '		}';			
-		}
-		
-		$php[] = '		$errCount = $this->validationErrors->count();';
-		$php[] = '		$property = new validation_Property("'.$name.'", $value);';
-		
-		foreach ($constraintsArray as $constraintName => $params) 
-		{
-			$className = 'validation_'.ucfirst($constraintName).'Validator';
-			if (!f_util_ClassUtils::classExists($className)) {continue;}
-			$validator = new $className();
-			if (isset($params['parameter'])) {$validator->setParameter($params['parameter']);}			
-			if (isset($params['reversed'])) {$validator->setReverseMode(true);}
-			
-			if (!($validator instanceof validation_BlankValidator))
-			{
-				$php[] = '		$v = new '.$className.'();';
-				$parameter = $validator->getParameter();
-				if ($parameter instanceof validation_Range)
-				{
-					$parameter = 'new validation_Range('.$this->buildPhpDecl($parameter->getMin()).', '.$this->buildPhpDecl($parameter->getMax()).')';
-				}
-				else if (!is_object($parameter))
-				{
-					$parameter = $this->buildPhpDecl($parameter);
-				}
-				$php[] = '		$v->setParameter(' . $parameter . ');';
-				
-				if ($validator->usesReverseMode())
-				{
-					$php[] = '		$v->setReverseMode(true);';
-				}
-				if ($validator instanceof validation_UniqueValidator)
-				{
-					$php[] = '		$v->setDocument($this);';
-					$php[] = '		$v->setDocumentPropertyName("'.$this->name.'");';
-				}
+		$php[] = '		$prop = $this->getPersistentModel()->'.$this->generatePhpPropertyModelGetter().';';
+		$php[] = '		if ($value === null || $value === \'\') {';	
+		$php[] = '			if (!$prop->isRequired()) {return true;}';			
+		$php[] = '			$this->addPropertyErrors(\''.$name.'\', LocaleService::getInstance()->trans(\'f.constraints.isempty\', array(\'ucf\')));';
+		$php[] = '			return false;';
+		$php[] = '		}';
 
-				$php[] = '		$v->validate($property, $this->validationErrors);';
-			}
-		}	
-		$php[] = '		return $this->validationErrors->count() === $errCount;';
+		if (is_array($constraintsArray))
+		{
+			$php[] = '		foreach ($prop->getConstraintArray() as $name => $params) {';
+			$php[] = '			$params += array(\'documentId\' => $this->getId());';		
+			$php[] = '			$c = change_Constraints::getByName($name, $params);';		
+			$php[] = '			if (!$c->isValid($value)) {';		
+			$php[] = '				$this->addPropertyErrors(\''.$name.'\', change_Constraints::formatMessages($c));';
+			$php[] = '				return false;';					
+			$php[] = '			}';		
+			$php[] = '		}';	
+		}
+		$php[] = '		return true;';
 		return join(PHP_EOL, $php);
 	}
 

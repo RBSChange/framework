@@ -285,26 +285,6 @@ class PropertyInfo
 		$this->defaultValue = $value;
 		return $this;
 	}
-
-	/**
-	 * Returns the constraints string defined for the property.
-	 *
-	 * @return string
-	 */
-	public function getConstraints()
-	{
-		if (is_array($this->constraintArray))
-		{
-			$const = array();
-			foreach ($this->constraintArray as $name => $params) 
-			{
-				if (isset($params['reversed'])) {$name = '!' . $name;}
-				$const[] = $name . ':' . (isset($params['parameter']) ? $params['parameter'] : 'true');
-			}
-			return count($const) ? implode(';', $const) : null;
-		}
-		return $this->constraintArray;
-	}
 	
 	/**	
 	 * Returns the constraints defined for the property.
@@ -499,5 +479,38 @@ class PropertyInfo
 			throw new Exception("Invalid call to ".__METHOD__.": ".$this->name." is not a document property");
 		}
 		return f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($this->type);
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function getConstraints()
+	{
+		if (is_array($this->constraintArray))
+		{
+			$const = array();
+			foreach ($this->constraintArray as $name => $params) 
+			{
+				if (isset($params['reversed'])) 
+				{
+					$name = '!' . $name;
+					unset($params['reversed']);
+				}
+				if (isset($params['parameter']))
+				{
+					$const[] = $name . ':' . $params['parameter'];
+				}
+				elseif (count($params))
+				{
+					$const[] = $name . ':' . f_util_ArrayUtils::firstElement($params);
+				}
+				else
+				{
+					$const[] = $name . ':true';
+				}
+			}
+			return count($const) ? implode(';', $const) : null;
+		}
+		return $this->constraintArray;
 	}
 }

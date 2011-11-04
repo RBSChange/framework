@@ -251,7 +251,9 @@ class f_persistentdocument_PersistentDocumentArray extends ArrayObject
 	{
 		if ($minOccurence > $this->count() || ($maxOccurence != -1 && $maxOccurence < $this->count()))
 		{
-			$this->m_parentDocument->addValidationError(f_Locale::translate('&framework.validation.validator.persisentdocumentarray;', array('field' => $this->m_relationName, 'minOccurs' => $minOccurence, 'maxOccurs' => $maxOccurence, 'count' => $this->count())));
+			$args = array('minOccurs' => $this->getMinOccurs(), 'maxOccurs' => $this->getMaxOccurs(), 'count' => $this->count());
+			$error = LocaleService::getInstance()->trans('f.constraints.notbetweendocumentarray', array('ucf'), array($args));
+			$this->m_parentDocument->addPropertyErrors($this->getRelationName(), $error);
 			return false;
 		}
 		elseif ($cascade)

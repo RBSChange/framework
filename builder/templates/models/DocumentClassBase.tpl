@@ -130,6 +130,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	{
 		return <{$model->escapeBoolean($model->isLocalized())}>;
 	}
+<{if $model->hasClassMembers()}>
 
 	/**
 	 * @internal For framework internal usage only
@@ -196,6 +197,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 			}
 		}
 	}
+<{/if}>
 <{if $model->hasValidatesProperties()}>
 
 	/**
@@ -203,7 +205,11 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	 */
 	public function isValid()
 	{
-		return parent::isValid()<{foreach from=$model->getValidatesProperties() item=property}> && $this->is<{$property->getPhpName()}>Valid()<{/foreach}>;
+		parent::isValid();
+<{foreach from=$model->getValidatesProperties() item=property}>
+		$this->is<{$property->getPhpName()}>Valid();
+<{/foreach}>
+		return !$this->hasPropertiesErrors();
 	}
 <{foreach from=$model->getValidatesProperties() item=property}>
 
@@ -304,6 +310,8 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		$val = ($val instanceof f_persistentdocument_PersistentDocument) ? $val->getId() : intval($val);
 		if ($val < 0) {Framework::error(__METHOD__ . ' Invalid documentId');}
 		if ($val <= 0) {$val = null;}
+<{else}>
+		$val = (null === $val) ? null : strval($val);
 <{/if}>
 <{if $property->isLocalized()}>
 <{if $property->getPreserveOldValue()}>
@@ -888,6 +896,8 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		$val = ($val instanceof f_persistentdocument_PersistentDocument) ? $val->getId() : intval($val);
 		if ($val < 0) {Framework::error(__METHOD__ . ' Invalid documentId');}
 		if ($val <= 0) {$val = null;}
+<{else}>
+		$val = (null === $val) ? null : strval($val);
 <{/if}>
 <{if $property->isLocalized()}>
 		$this->getI18nObject()->setS18sProperty('<{$property->getName()}>', $val);

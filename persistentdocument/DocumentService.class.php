@@ -187,32 +187,32 @@ class f_persistentdocument_DocumentService extends BaseService
 	}
 
 	/**
-	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param f_persistentdocument_PersistentDocumentImpl $document
+	 * @throws ValidationException
 	 */
 	private function validateDocument($document)
 	{
 		if (!$document->isValid())
 		{
-			$message = '';
-			$errors = $document->getValidationErrors();
-			$first = true;
-			foreach ($errors as $error)
+			$errors = $document->getPropertiesErrors();
+			$properties = implode(', ', array_keys($errors)) ;
+			if (Framework::isWarnEnabled())
 			{
-				if ($first)
+				$message = array(PHP_EOL);
+				foreach ($errors as $name => $errs) 
 				{
-					$message .= $error;
-					$first = false;
+					$message[] = $name . " -> ";
+					foreach ($errs as $er) 
+					{
+						$message[] = $er . ' ';
+					}
+					$message[] = PHP_EOL;
 				}
-				else
-				{
-					$message .= "; ".$error;
-				}
+				Framework::warn($document->__toString() . ":" . implode('', $message));
 			}
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug("Document ".$document->__toString()." does not validate: ".$message);
-			}
-			throw new ValidationException($document->__toString().": " . $message);
+			$e = new ValidationException($document->__toString()." errors on: " . $properties);
+			$e->setErrors($errors);
+			throw $e;
 		}
 	}
 

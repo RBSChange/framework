@@ -190,7 +190,7 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 			}
 			else
 			{
-				$this->constraints = $this->getName() . '{' . $this->propertyInfo->getConstraints() . '}';	
+				$this->constraints = $this->getName() . '{' . $constraints . '}';	
 			}
 		}
 		return $this->constraints;

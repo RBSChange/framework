@@ -5,18 +5,18 @@
 	has-url="true" use-rewrite-url="true"
 	publish-on-day-change="true" indexable="false" backoffice-indexable="true">
 	<properties>
-		<add name="label" type="String" min-occurs="1" db-mapping="document_label" db-size="255" />
-		<add name="author" type="String" db-mapping="document_author" db-size="50" indexed="none"/>
-		<add name="authorid" type="Integer" db-mapping="document_authorid" />
-		<add name="creationdate" type="DateTime" db-mapping="document_creationdate" />
-		<add name="modificationdate" type="DateTime" db-mapping="document_modificationdate" />
-		<add name="publicationstatus" type="String" db-mapping="document_publicationstatus" db-size="50" indexed="none"/>
-		<add name="lang" type="String" db-mapping="document_lang" db-size="2" indexed="none"/>
-		<add name="modelversion" type="String" db-mapping="document_modelversion" db-size="20" indexed="none"/>
-		<add name="documentversion" type="Integer" db-mapping="document_version" default-value="0" />
-		<add name="startpublicationdate" type="DateTime" db-mapping="document_startpublicationdate" />
-		<add name="endpublicationdate" type="DateTime" db-mapping="document_endpublicationdate" />
-		<add name="metastring" type="Lob" db-mapping="document_metas" />
+		<property name="label" type="String" min-occurs="1" db-mapping="document_label" db-size="255" />
+		<property name="author" type="String" db-mapping="document_author" db-size="100" indexed="none"/>
+		<property name="authorid" type="Integer" db-mapping="document_authorid" />
+		<property name="creationdate" type="DateTime" db-mapping="document_creationdate" />
+		<property name="modificationdate" type="DateTime" db-mapping="document_modificationdate" />
+		<property name="publicationstatus" type="String" db-mapping="document_publicationstatus" db-size="50" indexed="none"/>
+		<property name="lang" type="String" db-mapping="document_lang" db-size="2" indexed="none"/>
+		<property name="modelversion" type="String" db-mapping="document_modelversion" db-size="20" indexed="none"/>
+		<property name="documentversion" type="Integer" db-mapping="document_version" default-value="0" />
+		<property name="startpublicationdate" type="DateTime" db-mapping="document_startpublicationdate" />
+		<property name="endpublicationdate" type="DateTime" db-mapping="document_endpublicationdate" />
+		<property name="metastring" type="Lob" db-mapping="document_metas" />
 	</properties>
 
 	<statuses default="DRAFT" />

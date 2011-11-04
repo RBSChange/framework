@@ -701,6 +701,18 @@ class generator_PersistentModel
 	{
 		return ($this->extend !== null) ? self::$m_models[$this->extend] : null; 
 	}
+
+	/**
+	 * @return generator_PersistentModel
+	 */
+	public function getRootModel()
+	{
+		if ($this->hasParentModel())
+		{
+			return $this->getParentModel()->getRootModel();
+		}
+		return $this;
+	}
 	
 	/**
 	 * @return Boolean
@@ -1452,6 +1464,12 @@ class generator_PersistentModel
 		}
 		return $result;
 	}
+	
+	public function hasClassMembers()
+	{
+		return count($this->getClassMember()) > 0;
+	}
+	
 	/**
 	 * @return array<generator_PersistentProperty>
 	 */
@@ -1668,6 +1686,47 @@ class generator_PersistentModel
 		}
 		return join("\n", $code);
 	}
+	
+	/**
+	 * @param boolean $addSelf
+	 * @return string
+	 */
+	private function getValidatesPropertyNamesToExclude($addSelf = false)
+	{
+		if ($this->hasParentModel())
+		{
+			$array = $this->getParentModel()->getValidatesPropertyNamesToExclude(true);
+		}
+		else
+		{
+			$array = array('id', 'lang', 'model');
+		}
+		if ($addSelf)
+		{
+			foreach ($this->getPropertiesComplete() as $property) 
+			{
+				if ($property->hasDefinedConstraints() || $property->isRequired() || $property->getMaxOccurs() > 1)
+				{
+					if (!in_array($property->getName(), $array))
+					{
+						$array[] = $property->getName();
+					}
+				}
+			}
+			
+			foreach ($this->getSerializedProperties() as $property)
+			{
+				if ($property->hasDefinedConstraints() || $property->isRequired() || $property->getMaxOccurs() > 1)
+				{
+					if (!in_array($property->getName(), $array))
+					{
+						$array[] = $property->getName();
+					}
+				}				
+			}
+		}
+		return $array;
+	}
 
 	/**
 	 * @return array<generator_PersistentProperty>
@@ -1675,19 +1734,26 @@ class generator_PersistentModel
 	public function getValidatesProperties()
 	{
 		$result = array();
-		$properties = $this->getClassMember();
-		$labelProperty = $this->getPropertyByName("label");
-		if ($labelProperty !== null)
+		$alreadyValidated = $this->getValidatesPropertyNamesToExclude();
+		foreach ($this->getPropertiesComplete() as $property)
 		{
-			$properties[] = $labelProperty;
-		}
-		foreach ($properties as $property)
-		{
-			if (!is_array($property->getConstraintArray()) && !$property->isRequired() && $property->getMaxOccurs() <= 1)
+			if ($property->hasDefinedConstraints() || $property->isRequired() || $property->getMaxOccurs() > 1)
 			{
-				continue;
+				if (!in_array($property->getName(), $alreadyValidated))
+				{
+					$result[] = $property;
+				}
 			}
-			$result[] = $property;
+		}
+		foreach ($this->getSerializedProperties() as $property)
+		{
+			if ($property->hasDefinedConstraints() || $property->isRequired() || $property->getMaxOccurs() > 1)
+			{
+				if (!in_array($property->getName(), $alreadyValidated))
+				{
+					$result[] = $property;
+				}
+			}				
 		}
 		return $result;
 	}
@@ -1926,6 +1992,7 @@ class generator_PersistentModel
 				if ($xmlProperty->nodeName == "property" || $xmlProperty->nodeName == "add")
 				{
 					$property = new generator_PersistentProperty($this);
+					$property->setModelPart(generator_PersistentProperty::SERIALISED_PROPERTY);
 					$property->setSerializedProperty(true);
 					$property->initialize($xmlProperty);
 					$this->addSerializedProperty($property);

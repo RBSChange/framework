@@ -176,6 +176,24 @@ class UnavailableModuleException extends Exception
  */
 class ValidationException extends Exception
 {
+	private $errors;
+	
+	/**
+	 * @param array $errors
+	 */
+	public function setErrors($errors)
+	{
+		$this->errors = $errors;
+	}
+	
+	public function getErrors()
+	{
+		if (is_array($this->errors))
+		{
+			return $this->errors;
+		}
+		return array();
+	}
 }
 
 class ValidatorConfigurationException extends Exception

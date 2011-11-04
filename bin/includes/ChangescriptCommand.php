@@ -434,7 +434,8 @@ abstract class c_ChangescriptCommand
 	{
 		if (!$this->validateArgs($params, $options))
 		{
-			return $this->quitError('Inavlid argrument for command: ' . $this->callName);
+			$this->log($this->getChangeCmdName() . ' ' . $this->getCallName() . ' ' . $this->getUsage());
+			return $this->quitError('Inavlid command argruments');
 		}
 		
 		$this->startPointCut("before", $params, $options);

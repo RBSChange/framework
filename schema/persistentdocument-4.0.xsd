@@ -56,6 +56,53 @@
 			<xs:enumeration value="description" />
 		</xs:restriction>
 	</xs:simpleType>
+	
+	<xs:complexType name="constraint">
+		<xs:attribute name="name" use="required" type="xs:string" />
+		<xs:attribute name="parameter" use="optional" type="xs:string" />
+		
+		<xs:attribute name="min" use="optional" type="xs:double" />
+		<xs:attribute name="max" use="optional" type="xs:double" />
+		
+		<xs:attribute name="inclusive" use="optional" type="xs:boolean">
+			<xs:annotation>
+				<xs:documentation source="description"> use by 'range' constraint</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>		
+		
+		<xs:attribute name="modelName" use="optional" type="documentModel">
+			<xs:annotation>
+				<xs:documentation source="description"> use by 'unique' constraint</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>		
+		<xs:attribute name="propertyName" use="optional" type="xs:string">
+			<xs:annotation>
+				<xs:documentation source="description"> use by 'unique' constraint</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>		
+		<xs:attribute name="documentId" use="optional" type="xs:unsignedLong">
+			<xs:annotation>
+				<xs:documentation source="description"> use by 'unique' constraint</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>	
+				
+		<xs:attribute name="pattern" use="optional" type="xs:string">
+			<xs:annotation>
+				<xs:documentation source="description"> use by 'matches' constraint</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>		
+		<xs:attribute name="message" use="optional" type="xs:string">
+			<xs:annotation>
+				<xs:documentation source="description"> use by 'matches' constraint</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		
+		<xs:attribute name="allow" use="optional" type="xs:string">
+			<xs:annotation>
+				<xs:documentation source="description"> use by 'hostname' constraint</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>		
+	</xs:complexType>
 
 	<xs:element name="document">
 		<xs:annotation>
@@ -67,14 +114,13 @@
 		</xs:annotation>
 		<xs:complexType>
 			<xs:all>
-				<xs:element name="properties" minOccurs="0"
-					maxOccurs="1">
+				<xs:element name="properties" minOccurs="0" maxOccurs="1">
 					<xs:complexType>
 						<xs:sequence>
-							<xs:element name="add" minOccurs="0" maxOccurs="unbounded">
+							<xs:element name="property" minOccurs="0" maxOccurs="unbounded">
 								<xs:complexType>
 									<xs:sequence>
-										<xs:element name="constraints" type="xs:string" minOccurs="0" maxOccurs="1" />
+										<xs:element name="constraint" type="constraint" minOccurs="0" maxOccurs="unbounded" />
 									</xs:sequence>
 									<xs:attribute name="name" use="required" type="xs:string" />
 									<xs:attribute name="type" use="optional" type="propertyType" default="String" />
@@ -109,10 +155,10 @@
 				<xs:element name="serializedproperties" minOccurs="0" maxOccurs="1">
 					<xs:complexType>
 						<xs:sequence>
-							<xs:element name="add" minOccurs="0" maxOccurs="unbounded">
+							<xs:element name="property" minOccurs="0" maxOccurs="unbounded">
 								<xs:complexType>
 									<xs:sequence>
-										<xs:element name="constraints" type="xs:string" minOccurs="0" maxOccurs="1" />
+										<xs:element name="constraint" type="constraint" minOccurs="0" maxOccurs="unbounded" />
 									</xs:sequence>
 									<xs:attribute name="name" use="required" type="xs:string" />
 									<xs:attribute name="type" use="optional" type="propertyType" default="String" />
