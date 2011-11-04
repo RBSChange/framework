@@ -22,12 +22,16 @@ class validation_EmailsValidator extends validation_ValidatorImpl implements val
 	{
 		if ($this->getParameter() == true)
 		{
-			$addressArray = explode(',', $field->getValue());
-			foreach ($addressArray as $address)
+			$value = $field->getValue();
+			if ($value !== null && $value !== '')
 			{
-				if (!is_string($address) || !preg_match(validation_EmailValidator::EMAIL_REGEXP, trim($address)))
+				$addressArray = explode(',', $field->getValue());
+				foreach ($addressArray as $address)
 				{
-					$this->reject($field->getName(), $errors);
+					if (!validation_EmailValidator::isEmail(trim($address)))
+					{
+						$this->reject($field->getName(), $errors);
+					}
 				}
 			}
 		}
