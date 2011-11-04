@@ -7,12 +7,37 @@ class f_TalesUrl implements PHPTAL_Tales
 	static public function url($src, $nothrow)
 	{
 		$parts = array_map('trim', explode(',', $src));
-		if (empty($parts[0])) {return "''";}
+		if (count($parts) < 1 || empty($parts[0])) {return "''";}
 		$p1 = array_shift($parts);
 		$document = (is_numeric($p1)) ? $p1 : phptal_tales($p1, $nothrow);
+		
+		list ($formatterStr, $parametersStr) = self::buildFormattersAndParameters($parts);
+		
+		return "f_TalesUrl::buildURL($document, array(".implode(', ', $parametersStr)."), $formatterStr)";
+	}
+	
+	/**
+	 * actionurl: modifier.
+	 */
+	static public function actionurl($src, $nothrow)
+	{
+		$parts = array_map('trim', explode(',', $src));
+		if (count($parts) < 2 || empty($parts[0]) || empty($parts[1])) {return "''";}
+		$module = phptal_tales(array_shift($parts), $nothrow);
+		$action = phptal_tales(array_shift($parts), $nothrow);
+		
+		list ($formatterStr, $parametersStr) = self::buildFormattersAndParameters($parts);
+		
+		return "f_TalesUrl::buildActionURL($module, $action, array(".implode(', ', $parametersStr)."), $formatterStr)";
+	}
+	
+	/**
+	 * @param array $parts
+	 */
+	protected static function buildFormattersAndParameters($parts)
+	{
 		$formatter = 'html';
 		$parameters = array();
-		
 		foreach ($parts as $data)
 		{
 			if (empty($data)) {continue;}
@@ -61,7 +86,7 @@ class f_TalesUrl implements PHPTAL_Tales
 				$parametersStr[] = var_export($name , true). ' => ' . var_export($value , true);
 			}
 		}
-		return "f_TalesUrl::buildURL($document, array(".implode(', ', $parametersStr)."), $formatterStr)";
+		return array($formatterStr, $parametersStr);
 	}
 	
 	/**
@@ -99,6 +124,65 @@ class f_TalesUrl implements PHPTAL_Tales
 				}
 				
 				$link = website_UrlRewritingService::getInstance()->getDocumentLinkForWebsite($document, $website, $lang, $parameters);
+				$link->setArgSeparator(f_web_HttpLink::STANDARD_SEPARATOR);
+				$url = $link->getUrl();
+				
+				if ($formatter === 'html')
+				{
+					$url = LocaleService::getInstance()->transformHtml($url, $lang);
+				}
+				elseif ($formatter === 'js')
+				{
+					$url = LocaleService::getInstance()->transformJs($url, $lang);
+				}
+				elseif ($formatter === 'attr')
+				{
+					$url = LocaleService::getInstance()->transformAttr($url, $lang);
+				}
+			}
+		}
+		catch (Exception $e)
+		{
+			Framework::exception($e);
+		}
+		return $url;
+	}	
+	
+	/**
+	 * @param string $module
+	 * @param string $action
+	 * @param array $parameters
+	 * @param string $formatters
+	 */
+	public static function buildActionURL($module, $action, $parameters, $formatter)
+	{
+		$url = '';
+		try 
+		{
+			if (ModuleService::getInstance()->moduleExists($module))
+			{
+				if (isset($parameters['lang']))
+				{
+					$lang = $parameters['lang'];
+					unset($parameters['lang']);
+				}
+				else
+				{
+					$lang = RequestContext::getInstance()->getLang();
+				}
+				
+				$website = null;				
+				if (isset($parameters['website']) && ($parameters['website'] instanceof website_persistentdocument_website))
+				{
+					$website = $parameters['website'];
+					unset($parameters['website']);
+				}
+				else 
+				{
+					$website = website_WebsiteModuleService::getInstance()->getCurrentWebsite();
+				}
+				
+				$link = website_UrlRewritingService::getInstance()->getActionLinkForWebsite($module, $action, $website, $lang, $parameters);
 				$link->setArgSeparator(f_web_HttpLink::STANDARD_SEPARATOR);
 				$url = $link->getUrl();
 				

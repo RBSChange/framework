@@ -184,6 +184,7 @@
 				<entry name="date">f_TalesDate</entry>
 				<entry name="datetime">f_TalesDate</entry>
 				<entry name="url">f_TalesUrl</entry>
+				<entry name="actionurl">f_TalesUrl</entry>
 			</prefix>
 		</tal>
 		
