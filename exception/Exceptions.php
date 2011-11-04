@@ -37,22 +37,6 @@ class FileNotFoundException extends BaseException
 	}
 }
 
-class IllegalArgumentException extends Exception
-{
-
-	public function __construct ($argumentNameOrMessage, $expectedArgumentType = null)
-	{
-		if (!is_null($expectedArgumentType))
-		{
-			parent::__construct("Illegal argument: ".$argumentNameOrMessage." must be a ".$expectedArgumentType);
-		}
-		else
-		{
-			parent::__construct($argumentNameOrMessage);
-		}
-	}
-}
-
 class IllegalOperationException extends Exception
 {
 }
@@ -198,4 +182,23 @@ class ValidationException extends Exception
 
 class ValidatorConfigurationException extends Exception
 {
+}
+
+/**
+ * @deprecated use standard InvalidArgumentException
+ */
+class IllegalArgumentException extends InvalidArgumentException
+{
+
+	public function __construct ($argumentNameOrMessage, $expectedArgumentType = null)
+	{
+		if (!is_null($expectedArgumentType))
+		{
+			parent::__construct("Illegal argument: ".$argumentNameOrMessage." must be a ".$expectedArgumentType);
+		}
+		else
+		{
+			parent::__construct($argumentNameOrMessage);
+		}
+	}
 }
