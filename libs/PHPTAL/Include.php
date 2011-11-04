@@ -48,7 +48,7 @@ class PHPTAL_Php_Attribute_CHANGE_Include extends ChangeTalAttribute
 			$staticRefs = array("website_page", "context");
 			foreach ($staticRefs as $refName)
 			{
-				$ref = $ctx->__get($refName);
+				$ref = $ctx->{$refName};
 				if ($ref !== null)
 				{
 					$template->setAttribute($refName, $ref);
