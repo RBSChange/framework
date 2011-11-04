@@ -1427,8 +1427,10 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 		}
 		return null;
 	}
+	
+	
 
-	public function __call ($name, $args)
+	public function __call($name, $args)
 	{
 		switch ($name)
 		{
@@ -1442,7 +1444,7 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 				$v->setDocument($this);
 				return $v;
 			default:
-				throw new Exception('No method ' . get_class($this) . '->' . $name . ' method');
+				throw new BadMethodCallException('No method ' . get_class($this) . '->' . $name . ' method');
 		}
 	}
 }

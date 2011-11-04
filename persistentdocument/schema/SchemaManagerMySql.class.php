@@ -371,11 +371,13 @@ class change_SchemaManagerMySql implements change_SchemaManager
 			$sqls[] = "UPDATE `f_relation` SET relation_name = '" . $newProperty->getName() . "', relation_id = " .$newRelationId.
 				 " WHERE document_model_id1 IN (" . implode(", ", $modelNames) . ") AND relation_id = " . $oldRelationId;
 		}
-		foreach ($sqls as $sql)
+		
+		$script = implode(';'.PHP_EOL, $sqls);
+		if ($apply)
 		{
-			$this->executeSQLScript($sql);
+			$this->executeBatch($script);
 		}
-		return $sqls;
+		return $script;
 	}
 	
 	protected function getRelationId($propertyName)

@@ -221,16 +221,16 @@ class f_persistentdocument_DocumentService extends BaseService
 	 */
 	private function setAuthor($document)
 	{
-		if (is_null($document->getAuthor()))
+		if ($document->getAuthor() === null)
 		{
 			$user = users_UserService::getInstance()->getCurrentUser();
-			if (is_null($user))
+			if ($user === null)
 			{
 				$document->setAuthor('system');
 			}
 			else
 			{
-				$document->setAuthor($user->getLogin());
+				$document->setAuthor($user->getLabel());
 				$document->setAuthorid($user->getId());
 			}
 		}
