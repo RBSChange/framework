@@ -381,37 +381,34 @@ class f_web_CSSStylesheet
 					$inParenthesis = false;
 				}
 			}
-			if ($cssText[$i] === '@' && $inSelector)
-			{
-			    // handle import
-			    if (substr($cssText, $i, 7) === '@import' && !$inComment)
-			    {
-					$idx = strpos($cssText, ";", $i);
-					if (!$idx)
-					{
-						throw new Exception('Invalid directive @import syntax');
-					}
-					$directive = substr($cssText, $i, $idx - $i);
-					$matches = array();
-					if (preg_match('/url\((.*)\)/', $directive, $matches))
-					{
-						$this->importCSS(trim($matches[1]));
-					}
-					else
-					{
-						throw new Exception('Invalid directive @import syntax');
-					}
-					$i = $idx;
-			    }
-			    else if (substr($cssText, $i, 6) === '@media' && !$inComment)
+			// handle @import
+		    if ($cssText[$i] === '@' && $inSelector && substr($cssText, $i, 7) === '@import' && !$inComment)
+		    {
+				$idx = strpos($cssText, ";", $i);
+				if (!$idx)
 				{
-					$inMediaRule = true;
-					$inMediaType = true;
-					$i += 6;
-					$inSelector = false;
-			    }
-			    
-			}
+					throw new Exception('Invalid directive @import syntax');
+				}
+				$directive = substr($cssText, $i, $idx - $i);
+				$matches = array();
+				if (preg_match('/url\((.*)\)/', $directive, $matches))
+				{
+					$this->importCSS(trim($matches[1]));
+				}
+				else
+				{
+					throw new Exception('Invalid directive @import syntax');
+				}
+				$i = $idx;
+		    }
+		    // handle @media
+		    else if ($cssText[$i] === '@' && $inSelector && substr($cssText, $i, 6) === '@media' && !$inComment)
+			{
+				$inMediaRule = true;
+				$inMediaType = true;
+				$i += 6;
+				$inSelector = false;
+		    }
 			else if ($cssText[$i] === '/' && $cssText[$i + 1] === '*' && !$inComment)
 			{
 				$inComment = true;
