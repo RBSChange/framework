@@ -29,7 +29,9 @@ class commands_ApplyWebappPolicy extends c_ChangescriptCommand
 	 */
 	function _execute($params, $options)
 	{
-		$this->message("== Apply webapp policy ==");	
+		$this->message("== Apply webapp policy ==");
+		
+		$this->loadFramework();
 		$apacheGroup = $this->getApacheGroup();
 		$user = $this->getUser();
 		$dirs = array(f_util_FileUtils::buildOverridePath(), 
