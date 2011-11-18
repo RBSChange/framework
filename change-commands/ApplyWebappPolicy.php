@@ -31,6 +31,7 @@ class commands_ApplyWebappPolicy extends commands_AbstractChangeCommand
 	{
 		$this->message("== Apply webapp policy ==");
 		
+		$this->loadFramework();
 		$apacheGroup = $this->getApacheGroup();
 		$user = $this->getUser();
 		$dirs = array(WEB_CACHE_DIR, PROJECT_OVERRIDE, "media", "securemedia");
