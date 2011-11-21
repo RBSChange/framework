@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <i18n baseKey="f.validation.validator.password.message" lcid="en_GB">
-  <key id="reversed">the field ″{field}″ must not be a valid password.</key>
-  <key id="high">the field ″{field}″ is not a valid password : it must contain at least 6 characters (letters uppercase and lowercase and digits).</key>
-  <key id="medium">the field ″{field}″ is not a valid password  : it must contain at least 6 characters (letters and digits)</key>
-  <key id="low">the field ″{field}″ is not a valid password : it must contain at least 6 characters.</key>
+  <key id="reversed">The ″{field}″ field does not have to be a valid password.</key>
+  <key id="high">the ″{field}″ field is not a valid password: it must contain at least 6 characters (uppercase and lowercase letters and numbers).</key>
+  <key id="medium">the ″{field}″ field is not a valid password: it must contain at least 6 characters (letters and numbers)</key>
+  <key id="low">the ″{field}″ field is not a valid password: it must contain at least 6 characters.</key>
 </i18n>

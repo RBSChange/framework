@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<i18n baseKey="f.validation.validator.requiredif" lcid="en_GB">
+  <key id="message">The "{field}" field is mandatory if the "{fieldIf}" field is filled.</key>
+</i18n>

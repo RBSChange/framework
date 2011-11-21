@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <i18n baseKey="f.pdf.messages" lcid="en_GB">
-  <key id="error">PDF creation has failed, please try again later.</key>
+  <key id="error">PDF creation failed, please try again later.</key>
 </i18n>

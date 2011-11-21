@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<i18n baseKey="f.validation.validator.maxsize-array" lcid="en_GB">
+  <key id="message">Please choose at most {param} entries for the "{field}" field.</key>
+</i18n>

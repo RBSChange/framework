@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <i18n baseKey="f.validation.validator.uniqueinparentnode" lcid="en_GB">
-  <key id="message">the field ″{field}″ must be have a unique value in the current folder.</key>
+  <key id="message">The ″{field}″ field must have a unique value in the current folder.</key>
 </i18n>

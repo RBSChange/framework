@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<i18n baseKey="f.validation.validator.date.max" lcid="en_GB">
+  <key id="message">The "{field}″ field must contain a date on or before {maxdate}.</key>
+</i18n>

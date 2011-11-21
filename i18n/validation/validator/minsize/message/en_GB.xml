@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <i18n baseKey="f.validation.validator.minsize.message" lcid="en_GB">
-  <key id="reversed">the field ″{field}″ must not have a minimum size of {param} characters.</key>
+  <key id="reversed">the ″{field}″ field must not have a minimum length of {param} characters.</key>
 </i18n>

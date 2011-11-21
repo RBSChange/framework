@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <i18n baseKey="f.validation.validator.propeq" lcid="en_GB">
-  <key id="message">Fields ″{field1}″ and ″{field2}″ must be identical.</key>
+  <key id="message">The ″{field1}″ field is not identical to ″{field2}″.</key>
 </i18n>
