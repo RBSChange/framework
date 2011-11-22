@@ -237,6 +237,10 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 			$list = $this->getList();
 			if ($list instanceof list_persistentdocument_editablelist)
 			{
+				if ($this->propertyInfo->isArray())
+				{
+					return new bean_EditableListMultipleConverter($list);
+				}
 				return new bean_EditableListConverter($list);
 			}
 		}
