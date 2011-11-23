@@ -42,30 +42,18 @@ class bean_EditableListConverter implements BeanValueConverter
 	 */
 	public function convertFromRequestToBeanValue($value)
 	{
-		if(is_array($value))
-		{
-			$do = 'in';
-			$method = 'find';
-		}
-		else
-		{
-			$do = 'eq';
-			$method = 'findUnique';
-		}
-		
 		if ($this->editableList instanceof list_persistentdocument_valuededitablelist)
 		{
 			return list_ValueditemService::getInstance()->createQuery()
 				->add(Restrictions::eq("valuededitablelist", $this->editableList))
-				->add(Restrictions::$do("value", $value))->$method();
+				->add(Restrictions::eq("value", $value))->findUnique();
 		}
 		if ($this->editableList instanceof list_persistentdocument_editablelist)
 		{
 			return list_ItemService::getInstance()->createQuery()
 				->add(Restrictions::eq("editablelist", $this->editableList))
-				->add(Restrictions::$do("id", $value))->$method();
+				->add(Restrictions::eq("id", $value))->findUnique();
 		}
-		
 		return null;
 	}
 	
