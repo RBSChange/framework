@@ -18,6 +18,11 @@ abstract class validation_ValidatorHelper
 		$validators = $parser->getValidatorsFromDefinition($definition);
 		foreach ($validators as $validator)
 		{
+			$value = $field->getValue();
+			if (!($validator instanceof validation_BlankValidator) && ($value === null || $value === ''))
+			{
+				continue;
+			}
 			$validator->validate($field, $errors);
 		}
 		return ($errors->isEmpty());
