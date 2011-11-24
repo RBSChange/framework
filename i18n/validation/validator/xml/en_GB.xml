@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <i18n baseKey="f.validation.validator.xml" lcid="en_GB">
-  <key id="message">the field ″{field}″ must be a valid XML.</key>
+  <key id="message">The ″{field}″ field must contain valid XML.</key>
 </i18n>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <i18n baseKey="f.validation.validator.date" lcid="en_GB">
-  <key id="message">the field ″{field}″ must be a valid date (format: {format}).</key>
+  <key id="message">The ″{field}″ field must contain a valid date (format: {format}).</key>
   <key id="d">dd</key>
   <key id="m">mm</key>
   <key id="y">yyyy</key>

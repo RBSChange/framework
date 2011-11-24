@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <i18n baseKey="f.validation.validator.inlist" lcid="en_GB">
-  <key id="message">the field ″{field}″ must have a value from the following list: {param}.</key>
+  <key id="message">the ″{field}″ field must have a value from the following list: {param}.</key>
 </i18n>

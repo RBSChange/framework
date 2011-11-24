@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <i18n baseKey="f.validation.validator.integer.message" lcid="en_GB">
-  <key id="reversed">the value of field ″{field}″ must not be an integer number.</key>
+  <key id="reversed">The value of the ″{field}″ field does not have to be an integer.</key>
 </i18n>
