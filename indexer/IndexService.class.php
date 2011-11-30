@@ -1119,7 +1119,6 @@ class indexer_IndexService extends BaseService
 		$indexedDocument = $document->getIndexedDocument();
 		if ($indexedDocument instanceof indexer_IndexedDocument)
 		{
-			
 			$websiteIds = $document->getDocumentService()->getWebsiteIds($document);
 			if (is_array($websiteIds) && count($websiteIds) === 0)
 			{
@@ -1143,9 +1142,20 @@ class indexer_IndexService extends BaseService
 			}
 			$indexedDocument->setDateField('sortable_date', date_Calendar::getInstance($document->getModificationdate()));
 			$fields = $indexedDocument->getFields();
+			$this->completeFrontIndexDocument($indexedDocument, $document);
 			return $indexedDocument;
 		}
 		return null;
+	}
+	
+	/**
+	 * @param indexer_IndexedDocument $indexedDocument
+	 * @param f_persistentdocument_PersistentDocument $document
+	 */
+	protected function completeFrontIndexDocument($indexedDocument, $document)
+	{
+		// Nothing to do by default.
+		// Override this method to apply treatments globally on all front index documents.
 	}
 	
 	/**
@@ -1240,10 +1250,20 @@ class indexer_IndexService extends BaseService
 					$backofficeIndexDocument->setStringField('block', $attributes['block']);
 				}
 			}
-			
+			$this->completeBackIndexDocument($backofficeIndexDocument, $document);
 			return $backofficeIndexDocument;
 		}
 		return null;
+	}
+	
+	/**
+	 * @param indexer_IndexedDocument $indexedDocument
+	 * @param f_persistentdocument_PersistentDocument $document
+	 */
+	protected function completeBackIndexDocument($indexedDocument, $document)
+	{
+		// Nothing to do by default.
+		// Override this method to apply treatments globally on all back index documents.
 	}
 	
 	/**
