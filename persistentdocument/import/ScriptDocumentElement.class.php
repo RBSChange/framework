@@ -86,7 +86,7 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 						{
 							$propName = strtolower($matches[1][0]).substr($matches[1], 1);
 							$document = $this->getChildDocumentByProperty($propName, $value, $model->getName());
-							if ($document === null && !isset($this->attributes[$propName]))
+							if (!isset($this->attributes[$propName]))
 							{
 								$this->attributes[$propName] = $value;
 							}
