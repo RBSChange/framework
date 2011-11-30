@@ -246,6 +246,7 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 		$query = $persistentProvider->createQuery($type)->add(Restrictions::eq($propName, $propValue));
 		
 		$parentScript = $this->getParentDocument();
+		$parentInTree = $this->getParentInTree(); // Some documents should redefine getParentInTree, so use it here.
 		if ($parentScript)
 		{
 			$parent = $parentScript->getPersistentDocument();
@@ -255,10 +256,14 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 			{
 				$query->add(Restrictions::eq($candidateComponentNames[0], $parent));
 			}
-			elseif ($parent->getTreeId())
+			elseif ($parentInTree)
 			{
-				$query->add(Restrictions::childOf($parent->getId()));
+				$query->add(Restrictions::childOf($parentInTree->getId()));
 			}
+		}
+		elseif ($parentInTree)
+		{
+			$query->add(Restrictions::childOf($parentInTree->getId()));
 		}
 
 		$documents = $query->find();
