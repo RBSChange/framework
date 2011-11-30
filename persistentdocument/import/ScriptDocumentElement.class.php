@@ -245,10 +245,20 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 		$persistentProvider = f_persistentdocument_PersistentProvider::getInstance();
 		$query = $persistentProvider->createQuery($type)->add(Restrictions::eq($propName, $propValue));
 		
-		$parentDoc = $this->getParentInTree();
-		if ($parentDoc !== null)
+		$parentScript = $this->getParentDocument();
+		if ($parentScript)
 		{
-			$query->add(Restrictions::childOf($parentDoc->getId()));
+			$parent = $parentScript->getPersistentDocument();
+			$model = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($type);
+			$candidateComponentNames = $model->findTreePropertiesNamesByType($parent->getDocumentModelName());
+			if (count($candidateComponentNames) == 1)
+			{
+				$query->add(Restrictions::eq($candidateComponentNames[0], $parent));
+			}
+			elseif ($parent->getTreeId())
+			{
+				$query->add(Restrictions::childOf($parent->getId()));
+			}
 		}
 
 		$documents = $query->find();
