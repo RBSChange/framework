@@ -63,23 +63,39 @@ class f_web_CSSStylesheet
 	public function getAsCSS($fullEngine, $skin)
 	{
 		$result = array();
-		$media = null;
+		$atSelectors = array('');
+		$atLevel = 0;
 		foreach ($this->cssRules as $rule)
 		{
 			$ruleText = $rule->getAsCSS($fullEngine, $skin);
-			$currentMedia = $rule->getMediaType();
-			if ($currentMedia!= $media)
+			$currentAtLevel = $rule->getAtLevel();
+			$currentAtSelector = $rule->getAtSelector();
+			if ($currentAtLevel != $atLevel || $currentAtSelector != $atSelectors[$atLevel])
 			{
-				if ($media !== null)
+				if ($currentAtLevel < $atLevel)
+				{
+					for ($i = $currentAtLevel; $i < $atLevel; $i++)
+					{
+						$result[] = "}\n";
+					}
+				}
+				elseif ($currentAtLevel == $atLevel && $currentAtSelector != $atSelectors[$atLevel])
 				{
 					$result[] = "}\n";
 				}
-				if ($currentMedia !== null)
+				elseif ($currentAtLevel > $atLevel+1)
 				{
-					$result[] ='@media ' . $currentMedia . " {\n";
+					throw new Exception('Invalid @-rules nesting!');
 				}
-				$media = $currentMedia;
+				
+				if ($currentAtSelector !== null)
+				{
+					$result[] = $currentAtSelector . " {\n";
+				}
+				$atLevel = $currentAtLevel;
+				$atSelectors[$atLevel] = $currentAtSelector;
 			}
+			
 			if ($ruleText !== null)
 			{
 				$result[] = $ruleText;
@@ -359,11 +375,11 @@ class f_web_CSSStylesheet
 		$inParenthesis = false;
 		$inDeclarationBlock = false;
 		$inSelector = true;
-		$inMediaType = false;
-		$inMediaRule = false;
+		$inAtSelector = false;
+		$atSelectors = array();
+		$atLevel = 0;
 		$selectorText = "";
 		$declarationText = "";
-		$mediaText = "";
 		$commentText = "";
 		$comments = array();
 		$currentRule = null;
@@ -401,13 +417,22 @@ class f_web_CSSStylesheet
 				}
 				$i = $idx;
 		    }
-		    // handle @media
-		    else if ($cssText[$i] === '@' && $inSelector && substr($cssText, $i, 6) === '@media' && !$inComment)
+		    // handle @-rules
+		    // Rules like @xxx ...; //@charset, @namespace, @phonetic-alphabet
+		    // -> These @-rules are not very used, so we choose to ignore them here: using these rules will cause an error!
+		    else if ($cssText[$i] === '@' && $inSelector && !$inComment && (substr($cssText, $i, 8) === '@charset' || substr($cssText, $i, 10) === '@namespace' || substr($cssText, $i, 18) === '@phonetic-alphabet'))
+		    {
+		    	throw new Exception('@charset, @namespace and @phonetic-alphabet are not handeled.');
+		    }
+		    // Rules like @xxx { ... }; //@page, @font-face
+			// -> These @-rules work like selectors, so nothing specific to do.
+		    // Rules like @xxx { yyy { ... } ... }; //@media, @document, @support, @keyframes
+		    // -> These @-rules wil containt selectors or maybe nested @-rules, handle them specifically.
+			else if ($cssText[$i] === '@' && $inSelector && !$inComment && substr($cssText, $i, 5) !== '@page' && substr($cssText, $i, 10) !== '@font-face')
 			{
-				$inMediaRule = true;
-				$inMediaType = true;
-				$i += 6;
-				$inSelector = false;
+				$inAtSelector = true;
+				$atLevel++;
+				$atSelectors[$atLevel] = '@';
 		    }
 			else if ($cssText[$i] === '/' && $cssText[$i + 1] === '*' && !$inComment)
 			{
@@ -430,7 +455,6 @@ class f_web_CSSStylesheet
 			}
 			else if ($cssText[$i] === '}' && !$inComment)
 			{
-				
 				if ($inDeclarationBlock)
 				{
 					if (!f_util_StringUtils::isEmpty($declarationText))
@@ -450,18 +474,16 @@ class f_web_CSSStylesheet
 						$declarationText = "";
 					}
 					
-					
 					// End of declarations
 					$inSelector = true;
 
 					$inDeclarationBlock = false;
 					$selectorText = "";
-					
 				}								
-				else if ($inMediaRule)
+				else if ($atLevel > 0)
 				{
-					$inMediaRule = false;
-					$mediaText = "";
+					unset($atSelectors[$atLevel]);
+					$atLevel--;
 				}
 				
 				if ($currentRule)
@@ -474,14 +496,12 @@ class f_web_CSSStylesheet
 					$this->cssRules[] = $currentRule;
 					$currentRule = null;
 				}
-
 			}
 			else if ($cssText[$i] === '{' && !$inComment)
 			{
-			    if ($inMediaType)
+			    if ($inAtSelector)
 			    {
-					$inMediaType = false;
-					$inSelector = true;
+					$inAtSelector = false;
 			    }
 				else
 				{
@@ -501,9 +521,10 @@ class f_web_CSSStylesheet
 
 					$currentRule = new f_web_CSSRule();
 					$currentRule->setSelectorText(trim($selectorText));
-					if ($mediaText != "")
+					$currentRule->setAtLevel($atLevel);
+					if ($atLevel > 0)
 					{
-						$currentRule->setMediaType(trim($mediaText));
+						$currentRule->setAtSelector(trim($atSelectors[$atLevel]));
 					}
 					if ($currentEngine !== null)
 					{
@@ -537,21 +558,21 @@ class f_web_CSSStylesheet
 			}
 			else
 			{
-				if (!$inDeclarationBlock && !$inComment && !$inMediaType)
+				if ($inComment)
 				{
-					$selectorText .= $cssText[$i];
+					$commentText .= $cssText[$i];
 				}
-				else if ($inDeclarationBlock && !$inComment)
+				else if ($inDeclarationBlock)
 				{
 					$declarationText .= $cssText[$i];
 				}
-				else if ($inMediaType && !$inComment)
+				else if ($inAtSelector)
 				{
-					$mediaText .= $cssText[$i];
+					$atSelectors[$atLevel] .= $cssText[$i];
 				}
-				else if ($inComment)
+				else
 				{
-					$commentText .= $cssText[$i];
+					$selectorText .= $cssText[$i];
 				}
 			}
 			$i++;

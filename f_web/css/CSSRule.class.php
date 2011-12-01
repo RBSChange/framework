@@ -275,12 +275,56 @@ class f_web_CSSRule
 	}
 	
     /**
-     * @var String 
+     * @var sString 
+     */
+    private $atSelector;
+    
+    /**
+     * @return string 
+     */
+    public function getAtSelector() 
+    {
+		return $this->atSelector;
+    }
+
+    /**
+     * @param string $selector 
+     */
+    public function setAtSelector($selector) 
+    {
+		$this->atSelector = $selector;
+    }
+    
+    /**
+     * @var integer 
+     */
+    private $atLevel;
+    
+    /**
+     * @return intger 
+     */
+    public function getAtLevel() 
+    {
+		return $this->atLevel;
+    }
+
+    /**
+     * @param integer $level
+     */
+    public function setAtLevel($level) 
+    {
+		$this->atLevel = $level;
+    }
+	
+    // Deprecated.
+    
+    /**
+     * @deprecated with no replacement
      */
     private $mediaType;
     
     /**
-     * @return String 
+     * @deprecated with no replacement
      */
     public function getMediaType() 
     {
@@ -288,11 +332,10 @@ class f_web_CSSRule
     }
 
     /**
-     * @param String $type 
+     * @deprecated with no replacement
      */
     public function setMediaType($type) 
     {
 		$this->mediaType = $type;
     }
-
 }
