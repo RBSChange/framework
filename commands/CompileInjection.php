@@ -30,6 +30,7 @@ class commands_CompileInjection extends c_ChangescriptCommand
 		return array(
 			array('target' => 'compile-config'),
 			array('target' => 'update-autoload'),
+			array('target' => 'compile-documents'),
 		);
 	}	
 
