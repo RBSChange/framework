@@ -162,7 +162,6 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 	{
 		return <{$model->getServiceClassName()}>::getInstance();
 	}
-<{/if}>	
 
 	/**
 	 * @return string
@@ -171,6 +170,7 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 	{
 		return 'm.<{$model->getModuleName()}>.document.<{$model->getDocumentName()}>.document-name';
 	}
+<{/if}>	
 <{if (!$model->hasParentModel())}>
 
 	/**
