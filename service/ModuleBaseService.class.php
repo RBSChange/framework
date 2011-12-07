@@ -27,7 +27,7 @@ class ModuleBaseService extends BaseService
 	 */
 	public static function getInstanceByModuleName($moduleName)
 	{
-		if (f_util_ClassUtils::classExists($moduleName.'_ModuleService'))
+		if (class_exists($moduleName.'_ModuleService'))
 		{
 			return f_util_ClassUtils::callMethod($moduleName.'_ModuleService', 'getInstance');
 		}
@@ -54,6 +54,7 @@ class ModuleBaseService extends BaseService
 	
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param string $moduleName
 	 * @return Integer[] id of documents that define the path of the document
 	 */
 	public function getPathTo($document, $moduleName = null)

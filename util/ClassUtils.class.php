@@ -172,20 +172,6 @@ abstract class f_util_ClassUtils
 		return $classObj->newInstanceArgs($constructorArgs);
 	}
 	
-	/**
-	 * Indicates whether the class $className exists or not.
-	 *
-	 * This replaces the PHP built-in function class_exists() and it is strongly
-	 * recommended to use f_util_ClassUtils::classExists() instead of class_exists().
-	 *
-	 * @param string $className
-	 * @return boolean
-	 */
-	public static function classExists($className)
-	{
-		return ClassLoader::getInstance()->exists($className);
-	}
-	
 	public static function classExistsNoLoad($className)
 	{
 		return ClassLoader::getInstance()->existsNoLoad($className);
@@ -344,6 +330,16 @@ abstract class f_util_ClassUtils
 			throw new IllegalArgumentException('$object must be an object or a string.');
 		}
 		return new ReflectionClass($className);
+	}
+
+	// Deprecated.
+	
+	/**
+	 * @deprecated use class_exists
+	 */
+	public static function classExists($className)
+	{
+		return class_exists($className);
 	}
 }
 

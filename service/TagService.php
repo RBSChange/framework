@@ -256,16 +256,12 @@ class TagService extends BaseService
 	public function getTagObjects($document)
 	{
 		$tags = array();
-		$tagNames = $this->getPersistentProvider()->getTags($document->getId());
-		if (count($tagNames) > 0)
+		foreach ($this->getPersistentProvider()->getTags($document->getId()) as $tagName)
 		{
-			foreach ($tagNames as $tagName)
+			$to = $this->getTagObject($tagName);
+			if ($to !== null)
 			{
-				$to = $this->getTagObject($tagName);
-				if ($to !== null)
-				{
-					$tags[] = $to;
-				}
+				$tags[] = $to;
 			}
 		}
 		return $tags;
@@ -277,7 +273,8 @@ class TagService extends BaseService
 		if (isset($avaiableTags[$tagName]))
 		{
 			$tagInfo = $avaiableTags[$tagName];
-			return new object_TagObject($tagName, $tagInfo['label'], $tagInfo['icon'], $tagInfo['package']);
+			$label = (isset($tagInfo['labeli18n'])) ? LocaleService::getInstance()->trans($tagInfo['labeli18n'], array('ucf')) : $tagInfo['label'];
+			return new object_TagObject($tagName, $label, $tagInfo['icon'], $tagInfo['package']);
 		}		
 		return null;
 	}

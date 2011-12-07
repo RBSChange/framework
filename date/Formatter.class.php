@@ -62,7 +62,7 @@ class date_Formatter
 
 					// A textual representation of a day, three letters
 					case 'D' :
-						$result .= $ls->transFO('f.date.date.abbr.'.self::$dayArray[$date->getDayOfWeek()]);
+						$result .= $ls->trans('f.date.date.abbr.'.self::$dayArray[$date->getDayOfWeek()]);
 						break;
 
 					// Day of the month without leading zeros
@@ -72,14 +72,14 @@ class date_Formatter
 
 					// A full textual representation of the day of the week
 					case 'l' :
-						$result .=  $ls->transFO('f.date.date.'.self::$dayArray[$date->getDayOfWeek()]);
+						$result .=  $ls->trans('f.date.date.'.self::$dayArray[$date->getDayOfWeek()]);
 						break;
 
 					// English ordinal suffix for the day of the month, 2 characters
 					case 'S' :
 						$key = strval($date->getDay());		
 						$key =  (isset(self::$ordinalSuffixArray[$key])) ? self::$ordinalSuffixArray[$key] : self::$ordinalSuffixArray['default'];
-						$result .= $ls->transFO('f.date.date.suffix.'.$key);
+						$result .= $ls->trans('f.date.date.suffix.'.$key);
 						break;
 
 					// Numeric representation of the day of the week
@@ -89,7 +89,7 @@ class date_Formatter
 
 					// A full textual representation of a month, such as January or March
 					case 'F' :
-						$result .= $ls->transFO('f.date.date.'.self::$monthArray[$date->getMonth() - 1]);
+						$result .= $ls->trans('f.date.date.'.self::$monthArray[$date->getMonth() - 1]);
 						break;
 
 					// Numeric representation of a month, with leading zeros
@@ -99,7 +99,7 @@ class date_Formatter
 
 					// A short textual representation of a month, three letters
 					case 'M' :
-						$result .= $ls->transFO('f.date.date.abbr.'.self::$monthArray[$date->getMonth() - 1]);
+						$result .= $ls->trans('f.date.date.abbr.'.self::$monthArray[$date->getMonth() - 1]);
 						break;
 
 					// Numeric representation of a month, without leading zeros
@@ -135,12 +135,12 @@ class date_Formatter
 					// Lowercase Ante meridiem and Post meridiem
 					case 'a' :
 						
-						$result .= $ls->transFO('f.date.date.'. (($date->getHour() < 12) ? 'am' : 'pm'));
+						$result .= $ls->trans('f.date.date.'. (($date->getHour() < 12) ? 'am' : 'pm'));
 						break;
 
 					// Uppercase Ante meridiem and Post meridiem
 					case 'A' :
-						$result .= $ls->transFO('f.date.date.'. (($date->getHour() < 12) ? 'am' : 'pm'), array('uc'));
+						$result .= $ls->trans('f.date.date.'. (($date->getHour() < 12) ? 'am' : 'pm'), array('uc'));
 						break;
 
 					// 12-hour format of an hour without leading zeros

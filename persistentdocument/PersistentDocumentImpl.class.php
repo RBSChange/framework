@@ -687,7 +687,7 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 		{
 			return $this->getLabel();
 		}
-		return $this->getVoLabel();
+		return $this->getVoLabel() . ' [' . LocaleService::getInstance()->trans('m.uixul.bo.languages.' . $document->getLang(), array('ucf')) . ']';
 	}
 
 	/**

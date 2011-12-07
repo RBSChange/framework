@@ -817,45 +817,6 @@ class indexer_IndexService extends BaseService
 		}
 	}
 	
-
-	
-		
-	/**
-	 * @param f_persistentdocument_PersistentDocument $document
-	 * @return array();
-	 */
-	private function getBackofficeAttributes($document)
-	{
-		$attributes = array();
-		$model = $document->getPersistentModel();
-		if (f_util_ClassUtils::methodExists($document, 'getNavigationtitle'))
-		{
-			$label = f_util_ClassUtils::callMethodOn($document, 'getNavigationtitle');
-		}
-		else
-		{
-			$label = $document->getLabel();
-		}
-		$lang = RequestContext::getInstance()->getLang();
-		$labelKey = LocaleService::getInstance()->cleanOldKey($label);
-		$escapedLabel = htmlspecialchars($labelKey !== false ? LocaleService::getInstance()->transBO($labelKey) :$label , ENT_NOQUOTES, 'UTF-8');
-		
-		$attributes['htmllink'] = '<a class="link" href="#" rel="cmpref:' . $document->getId() . '" lang="' . $lang . '">' . $escapedLabel . '</a>';
-		if (!($document instanceof generic_persistentdocument_folder))
-		{
-			$document->getDocumentService()->addTreeAttributes($document, $model->getModuleName(), 'wmultilist', $attributes);
-			if (!isset($attributes['block']))
-			{
-				$models = block_BlockService::getInstance()->getBlocksDocumentModelToInsert();
-				if (isset($models[$document->getDocumentModelName()]))
-				{
-					$attributes['block'] = f_util_ArrayUtils::firstElement($models[$document->getDocumentModelName()]);
-				}
-			}
-		}
-		return $attributes;
-	}
-	
 	/**
 	 * @param Array $updatedRoles
 	 */
@@ -893,8 +854,6 @@ class indexer_IndexService extends BaseService
 		{
 			$this->getTransactionManager()->rollBack($e);
 		}
-		
-		
 	}
 	
 	/**
@@ -935,7 +894,8 @@ class indexer_IndexService extends BaseService
 		}
 		return array_values($result);
 	}
-				
+	
+	// Deprecated
 	
 	/**
 	 * @deprecated
