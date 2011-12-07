@@ -1338,7 +1338,6 @@ class f_persistentdocument_DocumentService extends BaseService
 	}
 
 	/**
-	 * TODO: move to TreeService
 	 * Generate the path string of ancestor document (excluding the rootfolder).
 	 * @param f_persistentdocument_PersistentDocument $document
 	 * @param String $separator ' > ' by default
@@ -2965,16 +2964,24 @@ class f_persistentdocument_DocumentService extends BaseService
 
 		return $data;
 	}
-	
+		
 	/**
+	 * Do not call this method directly. Call DocumentHelper::completeBOAttributes() instead.
+	 * 
 	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param array<string, string> $attributes
+	 * @param integer $mode
 	 * @param string $moduleName
-	 * @param string $treeType
-	 * @param array<string, string> $nodeAttributes
 	 */
-	public function addTreeAttributes($document, $moduleName, $treeType, &$nodeAttributes)
+	public function completeBOAttributes($document, &$attributes, $mode, $moduleName)
 	{
 		// Nothing done by default.
+		
+		// For compatibility only.
+		if ($mode & DocumentHelper::MODE_RESOURCE) { $treeType = 'wmultilist'; }
+		elseif ($mode & DocumentHelper::MODE_CUSTOM) { $treeType = 'wlist'; }
+		else { $treeType = 'wtree'; }
+		$this->addTreeAttributes($document, $moduleName, $treeType, $attributes);
 	}
 	
 	/**
@@ -3002,5 +3009,13 @@ class f_persistentdocument_DocumentService extends BaseService
 		return f_util_HtmlUtils::buildLink($attributes, $content);
 	}
 	
+	// Deprecated.
 	
+	/**
+	 * @deprecated (will be removed in 5.0) use DocumentHelper::completeBOAttributes() instead.
+	 */
+	public function addTreeAttributes($document, $moduleName, $treeType, &$nodeAttributes)
+	{
+		// Nothing done by default.
+	}
 }

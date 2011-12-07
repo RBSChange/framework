@@ -4,7 +4,6 @@
  */
 class DocumentHelper
 {
-
 	/**
 	 * Checks if $a equals $b.
 	 *
@@ -635,5 +634,56 @@ class DocumentHelper
 			}
 		}
 		return array_keys($models);
+	}
+	
+	// BASE: label if specific + icon if specific + all values used in js actions
+	const MODE_ITEM = 1; // + hasPreviewImage
+	const MODE_RESOURCE = 2; // + block + htmllink
+	const MODE_CUSTOM = 4; // + thumbnailsrc + custom columns
+	const MODE_ICON = 8; // + icon always set
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param array<string, string> $attributes
+	 * @param integer $mode
+	 * @param string $moduleName
+	 */
+	public static function completeBOAttributes($document, &$attributes, $mode = 0, $moduleName = null)
+	{
+		$document->getDocumentService()->completeBOAttributes($document, $attributes, $mode, $moduleName);
+		
+		$moduleService = ModuleBaseService::getInstanceByModuleName($moduleName);
+		if ($moduleService && f_util_ClassUtils::methodExists($moduleService, 'completeBOAttributes'))
+		{
+			$moduleService->completeBOAttributes($document, $attributes, $mode);
+		}
+
+		if (!isset($attributes['label']))
+		{
+			$attributes['label'] = $document->getTreeNodeLabel();
+		}
+		
+		if (($mode & self::MODE_ICON) && !isset($attributes['icon']))
+		{
+			$attributes['icon'] = $document->getPersistentModel()->getIcon();
+		}
+		
+		if ($mode & self::MODE_RESOURCE)
+		{
+			if (!isset($attributes['block']))
+			{
+				$modelName = $document->getDocumentModelName();
+				$models = block_BlockService::getInstance()->getBlocksDocumentModelToInsert();
+				if (isset($models[$modelName]))
+				{
+					$attributes['block'] = f_util_ArrayUtils::firstElement($models[$modelName]);
+				}
+			}
+			if (!isset($attributes['htmllink']) && $document->isContextLangAvailable() && $document->getPersistentModel()->hasURL())
+			{
+				$lang = RequestContext::getInstance()->getLang();
+				$attributes['htmllink'] = '<a class="link" href="#" rel="cmpref:' . $document->getId() . '" lang="' . $lang . '">' . f_util_HtmlUtils::textToHtml($attributes['label']) . '</a>';
+			}
+		}
 	}
 }
