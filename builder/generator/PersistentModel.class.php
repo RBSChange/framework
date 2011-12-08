@@ -5,7 +5,7 @@
 class generator_PersistentModel
 {
 	const BASE_MODEL = 'modules_generic/Document';
-	const BASE_CLASS_NAME = 'f_persistentdocument_PersistentDocumentImpl';
+	const BASE_CLASS_NAME = 'f_persistentdocument_PersistentDocument';
 
 	private static $m_models;
 	private static $m_inverseProperties = array();

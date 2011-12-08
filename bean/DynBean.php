@@ -383,7 +383,7 @@ class f_mvc_DynBeanModel implements f_mvc_BeanModel
 	private function addClassProperty($propName, $class, $localePrefix = null)
 	{
 		$propertyInfo = null;
-		if ($class->implementsInterface("f_persistentdocument_PersistentDocument"))
+		if ($class->isSubclassOf("f_persistentdocument_PersistentDocument"))
 		{
 			$propertyInfo = new BeanPropertyInfoImpl($propName, BeanPropertyType::DOCUMENT, $class->getName());
 		}

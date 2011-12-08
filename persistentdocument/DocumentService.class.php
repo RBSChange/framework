@@ -187,7 +187,7 @@ class f_persistentdocument_DocumentService extends BaseService
 	}
 
 	/**
-	 * @param f_persistentdocument_PersistentDocumentImpl $document
+	 * @param f_persistentdocument_PersistentDocument $document
 	 * @throws ValidationException
 	 */
 	private function validateDocument($document)

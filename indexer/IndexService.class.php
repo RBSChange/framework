@@ -772,7 +772,7 @@ class indexer_IndexService extends BaseService
 	}
 	
 	/**
-	 * @param f_persistentdocument_PersistentDocumentImpl $document
+	 * @param f_persistentdocument_PersistentDocument $document
 	 * @param indexer_IndexedDocument $indexedDocument
 	 */
 	private function setAncestors($document, $indexedDocument)

@@ -47,7 +47,7 @@ class validation_Errors extends ArrayObject
 	
 	/**
 	 * @deprecated for compatibility
-	 * @param f_persistentdocument_PersistentDocumentImpl $document
+	 * @param f_persistentdocument_PersistentDocument $document
 	 */
 	public function setDocument($document)
 	{

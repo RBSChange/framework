@@ -378,10 +378,8 @@ class ModuleService extends BaseService
 					$tm->beginTransaction();
 					
 					// create root folder
-					
-
 					$rootFolder = $tm->getPersistentProvider()->getNewDocumentInstance('modules_generic/rootfolder');
-					$rootFolder->setLabel('&modules.' . $moduleName . '.bo.general.Module-name;');
+					$rootFolder->setLabel($moduleName);
 					$rootFolder->save();
 					
 					// set as root folder in the tree
