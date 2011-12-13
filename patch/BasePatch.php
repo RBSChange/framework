@@ -179,6 +179,17 @@ abstract class patch_BasePatch
 			return $this->getPersistentProvider()->executeSQLSelect($query);
 		}
 	}
+	
+	/**
+	 * @example set value to null for remove entry
+	 * @param string $path
+	 * @param string $value
+	 * @return string || false if return value != input value compile-config is required
+	 */
+	protected final function addProjectConfigurationEntry($path, $value)
+	{
+		return config_ProjectParser::addProjectConfigurationEntry($path, $value);
+	}
 
 	/**
 	 * @return f_persistentdocument_PersistentProvider

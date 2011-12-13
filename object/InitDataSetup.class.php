@@ -145,4 +145,15 @@ abstract class object_InitDataSetup
 			return false;
 		}
 	}
+	
+	/**
+	 * @example set value to null for remove entry
+	 * @param string $path
+	 * @param string $value
+	 * @return string || false if return value != input value compile-config is required
+	 */
+	protected final function addProjectConfigurationEntry($path, $value)
+	{
+		return config_ProjectParser::addProjectConfigurationEntry($path, $value);
+	}
 }
