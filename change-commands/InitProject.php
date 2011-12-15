@@ -86,6 +86,8 @@ class commands_InitProject extends commands_AbstractChangeCommand
 
 		f_util_FileUtils::mkdir("mailbox");
 		
+		f_util_FileUtils::mkdir("themes");
+		
 		$this->getParent()->executeCommand("compileConfig");
 		$this->loadFramework();
 
