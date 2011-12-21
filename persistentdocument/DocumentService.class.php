@@ -2703,7 +2703,7 @@ class f_persistentdocument_DocumentService extends BaseService
 		$contextlang = RequestContext::getInstance()->getLang();
 		$usecontextlang = $document->isLangAvailable($contextlang);
 		$infos = array('id' => $document->getId(),
-				'model' => $model->getOriginalModelName(),
+				'model' => $model->getName(),
 				'contextlang' => $contextlang,
 				'vo' => $document->getLang(),
 				'label' => $model->isLocalized() ? $document->getVoLabel() :  $document->getLabel(),
