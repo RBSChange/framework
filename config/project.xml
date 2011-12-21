@@ -91,6 +91,8 @@
 			<entry name="https-request-marker">HTTPS</entry>
 			<!-- What is the value of https-request-marker for https queries -->
 			<entry name="https-request-marker-value">on</entry>
+			
+			<entry name="selfRequestProxy">127.0.0.1:80</entry>
 		</general>
 		
 		<i18n>

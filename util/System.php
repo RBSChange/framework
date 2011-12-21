@@ -127,6 +127,8 @@ class f_util_System
 		$request->setToken($token);
 		$client = new f_web_oauth_HTTPClient($request);
 		$client->getBackendClientInstance()->setTimeOut(0);
+		$lp = Framework::getConfigurationValue('general/selfRequestProxy');
+		if (!empty($lp)) {list($host, $port) = explode(':', $lp); $client->getBackendClientInstance()->setProxy($host, $port);}
 		return $client->execute();		
 	}
 	

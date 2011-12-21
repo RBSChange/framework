@@ -52,7 +52,7 @@ else
 {
 	$protocol = 'http://';
 }
-$currentUrl = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+$currentUrl = strpos($_SERVER['REQUEST_URI'], $protocol . $_SERVER['HTTP_HOST']) === 0 ? $_SERVER['REQUEST_URI'] : $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']; 
 $request = new f_web_oauth_Request($currentUrl, $consumer, f_web_oauth_Request::METHOD_POST);
 $request->setToken($token);
 
