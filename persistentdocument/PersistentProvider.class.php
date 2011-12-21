@@ -802,6 +802,7 @@ abstract class f_persistentdocument_PersistentProvider
 			if ($modelName === null)
 			{
 				$sql = $this->getDocumentInstanceQuery();
+				$lang = null;
 			}
 			else
 			{
@@ -809,10 +810,17 @@ abstract class f_persistentdocument_PersistentProvider
 				// TODO: not *, especially if a lang is requested
 				$sql = "select * from ".$model->getTableName()." inner join f_document using(document_id)";
 				$where = array($model->getTableName().".document_id = :document_id");
-				if ($lang !== null && $model->isLocalized())
+				if ($lang !== null)
 				{
-					$sql .= " inner join ".$model->getTableName() . $this->getI18nSuffix()." using(document_id)";
-					$where[] = "lang_i18n = :lang";
+					if ($model->isLocalized())
+					{
+						$sql .= " inner join ".$model->getTableName() . $this->getI18nSuffix()." using(document_id)";
+						$where[] = "lang_i18n = :lang";
+					}
+					else
+					{
+						$lang = null;
+					}
 				}
 				$sql .= " where ".join(" and ", $where);
 			}
@@ -3251,8 +3259,10 @@ abstract class f_persistentdocument_PersistentProvider
 		{
 			$content = $results[0]['content'];
 			if ($content == NULL) {$content = '';}
+			i18nmanager_ModuleService::getInstance()->loadLocale($keyPath, $id);
 			return array($content, $results[0]['format']);
 		}
+		i18nmanager_ModuleService::getInstance()->localeNotFound($keyPath, $id);
 		return array(null, null);
 	}
 	
