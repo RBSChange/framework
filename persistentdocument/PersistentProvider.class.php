@@ -3259,10 +3259,8 @@ abstract class f_persistentdocument_PersistentProvider
 		{
 			$content = $results[0]['content'];
 			if ($content == NULL) {$content = '';}
-			i18nmanager_ModuleService::getInstance()->loadLocale($keyPath, $id);
 			return array($content, $results[0]['format']);
 		}
-		i18nmanager_ModuleService::getInstance()->localeNotFound($keyPath, $id);
 		return array(null, null);
 	}
 	
