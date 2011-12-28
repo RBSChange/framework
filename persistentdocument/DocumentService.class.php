@@ -1814,7 +1814,7 @@ class f_persistentdocument_DocumentService extends BaseService
 		$enddate = $document->getEndpublicationdate();
 		if (!is_null($enddate))
 		{
-			if ($date > $enddate)
+			if ($date >= $enddate)
 			{
 				$this->setActivePublicationStatusInfo($document, '&framework.persistentdocument.status.active.enddate;');
 				return false;
