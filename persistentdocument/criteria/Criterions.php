@@ -266,7 +266,7 @@ class f_persistentdocument_criteria_LikeExpression implements f_persistentdocume
 	/**
      * Default constructor
      * @param String $String
-     * @param mixed $mixed
+     * @param mixed $value
      * @param MatchMode $MatchMode by default, MatchMode is MatchMode::ANYWHERE()
      * @param Boolean $Boolean
      */

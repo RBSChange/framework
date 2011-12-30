@@ -928,7 +928,6 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 
 		/**
-		 * @example "select distinct(block) from f_blockcache where pattern = :pattern"
 		 * @return String
 		 */
 		protected function getCacheIdsByPatternQuery()
@@ -936,7 +935,6 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 			return "select distinct(cache_id) from f_simplecache_registration where pattern = :pattern";
 		}
 		/**
-		 * @example "insert into f_blockcache values (:pattern, :block, :pageId)"
 		 * @return String
 		 */
 		protected function getRegisterSimpleCacheQuery()
@@ -945,7 +943,6 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 
 		/**
-		 * @example "delete from f_simplecache_registration where cache_id = :cacheId"
 		 * @return String
 		 */
 		protected function getUnregisterSimpleCacheQuery()

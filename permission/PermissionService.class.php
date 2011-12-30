@@ -128,11 +128,9 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 	/**
 	 * Get the list of "permissions" defined on the node $nodeId on the first upstream node where permissions are defined.
 	 *
-	 * @example getPermissionsInfoByNode($nodeId) returns
-	 * 			array(	'users' => array(userId => array('role1', 'role2'),
-	 * 					'groups' => array(groupId => array('role3', 'role4')))
 	 * @param Integer $nodeId
-	 * @return array< String, array< String, String > >
+	 * @return array< String, array< String, String > > For example: array(	'users' => array(userId => array('role1', 'role2'),
+	 * 					'groups' => array(groupId => array('role3', 'role4')))
 	 */
 	public function getPermissionsInfoByNode($nodeId)
 	{
@@ -205,7 +203,6 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 	/**
 	 * Assign role $roleName to user $user for the domain $domain (array of node ids).
 	 *
-	 * @example addRoleToUser(users_persistentdocument_user, 'modules_news.developper', array($permissionModuleRootNodeId))
 	 * @param users_persistentdocument_user $user
 	 * @param String $roleName
 	 * @param array<Integer> $domain node identifiers
@@ -260,9 +257,6 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 	 * If $domain is null or empty, all userAcls matching ($user, $roleName) are deleted.
 	 * If $roleName is null, $domain is ignored and all userAcls mathcing $user are deleted.
 	 *
-	 * @example removeUserPermission(users_persistentdocument_user, 'aRole', array($nodeId1, $nodeId2))
-	 * @example removeUserPermission(users_persistentdocument_user, 'aRole')
-	 * @example removeUserPermission(users_persistentdocument_user)
 	 * @param users_persistentdocument_user $user
 	 * @param String $roleName
 	 * @param array<Integer> $domain
@@ -303,7 +297,6 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 	/**
 	 * Assign role $roleName to group $group for the domains $domain (array of node ids)..
 	 *
-	 * @example addRoleToGroup(users_persistentdocument_group, 'modules_news.developper', array($permissionModuleRootNode))
 	 * @param users_persistentdocument_group $group
 	 * @param String $rolename
 	 * @param array<Integer> $domain
@@ -415,7 +408,6 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 	/**
 	 * Checks if the user $user has the permission $permission on node $nodeId.
 	 *
-	 * @example hasPermission(users_persistentdocument_user, 'modules_news.edit', $nodeId)
 	 * @param users_persistentdocument_user $user
 	 * @param String $permission
 	 * @param Integer $nodeId element of a possible domain
@@ -696,9 +688,10 @@ class f_permission_PermissionService extends f_persistentdocument_DocumentServic
 	 * Fetches all the user's roles (directly attributed to him or via a group he belongs to). If
 	 * $module is not null, the results are filtered by module name.
 	 *
-	 * @example getRolesByUser(users_persistentdocument_user, 'news') would return an array that looks like
+	 * getRolesByUser(users_persistentdocument_user, 'news') would return an array that looks like
 	 * 			array( 	'modules_news.writer' => array( 10, 11, 17)
 	 * 					'modules_news.validator' => array(11, 17)  ).
+	 * 
 	 * @param users_persistentdocument_user $user
 	 * @param String $module
 	 * @return array<String, array<Integer>> where the array key is a qualified roleName.

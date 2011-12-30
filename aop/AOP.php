@@ -288,8 +288,7 @@ class f_AOP
 	
 	/**
 	 * @param String $className
-	 * @return array<String, String[]>
-	 * @example return array(
+	 * @return array<String, String[]> For example: return array(
 	 array("f_aop_samples_ArroundAdvice", "applyAroundAdvice", $className, "getInstance", "f_aop_samples_ArroundAdvice", "save"),
 	 array("f_aop_samples_ArroundAdvice", "applyAroundAdvice", $className, "createQuery", "f_aop_samples_ArroundAdvice", "save")
 	 );

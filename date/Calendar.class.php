@@ -118,9 +118,6 @@ abstract class date_Calendar
 	 *
 	 * @return date_Calendar
 	 *
-	 * @example date_Calendar::getInstanceFromFormat('01/07/1979', 'd/m/Y')
-	 * @example date_Calendar::getInstanceFromFormat('1/7/1979', 'd/m/Y')
-	 *
 	 * @throws InvalidDateException
 	 */
 	public static function getInstanceFromFormat($dateString, $format, $impl = 'Gregorian')
@@ -188,10 +185,6 @@ abstract class date_Calendar
 	 * @param String $impl
 	 *
 	 * @return date_Calendar
-	 *
-	 * @example date_Calendar::getInstanceFromPhpFormat('01/12/1979', 'd/m/Y')
-	 * @example date_Calendar::getInstanceFromPhpFormat('01121979', 'dmY')
-	 * @example date_Calendar::getInstanceFromPhpFormat('01/1279 05:17:13 pm', 'd/my h:i:s a')
 	 *
 	 * @throws InvalidDateException
 	 */

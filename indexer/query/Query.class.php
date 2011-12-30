@@ -28,7 +28,7 @@ interface indexer_Query
 	/**
 	 * Filters the query according to the $query passed as argument.
 	 *
-	 * @example $myQuery->setField(new indexer_TermQuery('lang', 'fr')) will only return french document.
+	 * For example: $myQuery->setField(new indexer_TermQuery('lang', 'fr')) will only return french document.
 	 * @param indexer_Query $query
 	 * @return indexer_Query
 	 */
@@ -84,7 +84,7 @@ interface indexer_Query
 	/**
 	 * Sets the fields the query should retrieve.  Returns $this.
 	 * 
-	 * @example myQuery->setLimit(array('id', 'model')) will only return id and model of the matching hits.
+	 * For example: myQuery->setLimit(array('id', 'model')) will only return id and model of the matching hits.
 	 * @param Array<String> $array
 	 * @return indexer_Query
 	 */

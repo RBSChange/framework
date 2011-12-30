@@ -13,7 +13,7 @@ class Restrictions
 	/**
 	 * Apply an "equals" constraint to each property in the key set of a Array
 	 * @param array $propertyNameValues
-	 * @example allEq(array("author" => "me", "contributor" => "you"))
+	 * @return f_persistentdocument_criteria_Conjunction
 	 */
 	static function allEq($propertyNameValues)
 	{
@@ -27,7 +27,7 @@ class Restrictions
 
 	/**
 	 * Return the conjunction of 1..n expressions
-	 * @example andExp(Restrictions::eq("author", "me"), Restrictions::between("creationdate", "2007-01-31 00:00:00", "2007-02-28 00:00:00"))
+	 * @return f_persistentdocument_criteria_Conjunction
 	 */
 	static function andExp()
 	{
@@ -51,7 +51,7 @@ class Restrictions
 
 	/**
    	 * Apply a "between" constraint to the named property
-   	 * @example between("creationdate", "2007-01-31 00:00:00", "2007-02-28 00:00:00")
+   	 * @return f_persistentdocument_criteria_BetweenExpression
    	 */
 	static function between($propertyName, $min, $max)
 	{
@@ -63,8 +63,7 @@ class Restrictions
 	 * @param String $propertyName
 	 * @param mixed $value
 	 * @param boolean $ignoreCase deprecated, use ieq($propertyName, $value) instead of eq($propertyName, $value, true)
-	 * @example eq("author", "me")
-	 * @return SimpleExpression
+	 * @return f_persistentdocument_criteria_SimpleExpression
 	 */
 	static function eq($propertyName, $value, $ignoreCase = false)
 	{
@@ -73,6 +72,7 @@ class Restrictions
 
 	/**
 	 * Apply an "equal" constraint to two properties
+	 * @return f_persistentdocument_criteria_PropertyExpression
 	 */
 	static function eqProperty($propertyName, $otherPropertyName)
 	{
@@ -81,7 +81,7 @@ class Restrictions
 
 	/**
       * Apply a "greater than or equal" constraint to the named property
-      * @example ge("creationdate", $today)
+      * @return f_persistentdocument_criteria_SimpleExpression
       */
 	static function ge($propertyName, $value)
 	{
@@ -90,7 +90,7 @@ class Restrictions
 
 	/**
 	 * Apply a "greater than or equal" constraint to two properties
-	 *
+	 * @return f_persistentdocument_criteria_PropertyExpression
 	 */
 	static function geProperty($propertyName, $otherPropertyName)
 	{
@@ -99,7 +99,7 @@ class Restrictions
 
 	/**
 	 * Apply a "greater than" constraint to the named property
-	 * @example ge("creationdate", $today)
+	 * @return f_persistentdocument_criteria_SimpleExpression
 	 */
 	static function gt($propertyName, $value)
 	{
@@ -108,7 +108,7 @@ class Restrictions
 
 	/**
 	 * Apply a "greater than" constraint to two properties
-	 *
+	 * @return f_persistentdocument_criteria_PropertyExpression
 	 */
 	static function gtProperty($propertyName, $otherPropertyName)
 	{
@@ -117,7 +117,7 @@ class Restrictions
 
 	/**
 	 * Apply an "equal" constraint to the identifier property
-	 * @example idEq($documentId)
+	 * @return f_persistentdocument_criteria_SimpleExpression
 	 */
 	static function idEq($value)
 	{
@@ -127,7 +127,7 @@ class Restrictions
 	/**
 	 * Apply an "equal ignore case" constraint to the named property,
 	 * ignoring case
-	 * @example ieq("author", mE)
+	 * @return f_persistentdocument_criteria_SimpleExpression
 	 */
 	static function ieq($propertyName, $value)
 	{
@@ -139,8 +139,8 @@ class Restrictions
 	 * @param String $propertyName
 	 * @param String $value
 	 * @param MatchMode $matchMode
-	 * @example ilike("email", "@rBbS.fR", MatchMode::END)
 	 * @see MatchMode
+	 * @return f_persistentdocument_criteria_LikeExpression
 	 */
 	static function ilike($propertyName, $value, $matchMode = null)
 	{
@@ -150,6 +150,7 @@ class Restrictions
 	/**
 	 * @param String $propertyName
 	 * @param String $value
+	 * @return f_persistentdocument_criteria_LikeExpression
 	 */
 	static function beginsWith($propertyName, $value)
 	{
@@ -159,6 +160,7 @@ class Restrictions
 	/**
 	 * @param String $propertyName
 	 * @param String $value
+	 * @return f_persistentdocument_criteria_LikeExpression
 	 */
 	static function ibeginsWith($propertyName, $value)
 	{
@@ -168,6 +170,7 @@ class Restrictions
 	/**
 	 * @param String $propertyName
 	 * @param String $value
+	 * @return f_persistentdocument_criteria_LikeExpression
 	 */
 	static function endsWith($propertyName, $value)
 	{
@@ -177,6 +180,7 @@ class Restrictions
 	/**
 	 * @param String $propertyName
 	 * @param String $value
+	 * @return f_persistentdocument_criteria_LikeExpression
 	 */
 	static function iendsWith($propertyName, $value)
 	{

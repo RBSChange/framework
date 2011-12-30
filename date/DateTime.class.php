@@ -3,18 +3,10 @@
  * A class that represents a datetime information.
  * This class is able to handle dates before 1970 as it does not use timestamps.
  *
- * @deprecated Use date_Calendar, date_Date and date_DateFormat instead.
+ * @deprecated Use @link date_Calendar, @link date_Date and @link date_DateFormat instead.
  *
- * @date Thu May 31 11:15:31 CEST 2007
- * @author intbonjf
  * @see http://fr.wikipedia.org/wiki/Calendrier_perp%C3%A9tuel
  *
- * @example $date = new date_DateTime();
- * @example $date = new date_DateTime('2007-06-04');
- * @example $date = new date_DateTime('2007-06-04 11:07:12');
- * @example $date = date_DateTime::now();
- * @example $date = date_DateTime::yesterday();
- * @example $date = date_DateTime::tomorrow();
  */
 class date_DateTime
 {
@@ -386,11 +378,7 @@ class date_DateTime
 	 *
 	 * @return String
 	 *
-	 * @example $date->format('d/m/Y');
-	 * @example $date->format('d/m/Y H:i:s');
-	 * @example $date->format('D M Y', 'en');
-	 *
-	 * @deprecated Use date_DateFormat::format($date, $format, $lang) instead.
+	 * @deprecated Use @link date_DateFormat::format($date, $format, $lang) instead.
 	 */
 	public function format($format, $lang = null)
 	{

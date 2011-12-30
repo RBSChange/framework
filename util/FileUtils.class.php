@@ -162,10 +162,12 @@ abstract class f_util_FileUtils
 	}
 
 	/**
+	 * Find file in a directory with a pattern 
+	 * f_util_FileUtils::find("*.php", util_File_Utils::buildWebeditPath("modules", "myModule"));
+	 * 
 	 * @param String $pattern
 	 * @param String $fromPath
 	 * @return String[] the founded files as a "relative to $fromPath path" array
-	 * @example f_util_FileUtils::find("*.php", util_File_Utils::buildWebeditPath("modules", "myModule"));
 	 */
 	static public function find($pattern, $fromPath)
 	{
@@ -225,7 +227,7 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @example FileUtils::buildRelativePath('home', 'toto') returns 'home/toto'
+	 * FileUtils::buildRelativePath('home', 'toto') returns 'home/toto'
 	 * @return String the path builded using concatenated arguments
 	 */
 	public static function buildRelativePath()
@@ -235,8 +237,9 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @example FileUtils::buildPath('home', 'toto') returns 'home/toto'
-	 * @example FileUtils::buildPath('/home/titi/tutu', 'toto') returns '/home/titi/tutu/toto'
+	 * FileUtils::buildPath('home', 'toto') returns 'home/toto'
+	 * FileUtils::buildPath('/home/titi/tutu', 'toto') returns '/home/titi/tutu/toto'
+	 * 
 	 * @return String the path builded using concatenated arguments
 	 */
 	public static function buildPath()
@@ -246,8 +249,9 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @example FileUtils::buildAbsolutePath('home', 'toto') returns '/home/toto'
-	 * @example FileUtils::buildAbsolutePath('/home', 'toto') returns '/home/toto'
+	 * FileUtils::buildAbsolutePath('home', 'toto') returns '/home/toto'
+	 * FileUtils::buildAbsolutePath('/home', 'toto') returns '/home/toto'
+	 * 
 	 * @return String the path builded using concatenated arguments
 	 */
 	public static function buildAbsolutePath()
@@ -280,7 +284,7 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @example FileUtils::buildWebeditPath('bin', 'tasks') returns WEBEDIT_HOME.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'tasks'
+	 * FileUtils::buildWebeditPath('bin', 'tasks') returns WEBEDIT_HOME.DIRECTORY_SEPARATOR.'bin'.DIRECTORY_SEPARATOR.'tasks'
 	 * @return String
 	 */
 	public static function buildWebeditPath()
@@ -291,7 +295,7 @@ abstract class f_util_FileUtils
 	}
 		
 	/**
-	 * @example FileUtils::buildOverridePath('toto') returns PROJECT_OVERRIDE.DIRECTORY_SEPARATOR.'toto'
+	 * FileUtils::buildOverridePath('toto') returns PROJECT_OVERRIDE.DIRECTORY_SEPARATOR.'toto'
 	 * @return String
 	 */
 	public static function buildOverridePath()
@@ -302,7 +306,7 @@ abstract class f_util_FileUtils
 	}
 
 	/**
- 	 * @example FileUtils::buildDocumentRootPath('toto') returns DOCUMENT_ROOT.DIRECTORY_SEPARATOR.'toto'
+ 	 * FileUtils::buildDocumentRootPath('toto') returns DOCUMENT_ROOT.DIRECTORY_SEPARATOR.'toto'
 	 * @return String
 	 */
 	public static function buildDocumentRootPath()
@@ -313,7 +317,7 @@ abstract class f_util_FileUtils
 	}
 	
 	/**
-	 * @example FileUtils::buildCachePath('toto') returns AG_CACHE_DIR.DIRECTORY_SEPARATOR.'toto'
+	 * FileUtils::buildCachePath('toto') returns AG_CACHE_DIR.DIRECTORY_SEPARATOR.'toto'
 	 * @return String
 	 */
 	public static function buildCachePath()
@@ -324,7 +328,7 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @example FileUtils::buildCachePath('toto') returns AG_CACHE_DIR.DIRECTORY_SEPARATOR.'toto'
+	 * FileUtils::buildCachePath('toto') returns AG_CACHE_DIR.DIRECTORY_SEPARATOR.'toto'
 	 * @return String
 	 */
 	public static function buildChangeCachePath()
@@ -335,7 +339,7 @@ abstract class f_util_FileUtils
 	}
 	
 	/**
-	 * @example FileUtils::buildWebCachePath('toto') returns WEB_CACHE_DIR.DIRECTORY_SEPARATOR.'toto'
+	 * FileUtils::buildWebCachePath('toto') returns WEB_CACHE_DIR.DIRECTORY_SEPARATOR.'toto'
 	 * @return String
 	 */
 	public static function buildWebCachePath()
@@ -346,7 +350,7 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @example FileUtils::buildChangeBuildPath('toto') returns CHANGE_BUILD_DIR.DIRECTORY_SEPARATOR.'toto'
+	 * FileUtils::buildChangeBuildPath('toto') returns CHANGE_BUILD_DIR.DIRECTORY_SEPARATOR.'toto'
 	 * @return String
 	 */
 	public static function buildChangeBuildPath()
@@ -357,7 +361,7 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @example FileUtils::buildFrameworkPath('indexer.log') returns CHANGE_LOG_DIR.DIRECTORY_SEPARATOR.'indexer.log'
+	 * FileUtils::buildFrameworkPath('indexer.log') returns CHANGE_LOG_DIR.DIRECTORY_SEPARATOR.'indexer.log'
 	 * @return String
 	 */
 	public static function buildLogPath()
@@ -368,7 +372,7 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @example FileUtils::buildFrameworkPath('config', 'listeners.xml') returns FRAMEWORK_HOME.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'listeners.xml'
+	 * FileUtils::buildFrameworkPath('config', 'listeners.xml') returns FRAMEWORK_HOME.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'listeners.xml'
 	 * @return String
 	 */
 	public static function buildFrameworkPath()
@@ -960,11 +964,14 @@ abstract class f_util_FileUtils
 	}
 
 	/**
+	 * chmod(..., "2775") or chmod (..., 02775)
+	 * 
 	 * @param String $file
 	 * @param String|Integer $mode Cf. http://php.net/manual/en/function.chmod.php
 	 * @param Boolean $recursive
 	 * @param String|Integer $filesMode if recursive, you can specify a different mode than $mode for files
-	 * @example chmod(..., "2775") or chmod (..., 02775)
+	 * 
+	 * @throws Exception
 	 */
 	public static function chmod($file, $mode, $recursive = true, $filesMode = null)
 	{

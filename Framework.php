@@ -191,7 +191,7 @@ class Framework
 	}
 
 	/**
-	 * @example
+	 * To benchmark a piece of code, use: 
 	 * Framework::startBench(); // begin bench process
 	 * $brands = $this->getBrandsList();
 	 * Framework::bench("getBrandList"); // debug time between this call and last call
@@ -325,8 +325,6 @@ class Framework
 	/**
 	 * Return true if the $path configuration exist
 	 * @param String $path
-	 * @example Framework::hasConfiguration('databases')
-	 * @example Framework::hasConfiguration('databases/webapp')
 	 */
 	public static function hasConfiguration($path)
 	{
@@ -348,8 +346,6 @@ class Framework
 	 * @param String $path
 	 * @param Boolean $strict
 	 * @throws ConfigurationException if the $path configuration does not exist
-	 * @example Framework::getConfiguration('databases')
-	 * @example Framework::getConfiguration('databases/webapp')
 	 * @return String | false if the path was not founded and strict value if false
 	 */
 	public static function getConfiguration($path, $strict = true)

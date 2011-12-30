@@ -1747,13 +1747,13 @@ abstract class f_persistentdocument_PersistentProvider
 	protected abstract function getLastInsertId($tableName);
 
 	/**
-	 * @example INSERT INTO f_document (document_model, lang_vo, label_fr, ...) VALUES (:document_model, :lang_vo, :label_fr, ...)
+	 * Query like INSERT INTO f_document (document_model, lang_vo, label_fr, ...) VALUES (:document_model, :lang_vo, :label_fr, ...)
 	 * @return String
 	 */
 	protected abstract function getNewDocumentIdQuery1();
 
 	/**
-	 * @example INSERT INTO f_document (document_id, document_model, lang_vo, label_fr, ...) VALUES (:document_id, :document_model, :lang_vo, :label_fr, ...)';
+	 * Query like INSERT INTO f_document (document_id, document_model, lang_vo, label_fr, ...) VALUES (:document_id, :document_model, :lang_vo, :label_fr, ...)';
 	 * @return String
 	 */
 	protected abstract function getNewDocumentIdQuery2();
@@ -1836,7 +1836,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @example INSERT INTO '.$table.' (' . implode(', ', $fieldsName) .') VALUES (' . implode(', ', $parameters) .')
+	 * Query like INSERT INTO '.$table.' (' . implode(', ', $fieldsName) .') VALUES (' . implode(', ', $parameters) .')
 	 * @return String
 	 */
 	protected abstract function get_insertDocumentQuery($table, $fieldsName, $parameters, $lobParameters = array());
@@ -2136,7 +2136,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @example 'SELECT parent_id, node_order, node_level, node_path, children_count FROM f_tree_'.$treeId.' WHERE document_id = :document_id';
+	 * Query like 'SELECT parent_id, node_order, node_level, node_path, children_count FROM f_tree_'.$treeId.' WHERE document_id = :document_id';
 	 */
 	protected abstract function getNodeInfoQuery($treeId);
 
@@ -2167,7 +2167,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @example 'SELECT document_id, parent_id, node_order, node_level, node_path, children_count FROM f_tree_'.$treeId.' WHERE document_id in (:p0, ...)';
+	 * Query like 'SELECT document_id, parent_id, node_order, node_level, node_path, children_count FROM f_tree_'.$treeId.' WHERE document_id in (:p0, ...)';
 	 */
 	protected abstract function getNodesInfoQuery($treeId, $documentCount);
 
@@ -2193,7 +2193,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @example 'SELECT document_id, parent_id, node_order, node_level, node_path, children_count FROM f_tree_'.$treeId.'
+	 * Query like 'SELECT document_id, parent_id, node_order, node_level, node_path, children_count FROM f_tree_'.$treeId.'
 	 * 	WHERE parent_id = :parent_id ORDER BY node_order'
 	 */
 	protected abstract function getChildrenNodesInfoQuery($treeId);
@@ -2226,7 +2226,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @example 'SELECT document_id, parent_id, node_order, node_level, node_path, children_count FROM f_tree_'.$treeId
+	 * Query like 'SELECT document_id, parent_id, node_order, node_level, node_path, children_count FROM f_tree_'.$treeId
 	 * 	WHERE node_level > :min_level AND node_level <= :max_level AND node_path like :node_path ORDER BY node_level, node_order'
 	 */
 	protected abstract function getDescendantsNodesInfoQuery($treeId);
@@ -2252,7 +2252,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @example 'SELECT document_id FROM f_tree_'.$treeId.' WHERE parent_id = :parent_id ORDER BY node_order'
+	 * Query like 'SELECT document_id FROM f_tree_'.$treeId.' WHERE parent_id = :parent_id ORDER BY node_order'
 	 */
 	protected abstract function getChildrenIdQuery($treeId);
 
@@ -2278,7 +2278,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @example 'SELECT document_id FROM f_tree_'.$treeId.' WHERE node_level > :node_level and node_path like :node_path';
+	 * Query like 'SELECT document_id FROM f_tree_'.$treeId.' WHERE node_level > :node_level and node_path like :node_path';
 	 */
 	protected abstract function getDescendantsIdQuery($treeId);
 
@@ -2319,12 +2319,12 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @example 'UPDATE `f_document` SET `treeid` = NULL WHERE `treeid` = :treeid AND document_id <> :document_id'
+	 * Query like 'UPDATE `f_document` SET `treeid` = NULL WHERE `treeid` = :treeid AND document_id <> :document_id'
 	 */
 	protected abstract function getDeleteTreeDocumentQuery();
 
 	/**
-	 * @example 'DELETE FROM f_tree_'.$treeId
+	 * Query like 'DELETE FROM f_tree_'.$treeId
 	 */
 	protected abstract function getDeleteTreeQuery($treeId);
 
@@ -2362,13 +2362,13 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @example INSERT INTO `f_tree_'.$treeId.'` (`document_id`, `parent_id`, `node_order`, `node_level`, `node_path`, `children_count`)
+	 * Query like INSERT INTO `f_tree_'.$treeId.'` (`document_id`, `parent_id`, `node_order`, `node_level`, `node_path`, `children_count`)
 	 * 	VALUES (:document_id, :parent_id, :node_order, :node_level, :node_path, :children_count)'
 	 */
 	protected abstract function getInsertNodeQuery($treeId);
 
 	/**
-	 * @example 'UPDATE `f_document` SET `treeid` = :treeid WHERE `document_id` = :document_id';
+	 * Query like 'UPDATE `f_document` SET `treeid` = :treeid WHERE `document_id` = :document_id';
 	 */
 	protected abstract function getUpdateDocumentTreeQuery();
 
@@ -2441,17 +2441,17 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @example 'DELETE FROM `f_tree_'.$treeId.'` WHERE `document_id` = :document_id'
+	 * Query like 'DELETE FROM `f_tree_'.$treeId.'` WHERE `document_id` = :document_id'
 	 */
 	protected abstract function deleteEmptyNodeDocumentQuery($treeId);
 
 	/**
-	 * @example 'UPDATE f_tree_'.$treeId.' SET children_count = children_count + :offest WHERE document_id = :document_id'
+	 * Query like 'UPDATE f_tree_'.$treeId.' SET children_count = children_count + :offest WHERE document_id = :document_id'
 	 */
 	protected abstract function updateChildenCountQuery($treeId);
 
 	/**
-	 * @example 'UPDATE f_tree_'.$treeId.' SET node_order = node_order + :offest WHERE parent_id = :parent_id AND node_order >= :node_order'
+	 * Query like 'UPDATE f_tree_'.$treeId.' SET node_order = node_order + :offest WHERE parent_id = :parent_id AND node_order >= :node_order'
 	 */
 	protected abstract function updateChildrenOrderQuery($treeId, $offset);
 
@@ -2486,13 +2486,13 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @example 'UPDATE `f_document` SET `treeid` = NULL WHERE
+	 * Query like 'UPDATE `f_document` SET `treeid` = NULL WHERE
 	 * 	`document_id` IN (SELECT document_id FROM f_tree_'.$treeId.' WHERE node_level > :node_level and node_path like :node_path)'
 	 */
 	protected abstract function getUpdateDocumentsTreeQuery($treeId);
 
 	/**
-	 * @example 'DELETE FROM f_tree_'.$treeId.' WHERE node_level > :node_level and node_path like :node_path)'
+	 * Query like 'DELETE FROM f_tree_'.$treeId.' WHERE node_level > :node_level and node_path like :node_path)'
 	 */
 	protected abstract function deleteNodeRecursivelyQuery($treeId);
 
@@ -4271,9 +4271,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @example INSERT INTO f_user_action_entry (entry_date , user_id , document_id , module_name , action_name, username, info)
-	 * VALUES (:entry_date, :user_id, :document_id, :module_name, :action_name, :username, :info)
-	 * @return String
+	 * @return String INSERT INTO f_user_action_entry (entry_date , user_id , document_id , module_name , action_name, username, info) VALUES (:entry_date, :user_id, :document_id, :module_name, :action_name, :username, :info)
 	 */
 	protected function addUserActionEntryQuery()
 	{
@@ -4385,10 +4383,9 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 *
+	 * Return a sql request like "SELECT (document_id | module_name | action_name | [user_id]) as distinctvalue FROM f_user_action_entry GROUP BY (document_id | module_name | action_name | [user_id])"
 	 * @param String $fieldName (document | module | action | [user])
 	 * @return String
-	 * @example SELECT $sqlName as distinctvalue FROM f_user_action_entry GROUP BY $sqlName
 	 */
 	protected function getDistinctLogEntryQuery($fieldName)
 	{

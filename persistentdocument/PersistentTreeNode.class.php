@@ -118,7 +118,6 @@ class f_persistentdocument_PersistentTreeNode implements tree_TreeNode
 	
 	/**
 	 * @return string
-	 * @example '/123/45/'
 	 */
 	public function getPath()
 	{
@@ -168,7 +167,6 @@ class f_persistentdocument_PersistentTreeNode implements tree_TreeNode
 	
 	/**
 	 * Obtient le model du document
-	 * @example 'modules_generic/folder'
 	 * @return String
 	 */
 	public function getDocumentModelName()
@@ -181,7 +179,7 @@ class f_persistentdocument_PersistentTreeNode implements tree_TreeNode
 	}
 	
 	/**
-	 * Verifie si les noeud sont identique
+	 * Verifie si les noeuds sont identiques
 	 * (du point de vu de la persistance)
 	 * @param f_persistentdocument_PersistentTreeNode $node
 	 * @return Boolean

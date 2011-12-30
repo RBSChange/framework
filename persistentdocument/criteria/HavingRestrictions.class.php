@@ -12,7 +12,11 @@ class HavingRestrictions
 
 	/**
 	 * Apply a "between" constraint to the named property
-	 * @example between("creationdate", "2007-01-31 00:00:00", "2007-02-28 00:00:00")
+	 * For example between("creationdate", "2007-01-31 00:00:00", "2007-02-28 00:00:00")
+	 * @param String $propertyName
+	 * @param Integer $min
+	 * @param Integer $max
+	 * @return f_persistentdocument_criteria_HavingBetweenExpression
 	 */
 	static function between($propertyName, $min, $max)
 	{
@@ -24,8 +28,7 @@ class HavingRestrictions
 	 * @param String $propertyName
 	 * @param mixed $value
 	 * @param boolean $ignoreCase deprecated, use ieq($propertyName, $value) instead of eq($propertyName, $value, true)
-	 * @example eq("author", "me")
-	 * @return SimpleExpression
+	 * @return f_persistentdocument_criteria_HavingSimpleExpression
 	 */
 	static function eq($propertyName, $value)
 	{
@@ -34,7 +37,9 @@ class HavingRestrictions
 
 	/**
 	 * Apply a "greater than or equal" constraint to the named property
-	 * @example ge("creationdate", $today)
+	 * @param String $propertyName
+	 * @param mixed $value
+	 * @return f_persistentdocument_criteria_HavingSimpleExpression
 	 */
 	static function ge($propertyName, $value)
 	{
@@ -43,7 +48,9 @@ class HavingRestrictions
 
 	/**
 	 * Apply a "greater than" constraint to the named property
-	 * @example ge("creationdate", $today)
+	 * @param String $propertyName
+	 * @param mixed $value
+	 * @return f_persistentdocument_criteria_HavingSimpleExpression
 	 */
 	static function gt($propertyName, $value)
 	{
@@ -52,6 +59,9 @@ class HavingRestrictions
 
 	/**
 	 * Apply an "in" constraint to the named property
+	 * @param String $propertyName
+	 * @param array $value
+	 * @return f_persistentdocument_criteria_HavingSimpleExpression
 	 */
 	static function in($propertyName, $values)
 	{
@@ -60,6 +70,9 @@ class HavingRestrictions
 
 	/**
 	 * Apply an "notin" constraint to the named property
+	 * @param String $propertyName
+	 * @param array $value
+	 * @return f_persistentdocument_criteria_HavingSimpleExpression
 	 */
 	static function notin($propertyName, $values)
 	{
@@ -71,6 +84,7 @@ class HavingRestrictions
 	 *
 	 * @param String $propertyName
 	 * @param mixed $value
+	 * @return f_persistentdocument_criteria_HavingSimpleExpression
 	 */
 	static function le($propertyName, $value)
 	{
@@ -82,6 +96,7 @@ class HavingRestrictions
 	 *
 	 * @param String $propertyName
 	 * @param mixed $value
+	 * @return f_persistentdocument_criteria_HavingSimpleExpression
 	 */
 	static function lt($propertyName, $value)
 	{
@@ -92,6 +107,8 @@ class HavingRestrictions
 	 * Apply a "not equal" constraint to the named property
 	 *
 	 * @param String $propertyName
+	 * @param mixed $value
+	 * @return f_persistentdocument_criteria_HavingSimpleExpression
 	 */
 	static function ne($propertyName, $value)
 	{

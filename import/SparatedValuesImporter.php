@@ -13,8 +13,7 @@ class import_SparatedValuesImporter
 	}
 
 	/**
-	 * @var array<String>
-	 * @example array("article.label", ..., "price.value")
+	 * @var array<String> Example: array("article.label", ..., "price.value")
 	 */
 	private $definition;	
 
@@ -99,8 +98,8 @@ class import_SparatedValuesImporter
 	
 	/**
 	 * @param String $fileContent
-	 * @return array<array<String, String>>
-	 * @example 
+	 * @return array<array<String, String>> 
+	 * For example: 
 	 * 		array(
 	 * 			array("article.label" => "Shampooing", ..., "price.value" => "50"), 
 	 * 			array("article.label" => "Sèche-cheveux", ..., "price.value" => "15.20")
@@ -125,8 +124,8 @@ class import_SparatedValuesImporter
 	
 	/**
 	 * @param String $filePath
-	 * @return array<array<String, String>>
-	 * @example 
+	 * @return array<array<String, String>> 
+	 * For example: 
 	 * 		array(
 	 * 			array("article.label" => "Shampooing", ..., "price.value" => "50"), 
 	 * 			array("article.label" => "Sèche-cheveux", ..., "price.value" => "15.20")

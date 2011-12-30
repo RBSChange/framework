@@ -96,7 +96,6 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	/**
 	 * @param String $documentModelName
 	 * @return String the corresponding document class name
-	 * @example documentModelNameToDocumentClassName("modules_mymodule/mydocument") returns mymodule_persistentdocument_mydocument
 	 */
 	public static function documentModelNameToDocumentClassName($documentModelName)
 	{
@@ -382,7 +381,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	/**********************************************************/
 
 	/**
-	 * @example Convert model name from 'modules_generic/folder' to 'modules_generic_folder'
+	 * Convert model name from 'modules_generic/folder' to 'modules_generic_folder'
 	 * @return string
 	 */
 	public final function getBackofficeName()

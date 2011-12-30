@@ -98,7 +98,6 @@ class <{$model->getFinalDocumentClassName()}>model extends f_persistentdocument_
 
 	/**
 	 * @return String
-	 * @example modules_generic/folder
 	 */
 	public final function getName()
 	{
@@ -107,7 +106,6 @@ class <{$model->getFinalDocumentClassName()}>model extends f_persistentdocument_
 
 	/**
 	 * @return String
-	 * @example modules_generic/reference or null
 	 */
 	public final function getBaseName()
 	{
@@ -132,7 +130,6 @@ class <{$model->getFinalDocumentClassName()}>model extends f_persistentdocument_
 
 	/**
 	 * @return String
-	 * @example generic
 	 */
 	public final function getModuleName()
 	{
@@ -141,7 +138,6 @@ class <{$model->getFinalDocumentClassName()}>model extends f_persistentdocument_
 
 	/**
 	 * @return String
-	 * @example folder
 	 */
 	public final function getDocumentName()
 	{
