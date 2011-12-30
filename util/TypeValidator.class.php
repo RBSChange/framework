@@ -1,11 +1,7 @@
 <?php
 /**
  * A class to check objects' type.
- *
- * @example f_util_TypeValidator::check($myInteger, f_util_TypeValidator::INTEGER, $myFooInstance, 'Foo', ...)
- * @example f_util_TypeValidator::checkAll(array($myInteger, $myFooInstance), f_util_TypeValidator::INTEGER, 'Foo', ...)
- * @example f_util_TypeValidator::check($myObject, 'Foo | Bar'): checks if $myObject is an instance of class Foo or class Bar.
- * @example f_util_TypeValidator::check($myObject, 'null | Foo | Bar'): checks if $myObject is an instance of class Foo or class Bar or if $myObject is null.
+ * 
  */
 abstract class f_util_TypeValidator
 {
@@ -23,7 +19,9 @@ abstract class f_util_TypeValidator
 	/**
 	 * Checks the arguments.
 	 *
-	 * @example f_util_TypeValidator::check($myInteger, f_util_TypeValidator::INTEGER, $myFooInstance, 'Foo', ...)
+	 * f_util_TypeValidator::check($myInteger, f_util_TypeValidator::INTEGER, $myFooInstance, 'Foo', ...)
+	 * f_util_TypeValidator::check($myObject, 'Foo | Bar'): checks if $myObject is an instance of class Foo or class Bar.
+	 * f_util_TypeValidator::check($myObject, 'null | Foo | Bar'): checks if $myObject is an instance of class Foo or class Bar or if $myObject is null.
 	 *
 	 * @throws IllegalArgumentException()
 	 *
@@ -51,8 +49,8 @@ abstract class f_util_TypeValidator
 	/**
 	 * Checks all the arguments.
 	 *
-	 * @example f_util_TypeValidator::checkAll(array($myInteger, $myFooInstance), f_util_TypeValidator::INTEGER, 'Foo', ...)
-	 * @example f_util_TypeValidator::checkAll(func_get_args(), f_util_TypeValidator::INTEGER, 'Foo', ...)
+	 * f_util_TypeValidator::checkAll(array($myInteger, $myFooInstance), f_util_TypeValidator::INTEGER, 'Foo', ...)
+	 * f_util_TypeValidator::checkAll(func_get_args(), f_util_TypeValidator::INTEGER, 'Foo', ...)
 	 *
 	 * @throws IllegalArgumentException()
 	 *

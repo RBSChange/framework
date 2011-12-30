@@ -284,10 +284,10 @@ class ClassResolver implements ResourceResolver
 	}
 	
 	/**
+	 * Return all available classes name. If $basePattern is set, the class name must begin with.
+	 * 
 	 * @param String $basePattern
 	 * @return String[]
-	 * @example getClassNames() return all available classes name
-	 * @example getCLassNames("web") return all available classes that the name starts with "web"
 	 */
 	function getClassNames($basePattern = null)
 	{

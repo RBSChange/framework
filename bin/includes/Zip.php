@@ -54,7 +54,7 @@ class cboot_ZipContent
 	private $entries;
 
 	/**
-	 * @example new cboot_ZipContent('afile', array('file2', 'file3'), array('file4' => 'localFile4Path'))
+	 * For example: new cboot_ZipContent('afile', array('file2', 'file3'), array('file4' => 'localFile4Path')) 
 	 */
 	function __construct()
 	{

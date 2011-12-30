@@ -17,9 +17,7 @@ class validation_ContraintsParser
 	 * Returns an array of Validator objects, ready to be used, from a constraints
 	 * definition string.
 	 * 
-	 * @example $validators = validation_ContraintsParser::getValidatorsFromDefinition('size:6..12;unique:true;notEqual:"wwwadmin"');
-	 *
-	 * @param string $definition
+	 * @param string $definition For example: 'size:6..12;unique:true;notEqual:"wwwadmin"'
 	 * @return array<Validator>
 	 */
 	public function getValidatorsFromDefinition($definition)

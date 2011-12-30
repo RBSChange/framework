@@ -1060,7 +1060,6 @@ class LocaleService extends BaseService
 	}
 	
 	/**
-	 * @example transFO('f.boolean.true')
 	 * @param string $cleanKey
 	 * @param array $formatters value in array lab, lc, uc, ucf, js, html, attr
 	 * @param array $replacements
@@ -1073,7 +1072,6 @@ class LocaleService extends BaseService
 	}
 	
 	/**
-	 * @example transBO('f.boolean.true')
 	 * @param string $cleanKey
 	 * @param array $formatters value in array lab, lc, uc, ucf, js, html, attr
 	 * @param array $replacements
@@ -1111,7 +1109,6 @@ class LocaleService extends BaseService
 	
 	
 	/**
-	 * @example formatKey('fr', 'f.boolean.true')
 	 * @param string $lang
 	 * @param string $cleanKey
 	 * @param array $formatters value in array lab, lc, uc, ucf, js, attr, raw, text, html

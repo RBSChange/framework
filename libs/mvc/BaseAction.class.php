@@ -476,7 +476,6 @@ abstract class f_action_BaseAction extends Action
 	
 	/**
 	 * Retourne le nom de l'action permissionnée
-	 * @example modules_website.RewriteUrl
 	 * @param Integer $documentId
 	 * @param Boolean $addDocumentName
 	 * @return String

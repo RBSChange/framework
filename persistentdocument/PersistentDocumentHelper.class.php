@@ -519,8 +519,10 @@ class DocumentHelper
 	}
 	
 	/**
-	 * @example "[modules_generic_folder],!modules_generic_rootfolder"
-	 * @example "modules_generic_folder,modules_generic_systemfolder"
+	 * Two syntax are available to set the allowed list
+	 * - "[modules_generic_folder],!modules_generic_rootfolder"
+	 * - "modules_generic_folder,modules_generic_systemfolder"
+	 * 
 	 * @param string $allow
 	 * @return string
 	 */
@@ -587,8 +589,10 @@ class DocumentHelper
 	}
 	
 	/**
-	 * @example "[modules_generic/folder],!modules_generic/rootfolder"
-	 * @example "modules_generic/folder,modules_generic/systemfolder"
+	 * Two syntax are available to set the model list :
+	 * - "[modules_generic/folder],!modules_generic/rootfolder"
+	 * -  "modules_generic/folder,modules_generic/systemfolder"
+	 * 
 	 * @param string $modelList
 	 * @return string[]
 	 */

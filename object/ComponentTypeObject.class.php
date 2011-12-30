@@ -76,7 +76,6 @@ class ComponentTypeObject
 	}
 	
 	/**
-	 * @example ComponentTypeObject::getInstance('packageName/componentType')
 	 * @param String $componentType
 	 * @return ComponentTypeObject
 	 */

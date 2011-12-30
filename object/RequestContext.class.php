@@ -592,7 +592,6 @@ class RequestContext
 
 	/**
 	 * Get current context mime content-type
-	 * @example html
 	 * @return string
 	 */
 	public function getMimeContentType()

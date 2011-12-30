@@ -235,8 +235,7 @@ abstract class Mailer
 	}
 	
 	/**
-	 * @param String $sender
-	 * @example $myMail->setSender($string) where $string = "myemail1@rbs.fr" or "myemail1@rbs.fr,myemail2@rbs.fr" or "my name <myemail1@rbs.fr>"
+	 * @param String $sender For example: "myemail1@rbs.fr" or "myemail1@rbs.fr,myemail2@rbs.fr" or "my name <myemail1@rbs.fr>"
 	 */
 	public function setSender($sender)
 	{

@@ -533,7 +533,7 @@ class indexer_SolrManager
 
 	/**
 	 * Set the indexer's 'Task' we want to perform
-	 * @example: $this->setTask('update') means the URL used for communication will be http://<serverurl>/update
+	 * For exmaple: $this->setTask('update') means the URL used for communication will be http://<serverurl>/update
 	 * @param String $string
 	 */
 	protected function setTask($string)

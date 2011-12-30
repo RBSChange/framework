@@ -394,12 +394,10 @@ class BeanUtils
 	}
 
 	/**
-	 * @param String $beanClassName
-	 * @param String[] $include
-	 * @param String[] $exclude
+	 * @param String $beanClassName Example: "mymodule_persistentdocument_mybean"
+	 * @param String[] $include Example: "aDocumentPropertyName"
+	 * @param String[] $exclude Example: array("label", "aSubBeanPropertyName")
 	 * @return String[]
-	 * @example BeanUtils::getSubBeanValidationRules("mymodule_persistentdocument_mybean", "aDocumentPropertyName", array("label", "aSubBeanPropertyName")));
-	 *
 	 */
 	static function getSubBeanValidationRules($beanClassName, $subBeanName, $include = null, $exclude = null)
 	{

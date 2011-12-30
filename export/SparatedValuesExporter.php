@@ -13,8 +13,7 @@ class export_SparatedValuesExporter
 	}
 
 	/**
-	 * @var array<String>
-	 * @example array("article.label", "countryCode", "", ..., "price.value")
+	 * @var array<String> For example: array("article.label", "countryCode", "", ..., "price.value")
 	 */
 	private $definition;	
 
@@ -98,13 +97,11 @@ class export_SparatedValuesExporter
 	}
 	
 	/**
-	 * @param array<array<String, Object>> $data
-	 * @return String
-	 * @example 
-	 * 		write(array(
+	 * @param array<array<String, Object>> $data For example: array(
 	 * 			array("article" => $article1, "price" => $price1), 
 	 * 			array("article" => $article2, "price" => $price2)
-	 * 		))
+	 * 		)
+	 * @return String
 	 */
 	public function write($data)
 	{
@@ -120,12 +117,10 @@ class export_SparatedValuesExporter
 	}
 		
 	/**
-	 * @param array<array<String, Object>> $data
-	 * @example 
-	 * 		write(array(
+	 * @param array<array<String, Object>> $data For example: array(
 	 * 			array("article" => $article1, "price" => $price1), 
 	 * 			array("article" => $article2, "price" => $price2)
-	 * 		))
+	 * 		)
 	 * @param String $filePath
 	 * @throws IOException
 	 */

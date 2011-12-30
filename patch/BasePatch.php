@@ -1,8 +1,5 @@
 <?php
-/**
- * @date Tue Jul 24 18:24:44 CEST 2007
- * @author INTcoutL
- */
+
 abstract class patch_BasePatch
 {
 	/**
@@ -38,7 +35,6 @@ abstract class patch_BasePatch
 	 * @param String $message
 	 * @param Integer $level
 	 *
-	 * @author intbonjf
 	 */
 	protected final function log($message, $level = "info")
 	{
@@ -123,7 +119,6 @@ abstract class patch_BasePatch
 	 *
 	 * @param String $relativeFilePath
 	 *
-	 * @author intbonjf
 	 */
 	protected final function executeSQLFile($relativeFilePath)
 	{
@@ -193,8 +188,6 @@ abstract class patch_BasePatch
 
 	/**
 	 * @return f_persistentdocument_PersistentProvider
-	 *
-	 * @author intbonjf
 	 */
 	protected final function getPersistentProvider()
 	{
@@ -203,8 +196,6 @@ abstract class patch_BasePatch
 
 	/**
 	 * Begins a new database transaction.
-	 *
-	 * @author intbonjf
 	 */
 	protected final function beginTransaction()
 	{
@@ -213,8 +204,6 @@ abstract class patch_BasePatch
 
 	/**
 	 * Commits a previously begun database transaction.
-	 *
-	 * @author intbonjf
 	 */
 	protected final function commit()
 	{
@@ -225,8 +214,6 @@ abstract class patch_BasePatch
 	 * Rolls back a previously begun database transaction.
 	 *
 	 * @param Exception $e
-	 *
-	 * @author intbonjf
 	 */
 	protected final function rollBack($e)
 	{
@@ -255,7 +242,6 @@ abstract class patch_BasePatch
 	/**
 	 * Returns the number of the current patch.
 	 *
-	 * @example 0006
 	 * @return String
 	 */
 	protected function getNumber()

@@ -38,9 +38,8 @@ class commands_CheckHotfix extends commands_AbstractChangeCommand
 	}
 	
 	/**
-	 * @return array
-	 * @example   3 => '/framework/framework-3.0.3-3',
-	 * 		 	  12 => '/framework/framework-3.0.3-12',
+	 * @return array For example: array(3 => '/framework/framework-3.0.3-3',
+	 * 		 	  12 => '/framework/framework-3.0.3-12')
 	 */
 	function getHotfixes()
 	{

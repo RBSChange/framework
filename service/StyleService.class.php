@@ -258,8 +258,7 @@ class StyleService extends BaseService
 	}
 
 	/**
-	 * @example StyleService->getSourceLocation('modules.catalog.frontoffice')
-	 * @param String $id
+	 * @param String $id For example: 'modules.catalog.frontoffice'
 	 * @return String | null the path of the xml source file
 	 */
 	public function getSourceLocation($id)
@@ -380,8 +379,7 @@ class StyleService extends BaseService
 	
 	/**
 	 * @param string $contentType (html, xul)
-	 * @return string
-	 * @example 'all.all' 'xul.all' 'gecko.3'
+	 * @return string For example: 'all.all' 'xul.all' 'gecko.3'
 	 */
 	public function getFullEngineName($contentType = null)
 	{
@@ -456,8 +454,7 @@ class StyleService extends BaseService
 	}
 	
 	/**
-	 * @example StyleService->getSourceLocation('modules.catalog.frontoffice')
-	 * @param String $id
+	 * @param String $id For example: 'modules.catalog.frontoffice'
 	 * @return String | null the path of the xml source file
 	 */
 	private function getImageSourceLocation($id)

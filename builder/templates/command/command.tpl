@@ -14,7 +14,6 @@ class commands_<{$module}>_<{$name}> extends commands_AbstractChange<{$type}>Com
 {
 	/**
 	 * @return String
-	 * @example "<moduleName> <name>"
 	 */
 	public function getUsage()
 	{
@@ -23,7 +22,6 @@ class commands_<{$module}>_<{$name}> extends commands_AbstractChange<{$type}>Com
 
 	/**
 	 * @return String
-	 * @example "initialize a document"
 	 */
 	public function getDescription()
 	{
