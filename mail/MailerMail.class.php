@@ -7,6 +7,15 @@
 class MailerMail extends Mailer
 {
 
+	/**
+	 * @param array $params
+	 */
+	public function __construct($params)
+	{
+	
+		
+	}
+
 	public function sendMail($body = null, $hdrs = null)
 	{
 		if (Framework::isDebugEnabled())
@@ -33,5 +42,3 @@ class MailerMail extends Mailer
 	}
 
 }
-
-?>
