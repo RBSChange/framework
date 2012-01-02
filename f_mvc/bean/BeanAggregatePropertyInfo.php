@@ -8,6 +8,15 @@ class BeanAggregatePropertyInfo implements BeanPropertyInfo
 	private $beanName;
 
 	/**
+	 * If the property type if DOCUMENT, BEAN or CLASS
+	 * @return String
+	 */
+	public function getClassName()
+	{
+		return $this->wrappedBeanPropertyInfo->getClassName();
+	}
+
+	/**
 	 * @see BeanPropertyInfo::getList()
 	 *
 	 */
