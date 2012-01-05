@@ -1,6 +1,8 @@
 <?php
-define("WEBEDIT_HOME", getcwd());
-
+if (!defined("WEBEDIT_HOME"))
+{
+	define("WEBEDIT_HOME", getcwd());
+}	
 $profile = @file_get_contents(WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'profile');
 if ($profile === false || empty($profile))
 {
@@ -12,6 +14,7 @@ if ($profile === false || empty($profile))
 define('PROFILE', trim($profile));
 define('FRAMEWORK_HOME', WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'framework');
 define('AG_CACHE_DIR', WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . PROFILE);
+
 
 require_once dirname(__FILE__) . '/bootstrap.php';
 umask(0002);
