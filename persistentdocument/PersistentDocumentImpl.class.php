@@ -501,7 +501,7 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 	 */
 	function updateId($id)
 	{
-		$this->m_id = $id;
+		$this->m_id = intval($id);
 	}
 
 	/**
