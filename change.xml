@@ -253,5 +253,12 @@
 				<version>3.6.0</version>
 			</versions>
 		</dependency>
+		
+		<dependency>
+			<name>change-module/updater</name>
+			<versions>
+				<version>3.6.0</version>
+			</versions>
+		</dependency>
 	</dependencies>
 </change>
