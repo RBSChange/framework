@@ -795,7 +795,7 @@ abstract class f_persistentdocument_PersistentProvider
 				$cached = $this->getCacheService()->get($documentId);
 				if ($cached !== null)
 				{
-					$this->putInCache($id, $cached);
+					$this->putInCache($documentId, $cached);
 					return  $this->checkModelCompatibility($cached, $modelName);
 				}
 			}
@@ -846,7 +846,16 @@ abstract class f_persistentdocument_PersistentProvider
 			$document = $this->getDocumentInstanceWithModelName($documentId, $result['document_model'], $result['treeid'], $result, true);
 			if ($lang !== null && $result['document_lang'] != $lang)
 			{
-				$i18nDoc = $this->buildI18nDocument($document, $lang, $result);
+				
+				$properties = array();
+				foreach ($document->getPersistentModel()->getPropertiesInfos() as $key => $propertyInfo)
+				{
+					if ($propertyInfo->isLocalized())
+					{
+						$properties[$key] = $result[$propertyInfo->getDbMapping() . $this->getI18nSuffix()];
+					}
+				}
+				$this->buildI18nDocument($document, $lang, $properties);
 			}
 			$this->_loadDocument($document, $result);
 			if ($this->useDocumentCache)
