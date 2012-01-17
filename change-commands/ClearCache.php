@@ -21,6 +21,11 @@ class commands_ClearCache extends commands_AbstractChangeCommand
 	{
 		return "clear cache directory";
 	}
+	
+	function isHidden()
+	{
+		return true;
+	}
 
 	/**
 	 * @param String[] $params

@@ -28,7 +28,6 @@ class commands_ClearAll extends commands_AbstractChangeCommand
 		
 		$parent = $this->getParent();
 		$parent->executeCommand("updateAutoload");
-		$parent->executeCommand("clearLog");
 		$parent->executeCommand("clearCache");
 		$parent->executeCommand("clearWebappCache");
 		$parent->executeCommand("clearSimplecache");
