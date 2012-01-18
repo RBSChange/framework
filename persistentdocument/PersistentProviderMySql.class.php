@@ -68,14 +68,21 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 	}
 	
 	/**
-	 * @throws Exception on error
+	 * Drop all tables from current configured database
 	 */
 	function clearDB()
 	{
 		$stmt = $this->executeSQLSelect("show tables");
 		foreach ($stmt->fetchAll() as $table)
 		{
-			$this->executeSQLScript("drop table " . $table[0]);
+			try
+			{
+				$this->executeSQLScript("drop table " . $table[0]);
+			} 
+			catch (Exception $e) 
+			{
+				Framework::warn($e->getMessage());
+			}
 		}
 	}
 	
