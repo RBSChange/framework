@@ -64,21 +64,39 @@ class DocumentHelper
 	}
 
 	/**
-	 * Returns the document instance with ID $id.
-	 * 
-	 * If you are in the context of a DocumentService, please use
-	 * $this->getDocumentInstance().
-	 * 
-	 * If you expect a given model name, give the modelName parameter :
-	 * you will save queries, except if you only load model or the label
-	 * of the document (directly stored in f_document table)
+	 * Returns the document instance or throws an exception.
+	 * If you are in the context of a DocumentService, please use $this->getDocumentInstance().
+	 * If you expect a given model name, please use static getInstanceById() on the final document class.
 	 * @param integer $id
-	 * @param String $modelName
+	 * @param string $modelName
 	 * @return f_persistentdocument_PersistentDocument
+	 * @throws BaseException
+	 * @throws IllegalArgumentException
 	 */
 	public static function getDocumentInstance($id, $modelName = null)
 	{
-		return f_persistentdocument_DocumentService::getInstance()->getDocumentInstance($id, $modelName);
+		return f_persistentdocument_PersistentProvider::getInstance()->getDocumentInstance($id, $modelName);
+	}
+	
+	/**
+	 * Returns the document instance or null if the document does not exist. 
+	 * Please check the retuned value with instanceof. 
+	 * @param integer $id
+	 * @return f_persistentdocument_PersistentDocument|null
+	 */
+	public static function getDocumentInstanceIfExists($id)
+	{
+		if (!is_numeric($id) || $id <= 0)
+		{
+			return null;
+		}
+		$pp = f_persistentdocument_PersistentProvider::getInstance();
+		$realModelName = $pp->getDocumentModelName($id);
+		if ($realModelName === false)
+		{
+			return null;
+		}
+		return $pp->getDocumentInstance($id, $realModelName);
 	}
 
 	/**
