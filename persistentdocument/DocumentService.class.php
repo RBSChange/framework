@@ -1241,9 +1241,8 @@ class f_persistentdocument_DocumentService extends BaseService
 	 * Returns the child documents from the tree of $document.
 	 *
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param string $modelName Restrict to model $modelName.
-	 *
-	 * @return array<f_persistentdocument_PersistentDocument>
+	 * @param string $modelName Restrict to model $modelName
+	 * @return f_persistentdocument_PersistentDocument[]
 	 */
 	public function getChildrenOf($document, $modelName = null)
 	{
@@ -1256,11 +1255,34 @@ class f_persistentdocument_DocumentService extends BaseService
 		return $docs;
 	}
 
+	/**
+	 * Returns the published child documents from the tree of $document.
+	 *
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param string $modelName Restrict to model $modelName.
+	 * @return f_persistentdocument_PersistentDocument[]
+	 */
+	public function getPublishedChildrenOf($document, $modelName = null)
+	{
+		$docs = array();
+		$lang = RequestContext::getInstance()->getLang();
+		$treeNode = TreeService::getInstance()->getInstanceByDocument($document);
+		foreach ($treeNode->getChildren($modelName) as $child)
+		{
+			/* @var $doc f_persistentdocument_PersistentDocumentImpl */
+			$doc = $child->getPersistentDocument();
+			if ($doc->isLangAvailable($lang) && $doc->isPublished())
+			{
+				$docs[] = $child->getPersistentDocument();
+			}
+		}
+		return $docs;
+	}
+
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
 	 * @param string $modelName Restrict to model $modelName.
-	 *
 	 * @return f_persistentdocument_PersistentDocument[]
 	 */
 	public function getAncestorsOf($document, $modelName = null)
