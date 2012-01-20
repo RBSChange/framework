@@ -1038,6 +1038,7 @@ abstract class f_persistentdocument_PersistentProvider
 	 */
 	public function getDocumentModelName($id)
 	{
+		$id = intval($id);
 		if ($this->isInCache($id))
 		{
 			return $this->getFromCache($id)->getDocumentModelName();
