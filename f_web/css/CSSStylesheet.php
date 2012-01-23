@@ -372,6 +372,8 @@ class f_web_CSSStylesheet
 		$i = 0;
 		$cssTextLength = strlen($cssText);
 		$inComment = false;
+		$inSimpleQuotedString = false;
+		$inDoubleQuotedString = false;
 		$inParenthesis = false;
 		$inDeclarationBlock = false;
 		$inSelector = true;
@@ -397,8 +399,23 @@ class f_web_CSSStylesheet
 					$inParenthesis = false;
 				}
 			}
+			// handle special chars in strings (for exemple in content: declarations)
+			if ($cssText[$i] === "'" && $inDeclarationBlock && !$inComment)
+			{
+				$inSimpleQuotedString = !($inSimpleQuotedString && $cssText[$i-1] != '\\');
+				$declarationText .= $cssText[$i];
+			}
+			else if ($cssText[$i] === '"' && $inDeclarationBlock && !$inComment)
+			{
+				$inDoubleQuotedString = !($inDoubleQuotedString && $cssText[$i-1] != '\\');
+				$declarationText .= $cssText[$i];
+			}
+			else if ($inSimpleQuotedString || $inDoubleQuotedString)
+			{
+				$declarationText .= $cssText[$i];
+			}
 			// handle @import
-		    if ($cssText[$i] === '@' && $inSelector && substr($cssText, $i, 7) === '@import' && !$inComment)
+		    else if ($cssText[$i] === '@' && $inSelector && substr($cssText, $i, 7) === '@import' && !$inComment)
 		    {
 				$idx = strpos($cssText, ";", $i);
 				if (!$idx)
