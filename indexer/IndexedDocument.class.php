@@ -129,7 +129,7 @@ final class indexer_Field
 	 */
 	static function getIntegerMultiFieldName($baseName)
 	{
-		return $baseName . self::INTEGER;
+		return $baseName . self::INTEGER_MULTI;
 	}
 	
 	/**
