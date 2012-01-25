@@ -639,6 +639,7 @@ class TagService extends BaseService
 			return true;
 		}
 
+		$functionName = null;
 		$this->getFunctionalTagInfo($tag, $moduleName, $documentName, $functionName);
 		if ($functionName == 'detail')
 		{
@@ -659,6 +660,7 @@ class TagService extends BaseService
 			return true;
 		}
 
+		$functionName = null;
 		$this->getFunctionalTagInfo($tag, $moduleName, $documentName, $functionName);
 		if ($functionName == 'list')
 		{
@@ -672,6 +674,7 @@ class TagService extends BaseService
 
 	public function isArchivePageTag($tag, &$moduleName = null, &$documentName = null)
 	{
+		$functionName = null;
 		$this->getFunctionalTagInfo($tag, $moduleName, $documentName, $functionName);
 		if ($functionName == 'archive')
 		{
@@ -980,7 +983,7 @@ class TagService extends BaseService
 	}
 	
 	/**
-	 * @return array<tag => array<tag, icon, label, package, component_type>>
+	 * @return array<tag => array<tag, icon, label, labeli18n, package, component_type>>
 	 */
 	private function getAvailableTagsInfo()
 	{
@@ -990,6 +993,47 @@ class TagService extends BaseService
 			$this->tagsInfo = unserialize(f_util_FileUtils::read($compiledFilePath));
 		}
 		return $this->tagsInfo;
+	}
+	
+	/**
+	 * @var array
+	 */
+	private $tagsInfosByModel;
+	
+	/**
+	 * @var array
+	 */
+	private $compatibleTagsInfosByModel;
+	
+	/**
+	 * @param string $modelName
+	 */
+	public function getAvailableTagsInfoByModel($modelName)
+	{
+		if (!isset($this->compatibleTagsInfosByModel[$modelName]))
+		{
+			if ($this->tagsInfosByModel === null)
+			{
+				$this->tagsInfosByModel = array();
+				foreach (TagService::getInstance()->getAllAvailableTags() as $tagName => $tagInfos)
+				{
+					$this->tagsInfosByModel[$tagInfos['component_type']][$tagName] = $tagInfos;
+				}
+			}
+			
+			$tagsInfos = array();
+			$modelNames = f_persistentdocument_PersistentDocumentModel::getModelChildrenNames('modules_website/menu');
+			$modelNames[] = 'modules_website/menu';
+			foreach ($modelNames as $modelName)
+			{
+				if (isset($this->tagsInfosByModel[$modelName]))
+				{
+					$tagsInfos = array_merge($tagsInfos, $this->tagsInfosByModel[$modelName]);
+				}
+			}
+			$this->compatibleTagsInfosByModel[$modelName] = $tagsInfos;
+		}
+		return $this->compatibleTagsInfosByModel[$modelName];
 	}
 	
 	private function processModules()
@@ -1026,7 +1070,8 @@ class TagService extends BaseService
 
 				// Search for tags definition file in each "config" directory...
 				$found = false;
-				if ($dh = opendir($configPath))
+				$dh = opendir($configPath);
+				if ($dh)
 				{
 					while (($file = readdir($dh)) !== false)
 					{
@@ -1083,7 +1128,8 @@ class TagService extends BaseService
 	{
 		if (is_dir($dir))
 		{
-			if ($dh = opendir($dir))
+			$dh = opendir($dir);
+			if ($dh)
 			{
 				while (($file = readdir($dh)) !== false)
 				{
