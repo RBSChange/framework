@@ -1389,8 +1389,11 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	 */
 	public function add<{$property->getPhpName()}>Inverse($value)
 	{
-		$value->add<{$property->getRelationName()|capitalize}>($this);
-		$this->addDocumentInverse($value);
+		if ($value->getIndexof<{$property->getRelationName()|capitalize}>($this) == -1)
+		{
+			$value->add<{$property->getRelationName()|capitalize}>($this);
+			$this->addDocumentInverse($value);
+		}
 	}
 
 
