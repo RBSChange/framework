@@ -538,12 +538,26 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 	}
 	
 	/**
-	 * May be used inside an xml script with the "execute" element to set the byDocumentId attribute.
+	 * May be used inside an xml script with the "execute" element to set the 'byDocumentId' attribute by default.
+	 * 
 	 * @param import_ScriptExecuteElement $scriptExecute
+	 * @param array $attr Si le tableau contient une clé 'attribute-name' cette valeur sera utilisée comme nom d'attribut
 	 */
-	public function setDocumentIdAttribute($scriptExecute)
+	public function setDocumentIdAttribute($scriptExecute, $attr = null)
 	{
-		$this->script->setAttribute('byDocumentId', $this->getPersistentDocument()->getId());
+		$attributeName = (is_array($attr) && isset($attr['attribute-name'])) ? $attr['attribute-name'] : 'byDocumentId';
+		$this->script->setAttribute($attributeName, $this->getPersistentDocument()->getId());
+	}
+	
+	/**
+	 * May be used inside an xml script with the "execute" element to set the 'type' attribute by default.
+	 * @param import_ScriptExecuteElement $scriptExecute
+	 * @param array $attr Si le tableau contient une clé 'attribute-name' cette valeur sera utilisée comme nom d'attribut
+	 */
+	public function setDocumentTypeAttribute($scriptExecute, $attr = null)
+	{
+		$attributeName = (is_array($attr) && isset($attr['attribute-name'])) ? $attr['attribute-name'] : 'type';
+		$this->script->setAttribute($attributeName, $this->getPersistentDocument()->getDocumentModelName());
 	}
 	
 	// Deprecated
