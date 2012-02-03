@@ -4,7 +4,6 @@
  */
 class TemplateResolver extends FileResolver implements ResourceResolver
 {
-
 	/**
 	 * The singleton instance
 	 * @var TemplateResolver
@@ -16,6 +15,7 @@ class TemplateResolver extends FileResolver implements ResourceResolver
 	 * @var string
 	 */
 	private $engine = 'all';
+	
 	/**
 	 * Engine version used by browser (all, 1.8, 4, ...)
 	 * @var string
@@ -35,15 +35,13 @@ class TemplateResolver extends FileResolver implements ResourceResolver
 	 */
 	public static function getInstance()
 	{
-
-		if ( is_null(self::$instance) )
+		if (is_null(self::$instance))
 		{
-			self::$instance = new TemplateResolver();
-
+			$finalClassName = Injection::getFinalClassName(get_class());
+			self::$instance = new $finalClassName();
 		}
 		self::$instance->reset();
 		return self::$instance;
-
 	}
 
 	/**
@@ -81,7 +79,6 @@ class TemplateResolver extends FileResolver implements ResourceResolver
 	 */
 	public function getPath($templateName)
 	{
-
 		// If not found in cache file search with FileResolver
 		// Test multi name case
 		// Engine + Engine Version
@@ -105,7 +102,6 @@ class TemplateResolver extends FileResolver implements ResourceResolver
 		}
 
 		return $path;
-
 	}
 
 	/**
@@ -116,10 +112,8 @@ class TemplateResolver extends FileResolver implements ResourceResolver
 	 */
 	public function setMimeContentType($type)
 	{
-
 		$this->mimeContentType = $type;
 		return $this;
-
 	}
 
 	/**
@@ -129,9 +123,7 @@ class TemplateResolver extends FileResolver implements ResourceResolver
 	 */
 	public function getMimeContentType()
 	{
-
 		return $this->mimeContentType;
-
 	}
 
 	/**
@@ -144,7 +136,6 @@ class TemplateResolver extends FileResolver implements ResourceResolver
 	 */
 	private function getFullFileName($templateName, $useVersion = true, $useEngine = true)
 	{
-
 		$engine = $this->engine;
 		$engineVersion = $this->engineVersion;
 
@@ -161,7 +152,6 @@ class TemplateResolver extends FileResolver implements ResourceResolver
 		}
 
 		return $templateName . "." . $engine . "." . $engineVersion . "." . $this->mimeContentType;
-
 	}
 
 	/**
@@ -173,5 +163,4 @@ class TemplateResolver extends FileResolver implements ResourceResolver
         $this->engine = $requestContext->getUserAgentType();
         $this->engineVersion = $requestContext->getUserAgentTypeVersion();
 	}
-
 }
