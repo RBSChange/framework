@@ -4423,6 +4423,47 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 	
 	
+	/**
+	 * @param string $date
+	 * @param string|null $moduleName
+	 */
+	public final function deleteUserActionEntries($date, $moduleName = null)
+	{
+		if ($moduleName !== null)
+		{
+			$sql = $this->deleteUserActionEntriesQuery(true);
+		}
+		else
+		{
+			$sql = $this->deleteUserActionEntriesQuery(false);
+		}
+		
+		$stmt = $this->prepareStatement($sql);
+		$stmt->bindValue(':entry_date', $date, PersistentProviderConst::PARAM_STR);
+		
+		if ($moduleName !== null) 
+		{
+			$stmt->bindValue(':module_name', $moduleName, PersistentProviderConst::PARAM_STR);
+		}
+		$this->executeStatement($stmt);
+		return $stmt->rowCount();
+	}
+
+	/**
+	 * @param boolean $addModuleFilter
+	 * @return string
+	 */
+	protected function deleteUserActionEntriesQuery($addModuleFilter)
+	{
+		if ($addModuleFilter)
+		{
+			return "DELETE FROM f_user_action_entry WHERE entry_date < :entry_date AND module_name = :module_name";
+		}
+		else
+		{
+			return "DELETE FROM f_user_action_entry WHERE entry_date < :entry_date";
+		}
+	}
 	
 	
 	// Indexing function
