@@ -112,10 +112,17 @@ class PHPTAL_Context
     /**
      * Activate or deactivate exception throwing during unknown path
      * resolution.
+     * 
+     * @return boolean old value or current if $bool argument is null
      */
     public function noThrow($bool)
     {
-        $this->__nothrow = $bool;
+    	$oldValue = $this->__nothrow;
+    	if ($bool !== null)
+    	{
+	        $this->__nothrow = ($bool == true);
+	    }
+	    return $oldValue;
     }
 
     /**
@@ -355,9 +362,9 @@ function phptal_exists($ctx, $path)
     // special note: this method may requires to be extended to a full
     // phptal_path() sibling to avoid calling latest path part if it is a
     // method or a function...
-    $ctx->noThrow(true);
+    $old = $ctx->noThrow(true);
     $res = phptal_path($ctx, $path, true);
-    $ctx->noThrow(false);
+    $ctx->noThrow($old);
     return !is_null($res);
 }
 
