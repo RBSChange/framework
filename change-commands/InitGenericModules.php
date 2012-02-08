@@ -2,16 +2,19 @@
 class commands_InitGenericModules extends commands_AbstractChangeCommand
 {
 	/**
+	 * @return boolean
+	 */
+	public function isHidden()
+	{
+		return true;
+	}
+	
+	/**
 	 * @return String
 	 */
 	function getUsage()
 	{
 		return "";
-	}
-
-	function getAlias()
-	{
-		return "igm";
 	}
 
 	/**
