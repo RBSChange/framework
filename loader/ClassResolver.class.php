@@ -195,9 +195,7 @@ class ClassResolver implements ResourceResolver
 		 
 		$result = array(
 				array('path' => '%FRAMEWORK_HOME%/', 'recursive' => 'true', 
-						'exclude' => array('deprecated', 'doc', 'module', 'webapp')), 
-				array('path' => '%WEBEDIT_HOME%/libs/', 'recursive' => 'true',
-					'exclude' => array('fckeditor', 'icons', 'pearlibs')),
+						'exclude' => array('deprecated', 'doc', 'module', 'webapp')),
 				array('path' => '%WEBEDIT_HOME%/build/%PROFILE%/', 'recursive' => 'true'), 
 				array('path' => '%WEBEDIT_HOME%/modules/*/actions'), 
 				array('path' => '%WEBEDIT_HOME%/modules/*/change-commands', 'recursive' => 'true'), 

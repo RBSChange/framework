@@ -1,4 +1,8 @@
 <?php
+
+$smartyClassPath = f_util_FileUtils::buildWebeditPath('libs', 'smarty', 'libs', 'Smarty.class.php');
+require($smartyClassPath);
+
 /**
  * @package framework.builder
  */
