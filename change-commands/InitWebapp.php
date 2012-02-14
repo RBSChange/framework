@@ -57,8 +57,10 @@ class commands_InitWebapp extends commands_AbstractChangeCommand
 		{
 			f_util_FileUtils::cp($htAccess, $to);
 		}
+		
+		
 
-		foreach (array('config', 'securemedia', 'build', 'log', 'libs', 'modules', 'override', 'mailbox') as $hiddeDir) 
+		foreach (array('config', 'securemedia', 'build', 'log', 'libs', 'modules', 'override', 'mailbox', 'cache/autoload', 'cache/' . PROFILE) as $hiddeDir) 
 		{
 			$to = f_util_FileUtils::buildWebeditPath($hiddeDir, '.htaccess');
 			if (is_dir(dirname($to)))
@@ -130,15 +132,21 @@ class commands_InitWebapp extends commands_AbstractChangeCommand
 		$targetDir .= DIRECTORY_SEPARATOR;
 		$exclude = array('apache', 'bin', 'log', 'build', 'config', 'framework', 'libs', 'modules', 'securemedia', 
 			'webapp', 'mailbox', 'override', 'profile', 'change.xml', 'change.properties',
-			'migration', 'mockup', 'target');
+			'migration', 'mockup', 'installedpatch', 'pear', 'themes', 'target');
 		$dh = opendir($targetDir);
 		while (($file = readdir($dh)) !== false)
 		{
 			if (strpos($file, '.') === 0) {continue;}
 			if (in_array($file, $exclude)) {continue;}
+			
 			$target = $targetDir.$file;
+			if (is_file($target) && substr($target, -4) !=  '.php') {continue;}
+			
 			$link = f_util_FileUtils::buildDocumentRootPath($file);
-			f_util_FileUtils::symlink($target, $link, f_util_FileUtils::OVERRIDE);
+			if (strpos($link, $target) !== 0)
+			{
+				f_util_FileUtils::symlink($target, $link, f_util_FileUtils::OVERRIDE);
+			}
 		}
 		closedir($dh);
 	}
