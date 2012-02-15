@@ -36,11 +36,17 @@ class HTTPClient
 	 * @var Integer
 	 */
 	private $httpReturnCode = -1;
+	
+	/**
+	 * @var string
+	 */
+	private $curlError;
 
 	/**
 	 * @var Integer
 	 */
 	private $httpHeaders = array();
+	
 	/**
 	 * @var resource
 	 */
@@ -264,10 +270,10 @@ class HTTPClient
 
 		$data = curl_exec($this->curlResource);
 		$errno = curl_errno($this->curlResource);
-		// 52 is just CURLE_GOT_NOTHING
-		if ($errno && $errno != 52)
+		if ($errno)
 		{
 			Framework::error(__METHOD__ . ': curl_errno : ' . $errno);
+			$this->curlError = $errno . ': ' . curl_error($this->curlResource);
 		}
 		$this->httpReturnCode = curl_getinfo($this->curlResource, CURLINFO_HTTP_CODE);
 		$this->close();
@@ -290,6 +296,14 @@ class HTTPClient
 	public function getHTTPReturnCode()
 	{
 		return $this->httpReturnCode;
+	}
+
+	/**
+	 * @return Integer
+	 */
+	public function getCurlError()
+	{
+		return $this->curlError;
 	}
 
 	/**
