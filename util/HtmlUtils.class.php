@@ -276,11 +276,14 @@ abstract class f_util_HtmlUtils
 					$attributes['href'] = html_entity_decode($attributes['href'], ENT_NOQUOTES, "UTF-8");
 				}
 			}
+			elseif (isset($attributes['name']) && !empty($attributes['name']))
+			{
+				unset($attributes['href']);
+			}
 			else
 			{
 				$attributes['href'] = '#';
 			}
-
 			return self::buildLink($attributes, $content);
 		}
 
