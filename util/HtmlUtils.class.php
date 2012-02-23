@@ -433,7 +433,8 @@ abstract class f_util_HtmlUtils
 	private static function buildBrokenImage($documentId)
 	{
 		Framework::warn(__METHOD__ . ' Broken document image (ID=' . $documentId . ')');
-		return '<img src="' . Framework::getUIBaseUrl() .'/icons/normal/unknown.png" class="image-broken" />';
+		$alt = LocaleService::getInstance()->transFO('m.media.frontoffice.broken-image', array('ucf'));
+		return '<img src="' . MediaHelper::getIcon('unknown', 'normal') . '" class="image-broken" alt="' . $alt . '" title="' . $alt . '" />';
 	}
 
 	private static function renderDocumentLink($documentId, $attributes, $content)
