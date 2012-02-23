@@ -113,7 +113,7 @@ class indexer_SolrManager
 		if (!self::$confRead)
 		{
 			self::$cache = self::getCache();
-			self::$schemaVersion = Framework::getConfigurationValue("indexer/SolrManager/schemaVersion", "2.0.4");
+			self::$schemaVersion = Framework::getConfigurationValue("indexer/SolrManager/schemaVersion", "3.0.3");
 			self::$confRead = true;
 		}
 	}
