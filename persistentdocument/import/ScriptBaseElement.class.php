@@ -177,16 +177,30 @@ class import_ScriptBaseElement
 				{
 					case 'refid':
 						$key = $subkey;
-						$value = $this->script->getElementById($value, "import_ScriptObjectElement")->getObject();
+						if (f_util_StringUtils::isNotEmpty($value))
+						{
+							$value = $this->script->getElementById($value, "import_ScriptObjectElement")->getObject();
+						}
+						else
+						{
+							$value = null;
+						}
 						break;
 						
 					case 'refids':
 						$key = $subkey;
-						$values = explode(',', $value);
-						$value = array();
-						foreach ($values as $oneValue)
+						if (f_util_StringUtils::isNotEmpty($value))
 						{
-							$value[] = $this->script->getElementById($oneValue, "import_ScriptObjectElement")->getObject();
+							$values = explode(',', $value);
+							$value = array();
+							foreach ($values as $oneValue)
+							{
+								$value[] = $this->script->getElementById($oneValue, "import_ScriptObjectElement")->getObject();
+							}
+						}
+						else
+						{
+							$value = array();
 						}
 						break;
 						
