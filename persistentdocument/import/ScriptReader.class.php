@@ -258,7 +258,7 @@ class import_ScriptReader extends BaseService
 			}
 			return $element;
 		}
-		throw new Exception('Identifiant ' . $id . ' introuvable');
+		throw new Exception('Identifiant "' . $id . '" introuvable');
 	}
 
 	/**
