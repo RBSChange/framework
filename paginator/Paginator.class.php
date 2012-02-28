@@ -8,7 +8,7 @@ class paginator_PaginatorItem
 	 * @var Boolean
 	 */
 	public $isCurrent = false;
-
+	
 	/**
 	 * Get the label of the paginator link
 	 *
@@ -18,7 +18,7 @@ class paginator_PaginatorItem
 	{
 		return $this->label;
 	}
-
+	
 	/**
 	 * Set the label of the paginator link
 	 *
@@ -30,7 +30,7 @@ class paginator_PaginatorItem
 		$this->label = $value;
 		return $this;
 	}
-
+	
 	/**
 	 * Get the url of the paginator link
 	 *
@@ -40,7 +40,7 @@ class paginator_PaginatorItem
 	{
 		return $this->url;
 	}
-
+	
 	/**
 	 * Set the url of the paginator link
 	 *
@@ -65,7 +65,7 @@ class paginator_Paginator extends ArrayObject
 	 * The page index parameter name
 	 */
 	const PAGEINDEX_PARAMETER_NAME = 'page';
-
+	
 	private $items = null;
 	private $currentItemIndex = 0;
 	private $templateFileName = 'Website-Default-Paginator';
@@ -77,19 +77,19 @@ class paginator_Paginator extends ArrayObject
 	 * @var integer
 	 */
 	private $currentPageNumber = null;
-
+	
 	/**
 	 * Count of pages for the paginator
 	 * @var integer
 	 */
-	private $pageCount = null;
-
+	private $pageCount = 1;
+	
 	/**
 	 * Name of the module that use the paginator
 	 * @var string
 	 */
 	private $moduleName = null;
-
+	
 	private $extraParameters = array();
 	/**
 	 * @var Integer
@@ -105,16 +105,27 @@ class paginator_Paginator extends ArrayObject
 	 * @var String
 	 */
 	private $listName;
-
-	public function __construct($moduleName, $pageIndex, $items, $nbItemPerPage)
+	
+	/**
+	 * @var Array
+	 */
+	private $excludeParams = array();
+	
+	public function __construct($moduleName, $pageIndex, $items, $nbItemPerPage, $itemCount = null, $excludeParams = array())
 	{
 		$this->setModuleName($moduleName);
 		$this->setCurrentPageNumber($pageIndex);
 		$this->nbItemPerPage = $nbItemPerPage;
+		
+		if ($itemCount != null)
+		{
+			$this->setItemCount($itemCount);
+		}
+		
+		$this->excludeParams = $excludeParams;
+		
 		if ($items !== null)
 		{
-			$itemCount = count($items);
-			$this->setItemCount($itemCount);
 			if ($items instanceof ArrayObject)
 			{
 				$itemsArray = $items->getArrayCopy();
@@ -123,14 +134,23 @@ class paginator_Paginator extends ArrayObject
 			{
 				$itemsArray = $items;
 			}
-			if ($itemCount > $nbItemPerPage)
+			
+			$count = count($items);
+			
+			if ($count > $nbItemPerPage)
 			{
-				parent::__construct(array_slice($itemsArray, ($pageIndex - 1) * $nbItemPerPage, $nbItemPerPage));
-			}	
-			else
-			{
-				parent::__construct($itemsArray);
+				Framework::warn(__METHOD__ . " - Only page items must be sent ($nbItemPerPage), don't send the full items array ($count)");
+				
+				if ($itemCount != null && $count != $itemCount)
+				{
+					throw new BadInitializationException("itemCount($itemCount) is different than calculate count($count) of items.");
+				}
+				
+				$this->setItemCount($count);
+				$itemsArray = array_slice($itemsArray, ($pageIndex - 1) * $nbItemPerPage, $nbItemPerPage);
 			}
+			
+			parent::__construct($itemsArray);
 		}
 	}
 	
@@ -149,15 +169,15 @@ class paginator_Paginator extends ArrayObject
 	{
 		return $this->pageIndexParamName;
 	}
-
+	
 	/**
 	 * @param Integer $itemCount
 	 */
 	public function setItemCount($itemCount)
 	{
-		$this->setPageCount((int)ceil($itemCount / $this->nbItemPerPage));
+		$this->setPageCount((int) ceil($itemCount / $this->nbItemPerPage));
 	}
-
+	
 	/**
 	 * @param integer $value
 	 * @return paginator_Paginator
@@ -167,7 +187,7 @@ class paginator_Paginator extends ArrayObject
 		$this->currentPageNumber = $value;
 		return $this;
 	}
-
+	
 	/**
 	 * @param integer $value
 	 * @return paginator_Paginator
@@ -177,7 +197,7 @@ class paginator_Paginator extends ArrayObject
 		$this->pageCount = $value;
 		return $this;
 	}
-
+	
 	/**
 	 * @param string $value
 	 * @return paginator_Paginator
@@ -187,7 +207,7 @@ class paginator_Paginator extends ArrayObject
 		$this->moduleName = $value;
 		return $this;
 	}
-
+	
 	/**
 	 * @return mixed integer or null
 	 */
@@ -195,7 +215,7 @@ class paginator_Paginator extends ArrayObject
 	{
 		return $this->currentPageNumber;
 	}
-
+	
 	/**
 	 * @return mixed integer or null
 	 */
@@ -203,7 +223,7 @@ class paginator_Paginator extends ArrayObject
 	{
 		return $this->pageCount;
 	}
-
+	
 	/**
 	 * @return string
 	 */
@@ -211,7 +231,7 @@ class paginator_Paginator extends ArrayObject
 	{
 		return $this->moduleName;
 	}
-
+	
 	/**
 	 * Set the request's extra parameters, besides page.
 	 *
@@ -221,7 +241,7 @@ class paginator_Paginator extends ArrayObject
 	{
 		$this->extraParameters = $value;
 	}
-
+	
 	/**
 	 * Returns the request's extra parameters, besides page.
 	 *
@@ -231,13 +251,13 @@ class paginator_Paginator extends ArrayObject
 	{
 		return $this->extraParameters;
 	}
-
+	
 	public function getItems()
 	{
 		$this->load();
 		return $this->items;
 	}
-
+	
 	public function shouldRender()
 	{
 		return $this->getPageCount() > 1;
@@ -251,7 +271,7 @@ class paginator_Paginator extends ArrayObject
 	{
 		$this->anchor = $anchor;
 	}
-
+	
 	private function buildItems()
 	{
 		$pageCount = $this->getPageCount();
@@ -259,21 +279,21 @@ class paginator_Paginator extends ArrayObject
 		{
 			$currentPageIndex = $this->getCurrentPageNumber();
 			// Minimum page index to display
-			$minPage = max(1, $currentPageIndex-2);
+			$minPage = max(1, $currentPageIndex - 2);
 			// Maximum page index to display
-			$maxPage = min($pageCount, $currentPageIndex+2);
+			$maxPage = min($pageCount, $currentPageIndex + 2);
 			// If the Maximum page index to display is equal to the last page, try to display the last 5 pages
 			if ($maxPage == $pageCount)
 			{
-				$minPage = max(1, $maxPage-4);
+				$minPage = max(1, $maxPage - 4);
 			}
 			// If the Maximum page index to display is smaller than 5 to the last page, try to display the first 5 pages
 			else if ($maxPage < 5)
 			{
 				$maxPage = min(5, $pageCount);
 			}
-
-			for ($p = $minPage  ; $p <= $maxPage ; $p++)
+			
+			for ($p = $minPage; $p <= $maxPage; $p++)
 			{
 				$newItem = new paginator_PaginatorItem();
 				$newItem->setLabel($p)->setUrl($this->getUrlForPage($p));
@@ -290,7 +310,7 @@ class paginator_Paginator extends ArrayObject
 			$this->items = array();
 		}
 	}
-
+	
 	/**
 	 * @var f_web_ParametrizedLink
 	 */
@@ -298,7 +318,7 @@ class paginator_Paginator extends ArrayObject
 	
 	private function getUrlForPage($pageIndex)
 	{
-		$key = $this->getModuleName().'Param';
+		$key = $this->getModuleName() . 'Param';
 		if ($this->currentUrl === null)
 		{
 			$rq = RequestContext::getInstance();
@@ -312,25 +332,32 @@ class paginator_Paginator extends ArrayObject
 			}
 			$parts = explode('?', $requestUri);
 			$this->currentUrl = new f_web_ParametrizedLink($rq->getProtocol(), $_SERVER['SERVER_NAME'], $parts[0]);
+			
+			$params = array();
+			if (is_array($this->extraParameters) && count($this->extraParameters))
+			{
+				$params = $this->extraParameters;
+			}
+			
 			if (isset($parts[1]) && $parts[1] != '')
 			{
 				parse_str($parts[1], $queryParameters);
-				$this->currentUrl->setQueryParameters($queryParameters);
+				$params = array_merge($params, $queryParameters);
 			}
 			
-			if (is_array($this->extraParameters) && count($this->extraParameters))
+			if (count($this->excludeParams) > 0)
 			{
-				foreach ($this->extraParameters as $name => $value) 
-				{
-					$this->currentUrl->setQueryParameter($name, $value);
-				}
+				$params = array_diff_key($params, array_fill_keys($this->excludeParams, ''));
 			}
+			
+			$this->currentUrl->setQueryParameters($params);
+		
 		}
 		$this->currentUrl->setQueryParameter($key, array($this->pageIndexParamName => $pageIndex > 1 ? $pageIndex : null));
 		$this->currentUrl->setFragment($this->anchor);
 		return $this->currentUrl->getUrl();
 	}
-
+	
 	/**
 	 * Returns the "Page 1 sur XX" text
 	 *
@@ -338,9 +365,10 @@ class paginator_Paginator extends ArrayObject
 	 */
 	public function getLocalizedPageCount()
 	{
-		return LocaleService::getInstance()->transFO('m.website.paginator.detail', array('ucf'), array('currentPage' => $this->getCurrentPageNumber(), 'pageCount' => $this->getPageCount(), 'listName' => $this->getListName()));
+		return LocaleService::getInstance()->transFO('m.website.paginator.detail', array('ucf'), array(
+			'currentPage' => $this->getCurrentPageNumber(), 'pageCount' => $this->getPageCount(), 'listName' => $this->getListName()));
 	}
-
+	
 	public function getFirstPageItem()
 	{
 		$this->load();
@@ -353,24 +381,24 @@ class paginator_Paginator extends ArrayObject
 		$newItem->isCurrent = 0 == $this->getPageCount();
 		return $newItem;
 	}
-
+	
 	public function getPreviousPageItem()
 	{
 		$this->load();
 		if ($this->currentItemIndex > 0)
 		{
 			$items = $this->getItems();
-			return $items[$this->currentItemIndex-1];
+			return $items[$this->currentItemIndex - 1];
 		}
 		return null;
-
+	
 	}
-
+	
 	public function getLastPageItem()
 	{
 		$this->load();
 		$p = $this->getPageCount();
-		if ( $this->getCurrentPageNumber() == $p || $p == 0)
+		if ($this->getCurrentPageNumber() == $p || $p == 0)
 		{
 			return null;
 		}
@@ -379,30 +407,30 @@ class paginator_Paginator extends ArrayObject
 		$newItem->isCurrent = $p == $this->getPageCount();
 		return $newItem;
 	}
-
+	
 	public function getNextPageItem()
 	{
 		$this->load();
 		if ($this->getCurrentPageNumber() < $this->getPageCount())
 		{
 			$items = $this->getItems();
-			return $items[$this->currentItemIndex+1];
+			return $items[$this->currentItemIndex + 1];
 		}
 		return null;
 	}
-
+	
 	public final function setTemplateFileName($string)
 	{
 		$this->html = null;
 		$this->templateFileName = $string;
 	}
-
+	
 	public final function setTemplateModuleName($string)
 	{
 		$this->html = null;
 		$this->templateModuleName = $string;
 	}
-
+	
 	public final function getTemplate()
 	{
 		$loader = TemplateLoader::getInstance()->setPackageName('modules_' . $this->templateModuleName)->setDirectory('templates')->setMimeContentType('html');
@@ -433,7 +461,7 @@ class paginator_Paginator extends ArrayObject
 	{
 		$this->listName = $listName;
 	}
-
+	
 	private function load()
 	{
 		if (is_null($this->items))
@@ -472,7 +500,7 @@ class paginator_Url
 		$inst->setQueryParameters($_GET);
 		return $inst;
 	}
-
+	
 	public function removeQueryParameter($name)
 	{
 		$key = urlencode($name);
@@ -482,13 +510,13 @@ class paginator_Url
 			$this->setNeedsUpdate();
 		}
 	}
-
+	
 	public function setQueryParameter($name, $value)
 	{
 		if (!is_array($value))
 		{
 			$key = urlencode($name);
-			$this->urlRequestParts[$key] =  $key. "=" . urlencode($value);
+			$this->urlRequestParts[$key] = $key . "=" . urlencode($value);
 		}
 		else
 		{
@@ -496,13 +524,13 @@ class paginator_Url
 		}
 		$this->setNeedsUpdate();
 	}
-
+	
 	public function setRequestPart($key, $value)
 	{
 		$this->urlRequestParts[$key] = $value;
 		$this->setNeedsUpdate();
 	}
-
+	
 	public function setQueryParameters($array)
 	{
 		foreach ($array as $key => $val)
@@ -511,13 +539,13 @@ class paginator_Url
 		}
 		$this->setNeedsUpdate();
 	}
-
+	
 	public function setBaseUrl($url)
 	{
 		$this->baseUrl = $url;
 		$this->setNeedsUpdate();
 	}
-
+	
 	public function getStringRepresentation()
 	{
 		if (is_null($this->stringRepresentation))
@@ -530,17 +558,17 @@ class paginator_Url
 		}
 		return $this->stringRepresentation;
 	}
-
+	
 	public function __toString()
 	{
 		return $this->getStringRepresentation();
 	}
-
+	
 	private $currentPath = array();
 	private $urlRequestParts = array();
 	private $stringRepresentation = null;
 	private $baseUrl = null;
-
+	
 	private function buildRecursivelyWithKeyAndValue($name, $value)
 	{
 		$this->currentPath[] = urlencode(count($this->currentPath) == 0 ? $name : "[$name]");
@@ -563,12 +591,12 @@ class paginator_Url
 			}
 			else
 			{
-				$this->urlRequestParts[$path] =  $path. "=" . urlencode($value);
+				$this->urlRequestParts[$path] = $path . "=" . urlencode($value);
 			}
 		}
 		array_pop($this->currentPath);
 	}
-
+	
 	private function setNeedsUpdate()
 	{
 		$this->stringRepresentation = null;
