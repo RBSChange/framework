@@ -226,7 +226,7 @@ class generator_PersistentModel
 		{	
 			if (!$model->hasPublishOnDayChange()) {continue;}
 			
-			$modelName = $model->getName();
+			$modelName = $model->getFinalName();
 			while ($model)
 			{
 				$pubproperty = $model->getPropertyByName('publicationstatus');
