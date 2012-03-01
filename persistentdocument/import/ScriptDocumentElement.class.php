@@ -296,6 +296,14 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 			else if ($tagService->isContextualTag($tag))
 			{
 				$website = $this->getAncestorDocumentByType('website_persistentdocument_website');
+				if ($website === null)
+				{
+					if ($this->getParentDocument() instanceof import_ScriptDocumentElement)
+					{
+						$parent = $this->getParentDocument()->getPersistentDocument();
+						$website = website_WebsiteService::getInstance()->getByDescendentId($parent->getId());
+					}
+				}
 				return TagService::getInstance()->getDocumentByContextualTag($tag, $website);
 			}
 			// Functional tags.

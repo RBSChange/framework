@@ -1,5 +1,5 @@
 <?php
-// change:price
+// change:select
 //
 // <span change:select="min 1; max 50;" />
 // <span change:select="listId 'modules_blabla/listid';" />
