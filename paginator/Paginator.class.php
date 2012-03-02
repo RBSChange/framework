@@ -316,6 +316,10 @@ class paginator_Paginator extends ArrayObject
 	 */
 	private $currentUrl;
 	
+	/**
+	 * @param index $pageIndex
+	 * @return string
+	 */
 	private function getUrlForPage($pageIndex)
 	{
 		$key = $this->getModuleName() . 'Param';
@@ -347,15 +351,34 @@ class paginator_Paginator extends ArrayObject
 			
 			if (count($this->excludeParams) > 0)
 			{
-				$params = array_diff_key($params, array_fill_keys($this->excludeParams, ''));
+				parse_str(implode('&', $this->excludeParams), $excludeParameters);
+				$this->doExcludeParams(&$params, $excludeParameters);
 			}
 			
 			$this->currentUrl->setQueryParameters($params);
-		
 		}
 		$this->currentUrl->setQueryParameter($key, array($this->pageIndexParamName => $pageIndex > 1 ? $pageIndex : null));
 		$this->currentUrl->setFragment($this->anchor);
 		return $this->currentUrl->getUrl();
+	}
+	
+	/**
+	 * @param array $params
+	 * @param array $excludeParameters
+	 */
+	private function doExcludeParams(&$params, $excludeParameters)
+	{
+		foreach ($excludeParameters as $key => $value)
+		{
+			if (is_array($value))
+			{
+				$this->doExcludeParams($params[$key], $value);
+			}
+			else
+			{
+				unset($params[$key]);
+			}
+		}
 	}
 	
 	/**
