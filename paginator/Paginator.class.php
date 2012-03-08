@@ -352,7 +352,7 @@ class paginator_Paginator extends ArrayObject
 			if (count($this->excludeParams) > 0)
 			{
 				parse_str(implode('&', $this->excludeParams), $excludeParameters);
-				$this->doExcludeParams(&$params, $excludeParameters);
+				$this->doExcludeParams($params, $excludeParameters);
 			}
 			
 			$this->currentUrl->setQueryParameters($params);
