@@ -14,7 +14,14 @@ abstract class f_util_ProcessUtils
 		{
 			if ($i-$nbSkip >= 0)
 			{
-				echo "#".($i-$nbSkip)." Called in ".$call['file'].'/'.$call['function']."(".self::printArgs($call['args']).") line ".$call['line'];
+				if (isset($call['file']))
+				{
+					echo "#".($i-$nbSkip)." Called in ".$call['file'].'/'.$call['function']."(".self::printArgs($call['args']).") line ".$call['line'];
+				}
+				else
+				{
+					echo "#".($i-$nbSkip)." Called in ". $call['function']."(".self::printArgs($call['args']).")";
+				}
 				if ($html)
 				{
 					echo "<br>";
