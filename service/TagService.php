@@ -286,6 +286,7 @@ class TagService extends BaseService
 	/**
 	 * Checks wether the document has the specified tag. Returns true if the
 	 * document has the tag, otherwise returns false.
+	 * @param f_persistentdocument_PersistentDocument $document
 	 */
 	public function hasTag($document, $tag)
 	{
