@@ -46,6 +46,20 @@ class framework_patch_0350 extends patch_BasePatch
 					$this->logError($e->getMessage());
 				}
 			}
+			
+			$ls = LocaleService::getInstance();
+			$query = "SELECT `id`, `lang`, `content`, `useredited` FROM `f_locale_old`";
+			$stmt = $this->executeSQLSelect($query);
+			$row = $stmt->fetch();
+			while ($row)
+			{
+				$lcid = $ls->getLCID($row['lang']);
+				list($keyPath, $id) = $ls->explodeKey(strtolower($row['id']));
+				$ls->updateKey($lcid, $id, $keyPath, $row['content'], 'TEXT', true);
+				$row = $stmt->fetch();
+			}
+			$stmt->closeCursor();
+			
 		}
 		catch (Exception $e)
 		{
