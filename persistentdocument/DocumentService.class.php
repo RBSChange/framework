@@ -2630,6 +2630,15 @@ class f_persistentdocument_DocumentService extends BaseService
 	}
 	
 	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @return string|null
+	 */
+	public function getNavigationtitle($document)
+	{
+		return $document->getLabel();
+	}
+	
+	/**
 	 * @param website_UrlRewritingService $urlRewritingService
 	 * @param f_persistentdocument_PersistentDocument $document
 	 * @param website_persistentdocument_website $website
