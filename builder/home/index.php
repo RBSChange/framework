@@ -1,5 +1,4 @@
 <?php
-$start = microtime(true);
 define('WEBEDIT_HOME', dirname(realpath(__FILE__)));
 
 // Set exception handler, called when an exception is not caught.
@@ -39,23 +38,8 @@ if (get_magic_quotes_gpc()) {
 // Starts the framework
 require_once WEBEDIT_HOME . "/framework/Framework.php";
 
-// Log request time and remote_addr.
-if (Framework::isDebugEnabled())
-{
-	$intitilized = microtime(true);
-	$requestId = $_SERVER['REMOTE_ADDR'] ." - ". $_SERVER['REQUEST_URI'];
-	Framework::debug('|BENCH|'.($intitilized-$start).'|=== START CLIENT request |'.$requestId);
-}
-
 // Instantiate HttpController and dispatch the request
 $controller = Controller::newInstance("controller_ChangeController");
 $controller->dispatch();
-
-if (Framework::isDebugEnabled())
-{
-	$end = microtime(true);
-	Framework::debug('|BENCH|'.($end-$intitilized).'|=== END CLIENT request |'.$requestId);
-	Framework::debug('|BENCH|'.(MysqlStatment::$time['exec'] + MysqlStatment::$time['read']).'|=== SQL Time |'. str_replace("\n", '', var_export(MysqlStatment::$time, true)));
-}
 
 f_persistentdocument_PersistentProvider::getInstance()->closeConnection();

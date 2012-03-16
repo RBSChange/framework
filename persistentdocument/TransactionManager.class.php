@@ -78,20 +78,16 @@ class f_persistentdocument_TransactionManager
 		$this->checkDirty();
 		if ($this->transactionCount == 0)
 		{
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug('TransactionManager::beginTransaction() => primary transaction '.f_persistentdocument_PersistentProvider::getDatabaseProfileName());
-			}
 			$this->transactionCount++;
 			$this->persistentProvider->beginTransaction();
 		}
 		else
 		{
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug('TransactionManager::beginTransaction() => embeded transaction ('. $this->transactionCount.' => '.($this->transactionCount+1).')');
-			}
 			$this->transactionCount++;
+			if ($this->transactionCount > 5)
+			{
+				Framework::warn('embeded transaction: ' . $this->transactionCount);
+			}
 		}
 	}
 

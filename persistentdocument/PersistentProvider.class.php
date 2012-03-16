@@ -63,7 +63,12 @@ abstract class f_persistentdocument_PersistentProvider
 	 * @var array<Integer, f_persistentdocument_I18nPersistentDocument>
 	 */
 	protected $m_i18nDocumentInstances = array();
-
+	
+	/**
+	 * @var array
+	 */
+	protected $timers;
+		
 	/**
 	 * @var array
 	 */
@@ -121,11 +126,8 @@ abstract class f_persistentdocument_PersistentProvider
 
 			$instance = new self::$m_classByDriverName[$driverName];
 			$instance->connectionInfos = $connectionInfos;
-
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug(__METHOD__.'('. get_class($instance) .')');
-			}
+			$instance->timers = array('init' => microtime(true), 
+					'longTransaction' => isset($connectionInfos['longTransaction']) ? floatval($connectionInfos['longTransaction']) : 0.2);
 			self::$m_instance = $instance;
 		}
 		return self::$m_instance;
@@ -264,6 +266,18 @@ abstract class f_persistentdocument_PersistentProvider
 	public function setDriver($driver)
 	{
 		$this->m_driver = $driver;
+		if ($driver === null)
+		{
+			$duration = microtime(true) - $this->timers['init'];
+			if ($duration > 60)
+			{
+				Framework::warn('Total DB connection: ' . round($duration, 4) . 's');
+			}
+			elseif (Framework::isDebugEnabled())
+			{
+				Framework::debug('Total DB connection: ' . round($duration, 4) . 's');
+			}
+		}
 	}
 
 	/**
@@ -1634,16 +1648,13 @@ abstract class f_persistentdocument_PersistentProvider
 
 	public function beginTransaction()
 	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("PersistentProvider::beginTransaction");
-		}
 		if ($this->m_inTransaction)
 		{
 			Framework::warn("PersistentProvider->beginTransaction() while already in transaction");
 		}
 		else
 		{
+			$this->timers['bt'] = microtime(true);
 			$this->beginTransactionInternal();
 			$this->m_inTransaction = true;
 			if ($this->useDocumentCache)
@@ -1659,10 +1670,6 @@ abstract class f_persistentdocument_PersistentProvider
 
 	public function commit()
 	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("PersistentProvider::commit");
-		}
 		if (!$this->m_inTransaction)
 		{
 			Framework::warn("PersistentProvider->commit() called while not in transaction");
@@ -1674,8 +1681,20 @@ abstract class f_persistentdocument_PersistentProvider
 				$this->getCacheService()->commit();
 			}
 			$this->commitInternal();
-			$this->m_inTransaction = false;		
-				
+			$duration = round(microtime(true) - $this->timers['bt'], 4);	
+			if ($duration > $this->timers['longTransaction'])
+			{			
+				Framework::warn('Long Transaction detected '.  number_format($duration, 3) . 's > ' . $this->timers['longTransaction']);
+				if (Framework::isInfoEnabled())
+				{
+					Framework::info(f_util_ProcessUtils::getBackTrace());
+				}
+			}
+// 			elseif (Framework::isInfoEnabled())
+// 			{	
+// 				Framework::info('Total Transaction duration '. number_format($duration, 3) . 's');	
+// 			}
+			$this->m_inTransaction = false;
 			$this->commitIndexService();
 		}
 	}
