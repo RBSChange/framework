@@ -490,32 +490,6 @@ class f_util_StringUtils
 	private static $htmlToTagsFrom = null, $htmlToTagsTo = null;
 	
 	/**
-     * @param String $string
-     * @param Boolean $translateUri
-     * @param Boolean $convertNlToSpace
-     * @return String
-     */
-	public static function htmlToText($string, $translateUri = true, $convertNlToSpace = false)
-	{
-		if ($string === null)
-		{
-			return "";
-		}
-		$string = self::addCrLfToHtml($string);
-		if ($translateUri)
-		{
-			$string = preg_replace(array('/<a[^>]+href="([^"]+)"[^>]*>([^<]+)<\/a>/i', '/<img[^>]+alt="([^"]+)"[^>]*\/>/i'), array('$2 [$1]', 
-				K::CRLF . '[$1]' . K::CRLF), $string);
-		}
-		$string = trim(html_entity_decode(strip_tags($string), ENT_QUOTES, 'UTF-8'));
-		if ($convertNlToSpace)
-		{
-			$string = str_replace(K::CRLF, ' ', $string);
-		}
-		return $string;
-	}
-	
-	/**
      * @param String $html
      * @return String
      */
@@ -624,6 +598,13 @@ class f_util_StringUtils
 	
 	// Deprecated
 	
+	/**
+	 * @deprecated (will be removed in 4.0) use f_util_HtmlUtils::htmlToText
+	 */
+	public static function htmlToText($string, $translateUri = true, $convertNlToSpace = false)
+	{
+		return f_util_HtmlUtils::htmlToText($string, $translateUri, $convertNlToSpace);
+	}
 
 	/**
 	 * @deprecated (will be removed in 4.0) use convertEncoding()

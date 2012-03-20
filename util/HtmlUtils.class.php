@@ -18,8 +18,8 @@ abstract class f_util_HtmlUtils
 	}
 
 	/**
-	 * @param String $string
-	 * @return String
+	 * @param string $string
+	 * @return string
 	 */
 	public static function textToHtml($string)
 	{
@@ -28,7 +28,46 @@ abstract class f_util_HtmlUtils
 			$string = htmlspecialchars($string, ENT_COMPAT, "utf-8");
 			return nl2br($string);
 		}
+		return '';
+	}
+	
+	/**
+	 * @param String $string
+	 * @param Boolean $translateUri
+	 * @param Boolean $convertNlToSpace
+	 * @return String
+	 */
+	public static function htmlToText($string, $translateUri = true, $convertNlToSpace = false)
+	{
+		if ($string === null)
+		{
+			return "";
+		}
+		$string = f_util_StringUtils::addCrLfToHtml($string);
+		if ($translateUri)
+		{
+			$string = preg_replace(array('/<a[^>]+href="([^"]+)"[^>]*>([^<]+)<\/a>/i', '/<img[^>]+alt="([^"]+)"[^>]*\/>/i'), array('$2 [$1]',
+				K::CRLF . '[$1]' . K::CRLF), $string);
+		}
+		$string = trim(html_entity_decode(strip_tags($string), ENT_QUOTES, 'UTF-8'));
+		if ($convertNlToSpace)
+		{
+			$string = str_replace(K::CRLF, ' ', $string);
+		}
 		return $string;
+	}
+
+	/**
+	 * @param string $string
+	 * @return string
+	 */
+	public static function textToAttribute($string)
+	{
+		if (!empty($string))
+		{
+			return htmlspecialchars(str_replace(array("\t", "\n"), array("&#09;", "&#10;"), $string), ENT_COMPAT, 'UTF-8');
+		}
+		return '';
 	}
 
 	/**
@@ -110,7 +149,7 @@ abstract class f_util_HtmlUtils
 	 */
 	public static function buildAttribute($name, $value)
 	{
-		return $name . '="' . htmlspecialchars($value, ENT_COMPAT, "UTF-8") . '"';
+		return $name . '="' . self::textToAttribute($value) . '"';
 	}
 
 	/**

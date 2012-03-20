@@ -1204,8 +1204,7 @@ class LocaleService extends BaseService
 	
 	public function transformAttr($text, $lang)
 	{
-		return htmlspecialchars(str_replace(array("\t", "\n"), array("&#09;", "&#10;"), $text), 
-				ENT_COMPAT, 'UTF-8');
+		return f_util_HtmlUtils::textToAttribute($text);
 	}
 	
 	public function transformSpace($text, $lang)
