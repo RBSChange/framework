@@ -2633,7 +2633,20 @@ class f_persistentdocument_DocumentService extends BaseService
 	 * @param f_persistentdocument_PersistentDocument $document
 	 * @return string|null
 	 */
-	public function getNavigationtitle($document)
+	public function getTreeNodeLabel($document)
+	{
+		if ($document->isContextLangAvailable())
+		{
+			return $document->getLabel();
+		}
+		return $document->getVoLabel();
+	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @return string|null
+	 */
+	public function getNavigationLabel($document)
 	{
 		return $document->getLabel();
 	}

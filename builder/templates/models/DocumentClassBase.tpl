@@ -487,9 +487,9 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 <{/if}>
 <{if $property->getFromList() && $property->getMaxOccurs() == 1}>
 	/**
-	 * @return String
+	 * @return string
 	 */
-	public function get<{$property->getPhpName()}>LabelAsHtml()
+	public function get<{$property->getPhpName()}>Label()
 	{
 		$list = list_ListService::getInstance()->getByListId('<{$property->getFromList()}>');
 		if ($list === null)
@@ -501,7 +501,16 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		{
 			return null;
 		}
-		return f_util_HtmlUtils::textToHtml($listItem->getLabel());
+		return $listItem->getLabel();
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function get<{$property->getPhpName()}>LabelAsHtml()
+	{
+		$label = $this->get<{$property->getPhpName()}>Label();
+		return $label ? f_util_HtmlUtils::textToHtml(label) : null;
 	}
 <{/if}>
 <{elseif  $property->isDocument() && !$property->isArray()}>

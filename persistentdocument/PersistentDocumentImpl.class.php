@@ -681,13 +681,25 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 	 * By default, this method returns the label property value.
 	 * @return String
 	 */
-	function getTreeNodeLabel()
+	public function getTreeNodeLabel()
 	{
-		if ($this->isContextLangAvailable())
-		{
-			return $this->getLabel();
-		}
-		return $this->getVoLabel();
+		return $this->getDocumentService()->getTreeNodeLabel($this);
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getNavigationLabel()
+	{
+		return $this->getDocumentService()->getNavigationLabel($this);
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getNavigationLabelAsHtml()
+	{
+		return f_util_HtmlUtils::textToHtml($this->getNavigationLabel());
 	}
 
 	/**
