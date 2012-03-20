@@ -80,13 +80,6 @@
 		</dependency>
 
 		<dependency>
-			<name>change-module/mailbox</name>
-			<versions>
-				<version>3.6.0</version>
-			</versions>
-		</dependency>
-
-		<dependency>
 			<name>change-module/contactcard</name>
 			<versions>
 				<version>3.6.0</version>
