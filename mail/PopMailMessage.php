@@ -217,7 +217,7 @@ class PopMailMessage extends f_mail_MIMEObject
 			$subMessage->setErrorRegularExpression($this->errorRegularExpression);
 			return $subMessage->isError();
 		}
-		else if ($contentType = "text/plain" || $contentType = "text/html")
+		else if ($contentType == "text/plain" || $contentType == "text/html")
 		{
 			return preg_match($this->errorRegularExpression, $mimeObject->getContent(), $this->errorMatches) !== 0;
 		}
