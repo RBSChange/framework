@@ -510,7 +510,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	public function get<{$property->getPhpName()}>LabelAsHtml()
 	{
 		$label = $this->get<{$property->getPhpName()}>Label();
-		return $label ? f_util_HtmlUtils::textToHtml(label) : null;
+		return $label ? f_util_HtmlUtils::textToHtml($label) : null;
 	}
 <{/if}>
 <{elseif  $property->isDocument() && !$property->isArray()}>
