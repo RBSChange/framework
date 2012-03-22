@@ -1,0 +1,5 @@
+Version: 3.5.5
+
+If your project contains documents in frontoffice with restricted access, you should reindex them for frontoffice:
+
+	php framework/bin/change.php indexer reset-frontoffice
