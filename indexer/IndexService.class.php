@@ -1128,7 +1128,7 @@ class indexer_IndexService extends BaseService
 			$indexedDocument->setWebsiteIds($websiteIds);
 			if (!$indexedDocument->hasDocumentAccessors())
 			{
-				$userIds = array(0);
+				$userIds = array();
 				if (is_array($websiteIds))
 				{
 					foreach (DocumentHelper::getDocumentArrayFromIdArray($websiteIds) as $website) 
@@ -1137,6 +1137,11 @@ class indexer_IndexService extends BaseService
 						$userIds = array_merge($this->getFrontendAccessorIds($document), $userIds);
 					}
 					$userIds = array_unique($userIds);
+				}
+				// If there is no explicit accessor, anybody can access. 
+				if (count($userIds) == 0)
+				{
+					$userIds[] = 0;
 				}
 				$indexedDocument->setDocumentAccessors($userIds);
 			}
