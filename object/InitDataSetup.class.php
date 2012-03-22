@@ -156,4 +156,24 @@ abstract class object_InitDataSetup
 	{
 		return config_ProjectParser::addProjectConfigurationEntry($path, $value);
 	}
+	
+	/**
+	 * @param string $originalClass
+	 * @param string $newClass
+	 * @return boolean
+	 */
+	protected final function addInjectionInProjectConfiguration($originalClass, $newClass)
+	{
+		$nnsName = Framework::getConfigurationValue('injection/' . $originalClass, $newClass);
+		if ($nnsName != $originalClass && $nnsName != $newClass)
+		{
+			$this->addWarning($nnsName . ' must extend ' . $newClass . ' !');
+			return false;
+		}
+		else
+		{
+			$this->addProjectConfigurationEntry('injection/' . $originalClass, $newClass);
+			return true;
+		}
+	}
 }
