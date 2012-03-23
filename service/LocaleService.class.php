@@ -1491,7 +1491,6 @@ class LocaleService extends BaseService
 			}
 			else
 			{
-				Framework::fatal('NO Synchro config file');
 				$tm->getPersistentProvider()->deleteI18nSynchroStatus($documentId);
 			}
 			$tm->commit();
