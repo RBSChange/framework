@@ -47,7 +47,66 @@ class RequestContext
 	 * @var array
 	 */
 	private $m_ui_supportedLanguages = array();
+	
+	
+	private $m_i18n_syncho = null;
 
+	protected function loadI18nSynchoConfiguration()
+	{
+		$this->m_i18n_syncho = false;
+		$data = Framework::getConfigurationValue('i18nsynchro', null);
+	
+		if (is_array($data) && count($data))
+		{
+			$langs = RequestContext::getInstance()->getSupportedLanguages();
+			$result = array();
+			foreach ($data as $lang => $froms)
+			{
+				if (in_array($lang, $langs))
+				{
+					$fromLangs = array();
+					foreach (array_map('trim', explode(',', $froms)) as $fromLang)
+					{
+						if (in_array($fromLang, $langs))
+						{
+							$fromLangs[] = $fromLang;
+						}
+					}
+						
+					if (count($fromLangs))
+					{
+						$result[$lang] = $fromLangs;
+					}
+				}
+			}
+				
+			if (count($result))
+			{
+				$this->m_i18n_syncho = $result;
+			}
+		}
+	}
+	
+	/**
+	 * @return boolean
+	 */
+	public function hasI18nSyncho()
+	{
+		if ($this->m_i18n_syncho === null)
+		{
+			$this->loadI18nSynchoConfiguration();
+		}
+		return $this->m_i18n_syncho !== false;
+	}
+	
+	/**
+	 * @return array string : string[]
+	 */
+	public function getI18nSyncho()
+	{
+		return $this->hasI18nSyncho() ? $this->m_i18n_syncho : array();
+	}	
+	
 	/**
 	 * @var string
 	 */
@@ -62,6 +121,8 @@ class RequestContext
 	 * @var string
 	 */
 	private $m_pathURI;
+	
+	
 
 	/**
 	 * The possible request modes : backoffice or frontoffice

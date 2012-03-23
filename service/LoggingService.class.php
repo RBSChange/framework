@@ -75,11 +75,11 @@ class LoggingService
 	
 	public function log($stringLine, $loggerGroup)
 	{
-		error_log("\n". gmdate('Y-m-d H:i:s')."\t".$stringLine, 3, $this->stdLogFilePath);
+		error_log(gmdate('Y-m-d H:i:s')."\t".$stringLine . PHP_EOL, 3, $this->stdLogFilePath);
 	}
 	
 	public function errorLog($stringLine, $loggerGroup)
 	{
-		error_log("\n". gmdate('Y-m-d H:i:s')."\t".$stringLine, 3, $this->errLogFilePath);
+		error_log(gmdate('Y-m-d H:i:s')."\t".$stringLine . PHP_EOL, 3, $this->errLogFilePath);
 	}
 }

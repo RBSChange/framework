@@ -1506,6 +1506,28 @@ class f_persistentdocument_DocumentService extends BaseService
 	{
 
 	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document (Read only)
+	 * @param array $defaultSynchroConfig string : string[]
+	 * @return array string : string[]
+	 */
+	public function getI18nSynchroConfig($document, $defaultSynchroConfig)
+	{
+		return $defaultSynchroConfig;
+	}	
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document (Read only)
+	 * @param f_persistentdocument_I18nPersistentDocument  $from (Read only)
+	 * @param f_persistentdocument_I18nPersistentDocument $to
+	 * @return boolean
+	 */
+	public function synchronizeI18nProperties($document, $from, $to)
+	{
+		return in_array($from->getPublicationstatus(), array('ACTIVE', 'PUBLICATED', 'DEACTIVATED'));
+	}
+
 
 	/**
 	 * Methode à surcharger pour effectuer des post traitement apres le changement de status du document

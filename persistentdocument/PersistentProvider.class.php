@@ -248,7 +248,6 @@ abstract class f_persistentdocument_PersistentProvider
 		{
 			$end = microtime(true);
 			Framework::debug('Time initDocumentCache '.($end-$begin).' s, '.count($this->m_documentInstances).' documents');
-			//Framework::debug('INITDOCUMENTCACHE '.var_export($this->m_documentInstances, true));
 		}
 	}
 
@@ -416,7 +415,6 @@ abstract class f_persistentdocument_PersistentProvider
 			throw new Exception("Error while executing :[$queryStr]" . " ". var_export($params, true) .':' . join(', ', $statement->errorInfo()));
 		}
 		
-		//Framework::debug("FIND from : ".f_util_ProcessUtils::getBackTrace());
 		$rows = $statement->fetchAll(PersistentProviderConst::FETCH_ASSOC);
 		if (!$query->hasProjectionDeep())
 		{
@@ -928,41 +926,22 @@ abstract class f_persistentdocument_PersistentProvider
 		if ($documentId > 0)
 		{
 			$model = $doc->getPersistentModel();
-			// TODO : if isVo, get the data from the persistentDocument
-			if ($isVo && $doc->getDocumentPersistentState() === f_persistentdocument_PersistentDocument::PERSISTENTSTATE_LOADED)
+			$sql = $this->getI18nDocumentQuery($model->getTableName() . $this->getI18nSuffix());
+			$stmt = $this->prepareStatement($sql);
+			$stmt->bindValue(':document_id', $documentId, PersistentProviderConst::PARAM_INT);
+			$stmt->bindValue(':lang', $lang, PersistentProviderConst::PARAM_STR);
+
+			$this->executeStatement($stmt);
+			$results = $stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC);
+			if (count($results) > 0)
 			{
-				Framework::info(__METHOD__." could be optimized");
-				// argh !! the document does not have the vo properties !
-				/*
-				$properties = $doc->getDocumentProperties(false); // this can not be done as it checks for i18nObject ...
+				$dbresult = $results[0];
+				$properties = array();
 				foreach ($model->getPropertiesInfos() as $key => $propertyInfo)
 				{
-				if ($propertyInfo->isLocalized())
-				{
-				$properties[$key] = $documentProperties[$key];
-				}
-				}*/
-			}
-			// else
-			{
-				$sql = $this->getI18nDocumentQuery($model->getTableName() . $this->getI18nSuffix());
-				$stmt = $this->prepareStatement($sql);
-				$stmt->bindValue(':document_id', $documentId, PersistentProviderConst::PARAM_INT);
-				$stmt->bindValue(':lang', $lang, PersistentProviderConst::PARAM_STR);
-
-				$this->executeStatement($stmt);
-				$results = $stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC);
-				if (count($results) > 0)
-				{
-					$dbresult = $results[0];
-					$properties = array();
-					// TODO : $model::getLocalizedPropertiesInfos() to avoid the if
-					foreach ($model->getPropertiesInfos() as $key => $propertyInfo)
+					if ($propertyInfo->isLocalized())
 					{
-						if ($propertyInfo->isLocalized())
-						{
-							$properties[$key] = $dbresult[$propertyInfo->getDbMapping() . $this->getI18nSuffix()];
-						}
+						$properties[$key] = $dbresult[$propertyInfo->getDbMapping() . $this->getI18nSuffix()];
 					}
 				}
 			}
@@ -1225,15 +1204,7 @@ abstract class f_persistentdocument_PersistentProvider
 	 */
 	public function insertDocument($persistentDocument)
 	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("PersistentProvider::insertDocument : " .get_class($persistentDocument));
-		}
 		$documentId = $this->getNewDocumentId($persistentDocument);
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("PersistentProvider::insertDocument newId : " . $documentId);
-		}
 		$this->_insertDocument($documentId, $persistentDocument);
 	}
 
@@ -1246,13 +1217,8 @@ abstract class f_persistentdocument_PersistentProvider
 	public function loadDocument($persistentDocument)
 	{
 		$documentId = $persistentDocument->getId();
-
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("PersistentProvider::loadDocument ($documentId) ". get_class($persistentDocument));
-		}
-		$table = $persistentDocument->getDatabaseTableName();
-
+		$table = $persistentDocument->getPersistentModel()->getTableName();
+		
 		$sql = $this->getLoadDocumentQuery($table);
 		$stmt = $this->prepareStatement($sql);
 		$stmt->bindValue(':document_id', $documentId, PersistentProviderConst::PARAM_INT);
@@ -1515,7 +1481,7 @@ abstract class f_persistentdocument_PersistentProvider
 			$this->bindValue($stmt, $properties[$propertyName], $documentModel->getProperty($propertyName));
 		}
 		$this->executeStatement($stmt);
-
+		$this->setI18nSynchroStatus($i18nDocument->getId(), $i18nDocument->getLang(), 'MODIFIED');
 		$i18nDocument->setIsPersisted();
 
 		$this->m_i18nDocumentInstances[$i18nDocument->getId()][$i18nDocument->getLang()] = $i18nDocument;
@@ -1536,7 +1502,9 @@ abstract class f_persistentdocument_PersistentProvider
 		$stmt->bindValue(':id', $i18nDocument->getId(), PersistentProviderConst::PARAM_INT);
 		$stmt->bindValue(':lang', $i18nDocument->getLang(), PersistentProviderConst::PARAM_STR);
 		$this->executeStatement($stmt);
-		$this->m_i18nDocumentInstances[$i18nDocument->getId()][$i18nDocument->getLang()] = null;
+		
+		$this->deleteI18nSynchroStatus($i18nDocument->getId(), $i18nDocument->getLang());
+		unset($this->m_i18nDocumentInstances[$i18nDocument->getId()][$i18nDocument->getLang()]);
 	}
 	/**
 	 * @param String $tableName
@@ -1561,33 +1529,47 @@ abstract class f_persistentdocument_PersistentProvider
 	{
 		$documentId = $persistentDocument->getId();
 		$lang = $persistentDocument->getLang();
-		
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("PersistentProvider::deleteDocument($documentId, $lang) ". get_class($persistentDocument));
-		}
 		$documentModel = $persistentDocument->getPersistentModel();
 
 		$deleteDocumentInstance = true;
 		if ($documentModel->isLocalized())
 		{
-			if (!$persistentDocument->isContextLangAvailable())
+			$rc = RequestContext::getInstance();
+			$contextLang = $rc->getLang();	
+			if (!$persistentDocument->isLangAvailable($contextLang))
 			{
 				//Le document n'existe pas dans la langue du context on ne fait rien
 				return;
 			}
+		
+			if ($rc->hasI18nSyncho())
+			{
+				//Suppression de toute les versions de lang synchronisé
+				foreach ($this->getI18nSynchroStatus($documentId) as $stl => $stInfo)
+				{
+					if (isset($stInfo['from']) && $stInfo['from'] === $contextLang)
+					{
+						$i18nSyncDoc = $this->getI18nDocument($persistentDocument, $stl);
+						$this->_deleteI18nDocument($i18nSyncDoc, $documentModel);
+						unset($this->m_i18nDocumentInstances[$documentId][$stl]);
+						$persistentDocument->getI18nInfo()->removeLabel($stl);
+					}
+				}
+			}
+			
 			$langCount = $persistentDocument->removeContextLang();
 			$deleteDocumentInstance = ($langCount == 0);
-
+			
 			//On supprime physiquement la traduction
-			$contextLang = RequestContext::getInstance()->getLang();
+			
 			$i18nDocument = $this->getI18nDocument($persistentDocument, $contextLang);
 			$this->_deleteI18nDocument($i18nDocument, $documentModel);
-			unset($this->m_i18nDocumentInstances[$documentId][$contextLang]);
 		}
 
 		if (!$deleteDocumentInstance)
 		{
+			//Election d'une nouvelle VO
+			$this->setI18nSynchroStatus($documentId, $persistentDocument->getLang(), 'MODIFIED');
 			$this->updateDocument($persistentDocument);
 		}
 		else
@@ -1597,7 +1579,7 @@ abstract class f_persistentdocument_PersistentProvider
 				$persistentDocument->preCascadeDelete();
 			}
 
-			$table = $persistentDocument->getDatabaseTableName();
+			$table = $documentModel->getTableName();
 			$sql = $this->getDeleteDocumentQuery1();
 			$stmt = $this->prepareStatement($sql);
 			$stmt->bindValue(':document_id', $documentId, PersistentProviderConst::PARAM_INT);
@@ -1910,7 +1892,7 @@ abstract class f_persistentdocument_PersistentProvider
 			$this->bindValue($stmt, $propertyValue, $documentModel->getProperty($propertyName));
 		}
 		$this->executeStatement($stmt);
-
+		$this->setI18nSynchroStatus($i18nDocument->getId(), $i18nDocument->getLang(), 'MODIFIED');
 		$i18nDocument->setIsPersisted();
 	}
 
@@ -3459,8 +3441,51 @@ abstract class f_persistentdocument_PersistentProvider
 	 * @return DELETE FROM `f_locale` WHERE `key_path` = :key_path AND `id` = :id AND `lang` = :lang
 	 */
 	protected abstract function deleteI18nKeyQuery($id, $lcid);	
-
 	
+	
+	//I18nSynchro 
+	
+	/**
+	 * @param integer $id
+	 * @param string $lang
+	 * @param string $synchroStatus 'MODIFIED'|'VALID'|'SYNCHRONIZED'
+	 * @param string|null $fromLang
+	 */
+	public abstract function setI18nSynchroStatus($id, $lang, $synchroStatus, $fromLang = null);
+	
+	/**
+	 * @param integer $id
+	 * @return array
+	 * 		- 'fr'|'en'|'??' : array
+	 * 			- status : 'MODIFIED'|'VALID'|'SYNCHRONIZED'
+	 * 			- from : fr'|'en'|'??'|null
+	 */
+	public abstract function getI18nSynchroStatus($id);
+	
+	/**
+	 * @return integer[]
+	 */
+	public abstract function getI18nSynchroIds();
+
+	/**
+	 * @param f_persistentdocument_PersistentDocumentModel $pm
+	 * @param integer $id
+	 * @param string $lang
+	 * @param string $fromLang
+	 */
+	public abstract function prepareI18nSynchro($pm, $documentId, $lang, $fromLang);
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocumentModel $pm
+	 * @param f_persistentdocument_I18nPersistentDocument $to
+	 */
+	public abstract function setI18nSynchro($pm, $to);
+
+	/**
+	 * @param integer $id
+	 * @param string|null $lang
+	 */
+	public abstract function deleteI18nSynchroStatus($id, $lang = null);
 
 	/**
 	 * @param integer $documentId
@@ -4052,7 +4077,7 @@ abstract class f_persistentdocument_PersistentProvider
 	 * @param Integer $documentId
 	 * @return void
 	 */
-	private function deleteFromCache($documentId)
+	protected function deleteFromCache($documentId)
 	{
 		if ($this->useDocumentCache)
 		{
@@ -4498,7 +4523,6 @@ abstract class f_persistentdocument_PersistentProvider
 	 */
 	public final function getIndexingDocumentStatus($documentId, $mode)
 	{
-		//Framework::fatal(__METHOD__ . "($documentId, $mode)");
 		$stmt = $this->prepareStatement($this->getIndexingDocumentStatusQuery());
 		$stmt->bindValue(':document_id', $documentId, PersistentProviderConst::PARAM_INT);
 		$stmt->bindValue(':indexing_mode', $mode, PersistentProviderConst::PARAM_INT);
@@ -4576,7 +4600,6 @@ abstract class f_persistentdocument_PersistentProvider
 	 */
 	public final function deleteIndexingDocumentStatus($documentId, $mode)
 	{
-		//Framework::fatal(__METHOD__ . "($documentId, $mode)");
 		$stmt = $this->prepareStatement($this->deleteIndexingDocumentStatusQuery());
 		$stmt->bindValue(':document_id', $documentId, PersistentProviderConst::PARAM_INT);
 		$stmt->bindValue(':indexing_mode', $mode, PersistentProviderConst::PARAM_INT);
@@ -4595,7 +4618,6 @@ abstract class f_persistentdocument_PersistentProvider
 	 */
 	public final function clearIndexingDocumentStatus($mode)
 	{
-		//Framework::fatal(__METHOD__ . "($mode)");
 		$stmt = $this->prepareStatement($this->clearIndexingDocumentStatusQuery());
 		$stmt->bindValue(':indexing_mode', $mode, PersistentProviderConst::PARAM_INT);
 		$this->executeStatement($stmt);
@@ -4612,7 +4634,6 @@ abstract class f_persistentdocument_PersistentProvider
 	 */
 	public final function getIndexingStats()
 	{
-		//Framework::fatal(__METHOD__);
 		$stmt = $this->prepareStatement($this->getIndexingStatsQuery());
 		$this->executeStatement($stmt);
 		$result = $stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC);
@@ -4650,7 +4671,6 @@ abstract class f_persistentdocument_PersistentProvider
 	 */
 	public final function getIndexingDocuments($mode, $maxDocumentId, $chunkSize = 100)
 	{
-		//Framework::fatal(__METHOD__ . "($mode, $maxDocumentId, $chunkSize)");
 		$stmt = $this->prepareStatement($this->getIndexingDocumentsQuery($chunkSize));
 		$stmt->bindValue(':indexing_mode', $mode, PersistentProviderConst::PARAM_INT);
 		$stmt->bindValue(':document_id', $maxDocumentId, PersistentProviderConst::PARAM_INT);	

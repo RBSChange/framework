@@ -144,11 +144,11 @@ abstract class f_persistentdocument_PersistentDocumentImpl implements f_persiste
 	{
 		$this->m_treeId = $treeId;
 	}
-	
+		
 	/**
 	 * @return Integer the count of available langs, after deleting
 	 */
-	function removeContextLang ()
+	public function removeContextLang()
 	{
 		$this->is_i18InfoModified = true;
 		$contextLang = $this->getContextLang();
