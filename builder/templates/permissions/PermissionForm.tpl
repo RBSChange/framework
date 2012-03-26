@@ -30,7 +30,7 @@ to regenerate this file.
 <{/if}>
 <{foreach from=$tabNames item=tab}>
 	<{if $needsTabs}>
-     		<tabpanel id="<{$tab}>" orient="vertical">
+     		<tabpanel id="<{$tab[1]}>" orient="vertical">
 	<{/if}>
    			<grid flex="1">
     				<columns>
