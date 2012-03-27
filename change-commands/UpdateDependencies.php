@@ -6,7 +6,7 @@ class commands_UpdateDependencies extends commands_AbstractChangeCommand
 	 */
 	function getUsage()
 	{
-		return "";
+		return "[--forcedownload]";
 	}
 	
 	function getAlias()
@@ -22,6 +22,10 @@ class commands_UpdateDependencies extends commands_AbstractChangeCommand
 		return "Update project dependencies";
 	}
 
+	function getOptions()
+	{
+		return array('forcedownload');
+	}
 	/**
 	 * @param String[] $params
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
@@ -31,37 +35,47 @@ class commands_UpdateDependencies extends commands_AbstractChangeCommand
 	{
 		$this->message("== Update project dependencies ==");
 		$bootstrap = $this->getParent()->getBootStrap();
-		
+		$forceDownload = isset($options['forcedownload']);
 		do 
 		{
 			$dependencies = $bootstrap->loadDependencies();
-			$downloads = $this->getDepsToDownload($dependencies);
-			foreach ($downloads as $repositoryPath) 
+			$downloads = $this->getDepsToDownload($dependencies, $forceDownload);	
+			foreach ($downloads as $depsInfos) 
 			{
-				list($debType, $componentName, $version, $hotfix) = $bootstrap->explodeRepositoryPath($repositoryPath);
-				$this->message("Download $componentName-$version ($hotfix)...");
-				$result = $bootstrap->installComponent($debType, $componentName, $version, $hotfix);
-				if ($result === null)
+				list($debType, $componentName, $version) = $depsInfos;
+				$fullName = $bootstrap->convertToCategory($debType) . '/' . $componentName .'-' . $version;
+				
+				$this->message('Download ' . $fullName . ' ...');
+				try
 				{
-					return $this->quitError('Unable to download : ' . $repositoryPath . ' in local repository.');
+					$path = $bootstrap->downloadDependency($debType, $componentName, $version);
+				} 
+				catch (Exception $e) 
+				{
+					return $this->quitError('Unable to download : ' . $fullName . ' in local repository.');
 				}
 			}
+			$forceDownload = false;
 		} 
 		while (count($downloads) > 0);
 		
-
+		$moduleType = $bootstrap->convertToCategory(c_ChangeBootStrap::$DEP_MODULE);		
 		$dependencies = $bootstrap->loadDependencies();
 		$linkeds = $this->getDepsToLink($dependencies);
-		foreach ($linkeds as $repositoryPath) 
+		foreach ($linkeds as $depsInfos) 
 		{
-			list($debType, $componentName, $version, $hotfix) = $bootstrap->explodeRepositoryPath($repositoryPath);
-			$this->message("linking $componentName-$version ($hotfix)...");
-			if (!$bootstrap->linkToProject($debType, $componentName, $version, $hotfix))
+			list($debType, $componentName, $version) = $depsInfos;
+			
+			$fullName = $bootstrap->convertToCategory($debType) . '/' . $componentName .'-' . $version;
+			
+			$this->message('linking ' . $fullName . ' ...');
+			
+			if (!$bootstrap->linkToProject($debType, $componentName, $version))
 			{
-				return $this->quitError('Unable to link : ' . $repositoryPath . ' in project.');
+				return $this->quitError('Unable to link : ' . $fullName . ' in project.');
 			}
 			
-			if ($debType == c_ChangeBootStrap::$DEP_MODULE)
+			if ($bootstrap->convertToCategory($debType) == $moduleType)
 			{
 				$moduleName = $componentName;
 				if (is_dir("modules/$moduleName/change-commands"))
@@ -79,16 +93,16 @@ class commands_UpdateDependencies extends commands_AbstractChangeCommand
 		return $this->quitOk('Update Checked successfully.');
 	}
 	
-	private function getDepsToDownload($dependencies)
+	private function getDepsToDownload($dependencies, $forceDownload)
 	{
 		$result = array();
 		foreach ($dependencies as $debType => $debs) 
 		{
 			foreach ($debs as $debName => $infos)
 			{
-				if (!$infos['localy'])
+				if ($forceDownload || !$infos['localy'])
 				{
-					$result[] = $infos['repoRelativePath'];
+					$result[] = array($debType, $debName, $infos['version']) ;
 				}
 			} 
 		}	
@@ -104,7 +118,7 @@ class commands_UpdateDependencies extends commands_AbstractChangeCommand
 			{
 				if (!$infos['linked'])
 				{
-					$result[] = $infos['repoRelativePath'];
+					$result[] = array($debType, $debName, $infos['version']) ;
 				}
 			} 
 		}	
