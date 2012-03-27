@@ -34,30 +34,27 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 	 */
 	function getParameters($completeParamCount, $params, $options, $current)
 	{
+		$modules = array();	
 		$bootStrap = c_ChangeBootStrap::getInstance();
-		$remoteModules = $bootStrap->getRemoteModules(Framework::getVersion());
+		$definitions = $bootStrap->getReleaseDefinition($bootStrap->getCurrentReleaseName());
+		
+		$moduleType = $bootStrap->convertToCategory(c_ChangeBootStrap::$DEP_MODULE);
 		$moduleService = ModuleService::getInstance();
-		foreach ($remoteModules as $key => $module)
+		
+		foreach ($definitions as $key => $dependencyInfos)
 		{
-			$matches = null;
-			if (!preg_match('/^(.*?)-([0-9].*)$/', $module, $matches))
-			{
-				// this should not happen ...
-				continue;
-			}
-			$moduleName = $matches[1];
-			if (!$moduleService->moduleExists($moduleName))
+			if ($dependencyInfos['type'] != $moduleType)
 			{
 				continue;
 			}
-			$installedVersion = $moduleService->getModuleVersion($moduleName);
-			$remoteVersion = $matches[2];
-			if ($bootStrap->compareVersion($installedVersion, $remoteVersion) <= 0)
+			$moduleName = $dependencyInfos['name'];
+			if ($moduleService->moduleExists($moduleName))
 			{
-				unset($remoteModules[$key]);
+				continue;
 			}
+			$modules[] = $moduleName . '-' . $dependencyInfos['version'];
 		}
-		return $remoteModules;
+		return $modules;
 	}
 
 	/**
@@ -77,28 +74,15 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 		}
 		
 		$bootStrap = $this->getParent()->getBootStrap();
+		$type = c_ChangeBootStrap::$DEP_MODULE;
 		$moduleName = $matches[1];
 		$moduleVersion = $matches[2];
-		$parts = explode('-', $moduleVersion);
-		if (count($parts) > 2)
-		{
-			return $this->quitError("'$moduleVersion' is not a valid version");
-		}
-		else if (count($parts) == 2)
-		{
-			$hotFix = $parts[1];
-			$moduleVersion = $parts[0];
-		}
-		else
-		{
-			$hotFix = null;
-		}
 		
 		$computedDeps = $this->getComputedDeps();
-		if (ModuleService::getInstance()->isInstalled($moduleName) && isset($computedDeps['module'][$moduleName]))
+		if (ModuleService::getInstance()->isInstalled($moduleName))
 		{
-			$installedVersion = $computedDeps['module'][$moduleName]['version'];
-			$this->message("$moduleName module is already installed in version ".$installedVersion);
+			$installedVersion = ModuleService::getInstance()->getModuleVersion($moduleName);
+			$this->message($moduleName . " module is already installed in version ". $installedVersion);
 			switch ($bootStrap->compareVersion($moduleVersion, $installedVersion))
 			{
 				case 0:
@@ -110,28 +94,41 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 			}		
 		}
 			
-		$modulePath = $bootStrap->installComponent(c_ChangeBootStrap::$DEP_MODULE, $moduleName, $moduleVersion, $hotFix);
-		if ($modulePath === null)
+		if (!$bootStrap->dependencyInLocalRepository($type, $moduleName, $moduleVersion))
 		{
-			return $this->quitError("Unable to download '$moduleFullName' in local repository.");
+			try
+			{
+				$localPath = $bootStrap->downloadDependency($type, $moduleName, $moduleVersion);
+				$this->message("Module downloaded in: " . $localPath);
+			} 
+			catch (Exception $e) 
+			{
+				return $this->quitError($e->getMessage());
+			}
 		}
-		if (!$bootStrap->linkToProject(c_ChangeBootStrap::$DEP_MODULE, $moduleName, $moduleVersion, $hotFix))
+		else
+		{
+			$this->message("Module already downloaded.");
+		}
+		
+		if (!$bootStrap->linkToProject($type, $moduleName, $moduleVersion))
 		{
 			return $this->quitError("Unable to link '$moduleName' in project");
 		}
 		
-		if (!isset($computedDeps['module'][$moduleName]) && !$bootStrap->updateProjectDependencies(c_ChangeBootStrap::$DEP_MODULE, $moduleName, $moduleVersion, $hotFix))
+		if (!$bootStrap->updateProjectDependencies($type, $moduleName, $moduleVersion))
 		{
 			return $this->quitError("Unable to update file project dependencies change.xml");
 		}
 		
 		$this->message("Check dependencies integrity");
+		
 		$this->getParent()->executeCommand('updateDependencies');
 		
 		$this->changecmd("compile-all");
 		$this->changecmd("generate-database");
 		$this->changecmd("import-init-data", array($moduleName));		
-		$this->changecmd("init-patch-db", array("modules_$moduleName"));
+		$this->changecmd("init-patch-db", array('modules_' . $moduleName));
 		
 		$updatedComputedDebs = $this->getComputedDeps();
 		foreach ($updatedComputedDebs['module'] as $mN => $ignore) 
@@ -140,12 +137,10 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 			if (!isset($computedDeps['module'][$mN]) && $mN !== $moduleName)
 			{
 				$this->changecmd("import-init-data", array($mN));
-				$this->changecmd("init-patch-db", array("modules_".$mN));
+				$this->changecmd("init-patch-db", array("modules_" . $mN));
 			}
 		}
-		
         $this->changecmd("init-webapp");
-
 		return $this->quitOk("Install OK");
 	}
 }

@@ -6,7 +6,7 @@ class commands_CheckDependencies extends commands_AbstractChangeCommand
 	 */
 	function getUsage()
 	{
-		return "";
+		return "[--verbose] [--xml]";
 	}
 	
 	function getAlias()
@@ -52,10 +52,15 @@ class commands_CheckDependencies extends commands_AbstractChangeCommand
 		}
 		
 		$this->okMessage('Project depencendies :' .$changeXmlPath);
-		
+		$hasWritable = false;
 		foreach ($bootstrap->getLocalRepositories() as $path => $writable) 
 		{
-			$this->okMessage('Local Repo: ' . $path . ($writable ? ' w' : 'r'));
+			$hasWritable = $hasWritable | $writable;
+			$this->okMessage('Local Repo: ' . $path . ($writable ? ' writable' : 'read only'));
+		}
+		if (!$hasWritable)
+		{
+			$this->warnMessage('Project has no Writable repository');
 		}
 
 		$pearInfo = $bootstrap->loadPearInfo();
@@ -75,10 +80,6 @@ class commands_CheckDependencies extends commands_AbstractChangeCommand
 			{
 				$msg =  (isset($infos['depfor'])) ?  'Implicit dependency ' : 'Dependency ';
 				$msg .= $debType . '/' . $debName . ' version ' . $infos['version'];
-				if (count($infos['hotfix']))
-				{
-					$msg .= '-' . max($infos['hotfix']);
-				}
 				
 				if (!$infos['localy'])
 				{
@@ -105,7 +106,7 @@ class commands_CheckDependencies extends commands_AbstractChangeCommand
 	{
 		$domDoc = new DOMDocument("1.0", "UTF-8");
 		$domDoc->loadXml('<dependencies></dependencies>');
-		// <dependency type="module" name="website" version="3.5.0" hotfix="1" />
+		// <dependency type="module" name="website" version="3.5.0" />
 		$bootstrap = $this->getParent()->getBootStrap();
 
 		
@@ -119,10 +120,6 @@ class commands_CheckDependencies extends commands_AbstractChangeCommand
 				$depNode->setAttribute('type', $debType);
 				$depNode->setAttribute('name', $debName);
 				$depNode->setAttribute('version', $infos['version']);
-				if (count($infos['hotfix']))
-				{
-					$depNode->setAttribute('hotfix', max($infos['hotfix']));
-				}
 			}
 		}
 
