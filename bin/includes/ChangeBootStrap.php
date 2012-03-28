@@ -363,7 +363,7 @@ class c_ChangeBootStrap
 	{
 		if ($this->remoteRepositories === null)
 		{
-			$this->remoteRepositories = array_unique(explode(",", $this->getProperties()->getProperty("REMOTE_REPOSITORIES", "http://osrepo.rbschange.fr")));
+			$this->remoteRepositories = array_unique(explode(",", $this->getProperties()->getProperty("REMOTE_REPOSITORIES", "http://update.rbschange.fr")));
 		}
 		return $this->remoteRepositories;
 	}	
