@@ -76,7 +76,6 @@ class ClassResolver implements ResourceResolver
 		{
 			foreach ($injections["document"] as $injectedDoc => $replacerDoc)
 			{
-				//echo "AOP: replace document $injectedDoc => $replacerDoc\n";
 				list ($injectedModule, $injectedDoc) = explode("/", $injectedDoc);
 				list ($replacerModule, $replacerDoc) = explode("/", $replacerDoc);
 				
@@ -194,22 +193,21 @@ class ClassResolver implements ResourceResolver
 	{
 		 
 		$result = array(
-				array('path' => '%FRAMEWORK_HOME%/', 'recursive' => 'true', 
-						'exclude' => array('deprecated', 'doc', 'module', 'webapp')),
-				array('path' => '%WEBEDIT_HOME%/build/%PROFILE%/', 'recursive' => 'true'), 
+				array('path' => '%FRAMEWORK_HOME%', 'recursive' => true, 'exclude' => array('deprecated', 'doc', 'module', 'webapp')),
+				array('path' => '%WEBEDIT_HOME%/build/%PROFILE%', 'recursive' => true), 
 				array('path' => '%WEBEDIT_HOME%/modules/*/actions'), 
-				array('path' => '%WEBEDIT_HOME%/modules/*/change-commands', 'recursive' => 'true'), 
-				array('path' => '%WEBEDIT_HOME%/modules/*/changedev-commands', 'recursive' => 'true'), 
-				array('path' => '%WEBEDIT_HOME%/modules/*/lib/', 'recursive' => 'true'), 
-				array('path' => '%WEBEDIT_HOME%/modules/*/views/'), 
-				array('path' => '%WEBEDIT_HOME%/modules/*/persistentdocument/', 'recursive' => 'true'), 
+				array('path' => '%WEBEDIT_HOME%/modules/*/change-commands', 'recursive' => true), 
+				array('path' => '%WEBEDIT_HOME%/modules/*/changedev-commands', 'recursive' => true), 
+				array('path' => '%WEBEDIT_HOME%/modules/*/lib', 'recursive' => true), 
+				array('path' => '%WEBEDIT_HOME%/modules/*/views'), 
+				array('path' => '%WEBEDIT_HOME%/modules/*/persistentdocument', 'recursive' => true), 
 				array('path' => '%WEBEDIT_HOME%/override/modules/*/actions'), 
-				array('path' => '%WEBEDIT_HOME%/override/modules/*/lib/', 'recursive' => 'true'), 
-				array('path' => '%WEBEDIT_HOME%/override/modules/*/views/'));
+				array('path' => '%WEBEDIT_HOME%/override/modules/*/lib', 'recursive' => true), 
+				array('path' => '%WEBEDIT_HOME%/override/modules/*/views'));
 				
 		if (defined('PEAR_DIR'))
 		{
-			array_unshift($result, array('path' => PEAR_DIR . '/', 'recursive' => 'true'));
+			array_unshift($result, array('path' => PEAR_DIR, 'recursive' => 'true'));
 		}
 		return $result;
 	}
@@ -220,65 +218,59 @@ class ClassResolver implements ResourceResolver
 	public function initialize()
 	{
 		$ini = $this->getPathsToAnalyse();
-		// we automatically add our php classes
-		require_once (FRAMEWORK_HOME . '/util/Finder.class.php');
-		$ext = '.php';
-		
+
 		// let's do our fancy work
 		foreach ($ini as $entry)
 		{
-			// directory mapping
+
 			$path = $this->replaceConstants($entry['path']);
-			$finder = f_util_Finder::type('file')->ignore_version_control()->name('*' . $ext);
-			$finder->follow_link();
-			
-			// recursive mapping?
-			$recursive = ((isset($entry['recursive'])) ? $entry['recursive'] : false);
-			
-			if (!$recursive)
-			{
-				$finder->maxdepth(0);
-			}
-			
-			// exclude files or directories?
-			if (isset($entry['exclude']))
-			{
-				if (! is_array($entry['exclude']))
-				{
-					$entry['exclude'] = explode(',', $entry['exclude']);
-				}
-				$finder->prune($entry['exclude'])->discard($entry['exclude']);
-			}
+
+			$recursive = isset($entry['recursive']) ? $entry['recursive'] : false;			
+			$exludeDirs = isset($entry['exclude']) ? $entry['exclude'] : array();
 			
 			$matches = $this->glob($path);
 			if ($matches)
 			{
-				$files = $finder->in($matches);
-				$this->constructClassList($files);
+				foreach ($matches as $subpath)
+				{
+					$files = $this->getPHPFiles($subpath, $recursive, $exludeDirs);
+					$this->constructClassList($files);
+				}
 			}			
 		}
 	}
 	
 	private function glob($path)
 	{
-		if (strpos($path, '*') !== false && basename($path) !== '*')
+		if (strpos($path, '*') !== false)
 		{
-			$result = glob($path);
+			$result = glob($path, GLOB_ONLYDIR);
 			return (is_array($result) && count($result) > 0) ? $result : false;
 		}
-		$cleanPath = str_replace('/*', '', $path);
-		$result = array($cleanPath);
-		if (is_dir($cleanPath))
+		
+		if (is_dir($path))
 		{
-			foreach (new DirectoryIterator($cleanPath) as $fileInfo)
-			{
-				if (! $fileInfo->isDot())
-				{
-					$result[] = realpath($fileInfo->getPathname());
-				}
-			}
+			$result = array($path);
 		}
 		return count($result) > 0 ? $result : false;
+	}
+	
+	private function getPHPFiles($path, $recursive, $exludeDirs)
+	{
+		$result = array();
+		$di = new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::KEY_AS_PATHNAME);
+		
+		f_PHPFileFilter::setFilters($recursive, $exludeDirs);
+		$fi = new f_PHPFileFilter($di);	
+		$it = new RecursiveIteratorIterator($fi, RecursiveIteratorIterator::CHILD_FIRST);	
+		foreach ($it as $file => $info)
+		{
+			if ($info->isFile())
+			{
+				$result[] = $file;
+			}
+		}
+		return $result;
 	}
 	
 	/**
@@ -310,8 +302,7 @@ class ClassResolver implements ResourceResolver
 		}
 		if ($lastPatternPart != '')
 		{
-			foreach (glob($path . "/" . $lastPatternPart . "*", 
-					GLOB_MARK | GLOB_ONLYDIR | GLOB_NOSORT) as $subPath)
+			foreach (glob($path . "/" . $lastPatternPart . "*", GLOB_MARK | GLOB_ONLYDIR | GLOB_NOSORT) as $subPath)
 			{
 				foreach (f_util_FileUtils::find("to_include", $subPath) as $toIncludePath)
 				{
@@ -416,9 +407,12 @@ class ClassResolver implements ResourceResolver
 	
 	public function appendRealDir($dirPath)
 	{
-		foreach (f_util_FileUtils::find("*.php", $dirPath) as $filePath)
+		if (is_dir($dirPath))
 		{
-			$this->appendFile($filePath, true);
+			foreach ($this->getPHPFiles($dirPath, true, array()) as $filePath)
+			{
+				$this->appendFile($filePath, true);
+			}
 		}		
 	}
 	
@@ -428,36 +422,15 @@ class ClassResolver implements ResourceResolver
 	 */
 	public function appendDir($dirPath, $override = false)
 	{
-		$ini = $this->getPathsToAnalyse();
-		// we automatically add our php classes
-		require_once (FRAMEWORK_HOME . '/util/Finder.class.php');
-		$ext = '.php';		
-		// let's do our fancy work
+		$ini = $this->getPathsToAnalyse();	
 		foreach ($ini as $entry)
 		{
 			// directory mapping
 			$path = $this->replaceConstants($entry['path']);
-			$finder = f_util_Finder::type('file')->ignore_version_control()->name('*' . $ext);
-			$finder->follow_link();
-			
-			// recursive mapping?
-			$recursive = ((isset($entry['recursive'])) ? $entry['recursive'] : false);
-			
-			if (!$recursive)
-			{
-				$finder->maxdepth(0);
-			}
-			
-			// exclude files or directories?
-			if (isset($entry['exclude']))
-			{
-				if (! is_array($entry['exclude']))
-				{
-					$entry['exclude'] = explode(',', $entry['exclude']);
-				}
-				$finder->prune($entry['exclude'])->discard($entry['exclude']);
-			}
-			
+	
+			$recursive = isset($entry['recursive']) ? $entry['recursive'] : false;			
+			$exludeDirs = isset($entry['exclude']) ? $entry['exclude'] : array();
+
 			$matches = $this->glob($path);
 			if ($matches)
 			{
@@ -465,12 +438,12 @@ class ClassResolver implements ResourceResolver
 				{
 					if (strpos($path, $dirPath) === 0)
 					{
-						$files = $finder->in(array($path));
+						$files = $this->getPHPFiles($path, $recursive, $exludeDirs);
 						$this->constructClassList($files);
 					}
 					else if (strpos($dirPath, $path) === 0 && $recursive)
 					{
-						$files = $finder->in(array($dirPath));
+						$files = $this->getPHPFiles($path, $recursive, $exludeDirs);
 						$this->constructClassList($files);	
 						return;			
 					}
@@ -652,5 +625,43 @@ class ClassResolverDevMode extends ClassResolver
 	public function loadCacheFile()
 	{
 		// nothing
+	}
+}
+
+class f_PHPFileFilter extends RecursiveFilterIterator
+{
+	public static $excludeDirs;
+
+	public static $recursive;
+	
+	public static function setFilters($recursive, $exludeDirs)
+	{
+		self::$recursive = ($recursive == true);
+		if (self::$recursive && is_array($exludeDirs))
+		{
+			self::$excludeDirs = array_merge(array('.svn', '.git'), $exludeDirs);
+		}
+		else
+		{
+			self::$excludeDirs = array('.svn', '.git');
+		}
+	}
+
+	public function accept()
+	{
+		$c = $this->current();
+		if ($c->isDir())
+		{
+			if (!self::$recursive || in_array($c->getFilename(), self::$excludeDirs))
+			{
+				return false;
+			}
+			return true;
+		}
+		elseif ($c->isFile() && substr($c->getFilename(), -4) == '.php')
+		{
+			return true;
+		}
+		return false;
 	}
 }

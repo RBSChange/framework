@@ -4,7 +4,6 @@ require_once($frameworkPath . '/loader/ResourceResolver.class.php');
 require_once($frameworkPath . '/loader/ClassResolver.class.php');
 require_once($frameworkPath . '/util/FileUtils.class.php');
 require_once($frameworkPath . '/util/StringUtils.class.php');
-require_once($frameworkPath . '/util/Finder.class.php');
 
 class cboot_ClassDirAnalyzer extends ClassResolver
 {
