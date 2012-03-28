@@ -788,7 +788,6 @@ class c_ChangeBootStrap
 				}
 				while ($count > 0)
 				{
-					echo 'Backup ', $localPath , '-bak', ($count - 1), ' => ', $localPath , '-bak',$count, PHP_EOL;
 					rename($localPath . '-bak'.($count -1 ) , $localPath . '-bak'.$count);
 					$count--;
 				}
