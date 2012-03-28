@@ -466,7 +466,7 @@ class c_ChangeBootStrap
 	
 	/**
 	 * @param integer $depType
-	 * @return string
+	 * @return string (framework|modules|libs|pearlibs|themes)
 	 */
 	public function convertToCategory($depType)
 	{
@@ -1459,6 +1459,7 @@ class c_ChangeBootStrap
 			case self::$DEP_FRAMEWORK :
 			case self::$DEP_LIB :
 			case self::$DEP_PEAR :
+			case self::$DEP_THEME :
 				return intval($typeStr);
 		}
 		return self::$DEP_UNKNOWN;
