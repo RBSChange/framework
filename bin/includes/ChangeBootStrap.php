@@ -490,6 +490,7 @@ class c_ChangeBootStrap
 			case self::$DEP_PEAR :
 			case "lib-pear" :
 			case "pearlibs" :
+			case "pearlib" :
 			case "pear" :
 				return 'pearlibs';
 					
@@ -528,7 +529,7 @@ class c_ChangeBootStrap
 						case 'change-lib':
 							$e = array('type' => $this->convertToCategory(self::$DEP_FRAMEWORK),
 							'name' => 'framework', 'version' => $node->getAttribute('version'));
-							$result[self::$DEP_FRAMEWORK. '/' . $e['name']] = $e;
+							$result[$e['type']][$e['name']] = $e;
 							break;
 						case 'module':
 						case 'lib':
@@ -536,7 +537,7 @@ class c_ChangeBootStrap
 						case 'theme':
 							$e = array('type' => $this->convertToCategory($node->localName),
 							'name' => $node->getAttribute('name'), 'version' => $node->getAttribute('version'));
-							$result[$this->convertToValidType($node->localName) . '/' . $e['name']] = $e;
+							$result[$e['type']][$e['name']] = $e;
 					}
 				}
 				unlink($releaseContentPath);
@@ -563,7 +564,7 @@ class c_ChangeBootStrap
 		$dependencies = array();
 		$changeXMLDoc = f_util_DOMUtils::fromPath($this->getDescriptorPath());
 		$changeXMLDoc->registerNamespace("c", "http://www.rbs.fr/schema/change-project/1.0");
-		$infos = array('localy' => FALSE, 'linked' => false, 'version' => '', 'hotfix' => array(), 'repoRelativePath' => null);
+		$infos = array('localy' => FALSE, 'linked' => false, 'version' => '', 'repoRelativePath' => null);
 		$dependencies['framework'] = array('framework' => $infos);
 		$frameworkElem = $changeXMLDoc->findUnique("c:dependencies/c:framework");
 		if ($frameworkElem !== null)
@@ -582,7 +583,7 @@ class c_ChangeBootStrap
 		$dependencies['modules'] = array();
 		foreach ($changeXMLDoc->find("c:dependencies/c:modules/c:module") as $moduleElem)
 		{
-			$infos = array('localy' => FALSE, 'linked' => false, 'version' => '', 'hotfix' => array(), 'repoRelativePath' => null);
+			$infos = array('localy' => FALSE, 'linked' => false, 'version' => '', 'repoRelativePath' => null);
 			$matches = array();
 			if (!preg_match('/^(.*?)-([0-9].*)$/', $moduleElem->textContent, $matches))
 			{
@@ -606,7 +607,7 @@ class c_ChangeBootStrap
 		$dependencies['libs'] = array();
 		foreach ($changeXMLDoc->find("c:dependencies/c:libs/c:lib") as $libElem)
 		{
-			$infos = array('localy' => FALSE, 'linked' => false, 'version' => '', 'hotfix' => array(), 'repoRelativePath' => null);
+			$infos = array('localy' => FALSE, 'linked' => false, 'version' => '', 'repoRelativePath' => null);
 			$matches = array();
 			if (!preg_match('/^(.*?)-([0-9].*)$/', $libElem->textContent, $matches))
 			{
@@ -673,12 +674,23 @@ class c_ChangeBootStrap
 	 * @param string $type
 	 * @param string $name
 	 * @param string $version
-	 * @return boolean
+	 * @return string|false
 	 */
 	public function dependencyInLocalRepository($type, $name, $version)
 	{
 		$path = $this->buildLocalRepositoryPath($this->convertToValidType($type), $name, $version);
-		return is_dir($path);
+		return is_dir($path) ? $path : false;
+	}
+	
+	/**
+	 * @param string $url
+	 * @param string $filePath
+	 * @param array $postDataArray
+	 * @return true|array<errorNumber, errorMessage>
+	 */
+	public function downloadRepositoryFile($url, &$filePath, $postDataArray = null)
+	{
+		return $this->getRemoteFile($url, $filePath, $postDataArray);
 	}
 
 	/**
@@ -692,14 +704,16 @@ class c_ChangeBootStrap
 	public function downloadDependency($type, $name, &$version, &$url)
 	{
 		$depType = $this->convertToValidType($type);
+		$type = $this->convertToCategory($type);
+		
 		if ($version === null)
 		{
 			$relaseInfos = $this->getReleaseDefinition($this->getCurrentReleaseName());
-			if (!isset($relaseInfos[$depType . '/' . $name]))
+			if (!isset($relaseInfos[$type]) || !isset($relaseInfos[$type][$name]))
 			{
 				throw new Exception('Unable to find version of: ' . $type .  '/' . $name);
 			}
-			$version = $relaseInfos[$depType . '/' . $name]['version'];
+			$version = $relaseInfos[$type][$name]['version'];
 		}
 		$path = $this->buildRepositoryPath($depType, $name, $version);
 		$tmpFile = null;
@@ -1072,9 +1086,10 @@ class c_ChangeBootStrap
 	 *
 	 * @param string $url
 	 * @param string $destFile
+	 * @param array $postDataArray
 	 * @return true array
 	 */
-	private function getRemoteFile($url, &$destFile)
+	private function getRemoteFile($url, &$destFile, $postDataArray = null)
 	{
 		$this->remoteError = true;
 		if (!$destFile)
@@ -1106,7 +1121,13 @@ class c_ChangeBootStrap
 		curl_setopt($ch, CURLOPT_AUTOREFERER, true);
 		curl_setopt($ch, CURLOPT_COOKIEFILE, '');
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-	
+
+		if (is_array($postDataArray) && count($postDataArray))
+		{
+			curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postDataArray, null , '&'));
+			curl_setopt($ch, CURLOPT_POST, true);
+		}
+		
 		$proxy = $this->getProxy();
 		if ($proxy !== null)
 		{
@@ -1264,7 +1285,7 @@ class c_ChangeBootStrap
 				$declaredDeps[$depTypeKey] = array();
 			}
 				
-			$infos = array('localy' => FALSE, 'linked' => false, 'version' => '', 'hotfix' => array(), 'repoRelativePath' => null);
+			$infos = array('localy' => FALSE, 'linked' => false, 'version' => '', 'repoRelativePath' => null);
 				
 			foreach ($changeXMLDoc->find("cc:versions/cc:version", $dep) as $versionElem)
 			{

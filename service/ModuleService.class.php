@@ -875,15 +875,7 @@ class c_Module
 	{
 		return isset($this->infos['VERSION']) ? $this->infos['VERSION'] : null;
 	}
-	
-	/**
-	 * @return String
-	 */
-	function getHotfix()
-	{
-		return isset($this->infos['HOTFIX']) ? $this->infos['HOTFIX'] : null;
-	}
-	
+		
 	/**
 	 * @return String
 	 */
@@ -906,5 +898,15 @@ class c_Module
 	function getRootFolderId()
 	{
 		return ModuleService::getInstance()->getRootFolderId($this->name);
+	}
+	
+	//DEPRECATED
+	
+	/**
+	 * @deprecated
+	 */
+	function getHotfix()
+	{
+		return null;
 	}
 }

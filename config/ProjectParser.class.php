@@ -113,7 +113,6 @@ class config_ProjectParser
 		}
 		$fDeps = $computedDeps['change-lib']['framework'];
 		$this->addConstant($configArray['defines'], "FRAMEWORK_VERSION", $fDeps['version']);
-		$this->addConstant($configArray['defines'], "FRAMEWORK_HOTFIX", null);
 
 		// -- Modules informations.
 		$configArray['packageversion'] = $this->compilePackageVersion();
@@ -353,7 +352,7 @@ class config_ProjectParser
 					$pname = 'modules_'.$moduleName;
 					$version = isset($configArray['packageversion'][$pname]) ? $configArray['packageversion'][$pname] : null;	
 					$configArray['packageversion'][$pname] = array('ENABLED' => true, 'VISIBLE' => true, 'CATEGORY' => null, 
-						'ICON' => 'package', 'USETOPIC' => false, 'VERSION' => $version, 'HOTFIX' => null);
+						'ICON' => 'package', 'USETOPIC' => false, 'VERSION' => $version);
 								
 					foreach ($moduleConfig['module'] as $key => $value)
 					{

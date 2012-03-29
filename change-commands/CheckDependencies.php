@@ -73,7 +73,62 @@ class commands_CheckDependencies extends commands_AbstractChangeCommand
 			$this->okMessage("Pear $key: $data");
 		}
 		$dependencies = $bootstrap->loadDependencies();
+
+		$repoModules = $dependencies['modules'];
+		$postDataArray = array();
+		foreach (ModuleService::getInstance()->getModulesObj() as $module)
+		{
+			/* @var $module c_Module */
+			if (isset($repoModules[$module->getName()]))
+			{
+				$repData = $repoModules[$module->getName()];
+				$data = array('repo' => $repData['linked'], 'version' => $module->getVersion());
+			}
+			else
+			{
+				$data = array('repo' => false, 'version' => $module->getVersion());
+			}
+			$postDataArray[$module->getName()] = $data;
+		}
+		$this->okMessage('Release : ' . $bootstrap->getCurrentReleaseName());
 		
+		
+		$filePath = null;
+		$licenseStatus = 'Unknown (Remote repository not responding)';
+		$errorModules = array();
+		
+		foreach ($bootstrap->getRemoteRepositories() as $baseURL)
+		{
+			/* @var $baseURL string */
+			$result = $bootstrap->downloadRepositoryFile($baseURL . '/license.xml', $filePath, array('modules' => $postDataArray));
+			if ($result === true)
+			{
+				$xml = new DOMDocument('1.0', 'UTF-8');
+				if ($xml->load($filePath) === true)
+				{
+					$licenseStatus = $xml->documentElement->hasAttribute('status') ? $xml->documentElement->getAttribute('status') : 'Unknown';
+					$mnl = $xml->getElementsByTagName('modules');
+					if ($mnl->length)
+					{
+						foreach ($mnl->item(0)->getElementsByTagName('module') as $mn)
+						{
+							/* @var $mn DOMElement */
+							$errorModules[$mn->getAttribute('name')] = $mn->getAttribute('status');
+						}
+					}
+					unlink($filePath);
+					break;
+				}
+				else
+				{
+					$licenseStatus = 'Invalid License Informations';
+					unlink($filePath);
+				}
+			}
+		}
+		
+		$this->okMessage("License: " . $bootstrap->getProperties()->getProperty("PROJECT_LICENSE") . ' : ' . $licenseStatus);
+				
 		foreach ($dependencies as $debType => $debs) 
 		{
 			foreach ($debs as $debName => $infos)
@@ -91,14 +146,37 @@ class commands_CheckDependencies extends commands_AbstractChangeCommand
 					$msg .= ': Not linked in project';
 					$this->warnMessage($msg);
 				}
-				else if (isset($options['verbose']))
+				elseif ($debType == 'modules' && isset($errorModules[$debName]))
+				{
+					$msg .= ': ' . $errorModules[$debName];
+					$this->warnMessage($msg);
+				}
+				elseif (isset($options['verbose']))
 				{
 					$msg .= ': Ok';
 					$this->okMessage($msg);
 				}
-			} 
+			}
+		}	
+				
+		foreach (ModuleService::getInstance()->getModulesObj() as $module)
+		{
+			/* @var $module c_Module */
+			$debName = $module->getName();
+			if (isset($repoModules[$debName])) {continue;}
+			$msg = 'Project modules/' . $debName . ' version ' . $module->getVersion();
+			if (isset($errorModules[$debName]))
+			{
+				$msg .= ': ' . $errorModules[$debName];
+				$this->warnMessage($msg);
+			}
+			else if (isset($options['verbose']))
+			{
+				$msg .= ': Ok';
+				$this->okMessage($msg);
+			}
 		}
-		
+					
 		return $this->quitOk('Project Checked successfully.');
 	}
 
