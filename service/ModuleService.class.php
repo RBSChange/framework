@@ -419,10 +419,7 @@ class ModuleService extends BaseService
 					$tm->beginTransaction();
 					
 					// create root folder
-					
-
 					$rootFolder = $tm->getPersistentProvider()->getNewDocumentInstance('modules_generic/rootfolder');
-					$rootFolder->setLabel('&modules.' . $moduleName . '.bo.general.Module-name;');
 					$rootFolder->save();
 					
 					// set as root folder in the tree
@@ -502,7 +499,7 @@ class ModuleService extends BaseService
 					
 					// create system folder
 					$systemFolder = $tm->getPersistentProvider()->getNewDocumentInstance('modules_generic/systemfolder');
-					$systemFolder->setLabel('&modules.' . $relatedModuleName . '.bo.general.System-folder-name;');
+					$systemFolder->setLabel('m.' . $relatedModuleName . '.bo.general.system-folder-name');
 					
 					$systemFolder->save(ModuleService::getInstance()->getRootFolderId($ownerModuleName));
 					
@@ -625,7 +622,7 @@ class ModuleService extends BaseService
 	 */
 	public function getLocalizedModuleLabel($moduleName)
 	{
-		return f_Locale::translate("&modules.$moduleName.bo.general.Module-name;");
+		return LocaleService::getInstance()->transFO('m.'.$moduleName.'.bo.general.module-name', array('ucf'));
 	}
 	
 	/**
@@ -636,10 +633,9 @@ class ModuleService extends BaseService
 	 */
 	public function getUILocalizedModuleLabel($moduleName)
 	{
-		return f_Locale::translateUI("&modules.$moduleName.bo.general.Module-name;");
+		return LocaleService::getInstance()->transBO('m.'.$moduleName.'.bo.general.module-name', array('ucf'));
 	}
 	
-
 	/**
 	 * @param String $moduleName
 	 * @return array<String> module names

@@ -1,7 +1,14 @@
 <?php
 class paginator_PaginatorItem
 {
+	/**
+	 * @var string
+	 */
 	private $label;
+	
+	/**
+	 * @var string
+	 */
 	private $url;
 	
 	/**
@@ -66,12 +73,31 @@ class paginator_Paginator extends ArrayObject
 	 */
 	const PAGEINDEX_PARAMETER_NAME = 'page';
 	
+	/**
+	 * @var array
+	 */
 	private $items = null;
+	
+	/**
+	 * @var integer
+	 */
 	private $currentItemIndex = 0;
+	
+	/**
+	 * @var string
+	 */	
 	private $templateFileName = 'Website-Default-Paginator';
+	
+	/**
+	 * @var string
+	 */	
 	private $templateModuleName = 'website';
 	
+	/**
+	 * @var integer
+	 */
 	private $pageIndexParamName = self::PAGEINDEX_PARAMETER_NAME;
+	
 	/**
 	 * Index of the current page of paginator
 	 * @var integer
@@ -90,27 +116,40 @@ class paginator_Paginator extends ArrayObject
 	 */
 	private $moduleName = null;
 	
-	private $extraParameters = array();
 	/**
-	 * @var Integer
+	 * @var array
+	 */
+	private $extraParameters = array();
+	
+	/**
+	 * @var integer
 	 */
 	private $nbItemPerPage;
 	
 	/**
-	 * @var String
+	 * @var string
 	 */
 	private $html = null;
 	
 	/**
-	 * @var String
+	 * @var string
 	 */
 	private $listName;
 	
 	/**
-	 * @var Array
+	 * @var array
 	 */
 	private $excludeParams = array();
 	
+	/**
+	 * @param string $moduleName
+	 * @param integer $pageIndex
+	 * @param array $items
+	 * @param integer $nbItemPerPage
+	 * @param integer $itemCount
+	 * @param array $excludeParams
+	 * @throws BadInitializationException
+	 */
 	public function __construct($moduleName, $pageIndex, $items, $nbItemPerPage, $itemCount = null, $excludeParams = array())
 	{
 		$this->setModuleName($moduleName);
@@ -252,20 +291,30 @@ class paginator_Paginator extends ArrayObject
 		return $this->extraParameters;
 	}
 	
+	/**
+	 * @return array
+	 */
 	public function getItems()
 	{
 		$this->load();
 		return $this->items;
 	}
 	
+	/**
+	 * @return boolean
+	 */
 	public function shouldRender()
 	{
 		return $this->getPageCount() > 1;
 	}
 	
-	private $anchor;
 	/**
-	 * @param String $anchor the anchor to add to each paginator URL
+	 * @var string
+	 */
+	private $anchor;
+	
+	/**
+	 * @param string $anchor the anchor to add to each paginator URL
 	 */
 	public function setAnchor($anchor)
 	{
@@ -384,7 +433,7 @@ class paginator_Paginator extends ArrayObject
 	/**
 	 * Returns the "Page 1 sur XX" text
 	 *
-	 * @return String
+	 * @return string
 	 */
 	public function getLocalizedPageCount()
 	{
@@ -392,6 +441,9 @@ class paginator_Paginator extends ArrayObject
 			'currentPage' => $this->getCurrentPageNumber(), 'pageCount' => $this->getPageCount(), 'listName' => $this->getListName()));
 	}
 	
+	/**
+	 * @return paginator_PaginatorItem|null
+	 */
 	public function getFirstPageItem()
 	{
 		$this->load();
@@ -405,6 +457,9 @@ class paginator_Paginator extends ArrayObject
 		return $newItem;
 	}
 	
+	/**
+	 * @return paginator_PaginatorItem|null
+	 */
 	public function getPreviousPageItem()
 	{
 		$this->load();
@@ -417,6 +472,9 @@ class paginator_Paginator extends ArrayObject
 	
 	}
 	
+	/**
+	 * @return paginator_PaginatorItem|null
+	 */
 	public function getLastPageItem()
 	{
 		$this->load();
@@ -431,6 +489,9 @@ class paginator_Paginator extends ArrayObject
 		return $newItem;
 	}
 	
+	/**
+	 * @return paginator_PaginatorItem|null
+	 */
 	public function getNextPageItem()
 	{
 		$this->load();
@@ -442,18 +503,27 @@ class paginator_Paginator extends ArrayObject
 		return null;
 	}
 	
+	/**
+	 * @param string $string
+	 */
 	public final function setTemplateFileName($string)
 	{
 		$this->html = null;
 		$this->templateFileName = $string;
 	}
 	
+	/**
+	 * @param string $string
+	 */
 	public final function setTemplateModuleName($string)
 	{
 		$this->html = null;
 		$this->templateModuleName = $string;
 	}
 	
+	/**
+	 * @return string 
+	 */
 	public final function getTemplate()
 	{
 		$loader = TemplateLoader::getInstance()->setPackageName('modules_' . $this->templateModuleName)->setDirectory('templates')->setMimeContentType('html');
@@ -463,7 +533,7 @@ class paginator_Paginator extends ArrayObject
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public final function execute()
 	{
@@ -475,11 +545,17 @@ class paginator_Paginator extends ArrayObject
 		return $this->html;
 	}
 	
+	/**
+	 * @return string 
+	 */
 	function getListName()
 	{
 		return $this->listName;
 	}
 	
+	/**
+	 * @param string $listName
+	 */
 	function setListName($listName)
 	{
 		$this->listName = $listName;
@@ -524,6 +600,9 @@ class paginator_Url
 		return $inst;
 	}
 	
+	/**
+	 * @param string $name
+	 */
 	public function removeQueryParameter($name)
 	{
 		$key = urlencode($name);
@@ -533,7 +612,11 @@ class paginator_Url
 			$this->setNeedsUpdate();
 		}
 	}
-	
+
+	/**
+	 * @param string $name
+	 * @param mixed $value
+	 */
 	public function setQueryParameter($name, $value)
 	{
 		if (!is_array($value))
@@ -548,12 +631,19 @@ class paginator_Url
 		$this->setNeedsUpdate();
 	}
 	
+	/**
+	 * @param string $key
+	 * @param string $value
+	 */
 	public function setRequestPart($key, $value)
 	{
 		$this->urlRequestParts[$key] = $value;
 		$this->setNeedsUpdate();
 	}
 	
+	/**
+	 * @param array $array
+	 */
 	public function setQueryParameters($array)
 	{
 		foreach ($array as $key => $val)
@@ -563,12 +653,18 @@ class paginator_Url
 		$this->setNeedsUpdate();
 	}
 	
+	/**
+	 * @param string $url
+	 */
 	public function setBaseUrl($url)
 	{
 		$this->baseUrl = $url;
 		$this->setNeedsUpdate();
 	}
 	
+	/**
+	 * @return string
+	 */
 	public function getStringRepresentation()
 	{
 		if (is_null($this->stringRepresentation))
@@ -582,6 +678,9 @@ class paginator_Url
 		return $this->stringRepresentation;
 	}
 	
+	/**
+	 * @return string
+	 */
 	public function __toString()
 	{
 		return $this->getStringRepresentation();
@@ -592,6 +691,10 @@ class paginator_Url
 	private $stringRepresentation = null;
 	private $baseUrl = null;
 	
+	/**
+	 * @param string $name
+	 * @param mixed $value
+	 */
 	private function buildRecursivelyWithKeyAndValue($name, $value)
 	{
 		$this->currentPath[] = urlencode(count($this->currentPath) == 0 ? $name : "[$name]");

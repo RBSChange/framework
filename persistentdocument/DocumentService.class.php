@@ -2653,15 +2653,12 @@ class f_persistentdocument_DocumentService extends BaseService
 	
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @return string|null
+	 * @return string
 	 */
 	public function getTreeNodeLabel($document)
 	{
-		if ($document->isContextLangAvailable())
-		{
-			return $document->getLabel();
-		}
-		return $document->getVoLabel();
+		$label = ($document->isContextLangAvailable()) ? $document->getLabel() : $document->getVoLabel();
+		return LocaleService::getInstance()->transBO($label, array('ucf'));
 	}
 	
 	/**
