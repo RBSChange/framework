@@ -347,6 +347,26 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		return $this->getOldValue('<{$property->getName()}>', $this->getI18nObject()->getLang());
 	}
 <{/if}>
+<{if $property->getFromList() && $property->getMaxOccurs() == 1}>
+
+	/**
+	 * @return String
+	 */
+	public function get<{$property->getPhpName()}>LabelAsHtml()
+	{
+		$list = list_ListService::getInstance()->getByListId('<{$property->getFromList()}>');
+		if ($list === null)
+		{
+			return null;
+		}
+		$listItem = $list->getItemByValue($this->get<{$property->getPhpName()}>());
+		if ($listItem === null)
+		{
+			return null;
+		}
+		return f_util_HtmlUtils::textToHtml($listItem->getLabel());
+	}
+<{/if}>
 
 <{/foreach}>
 <{foreach from=$model->getPrivateClassMember() item=property}>
@@ -486,6 +506,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	}
 <{/if}>
 <{if $property->getFromList() && $property->getMaxOccurs() == 1}>
+
 	/**
 	 * @return String
 	 */
@@ -566,7 +587,6 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		return null;
 	}
 <{/if}>
-
 <{elseif  $property->isDocument() && $property->isArray()}>
 
 	private function checkLoaded<{$property->getPhpName()}>()
