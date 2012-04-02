@@ -26,6 +26,8 @@ class commands_UpdateDependencies extends commands_AbstractChangeCommand
 	{
 		return array('forcedownload');
 	}
+	
+
 	/**
 	 * @param String[] $params
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
@@ -53,7 +55,14 @@ class commands_UpdateDependencies extends commands_AbstractChangeCommand
 				} 
 				catch (Exception $e) 
 				{
-					return $this->quitError('Unable to download : ' . $fullName . ' in local repository. ' . $e->getMessage());
+					if ($forceDownload && $dependencies[$debType][$componentName]['localy'])
+					{
+						$this->warnMessage('Unable to Download : ' . $fullName . ' in local repository. ' . $e->getMessage());
+					}
+					else
+					{
+						return $this->quitError('Unable to Download : ' . $fullName . ' in local repository. ' . $e->getMessage());
+					}
 				}
 			}
 			$forceDownload = false;
