@@ -204,13 +204,17 @@ class generator_PersistentModel
 		foreach (self::loadModels() as $model)
 		{
 			$childrenNames = array();
-			foreach ($model->getFinalChildren() as $child)
+			$finalChildren = $model->getFinalChildren();
+			if (is_array($finalChildren))
 			{
-				$childrenNames[] = $child->getName();
-			}
-			if (count($childrenNames) > 0)
-			{
-				$modelsChildren[$model->getName()] = $childrenNames;
+				foreach ($finalChildren as $child)
+				{
+					$childrenNames[] = $child->getName();
+				}
+				if (count($childrenNames) > 0)
+				{
+					$modelsChildren[$model->getName()] = $childrenNames;
+				}
 			}
 		}
 		
