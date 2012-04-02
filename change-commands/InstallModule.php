@@ -98,8 +98,9 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 		{
 			try
 			{
-				$localPath = $bootStrap->downloadDependency($type, $moduleName, $moduleVersion);
-				$this->message("Module downloaded in: " . $localPath);
+				$url = null;
+				$localPath = $bootStrap->downloadDependency($type, $moduleName, $moduleVersion, $url);
+				$this->message("Module downloaded in: " . $localPath . ", from: ". $url);
 			} 
 			catch (Exception $e) 
 			{

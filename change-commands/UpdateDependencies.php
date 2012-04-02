@@ -48,11 +48,12 @@ class commands_UpdateDependencies extends commands_AbstractChangeCommand
 				$this->message('Download ' . $fullName . ' ...');
 				try
 				{
-					$path = $bootstrap->downloadDependency($debType, $componentName, $version);
+					$url = null;
+					$path = $bootstrap->downloadDependency($debType, $componentName, $version, $url);
 				} 
 				catch (Exception $e) 
 				{
-					return $this->quitError('Unable to download : ' . $fullName . ' in local repository.');
+					return $this->quitError('Unable to download : ' . $fullName . ' in local repository. ' . $e->getMessage());
 				}
 			}
 			$forceDownload = false;
