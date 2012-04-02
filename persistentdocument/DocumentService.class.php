@@ -640,11 +640,26 @@ class f_persistentdocument_DocumentService extends BaseService
 		$documentModel = $persistentDocument->getPersistentModel();
 		if ($documentModel->isLocalized())
 		{
-			if (!$persistentDocument->isContextLangAvailable())
+			$rc = RequestContext::getInstance();
+			$contextLang = $rc->getLang();		
+			if (!$persistentDocument->isLangAvailable($contextLang))
 			{
 				return false;
 			}
-			if (count($persistentDocument->getI18nInfo()->getLabels()) > 1)
+			
+			$count = count($persistentDocument->getI18nInfo()->getLabels());
+			if ($count > 1 && $rc->hasI18nSyncho())
+			{
+				foreach ($this->pp->getI18nSynchroStatus($persistentDocument->getId()) as $stl => $stInfo)
+				{
+					if (isset($stInfo['from']) && $stInfo['from'] === $contextLang)
+					{
+						$count--;
+					}
+				}
+			}
+			
+			if ($count > 1)
 			{
 				return false;
 			}
