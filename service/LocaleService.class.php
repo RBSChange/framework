@@ -808,7 +808,7 @@ class LocaleService extends BaseService
 			
 			if (count($entities))
 			{
-				$this->applyEntitiesI18nSyncho($entities);
+				$this->applyEntitiesI18nSynchro($entities);
 				$this->processDatabase($baseKey, $entities);
 			}
 			
@@ -819,9 +819,9 @@ class LocaleService extends BaseService
 		}
 	}
 	
-	protected function applyEntitiesI18nSyncho(&$entities)
+	protected function applyEntitiesI18nSynchro(&$entities)
 	{
-		$syncConf = RequestContext::getInstance()->getI18nSyncho();
+		$syncConf = RequestContext::getInstance()->getI18nSynchro();
 		if (count($syncConf) === 0) {return;}
 		foreach ($syncConf as $to => $froms)
 		{
@@ -1306,7 +1306,7 @@ class LocaleService extends BaseService
 	 */
 	public function resetSynchroForDocumentId($documentId)
 	{
-		if (RequestContext::getInstance()->hasI18nSyncho())
+		if (RequestContext::getInstance()->hasI18nSynchro())
 		{
 			$d = DocumentHelper::getDocumentInstanceIfExists($documentId);
 			if ($d && $d->getPersistentModel()->isLocalized())
@@ -1322,7 +1322,7 @@ class LocaleService extends BaseService
 	 */
 	public function initSynchroForDocumentId($documentId)
 	{
-		if (RequestContext::getInstance()->hasI18nSyncho())
+		if (RequestContext::getInstance()->hasI18nSynchro())
 		{
 			$d = DocumentHelper::getDocumentInstanceIfExists($documentId);
 			if ($d && $d->getPersistentModel()->isLocalized())
@@ -1340,7 +1340,7 @@ class LocaleService extends BaseService
 	 */
 	public function getDocumentIdsToSynchronize()
 	{
-		if (RequestContext::getInstance()->hasI18nSyncho())
+		if (RequestContext::getInstance()->hasI18nSynchro())
 		{
 			return $this->getPersistentProvider()->getI18nSynchroIds();
 		}
@@ -1361,7 +1361,7 @@ class LocaleService extends BaseService
 	 * 				- from : fr'|'en'|'??'|null
 	 * 			- ...
 	 */
-	public function getI18nSynchoForDocument($document)
+	public function getI18nSynchroForDocument($document)
 	{
 		$result = array('isLocalized' => false, 'action' => 'none', 'config' => array());
 		$pm = $document->getPersistentModel();
@@ -1369,9 +1369,9 @@ class LocaleService extends BaseService
 		{
 			$result['isLocalized'] = true;
 			$rc = RequestContext::getInstance();
-			if ($rc->hasI18nSyncho())
+			if ($rc->hasI18nSynchro())
 			{
-				$result['config'] = $rc->getI18nSyncho();
+				$result['config'] = $rc->getI18nSynchro();
 				$data = $this->getPersistentProvider()->getI18nSynchroStatus($document->getId());
 				$result['states'] = $data;
 				foreach ($document->getI18nInfo()->getLangs() as $lang)
@@ -1398,7 +1398,7 @@ class LocaleService extends BaseService
 	public function synchronizeDocumentId($documentId)
 	{
 		$rc = RequestContext::getInstance();
-		if (!$rc->hasI18nSyncho())
+		if (!$rc->hasI18nSynchro())
 		{
 			//No synchro configured
 			return false;
@@ -1423,7 +1423,7 @@ class LocaleService extends BaseService
 			$tm->beginTransaction();	
 			$ds = $d->getDocumentService();
 			
-			$synchroConfig = $ds->getI18nSynchroConfig($d, $rc->getI18nSyncho());			
+			$synchroConfig = $ds->getI18nSynchroConfig($d, $rc->getI18nSynchro());			
 			if (count($synchroConfig))
 			{			
 				$dcs = f_DataCacheService::getInstance();

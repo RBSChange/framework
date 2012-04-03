@@ -49,11 +49,11 @@ class RequestContext
 	private $m_ui_supportedLanguages = array();
 	
 	
-	private $m_i18n_syncho = null;
+	private $m_i18n_synchro = null;
 
-	protected function loadI18nSynchoConfiguration()
+	protected function loadI18nSynchroConfiguration()
 	{
-		$this->m_i18n_syncho = false;
+		$this->m_i18n_synchro = false;
 		$data = Framework::getConfigurationValue('i18nsynchro', null);
 	
 		if (is_array($data) && count($data))
@@ -82,7 +82,7 @@ class RequestContext
 				
 			if (count($result))
 			{
-				$this->m_i18n_syncho = $result;
+				$this->m_i18n_synchro = $result;
 			}
 		}
 	}
@@ -90,21 +90,21 @@ class RequestContext
 	/**
 	 * @return boolean
 	 */
-	public function hasI18nSyncho()
+	public function hasI18nSynchro()
 	{
-		if ($this->m_i18n_syncho === null)
+		if ($this->m_i18n_synchro === null)
 		{
-			$this->loadI18nSynchoConfiguration();
+			$this->loadI18nSynchroConfiguration();
 		}
-		return $this->m_i18n_syncho !== false;
+		return $this->m_i18n_synchro !== false;
 	}
 	
 	/**
 	 * @return array string : string[]
 	 */
-	public function getI18nSyncho()
+	public function getI18nSynchro()
 	{
-		return $this->hasI18nSyncho() ? $this->m_i18n_syncho : array();
+		return $this->hasI18nSynchro() ? $this->m_i18n_synchro : array();
 	}	
 	
 	/**

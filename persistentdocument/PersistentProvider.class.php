@@ -1542,7 +1542,7 @@ abstract class f_persistentdocument_PersistentProvider
 				return;
 			}
 		
-			if ($rc->hasI18nSyncho())
+			if ($rc->hasI18nSynchro())
 			{
 				//Suppression de toute les versions de lang synchronisé
 				foreach ($this->getI18nSynchroStatus($documentId) as $stl => $stInfo)

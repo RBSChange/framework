@@ -47,7 +47,7 @@ class commands_I18nSynchro extends commands_AbstractChangeCommand
 		$this->loadFramework();
 
 		
-		if (!RequestContext::getInstance()->hasI18nSyncho())
+		if (!RequestContext::getInstance()->hasI18nSynchro())
 		{
 			return $this->quitOk("No I18n synchronization configured");
 		}

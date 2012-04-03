@@ -648,7 +648,7 @@ class f_persistentdocument_DocumentService extends BaseService
 			}
 			
 			$count = count($persistentDocument->getI18nInfo()->getLabels());
-			if ($count > 1 && $rc->hasI18nSyncho())
+			if ($count > 1 && $rc->hasI18nSynchro())
 			{
 				foreach ($this->pp->getI18nSynchroStatus($persistentDocument->getId()) as $stl => $stInfo)
 				{
