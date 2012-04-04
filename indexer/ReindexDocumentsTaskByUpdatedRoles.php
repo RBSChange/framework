@@ -37,13 +37,13 @@ class f_tasks_ReindexDocumentsByUpdatedRolesTask extends task_SimpleSystemTask
 		$indexerLogPath = f_util_FileUtils::buildLogPath('indexer.log');
 		$chunkSize = 500;
 				
-		error_log("\n". gmdate('Y-m-d H:i:s')."\t".__METHOD__ . "\t START", 3, $indexerLogPath);
+		error_log(gmdate('Y-m-d H:i:s')."\t".__METHOD__ . "\t START" . PHP_EOL, 3, $indexerLogPath);
 		foreach ($modelsName as $modelName) 
 		{
 			$modeParam = array($mode);
 			$documentIndex = 0;
 			$progres = true;
-			error_log("\n". gmdate('Y-m-d H:i:s')."\t Processing $modelName", 3, $indexerLogPath);
+			error_log(gmdate('Y-m-d H:i:s')."\t Processing $modelName" . PHP_EOL, 3, $indexerLogPath);
 			while ($progres) 
 			{
 				$this->plannedTask->ping();
@@ -67,9 +67,9 @@ class f_tasks_ReindexDocumentsByUpdatedRolesTask extends task_SimpleSystemTask
 					$progres = false;
 					$chunkInfo = " $modelName processed Total: $documentIndex";
 				}
-				error_log("\n". gmdate('Y-m-d H:i:s')."\t".$chunkInfo, 3, $indexerLogPath);
+				error_log(gmdate('Y-m-d H:i:s')."\t".$chunkInfo . PHP_EOL, 3, $indexerLogPath);
 			} 	
 		}
-		error_log("\n". gmdate('Y-m-d H:i:s')."\t".__METHOD__ . "\t END TOTAL $totalDocumentCount", 3, $indexerLogPath);
+		error_log(gmdate('Y-m-d H:i:s')."\t".__METHOD__ . "\t END TOTAL $totalDocumentCount" . PHP_EOL, 3, $indexerLogPath);
 	}
 }

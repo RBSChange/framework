@@ -337,23 +337,6 @@ abstract class f_action_BaseAction extends Action
 			{
 				$context = $this->getContext();
 				$result = $this->_execute($context, $context->getRequest());
-				/*
-				if (!$this->logged && $this->isSecure())
-				{
-					$id = $this->getDocumentIdFromRequest($context->getRequest());
-					if (intval($id) > 0)
-					{
-						try 
-						{
-							$this->logAction(DocumentHelper::getDocumentInstance($id));
-						}
-						catch (Exception $e)
-						{
-							Framework::exception($e);
-						}
-					}
-				}
-				*/
 				return $result;
 			}
 			else
