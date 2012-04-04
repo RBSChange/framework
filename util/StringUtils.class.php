@@ -416,22 +416,20 @@ class f_util_StringUtils
 	
 	/**
 	 * UTF8-safe strtolower.
-	 *
-	 * @param String $string
-	 * @return String
+	 * @param string $string
+	 * @return string
 	 */
-	public static function strtolower($string)
+	public static function toLower($string)
 	{
 		return mb_strtolower($string, "UTF-8");
 	}
 	
 	/**
 	 * UTF8-safe strtoupper.
-	 *
-	 * @param String $string
-	 * @return String
+	 * @param string $string
+	 * @return string
 	 */
-	public static function strtoupper($string)
+	public static function toUpper($string)
 	{
 		return mb_strtoupper($string, "UTF-8");
 	}
@@ -1018,5 +1016,21 @@ class f_util_StringUtils
 	public static function strip_accents($string)
 	{
 		return self::stripAccents($string);
+	}
+	
+	/**
+	 * @deprecated use toLower
+	 */
+	public static function strtolower($string)
+	{
+		return mb_strtolower($string, "UTF-8");
+	}
+	
+	/**
+	 * @deprecated use toUpper
+	 */
+	public static function strtoupper($string)
+	{
+		return mb_strtoupper($string, "UTF-8");
 	}
 }
