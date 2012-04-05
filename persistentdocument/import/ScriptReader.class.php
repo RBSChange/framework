@@ -67,6 +67,10 @@ class import_ScriptReader extends BaseService
 		{
 			$attributes['template'] = Framework::getConfigurationValue('modules/website/sample/defaultPageTemplate');
 		}
+		if (!isset($attributes['templateNosidebar']))
+		{
+			$attributes['templateNosidebar'] = Framework::getConfigurationValue('modules/website/sample/defaultNosidebarTemplate');
+		}
 		if (!isset($attributes['templateHome']))
 		{
 			$attributes['templateHome'] = Framework::getConfigurationValue('modules/website/sample/defaultHomeTemplate');

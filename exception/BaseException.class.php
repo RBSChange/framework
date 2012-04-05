@@ -51,7 +51,7 @@ class BaseException extends Exception
 		$key = $this->key; 
 		if (!empty($key))
 		{
-			return LocaleService::getInstance()->transBO($key, array(), $this->attributes);
+			return LocaleService::getInstance()->transBO($key, array('ucf'), $this->attributes);
 		}
 		return $this->getMessage();
 	}
