@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.date.date.abbr" lcid="en_GB">
+<i18n baseKey="f.date.date.initial" lcid="en_GB">
 	<key id="monday">m</key>
 	<key id="tuesday">t</key>
 	<key id="wednesday">w</key>
