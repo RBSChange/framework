@@ -13,6 +13,8 @@ if ($clearKey !== false)
 	$bootStrap->cleanDependenciesCache();
 }
 
+clearstatcache();
+
 $script->setBootStrap($bootStrap);
 $script->setEnvVar('computedDeps', $bootStrap->getComputedDependencies());
 
