@@ -41,7 +41,7 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 		$moduleType = $bootStrap->convertToCategory(c_ChangeBootStrap::$DEP_MODULE);
 		$moduleService = ModuleService::getInstance();
 		
-		foreach ($definitions as $key => $dependencyInfos)
+		foreach ($definitions['modules'] as $key => $dependencyInfos)
 		{
 			if ($dependencyInfos['type'] != $moduleType)
 			{
