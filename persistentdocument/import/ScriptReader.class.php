@@ -75,6 +75,10 @@ class import_ScriptReader extends BaseService
 		{
 			$attributes['templateHome'] = Framework::getConfigurationValue('modules/website/sample/defaultHomeTemplate');
 		}
+		if (!isset($attributes['templatePopin']))
+		{
+			$attributes['templatePopin'] = Framework::getConfigurationValue('modules/website/sample/defaultPopinTemplate');
+		}
 		
 		$this->execute($path, $attributes);
 	}
