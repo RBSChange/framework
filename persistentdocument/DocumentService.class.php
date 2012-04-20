@@ -2499,7 +2499,7 @@ class f_persistentdocument_DocumentService extends BaseService
 	 */
 	private function updateDuplicateLabel($label, $parentNodeId, $size = -1)
 	{
-		$defaultPrefix = f_Locale::translate('&modules.generic.backoffice.Duplicate-prefix;') . ' ';
+		$defaultPrefix = LocaleService::getInstance()->transBO('m.generic.backoffice.duplicate-prefix', array('ucf')) . ' ';
 		$number = -1;
 		$prefix = $defaultPrefix;
 		while ($parentNodeId)

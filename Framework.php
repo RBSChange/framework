@@ -468,16 +468,18 @@ class Framework
 		}
 	}
 
+
+	
+	// Deprecated
+	
 	/**
-	 * @return String
+	 * @deprecated
 	 */
 	public static function getCompanyName()
 	{
 		return AG_WEBAPP_NAME;
 	}
 	
-	// Deprecated
-
 	/**
 	 * @deprecated (will be removed in 4.0)
 	 */

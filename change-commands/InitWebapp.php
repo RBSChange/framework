@@ -130,9 +130,11 @@ class commands_InitWebapp extends commands_AbstractChangeCommand
 	private function addRootLink($targetDir)
 	{
 		$targetDir .= DIRECTORY_SEPARATOR;
+		
 		$exclude = array('apache', 'bin', 'log', 'build', 'config', 'framework', 'libs', 'modules', 'securemedia', 
-			'webapp', 'mailbox', 'override', 'profile', 'change.xml', 'change.properties',
+			'webapp', 'mailbox', 'override', 'profile', 'change.xml', 'change.properties', 'repository',
 			'mockup', 'installedpatch', 'pear', 'themes', 'target');
+		
 		$dh = opendir($targetDir);
 		$this->message("Generate symlink on DOCUMENT_ROOT: " . f_util_FileUtils::buildDocumentRootPath());
 		while (($file = readdir($dh)) !== false)
