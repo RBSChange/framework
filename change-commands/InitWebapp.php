@@ -132,8 +132,9 @@ class commands_InitWebapp extends commands_AbstractChangeCommand
 		$targetDir .= DIRECTORY_SEPARATOR;
 		$exclude = array('apache', 'bin', 'log', 'build', 'config', 'framework', 'libs', 'modules', 'securemedia', 
 			'webapp', 'mailbox', 'override', 'profile', 'change.xml', 'change.properties',
-			'migration', 'mockup', 'installedpatch', 'pear', 'themes', 'target');
+			'mockup', 'installedpatch', 'pear', 'themes', 'target');
 		$dh = opendir($targetDir);
+		$this->message("Generate symlink on DOCUMENT_ROOT: " . f_util_FileUtils::buildDocumentRootPath());
 		while (($file = readdir($dh)) !== false)
 		{
 			if (strpos($file, '.') === 0) {continue;}
@@ -145,6 +146,7 @@ class commands_InitWebapp extends commands_AbstractChangeCommand
 			$link = f_util_FileUtils::buildDocumentRootPath($file);
 			if (strpos($link, $target) !== 0)
 			{
+				$this->message("Add symlink for ".$file);
 				f_util_FileUtils::symlink($target, $link, f_util_FileUtils::OVERRIDE);
 			}
 		}
