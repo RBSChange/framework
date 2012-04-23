@@ -141,7 +141,14 @@ class import_ScriptBaseElement
 			$objects = array();
 			foreach (explode(',', $this->attributes[$key]) as $value)
 			{ 
-				$objects[] = $this->script->getElementById($value, "import_ScriptObjectElement")->getObject();
+				if ($value === '==')
+				{
+					$objects = array('==');
+				}
+				else
+				{
+					$objects[] = $this->script->getElementById($value, "import_ScriptObjectElement")->getObject();
+				}
 			}
 			if ($remove)
 			{
@@ -195,7 +202,14 @@ class import_ScriptBaseElement
 							$value = array();
 							foreach ($values as $oneValue)
 							{
-								$value[] = $this->script->getElementById($oneValue, "import_ScriptObjectElement")->getObject();
+								if ($oneValue === '==')
+								{
+									$value = array('==');
+								}
+								else
+								{
+									$value[] = $this->script->getElementById($oneValue, "import_ScriptObjectElement")->getObject();
+								}
 							}
 						}
 						else

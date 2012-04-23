@@ -420,9 +420,9 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 				}
 				elseif ($property->isDocument())
 				{
-					if ($propertyValue === NULL)
+					if ($propertyValue === null || $propertyValue === '==')
 					{
-						$document->{'set' . ucfirst($propertyName)}($propertyValue);
+						$document->{'set' . ucfirst($propertyName)}(null);
 					}
 					elseif ($propertyValue instanceof f_persistentdocument_PersistentDocument)
 					{
@@ -536,7 +536,11 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 	 */
 	private function addValueToDocumentProperty($document, $propertyName, $propertyValue)
 	{
-		if ($propertyValue instanceof f_persistentdocument_PersistentDocument)
+		if ($propertyValue === '==')
+		{
+			$document->{'removeAll' . ucfirst($propertyName)}();
+		}
+		elseif ($propertyValue instanceof f_persistentdocument_PersistentDocument)
 		{
 			$document->{'add' . ucfirst($propertyName)}($propertyValue);
 		}
