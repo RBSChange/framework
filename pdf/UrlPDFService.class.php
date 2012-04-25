@@ -1,4 +1,7 @@
 <?php
+/**
+ * @deprecated
+ */
 class UrlPDFService extends BaseService 
 {
 	/**

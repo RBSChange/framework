@@ -1,4 +1,7 @@
 <?php
+/**
+ * @deprecated
+ */
 interface f_web_oauth_Signature
 {
 	public function getName();
@@ -6,6 +9,9 @@ interface f_web_oauth_Signature
 	public function buildSignatureFromRequest($request);
 }
 
+/**
+ * @deprecated
+ */
 class f_web_oauth_SignatureHmacSha1 implements f_web_oauth_Signature
 {
 	
@@ -30,6 +36,9 @@ class f_web_oauth_SignatureHmacSha1 implements f_web_oauth_Signature
 	}
 }
 
+/**
+ * @deprecated
+ */
 class f_web_oauth_SignatureRsaSha1 implements f_web_oauth_Signature
 {
 	
@@ -52,7 +61,9 @@ class f_web_oauth_SignatureRsaSha1 implements f_web_oauth_Signature
 	}
 }
 
-
+/**
+ * @deprecated
+ */
 class f_web_oauth_SignaturePlaintext implements f_web_oauth_Signature
 {
 	/**

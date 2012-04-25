@@ -1,4 +1,7 @@
 <?php
+/**
+ * @deprecated
+ */
 abstract class f_util_MemoryUtils
 {
 	

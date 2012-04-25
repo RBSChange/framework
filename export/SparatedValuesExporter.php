@@ -1,4 +1,7 @@
 <?php
+/**
+ * @deprecated
+ */
 class export_SparatedValuesExporter
 {
 	/**

@@ -1,4 +1,7 @@
 <?php
+/**
+ * @deprecated
+ */
 function xmlObjectHandleXslt($errno, $errstr, $errfile, $errline)
 {
 	if (Framework::isDebugEnabled())
@@ -8,7 +11,9 @@ function xmlObjectHandleXslt($errno, $errstr, $errfile, $errline)
 }
 
 
-
+/**
+ * @deprecated
+ */
 class f_object_XmlObject
 {
 	public $xmlData = null;

@@ -2,6 +2,9 @@
 /**
  * @package framework.mail
  */
+/**
+ * @deprecated
+ */
 class MailMessage
 {
 

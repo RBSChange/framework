@@ -2,6 +2,9 @@
 /**
  * @package framework.mail
  */
+/**
+ * @deprecated
+ */
 class MailerSmtp extends Mailer
 {
 

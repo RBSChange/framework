@@ -1,4 +1,7 @@
 <?php
+/**
+ * @deprecated
+ */
 interface f_chart_DataTableProducer
 {
 	/**
@@ -8,6 +11,9 @@ interface f_chart_DataTableProducer
 	function getDataTable($params = null);
 }
 
+/**
+ * @deprecated
+ */
 class f_chart_Axis
 {
 	/**
@@ -49,6 +55,9 @@ class f_chart_Axis
 
 }
 
+/**
+ * @deprecated
+ */
 class f_chart_AxisStyle
 {
 	const ALIGN_LEFT = -1;
@@ -118,6 +127,9 @@ class f_chart_AxisStyle
 	}
 }
 
+/**
+ * @deprecated
+ */
 class f_chart_Range
 {
 	/**
@@ -178,6 +190,9 @@ class f_chart_Range
 	}
 }
 
+/**
+ * @deprecated
+ */
 class f_chart_DataTable
 {
 	const STRING_TYPE = 0;
@@ -280,6 +295,9 @@ class f_chart_DataTable
 	}
 }
 
+/**
+ * @deprecated
+ */
 abstract class f_chart_Visualization
 {
 	/**
@@ -344,6 +362,9 @@ abstract class f_chart_Visualization
 	}
 }
 
+/**
+ * @deprecated
+ */
 class f_chart_Table extends f_chart_Visualization
 {
 	private static $defaultOptions;
@@ -437,6 +458,9 @@ class f_chart_Table extends f_chart_Visualization
 	}
 }
 
+/**
+ * @deprecated
+ */
 class f_chart_Grid
 {
 	private $xAxisStepSize;
@@ -504,6 +528,9 @@ class f_chart_Grid
 	}
 }
 
+/**
+ * @deprecated
+ */
 abstract class f_chart_Chart extends f_chart_Visualization
 {
 	const LEGEND_RIGHT = 'right';
@@ -768,6 +795,9 @@ abstract class f_chart_Chart extends f_chart_Visualization
 /**
  * OK, this class has not really sense... just created for code mutualization
  */
+/**
+ * @deprecated
+ */
 abstract class f_chart_2AxisChart extends f_chart_Chart
 {
 	private static $defaultOptions;
@@ -982,6 +1012,9 @@ abstract class f_chart_2AxisChart extends f_chart_Chart
 	}
 }
 
+/**
+ * @deprecated
+ */
 class f_chart_LineChart extends f_chart_2AxisChart
 {
 	function getQueryString()
@@ -993,6 +1026,9 @@ class f_chart_LineChart extends f_chart_2AxisChart
 	}
 }
 
+/**
+ * @deprecated
+ */
 class f_chart_PieChart extends f_chart_Chart
 {
 	private static $defaultOptions;
@@ -1087,6 +1123,9 @@ class f_chart_PieChart extends f_chart_Chart
 	}
 }
 
+/**
+ * @deprecated
+ */
 class f_chart_BarChart extends f_chart_2AxisChart
 {
 	const ORIENTATION_VERTICAL = 1;

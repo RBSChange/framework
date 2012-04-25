@@ -3,6 +3,9 @@
  * A class to check objects' type.
  * 
  */
+/**
+ * @deprecated
+ */
 abstract class f_util_TypeValidator
 {
 	const TYPE_INTEGER      = 1;

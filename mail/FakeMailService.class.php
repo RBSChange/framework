@@ -3,7 +3,9 @@
  * Auto-generated doc comment
  * @package framework.mail
  */
-
+/**
+ * @deprecated
+ */
 class FakeMailService extends MailService
 {
     

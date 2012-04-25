@@ -7,6 +7,9 @@
  * Any call to Package::getInstance with the same given class path will give you
  * the same instance (say it's a "class path singleton").
  */
+/**
+ * @deprecated
+ */
 class Package
 {
 	public $classPath = null;

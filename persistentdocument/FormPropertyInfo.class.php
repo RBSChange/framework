@@ -2,6 +2,9 @@
 /**
  * @package framework.persistentdocument
  */
+/**
+ * @deprecated
+ */
 class FormPropertyInfo
 {
 	private $name;

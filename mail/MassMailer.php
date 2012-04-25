@@ -1,4 +1,7 @@
 <?php
+/**
+ * @deprecated
+ */
 class MassMailer
 {
 	const FILE_LOCK_EXTENSION = '.lock';

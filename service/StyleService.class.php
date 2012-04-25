@@ -2,6 +2,9 @@
 /**
  * @package framework.service
  */
+/**
+ * @deprecated
+ */
 class StyleService extends BaseService
 {
     /**

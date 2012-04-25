@@ -1,4 +1,7 @@
 <?php
+/**
+ * @deprecated
+ */
 class f_web_oauth_Token
 {
 	const TOKEN_NOT_AUTHORIZED = 0;

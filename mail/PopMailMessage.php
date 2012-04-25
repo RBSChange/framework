@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * @deprecated
+ */
 class f_mail_MIMEObject
 {
 	
@@ -80,7 +82,9 @@ class f_mail_MIMEObject
 		}
 	}
 }
-
+/**
+ * @deprecated
+ */
 class PopMailMessage extends f_mail_MIMEObject
 {
 	/**

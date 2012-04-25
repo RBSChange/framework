@@ -1,4 +1,7 @@
 <?php 
+/**
+ * @deprecated
+ */
 require("Charts.php");
 // **** DEMOS ****
 

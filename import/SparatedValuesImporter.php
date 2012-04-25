@@ -1,4 +1,7 @@
 <?php
+/**
+ * @deprecated
+ */
 class import_SparatedValuesImporter
 {
 	/**

@@ -1,4 +1,7 @@
 <?php
+/**
+ * @deprecated
+ */
 class f_util_TagReplacer {
 
 	protected $replacements  = array();

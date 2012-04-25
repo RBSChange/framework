@@ -3,6 +3,9 @@
  * Auto-generated doc comment
  * @package framework.persistentdocument
  */
+/**
+ * @deprecated
+ */
 class f_persistentdocument_PersistentDocumentDeserializer
 {
 	public function deserialize($persistentDocument, $data)

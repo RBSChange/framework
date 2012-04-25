@@ -1,4 +1,7 @@
 <?php
+/**
+ * @deprecated
+ */
 class JsService extends BaseService
 {
 	/**

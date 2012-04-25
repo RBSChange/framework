@@ -1,4 +1,7 @@
 <?php
+/**
+ * @deprecated
+ */
 class f_web_oauth_HTTPClient
 {
 	/**

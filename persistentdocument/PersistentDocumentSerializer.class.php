@@ -3,6 +3,9 @@
  * Auto-generated doc comment
  * @package framework.persistentdocument
  */
+/**
+ * @deprecated
+ */
 class SerialisationContext
 {
 	const DIRECTION_IN = 'IN';
@@ -47,8 +50,9 @@ class SerialisationContext
 	}
 }
 
-
-
+/**
+ * @deprecated
+ */
 class f_persistentdocument_PersistentDocumentSerializer
 {
 	

@@ -2,6 +2,9 @@
 /**
  * @package framework.mail
  */
+/**
+ * @deprecated
+ */
 class MailService extends BaseService
 {
 

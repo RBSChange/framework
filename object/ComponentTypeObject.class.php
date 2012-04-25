@@ -3,6 +3,9 @@
  * ComponentTypeObject provides a simple way to learn more about a component
  * from its full component type.
  */
+/**
+ * @deprecated
+ */
 class ComponentTypeObject
 {
 	const MODULE    = "modules";

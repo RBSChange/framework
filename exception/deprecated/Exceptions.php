@@ -2,18 +2,27 @@
 /**
  * @package framework.exception.deprecated
  */
+/**
+ * @deprecated
+ */
 class DataobjectException extends BaseException
 {
 }
-
+/**
+ * @deprecated
+ */
 class FunctionNotFoundException extends Exception
 {
 }
-
+/**
+ * @deprecated
+ */
 class InvalidComponentTypeException extends BaseException
 {
 }
-
+/**
+ * @deprecated
+ */
 class MalformedURLException extends Exception
 {
 	public function __construct($url)
@@ -21,7 +30,9 @@ class MalformedURLException extends Exception
 		parent::__construct('Invalid URL: "'.$url.'".');
 	}
 }
-
+/**
+ * @deprecated
+ */
 class PearException extends BaseException
 {
 
@@ -36,7 +47,9 @@ class PearException extends BaseException
 		parent::__construct("pear-exception", $key, $attributes);
 	}
 }
-
+/**
+ * @deprecated
+ */
 class RecursivityException extends BaseException
 {
 
@@ -47,12 +60,16 @@ class RecursivityException extends BaseException
 		parent::__construct("recursivity-exception", $key, $attributes);
 	}
 }
-
+/**
+ * @deprecated
+ */
 class ServiceException extends Exception 
 {
 	
 }
-
+/**
+ * @deprecated
+ */
 class SessionExpiredException extends Exception
 {
 	public function __construct()
@@ -60,7 +77,9 @@ class SessionExpiredException extends Exception
 		parent::__construct('Your session has expired.');
 	}
 }
-
+/**
+ * @deprecated
+ */
 class TranslationKeyNotFoundException extends BaseException
 {
 	public function __construct($translationKey)
@@ -70,7 +89,9 @@ class TranslationKeyNotFoundException extends BaseException
 		parent::__construct("translation-key-not-found", $key, $attributes);
 	}
 }
-
+/**
+ * @deprecated
+ */
 class UnexpectedExclusiveTagException extends TagException
 {
 	public function __construct($tagName)
@@ -78,15 +99,21 @@ class UnexpectedExclusiveTagException extends TagException
 		parent::__construct('Unexpected exclusive tag: '.$tagName);
 	}
 }
-
+/**
+ * @deprecated
+ */
 class UserNotFoundException extends Exception
 {
 }
-
+/**
+ * @deprecated
+ */
 class UnimplementedMethodException extends Exception 
 {	
 }
-
+/**
+ * @deprecated
+ */
 class ExtendedAgaviException extends AgaviException
 {
 

@@ -1,4 +1,7 @@
 <?php
+/**
+ * @deprecated
+ */
 class Logger
 {
 
@@ -42,6 +45,9 @@ class Logger
 	const FATAL = 5000;
 }
 	
+/**
+ * @deprecated
+ */
 class LoggingService
 {
 	protected $stdLogFilePath;

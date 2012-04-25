@@ -1,4 +1,7 @@
 <?php
+/**
+ * @deprecated
+ */
 interface export_ExportableDocument
 {
 	

@@ -1,6 +1,7 @@
 <?php
 /**
  * @package framework.builder.generator
+ * @deprecated
  */
 class generator_FormProperty
 {
