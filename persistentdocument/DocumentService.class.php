@@ -2815,7 +2815,7 @@ class f_persistentdocument_DocumentService extends BaseService
 			if ($allowedSections === null || isset($allowedSections['properties']))
 			{
 				$data['properties'] = array(
-				'label' => $document->getLabel(), 
+				'label' => $document->getTreeNodeLabel(), 
 				'author' => $document->getAuthor(),
 				'creationdate' => date_Formatter::toDefaultDateTimeBO($document->getUICreationdate()));
 			}
@@ -2823,7 +2823,7 @@ class f_persistentdocument_DocumentService extends BaseService
 			if ($allowedSections === null || isset($allowedSections['publication']))
 			{
 				$data['publication'] = array(
-				'status' => f_Locale::translateUI(DocumentHelper::getPublicationstatusLocaleKey($document)),
+				'status' => LocaleService::getInstance()->transBO(DocumentHelper::getStatusLocaleKey($document), array('ucf')),
 				'workflow' => ''
 				);
 				
