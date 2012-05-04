@@ -144,16 +144,17 @@ class f_web_CSSRule
 	/**
 	 * @param String $fullEngine
 	 * @param f_web_CSSVariables $skin
+	 * @param f_web_CSSStylesheet $stylesheet
 	 * @return String | null
 	 */
-	public function getAsCSS($fullEngine, $skin)
+	public function getAsCSS($fullEngine, $skin, $stylesheet)
 	{
 		if ($this->isCompatibleWithEngine($fullEngine))
 		{
 			$declarations = array();
 			foreach ($this->getDeclarations() as $declaration) 
 			{	
-				$cssText = $declaration->getAsCSS($fullEngine, $skin);
+				$cssText = $declaration->getAsCSS($fullEngine, $skin, $stylesheet);
 				if ($cssText !== null)
 				{
 					$declarations[] = $cssText;
@@ -164,7 +165,7 @@ class f_web_CSSRule
 				return $this->getSelectorText() . "{" . implode("", $declarations) . "}\n";	
 			}
 		}
-		return null;		
+		return null;
 	}	
 	
 	private function renderDeclarations($declarations, $ignoreComments = false)
