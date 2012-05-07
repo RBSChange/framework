@@ -28,7 +28,7 @@ class builder_LocaleFileGenerator
 	 */
 	public function __construct($model)
 	{
-		$this->managedLocaleList = explode(" ", AG_UI_SUPPORTED_LANGUAGES);
+		$this->managedLocaleList = array_slice(explode(" ", AG_UI_SUPPORTED_LANGUAGES), 0, 1);
 		$this->isModelInjected = $model->inject();
 		if ($this->isModelInjected)
 		{
@@ -89,7 +89,6 @@ class builder_LocaleFileGenerator
 				if (($parentModel === null || !$parentModel->hasProperty($propertyName)))
 				{
 					$properties[$keyId] = "[TO TRANSLATE] $propertyName";
-					$properties[$keyId . '-help'] = "[TO TRANSLATE] $propertyName-help";
 				}
 			}
 		}
@@ -99,7 +98,6 @@ class builder_LocaleFileGenerator
 			{
 				$keyId = strtolower($propertyName);
 				$properties[$keyId] = "[TO TRANSLATE] $propertyName";
-				$properties[$keyId . '-help'] = "[TO TRANSLATE] $propertyName-help";
 			}
 		}
 		
