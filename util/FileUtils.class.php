@@ -492,15 +492,24 @@ abstract class f_util_FileUtils
 	{
 		switch (strtolower($extension))
 		{
-			case 'flv': return 'video/x-flv';
-			case 'png': return 'image/png';
 			case 'gif': return 'image/gif';
 			case 'jpg':
 			case 'jpeg':
 				return 'image/jpeg';
-			case 'swf': return 'application/x-shockwave-flash';
-			case 'pdf': return 'application/pdf';
+			case 'png': return 'image/png';
 			case 'ico': return 'image/x-icon';
+			case 'pdf': return 'application/pdf';
+			case 'flv': return 'video/x-flv';
+			case 'swf': return 'application/x-shockwave-flash';
+			case 'mp3': return 'audio/mpeg';
+			case 'doc': return 'application/msword';
+			case 'docx': return 'application/vnd.openxmlformats-officedocument.WordprocessingML.document'; 
+			case 'xls': return 'application/vnd.ms-excel';
+			case 'xlsx': return 'application/vnd.openxmlformats-officedocument.SpreadsheetML.Sheet';
+			case 'ppt': return 'application/vnd.ms-powerpoint';
+			case 'pptx': return 'application/vnd.openxmlformats-officedocument.presentationml.Presentation';
+			case 'pps': return 'application/vnd.ms-powerpoint';
+			case 'ppsx': return 'application/vnd.openxmlformats-officedocument.presentationml.Slideshow';
 			default:
 				return 'application/octet-stream';
 		}
