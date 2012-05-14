@@ -345,7 +345,7 @@ class Framework
 	 * or throw a Exception if the $path configuration does not exist
 	 * @param String $path
 	 * @param Boolean $strict
-	 * @throws ConfigurationException if the $path configuration does not exist
+	 * @throws Exception if the $path configuration does not exist
 	 * @return String | false if the path was not founded and strict value if false
 	 */
 	public static function getConfiguration($path, $strict = true)

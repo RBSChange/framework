@@ -31,7 +31,7 @@ class Injection
 	 * </pre>
 	 * @param String $className
 	 * @return String provided the class name or a subclass name as indicated in injection config section
-	 * @throws ConfigurationException if the overriden class is not a subclass of $className
+	 * @throws Exception if the overriden class is not a subclass of $className
 	 */
 	public static final function getFinalClassName($className)
 	{
@@ -42,7 +42,7 @@ class Injection
 			$injectedClass = new ReflectionClass($injectedClassName);
 			if (!($injectedClass->isSubclassOf(new ReflectionClass($className))))
 			{
-				throw new ConfigurationException($injectedClassName." is not a $className");
+				throw new Exception($injectedClassName." is not a $className");
 			}
 			return $injectedClassName;
 		}

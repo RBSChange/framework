@@ -40,7 +40,7 @@ abstract class BaseService
 	 * </pre>
 	 * @param String $selfClassName 
 	 * @return mixed an instance of the service or a subclass indicated in injection config section
-	 * @throws ConfigurationException if the overriden class is not a subclass of $selfClassName
+	 * @throws Exception if the overriden class is not a subclass of $selfClassName
 	 */
 	protected static final function getServiceClassInstance($selfClassName)
 	{
