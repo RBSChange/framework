@@ -698,10 +698,11 @@ class c_ChangeBootStrap
 	 * @param string $name
 	 * @param string $version
 	 * @param string $url
+	 * @param boolean $linkToProject
 	 * @throws Exception
 	 * @return string repository download path
 	 */
-	public function downloadDependency($type, $name, &$version, &$url)
+	public function downloadDependency($type, $name, &$version, &$url, $linkToProject = true)
 	{
 		$depType = $this->convertToValidType($type);
 		$type = $this->convertToCategory($type);
@@ -748,9 +749,12 @@ class c_ChangeBootStrap
 		
 		$localPath = $this->buildLocalRepositoryPath($depType, $name, $version);
 		echo 'Unzip ', $tmpFile, ' in (', $localPath , ')',  PHP_EOL;
-		cboot_Zip::unzip($tmpFile, dirname($localPath));
+		if (!$this->unZip($tmpFile, dirname($localPath)))
+		{
+			echo 'Unable to unZip archive ', $tmpFile,  PHP_EOL;
+		}	
 		unlink($tmpFile);
-		
+				
 		clearstatcache();
 		if (!is_dir($localPath))
 		{
@@ -758,27 +762,48 @@ class c_ChangeBootStrap
 			throw new Exception('Invalid Archive Content: ' . dirname($localPath));
 		}
 		
-		if ($depType === self::$DEP_FRAMEWORK)
+		if ($linkToProject)
 		{
-			$deps = $this->loadDependencies();
-			if ($deps['framework']['framework']['version'] == $version)
+			if ($depType === self::$DEP_FRAMEWORK)
+			{
+				$deps = $this->loadDependencies();
+				if ($deps['framework']['framework']['version'] == $version)
+				{
+					$this->linkToProject($depType, $name, $version);
+				}
+			}
+			elseif ($depType === self::$DEP_MODULE)
+			{
+				$deps = $this->loadDependencies();
+				if (isset($deps['modules'][$name]) && $deps['modules'][$name]['version'] == $version)
+				{
+					$this->linkToProject($depType, $name, $version);
+				}
+			}
+			elseif ($depType === self::$DEP_PEAR)
 			{
 				$this->linkToProject($depType, $name, $version);
 			}
-		}
-		elseif ($depType === self::$DEP_MODULE)
-		{
-			$deps = $this->loadDependencies();
-			if (isset($deps['modules'][$name]) && $deps['modules'][$name]['version'] == $version)
-			{
-				$this->linkToProject($depType, $name, $version);
-			}
-		}
-		elseif ($depType === self::$DEP_PEAR)
-		{
-			$this->linkToProject($depType, $name, $version);
 		}
 		return $localPath;
+	}
+	
+	/**
+	 * @param string $zipFilePath
+	 * @param string $targetDir
+	 * @return boolean
+	 */
+	public function unZip($zipFilePath, $targetDir)
+	{
+		$zipArch = new ZipArchive();
+		$res = $zipArch->open($zipFilePath);
+		if ($res === TRUE)
+		{
+			$zipArch->extractTo($targetDir);
+			$zipArch->close();
+			return true;
+		}
+		return false;
 	}
 	
 	/**

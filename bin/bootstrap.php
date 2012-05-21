@@ -56,7 +56,6 @@ $binpath = dirname(__FILE__);
 require_once $binpath .'/includes/ChangeBootStrap.php';
 require_once $binpath .'/includes/ClassDirAnalyzer.php';
 require_once $binpath .'/includes/Configuration.php';
-require_once $binpath .'/includes/Zip.php';
 require_once $binpath .'/includes/Changescript.php';
 require_once $binpath .'/includes/Changescripthttp.php';
 require_once $binpath .'/includes/ChangescriptCommand.php';
