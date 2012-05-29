@@ -31,7 +31,7 @@ class commands_InitWebapp extends commands_AbstractChangeCommand
 	{
 		$this->message("== Init webapp ==");
 
-		$this->getParent()->executeCommand("compileConfig");
+		$this->getParent()->executeCommand("compile-config");
 
 		// Copy files
 		$this->loadFramework();
@@ -42,25 +42,17 @@ class commands_InitWebapp extends commands_AbstractChangeCommand
 			f_util_FileUtils::mkdir(DOCUMENT_ROOT);
 		}
 				
-		$exclude = array(".svn");
 		$home = f_util_FileUtils::buildWebeditPath();
-
 		$this->message("Import framework home files");
 		$frameworkWebapp = f_util_FileUtils::buildWebeditPath("framework", "builder", "home");
-		f_util_FileUtils::cp($frameworkWebapp, $home, f_util_FileUtils::OVERRIDE | f_util_FileUtils::APPEND, $exclude);
-		$exclude[] = "www";
+		f_util_FileUtils::cp($frameworkWebapp, $home, f_util_FileUtils::OVERRIDE | f_util_FileUtils::APPEND);
+		
+		$exclude =  array(".svn", ".git", "www");
 		//Add .htaccess for hide system folder
 		$this->message("Add missing .htaccess");
 		$htAccess = f_util_FileUtils::buildWebeditPath("framework", "builder", "home", "bin", ".htaccess");
-		$to = f_util_FileUtils::buildCachePath('.htaccess');
-		if (!file_exists($to)) 
-		{
-			f_util_FileUtils::cp($htAccess, $to);
-		}
-		
-		
-
-		foreach (array('config', 'securemedia', 'build', 'log', 'libs', 'modules', 'override', 'mailbox', 'cache/autoload', 'cache/' . PROFILE) as $hiddeDir) 
+	
+		foreach (array('config', 'securemedia', 'repository', 'build', 'log', 'libs', 'modules', 'themes', 'override', 'mailbox', 'cache/autoload', 'cache/' . PROFILE) as $hiddeDir) 
 		{
 			$to = f_util_FileUtils::buildWebeditPath($hiddeDir, '.htaccess');
 			if (is_dir(dirname($to)))
@@ -70,6 +62,7 @@ class commands_InitWebapp extends commands_AbstractChangeCommand
 					try 
 					{
 						f_util_FileUtils::cp($htAccess, $to);
+						$this->message('Add: ' . $to);
 					} 
 					catch (Exception $e)
 					{
@@ -122,7 +115,7 @@ class commands_InitWebapp extends commands_AbstractChangeCommand
 		}
 		
 		// Apply file policy
-		$this->getParent()->executeCommand("applyWebappPolicy");
+		$this->getParent()->executeCommand("apply-webapp-policy");
 		
 		$this->quitOk("Webapp initialized");
 	}
@@ -132,8 +125,8 @@ class commands_InitWebapp extends commands_AbstractChangeCommand
 		$targetDir .= DIRECTORY_SEPARATOR;
 		
 		$exclude = array('apache', 'bin', 'log', 'build', 'config', 'framework', 'libs', 'modules', 'securemedia', 
-			'webapp', 'mailbox', 'override', 'profile', 'change.xml', 'change.properties', 'repository',
-			'mockup', 'installedpatch', 'pear', 'themes', 'target');
+			'themes', 'override', 'profile', 'change.xml', 'change.properties', 'repository',
+			'installedpatch', 'pear', 'target', 'mockup', 'mailbox');
 		
 		$dh = opendir($targetDir);
 		$this->message("Generate symlink on DOCUMENT_ROOT: " . f_util_FileUtils::buildDocumentRootPath());

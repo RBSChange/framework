@@ -250,9 +250,9 @@ class ClassResolver implements ResourceResolver
 		
 		if (is_dir($path))
 		{
-			$result = array($path);
+			return array($path);
 		}
-		return count($result) > 0 ? $result : false;
+		return false;
 	}
 	
 	private function getPHPFiles($path, $recursive, $exludeDirs)

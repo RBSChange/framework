@@ -36,7 +36,7 @@ class commands_InitProject extends commands_AbstractChangeCommand
 	{
 		$this->message("== Initializing project ==");
 		$parent = $this->getParent();
-		$parent->executeCommand("updateDependencies");
+		$parent->executeCommand("update-dependencies");
 		
 		$computedDeps = $this->getComputedDeps();
 		
@@ -88,11 +88,11 @@ class commands_InitProject extends commands_AbstractChangeCommand
 		
 		f_util_FileUtils::mkdir("themes");
 		
-		$this->getParent()->executeCommand("compileConfig");
+		$this->getParent()->executeCommand("compile-config");
 		$this->loadFramework();
 
 		// init-file-policy
-		$this->getParent()->executeCommand("applyProjectPolicy");
+		$this->getParent()->executeCommand("apply-project-policy");
 
 		$this->quitOk("Project initialized");
 	}

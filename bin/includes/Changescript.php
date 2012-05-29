@@ -9,7 +9,7 @@ class c_Changescript
 	/**
 	 * @var array<String, String[]>
 	 */
-	private $ghostCommandSections = array();
+	private $devCommandSections = array();
 
 	/**
 	 * @var String
@@ -105,6 +105,60 @@ class c_Changescript
 	{
 		return $this->scriptName;
 	}
+	
+	function loadCommands($appendToAutoload = false)
+	{
+		$this->commandSections = array();
+		$this->devCommandSections = array();
+		
+		$bootStrap = $this->getBootStrap();
+		
+		$home = WEBEDIT_HOME . DIRECTORY_SEPARATOR;
+		
+		$addDevCmds = $bootStrap->getProperties()->getProperty('DEVELOPMENT_MODE') == true;
+		
+		$cmdPath  = realpath($home . 'framework' . DIRECTORY_SEPARATOR . 'change-commands');
+		if ($appendToAutoload) {$bootStrap->appendToAutoload($cmdPath);}
+		
+		$this->addCommandDir($cmdPath);
+		
+		if ($addDevCmds)
+		{
+			$devPath = realpath($home . 'framework' . DIRECTORY_SEPARATOR . 'changedev-commands');
+			if ($appendToAutoload) {$bootStrap->appendToAutoload($devPath);}
+			$this->addDevCommandDir($devPath);
+		}
+		
+		$path = $home . '/modules';		
+		if (is_dir($path))
+		{
+			foreach (new DirectoryIterator($path) as $fileInfo)
+			{
+				if (!$fileInfo->isDot() && $fileInfo->isDir())
+				{
+					$moduleName = basename($fileInfo->getPathname());
+					$cmdPath = $fileInfo->getPathname(). DIRECTORY_SEPARATOR . 'change-commands';
+					if (is_dir($cmdPath))
+					{
+						$cmdPath = realpath($cmdPath);
+						if ($appendToAutoload) {$bootStrap->appendToAutoload($cmdPath);}
+						$this->addCommandDir($cmdPath, "$moduleName|Module $moduleName commands");
+					}
+		
+					if ($addDevCmds)
+					{
+						$devPath = $fileInfo->getPathname(). DIRECTORY_SEPARATOR . '/changedev-commands';
+						if (is_dir($devPath))
+						{
+							$devPath = realpath($devPath);
+							if ($appendToAutoload) {$bootStrap->appendToAutoload($devPath);}
+							$this->addDevCommandDir($devPath, "$moduleName|Module $moduleName commands");
+						}
+					}
+				}
+			}
+		}
+	}
 
 	/**
 	 * @param String[] $args
@@ -148,7 +202,7 @@ class c_Changescript
 	{
 		foreach ($this->getCommands() as $sectionLabel => $sectionCommands)
 		{
-			if ($sectionLabel == "_hidden_") {continue;}
+			if ($sectionLabel == "_dev_") {continue;}
 			foreach (array_keys($sectionCommands) as $commandName)
 			{
 				echo $commandName." ";
@@ -260,7 +314,7 @@ class c_Changescript
 	{
 		$listeners = array();
 		$this->getListenersForSections($commandName, $this->commandSections, $listeners);
-		$this->getListenersForSections($commandName, $this->ghostCommandSections, $listeners);
+		$this->getListenersForSections($commandName, $this->devCommandSections, $listeners);
 		return $listeners;
 	}
 	
@@ -302,7 +356,7 @@ class c_Changescript
 	 * @param String $path
 	 * @param String $sectionName
 	 */
-	function addCommandDir($path, $sectionName = "default")
+	private function addCommandDir($path, $sectionName = "default")
 	{
 		$this->resetCommands();
 		if (!isset($this->commandSections[$sectionName]))
@@ -337,17 +391,17 @@ class c_Changescript
 	 * @param String $path
 	 * @param String $sectionName
 	 */
-	function addGhostCommandDir($path, $sectionName = "default")
+	function addDevCommandDir($path, $sectionName = "default")
 	{
 		$this->resetCommands();
-		if (!isset($this->ghostCommandSections[$sectionName]))
+		if (!isset($this->devCommandSections[$sectionName]))
 		{
-			$this->ghostCommandSections[$sectionName] = array();
+			$this->devCommandSections[$sectionName] = array();
 		}
-		$this->ghostCommandSections[$sectionName][] = $path;
+		$this->devCommandSections[$sectionName][] = $path;
 		if (is_dir($path."/default"))
 		{
-			$this->addGhostCommandDir($path."/default");
+			$this->addDevCommandDir($path."/default");
 		}
 	}
 
@@ -377,7 +431,7 @@ class c_Changescript
 		echo " where <commandName> in: \n";
 		foreach ($this->getCommands() as $sectionLabel => $sectionCommands)
 		{	
-			if ($sectionLabel == "_hidden_") {continue;}
+			if ($sectionLabel == "_dev_") {continue;}
 								
 			if ($sectionLabel != "Default" && f_util_ArrayUtils::isNotEmpty($sectionCommands))
 			{
@@ -523,7 +577,7 @@ class c_Changescript
 		}
 
 		$commands = array();
-		$ghostCommands = array();
+		$devCommands = array();
 		$aliases = array();
 		foreach ($commandDirs as $cmdDir)
 		{
@@ -549,7 +603,7 @@ class c_Changescript
 
 				if ($command->isHidden())
 				{
-					$ghostCommands[$cmdNamePrefix.$command->getName()] = $command;
+					$devCommands[$cmdNamePrefix.$command->getName()] = $command;
 				}
 				else
 				{
@@ -569,7 +623,7 @@ class c_Changescript
 			}
 		}
 		ksort($commands);
-		$this->commands["_hidden_"] = array_merge($ghostCommands, $this->commands["_hidden_"]);
+		$this->commands["_dev_"] = array_merge($devCommands, $this->commands["_dev_"]);
 		return array($commands, $aliases, $sectionLabel);
 	}
 
@@ -581,7 +635,7 @@ class c_Changescript
 		if ($this->commands === null)
 		{
 			$this->commands = array();
-			$this->commands["_hidden_"] = array();
+			$this->commands["_dev_"] = array();
 			
 			foreach ($this->commandSections as $sectionName => $commandDirs)
 			{
@@ -591,7 +645,7 @@ class c_Changescript
 				$this->aliases[$sectionLabel]= $aliases;
 			}
 			
-			foreach ($this->ghostCommandSections as $sectionName => $commandDirs)
+			foreach ($this->devCommandSections as $sectionName => $commandDirs)
 			{
 				list($commands, $aliases, $sectionLabel) = $this->_getCommands($commandDirs, $sectionName);
 				$sectionLabel = ($sectionLabel === "Default")? "Developper" : "Developper $sectionLabel";

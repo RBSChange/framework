@@ -1,7 +1,6 @@
 <?php
 class c_Changescripthttp extends c_Changescript
 {
-	
 
 	protected function echoMessage($message, $color = null)
 	{
@@ -20,7 +19,7 @@ class c_Changescripthttp extends c_Changescript
 		$this->message("Commands list:");
 		foreach ($this->getCommands() as $sectionLabel => $sectionCommands)
 		{
-			if ($sectionLabel == "_hidden_") {continue;}
+			if ($sectionLabel == "_dev_") {continue;}
 			if ($sectionLabel != "Default" && f_util_ArrayUtils::isNotEmpty($sectionCommands))
 			{
 				$this->message("== $sectionLabel ==");
@@ -105,7 +104,7 @@ class c_Changescripthttp extends c_Changescript
 		}
 		else
 		{
-				$this->message($cmdNameParam . " has no parameter value.");
+			$this->message($cmdNameParam . " has no parameter value.");
 		}
 	}
 	
@@ -120,7 +119,7 @@ class c_Changescripthttp extends c_Changescript
 		$response->loadXML('<cmds />');
 		foreach ($this->getCommands() as $sectionLabel => $sectionCommands)
 		{
-			if ($sectionLabel == "_hidden_") {continue;}
+			if ($sectionLabel == "_dev_") {continue;}
 			foreach ($sectionCommands as $commandName => $command)
 			{
 				$elem = $response->documentElement->appendChild($response->createElement('cmd'));

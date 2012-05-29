@@ -74,32 +74,19 @@ class commands_UpdateDependencies extends commands_AbstractChangeCommand
 		$linkeds = $this->getDepsToLink($dependencies);
 		foreach ($linkeds as $depsInfos) 
 		{
-			list($debType, $componentName, $version) = $depsInfos;
-			
+			list($debType, $componentName, $version) = $depsInfos;		
 			$fullName = $bootstrap->convertToCategory($debType) . '/' . $componentName .'-' . $version;
-			
 			$this->message('linking ' . $fullName . ' ...');
-			
 			if (!$bootstrap->linkToProject($debType, $componentName, $version))
 			{
 				return $this->quitError('Unable to link : ' . $fullName . ' in project.');
 			}
-			
-			if ($bootstrap->convertToCategory($debType) == $moduleType)
-			{
-				$moduleName = $componentName;
-				if (is_dir("modules/$moduleName/change-commands"))
-				{
-					$this->getParent()->addCommandDir("modules/$moduleName/change-commands", "$moduleName|Module $moduleName commands");
-				}
-				if (is_dir("modules/$moduleName/changedev-commands"))
-				{
-					$this->getParent()->addGhostCommandDir("modules/$moduleName/changedev-commands", "$moduleName|Module $moduleName commands");
-				}
-			}
 		}
 	
 		$bootstrap->cleanDependenciesCache();
+		
+		$this->getParent()->loadCommands();
+		
 		return $this->quitOk('Update Checked successfully.');
 	}
 	

@@ -32,18 +32,18 @@ class commands_CompileAll extends c_ChangescriptCommand
 		$this->message("== Compile all ==");
 		
 		$parent = $this->getParent();
-		$parent->executeCommand("compileConfig");
-		$parent->executeCommand("compileDocuments");
-		$parent->executeCommand("compileAop");
-		$parent->executeCommand("compileDocumentFilters");
-		$parent->executeCommand("compileRoles");
-		$parent->executeCommand("compilePermissions");
-		$parent->executeCommand("compileLocales");
-		$parent->executeCommand("compileTags");
-		$parent->executeCommand("compileListeners");
-		$parent->executeCommand("compileJsDependencies");
-		$parent->executeCommand("compilePhptal");
-		$parent->executeCommand("compileDbSchema");
+		$parent->executeCommand("compile-config");
+		$parent->executeCommand("compile-documents");
+		$parent->executeCommand("compile-aop");
+		$parent->executeCommand("compile-document-filters");
+		$parent->executeCommand("compile-roles");
+		$parent->executeCommand("compile-permissions");
+		$parent->executeCommand("compile-locales");
+		$parent->executeCommand("compile-tags");
+		$parent->executeCommand("compile-listeners");
+		$parent->executeCommand("compile-js-dependencies");
+		$parent->executeCommand("compile-phptal");
+		$parent->executeCommand("compile-db-schema");
 		
 		$this->quitOk("All files were compiled");
 	}

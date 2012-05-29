@@ -26,9 +26,9 @@ class commands_Init extends commands_AbstractChangeCommand
 	{
 		$this->message("== Init ==");
 		$parent = $this->getParent();
-		$parent->executeCommand("initProject");
-		$parent->executeCommand("initWebapp");
-		$parent->executeCommand("compileDocuments");
+		$parent->executeCommand("init-project");
+		$parent->executeCommand("init-webapp");
+		$parent->executeCommand("compile-documents");
 		$this->quitOk("Init OK");
 	}
 }
