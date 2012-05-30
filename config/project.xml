@@ -76,6 +76,9 @@
 		
 		<define name="CHANGE_COMMAND">framework/bin/change.php</define>
 		
+		<!-- Valid value: http | console | none -->
+		<define name="CHANGECRON_EXECUTION">http</define>
+		
 		<!-- DEPRECATED -->
 		<define name="AG_ACTION_ACCESSOR">action</define>
 		<define name="AG_MODULE_ACCESSOR">module</define>
