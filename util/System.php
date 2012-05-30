@@ -84,13 +84,59 @@ class f_util_System
 		return explode("\n", $out);
 	}
 	
+	
+	/**
+	 * @deprecated use f_util_System::execScript
+	 */
+	public static function execHTTPScript($relativeScriptPath, $arguments = array(), $noFramework = false, $baseUrl = null)
+	{
+		return self::execScript($relativeScriptPath, $arguments, $noFramework, $baseUrl);
+	}
+	
 	/**
 	 * @param string $relativeScriptPath to WEBEDIT_HOME
 	 * @param array $arguments
 	 * @param boolean $noFramework
 	 * @param string $baseUrl
 	 */
-	public static function execHTTPScript($relativeScriptPath, $arguments = array(), $noFramework = false, $baseUrl = null)
+	public static function execScript($relativeScriptPath, $arguments = array(), $noFramework = false, $baseUrl = null)
+	{	
+		if (defined('PHP_CLI_PATH') && PHP_CLI_PATH != '' && !isset($_SERVER['REMOTE_ADDR']))
+		{
+			return self::execScriptConsole($relativeScriptPath, $arguments, $noFramework, $baseUrl);
+		}
+		return self::execScriptHTTP($relativeScriptPath, $arguments, $noFramework, $baseUrl);		
+	}
+	
+	/**
+	 * @param string $relativeScriptPath to WEBEDIT_HOME
+	 * @param array $arguments
+	 * @param boolean $noFramework
+	 * @param string $baseUrl
+	 * @return string | false
+	 */
+	protected static function execScriptConsole($relativeScriptPath, $arguments = array(), $noFramework = false, $baseUrl = null)
+	{
+		try 
+		{
+			$cmd = PHP_CLI_PATH . ' framework/bin/consoleScript.php ' . $relativeScriptPath . ' ' . ($noFramework ? '1' : '0') . ' ' . implode(" ", $arguments);
+			return self::exec($cmd);
+		}
+		catch (Exception $e)
+		{
+			Framework::exception($e);
+		}
+		return false;
+	}	
+		
+	/**
+	 * @param string $relativeScriptPath to WEBEDIT_HOME
+	 * @param array $arguments
+	 * @param boolean $noFramework
+	 * @param string $baseUrl
+	 * @return string
+	 */
+	protected static function execScriptHTTP($relativeScriptPath, $arguments = array(), $noFramework = false, $baseUrl = null)
 	{
 		list($name, $secret) = explode('#', file_get_contents(WEBEDIT_HOME . '/build/config/oauth/script/consumer.txt'));
 		$consumer = new f_web_oauth_Consumer($name, $secret);
@@ -136,9 +182,22 @@ class f_util_System
 	 * @param string $relativeScriptPath to WEBEDIT_HOME
 	 * @param array $arguments
 	 */
+	public static function execChangeCommand($commandName, $arguments = array())
+	{
+		if (defined('PHP_CLI_PATH') && PHP_CLI_PATH != ''&& !isset($_SERVER['REMOTE_ADDR']))
+		{
+			return self::execChangeConsoleCommand($commandName, $arguments);
+		}
+		return self::execChangeHTTPCommand($commandName, $arguments);
+	}
+	
+	/**
+	 * @param string $relativeScriptPath to WEBEDIT_HOME
+	 * @param array $arguments
+	 */
 	public static function execChangeHTTPCommand($commandName, $arguments = array())
 	{
-		return self::execHTTPScript("framework/bin/changeHTTP.php", array_merge(array($commandName), $arguments), true);
+		return self::execScriptHTTP("framework/bin/changeHTTP.php", array_merge(array($commandName), $arguments), true);
 	}
 	
 	/**
@@ -147,23 +206,6 @@ class f_util_System
 	 */
 	public static function execChangeConsoleCommand($commandName, $arguments = array())
 	{
-		$phpCliPath = (defined('PHP_CLI_PATH')) ? PHP_CLI_PATH : '';
-		if (!empty($phpCliPath)) {$phpCliPath .= ' ';}
-		return self::exec($phpCliPath . "framework/bin/change.php $commandName " . implode(" ", $arguments)); 
+		return self::exec(PHP_CLI_PATH . " framework/bin/change.php $commandName " . implode(" ", $arguments)); 
 	}
-	
-	/**
-	 * @param string $relativeScriptPath to WEBEDIT_HOME
-	 * @param array $arguments
-	 */
-	public static function execChangeCommand($commandName, $arguments = array())
-	{
-		if (isset($_SERVER['REMOTE_ADDR']))
-		{
-			// Mode web
-			return self::execChangeHTTPCommand($commandName, $arguments);
-		}
-		return self::execChangeConsoleCommand($commandName, $arguments);
-	}
-	
 }

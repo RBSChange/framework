@@ -125,7 +125,7 @@ class commands_InitWebapp extends commands_AbstractChangeCommand
 		$targetDir .= DIRECTORY_SEPARATOR;
 		
 		$exclude = array('apache', 'bin', 'log', 'build', 'config', 'framework', 'libs', 'modules', 'securemedia', 
-			'themes', 'override', 'profile', 'change.xml', 'change.properties', 'repository',
+			'themes', 'override', 'profile', 'change.xml', 'change.properties', 'changecronconsole.php', 'repository',
 			'installedpatch', 'pear', 'target', 'mockup', 'mailbox');
 		
 		$dh = opendir($targetDir);

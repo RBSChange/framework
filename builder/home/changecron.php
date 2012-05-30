@@ -7,8 +7,17 @@ if (file_exists(WEBEDIT_HOME."/site_is_disabled"))
 }
 
 require_once WEBEDIT_HOME . "/framework/Framework.php";
+
+if (defined('CHANGECRON_EXECUTION') && constant('CHANGECRON_EXECUTION') != 'http')
+{
+	Framework::info(__FILE__ . ' Disabled');
+	exit(0);
+}
+
+/* @deprecated */
 if (defined('DISABLE_CHANGECRON_EXECUTION') && constant('DISABLE_CHANGECRON_EXECUTION') == true)
 {
+	Framework::info(__FILE__ . ' Disabled');
 	exit(0);
 }
 
@@ -31,24 +40,34 @@ else
 
 
 //Exectut Task
-if (isset($_GET['taskId']))
+if (isset($_GET['taskId']) && is_numeric($_GET['taskId']))
 {
-	chdir(WEBEDIT_HOME);
-	Controller::newInstance("controller_ChangeController");
-	try
+	$runnableTask = DocumentHelper::getDocumentInstanceIfExists($_GET['taskId']);
+	if ($runnableTask instanceof task_persistentdocument_plannedtask)
 	{
-		$runnableTask = DocumentHelper::getDocumentInstance(intval($_GET['taskId']));
-		task_PlannedTaskRunner::executeSystemTask($runnableTask);
+		try
+		{
+			chdir(WEBEDIT_HOME);
+			Controller::newInstance("controller_ChangeController");
+			task_PlannedTaskRunner::executeSystemTask($runnableTask);
+		}
+		catch (Exception $e)
+		{
+			Framework::exception($e);
+		}
+		exit();
 	}
-	catch (Exception $e)
-	{
-		Framework::exception($e);
-	}
-	exit();	 
 }
 else
 {
-	Framework::info($_SERVER['SERVER_NAME'] ." ".  $_SERVER['SERVER_PORT'] . " " .$_SERVER['REQUEST_URI']);
+	if (isset($_SERVER['REMOTE_ADDR']))
+	{
+		Framework::info($_SERVER['SERVER_NAME'] ." ".  $_SERVER['SERVER_PORT'] . " " .$_SERVER['REQUEST_URI']);
+	}
+	else
+	{
+		Framework::info("console exec ".  __FILE__);
+	}
 }
 
 

@@ -71,13 +71,14 @@ if (isset($_POST['phpscript']) && (!isset($_POST['argv']) || is_array($_POST['ar
 	{
 		if (Framework::isInfoEnabled())
 		{
-			Framework::info("execute $scriptPath with (" . (isset($_POST['argv']) ? count($_POST['argv']) : 'null') . " args)");
+			Framework::info("execute HTTP $scriptPath with (" . (isset($_POST['argv']) ? count($_POST['argv']) : 'null') . " args)");
 		}
 	}
 	chdir(WEBEDIT_HOME);
 	
 	if (file_exists($scriptPath) && is_readable($scriptPath) && strrpos($scriptPath, '.php') === strlen($scriptPath) - 4)
 	{
+		$argv = $_POST['argv'];
 		include_once $scriptPath;
 		exit();
 	}

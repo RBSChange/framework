@@ -65,7 +65,7 @@ class commands_I18nSynchro extends commands_AbstractChangeCommand
 					$lastIndexId = 0;	
 					while (true)
 					{		
-						$output = f_util_System::execHTTPScript($scriptPath, array($cmd, $modelName, $lastIndexId));
+						$output = f_util_System::execScript($scriptPath, array($cmd, $modelName, $lastIndexId));
 						if (is_numeric($output))
 						{
 							$lastIndexId = intval($output);
@@ -89,7 +89,7 @@ class commands_I18nSynchro extends commands_AbstractChangeCommand
 		$clear = false;
 		while (true)
 		{
-			$output = f_util_System::execHTTPScript($scriptPath, array('synchro'));
+			$output = f_util_System::execScript($scriptPath, array('synchro'));
 			if (is_numeric($output))
 			{
 				$clear = true;

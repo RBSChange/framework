@@ -88,7 +88,7 @@ class MassMailer
 			{
 				$plannedTask->ping();
 			}
-			$result = f_util_System::execHTTPScript($scriptRelativePath, $messagePathArray);
+			$result = f_util_System::execScript($scriptRelativePath, $messagePathArray);
 			// Log fatal errors...
 			if ($result != 'OK')
 			{

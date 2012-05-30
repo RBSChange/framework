@@ -32,7 +32,7 @@ class commands_CreateNewProject extends c_ChangescriptCommand
 		$parent->executeCommand("compile-all");
 		$parent->executeCommand("import-init-data");
 		$parent->executeCommand("init-patch-db");
-		f_util_System::execHTTPScript('changecron.php', array(), true);	
+		f_util_System::execScript('changecron.php', array(), true);	
 		$this->quitOk("Project is ready to use");
 	}
 }

@@ -47,7 +47,7 @@ class f_tasks_ReindexDocumentsByUpdatedRolesTask extends task_SimpleSystemTask
 			while ($progres) 
 			{
 				$this->plannedTask->ping();
-				$output = f_util_System::execHTTPScript($scriptPath, array($mode, $modelName, $documentIndex, $chunkSize, 1));
+				$output = f_util_System::execScript($scriptPath, array($mode, $modelName, $documentIndex, $chunkSize, 1));
 				if (!is_numeric($output))
 				{
 					$progres = false;
