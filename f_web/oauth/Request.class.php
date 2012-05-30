@@ -1,7 +1,4 @@
 <?php
-/**
- * @deprecated
- */
 class f_web_oauth_Util
 {
 	static function encode($input)
