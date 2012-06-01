@@ -174,7 +174,7 @@ abstract class f_util_ClassUtils
 	
 	public static function classExistsNoLoad($className)
 	{
-		return ClassLoader::getInstance()->existsNoLoad($className);
+		return class_exists($className, false);
 	}
 	
 	/**

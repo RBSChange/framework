@@ -89,10 +89,10 @@ class change_InjectionService
 	{
 		foreach ($this->getInfos() as $className => $info)
 		{
-		    $autoloadClassPath = ClassResolver::getInstance()->getPath($className);
-		    if (isset($info['path']))
+		    $autoloadClassPath = AutoloadBuilder::getInstance()->buildLinkPathByClass($className);
+		    if ($autoloadClassPath !== false && isset($info['path']))
 		    {
-				@unlink($autoloadClassPath);
+		    	@unlink($autoloadClassPath);
 		        f_util_FileUtils::symlink($info['path'], $autoloadClassPath);
 		    }  
 		}
@@ -135,8 +135,8 @@ class change_InjectionService
 		
 		foreach ($newInjectionInfos as $className => $info)
 		{
-		    $autoloadClassPath = ClassResolver::getInstance()->getPath($className);
-		    if (isset($info['link']))
+		    $autoloadClassPath = AutoloadBuilder::getInstance()->buildLinkPathByClass($className);
+		    if ($autoloadClassPath !== false || isset($info['link']))
 		    {
 				@unlink($autoloadClassPath);
 		        f_util_FileUtils::symlink($info['link'], $autoloadClassPath);
@@ -158,7 +158,7 @@ class change_InjectionService
 		{
 			return array('name' => $className, 'path' => $infos[$className]['path']);
 		}
-		return array('name' => $className, 'path' =>  realpath(ClassResolver::getInstance()->getPath($className)));
+		return array('name' => $className, 'path' => realpath(AutoloadBuilder::getInstance()->buildLinkPathByClass($className)));
 	}
 	
 		

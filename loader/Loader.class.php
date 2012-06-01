@@ -6,7 +6,7 @@ abstract class Loader
 {
 		
 	/**
-	 * Return the current ClassLoader
+	 * Return the current Loader
 	 *
 	 * @return ResourceLoader Instance of defined Loader
 	 */
@@ -15,8 +15,6 @@ abstract class Loader
 		$className = ucfirst( strtolower( $type ) ) . "Loader";
 		$method = new ReflectionMethod($className, 'getInstance');
 		return $method->invoke(null);
-	
 	}
-	
 }
 

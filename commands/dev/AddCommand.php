@@ -22,7 +22,7 @@ class commands_AddCommand extends c_ChangescriptCommand
 	 */
 	function getOptions()
 	{
-		return array('dev');
+		return array('--dev');
 	}
 		
 	
@@ -137,10 +137,8 @@ class commands_AddCommand extends c_ChangescriptCommand
 		$result = $generator->fetch('command.tpl');
 		
 		f_util_FileUtils::writeAndCreateContainer($commandFile, $result);
-		ClassResolver::getInstance()->appendToAutoloadFile($className, $commandFile);
-		
-		$this->getBootStrap()->cleanDependenciesCache();
-			
+		AutoloadBuilder::getInstance()->appendFile($commandFile);
+					
 		return $this->quitOk("Command $commandCallName successfully created!\nPlease now edit $commandFile.php");
 	}
 }

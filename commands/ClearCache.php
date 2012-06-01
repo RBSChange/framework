@@ -35,9 +35,12 @@ class commands_ClearCache extends c_ChangescriptCommand
 	function _execute($params, $options)
 	{
 		$this->message("== Clear cache ==");
-
+		
+		$this->getBootStrap()->cleanDependenciesCache();
+		
 		$cacheProfileDirectory = PROJECT_HOME . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'project';
 		$wwwCache = PROJECT_HOME . DIRECTORY_SEPARATOR .  'cache' . DIRECTORY_SEPARATOR . 'www';
+		
 		// Test if the cache directory of selected profile exist
 		if (is_dir($cacheProfileDirectory))
 		{

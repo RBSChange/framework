@@ -217,7 +217,7 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 		}
 		else if (preg_match('#([a-z0-9]+)_([A-Z][a-z0-9]+)ScriptDocumentElement#', get_class($this), $matches))
 		{
-			$type = 'modules_'.$matches[1].'/'.f_util_StringUtils::strtolower($matches[2]);
+			$type = 'modules_'.$matches[1].'/'.f_util_StringUtils::toLower($matches[2]);
 		}
 		return $type;
 	}

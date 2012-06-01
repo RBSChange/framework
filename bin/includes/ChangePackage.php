@@ -37,6 +37,27 @@ class c_Package
 	private $temporaryPath;
 	
 	/**
+	 * @var string
+	 */
+	private $archivePath;
+	
+	/**
+	 * @return string
+	 */
+	public function getArchivePath()
+	{
+		return $this->archivePath;
+	}
+
+	/**
+	 * @param string $archivePath
+	 */
+	public function setArchivePath($archivePath)
+	{
+		$this->archivePath = $archivePath;
+	}
+
+	/**
 	 * @return the $temporaryPath
 	 */
 	public function getTemporaryPath()
@@ -210,10 +231,20 @@ class c_Package
 				$node->removeAttribute('downloadURL');
 			}
 		}
+		
+		if ($this->getArchivePath() && is_readable($this->getArchivePath()))
+		{
+			$node->setAttribute('archivePath', $this->getArchivePath());
+		}
+		else
+		{
+			$node->removeAttribute('archivePath');
+		}
 	}
 		
 	/**
 	 * @param DOMElement $package
+	 * @param string $projectHomePath
 	 * @return c_Package
 	 */
 	public static function getInstanceFromPackageElement($package, $projectHomePath)
@@ -235,7 +266,47 @@ class c_Package
 		{
 			$o->setVersion($package->getAttribute('version'));
 		}
+		
+		if ($package->hasAttribute('archivePath'))
+		{
+			$o->setArchivePath($package->getAttribute('archivePath'));
+		}
 		return $o;	
+	}
+	
+	/**
+	 * @param DOMElement $package
+	 * @param string $projectHomePath
+	 * @return c_Package
+	 */
+	public static function getInstanceFromRepositoryElement($package, $projectHomePath)
+	{
+		$types = array('change-lib' => null, 'lib' => 'libs', 'theme' => 'themes', 'module' => 'modules');
+		$o = new self($projectHomePath);
+		if (array_key_exists($package->nodeName, $types))
+		{
+			$o->setType($types[$package->nodeName]);
+			$o->setName($package->getAttribute('name'));
+			if ($package->hasAttribute('downloadURL'))
+			{
+				$o->setDownloadURL($package->getAttribute('downloadURL'));
+			}
+			elseif($package->hasAttribute('releaseURL'))
+			{
+				$o->setReleaseURL($package->getAttribute('releaseURL'));
+			}
+		
+			if ($package->hasAttribute('version'))
+			{
+				$o->setVersion($package->getAttribute('version'));
+			}
+		
+			if ($package->hasAttribute('archivePath'))
+			{
+				$o->setArchivePath($package->getAttribute('archivePath'));
+			}
+		}
+		return $o;
 	}
 	
 	/**

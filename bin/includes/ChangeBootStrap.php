@@ -1,11 +1,10 @@
 <?php
 class c_ChangeBootStrap
 {
+	static $DEP_UNKNOWN = 0;
 	static $DEP_FRAMEWORK = 7;
 	static $DEP_LIB = 2;
 	static $DEP_MODULE = 3;
-	static $DEP_PEAR = 5;
-	static $DEP_UNKNOWN = 0;
 	static $DEP_THEME = 20;
 	
 	/**
@@ -46,31 +45,17 @@ class c_ChangeBootStrap
 	 * @var c_Package[]
 	 */
 	private $projectDependencies;
-	
-
-	/**
-	 * @var array
-	 */
-	private $pearInfos;
-	
+		
 	/**
 	 * @var string
 	 */
 	private $autoloadPath;
-	/**
-	 * @var string[]
-	 */	
-	private $autoloaded = array();
+
 	/**
 	 * @var boolean
 	 */
 	private $autoloadRegistered = false;
-	
-	/**
-	 * @var boolean
-	 */
-	private $refreshAutoload = false;
-	
+		
 	/**
 	 * @var XMLDocument[]	
 	 */
@@ -98,7 +83,12 @@ class c_ChangeBootStrap
 	 */
 	public function getReleaseRepository()
 	{
-		return 'http://update.rbschange.fr';
+		$releaseRepository = $this->getProperties()->getProperty('REMOTE_REPOSITORY');
+		if (empty($releaseRepository))
+		{
+			return 'http://update.rbschange.fr';
+		}
+		return $releaseRepository;
 	}
 	
 	/**
@@ -106,11 +96,33 @@ class c_ChangeBootStrap
 	 */
 	public function	inReleaseDevelopement()
 	{
-	 	return $this->getProperties()->getProperty('RELEASE_DEVELOPEMENT', false);
+	 	return ($this->getProperties()->getProperty('RELEASE_DEVELOPEMENT', false) == true);
+	}
+	
+	/**
+	 * @return boolean
+	 */
+	public function	inDevelopement()
+	{
+		return ($this->getProperties()->getProperty('DEVELOPMENT_MODE', false) == true);
+	}
+	
+	/**
+	 * @return string|null
+	 */
+	public function	getArchivePath()
+	{
+		$ap = $this->getProperties()->getProperty('REPOSITORY_ARCHIVE');
+		if (is_dir($ap) && is_writable($ap))
+		{
+			return $ap;
+		}
+		return null;
 	}
 	
 	
 	// CONFIGURATION
+	
 	/**
 	 * @return cboot_Configuration
 	 */
@@ -141,34 +153,18 @@ class c_ChangeBootStrap
 		$this->name = $name;
 	}
 	
-	
-	// AUTOLOAD
-		
-	/**
-	 * @param String $path
-	 */
-	function addPropertiesLocation($path)
-	{
-		$this->getConfiguration()->addLocation($path);
-	}
-	
-	function setAutoloadPath($autoloadPath)
-	{
-		$this->autoloadPath = $autoloadPath;
-	}
-	
+	// AUTOLOAD	
 	private function getAutoloadPath()
 	{
 		if ($this->autoloadPath === null)
 		{
-			$this->autoloadPath = $this->projectHomePath . "/cache/autoload";
+			$this->autoloadPath = $this->projectHomePath . '/cache/autoload';
+			if (!is_dir($this->autoloadPath))
+			{
+				mkdir($this->autoloadPath, 0777, true);
+			}
 		}
 		return $this->autoloadPath;
-	}
-	
-	function setRefreshAutoload($refresh)
-	{
-		$this->refreshAutoload = $refresh;
 	}
 	
 	/**
@@ -177,14 +173,10 @@ class c_ChangeBootStrap
 	 */
 	function autoload($className)
 	{
-		try
+		$path = AutoloadBuilder::getInstance()->buildLinkPathByClass($className);
+		if ($path !== false && is_readable($path))
 		{
-			require_once(ClassResolver::getInstance()->getPath($className));
-			return true;
-		}
-		catch (Exception $e)
-		{
-			return false;
+			require_once($path);
 		}
 	}
 	
@@ -193,28 +185,31 @@ class c_ChangeBootStrap
 	 */
 	function appendToAutoload($componentPath)
 	{	
-		$autoloadPath = $this->getAutoloadPath();
-		$autoloadedFlag = $autoloadPath . "/" . md5($componentPath) . ".autoloaded";
-		
 		if (!$this->autoloadRegistered)
 		{
 			spl_autoload_register(array($this, "autoload"));
 			$this->autoloadRegistered = true;
 		}
-		
-		if (isset($this->autoloaded[$componentPath]) || (!$this->refreshAutoload && file_exists($autoloadedFlag)))
-		{
-			$this->autoloaded[$componentPath] = true;
-			return;
-		}
-		
-		if (file_exists($autoloadedFlag))
-		{
-			unlink($autoloadedFlag);
-		}
-		ClassResolver::getInstance()->appendRealDir($componentPath);
-		$this->autoloaded[$componentPath] = true;
+		$autoloadPath = $this->getAutoloadPath();
+		$autoloadedFlag = $autoloadPath . "/" . md5($componentPath) . ".autoloaded";
+		if (file_exists($autoloadedFlag)) {return;}
+		AutoloadBuilder::getInstance()->appendDir($componentPath);
 		touch($autoloadedFlag);
+	}
+	
+	public function cleanDependenciesCache()
+	{
+		$autoloadPath = $this->getAutoloadPath();
+		$cacheKey = $autoloadPath . "/*.autoloaded";
+		$files = glob($cacheKey);
+		if (is_array($files))
+		{
+			foreach ($files as $file)
+			{
+				unlink($file);
+			}
+			clearstatcache();
+		}
 	}
 	
 	
@@ -226,6 +221,7 @@ class c_ChangeBootStrap
 		if ($this->instanceProjectKey === null)
 		{
 			$license = $this->getProperties()->getProperty("PROJECT_LICENSE");
+			$mode = ($this->getProperties()->getProperty("DEVELOPMENT_MODE", false) == true) ? "DEV" : "PROD";
 			if (empty($license)) {$license = "OS";}			
 			$pId = '-';  
 			$fqdn='-';
@@ -242,7 +238,7 @@ class c_ChangeBootStrap
 				$fqdnNode = $projectXMLDoc->findUnique('config/general/entry[@name="server-fqdn"]');
 				$fqdn = $fqdnNode ? $fqdnNode->textContent : '-';
 			}
-			$this->instanceProjectKey = 'Change/' . $release . ';License/' . $license. ';Profile/' . $profile . ';PId/' . $pId. ';FQDN/'. $fqdn;
+			$this->instanceProjectKey = 'Change/' . $release . ';License/' . $license. ';Profile/' . $profile . ';PId/' . $pId. ';DevMode/' . $mode . ';FQDN/' . $fqdn;
 		}
 		return $this->instanceProjectKey;
 	}
@@ -278,27 +274,13 @@ class c_ChangeBootStrap
 		$computedDeps = $this->generateComputedChangeComponents();
 		return $computedDeps;
 	}
-	
-	public function cleanDependenciesCache()
-	{
-		$autoloadPath = $this->getAutoloadPath();
-		$cacheKey = $autoloadPath . "/*.autoloaded";
-		$files = glob($cacheKey);
-		if (is_array($files))
-		{
-			foreach ($files as $file)
-			{
-				unlink($file);
-			}
-		}
-	}
-	
+		
 	private function generateComputedChangeComponents()
 	{
-		$pearInfos = $this->loadPearInfo();
 		$computedComponents = array('dependencies' => $this->getProjectDependencies());
-		$computedComponents["PEAR_DIR"] = $pearInfos['include_path'];
 		$computedComponents["ZEND_FRAMEWORK_PATH"] = $this->getProperties()->getProperty('ZEND_FRAMEWORK_PATH');
+		$computedComponents["INCLUDE_PATH"] = $this->getProperties()->getProperty('INCLUDE_PATH');
+
 		$computedComponents["WWW_GROUP"] = $this->getProperties()->getProperty('WWW_GROUP');
 		$computedComponents["DEVELOPMENT_MODE"] = $this->getProperties()->getProperty('DEVELOPMENT_MODE', false) == true;
 		$computedComponents["PHP_CLI_PATH"] = $this->getProperties()->getProperty('PHP_CLI_PATH', '');
@@ -312,12 +294,12 @@ class c_ChangeBootStrap
 		$computedComponents["FAKE_EMAIL"] = $this->getProperties()->getProperty('FAKE_EMAIL');
 		
 		$proxy = $this->getProxy();
-		if ($proxy !== null)
+		if ($proxy)
 		{
 			$proxyInfo = explode(":", $proxy);
-			if (! isset($proxyInfo[1]))
+			if (!isset($proxyInfo[1]))
 			{
-				$proxyInfo[1] = "80";
+				$proxyInfo[1] = "8080";
 			}
 			$computedComponents["OUTGOING_HTTP_PROXY_HOST"] = $proxyInfo[0];
 			$computedComponents["OUTGOING_HTTP_PROXY_PORT"] = $proxyInfo[1];
@@ -480,25 +462,29 @@ class c_ChangeBootStrap
 		{
 			$this->releaseDocuments[$releaseURL] = null;
 			$url = $releaseURL . '/release-'.$this->getRelease().'.xml';
-			$destFile = null;
-			$result = $this->downloadFile($url, $destFile);
+			$archivePath = $this->getArchivePath();
+			$destFile = $archivePath ? $archivePath. '/remoteRelease-'.$this->getRelease().'.xml' : null;
+			$result = $this->getRemoteFile($url, $destFile);
 			if ($result === true)
 			{
 				$doc = f_util_DOMUtils::fromPath($destFile);
 				if ($doc && $doc->documentElement)
 				{
 					$this->releaseDocuments[$releaseURL] = array();
-					foreach ($doc->getElementsByTagName('package') as $node) 
+					foreach ($doc->documentElement->childNodes as $node) 
 					{
-						$package = c_Package::getInstanceFromPackageElement($node, $this->projectHomePath);
-						if ($package->getTypeAsInt() != self::$DEP_UNKNOWN)
+						if ($node->nodeType == XML_ELEMENT_NODE && in_array($node->nodeName, array('change-lib', 'lib', 'theme', 'module')))
 						{
-							if ($package->getDownloadURL() == null)
+							$package = c_Package::getInstanceFromRepositoryElement($node, $this->projectHomePath);
+							if ($package->getTypeAsInt() != self::$DEP_UNKNOWN)
 							{
-								$package->setReleaseURL($releaseURL);
-								$package->populateDefaultDownloadUrl();
+								if ($package->getDownloadURL() == null)
+								{
+									$package->setReleaseURL($releaseURL);
+									$package->populateDefaultDownloadUrl();
+								}
+								$this->releaseDocuments[$releaseURL][$package->getKey()] = $package;
 							}
-							$this->releaseDocuments[$releaseURL][$package->getKey()] = $package;
 						}
 					}
 				}
@@ -506,7 +492,7 @@ class c_ChangeBootStrap
 				{
 					echo 'Invlid XML document : ', $destFile, ' ', $url, PHP_EOL;
 				}
-				unlink($destFile);
+				if (!$archivePath) {unlink($destFile);}
 			}
 			else
 			{
@@ -521,7 +507,7 @@ class c_ChangeBootStrap
 	 */
 	private function getProxy()
 	{
-		return $this->getProperties()->getProperty("PROXY");
+		return $this->getProperties()->getProperty("OUTGOING_HTTP_PROXY");
 	}
 	
 	public function getTmpPath()
@@ -543,73 +529,26 @@ class c_ChangeBootStrap
 		}
 		return $this->tmpPath;
 	}
-	
-	/**
-	 * @param string $url
-	 * @param string $destFile
-	 * @return true or error string
-	 */
-	public function downloadFile($url, &$destFile)
-	{
-		if (!$destFile) {$destFile = tempnam($this->getTmpPath(), 'tmp');}
 		
-		if (($ch = curl_init($url)) == false)
-		{
-			return "Error on curl initialize for url $url.";
-		}
-		
-		curl_setopt($ch, CURLOPT_USERAGENT, $this->getInstanceProjectKey());
-		curl_setopt($ch, CURLOPT_AUTOREFERER, true);
-		curl_setopt($ch, CURLOPT_COOKIEFILE, '');
-		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-		
-		$proxy = $this->getProxy();
-		if ($proxy !== null)
-		{
-			curl_setopt($ch, CURLOPT_PROXY, $proxy);
-		}
-		
-		if (($fp = fopen($destFile, "wb")) === false)
-		{
-			curl_close($ch);
-			return "Could not open file $destFile in write mode";
-		}
-		
-		curl_setopt($ch, CURLOPT_FILE, $fp);
-		curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
-		if (curl_exec($ch) === false)
-		{
-			$curlErr = curl_errno($ch) . ':' . curl_error($ch);
-			fclose($fp);
-			unlink($destFile);
-			curl_close($ch);
-			return "Error ($curlErr) for url $url in $destFile";
-		}
-		fclose($fp);
-		$info = curl_getinfo($ch);
-		curl_close($ch);
-		if ($info["http_code"] != "200")
-		{
-			unlink($destFile);
-			return "Could not download $url: bad http status (" . $info["http_code"] . ")";
-		}
-		return true;
-	}
-	
-	
 	/**
 	 * @var boolean|array
 	 */
 	private $remoteError = false;
+	
 	/**
-	 *
 	 * @param string $url
 	 * @param string $destFile
+	 * @param array $postDataArray
 	 * @return true array
 	 */
-	private function getRemoteFile($url, $destFile)
+	private function getRemoteFile($url, &$destFile, $postDataArray = null)
 	{
 		$this->remoteError = false;
+		if (!$destFile)
+		{
+			$destFile = tempnam($this->getTmpPath(), 'tmp');
+		}
+		
 		$fp = fopen($destFile, "wb");
 		if ($fp === false)
 		{
@@ -629,6 +568,12 @@ class c_ChangeBootStrap
 		curl_setopt($ch, CURLOPT_COOKIEFILE, '');
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 	
+		if (is_array($postDataArray) && count($postDataArray))
+		{
+			curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postDataArray, null , '&'));
+			curl_setopt($ch, CURLOPT_POST, true);
+		}
+		
 		$proxy = $this->getProxy();
 		if ($proxy !== null)
 		{
@@ -660,6 +605,17 @@ class c_ChangeBootStrap
 	}
 	
 	/**
+	 * @param string $url
+	 * @param string $filePath
+	 * @param array $postDataArray
+	 * @return true|array<errorNumber, errorMessage>
+	 */
+	public function downloadRepositoryFile($url, &$filePath, $postDataArray = null)
+	{
+		return $this->getRemoteFile($url, $filePath, $postDataArray);
+	}
+	
+	/**
 	 * @param string $zipPath
 	 * @param string $tmpPath
 	 * @return c_Package or null
@@ -667,49 +623,26 @@ class c_ChangeBootStrap
 	public function unzipPackage($zipPath, $tmpPath)
 	{
 		$package = null;
-		if (class_exists('ZipArchive'))
-		{
-			$zip = new ZipArchive();		
-			if ($zip->open($zipPath) === true) 
-			{		
-				if (is_dir($tmpPath)) {f_util_FileUtils::rmdir($tmpPath);}		
-			    for($i = 0; $i < $zip->numFiles; $i++) 
-			    {
-					$name = $zip->getNameIndex($i);
-					$zip->extractTo($tmpPath, array($name));
-					if ($name === 'install.xml')
-					{
-						$xmlDoc = f_util_DOMUtils::fromPath($tmpPath . '/' . $name);
-						$package = $this->getPackageFromXML($xmlDoc);
-						if ($package) {$package->setTemporaryPath($tmpPath);}
-					}          
-			    }             
-			    $zip->close();
-			}
+		$zip = new ZipArchive();		
+		if ($zip->open($zipPath) === true) 
+		{		
+			if (is_dir($tmpPath)) {f_util_FileUtils::rmdir($tmpPath);}		
+		    for($i = 0; $i < $zip->numFiles; $i++) 
+		    {
+				$name = $zip->getNameIndex($i);
+				$zip->extractTo($tmpPath, array($name));
+				if ($name === 'install.xml')
+				{
+					$xmlDoc = f_util_DOMUtils::fromPath($tmpPath . '/' . $name);
+					$package = $this->getPackageFromXML($xmlDoc);
+					if ($package) {$package->setTemporaryPath($tmpPath);}
+				}          
+		    }             
+		    $zip->close();
 		}
 		return $package;
 	}
-	
-	
-	
-	/**
-	 * @return array
-	 */
-	public function loadPearInfo()
-	{
-		if ($this->pearInfos === null)
-		{
-			$include_path = $this->getProperties()->getProperty("PEAR_INCLUDE_PATH");
-			if ($include_path === null)
-			{
-				$include_path = $this->projectHomePath . "/pear";
-			}
-			$this->pearInfos = array("include_path" => $include_path);
-		}
-		return $this->pearInfos;
-	}
-	
-	
+		
 	//COMMAND Manager
 	/**
 	 * @var String[]

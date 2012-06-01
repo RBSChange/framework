@@ -18,8 +18,6 @@ set_time_limit(0);
 require_once dirname(__FILE__) . '/bootstrap.php';
 umask(0002);
 $bootStrap = new c_ChangeBootStrap(PROJECT_HOME);
-$bootStrap->setAutoloadPath(PROJECT_HOME."/cache/autoload");
-
 $argv = isset($_POST['argv']) ? $_POST['argv'] : array();
 
 $clearKey = array_search('--clear', $argv);

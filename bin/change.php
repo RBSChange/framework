@@ -11,7 +11,6 @@ clearstatcache();
 require_once dirname(__FILE__) . '/bootstrap.php';
 umask(0002);
 $bootStrap = new c_ChangeBootStrap(PROJECT_HOME);
-$bootStrap->setAutoloadPath(PROJECT_HOME."/cache/autoload");
 
 $argv = array_slice($_SERVER['argv'], 1);
 

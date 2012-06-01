@@ -14,7 +14,7 @@ class commands_AddAction extends c_ChangescriptCommand
 	 */
 	public function getOptions()
 	{
-		return array('json');
+		return array('--json');
 	}
 
 	/**
@@ -120,10 +120,8 @@ class commands_AddAction extends c_ChangescriptCommand
 			$result = $moduleGenerator->generateFrontAction($actionName);
 		}
 		
-					
 		f_util_FileUtils::write($actionPath, $result);
-		$class = $moduleName.'_'.$actionName . 'Action';
-		ClassResolver::getInstance()->appendToAutoloadFile($class, $actionPath);
+		AutoloadBuilder::getInstance()->appendFile($actionPath);
 		$this->quitOk("Action $actionName added in module $moduleName Please now edit $actionPath.");
 	}
 }

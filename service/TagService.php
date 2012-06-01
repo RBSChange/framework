@@ -155,8 +155,7 @@ class TagService extends BaseService
 
 
 	/**
-	 * This method is used internally to check if a tag is exclusive (can appear
-	 * only once in all the tags).
+	 * This method is used internally to check if a tag is exclusive (can appear only once in all the tags).
 	 * @param string $tag The tag to check.
 	 * @return boolean true if $tag is an exclusive tag or false otherwise.
 	 */
@@ -166,8 +165,7 @@ class TagService extends BaseService
 	}
 
 	/**
-	 * This method is used internally to check if a tag is functional (can appear
-	 * only once in children document).
+	 * This method is used internally to check if a tag is functional (can appear only once in children document).
 	 * @param string $tag
 	 * @return boolean
 	 */
@@ -193,8 +191,7 @@ class TagService extends BaseService
 	}
 
 	/**
-	 * This method is used internally to check if a tag is contextual (can appear
-	 * only once in its context - a parent document).
+	 * This method is used internally to check if a tag is contextual (can appear only once in its context - a parent document).
 	 * @param string $tag The tag to check.
 	 * @return boolean true if $tag is a contextual tag or false otherwise.
 	 */
@@ -1070,15 +1067,11 @@ class TagService extends BaseService
 
 			}
 
-			$count = count($dirsToProcess);
+			var_export($dirsToProcess);
+			
 			foreach ($dirsToProcess as &$dir)
 			{
-				// If there are 3 directories containing tags definition files,
-				// skip the directory of the packaged module.
-				if ( ! ($count == 3 && f_util_StringUtils::beginsWith($dir, PEAR_DIR) ) )
-				{
-					$this->processDir($moduleName, $dir);
-				}
+				$this->processDir($moduleName, $dir);
 			}
 		}
 	}

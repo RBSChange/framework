@@ -1,5 +1,5 @@
 <?php
-class commands_UpdateAutoload extends c_ChangescriptCommand
+class commands_CompileAutoload extends c_ChangescriptCommand
 {
 	/**
 	 * @return String
@@ -9,17 +9,12 @@ class commands_UpdateAutoload extends c_ChangescriptCommand
 		return "";
 	}
 	
-	function getAlias()
-	{
-		return "ua";
-	}
-
 	/**
 	 * @return String
 	 */
 	function getDescription()
 	{
-		return "update autoload";
+		return "compile autoload";
 	}
 
 	/**
@@ -29,18 +24,11 @@ class commands_UpdateAutoload extends c_ChangescriptCommand
 	 */
 	function _execute($params, $options)
 	{
-		$this->message("== Update autoload ==");
-		
-		$pearIncludePath = $this->getBootStrap()->getProperties()->getProperty('PEAR_INCLUDE_PATH', null);
-		if ($pearIncludePath !== null)
-		{
-		    define('PEAR_DIR', $pearIncludePath);
-		}
-		
+		$this->message("== Compile autoload ==");		
 		if (f_util_ArrayUtils::isEmpty($params))
 		{
 			$this->message("Scanning all the project. Please wait: this can be long.");
-			ClassResolver::getInstance()->update();
+			AutoloadBuilder::getInstance()->update();
 		}
 		else
 		{
@@ -55,11 +43,11 @@ class commands_UpdateAutoload extends c_ChangescriptCommand
 				if (is_dir($path))
 				{
 					$this->message("Adding $path directory to autoload");
-					ClassResolver::getInstance()->appendDir($path, true);
+					AutoloadBuilder::getInstance()->appendDir($path);
 					continue;
 				}
 				$this->message("Adding $path file to autoload");
-				ClassResolver::getInstance()->appendFile($path, true);
+				AutoloadBuilder::getInstance()->appendFile($path);
 			}
 		}
 		
@@ -67,6 +55,6 @@ class commands_UpdateAutoload extends c_ChangescriptCommand
 		{
 			return $this->quitError("Some errors: ".$this->getErrorCount());
 		}
-		return $this->quitOk("Autoload updated");
+		return $this->quitOk("Autoload compiled");
 	}
 }

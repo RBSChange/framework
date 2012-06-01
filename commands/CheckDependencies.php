@@ -19,7 +19,7 @@ class commands_CheckDependencies extends c_ChangescriptCommand
 	 */
 	function getOptions()
 	{
-		return array('verbose', 'xml');
+		return array('--verbose', '--xml');
 	}
 	
 	/**
@@ -44,18 +44,72 @@ class commands_CheckDependencies extends c_ChangescriptCommand
 		}
 		$this->message("== Check project dependencies ==");
 		$bootstrap = $this->getBootStrap();
-		$cpDeps = $bootstrap->getComputedDependencies();	
-		$this->okMessage('Release Repo (' . $bootstrap->getRelease() . ') :' . $bootstrap->getReleaseRepository());
-		
-		$pearInfo = $bootstrap->loadPearInfo();
+		$cpDeps = $bootstrap->getComputedDependencies();
+		$baseURL = $bootstrap->getReleaseRepository();		
+
+		$this->okMessage('Release ' . $bootstrap->getRelease() . ' From: ' . $baseURL);
+		$ap = $bootstrap->getArchivePath();
+		if ($ap)
+		{
+			$this->okMessage('Archive Release path: ' . $ap);
+		}
+		$this->okMessage('Temporary path: ' . $bootstrap->getTmpPath());
 		$this->okMessage("External depencendies:");
-		$this->okMessage(" - Pear Include Path: " . $cpDeps['PEAR_DIR']);
+		if ($cpDeps['INCLUDE_PATH'])
+		{
+			$this->okMessage(" - Include Path: " . $cpDeps['INCLUDE_PATH']);
+		}
 		$this->okMessage(" - Zend Include Path: " . $cpDeps['ZEND_FRAMEWORK_PATH']);
 		
 		$changeXmlPath = $bootstrap->getDescriptorPath();
 		$this->okMessage('Project depencendies: ' .$changeXmlPath);
 		
 		$dependencies = $cpDeps['dependencies'];
+		
+		$postDataArray = array();
+		foreach ($dependencies as $package) 
+		{
+			/* @var $package c_Package */
+			if ($package->isModule())
+			{
+				$data = array('repo' => !$package->isStandalone() , 'version' => $package->getVersion());
+				$postDataArray[$package->getName()] = $data;
+			}
+		}		
+
+				
+		$filePath = null;
+		$licenseStatus = 'Unknown (Remote repository not responding)';
+		$errorModules = array();
+
+		/* @var $baseURL string */
+		$result = $bootstrap->downloadRepositoryFile($baseURL . '/license.xml', $filePath, array('modules' => $postDataArray));
+		if ($result === true)
+		{
+			$xml = new DOMDocument('1.0', 'UTF-8');
+			if ($xml->load($filePath) === true)
+			{
+				$licenseStatus = $xml->documentElement->hasAttribute('status') ? $xml->documentElement->getAttribute('status') : 'Unknown';
+				$mnl = $xml->getElementsByTagName('modules');
+				if ($mnl->length)
+				{
+					foreach ($mnl->item(0)->getElementsByTagName('module') as $mn)
+					{
+						/* @var $mn DOMElement */
+						$errorModules[$mn->getAttribute('name')] = $mn->getAttribute('status');
+					}
+				}
+				unlink($filePath);
+			}
+			else
+			{
+				$licenseStatus = 'Invalid License Informations';
+				unlink($filePath);
+			}
+		}
+
+		$this->okMessage("License: " . $bootstrap->getProperties()->getProperty("PROJECT_LICENSE") . ' : ' . $licenseStatus);
+		
 		foreach ($dependencies as $package) 
 		{
 			/* @var $package c_Package */
@@ -87,6 +141,11 @@ class commands_CheckDependencies extends c_ChangescriptCommand
 					$msg .= ': invalid install version ' . $reallyPackage->getVersion();
 					$this->warnMessage($msg);
 					continue;
+				}
+				elseif ($package->isModule() && isset($errorModules[$package->getName()]))
+				{
+					$msg .= ': ' . $errorModules[$package->getName()];
+					$this->warnMessage($msg);
 				}
 				else
 				{

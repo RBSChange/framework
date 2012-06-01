@@ -26,5 +26,4 @@ require_once $frameworkPath . '/util/System.php';
 require_once $frameworkPath . '/util/StringUtils.class.php';
 require_once $frameworkPath . '/util/ArrayUtils.class.php';
 require_once $frameworkPath . '/util/DomUtils.php';
-require_once($frameworkPath . '/loader/ResourceResolver.class.php');
-require_once($frameworkPath . '/loader/ClassResolver.class.php');
+require_once($frameworkPath . '/loader/AutoloadBuilder.class.php');

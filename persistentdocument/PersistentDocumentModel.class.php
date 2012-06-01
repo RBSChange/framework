@@ -150,7 +150,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	static function getNewModelInstance($moduleName, $documentName)
 	{
 		$className = self::getClassNameFromDocument($moduleName, $documentName);
-		if ( ! f_util_ClassUtils::classExistsNoLoad($className) )
+		if (!f_util_ClassUtils::classExists($className))
 		{
 			if ($moduleName != 'generic' && $documentName == 'folder')
 			{

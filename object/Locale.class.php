@@ -152,7 +152,7 @@ class f_Locale
 		}
 		if ($keyModifier & self::MODIFIER_UCALL)
 		{
-			$translated = f_util_StringUtils::strtoupper($translated);
+			$translated = f_util_StringUtils::toUpper($translated);
 		}
 		if ($keyModifier & self::MODIFIER_MANDATORY)
 		{

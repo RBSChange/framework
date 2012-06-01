@@ -125,7 +125,7 @@ abstract class f_util_FileUtils
 	 */
 	public static function normalizeFilename($string)
 	{
-		$string = f_util_StringUtils::strip_accents($string);
+		$string = f_util_StringUtils::stripAccents($string);
 		return preg_replace('=[ |:|\\|/|\?|>|<|*|"|\'|\|]=s','_', $string);
 	}
 
@@ -933,7 +933,7 @@ abstract class f_util_FileUtils
 
 	public static function cleanFilename($fileName)
 	{
-		$fileName = f_util_StringUtils::strip_accents($fileName);
+		$fileName = f_util_StringUtils::stripAccents($fileName);
 		$fileName = str_replace(' ', '_', $fileName);
 		return $fileName;
 	}

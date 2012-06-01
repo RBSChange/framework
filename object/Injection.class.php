@@ -63,7 +63,7 @@ class change_Injection
 		$originalClassName = $this->originalClassInfo['name'];
 		if (strpos($originalFileInfo->getPathname(), 'build' . DIRECTORY_SEPARATOR . 'injection') !== false)
 		{
-			throw new Exception('Your autoload seems to be corrupted - please run ' . CHANGE_COMMAND . 'update-autoload');
+			throw new Exception('Your autoload seems to be corrupted - please run ' . CHANGE_COMMAND . 'compile-autoload');
 		}
 		$newClassName = $originalClassName . self::REPLACED_CLASS_SUFFIX;
 		$infos = array();
@@ -92,7 +92,7 @@ class change_Injection
 		$injectClassName = $this->replacingClassInfo['name'];
 		if (strpos($injectFileInfo->getPathname(), 'build' . DIRECTORY_SEPARATOR . 'injection') !== false)
 		{
-			throw new Exception('Your autoload seems to be corrupted - please run ' . CHANGE_COMMAND . 'update-autoload');
+			throw new Exception('Your autoload seems to be corrupted - please run ' . CHANGE_COMMAND . 'compile-autoload');
 		}
 		$classes = change_PhpCodeManipulation::processContentForInjection($injectFileContent, array($injectClassName => array('name' => $originalClassName, 'extends' => $newClassName)));
 		$combinedContent[] = $classes[$injectClassName];

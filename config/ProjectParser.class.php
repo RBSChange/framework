@@ -273,7 +273,7 @@ class config_ProjectParser
 		}
 		
 		// -- Global constants.
-		foreach (array('PEAR_DIR', 'ZEND_FRAMEWORK_PATH', 'WWW_GROUP', 'TMP_PATH', 
+		foreach (array('INCLUDE_PATH', 'ZEND_FRAMEWORK_PATH', 'WWW_GROUP', 'TMP_PATH', 
 			'CHANGE_COMMAND', 'DOCUMENT_ROOT', 'PROJECT_LICENSE', 'FAKE_EMAIL', 
 			'PHP_CLI_PATH', 'DEVELOPMENT_MODE') as $constName) 
 		{

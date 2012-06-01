@@ -19,7 +19,7 @@ class commands_Install extends c_ChangescriptCommand
 	
 	function getOptions()
 	{
-		return array('recursive', 'post-install');
+		return array('--recursive', '--post-install');
 	}
 
 	/**
@@ -210,7 +210,7 @@ class commands_Install extends c_ChangescriptCommand
 	 */
 	protected function postInstallModules($p, $recursive)
 	{
-		$this->executeCommand("update-autoload" , array('modules/' . $p->getName()));
+		$this->executeCommand("compile-autoload" , array('modules/' . $p->getName()));
 		$this->executeCommand("init-patch-db", array($p->getName()));
 		
 		$xml = $p->getInstallDocument();
@@ -262,7 +262,7 @@ class commands_Install extends c_ChangescriptCommand
 	 */
 	protected function postInstallLibs($p)
 	{
-		ClassResolver::getInstance()->appendDir(PROJECT_HOME . '/libs');
+		
 	}
 	
 	protected function cleanFiles($filesToClean)

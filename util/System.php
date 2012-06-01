@@ -150,18 +150,21 @@ class f_util_System
 			}
 		}
 		list($name, $secret) = explode('#', file_get_contents(PROJECT_HOME . '/build/config/oauth/script/consumer.txt'));
-		$client = $token->getHttpClient(array( 'consumerKey' => $name, 'consumerSecret' => $secret));
 		
-		/* @TODO SELF Proxy Setting ?
-		$lp = Framework::getConfigurationValue('general/selfRequestProxy');
-		if (!empty($lp)) 
+		
+		$uri = $baseUrl .'/changescriptexec.php';
+		
+		$selfRequestProxy = Framework::getConfigurationValue('general/selfRequestProxy');
+		if (!empty($selfRequestProxy)) 
 		{
-			list($host, $port) = explode(':', $lp); 
-			$client->setProxy($host, $port);
-			///$client->getAdapter()->setConfig()
+			$config = array('adapter' => 'Zend_Http_Client_Adapter_Curl', 'curloptions' => array(CURLOPT_PROXY => $selfRequestProxy));
 		}
-		*/
-		$client->setUri($baseUrl .'/changescriptexec.php');
+		else
+		{
+			$config = null;
+		}
+		
+		$client = $token->getHttpClient(array( 'consumerKey' => $name, 'consumerSecret' => $secret), $uri, $config);
 		$client->setMethod(Zend_Http_Client::POST);
 		$client->setParameterPost('phpscript', $relativeScriptPath);
 		if ($noFramework)

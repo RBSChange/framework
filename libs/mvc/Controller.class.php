@@ -131,7 +131,6 @@ class change_Controller
 	protected function getAction($moduleName, $actionName)
 	{
 		$className = $moduleName . '_' . $actionName . 'Action';
-		ClassLoader::getInstance()->load($className);	
 		return new $className();
 	}
 
@@ -153,7 +152,6 @@ class change_Controller
 	protected function getView($moduleName, $viewName)
 	{
 		$className = $moduleName . '_' . $viewName . 'View';
-		ClassLoader::getInstance()->load($className);	
 		return new $className();
 	}
 	

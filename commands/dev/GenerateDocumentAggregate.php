@@ -108,12 +108,11 @@ class commands_GenerateDocumentAggregate extends c_ChangescriptCommand
 				return $this->quitError("Use --override if you want to override the file.\n");
 			}
 		}
+		
 		bean_BeanAggregateGenerator::generate($moduleBeanPath, $beanClassName, $classes);
-		if (!f_util_ClassUtils::classExists($beanClassName))
-		{
-			$this->message("adding $beanClassName to autoload\n");
-			ClassResolver::getInstance()->appendToAutoloadFile($beanClassName, $moduleBeanPath);
-		}
+		$this->message("adding $beanClassName to autoload\n");
+		AutoloadBuilder::getInstance()->appendFile($moduleBeanPath);
+
 		return $this->quitOk($moduleBeanPath." file ready");
 	}
 }

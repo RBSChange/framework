@@ -159,8 +159,7 @@ class builder_ModuleGenerator
 	 */
 	public function generateOnce()
 	{
-		$crs = ClassResolver::getInstance();
-		
+	
 		// Generate configuration files
 		f_util_FileUtils::write(f_util_FileUtils::buildModulesPath($this->name, 'install.xml'), $this->generateFile('install.xml'));
 		f_util_FileUtils::write(f_util_FileUtils::buildModulesPath($this->name, 'config', 'module.xml'), $this->generateFile('config_module.xml'));
@@ -178,15 +177,12 @@ class builder_ModuleGenerator
 		// Generate setup file
 		$path = f_util_FileUtils::buildModulesPath($this->name, 'setup', 'initData.php');
 		f_util_FileUtils::write($path, $this->generateFile('initData'));
-		$crs->appendToAutoloadFile($this->name . '_Setup', $path);
+		AutoloadBuilder::getInstance()->appendFile($path);
 
 		// Generate services files
 		$path = f_util_FileUtils::buildModulesPath($this->name, 'lib', 'services', 'ModuleService.class.php');
 		f_util_FileUtils::write($path, $this->generateFile('ModuleService.class.php'));
-		$crs->appendToAutoloadFile($this->name . '_ModuleService', $path);
-
-
-		
+		AutoloadBuilder::getInstance()->appendFile($path);
 		
 		if ($this->visibility)
 		{

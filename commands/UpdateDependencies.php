@@ -93,13 +93,13 @@ class commands_UpdateDependencies extends c_ChangescriptCommand
 			require_once PROJECT_HOME . '/framework/config/ProjectParser.class.php';
 			if (config_ProjectParser::isCompiled())
 			{
-				$this->log('Update autoload...');
-				$this->executeCommand('update-autoload');
+				$this->log('Compile autoload...');
+				$this->executeCommand('compile-autoload');
 			}
 			else
 			{
-				$this->log('Update autoload. Please wait: this can be long.');
-				ClassResolver::getInstance()->update();
+				$this->log('Compile autoload. Please wait: this can be long.');
+				AutoloadBuilder::getInstance()->update();
 				$this->rawMessage('Please execute: ' . $this->getChangeCmdName() . ' compile-config');
 			}
 		}
@@ -193,10 +193,10 @@ class commands_UpdateDependencies extends c_ChangescriptCommand
 		
 		$this->message('Download '. $downloadURL . '...');		
 		$tmpFile = null;
-		$dr = $bootstrap->downloadFile($downloadURL, $tmpFile);
+		$dr = $bootstrap->downloadRepositoryFile($downloadURL, $tmpFile);
 		if ($dr !== true)
 		{
-			$this->warnMessage($dr);
+			$this->warnMessage($dr[0] . ' - ' . $dr[1]);
 			return null;
 		}
 		

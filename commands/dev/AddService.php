@@ -97,9 +97,7 @@ class commands_AddService extends c_ChangescriptCommand
 		$result = $moduleGenerator->generateService($serviceName, $moduleName);
 
 		f_util_FileUtils::writeAndCreateContainer($serviceFile, $result);
-		
-		$class = $moduleName.'_'.$serviceName . 'Service';
-		ClassResolver::getInstance()->appendToAutoloadFile($class, realpath($serviceFile));
+		AutoloadBuilder::getInstance()->appendFile($serviceFile);
 		return $this->quitOk("Service $serviceName added in module $moduleName Please now edit $serviceFile.");
 	}
 }

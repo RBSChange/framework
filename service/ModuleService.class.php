@@ -288,7 +288,7 @@ class ModuleService extends BaseService
 		$ls = LocaleService::getInstance();
 		foreach ($packageVersionArray as $packageName => $version)
 		{
-			$packageVersion[$ls->transFO('m.' . substr($packageName, 8) . '.bo.general.module-name', array('ucf'))] = $version;
+			$packageVersion[$ls->trans('m.' . substr($packageName, 8) . '.bo.general.module-name', array('ucf'))] = $version;
 		}
 		krsort($packageVersion);
 		$packageVersion['Framework'] = FRAMEWORK_VERSION;

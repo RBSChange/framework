@@ -12,9 +12,6 @@ class Framework
 	 */
 	private static $log;
 
-
-
-
 	/**
 	 * @return string (DEBUG, INFO, NOTICE, WARN, ERR, ALERT, EMERG) 
 	 */
@@ -494,38 +491,47 @@ class Framework
 	{
 		return self::$config['http'];
 	}
+	
+	public static function registerAutoload()
+	{
+		spl_autoload_register(array(__CLASS__, "autoload"));
+	}
+	
+    /**
+     * @param string $className
+     * @return void
+     */
+    public static function autoload($className)
+    {
+    	$basePath = PROJECT_HOME . '/build/autoload';
+    	if (!is_dir($basePath))
+    	{
+    		die('Please execute '. CHANGE_COMMAND . ' compile-autoload');
+    	}
+    	$path =  $basePath . DIRECTORY_SEPARATOR . str_replace('_', DIRECTORY_SEPARATOR, $className) . DIRECTORY_SEPARATOR . "to_include";
+    	if (is_readable($path)) {require_once ($path);}
+    	
+    	if (strpos($className, 'Zend_') === 0 && defined("ZEND_FRAMEWORK_PATH"))
+    	{
+    		$path = ZEND_FRAMEWORK_PATH . DIRECTORY_SEPARATOR . str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
+    		if (is_readable($path)) {require_once ($path);}	
+    	}
+    }
 }
 
 // Load configuration
 Framework::loadConfiguration();
+if (Framework::inDevelopmentMode()) {error_reporting(E_ALL);}
 
-require_once(PROJECT_HOME . '/framework/loader/ResourceResolver.class.php');
-require_once(PROJECT_HOME . '/framework/loader/ClassResolver.class.php');
-require_once(PROJECT_HOME . '/framework/loader/Resolver.class.php');
-require_once(PROJECT_HOME . '/framework/loader/ResourceLoader.class.php');
-require_once(PROJECT_HOME . '/framework/loader/ClassLoader.class.php');
-require_once(PROJECT_HOME . '/framework/loader/Loader.class.php');
+ini_set('include_path', ZEND_FRAMEWORK_PATH . (defined('INCLUDE_PATH') ? PATH_SEPARATOR . INCLUDE_PATH : ''));
 
-if (spl_autoload_register(array(ClassLoader::getInstance(), "autoload")) === false)
-{
-	throw new Exception("Could not register Change framework autoload function");
-}
-
-ini_set('include_path', ZEND_FRAMEWORK_PATH . PATH_SEPARATOR . PEAR_DIR);
+Framework::registerAutoload();
 
 ini_set('arg_separator.output',      '&amp;');
 ini_set('display_errors',            1);
 ini_set('magic_quotes_runtime',      0);
 
-error_reporting(E_ALL);
 
-// Load modules informations
-require_once(PROJECT_HOME . '/framework/service/BaseService.class.php');
-require_once(PROJECT_HOME . '/framework/service/ModuleService.class.php');
-require_once(PROJECT_HOME . '/framework/service/InjectionService.class.php');
-
-$ms = ModuleService::getInstance();
-$ms->loadCacheFile();
 
 Framework::registerLogErrorHandler();
 

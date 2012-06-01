@@ -6,7 +6,7 @@ abstract class Resolver
 {
 		
 	/**
-	 * Return the current ClassResolver
+	 * Return the current Resolver
 	 *
 	 * @return ResourceResolver of defined Resolver
 	 */

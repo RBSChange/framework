@@ -213,7 +213,7 @@ abstract class f_persistentdocument_DocumentFilterImpl implements f_persistentdo
 			case 'eq':
 				return $testVal == $val;
 			case 'ieq' : 
-				return f_util_StringUtils::strtolower($testVal) == f_util_StringUtils::strtolower($val);
+				return f_util_StringUtils::toLower($testVal) == f_util_StringUtils::toLower($val);
 			case 'ge':
 				return $testVal >= $val;
 			case 'gt':
@@ -227,7 +227,7 @@ abstract class f_persistentdocument_DocumentFilterImpl implements f_persistentdo
 			case 'like':
 				return f_util_StringUtils::contains($testVal, $val);
 			case 'ilike':
-				return f_util_StringUtils::contains(f_util_StringUtils::strtolower($testVal), f_util_StringUtils::strtolower($val));
+				return f_util_StringUtils::contains(f_util_StringUtils::toLower($testVal), f_util_StringUtils::toLower($val));
 			case 'notLike':
 				return !f_util_StringUtils::contains($testVal, $val);
 			case 'beginsWith':

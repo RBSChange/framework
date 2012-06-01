@@ -1011,7 +1011,7 @@ class LocaleService extends BaseService
 	
 	public function transformUc($text, $lang)
 	{
-		return f_util_StringUtils::strtoupper($text);
+		return f_util_StringUtils::toUpper($text);
 	}
 	
 	public function transformUcf($text, $lang)
@@ -1026,7 +1026,7 @@ class LocaleService extends BaseService
 	
 	public function transformLc($text, $lang)
 	{
-		return f_util_StringUtils::strtolower($text);
+		return f_util_StringUtils::toLower($text);
 	}
 	
 	public function transformJs($text, $lang)

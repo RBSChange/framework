@@ -120,6 +120,22 @@ abstract class c_ChangescriptCommand
 	}
 	
 	/**
+	 * @return boolean
+	 */
+	protected function	inReleaseDevelopement()
+	{
+		return $this->bootStrap->inReleaseDevelopement();
+	}
+	
+	/**
+	 * @return boolean
+	 */
+	public function	inDevelopement()
+	{
+		return $this->bootStrap->inDevelopement();
+	}
+	
+	/**
 	 * @return String
 	 */
 	abstract function getUsage();

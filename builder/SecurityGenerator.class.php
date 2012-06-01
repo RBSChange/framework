@@ -133,7 +133,7 @@ class builder_SecurityGenerator
 			$filePath = f_util_FileUtils::buildChangeBuildPath('modules', $moduleName, 'roles', $className . '.class.php');
 			f_util_FileUtils::writeAndCreateContainer($filePath, $this->generateFile('RoleService' , 'permissions' , $module), 
 				f_util_FileUtils::OVERRIDE );
-			ClassResolver::getInstance()->appendToAutoloadFile('roles_'.$className, $filePath);
+			AutoloadBuilder::getInstance()->appendFile($filePath);
 		}
 	}
 

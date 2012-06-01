@@ -28,8 +28,8 @@ class commands_CompileInjection extends c_ChangescriptCommand
 	public function getEvents()
 	{
 		return array(
+			array('target' => 'compile-autoload'),
 			array('target' => 'compile-config'),
-			array('target' => 'update-autoload'),
 			array('target' => 'compile-documents'),
 		);
 	}	
