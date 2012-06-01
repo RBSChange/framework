@@ -36,7 +36,7 @@ class FileResolver implements ResourceResolver
 
 		if( is_null(self::$instance) )
 		{
-			self::$instance = new FileResolver();
+			self::$instance = new self();
 		}
 		self::$instance->reset();
 		return self::$instance;

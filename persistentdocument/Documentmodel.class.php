@@ -48,8 +48,7 @@ class generic_persistentdocument_Documentmodel extends f_persistentdocument_Pers
 	}
 	
 	/**
-	 * @return String
-	 * @example modules_generic/Document
+	 * @return string For example: modules_generic/Document
 	 */
 	public final function getName()
 	{
@@ -57,8 +56,7 @@ class generic_persistentdocument_Documentmodel extends f_persistentdocument_Pers
 	}
 
 	/**
-	 * @return String
-	 * @example modules_generic/reference or null
+	 * @return string|NULL For example: modules_generic/reference
 	 */
 	public final function getBaseName()
 	{
@@ -66,7 +64,7 @@ class generic_persistentdocument_Documentmodel extends f_persistentdocument_Pers
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public final function getLabel()
 	{
@@ -74,7 +72,7 @@ class generic_persistentdocument_Documentmodel extends f_persistentdocument_Pers
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public final function getLabelKey()
 	{
@@ -82,8 +80,7 @@ class generic_persistentdocument_Documentmodel extends f_persistentdocument_Pers
 	}
 	
 	/**
-	 * @return String
-	 * @example generic
+	 * @return string For example: generic
 	 */
 	public final function getModuleName()
 	{
@@ -91,8 +88,7 @@ class generic_persistentdocument_Documentmodel extends f_persistentdocument_Pers
 	}
 
 	/**
-	 * @return String
-	 * @example folder
+	 * @return string For example:folder
 	 */
 	public final function getDocumentName()
 	{
@@ -100,7 +96,7 @@ class generic_persistentdocument_Documentmodel extends f_persistentdocument_Pers
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public final function getTableName()
 	{
@@ -108,7 +104,7 @@ class generic_persistentdocument_Documentmodel extends f_persistentdocument_Pers
 	}	
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public final function isLocalized()
 	{
@@ -116,7 +112,7 @@ class generic_persistentdocument_Documentmodel extends f_persistentdocument_Pers
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public final function isLinkedToRootFolder()
 	{
@@ -124,7 +120,7 @@ class generic_persistentdocument_Documentmodel extends f_persistentdocument_Pers
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public final function isIndexable()
 	{

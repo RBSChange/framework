@@ -29,6 +29,6 @@ class import_ScriptExecuteElement extends import_ScriptBaseElement
 		{
 			throw new Exception("Method ($method) not found on script document: " . get_class($scriptDocument));
 		}
-		$scriptDocument->{$method}($this);
+		$scriptDocument->{$method}($this, $this->attributes);
 	}
 }

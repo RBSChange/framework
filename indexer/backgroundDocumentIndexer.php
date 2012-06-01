@@ -1,4 +1,6 @@
 <?php
+/* @var $arguments array */
+$arguments = isset($arguments) ? $arguments : array();
 if (count($arguments) == 2)
 {
 	list($maxDocumentId, $chunkSize) = $arguments;

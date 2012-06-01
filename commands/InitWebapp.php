@@ -42,23 +42,18 @@ class commands_InitWebapp extends c_ChangescriptCommand
 			f_util_FileUtils::mkdir(f_util_FileUtils::buildDocumentRootPath());
 		}
 				
-		$exclude = array(".svn");
 		$home = f_util_FileUtils::buildProjectPath();
 
 		$this->message("Import framework home files");
 		$frameworkWebapp = f_util_FileUtils::buildFrameworkPath("builder", "home");
-		f_util_FileUtils::cp($frameworkWebapp, $home, f_util_FileUtils::OVERRIDE | f_util_FileUtils::APPEND, $exclude);
-		$exclude[] = "www";
+		f_util_FileUtils::cp($frameworkWebapp, $home, f_util_FileUtils::OVERRIDE | f_util_FileUtils::APPEND);
+
+		
+		$exclude =  array(".svn", ".git", "www");
 		//Add .htaccess for hide system folder
 		$this->message("Add missing .htaccess");
 		$htAccess = f_util_FileUtils::buildFrameworkPath("builder", "home", "bin", ".htaccess");
-		$to = f_util_FileUtils::buildChangeCachePath('.htaccess');
-		if (!file_exists($to)) 
-		{
-			f_util_FileUtils::cp($htAccess, $to);
-		}
-
-		foreach (array('config', 'securemedia', 'build', 'log', 'libs', 'modules', 'override', 'mailbox') as $hiddeDir) 
+		foreach (array('config', 'securemedia', 'repository', 'build', 'log', 'libs', 'modules', 'themes', 'override', 'cache/autoload', 'cache/project') as $hiddeDir) 
 		{
 			$to = f_util_FileUtils::buildProjectPath($hiddeDir, '.htaccess');
 			if (is_dir(dirname($to)))
@@ -68,6 +63,7 @@ class commands_InitWebapp extends c_ChangescriptCommand
 					try 
 					{
 						f_util_FileUtils::cp($htAccess, $to);
+						$this->message('Add: ' . $to);
 					} 
 					catch (Exception $e)
 					{
@@ -129,16 +125,24 @@ class commands_InitWebapp extends c_ChangescriptCommand
 	{
 		$targetDir .= DIRECTORY_SEPARATOR;
 		$exclude = array('apache', 'bin', 'log', 'build', 'config', 'framework', 'libs', 'modules', 'securemedia', 
-			'webapp', 'mailbox', 'override', 'profile', 'change.xml', 'change.properties',
-			'migration', 'mockup', 'target');
+			'themes', 'override', 'profile', 'change.xml', 'change.properties', 'repository',
+			'installedpatch', 'pear', 'target', 'mockup', 'mailbox');
+		
 		$dh = opendir($targetDir);
 		while (($file = readdir($dh)) !== false)
 		{
 			if (strpos($file, '.') === 0) {continue;}
 			if (in_array($file, $exclude)) {continue;}
+			
 			$target = $targetDir.$file;
+			if (is_file($target) && substr($target, -4) !=  '.php') {continue;}
+			
 			$link = f_util_FileUtils::buildDocumentRootPath($file);
-			f_util_FileUtils::symlink($target, $link, f_util_FileUtils::OVERRIDE);
+			if (strpos($link, $target) !== 0)
+			{
+				$this->message("Add symlink for ".$file);
+				f_util_FileUtils::symlink($target, $link, f_util_FileUtils::OVERRIDE);
+			}
 		}
 		closedir($dh);
 	}

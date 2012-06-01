@@ -6,6 +6,8 @@ class f_web_ResourceLink extends f_web_HttpLink
     protected $scheme;
     protected $host;
     
+    private static $cacheVersion = false;
+    
     /**
      * @param String $protocol
      * @param String $domaine
@@ -14,6 +16,10 @@ class f_web_ResourceLink extends f_web_HttpLink
     {
         $this->scheme = $protocol;
         $this->host = $domaine;
+        if (self::$cacheVersion === false)
+        {
+        	self::$cacheVersion = intval(f_persistentdocument_PersistentProvider::getInstance()->getSettingValue('modules_uixul', 'cacheVersion'));
+        }
     }
     
     /**
@@ -35,7 +41,7 @@ class f_web_ResourceLink extends f_web_HttpLink
 		{
 			return $this->path;
 		}
-	    return $this->buildUrl($this->scheme, $this->host, $this->path);
+	    return $this->buildUrl($this->scheme, $this->host, $this->path, array('cv' => self::$cacheVersion));
 	}
 	
 	/**

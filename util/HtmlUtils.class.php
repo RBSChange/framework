@@ -5,8 +5,8 @@ abstract class f_util_HtmlUtils
 	const REGEXIMAGETAG = '/<img\s+(.*?)>/i';
 
 	/**
-	 * @param String $string
-	 * @return String
+	 * @param string $string
+	 * @return string
 	 */
 	public static function nlTobr($string)
 	{
@@ -18,8 +18,8 @@ abstract class f_util_HtmlUtils
 	}
 
 	/**
-	 * @param String $string
-	 * @return String
+	 * @param string $string
+	 * @return string
 	 */
 	public static function textToHtml($string)
 	{
@@ -28,7 +28,46 @@ abstract class f_util_HtmlUtils
 			$string = htmlspecialchars($string, ENT_COMPAT, "utf-8");
 			return nl2br($string);
 		}
+		return '';
+	}
+	
+	/**
+	 * @param String $string
+	 * @param Boolean $translateUri
+	 * @param Boolean $convertNlToSpace
+	 * @return String
+	 */
+	public static function htmlToText($string, $translateUri = true, $convertNlToSpace = false)
+	{
+		if ($string === null)
+		{
+			return "";
+		}
+		$string = f_util_StringUtils::addCrLfToHtml($string);
+		if ($translateUri)
+		{
+			$string = preg_replace(array('/<a[^>]+href="([^"]+)"[^>]*>([^<]+)<\/a>/i', '/<img[^>]+alt="([^"]+)"[^>]*\/>/i'), array('$2 [$1]',
+				PHP_EOL . '[$1]' . PHP_EOL), $string);
+		}
+		$string = trim(html_entity_decode(strip_tags($string), ENT_QUOTES, 'UTF-8'));
+		if ($convertNlToSpace)
+		{
+			$string = str_replace(PHP_EOL, ' ', $string);
+		}
 		return $string;
+	}
+	
+	/**
+	 * @param string $string
+	 * @return string
+	 */
+	public static function textToAttribute($string)
+	{
+		if (!empty($string))
+		{
+			return htmlspecialchars(str_replace(array("\t", "\n"), array("&#09;", "&#10;"), $string), ENT_COMPAT, 'UTF-8');
+		}
+		return '';
 	}
 
 	/**
@@ -110,7 +149,7 @@ abstract class f_util_HtmlUtils
 	 */
 	public static function buildAttribute($name, $value)
 	{
-		return $name . '="' . htmlspecialchars($value, ENT_COMPAT, "UTF-8") . '"';
+		return $name . '="' . self::textToAttribute($value) . '"';
 	}
 
 	/**
@@ -276,6 +315,10 @@ abstract class f_util_HtmlUtils
 					$attributes['href'] = html_entity_decode($attributes['href'], ENT_NOQUOTES, "UTF-8");
 				}
 			}
+			elseif (isset($attributes['name']) && !empty($attributes['name']))
+			{
+				unset($attributes['href']);
+			}
 			else
 			{
 				$attributes['href'] = '#';
@@ -433,7 +476,8 @@ abstract class f_util_HtmlUtils
 	private static function buildBrokenImage($documentId)
 	{
 		Framework::warn(__METHOD__ . ' Broken document image (ID=' . $documentId . ')');
-		return '<img src="' . Framework::getUIBaseUrl() .'/icons/normal/unknown.png" class="image-broken" />';
+		$alt = LocaleService::getInstance()->trans('m.media.frontoffice.broken-image', array('ucf', 'attr'));
+		return '<img src="' . MediaHelper::getIcon('unknown', 'normal') . '" class="image-broken" alt="' . $alt . '" title="' . $alt . '" />';
 	}
 
 	private static function renderDocumentLink($documentId, $attributes, $content)

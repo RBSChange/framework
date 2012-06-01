@@ -9,9 +9,9 @@ function c_error($msg, $exitCode = 1)
 	}
 }
 
-if (version_compare(PHP_VERSION, '5.2.0' , '<'))
+if (version_compare(PHP_VERSION, '5.3.0' , '<'))
 {
-	c_error("PHP version (".PHP_VERSION.") < 5.2.0", true);
+	c_error("PHP version (".PHP_VERSION.") < 5.3.0", true);
 }
 
 $binpath = dirname(__FILE__);

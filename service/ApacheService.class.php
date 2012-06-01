@@ -121,6 +121,7 @@ class ApacheService extends BaseService
 	private function createHtaccessSymlink()
 	{
 		$linkPath = f_util_FileUtils::buildDocumentRootPath('.htaccess');
+		f_util_FileUtils::mkdir(dirname($linkPath));
 		$linkTarget = $this->getHtaccessPath();
 		if (file_exists($linkPath))
 		{

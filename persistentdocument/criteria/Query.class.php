@@ -1225,6 +1225,16 @@ class f_persistentdocument_criteria_QueryIntersection
 		{
 			return array();
 		}
+		
+		if ($orderByIds === 'ASC')
+		{
+			sort($ids);
+		}
+		else if ($orderByIds === 'DESC')
+		{
+			rsort($ids);
+		}
+		
 		$pp = $this->getProvider();
 		$q = $pp->createQuery($this->getDocumentModel()->getName())->add(Restrictions::in("id", array_slice($ids, $offset, $count)));
 		if ($orderByIds === 'ASC')

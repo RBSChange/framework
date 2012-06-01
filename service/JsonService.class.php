@@ -1,7 +1,6 @@
 <?php
 /**
  * @package framework.service
- * @see Services_JSON ; 100% PHP based implementation for those that do not run json extension
  */
 class JsonService extends BaseService
 {
@@ -18,14 +17,7 @@ class JsonService extends BaseService
 	{
 		if (self::$instance === null)
 		{
-			if (function_exists('json_encode'))
-			{
-				self::$instance = new self();
-			}
-			else
-			{
-				self::$instance = new Services_JSON(SERVICES_JSON_IN_ARR);
-			}
+			self::$instance = new self();
 		}
 		return self::$instance;
 	}

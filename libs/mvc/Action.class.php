@@ -429,10 +429,9 @@ abstract class change_Action
 	
 	/**
 	 * Retourne le nom de l'action permissionnée
-	 * @example modules_website.RewriteUrl
 	 * @param Integer $documentId
 	 * @param Boolean $addDocumentName
-	 * @return String
+	 * @return string For example: modules_website.RewriteUrl
 	 */
 	protected function getSecureActionName($documentId)
 	{

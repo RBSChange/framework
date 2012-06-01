@@ -1,34 +1,49 @@
 <?php
 abstract class f_util_ProcessUtils
 {
+	/**
+	 * @param boolean $html
+	 * @param integer $nbSkip
+	 */
 	public static function printBackTrace($html = false, $nbSkip = 1)
 	{
 		$backTrace = debug_backtrace();
 
 		if ($html)
 		{
-			echo "<pre>\n";
+			echo "<pre>", PHP_EOL;
 		}
 		$i = 0;
 		foreach ($backTrace as $call)
 		{
 			if ($i-$nbSkip >= 0)
 			{
-				echo "#".($i-$nbSkip)." Called in ".$call['file'].'/'.$call['function']."(".self::printArgs($call['args']).") line ".$call['line'];
+				if (isset($call['file']))
+				{
+					echo "#", ($i-$nbSkip), " Called in ", $call['file'], '/', $call['function'], "(", self::printArgs($call['args']), ") line ", $call['line'];
+				}
+				else
+				{
+					echo "#", ($i-$nbSkip), " Called in ", $call['function'], "(", self::printArgs($call['args']), ")";
+				}
 				if ($html)
 				{
 					echo "<br>";
 				}
-				echo "\n";
+				echo PHP_EOL;
 			}
 			$i++;
 		}
 		if ($html)
 		{
-			echo "</pre>\n";
+			echo "</pre>", PHP_EOL;
 		}
 	}
 	
+	/**
+	 * @param boolean $html
+	 * @return string
+	 */
 	public static function getBackTrace($html = false)
 	{
 		ob_start();

@@ -16,7 +16,7 @@ class ModuleBaseService extends BaseService
 	{
 		if (self::$instance === null)
 		{
-			self::$instance = new ModuleBaseService();	
+			self::$instance = new self();	
 		}
 		return self::$instance;
 	}

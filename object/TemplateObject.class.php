@@ -1,4 +1,7 @@
 <?php
+$PHPTALClassPath = f_util_FileUtils::buildWebeditPath('libs', 'phptal', 'PHPTAL.php');
+require_once($PHPTALClassPath);
+
 /**
  * @package framework.object
  */
@@ -129,7 +132,6 @@ class TemplateObject
 		$template = new PHPTAL($fileName);
 		if (!PHPTAL_Dom_Defs::getInstance()->isHandledNamespace(PHPTAL_Namespace_CHANGE::NAMESPACE_URI))
 		{
-			spl_autoload_unregister(array('PHPTAL', 'autoload'));
 			PHPTAL_Dom_Defs::getInstance()->registerNamespace(new PHPTAL_Namespace_CHANGE());	
 			$registry = PHPTAL_TalesRegistry::getInstance();
 			foreach (Framework::getConfigurationValue('tal/prefix') as $prefix => $class)

@@ -19,11 +19,6 @@ class c_Package
 	/**
 	 * @var string	
 	 */
-	private $hotfix;
-	
-	/**
-	 * @var string	
-	 */
 	private $downloadURL;
 	
 	/**
@@ -41,49 +36,6 @@ class c_Package
 	 */
 	private $temporaryPath;
 	
-	/**
-	 * @var string
-	 */
-	private $hotfixHistory;
-
-
-	/**
-	 * @return string
-	 */
-	public function getHotfixHistory()
-	{
-		return $this->hotfixHistory;
-	}
-
-	/**
-	 * @param string $hotfixHistory
-	 */
-	public function setHotfixHistory($hotfixHistory)
-	{
-		$this->hotfixHistory = $hotfixHistory;
-	}
-	
-	/**
-	 * @return array
-	 */
-	public function getHotfixArray()
-	{
-		$result = array();
-		if ($this->getHotfixHistory())
-		{
-			foreach (explode(',', $this->getHotfixHistory()) as $str) 
-			{
-				$hotfix = trim($str);
-				if (!empty($hotfix)) {$result[] = $hotfix;}
-			}
-		}
-		if ($this->getHotfix() && !in_array($this->getHotfix(), $result))
-		{
-			$result[] = $this->getHotfix();
-		}
-		return $result;
-	}
-
 	/**
 	 * @return the $temporaryPath
 	 */
@@ -146,22 +98,6 @@ class c_Package
 	public function setVersion($version)
 	{
 		$this->version = $version;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getHotfix()
-	{
-		return $this->hotfix;
-	}
-
-	/**
-	 * @param string $hotfix
-	 */
-	public function setHotfix($hotfix)
-	{
-		$this->hotfix = empty($hotfix) ? null : $hotfix;
 	}
 
 	/**
@@ -242,26 +178,6 @@ class c_Package
 		{
 			$node->removeAttribute($attName);
 		}
-		
-		$attName = 'hotfix';
-		if ($this->getHotfix())
-		{
-			$node->setAttribute($attName, $this->getHotfix());
-		}
-		elseif($node->hasAttribute($attName))
-		{
-			$node->removeAttribute($attName);
-		}
-		
-		$attName = 'hotfixHistory';
-		if ($this->getHotfixHistory())
-		{
-			$node->setAttribute($attName, $this->getHotfixHistory());
-		}
-		elseif($node->hasAttribute($attName))
-		{
-			$node->removeAttribute($attName);
-		}
 	}
 	
 	/**
@@ -319,18 +235,6 @@ class c_Package
 		{
 			$o->setVersion($package->getAttribute('version'));
 		}
-		
-		if($package->hasAttribute('hotfix'))
-		{
-			$o->setVersion($package->getAttribute('hotfix'));
-		}
-		
-		//Specifique Release Information
-		if ($package->hasAttribute('hotfixHistory'))
-		{
-			$value = trim($package->getAttribute('hotfixHistory'));
-			if (!empty($value)){$o->setHotfixHistory($value);}
-		}	
 		return $o;	
 	}
 	
@@ -351,18 +255,6 @@ class c_Package
 	public function getKey()
 	{
 		return ($this->type) ? $this->type . '/' . $this->name : $this->name;
-	}
-	
-	/**
-	 * @return string
-	 */
-	public function getHotfixedVersion()
-	{
-		if ($this->hotfix)
-		{
-			return $this->version . '-' . $this->hotfix;
-		}
-		return $this->version;
 	}
 	
 	/**
@@ -457,7 +349,7 @@ class c_Package
 		$pathParts = array('');
 		if ($this->type) {$pathParts[] = $this->type;}
 		$pathParts[] = $this->name;
-		$pathParts[] = $this->name . '-' . $this->getHotfixedVersion();
+		$pathParts[] = $this->name . '-' . $this->getVersion();
 		return implode('/', $pathParts);		
 	}
 	
@@ -507,6 +399,6 @@ class c_Package
 	 */
 	public function __toString()
 	{
-		return $this->name . ($this->getVersion() ? '-' . $this->getHotfixedVersion() : '');		
+		return $this->name . ($this->getVersion() ? '-' . $this->getVersion() : '');		
 	}
 }

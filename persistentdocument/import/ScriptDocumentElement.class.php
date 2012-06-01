@@ -296,12 +296,12 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 			else if ($tagService->isContextualTag($tag))
 			{
 				$website = $this->getAncestorDocumentByType('website_persistentdocument_website');
-				if (!$website)
+				if ($website === null)
 				{
-					$topic = $this->getAncestorDocumentByType('website_persistentdocument_topic');
-					if ($topic)
+					if ($this->getParentDocument() instanceof import_ScriptDocumentElement)
 					{
-						$website = website_WebsiteService::getInstance()->getByDescendentId($topic->getId());
+						$parent = $this->getParentDocument()->getPersistentDocument();
+						$website = website_WebsiteService::getInstance()->getByDescendentId($parent->getId());
 					}
 				}
 				return TagService::getInstance()->getDocumentByContextualTag($tag, $website);
@@ -420,9 +420,9 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 				}
 				elseif ($property->isDocument())
 				{
-					if ($propertyValue === NULL)
+					if ($propertyValue === null || $propertyValue === '==')
 					{
-						$document->{'set' . ucfirst($propertyName)}($propertyValue);
+						$document->{'set' . ucfirst($propertyName)}(null);
 					}
 					elseif ($propertyValue instanceof f_persistentdocument_PersistentDocument)
 					{
@@ -447,7 +447,12 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 					{
 						$propertyValue = $this->parseXHTMLFragment($propertyValue);
 					}
-					
+					else if ($property->getType() == f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER
+						&& ($propertyValue instanceof f_persistentdocument_PersistentDocument))
+					{
+						$propertyValue = $propertyValue->getId();
+					}
+										
 					if ($lang !== null && $property->isLocalized())
 					{
 						RequestContext::getInstance()->beginI18nWork($lang);
@@ -531,7 +536,11 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 	 */
 	private function addValueToDocumentProperty($document, $propertyName, $propertyValue)
 	{
-		if ($propertyValue instanceof f_persistentdocument_PersistentDocument)
+		if ($propertyValue === '==')
+		{
+			$document->{'removeAll' . ucfirst($propertyName)}();
+		}
+		elseif ($propertyValue instanceof f_persistentdocument_PersistentDocument)
 		{
 			$document->{'add' . ucfirst($propertyName)}($propertyValue);
 		}
@@ -546,11 +555,25 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 	}
 	
 	/**
-	 * May be used inside an xml script with the "execute" element to set the byDocumentId attribute.
+	 * May be used inside an xml script with the "execute" element to set the 'byDocumentId' attribute by default.
+	 * 
 	 * @param import_ScriptExecuteElement $scriptExecute
+	 * @param array $attr Si le tableau contient une clé 'attribute-name' cette valeur sera utilisée comme nom d'attribut
 	 */
-	public function setDocumentIdAttribute($scriptExecute)
+	public function setDocumentIdAttribute($scriptExecute, $attr = null)
 	{
-		$this->script->setAttribute('byDocumentId', $this->getPersistentDocument()->getId());
+		$attributeName = (is_array($attr) && isset($attr['attribute-name'])) ? $attr['attribute-name'] : 'byDocumentId';
+		$this->script->setAttribute($attributeName, $this->getPersistentDocument()->getId());
+	}
+	
+	/**
+	 * May be used inside an xml script with the "execute" element to set the 'type' attribute by default.
+	 * @param import_ScriptExecuteElement $scriptExecute
+	 * @param array $attr Si le tableau contient une clé 'attribute-name' cette valeur sera utilisée comme nom d'attribut
+	 */
+	public function setDocumentTypeAttribute($scriptExecute, $attr = null)
+	{
+		$attributeName = (is_array($attr) && isset($attr['attribute-name'])) ? $attr['attribute-name'] : 'type';
+		$this->script->setAttribute($attributeName, $this->getPersistentDocument()->getDocumentModelName());
 	}
 }

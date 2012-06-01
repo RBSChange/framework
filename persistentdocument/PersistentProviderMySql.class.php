@@ -685,27 +685,17 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 			return 'SELECT document_id, lang_i18n FROM m_website_doc_website_i18n WHERE url_i18n = :url';
 		}
 
-		/**
-		 * @example "select distinct(block) from f_blockcache where pattern = :pattern"
-		 * @return String
-		 */
+
 		protected function getCacheIdsByPatternQuery()
 		{
 			return "select distinct(cache_id) from f_simplecache_registration where pattern = :pattern";
 		}
-		/**
-		 * @example "insert into f_blockcache values (:pattern, :block, :pageId)"
-		 * @return String
-		 */
+
 		protected function getRegisterSimpleCacheQuery()
 		{
 			return "insert into f_simplecache_registration values (:pattern, :cacheId)";
 		}
 
-		/**
-		 * @example "delete from f_simplecache_registration where cache_id = :cacheId"
-		 * @return String
-		 */
 		protected function getUnregisterSimpleCacheQuery()
 		{
 			return "delete from f_simplecache_registration where cache_id = :cacheId";
@@ -977,7 +967,192 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 			}
 			return $query;
 		}
-
+		
+		//I18nSynchro
+		
+		/**
+		 * @param integer $id
+		 * @param string $lang
+		 * @param string $synchroStatus 'MODIFIED'|'VALID'|'SYNCHRONIZED'
+		 * @param string|null $fromLang
+		 */
+		public function setI18nSynchroStatus($id, $lang, $synchroStatus, $fromLang = null)
+		{
+			$sql = "INSERT INTO `f_i18n` (`document_id`, `document_lang`, `synchro_status`, `synchro_from`)
+			VALUES (:document_id, :document_lang, :synchro_status, :synchro_from)
+			ON DUPLICATE KEY UPDATE `synchro_status` = VALUES(`synchro_status`), `synchro_from` = VALUES(`synchro_from`)";
+		
+			$stmt = $this->prepareStatement($sql);
+			$stmt->bindValue(':document_id', $id, PersistentProviderConst::PARAM_INT);
+			$stmt->bindValue(':document_lang', $lang, PersistentProviderConst::PARAM_STR);
+			$stmt->bindValue(':synchro_status', $synchroStatus, PersistentProviderConst::PARAM_STR);
+			$stmt->bindValue(':synchro_from', $fromLang, ($fromLang === null ? PersistentProviderConst::PARAM_NULL : PersistentProviderConst::PARAM_STR));
+			$this->executeStatement($stmt);
+			return $stmt->rowCount();
+		}
+		
+		/**
+		 * @param integer $id
+		 * @return array
+		 * 		- 'fr'|'en'|'??' : array
+		 * 			- status : 'MODIFIED'|'VALID'|'SYNCHRONIZED'
+		 * 			- from : fr'|'en'|'??'|null
+		 */
+		public function getI18nSynchroStatus($id)
+		{
+			$sql = "SELECT `document_lang`, `synchro_status`, `synchro_from` FROM `f_i18n` WHERE `document_id` = :document_id";
+			$stmt = $this->prepareStatement($sql);
+			$stmt->bindValue(':document_id', $id, PersistentProviderConst::PARAM_INT);
+			$this->executeStatement($stmt);
+			$result = array();
+			$row = $stmt->fetch(PersistentProviderConst::FETCH_ASSOC);
+			while ($row)
+			{
+				$result[$row['document_lang']] = array('status' => $row['synchro_status'], 'from' => $row['synchro_from']);
+				$row = $stmt->fetch(PersistentProviderConst::FETCH_ASSOC);
+			}
+			$stmt->closeCursor();
+			return $result;
+		}
+		
+		/**
+		 * @return integer[]
+		 */
+		public function getI18nSynchroIds()
+		{
+			$sql = "SELECT DISTINCT `document_id` FROM `f_i18n` WHERE `synchro_status` = 'MODIFIED' LIMIT 0, 100";
+		
+			$stmt = $this->prepareStatement($sql);
+			$this->executeStatement($stmt);
+			return $stmt->fetchAll(PersistentProviderConst::FETCH_COLUMN);
+		}
+		
+		/**
+		 * @param f_persistentdocument_PersistentDocumentModel $pm
+		 * @param integer $id
+		 * @param string $lang
+		 * @param string $fromLang
+		 */
+		public function prepareI18nSynchro($pm, $documentId, $lang, $fromLang)
+		{
+			$suf = $this->getI18nSuffix();
+			$tableName = $pm->getTableName() . $suf;
+			$className = $this->getI18nDocumentClassFromModel($pm->getName());
+			$fields = array();
+			foreach ($pm->getPropertiesInfos() as $key => $propertyInfo)
+			{
+				if ($propertyInfo->isLocalized())
+				{
+					$fields[] = '`' . $propertyInfo->getDbMapping() . $suf. '` AS `' . $key . '`';
+				}
+			}
+		
+			$sql =  "SELECT ". implode(', ', $fields)." FROM ".$tableName." WHERE document_id = :document_id and lang_i18n = :lang";
+			$stmt = $this->prepareStatement($sql);
+			$stmt->bindValue(':document_id', $documentId, PersistentProviderConst::PARAM_INT);
+			$stmt->bindValue(':lang', $fromLang, PersistentProviderConst::PARAM_STR);
+			$this->executeStatement($stmt);
+			$fromResult = $stmt->fetch(PersistentProviderConst::FETCH_ASSOC);
+			$stmt->closeCursor();
+		
+			$from = new $className($documentId, $fromLang, false);
+			$from->setDocumentProperties($fromResult);
+		
+			$sql =  "SELECT `document_publicationstatus_i18n` AS `publicationstatus` FROM ".$tableName." WHERE document_id = :document_id and lang_i18n = :lang";
+			$stmt = $this->prepareStatement($sql);
+			$stmt->bindValue(':document_id', $documentId, PersistentProviderConst::PARAM_INT);
+			$stmt->bindValue(':lang', $lang, PersistentProviderConst::PARAM_STR);
+			$this->executeStatement($stmt);
+			$toResult = $stmt->fetch(PersistentProviderConst::FETCH_ASSOC);
+			$stmt->closeCursor();
+			$isNew = true;
+			if ($toResult)
+			{
+				$fromResult['publicationstatus'] = $toResult['publicationstatus'];
+				$isNew = false;
+			}
+			$to = new $className($documentId, $lang, $isNew);
+			$to->setDocumentProperties($fromResult);
+		
+			return array($from, $to);
+		}
+		
+		/**
+		 * @param f_persistentdocument_PersistentDocumentModel $pm
+		 * @param f_persistentdocument_I18nPersistentDocument $to
+		 */
+		public function setI18nSynchro($pm, $to)
+		{
+		
+			$suf = $this->getI18nSuffix();
+			$tableName = $pm->getTableName() . $suf;
+			$sql = $this->getI18nDocumentQuery($tableName);
+			$id = $to->getId();
+			$lang = $to->getLang();
+		
+			$sqlInsert = array('`document_id`', '`lang_i18n`');
+			$sqlValues =  array(':document_id' => $id, ':lang_i18n' => $lang);
+			$sqlUpdate = array();
+		
+			foreach ($to->getDocumentProperties() as $propertyName => $value)
+			{
+				$property = $pm->getProperty($propertyName);
+				$fieldName = $property->getDbMapping() . $suf;
+					
+				if ($propertyName === 'publicationstatus')
+				{
+					$sqlInsert[] = '`' . $fieldName . '`';
+					$sqlValues[':' . $fieldName] = $value;
+				}
+				elseif ($propertyName !== 'correctionid')
+				{
+					$sqlInsert[] = '`' . $fieldName . '`';
+					$sqlValues[':' . $fieldName] = $value;
+					$sqlUpdate[] = '`' . $fieldName . '` = VALUES(`' . $fieldName . '`)';
+				}
+			}
+			$sql = 'INSERT INTO `'.$tableName.'` (' . implode(', ', $sqlInsert) .
+			') VALUES (' . implode(', ', array_keys($sqlValues)) .
+			') ON DUPLICATE KEY UPDATE' . implode(', ', $sqlUpdate);
+		
+			$stmt = $this->prepareStatement($sql);
+			foreach ($sqlValues as $bn => $value)
+			{
+				$stmt->bindValue($bn, $value, $value === null ? PersistentProviderConst::PARAM_NULL : PersistentProviderConst::PARAM_STR);
+			}
+			$this->executeStatement($stmt);
+			$this->m_i18nDocumentInstances[$id] = array();
+		
+			$sql = 'UPDATE `f_document` SET `label_' . $lang . '` = :label  WHERE (document_id = :document_id)';
+			$stmt = $this->prepareStatement($sql);
+			$stmt->bindValue(':label', $sqlValues[':document_label_i18n'], PersistentProviderConst::PARAM_STR);
+			$stmt->bindValue(':document_id', $id, PersistentProviderConst::PARAM_INT);
+			$this->executeStatement($stmt);
+			$this->deleteFromCache($id);
+		}
+		
+		/**
+		 * @param integer $id
+		 * @param string|null $lang
+		 */
+		public function deleteI18nSynchroStatus($id, $lang = null)
+		{
+			$sql = "DELETE FROM `f_i18n` WHERE `document_id` = :document_id";
+			if ($lang !== null)
+			{
+				$sql .= " AND `document_lang` = :document_lang";
+			}
+		
+			$stmt = $this->prepareStatement($sql);
+			$stmt->bindValue(':document_id', $id, PersistentProviderConst::PARAM_INT);
+			if ($lang !== null)
+			{
+				$stmt->bindValue(':document_lang', $lang, PersistentProviderConst::PARAM_STR);
+			}
+			$this->executeStatement($stmt);
+			return $stmt->rowCount();
+		}
+		
 		/**
 		 * @param f_persistentdocument_criteria_ExecutableQuery $query
 		 * @param array $params the parameters for the query, created and filled by buildQueryString

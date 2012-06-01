@@ -697,11 +697,27 @@ class f_persistentdocument_DocumentService extends BaseService
 		$documentModel = $persistentDocument->getPersistentModel();
 		if ($documentModel->isLocalized())
 		{
-			if (!$persistentDocument->isContextLangAvailable())
+			$rc = RequestContext::getInstance();
+			$contextLang = $rc->getLang();		
+			if (!$persistentDocument->isLangAvailable($contextLang))
 			{
 				return false;
 			}
-			if (count($persistentDocument->getI18nInfo()->getLabels()) > 1)
+			
+			$count = count($persistentDocument->getI18nInfo()->getLabels());
+			if ($count > 1 && $rc->hasI18nSynchro())
+			{
+				$pp = $this->getPersistentProvider();
+				foreach ($pp->getI18nSynchroStatus($persistentDocument->getId()) as $stl => $stInfo)
+				{
+					if (isset($stInfo['from']) && $stInfo['from'] === $contextLang)
+					{
+						$count--;
+					}
+				}
+			}
+			
+			if ($count > 1)
 			{
 				return false;
 			}
@@ -1285,9 +1301,8 @@ class f_persistentdocument_DocumentService extends BaseService
 	 * Returns the child documents from the tree of $document.
 	 *
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param string $modelName Restrict to model $modelName.
-	 *
-	 * @return array<f_persistentdocument_PersistentDocument>
+	 * @param string $modelName Restrict to model $modelName
+	 * @return f_persistentdocument_PersistentDocument[]
 	 */
 	public function getChildrenOf($document, $modelName = null)
 	{
@@ -1300,7 +1315,30 @@ class f_persistentdocument_DocumentService extends BaseService
 		return $docs;
 	}
 
-
+	/**
+	 * Returns the published child documents from the tree of $document.
+	 *
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param string $modelName Restrict to model $modelName.
+	 * @return f_persistentdocument_PersistentDocument[]
+	 */
+	public function getPublishedChildrenOf($document, $modelName = null)
+	{
+		$docs = array();
+		$lang = RequestContext::getInstance()->getLang();
+		$treeNode = TreeService::getInstance()->getInstanceByDocument($document);
+		foreach ($treeNode->getChildren($modelName) as $child)
+		{
+			/* @var $child f_persistentdocument_PersistentTreeNode */
+			$doc = $child->getPersistentDocument();
+			if ($doc->isLangAvailable($lang) && $doc->isPublished())
+			{
+				$docs[] = $child->getPersistentDocument();
+			}
+		}
+		return $docs;
+	}
+	
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
 	 * @param string $modelName Restrict to model $modelName.
@@ -1515,6 +1553,29 @@ class f_persistentdocument_DocumentService extends BaseService
 
 	}
 
+	/**
+	 * Return array() in no synchronisation available
+	 * @param f_persistentdocument_PersistentDocument $document (Read only)
+	 * @param array $defaultSynchroConfig string : string[]
+	 * @return array string : string[]
+	 */
+	public function getI18nSynchroConfig($document, $defaultSynchroConfig)
+	{
+		return $defaultSynchroConfig;
+	}
+	
+	/**
+	 * Return false for none authorized synchro from -> to
+	 * @param f_persistentdocument_PersistentDocument $document (Read only)
+	 * @param f_persistentdocument_I18nPersistentDocument  $from (Read only)
+	 * @param f_persistentdocument_I18nPersistentDocument $to
+	 * @return boolean
+	 */
+	public function synchronizeI18nProperties($document, $from, $to)
+	{
+		return in_array($from->getPublicationstatus(), array('ACTIVE', 'PUBLICATED', 'DEACTIVATED'));
+	}	
+	
 	/**
 	 * Methode à surcharger pour effectuer des post traitement apres le changement de status du document
 	 * utiliser $document->getPublicationstatus() pour retrouver le nouveau status du document.
@@ -1846,7 +1907,7 @@ class f_persistentdocument_DocumentService extends BaseService
 		$enddate = $document->getEndpublicationdate();
 		if (!is_null($enddate))
 		{
-			if ($date > $enddate)
+			if ($date >= $enddate)
 			{
 				$this->setActivePublicationStatusInfo($document, '&framework.persistentdocument.status.active.enddate;');
 				return false;
@@ -2545,7 +2606,7 @@ class f_persistentdocument_DocumentService extends BaseService
 	 */
 	private function updateDuplicateLabel($label, $parentNodeId, $size = -1)
 	{
-		$defaultPrefix = f_Locale::translate('&modules.generic.backoffice.Duplicate-prefix;') . ' ';
+		$defaultPrefix = LocaleService::getInstance()->trans('m.generic.backoffice.duplicate-prefix', array('ucf')) . ' ';
 		$number = -1;
 		$prefix = $defaultPrefix;
 		while ($parentNodeId)
@@ -2653,6 +2714,25 @@ class f_persistentdocument_DocumentService extends BaseService
 			return count($this->getPersistentProvider()->getChildRelationBySlaveDocumentId($document->getId()));
 		}
 		return -1;
+	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @return string
+	 */
+	public function getTreeNodeLabel($document)
+	{
+		$label = ($document->isContextLangAvailable()) ? $document->getLabel() : $document->getVoLabel();
+		return LocaleService::getInstance()->trans($label, array('ucf'));
+	}
+
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @return string
+	 */
+	public function getNavigationLabel($document)
+	{
+		return $document->getLabel();
 	}
 
 	/**
@@ -2870,7 +2950,7 @@ class f_persistentdocument_DocumentService extends BaseService
 			if ($allowedSections === null || isset($allowedSections['properties']))
 			{
 				$data['properties'] = array(
-				'label' => $document->getLabel(), 
+				'label' => $document->getTreeNodeLabel(), 
 				'author' => $document->getAuthor(),
 				'creationdate' => date_Formatter::toDefaultDateTimeBO($document->getUICreationdate()));
 			}
@@ -2878,7 +2958,7 @@ class f_persistentdocument_DocumentService extends BaseService
 			if ($allowedSections === null || isset($allowedSections['publication']))
 			{
 				$data['publication'] = array(
-					'status' => LocaleService::getInstance()->transBO(DocumentHelper::getStatusLocaleKey($document)),
+					'status' => LocaleService::getInstance()->trans(DocumentHelper::getStatusLocaleKey($document), array('ucf')), 
 					'workflow' => ''
 				);
 				

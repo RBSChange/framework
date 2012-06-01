@@ -220,8 +220,7 @@ class ChangeTalAttribute extends PHPTAL_Php_Attribute
 
 	/**
 	 * Subclasses should override this method to return the list of parameters they will evaluate
-	 * @example return array('value', 'label');
-	 * @return String[]
+	 * @return string[] For example: array('value', 'label');
 	 */
 	protected function getEvaluatedParameters()
 	{
@@ -230,9 +229,7 @@ class ChangeTalAttribute extends PHPTAL_Php_Attribute
 
 	/**
 	 * Subclasses should override this method to return the default parameters
-	 *
-	 * @example return array('value' => 'toto', 'label' => 'tutu');
-	 * @return String[]
+	 * @return string[] For example: array('value' => 'toto', 'label' => 'tutu');
 	 */
 	protected function getDefaultValues()
 	{
@@ -241,7 +238,7 @@ class ChangeTalAttribute extends PHPTAL_Php_Attribute
 
 	/**
 	 * @see ChangeTalAttribute::buildAttribute()
-	 * @example ChangeTalAttribute::buildAttributes(array("attrName" => "attrValue")) renders ' attrName="attrValue"'
+	 * For example: ChangeTalAttribute::buildAttributes(array("attrName" => "attrValue")) renders ' attrName="attrValue"'
 	 * @param array<String, String> $attributes
 	 * @return String
 	 */
@@ -257,7 +254,7 @@ class ChangeTalAttribute extends PHPTAL_Php_Attribute
 
 	/**
 	 * You should always use this method to output an attribute so it is safe
-	 * @example ChangeTalAttribute::buildAttribute("attrName", "attrValue") renders 'attrName="attrValue"'
+	 * For example: ChangeTalAttribute::buildAttribute("attrName", "attrValue") renders 'attrName="attrValue"'
 	 * @param String $attrName
 	 * @param String $attrValue
 	 * @return String

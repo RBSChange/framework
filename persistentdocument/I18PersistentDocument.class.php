@@ -7,32 +7,39 @@ interface f_persistentdocument_I18nPersistentDocument
 {
 	/**
 	 * The document id
-	 * @return Integer
+	 * @return integer
 	 */
 	function getId();
 	
 	/**
 	 * The document lang
-	 * @return String
+	 * @return string
 	 */
 	function getLang();
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	function isModified();
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getLabel();
 	
+	/**
+	 * @return string
+	 */
+	function getPublicationstatus();
 	
+	/**
+	 * @return void
+	 */
 	function setDefaultValues();
 	
 	/**
-	 * @param String $propertyName
-	 * @return Boolean
+	 * @param string $propertyName
+	 * @return boolean
 	 */
 	function isPropertyModified($propertyName);
 }

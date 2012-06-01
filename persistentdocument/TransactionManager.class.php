@@ -36,7 +36,7 @@ class f_persistentdocument_TransactionManager
 	{
 		if (self::$instance === null)
 		{
-			$instance = new f_persistentdocument_TransactionManager();
+			$instance = new self();
 			if ($persistentProvider === null)
 			{
 				$instance->persistentProvider = f_persistentdocument_PersistentProvider::getInstance();
@@ -62,10 +62,6 @@ class f_persistentdocument_TransactionManager
 	{
 		if ($this->dirty)
 		{
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug('TransactionManager : is dirty');
-			}
 			throw new Exception('Transaction is dirty');
 		}
 	}
@@ -78,20 +74,16 @@ class f_persistentdocument_TransactionManager
 		$this->checkDirty();
 		if ($this->transactionCount == 0)
 		{
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug('TransactionManager::beginTransaction() => primary transaction '.f_persistentdocument_PersistentProvider::getDatabaseProfileName());
-			}
 			$this->transactionCount++;
 			$this->persistentProvider->beginTransaction();
 		}
 		else
 		{
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug('TransactionManager::beginTransaction() => embeded transaction ('. $this->transactionCount.' => '.($this->transactionCount+1).')');
-			}
 			$this->transactionCount++;
+			if ($this->transactionCount > 5)
+			{
+				Framework::warn('embeded transaction: ' . $this->transactionCount);
+			}
 		}
 	}
 
@@ -113,19 +105,7 @@ class f_persistentdocument_TransactionManager
 		}
 		if ($this->transactionCount == 1)
 		{
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug('TransactionManager::commit() => real commit');
-			}
-
 			$this->persistentProvider->commit();
-		}
-		else
-		{
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug('TransactionManager::commit() => embeded commit ('.$this->transactionCount.' => '.($this->transactionCount-1).')');
-			}
 		}
 		$this->transactionCount--;
 	}
@@ -158,27 +138,15 @@ class f_persistentdocument_TransactionManager
 		$this->transactionCount--;
 		if (!$this->dirty)
 		{
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug('TransactionManager->rollBack() => real (first) rollback');
-			}
 			$this->dirty = true;
 			$this->persistentProvider->rollBack();
 		}
 		if ($this->transactionCount == 0)
 		{
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug('TransactionManager->rollBack() => last rollback');
-			}
 			$this->dirty = false;
 		}
 		else
 		{
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug('TransactionManager->rollBack() => embeded rollback');
-			}
 			throw new TransactionCancelledException($e);
 		}
 		return $e;

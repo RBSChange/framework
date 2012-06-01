@@ -30,7 +30,7 @@ class FileLoader implements ResourceLoader
 	{
 		if (self::$instance === null)
 		{
-			self::$instance = new FileLoader();
+			self::$instance = new self();
 		}
 
 		return self::$instance;

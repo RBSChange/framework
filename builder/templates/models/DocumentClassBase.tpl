@@ -463,9 +463,9 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 <{if $property->getFromList()}>
 
 	/**
-	 * @return String
+	 * @return string
 	 */
-	public function get<{$property->getPhpName()}>LabelAsHtml()
+	public function get<{$property->getPhpName()}>Label()
 	{
 		$list = list_ListService::getInstance()->getByListId('<{$property->getFromList()}>');
 		if ($list === null)
@@ -477,7 +477,16 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		{
 			return null;
 		}
-		return f_util_HtmlUtils::textToHtml($listItem->getLabel());
+		return $listItem->getLabel();
+	}
+	
+	/**
+	 * @return String
+	 */
+	public function get<{$property->getPhpName()}>LabelAsHtml()
+	{
+		$label = $this->get<{$property->getPhpName()}>Label();
+		return $label ? f_util_HtmlUtils::textToHtml(label) : null;
 	}
 <{/if}>
 <{/foreach}>
@@ -1018,9 +1027,9 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 <{if $property->getFromList()}>
 
 	/**
-	 * @return String
+	 * @return string
 	 */
-	public function get<{$property->getPhpName()}>LabelAsHtml()
+	public function get<{$property->getPhpName()}>Label()
 	{
 		$list = list_ListService::getInstance()->getByListId('<{$property->getFromList()}>');
 		if ($list === null)
@@ -1032,7 +1041,16 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		{
 			return null;
 		}
-		return f_util_HtmlUtils::textToHtml($listItem->getLabel());
+		return $listItem->getLabel();
+	}
+	
+	/**
+	 * @return String
+	 */
+	public function get<{$property->getPhpName()}>LabelAsHtml()
+	{
+		$label = $this->get<{$property->getPhpName()}>Label();
+		return $label ? f_util_HtmlUtils::textToHtml($label) : null;
 	}
 <{/if}>
 <{/foreach}>
@@ -1466,8 +1484,11 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	 */
 	public function add<{$property->getPhpName()}>Inverse($value)
 	{
-		$value->add<{$property->getRelationName()|capitalize}>($this);
-		$this->addDocumentInverse($value);
+		if ($value->getIndexof<{$property->getRelationName()|capitalize}>($this) == -1)
+		{
+			$value->add<{$property->getRelationName()|capitalize}>($this);
+			$this->addDocumentInverse($value);
+		}
 	}
 
 	/**

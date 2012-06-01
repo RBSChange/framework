@@ -77,6 +77,11 @@ class RequestContext
 	private $profile;
 	
 	/**
+	 * @var array
+	 */
+	private $m_i18n_synchro = null;
+	
+	/**
 	 * Constructor of RequestContext
 	 * @param array $supportedLanguages
 	 * @param array $ui_supportedLanguages
@@ -140,6 +145,62 @@ class RequestContext
 	public static function clearInstance()
 	{
 		self::$m_instance = null;
+	}
+		
+	protected function loadI18nSynchroConfiguration()
+	{
+		$this->m_i18n_synchro = false;
+		$data = Framework::getConfigurationValue('i18nsynchro', null);
+	
+		if (is_array($data) && count($data))
+		{
+			$langs = $this->getSupportedLanguages();
+			$result = array();
+			foreach ($data as $lang => $froms)
+			{
+				if (in_array($lang, $langs))
+				{
+					$fromLangs = array();
+					foreach (array_map('trim', explode(',', $froms)) as $fromLang)
+					{
+						if (in_array($fromLang, $langs))
+						{
+							$fromLangs[] = $fromLang;
+						}
+					}
+	
+					if (count($fromLangs))
+					{
+						$result[$lang] = $fromLangs;
+					}
+				}
+			}
+	
+			if (count($result))
+			{
+				$this->m_i18n_synchro = $result;
+			}
+		}
+	}
+	
+	/**
+	 * @return boolean
+	 */
+	public function hasI18nSynchro()
+	{
+		if ($this->m_i18n_synchro === null)
+		{
+			$this->loadI18nSynchroConfiguration();
+		}
+		return $this->m_i18n_synchro !== false;
+	}
+	
+	/**
+	 * @return array string : string[]
+	 */
+	public function getI18nSynchro()
+	{
+		return $this->hasI18nSynchro() ? $this->m_i18n_synchro : array();
 	}
 	
 	/**
@@ -659,8 +720,7 @@ class RequestContext
 
 	/**
 	 * Get current context mime content-type
-	 * @example html
-	 * @return string
+	 * @return string 'html'|'xul'
 	 */
 	public function getMimeContentType()
 	{

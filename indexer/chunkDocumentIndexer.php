@@ -1,4 +1,6 @@
 <?php
+/* @var $arguments array */
+$arguments = isset($arguments) ? $arguments : array();
 if (count($arguments) == 4)
 {
 	list ($modelName, $documentIndex, $chunkSize, $delayed) = $arguments;

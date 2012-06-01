@@ -2,14 +2,12 @@
 class I18nInfo
 {
 	/**
-	 * @example "fr"
-	 * @var String
+	 * @var string For example: "fr"
 	 */
 	private $m_vo;
 
 	/**
-	 * @example array("fr" => "fr label", ...)
-	 * @var array
+	 * @var array For example: array("fr" => "fr label")
 	 */
 	private $m_labels = array();
 

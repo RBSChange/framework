@@ -530,6 +530,7 @@ class LocaleService extends BaseService
 		if (is_dir($dir))
 		{
 			$dirs = array();
+			$entities = array();
 			foreach (scandir($dir) as $file)
 			{
 				if ($file[0] == ".")
@@ -543,15 +544,48 @@ class LocaleService extends BaseService
 				}
 				elseif (f_util_StringUtils::endsWith($file, '.xml'))
 				{
-					$entities = array();
 					$this->processFile($absFile, $entities);
-					$this->processDatabase($baseKey, $entities);
+
 				}
+			}
+			
+			if (count($entities))
+			{
+				$this->applyEntitiesI18nSynchro($entities);
+				$this->processDatabase($baseKey, $entities);
 			}
 			
 			foreach ($dirs as $baseKey => $dir)
 			{
 				$this->processDir($baseKey, $dir);
+			}
+		}
+	}
+	
+	protected function applyEntitiesI18nSynchro(&$entities)
+	{
+		$syncConf = RequestContext::getInstance()->getI18nSynchro();
+		if (count($syncConf) === 0) {return;}
+		foreach ($syncConf as $to => $froms)
+		{
+			$toLCID = $this->getLCID($to);
+			foreach ($froms as $from)
+			{
+				$fromLCID = $this->getLCID($from);
+				if (isset($entities[$fromLCID]))
+				{
+					if (!isset($entities[$toLCID]))
+					{
+						$entities[$toLCID] = array();
+					}
+					foreach ($entities[$fromLCID] as $id => $data)
+					{
+						if (!isset($entities[$toLCID][$id]))
+						{
+							$entities[$toLCID][$id] = $data;
+						}
+					}
+				}
 			}
 		}
 	}
@@ -867,7 +901,7 @@ class LocaleService extends BaseService
 	}
 
 	/**
-	 * @example transData('f.boolean.true')
+	 * For example: transData('f.boolean.true')
 	 * @param string $cleanKey
 	 * @param array $formatters value in array lab, lc, uc, ucf, js, html, attr
 	 * @param array $replacements
@@ -879,7 +913,7 @@ class LocaleService extends BaseService
 	}
 	
 	/**
-	 * @example trans('f.boolean.true')
+	 * For example: trans('f.boolean.true')
 	 * @param string $cleanKey
 	 * @param array $formatters value in array lab, lc, uc, ucf, js, html, attr
 	 * @param array $replacements
@@ -916,7 +950,7 @@ class LocaleService extends BaseService
 	
 	
 	/**
-	 * @example formatKey('fr', 'f.boolean.true')
+	 * For example: formatKey('fr', 'f.boolean.true')
 	 * @param string $lang
 	 * @param string $cleanKey
 	 * @param array $formatters value in array lab, lc, uc, ucf, js, attr, raw, text, html
@@ -1008,13 +1042,12 @@ class LocaleService extends BaseService
 	
 	public function transformText($text, $lang)
 	{
-		return f_util_StringUtils::htmlToText($text);
+		return f_util_HtmlUtils::htmlToText($text);
 	}
 	
 	public function transformAttr($text, $lang)
 	{
-		return htmlspecialchars(str_replace(array("\t", "\n"), array("&#09;", "&#10;"), $text), 
-				ENT_COMPAT, 'UTF-8');
+		return f_util_HtmlUtils::textToAttribute($text);
 	}
 	
 	public function transformSpace($text, $lang)
@@ -1100,6 +1133,212 @@ class LocaleService extends BaseService
 			$mode =  RequestContext::getInstance()->getMode() === RequestContext::FRONTOFFICE_MODE ? 'fo' : 'bo';
 			error_log("\n". gmdate('Y-m-d H:i:s')."\t" . $mode ."\t" .  $lang. "\t" . $key, 3, $this->logFilePath);
 		}
+	}
+	
+	const SYNCHRO_MODIFIED = 'MODIFIED';
+	const SYNCHRO_VALID = 'VALID';
+	const SYNCHRO_SYNCHRONIZED = 'SYNCHRONIZED';
+	
+	/**
+	 * @param integer $documentId
+	 */
+	public function resetSynchroForDocumentId($documentId)
+	{
+		if (RequestContext::getInstance()->hasI18nSynchro())
+		{
+			$d = DocumentHelper::getDocumentInstanceIfExists($documentId);
+			if ($d && $d->getPersistentModel()->isLocalized())
+			{
+				$this->getPersistentProvider()->setI18nSynchroStatus($d->getId(), $d->getLang(), self::SYNCHRO_MODIFIED, null);
+			}
+		}
+	}
+	
+	
+	/**
+	 * @param integer $documentId
+	 */
+	public function initSynchroForDocumentId($documentId)
+	{
+		if (RequestContext::getInstance()->hasI18nSynchro())
+		{
+			$d = DocumentHelper::getDocumentInstanceIfExists($documentId);
+			if ($d && $d->getPersistentModel()->isLocalized())
+			{
+				foreach ($d->getI18nInfo()->getLangs() as $lang)
+				{
+					$this->getPersistentProvider()->setI18nSynchroStatus($d->getId(), $lang, self::SYNCHRO_MODIFIED, null);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * @return integer[]
+	 */
+	public function getDocumentIdsToSynchronize()
+	{
+		if (RequestContext::getInstance()->hasI18nSynchro())
+		{
+			return $this->getPersistentProvider()->getI18nSynchroIds();
+		}
+		return array();
+	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @return array
+	 * 		- isLocalized : boolean
+	 * 		- action : 'none'|'generate'|'synchronize'
+	 * 		- config : array
+	 * 			- 'fr'|'??' : string[]
+	 * 			- ...
+	 *		- states : array
+	 * 			- 'fr'|'??' : array
+	 * 				- status : 'MODIFIED'|'VALID'|'SYNCHRONIZED'
+	 * 				- from : fr'|'en'|'??'|null
+	 * 			- ...
+	 */
+	public function getI18nSynchroForDocument($document)
+	{
+		$result = array('isLocalized' => false, 'action' => 'none', 'config' => array());
+		$pm = $document->getPersistentModel();
+		if ($pm->isLocalized())
+		{
+			$result['isLocalized'] = true;
+			$rc = RequestContext::getInstance();
+			if ($rc->hasI18nSynchro())
+			{
+				$result['config'] = $rc->getI18nSynchro();
+				$data = $this->getPersistentProvider()->getI18nSynchroStatus($document->getId());
+				$result['states'] = $data;
+				foreach ($document->getI18nInfo()->getLangs() as $lang)
+				{
+					if (!isset($data[$lang]))
+					{
+						$result['action'] = 'generate';
+						break;
+					}
+					elseif ($data[$lang]['status'] === self::SYNCHRO_MODIFIED)
+					{
+						$result['action'] = 'synchronize';
+					}
+				}
+			}
+		}
+		return $result;
+	}
+	
+	/**
+	 * @param integer $documentId
+	 * @return boolean
+	 */
+	public function synchronizeDocumentId($documentId)
+	{
+		$rc = RequestContext::getInstance();
+		if (!$rc->hasI18nSynchro())
+		{
+			//No synchro configured
+			return false;
+		}
+		$d = DocumentHelper::getDocumentInstanceIfExists($documentId);
+		if ($d === null)
+		{
+			//Invalid document
+			return false;
+		}
+	
+		$pm = $d->getPersistentModel();
+		if (!$pm->isLocalized())
+		{
+			//Not applicable on this document
+			return false;
+		}
+	
+		$tm = $this->getTransactionManager();
+		try
+		{
+			$tm->beginTransaction();
+			$ds = $d->getDocumentService();
+				
+			$synchroConfig = $ds->getI18nSynchroConfig($d, $rc->getI18nSynchro());
+			if (count($synchroConfig))
+			{
+				$dcs = f_DataCacheService::getInstance();
+				$datas = $tm->getPersistentProvider()->getI18nSynchroStatus($d->getId());
+				if (count($datas) === 0)
+				{
+					foreach ($d->getI18nInfo()->getLangs() as $lang)
+					{
+						$datas[$lang] = array('status' => self::SYNCHRO_MODIFIED, 'from' => null);
+					}
+				}
+				else
+				{
+					$datas[$d->getLang()] = array('status' => self::SYNCHRO_MODIFIED, 'from' => null);
+				}
+	
+				foreach ($synchroConfig as $lang => $fromLangs)
+				{
+					if (!isset($datas[$lang]) || $datas[$lang]['status'] === self::SYNCHRO_SYNCHRONIZED)
+					{
+						foreach ($fromLangs as $fromLang)
+						{
+							if (isset($datas[$fromLang]) && $datas[$fromLang]['status'] !== self::SYNCHRO_SYNCHRONIZED)
+							{
+								list($from, $to) = $tm->getPersistentProvider()->prepareI18nSynchro($pm, $documentId, $lang, $fromLang);
+								try
+								{
+									$rc->beginI18nWork($fromLang);
+										
+									if ($ds->synchronizeI18nProperties($d, $from, $to))
+									{
+										$tm->getPersistentProvider()->setI18nSynchro($pm, $to);
+										$tm->getPersistentProvider()->setI18nSynchroStatus($documentId, $lang, self::SYNCHRO_SYNCHRONIZED, $fromLang);
+										$dcs->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($d->getDocumentModelName()));
+										$dcs->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($documentId));
+									}
+									elseif (isset($datas[$lang]))
+									{
+										$this->getPersistentProvider()->setI18nSynchroStatus($documentId, $lang, self::SYNCHRO_VALID, null);
+									}
+	
+									$rc->endI18nWork();
+								}
+								catch (Exception $e)
+								{
+									$rc->endI18nWork($e);
+								}
+								break;
+							}
+						}
+					}
+				}
+	
+				foreach ($datas as $lang => $synchroInfos)
+				{
+					if ($synchroInfos['status'] === self::SYNCHRO_MODIFIED)
+					{
+						$this->getPersistentProvider()->setI18nSynchroStatus($documentId, $lang, self::SYNCHRO_VALID, null);
+					}
+					elseif ($synchroInfos['status'] === self::SYNCHRO_SYNCHRONIZED && !isset($synchroConfig[$lang]))
+					{
+						$this->getPersistentProvider()->setI18nSynchroStatus($documentId, $lang, self::SYNCHRO_VALID, null);
+					}
+				}
+			}
+			else
+			{
+				$tm->getPersistentProvider()->deleteI18nSynchroStatus($documentId);
+			}
+			$tm->commit();
+		}
+		catch (Exception $e)
+		{
+			$tm->rollback($e);
+			return false;
+		}
+		return true;
 	}
 	
 	

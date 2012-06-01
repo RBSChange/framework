@@ -159,11 +159,6 @@ abstract class f_util_Convert
 	/**
 	 * Fixes the data type of the given $value.
 	 *
-	 * @example f_util_Convert::fixDataType('true') returns the boolean true
-	 * @example f_util_Convert::fixDataType('false') returns the boolean false
-	 * @example f_util_Convert::fixDataType('199.20') returns the floating point number 199.2
-	 * @example f_util_Convert::fixDataType('5') returns the integer 5
-	 *
 	 * @param mixed $value
 	 * @return mixed
 	 */

@@ -131,7 +131,14 @@ class import_ScriptBaseElement
 			$objects = array();
 			foreach (explode(',', $this->attributes[$key]) as $value)
 			{ 
-				$objects[] = $this->script->getElementById($value, "import_ScriptObjectElement")->getObject();
+				if ($value === '==')
+				{
+					$objects = array('==');
+				}
+				else
+				{
+					$objects[] = $this->script->getElementById($value, "import_ScriptObjectElement")->getObject();
+				}
 			}
 			if ($remove)
 			{
@@ -167,16 +174,37 @@ class import_ScriptBaseElement
 				{
 					case 'refid':
 						$key = $subkey;
-						$value = $this->script->getElementById($value, "import_ScriptObjectElement")->getObject();
+						if (f_util_StringUtils::isNotEmpty($value))
+						{
+							$value = $this->script->getElementById($value, "import_ScriptObjectElement")->getObject();
+						}
+						else
+						{
+							$value = null;
+						}
 						break;
 						
 					case 'refids':
 						$key = $subkey;
-						$values = explode(',', $value);
-						$value = array();
-						foreach ($values as $oneValue)
+						if (f_util_StringUtils::isNotEmpty($value))
 						{
-							$value[] = $this->script->getElementById($oneValue, "import_ScriptObjectElement")->getObject();
+							$values = explode(',', $value);
+							$value = array();
+							foreach ($values as $oneValue)
+							{
+								if ($oneValue === '==')
+								{
+									$value = array('==');
+								}
+								else
+								{
+									$value[] = $this->script->getElementById($oneValue, "import_ScriptObjectElement")->getObject();
+								}
+							}
+						}
+						else
+						{
+							$value = array();
 						}
 						break;
 						

@@ -34,7 +34,7 @@ class ClassLoader implements ResourceLoader
 	{
 		if( is_null(self::$instance) )
 		{
-			self::$instance = new ClassLoader();
+			self::$instance = new self();
 		}
 
 		return self::$instance;

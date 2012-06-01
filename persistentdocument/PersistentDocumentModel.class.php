@@ -89,9 +89,8 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 	
 	/**
-	 * @param String $documentModelName
-	 * @return String the corresponding document class name
-	 * @example documentModelNameToDocumentClassName("modules_mymodule/mydocument") returns mymodule_persistentdocument_mydocument
+	 * @param String $documentModelName For example: "modules_mymodule/mydocument"
+	 * @return String the corresponding document class name For example: mymodule_persistentdocument_mydocument
 	 */
 	public static function documentModelNameToDocumentClassName($documentModelName)
 	{
@@ -249,7 +248,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	abstract public function getIcon();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getLabel()
 	{
@@ -257,46 +256,42 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	abstract function getLabelKey();
 
 	/**
-	 * @return String
-	 * @example modules_generic/folder
+	 * @return string For example: modules_generic/folder
 	 */
 	abstract public function getName();
 
 	/**
-	 * @return String
-	 * @example modules_generic/folder or null
+	 * @return string|NULL For example: modules_generic/folder or null
 	 */
 	abstract public function getBaseName();
 
 	/**
-	 * @return String
-	 * @example generic
+	 * @return string For example: generic
 	 */
 	abstract public function getModuleName();
 
 	/**
-	 * @return String
-	 * @example folder
+	 * @return string For example: folder
 	 */
 	abstract public function getDocumentName();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	abstract public function getTableName();
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	abstract public function isLocalized();
 	
 	/**
-	 * @return String[]
+	 * @return string[]|NULL
 	 */
 	public function getChildrenNames()
 	{
@@ -304,7 +299,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	function hasChildren()
 	{
@@ -312,7 +307,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getParentName()
 	{
@@ -320,7 +315,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getDocumentClassName()
 	{
@@ -328,7 +323,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	function hasParent()
 	{
@@ -336,17 +331,17 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	abstract public function isLinkedToRootFolder();
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	abstract public function isIndexable();
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isBackofficeIndexable()
 	{
@@ -359,8 +354,8 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	abstract public function getAncestorModelNames();
 	
 	/**
-	 * @param String $modelName
-	 * @return Boolean
+	 * @param string $modelName
+	 * @return boolean
 	 */
 	public final function isModelCompatible($modelName)
 	{
@@ -379,8 +374,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	/**********************************************************/
 
 	/**
-	 * @example Convert model name from 'modules_generic/folder' to 'modules_generic_folder'
-	 * @return string
+	 * @return string Convert model name from 'modules_generic/folder' to 'modules_generic_folder'
 	 */
 	public final function getBackofficeName()
 	{
@@ -388,7 +382,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 
 	/**
-	 * @return String[] 'DRAFT','CORRECTION','ACTIVE','PUBLICATED','DEACTIVATED','FILED','DEPRECATED','TRASH','WORKFLOW'
+	 * @return string[] 'DRAFT','CORRECTION','ACTIVE','PUBLICATED','DEACTIVATED','FILED','DEPRECATED','TRASH','WORKFLOW'
 	 */
 	public final function getStatuses()
 	{
@@ -396,8 +390,8 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 
 	/**
-	 * @param String $status
-	 * @return Boolean
+	 * @param string $status
+	 * @return boolean
 	 */
 	public final function hasSatutsCode($status)
 	{
@@ -405,14 +399,15 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	abstract public function getDefaultNewInstanceStatus();
 
 
 	/**********************************************************/
-	/* Properties Informations                                 */
+	/* Properties Informations                                */
 	/**********************************************************/
+	
 	protected function loadProperties()
 	{
 		$this->m_properties = array();

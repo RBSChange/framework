@@ -249,12 +249,11 @@ class config_ProjectParser
 			if ($package->isFramework())
 			{
 				$this->addConstant($configArray['defines'], "FRAMEWORK_VERSION", $package->getVersion());
-				$this->addConstant($configArray['defines'], "FRAMEWORK_HOTFIX", $package->getHotfix());
 			}
 			elseif ($package->isModule())
 			{
 				// -- Modules informations.
-				$configArray['packageversion']['modules_' . $package->getName()] = array('VERSION' => $package->getVersion(), 'HOTFIX' => $package->getHotfix());
+				$configArray['packageversion']['modules_' . $package->getName()] = array('VERSION' => $package->getVersion());
 			}
 		}
 		

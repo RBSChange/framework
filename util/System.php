@@ -87,42 +87,37 @@ class f_util_System
 	/**
 	 * @param string $relativeScriptPath to PROJECT_HOME
 	 * @param array $arguments
+	 * @param boolean $noFramework
+	 * @param string $baseUrl
 	 */
-	public static function execScript($relativeScriptPath, $arguments = array())
+	public static function execScript($relativeScriptPath, $arguments = array(), $noFramework = false, $baseUrl = null)
 	{
-		if (isset($_SERVER['REMOTE_ADDR']))
+		if (defined('PHP_CLI_PATH') && PHP_CLI_PATH != '' && !isset($_SERVER['REMOTE_ADDR']))
 		{
-			// Mode web
-			return self::execHTTPScript($relativeScriptPath, $arguments);
+			return self::execScriptConsole($relativeScriptPath, $arguments, $noFramework);
 		}
-		return self::execConsoleScript($relativeScriptPath, $arguments);
+		return self::execScriptHTTP($relativeScriptPath, $arguments, $noFramework, $baseUrl);
 	}
 	
 	/**
 	 * @param string $relativeScriptPath to PROJECT_HOME
 	 * @param array $arguments
+	 * @param boolean $noFramework
+	 * @param string $baseUrl
+	 * @return string | false
 	 */
-	public static function execConsoleScript($relativeScriptPath, $arguments = array())
+	public static function execScriptConsole($relativeScriptPath, $arguments = array(), $noFramework = false)
 	{
-		$phpCliPath = (defined('PHP_CLI_PATH')) ? PHP_CLI_PATH : '';
-		if (!empty($phpCliPath)) {$phpCliPath .= ' ';}
-		$phpCliPath .= f_util_FileUtils::buildFrameworkPath('bin', 'script.php');
-		if (is_array($arguments) && count($arguments))
+		try 
 		{
-			$file = f_util_FileUtils::getTmpFile('script_');
-			f_util_FileUtils::write($file, serialize($arguments), f_util_FileUtils::OVERRIDE);
+			$cmd = PHP_CLI_PATH . ' framework/bin/consoleScript.php ' . $relativeScriptPath . ' ' . ($noFramework ? '1' : '0') . ' ' . implode(" ", $arguments);
+			return self::exec($cmd);
 		}
-		else
+		catch (Exception $e)
 		{
-			$file = null;
+			Framework::exception($e);
 		}
-		$args = array($relativeScriptPath);
-		if ($file !== null)
-		{
-			$args[] = $file;
-		}
-		$cmd = $phpCliPath . ' ' . implode(" ", array_map('base64_encode', $args));
-		return self::exec($cmd); 
+		return false;
 	}
 
 	/**
@@ -131,7 +126,7 @@ class f_util_System
 	 * @param boolean $noFramework
 	 * @param string $baseUrl
 	 */
-	public static function execHTTPScript($relativeScriptPath, $arguments = array(), $noFramework = false, $baseUrl = null)
+	public static function execScriptHTTP($relativeScriptPath, $arguments = array(), $noFramework = false, $baseUrl = null)
 	{
 		list($name, $secret) = explode('#', file_get_contents(PROJECT_HOME . '/build/config/oauth/script/token.txt'));	
 		
@@ -156,6 +151,16 @@ class f_util_System
 		}
 		list($name, $secret) = explode('#', file_get_contents(PROJECT_HOME . '/build/config/oauth/script/consumer.txt'));
 		$client = $token->getHttpClient(array( 'consumerKey' => $name, 'consumerSecret' => $secret));
+		
+		/* @TODO SELF Proxy Setting ?
+		$lp = Framework::getConfigurationValue('general/selfRequestProxy');
+		if (!empty($lp)) 
+		{
+			list($host, $port) = explode(':', $lp); 
+			$client->setProxy($host, $port);
+			///$client->getAdapter()->setConfig()
+		}
+		*/
 		$client->setUri($baseUrl .'/changescriptexec.php');
 		$client->setMethod(Zend_Http_Client::POST);
 		$client->setParameterPost('phpscript', $relativeScriptPath);
@@ -180,9 +185,22 @@ class f_util_System
 	 * @param string $relativeScriptPath to PROJECT_HOME
 	 * @param array $arguments
 	 */
+	public static function execChangeCommand($commandName, $arguments = array())
+	{
+		if (defined('PHP_CLI_PATH') && PHP_CLI_PATH != ''&& !isset($_SERVER['REMOTE_ADDR']))
+		{
+			return self::execChangeConsoleCommand($commandName, $arguments);
+		}
+		return self::execChangeHTTPCommand($commandName, $arguments);
+	}
+	
+	/**
+	 * @param string $relativeScriptPath to PROJECT_HOME
+	 * @param array $arguments
+	 */
 	public static function execChangeHTTPCommand($commandName, $arguments = array())
 	{
-		return self::execHTTPScript("framework/bin/changeHTTP.php", array_merge(array($commandName), $arguments), true);
+		return self::execScriptHTTP("framework/bin/changeHTTP.php", array_merge(array($commandName), $arguments), true);
 	}
 	
 	/**
@@ -191,23 +209,6 @@ class f_util_System
 	 */
 	public static function execChangeConsoleCommand($commandName, $arguments = array())
 	{
-		$phpCliPath = (defined('PHP_CLI_PATH')) ? PHP_CLI_PATH : '';
-		if (!empty($phpCliPath)) {$phpCliPath .= ' ';}
-		return self::exec($phpCliPath . "framework/bin/change.php $commandName " . implode(" ", $arguments)); 
+		return self::exec(PHP_CLI_PATH . " framework/bin/change.php $commandName " . implode(" ", $arguments)); 
 	}
-	
-	/**
-	 * @param string $relativeScriptPath to PROJECT_HOME
-	 * @param array $arguments
-	 */
-	public static function execChangeCommand($commandName, $arguments = array())
-	{
-		if (isset($_SERVER['REMOTE_ADDR']))
-		{
-			// Mode web
-			return self::execChangeHTTPCommand($commandName, $arguments);
-		}
-		return self::execChangeConsoleCommand($commandName, $arguments);
-	}
-	
 }

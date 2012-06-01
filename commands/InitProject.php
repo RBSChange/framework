@@ -83,9 +83,10 @@ class commands_InitProject extends c_ChangescriptCommand
 		// cache directory
 		f_util_FileUtils::mkdir("cache/project");
 
-		f_util_FileUtils::mkdir("mailbox");
+		f_util_FileUtils::mkdir("themes");
 		
 		$this->executeCommand("compile-config");
+		
 		$this->loadFramework();
 
 		// init-file-policy

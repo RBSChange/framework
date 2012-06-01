@@ -197,9 +197,9 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 	
 	/**
-	 * @return Integer the count of available langs, after deleting
+	 * @return integer the count of available langs, after deleting
 	 */
-	function removeContextLang ()
+	public function removeContextLang()
 	{
 		$this->is_i18InfoModified = true;
 		$contextLang = $this->getContextLang();
@@ -554,7 +554,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	 */
 	function updateId($id)
 	{
-		$this->m_id = $id;
+		$this->m_id = intval($id);
 	}
 
 	/**
@@ -737,13 +737,25 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	 */
 	function getTreeNodeLabel()
 	{
-		if ($this->isContextLangAvailable())
-		{
-			return $this->getLabel();
-		}
-		return $this->getVoLabel() . ' [' . LocaleService::getInstance()->trans('m.uixul.bo.languages.' . $document->getLang(), array('ucf')) . ']';
+		return $this->getDocumentService()->getTreeNodeLabel($this);
 	}
 
+	/**
+	 * @return string
+	 */
+	public function getNavigationLabel()
+	{
+		return $this->getDocumentService()->getNavigationLabel($this);
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getNavigationLabelAsHtml()
+	{
+		return f_util_HtmlUtils::textToHtml($this->getNavigationLabel());
+	}
+	
 	/**
 	 * @return string
 	 */

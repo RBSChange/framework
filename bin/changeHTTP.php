@@ -1,9 +1,7 @@
 <?php
 if (!defined("PROJECT_HOME"))
 {
-	define("PROJECT_HOME", getcwd());
-	define("WEBEDIT_HOME", PROJECT_HOME);
-	
+	define("PROJECT_HOME", getcwd());	
 	$profile = @file_get_contents(PROJECT_HOME . DIRECTORY_SEPARATOR . 'profile');
 	if ($profile === false || empty($profile))
 	{
@@ -12,6 +10,7 @@ if (!defined("PROJECT_HOME"))
 		exit(-1);
 	}
 }
+clearstatcache();
 define("HTTP_MODE", true);
 ignore_user_abort(true);
 set_time_limit(0);

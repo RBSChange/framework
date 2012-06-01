@@ -364,12 +364,13 @@ class ModuleService extends BaseService
 		
 		$rootNodeId = null;
 		$tm = f_persistentdocument_TransactionManager::getInstance();
+		$pp = $tm->getPersistentProvider();
 		
 		if ($moduleName !== 'generic')
 		{
 			$package = 'modules_' . $moduleName;
 			
-			$rootNodeId = $this->getPersistentProvider()->getSettingValue($package, self::SETTING_ROOT_FOLDER_ID);
+			$rootNodeId = $pp->getSettingValue($package, self::SETTING_ROOT_FOLDER_ID);
 			if (is_null($rootNodeId))
 			{
 				// setting not found: create root folder and save setting information
@@ -378,8 +379,7 @@ class ModuleService extends BaseService
 					$tm->beginTransaction();
 					
 					// create root folder
-					$rootFolder = $tm->getPersistentProvider()->getNewDocumentInstance('modules_generic/rootfolder');
-					$rootFolder->setLabel($moduleName);
+					$rootFolder = $pp->getNewDocumentInstance('modules_generic/rootfolder');
 					$rootFolder->save();
 					
 					// set as root folder in the tree
@@ -387,7 +387,7 @@ class ModuleService extends BaseService
 					
 					// save root folder id in f_settings table
 					$rootNodeId = $rootFolder->getId();
-					$this->getPersistentProvider()->setSettingValue($package, self::SETTING_ROOT_FOLDER_ID, $rootNodeId);
+					$pp->setSettingValue($package, self::SETTING_ROOT_FOLDER_ID, $rootNodeId);
 					
 					$tm->commit();
 				}
@@ -759,14 +759,6 @@ class c_Module
 	function getVersion()
 	{
 		return isset($this->infos['VERSION']) ? $this->infos['VERSION'] : null;
-	}
-	
-	/**
-	 * @return String
-	 */
-	function getHotfix()
-	{
-		return isset($this->infos['HOTFIX']) ? $this->infos['HOTFIX'] : null;
 	}
 	
 	/**

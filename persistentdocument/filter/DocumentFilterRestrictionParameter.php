@@ -198,7 +198,7 @@ class f_persistentdocument_DocumentFilterRestrictionParameter extends f_persiste
 	
 	/**
 	 * @var Array<String => String[]>
-	 * @example array(
+	 * For example: array(
 	 * 		'modules_users/user.email' => array('like', 'ilike'),
 	 *  	'modules_users/user.login' => array('like'))
 	 */

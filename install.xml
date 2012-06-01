@@ -1,5 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install name="framework" version="4.0.0" >
+	<package type="modules" name="contactcard" />
+	<package type="modules" name="filter" />
+	<package type="modules" name="form" />
+	<package type="modules" name="markergas" />
+	<package type="modules" name="skin" />
+	<package type="modules" name="useractionlogger" />
+	<package type="modules" name="uixul" />
+	<package type="modules" name="list" />
+	<package type="modules" name="media" />
+	<package type="modules" name="notification" />
+	<package type="modules" name="generic" />
+	<package type="modules" name="preferences" />
+	<package type="modules" name="mysqlindexer" />
+	<package type="modules" name="solrsearch" />
+	<package type="modules" name="rss" />
+	<package type="modules" name="seo" />
+	<package type="modules" name="dashboard" />
+	<package type="modules" name="task" />
+	<package type="modules" name="theme" />
+	<package type="modules" name="i18n" />
+	<package type="modules" name="users" />
+	<package type="modules" name="website" />
+	<package type="modules" name="workflow" />
+	<package type="modules" name="zone" />
+	
+	<!-- 
+		<package type="modules" name="updater" />
+	
+	 -->
+		
 	<package type="libs" name="phptal" />
 	<package type="libs" name="smarty" />
 	<package type="libs" name="zfminimal" />

@@ -167,9 +167,7 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	}
 
 	/**
-	 * TODO: remove propertyName from this !
-	 * @param String $validationRules
-	 * @example setValidationRules("myProperty{blank:false;email:true}")
+	 * @param string $validationRules
 	 */
 	function setValidationRules($validationRules)
 	{

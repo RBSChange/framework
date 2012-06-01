@@ -52,8 +52,8 @@ class Framework
 			self::$log->addFilter($filter);
 			self::$log->setEventItem('sessionId' , '');
 			self::$log->setTimestampFormat('Y-m-d H:i:s');
-		}
-		self::$log->registerErrorHandler();
+			self::$log->registerErrorHandler();
+		}	
 		return self::$log;
 	}
 	
@@ -172,7 +172,6 @@ class Framework
 
 	
 	/**
-	 * @example
 	 * Framework::startBench(); // begin bench process
 	 * $brands = $this->getBrandsList();
 	 * Framework::bench("getBrandList"); // debug time between this call and last call
@@ -367,8 +366,6 @@ class Framework
 	/**
 	 * Return true if the $path configuration exist
 	 * @param String $path
-	 * @example Framework::hasConfiguration('databases')
-	 * @example Framework::hasConfiguration('databases/webapp')
 	 */
 	public static function hasConfiguration($path)
 	{
@@ -389,9 +386,7 @@ class Framework
 	 * or throw a Exception if the $path configuration does not exist
 	 * @param String $path
 	 * @param Boolean $strict
-	 * @throws ConfigurationException if the $path configuration does not exist
-	 * @example Framework::getConfiguration('databases')
-	 * @example Framework::getConfiguration('databases/webapp')
+	 * @throws Exception if the $path configuration does not exist
 	 * @return String | false if the path was not founded and strict value if false
 	 */
 	public static function getConfiguration($path, $strict = true)
@@ -490,14 +485,6 @@ class Framework
 			ModuleService::clearInstance();
 			generator_PersistentModel::reloadModels();
 		}
-	}
-
-	/**
-	 * @return String
-	 */
-	public static function getCompanyName()
-	{
-		return self::$config['general']['projectName'];
 	}
 	
 	/**

@@ -59,7 +59,7 @@ class commands_CheckDependencies extends c_ChangescriptCommand
 		foreach ($dependencies as $package) 
 		{
 			/* @var $package c_Package */
-			$msg =  'Dependency: ' . $package->getKey() . ' version ' . $package->getHotfixedVersion();
+			$msg =  'Dependency: ' . $package->getKey() . ' version ' . $package->getVersion();
 			if 	(!$package->isInProject())
 			{
 					$msg .= ': Not present in project';
@@ -82,9 +82,9 @@ class commands_CheckDependencies extends c_ChangescriptCommand
 					$this->warnMessage($msg);
 					continue;
 				}
-				elseif ($reallyPackage->getHotfixedVersion() != $package->getHotfixedVersion())
+				elseif ($reallyPackage->getVersion() != $package->getVersion())
 				{
-					$msg .= ': invalid install version ' . $reallyPackage->getHotfixedVersion();
+					$msg .= ': invalid install version ' . $reallyPackage->getVersion();
 					$this->warnMessage($msg);
 					continue;
 				}
@@ -131,10 +131,6 @@ class commands_CheckDependencies extends c_ChangescriptCommand
 			$depNode->setAttribute('type', $package->getType());
 			$depNode->setAttribute('name', $package->getName());
 			$depNode->setAttribute('version', $package->getVersion());
-			if ($package->getHotfix())
-			{
-				$depNode->setAttribute('hotfix', $package->getHotfix());
-			}
 		}
 
 		return $domDoc->saveXML();

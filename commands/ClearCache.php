@@ -22,6 +22,11 @@ class commands_ClearCache extends c_ChangescriptCommand
 		return "clear cache directory";
 	}
 
+	function isHidden()
+	{
+		return true;
+	}
+	
 	/**
 	 * @param String[] $params
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true

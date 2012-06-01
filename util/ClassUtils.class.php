@@ -2,8 +2,8 @@
 abstract class f_util_ClassUtils
 {
 	/**
+	 *  For example: getMethodByName('util_f_util_ClassUtils::getMethod')
 	 * @param String $fullMethodName
-	 * @example getMethod('util_f_util_ClassUtils::getMethod')
 	 * @return ReflectionMethod
 	 */
 	public static function getMethodByName($fullMethodName)
@@ -17,9 +17,9 @@ abstract class f_util_ClassUtils
 	}
 	
 	/**
+	 *  For example: getMethod('util_f_util_ClassUtils', 'getMethod')
 	 * @param String $fullMethodName
 	 * @param String $methodName
-	 * @example getMethod('util_f_util_ClassUtils', 'getMethod')
 	 * @return ReflectionMethod
 	 */
 	public static function getMethod($fullClassName, $methodName)
@@ -33,8 +33,8 @@ abstract class f_util_ClassUtils
 	}
 	
 	/**
+	 * For example: callMethodByName('util_f_util_ClassUtils::getMethodByName', 'util_f_util_ClassUtils::getMethod')
 	 * @param String $fullMethodName
-	 * @example callMethod('util_f_util_ClassUtils::getMethod', 'util_f_util_ClassUtils::callMethod') returns the ReflectionMethod util_f_util_ClassUtils::callMethod
 	 * @param mixed $args
 	 * @return mixed
 	 */
@@ -50,8 +50,8 @@ abstract class f_util_ClassUtils
 	}
 	
 	/**
+	 *  For example: callMethod('util_f_util_ClassUtils', 'getMethod', 'util_f_util_ClassUtils', 'getMethod')
 	 * @param String $fullMethodName
-	 * @example callMethod('util_f_util_ClassUtils', 'getMethod', 'util_f_util_ClassUtils::callMethod') returns the ReflectionMethod util_f_util_ClassUtils::callMethod
 	 * @param mixed $args
 	 * @return mixed
 	 */
@@ -67,8 +67,8 @@ abstract class f_util_ClassUtils
 	}
 	
 	/**
-	 * @param String $fullMethodName
-	 * @example callMethod('util_f_util_ClassUtils::getMethod', array('util_f_util_ClassUtils::callMethod')) returns the ReflectionMethod util_f_util_ClassUtils::callMethod
+	 * For example: callMethodArgsByName('util_f_util_ClassUtils::getMethod', array('util_f_util_ClassUtils::callMethod'))
+	 * @param String $fullMethodName 
 	 * @param array $args
 	 * @return mixed
 	 */
@@ -83,8 +83,8 @@ abstract class f_util_ClassUtils
 	}
 	
 	/**
-	 * @param String $fullMethodName
-	 * @example callMethod('util_f_util_ClassUtils', 'getMethod', array('util_f_util_ClassUtils::callMethod')) returns the ReflectionMethod util_f_util_ClassUtils::callMethod
+	 * For example: callMethodArgs('util_f_util_ClassUtils', 'getMethod', array('util_f_util_ClassUtils::callMethod'))
+	 * @param String $fullMethodName 
 	 * @param array $args
 	 * @return mixed
 	 */
@@ -99,9 +99,9 @@ abstract class f_util_ClassUtils
 	}
 	
 	/**
+	 *  For example: callMethodOn($myInstance, $myMethodName, $arg1, $arg2, $arg3 ...)
 	 * @param Object $objectInstance
 	 * @param String $methodName
-	 * @example callMethodOn($myInstance, $myMethodName, $arg1, $arg2, $arg3 ...)
 	 * @return mixed
 	 */
 	public static function callMethodOn($objectInstance, $methodName)
@@ -112,10 +112,10 @@ abstract class f_util_ClassUtils
 	}
 	
 	/**
+	 *  For example: callMethodArgsOn($myInstance, $myMethodName, array($arg1, $arg2, $arg3 ...))
 	 * @param Object $objectInstance
 	 * @param String $methodName
 	 * @param array $args
-	 * @example callMethodArgsOn($myInstance, $myMethodName, array($arg1, $arg2, $arg3 ...))
 	 * @return mixed
 	 */
 	public static function callMethodArgsOn($objectInstance, $methodName, $args = array())
@@ -125,8 +125,8 @@ abstract class f_util_ClassUtils
 	}
 	
 	/**
+	 * For example: newInstance($className, $arg1, $arg2, $arg3 ...)
 	 * @param String $className
-	 * @example newInstance($className, $arg1, $arg2, $arg3 ...)
 	 * @return mixed
 	 */
 	public static function newInstance($className)
@@ -141,9 +141,9 @@ abstract class f_util_ClassUtils
 	}
 	
 	/**
+	 * For example: newInstanceSandbox($className, "mymodule_SomeClass", $arg1, $arg2, $arg3 ...)
 	 * @param String $className
 	 * @param String $expectedClassName
-	 * @example newInstance($className, "mymodule_SomeClass", $arg1, $arg2, $arg3 ...)
 	 * @throws Exception if the $className is not compatible with $expectedClassName
 	 * @return mixed
 	 */

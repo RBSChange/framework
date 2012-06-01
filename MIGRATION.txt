@@ -1,0 +1,1232 @@
+Reprise Des commits de la branche 3.6 jusqau'au 30/05/2012 11:28:58
+
+Revision: c8eef3c9bae90bc8efc137079d84e891e3e6aa93
+Author: Eric HAUSWALD
+Date: 30/05/2012 11:28:58
+Message:
+[UPDATE] Replace DISABLE_CHANGECRON_EXECUTION by CHANGECRON_EXECUTION
+
+
+----
+Modified : config/project.xml
+
+Revision: 99dac458588fda0f09afff8c47da6a09de4dba2d
+Author: Eric HAUSWALD
+Date: 30/05/2012 11:27:35
+Message:
+[REFACTOR] Remove invalid comment
+
+
+----
+Modified : f_web/oauth/Consumer.class.php
+Modified : f_web/oauth/HTTPClient.class.php
+Modified : f_web/oauth/Request.class.php
+Modified : f_web/oauth/Service.class.php
+Modified : f_web/oauth/Signature.class.php
+Modified : f_web/oauth/Token.class.php
+
+Revision: 291ca83b4dcbca5e73f12233dba519f09b84dc96
+Author: Eric HAUSWALD
+Date: 30/05/2012 11:07:12
+Message:
+[NEW] Add crontab in console mode
+
+[REFACTOR] Replace DISABLE_CHANGECRON_EXECUTION by CHANGECRON_EXECUTION
+[REFACTOR] Convert f_util_System::execHTTPScript to f_util_System::execScript
+----
+Added : bin/consoleScript.php
+Modified : builder/home/changecron.php
+Added : builder/home/changecronconsole.php
+Modified : builder/home/changescriptexec.php
+Modified : change-commands/CreateNewProject.php
+Modified : change-commands/EnableSite.php
+Modified : change-commands/I18nSynchro.php
+Modified : change-commands/Indexer.php
+Modified : change-commands/InitWebapp.php
+Modified : indexer/BackgroundIndexingTask.class.php
+Modified : indexer/ReindexDocumentsTaskByUpdatedRoles.php
+Modified : mail/MassMailer.php
+Modified : util/System.php
+
+Revision: 643f7363fdfe7814c7a1fdf7e61d11c914f5a477
+Author: Eric HAUSWALD
+Date: 29/05/2012 11:42:20
+Message:
+[UPDATE] Update change commands loading
+
+
+----
+Modified : bin/change_script.inc
+Modified : bin/includes/Changescript.php
+Modified : bin/includes/Changescripthttp.php
+Modified : change-commands/CompileAll.php
+Modified : change-commands/CreateNewProject.php
+Modified : change-commands/Init.php
+Modified : change-commands/InitProject.php
+Modified : change-commands/InitWebapp.php
+Modified : change-commands/UpdateDependencies.php
+Modified : loader/ClassResolver.class.php
+Modified : service/ApacheService.class.php
+
+Revision: 8cdb3343ee6c905c0159678ef7173a48894788ac
+Author: Eric HAUSWALD
+Date: 21/05/2012 16:52:08
+Message:
+[UPDATE] Remove PclZip php class
+
+
+----
+Modified : bin/bootstrap.php
+Modified : bin/includes/ChangeBootStrap.php
+Deleted : bin/includes/PclZip.php
+Deleted : bin/includes/Zip.php
+Deleted : bin/includes/pclzip.lib.php
+
+Revision: 2eb4ebf4d12cae9f397cca063749034b386f8968
+Author: Eric HAUSWALD
+Date: 21/05/2012 10:36:04
+Message:
+Version updated to 3.6.1
+
+
+----
+Modified : change.xml
+
+Revision: d3bb0aca2e00255d6187810b4f0eaa7bfc284156
+Author: Gaël PORT
+Date: 14/05/2012 11:19:06
+Message:
+[FIX #56716] tri d'actualités ou d'événements dans une liste
+
+
+----
+Modified : persistentdocument/criteria/Query.class.php
+
+Revision: 38062c2ede02620f7e82ea0de84f93a06554952d
+Author: Gaël PORT
+Date: 14/05/2012 10:19:59
+Message:
+[FIX] ConfigurationException does not exist.
+
+
+----
+Modified : Framework.php
+Modified : service/BaseService.class.php
+Modified : service/Injection.php
+
+Revision: f3d840d4cdc2e4a993852b76aff809f7e17270cf
+Author: Gaël PORT
+Date: 11/05/2012 14:05:35
+Message:
+[FIX #57863] Téléchargement de fichiers XLSX sous IE 7-8
+
+
+----
+Modified : util/FileUtils.class.php
+
+Revision: 54ddaf0397faa1ba74539bdddbf38e29f9cbd2fb
+Author: Gaël PORT
+Date: 07/05/2012 15:44:03
+Message:
+[FIX] Generate document locale keys only for the main UI lang and do not generate -help keys.
+
+
+----
+Modified : builder/LocaleFileGenerator.class.php
+
+Revision: c25270d495c2944a4cdeaf86168c0cc118a37d8d
+Author: Gaël PORT
+Date: 04/05/2012 11:48:27
+Message:
+[NEW] Handle variables in CSS.
+
+
+----
+Modified : builder/Generator.class.php
+Modified : f_web/css/CSSDeclaration.php
+Modified : f_web/css/CSSRule.class.php
+Modified : f_web/css/CSSStylesheet.php
+
+Revision: 76499d3208e62ca44043aec0a65e5c23852ce5f2
+Author: Loïc Couturier
+Date: 04/05/2012 10:15:28
+Message:
+[UPDATE] Standardize backoffice editor
+
+
+----
+Modified : persistentdocument/DocumentService.class.php
+
+Revision: fadd24fd42a94dd61fb32e61f9f7fe6a213c6274
+Author: Gaël PORT
+Date: 04/05/2012 10:09:06
+Message:
+[FIX #57576] Classe ValidatorException inexistante
+
+
+----
+Modified : validation/parsers/ConstraintsParser.class.php
+
+Revision: 0d1f8db93fc270ac781ad6fce21043900a42ff29
+Author: Loïc Couturier
+Date: 25/04/2012 13:59:25
+Message:
+[REFACTOR] Deprecate some classes
+
+
+----
+Modified : bin/massMailerSend.php
+Modified : builder/generator/FormProperty.class.php
+Modified : chart/Charts.php
+Modified : chart/ChartsDemo.php
+Modified : exception/Exceptions.php
+Modified : exception/deprecated/Exceptions.php
+Modified : export/ExportableDocument.class.php
+Modified : export/ExportedDocument.class.php
+Modified : export/SparatedValuesExporter.php
+Modified : f_web/oauth/Consumer.class.php
+Modified : f_web/oauth/HTTPClient.class.php
+Modified : f_web/oauth/Request.class.php
+Modified : f_web/oauth/Service.class.php
+Modified : f_web/oauth/Signature.class.php
+Modified : f_web/oauth/Token.class.php
+Modified : import/SparatedValuesImporter.php
+Modified : indexer/IndexableDocument.class.php
+Modified : mail/FakeMailService.class.php
+Modified : mail/MailMessage.class.php
+Modified : mail/MailService.class.php
+Modified : mail/Mailer.class.php
+Modified : mail/MailerMail.class.php
+Modified : mail/MailerSendmail.class.php
+Modified : mail/MailerSmtp.class.php
+Modified : mail/MassMailer.php
+Modified : mail/MessageRecipients.class.php
+Modified : mail/NullMailService.class.php
+Modified : mail/PopMailMessage.php
+Modified : object/ComponentTypeObject.class.php
+Modified : object/ConstantObject.class.php
+Modified : object/Package.class.php
+Modified : object/XmlObject.class.php
+Modified : paginator/Paginator.class.php
+Modified : pdf/UrlPDFService.class.php
+Modified : persistentdocument/FormPropertyInfo.class.php
+Modified : persistentdocument/PersistentDocumentDeserializer.class.php
+Modified : persistentdocument/PersistentDocumentImpl.class.php
+Modified : persistentdocument/PersistentDocumentSerializer.class.php
+Modified : service/HTTPClientService.php
+Modified : service/Injection.php
+Modified : service/JsService.class.php
+Modified : service/LoggingService.class.php
+Modified : service/StyleService.class.php
+Modified : util/DomUtils.php
+Modified : util/MemoryUtils.class.php
+Modified : util/Properties.php
+Modified : util/TagReplacer.class.php
+Modified : util/TypeValidator.class.php
+
+Revision: 9145df90a8c62a1b15556cc838d7129368e6f7fc
+Author: Gaël PORT
+Date: 25/04/2012 09:30:04
+Message:
+[FIX] generic_FolderService class name case.
+
+
+----
+Modified : patch/0361/install.php
+
+Revision: 1ad6c1a6c33b88fb88be2bd7c201cd8744882094
+Author: Loïc Couturier
+Date: 24/04/2012 18:12:48
+Message:
+[UPDATE] Change folder label to use locale key
+
+
+----
+Modified : patch/0361/install.php
+
+Revision: 2729cbd7798f357b478f634f21f641689b3a8d49
+Author: Eric HAUSWALD
+Date: 24/04/2012 10:12:00
+Message:
+[REFACTOR] Refactor f_mvc_BufferedWriter class
+
+
+----
+Modified : f_mvc/BufferedWriter.php
+
+Revision: a6a0af1e7b6c5cd1a914ab1638fce3072d4722f1
+Author: Eric HAUSWALD
+Date: 23/04/2012 11:22:27
+Message:
+[FIX #55048] Import XML modifier un champ multivalué
+
+
+----
+Modified : persistentdocument/import/ScriptBaseElement.class.php
+Modified : persistentdocument/import/ScriptDocumentElement.class.php
+
+
+Revision: 14001c8526d84f398560a2814b0c5e4605dbf188
+Author: Eric HAUSWALD
+Date: 20/04/2012 14:36:24
+Message:
+[UPDATE] Support Integer document property in xml import script attribute with '-refid' suffix
+
+[UPDATE] Framework::getCompanyName() is deprecated
+----
+Modified : Framework.php
+Modified : change-commands/InitWebapp.php
+Modified : persistentdocument/DocumentService.class.php
+Modified : persistentdocument/import/ScriptDocumentElement.class.php
+
+Revision: 3a4928f978f27212d8448edffe46350ec9fb0ba2
+Author: Eric HAUSWALD
+Date: 20/04/2012 09:46:36
+Message:
+[UPDATE] Add migration folder in init-webapp command
+
+
+----
+Modified : change-commands/InitWebapp.php
+
+Revision: 88348e61347afa15059fc4d358854c6a72dc0e63
+Author: Eric HAUSWALD
+Date: 19/04/2012 15:14:34
+Message:
+[FIX #57007] Erreur d'auto complétion sur la commande install-module
+
+
+----
+Modified : change-commands/InstallModule.php
+
+Revision: cc19594614dc7d505665e04c5e67d1114dab0427
+Author: Gaël PORT
+Date: 19/04/2012 08:55:26
+Message:
+[NEW] defaultPopinTemplate script attribute.
+
+
+----
+Modified : persistentdocument/import/ScriptReader.class.php
+
+Revision: b1ae9f2a179fecc62d2d1dce0a3c09d0b25c3cb2
+Author: Eric HAUSWALD
+Date: 19/04/2012 11:23:18
+Message:
+[NEW] Add cacheVersion in f_web_ResourceLink
+
+
+----
+Modified : f_web/http/ResourceLink.class.php
+
+Revision: 54fd8bb344f19ba60cc035027e7a1afa5483cb1b
+Author: Eric HAUSWALD
+Date: 18/04/2012 11:42:04
+Message:
+[UPDATE] Add i18n date keys
+
+
+----
+Modified : i18n/date/date/initial/de_DE.xml
+Modified : i18n/date/date/initial/en_GB.xml
+Modified : i18n/date/date/initial/fr_FR.xml
+Modified : i18n/date/en_GB.xml
+Modified : i18n/date/fr_FR.xml
+
+Revision: 877f4b891b61390a6d6e4649eba90420ef7aac6d
+Author: Eric HAUSWALD
+Date: 18/04/2012 11:40:55
+Message:
+[UPDATE] Add clearstatcache() before each change command
+
+
+----
+Modified : bin/change_script.inc
+
+Revision: 614fb455ba92f673524b87d7b20b35b2b35f34a5
+Author: Gaël PORT
+Date: 05/04/2012 12:37:59
+Message:
+[NEW] Add new templateNosidebar default attribute in ScriptReader.
+
+
+----
+Modified : exception/BaseException.class.php
+Modified : persistentdocument/import/ScriptReader.class.php
+
+Revision: 983e8d3c7b3e9ad0f6552310edfec37a4ea0e420
+Author: Gaël PORT
+Date: 04/04/2012 11:02:06
+Message:
+[FIX] Add missing attribute in persistentdocument schema.
+
+
+----
+Modified : schema/persistentdocument-3.5.xsd
+
+Revision: 000184525c767fe81df6b6c475c7e1d30061f3ea
+Author: Gaël PORT
+Date: 04/04/2012 11:01:08
+Message:
+[REFACTOR] Rename strtolower and strtoupper to toLower and toUpper in StringUtils.
+
+
+----
+Modified : util/StringUtils.class.php
+
+Revision: 8e605b9079155d9d7e9d24bafb06404a525aaeda
+Author: Gaël PORT
+Date: 04/04/2012 11:00:16
+Message:
+[FIX] In logs, always use PHP_EOL to make new line and always at the end of logged message.
+
+
+----
+Modified : change-commands/Indexer.php
+Modified : indexer/BackgroundIndexingTask.class.php
+Modified : indexer/ReindexDocumentsTaskByUpdatedRoles.php
+Modified : libs/mvc/BaseAction.class.php
+
+
+Revision: d7a671e1ae0e3eadc810df6c6ea76a4d8322451d
+Author: Eric HAUSWALD
+Date: 03/04/2012 14:42:04
+Message:
+[REFACTOR] Rename 'syncho' to 'synchro'
+
+
+----
+Modified : change-commands/I18nSynchro.php
+Modified : object/RequestContext.class.php
+Modified : persistentdocument/DocumentService.class.php
+Modified : persistentdocument/PersistentProvider.class.php
+Modified : service/LocaleService.class.php
+
+Revision: b59665c5c3d03727f4dc74fb398b1d7bd0696b14 !!!!!!!!!!!!!!!!!!!!!!!!!!!
+Author: Eric HAUSWALD
+Date: 02/04/2012 16:19:06
+Message:
+[UPDATE] Update command update-dependencies forcedownload option
+
+
+----
+Modified : change-commands/UpdateDependencies.php
+
+Revision: f0b00ccfeba7b159ccf25c6d1bf2bfeda4c3cf39 !!!!!!!!!!!!!!!!!!!!!!!!!!!
+Author: Eric HAUSWALD
+Date: 02/04/2012 14:58:18
+Message:
+[FIX] correction of c_ChangeBootStrap::downloadDependency calling
+
+
+----
+Modified : change-commands/InstallModule.php
+Modified : change-commands/UpdateDependencies.php
+
+Revision: 912e395b85dc8fd341f6b003949f13b5436d76bc
+Author: Eric HAUSWALD
+Date: 02/04/2012 17:25:16
+Message:
+[FIX] Prise en compte de la synchro i18n sur la fonction f_persistentdocument_DocumentService::checkDeleteDocument
+
+
+----
+Modified : persistentdocument/DocumentService.class.php
+
+Revision: 11f229b5b6baaff8cd990e080b8fd427102c80f1 !!!!!!!!!!!!!!!!!!!!!!!!!!!
+Author: Gaël PORT
+Date: 02/04/2012 14:04:36
+Message:
+[FIX #56046] Une propriété from-list localisée n'a pas de getter getXXXLabelAsHtml
+
+
+----
+Modified : builder/templates/models/DocumentClassBase.tpl
+
+Revision: 7a1485e4215f7a6cdd3b5ce8da907a3c10e4b1e7 !!!!!!!!!!!!!!!!!!!!!!!!!!!
+Author: Gaël PORT
+Date: 02/04/2012 10:26:43
+Message:
+[FIX #56212] PHP error dans la compilation des documents
+
+
+----
+Modified : builder/generator/PersistentModel.class.php
+
+Revision: 575e0d9ae8fd40d794437e7f24abbb0bda6d7f5f
+Author: Gaël PORT
+Date: 30/03/2012 17:55:21
+Message:
+[NEW] getTreeNodeLabel in DocumentService now translate locale keys.
+
+
+----
+Modified : paginator/Paginator.class.php
+Added : patch/0361/README
+Added : patch/0361/install.php
+Modified : patch/lastpatch
+Modified : persistentdocument/DocumentService.class.php
+Modified : service/ModuleService.class.php
+
+Revision: 36d7c91bfdbde81d4b2a9e6f95cbe38214469e97
+Author: Eric HAUSWALD
+Date: 29/03/2012 18:00:39
+Message:
+[UPDATE] Complete check-dependencies command  !!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+[REFACTOR] Remove hotfix reference
+----
+Modified : bin/includes/ChangeBootStrap.php
+Modified : change-commands/CheckDependencies.php
+Modified : config/ProjectParser.class.php
+Modified : service/ModuleService.class.php
+
+Revision: 7e72956be51efd15c7b677b439cf9ec62fb09e24
+Author: Eric HAUSWALD
+Date: 28/03/2012 15:39:08
+Message:
+[UPDATE] Remove f_util_Finder class
+
+
+----
+Modified : bin/includes/ChangeBootStrap.php
+Modified : bin/includes/ClassDirAnalyzer.php
+Modified : loader/ClassResolver.class.php
+Deleted : util/Finder.class.php
+
+bin\includes\ChangeBootStrap.php
+
+
+Revision: 6a7501dc56f5fed7f07182cdd77a4d4f465a1c9e
+Author: Eric HAUSWALD
+Date: 28/03/2012 10:25:28
+Message:
+[UPDATE] Update default remote repository to http://update.rbschange.fr
+
+
+----
+Modified : bin/includes/ChangeBootStrap.php
+
+Revision: 0394b2ba3f167805686ae49441948cd7a01b57de
+Author: Eric HAUSWALD
+Date: 28/03/2012 10:20:35
+Message:
+[UPDATE] Remove Hotfix commands
+
+
+----
+Deleted : change-commands/ApplyHotfix.php
+Deleted : change-commands/CheckHotfix.php
+
+Revision: d977d68fa9e57621289b722e8472a2715a437495
+Author: Eric HAUSWALD
+Date: 28/03/2012 10:00:06
+Message:
+[UPDATE] Remove log in c_ChangeBootStrap
+
+
+----
+Modified : bin/includes/ChangeBootStrap.php
+
+Revision: 67c61b2d1488861b204e0f7751b93d7f3003f171
+Author: Eric HAUSWALD
+Date: 27/03/2012 18:05:56
+Message:
+[UPDATE] Remove hotfix command
+
+[REFACTOR] Update bootstrap for new remote repository system  !!!!!!!!!!!!!!!!!!!!!!!!!!! 
+----
+Modified : bin/includes/ChangeBootStrap.php
+Modified : change-commands/ApplyHotfix.php
+Modified : change-commands/CheckDependencies.php
+Modified : change-commands/CheckHotfix.php
+Added : change-commands/DownloadDependency.php
+Modified : change-commands/InstallModule.php
+Modified : change-commands/UpdateDependencies.php
+Modified : config/ProjectParser.class.php
+
+Revision: 7eaf942f3c387baa8c78866a165c622dc67e0a17
+Author: Eric HAUSWALD
+Date: 26/03/2012 10:45:42
+Message:
+[FIX] Correction in PermissionForm.tpl template file
+
+
+----
+Modified : builder/templates/permissions/PermissionForm.tpl
+
+Revision: d6c52c8b819e6b47e4505666ebf9a00bb8ec0318
+Author: Eric HAUSWALD
+Date: 23/03/2012 11:03:33
+Message:
+[REFACTOR] Remove debug log
+
+
+----
+Modified : service/LocaleService.class.php
+
+
+Revision: 1f9f011e7e3ecff81548bd31536b31d8dfcfc931
+Author: Eric HAUSWALD
+Date: 23/03/2012 10:01:35
+Message:
+[NEW] Synchronisation des documents localisé
+
+
+----
+Added : bin/batchI18nSynchro.php
+Modified : builder/templates/documents/serviceModel.tpl
+Added : change-commands/I18nSynchro.php
+Added : dataobject/FI18n.mysql.sql
+Modified : object/RequestContext.class.php
+Added : patch/0360/README
+Added : patch/0360/install.php
+Modified : patch/lastpatch
+Modified : persistentdocument/DocumentService.class.php
+Modified : persistentdocument/I18PersistentDocument.class.php
+Modified : persistentdocument/PersistentDocumentImpl.class.php
+Modified : persistentdocument/PersistentProvider.class.php
+Modified : persistentdocument/PersistentProviderMySql.class.php
+Modified : service/LocaleService.class.php
+Modified : service/LoggingService.class.php
+
+Revision: 001a852b99d7a6f6e635e238a2edccd8438c44ad
+Author: Gaël PORT
+Date: 22/03/2012 16:29:11
+Message:
+[NEW] New addInjectionInProjectConfiguration method on object_InitDataSetup
+
+
+----
+Modified : object/InitDataSetup.class.php
+
+
+Revision: 870c6382f2bdf56be0f79e3d713ba4b3f5883e36
+Author: Gaël PORT
+Date: 22/03/2012 14:48:07
+Message:
+[FIX #56098] Mauvaise gestion des permissions dans l'indexation front
+
+
+----
+Modified : indexer/IndexService.class.php
+Added : patch/0355/README
+Added : patch/0355/install.php
+Modified : patch/lastpatch
+
+Revision: b4b508e8950c4cf4a23a2888d977e078111104e7
+Author: Franck STAUFFER
+Date: 21/03/2012 16:09:24
+Message:
+Typo fixed
+
+
+----
+Modified : builder/templates/models/DocumentClassBase.tpl
+
+Revision: 1ccde213686fe025c1fb899e17656202bef803f4
+Author: Gaël PORT
+Date: 20/03/2012 14:45:09
+Message:
+[NEW] textToAttribute method in HtmlUtils.
+
+[REFACTOR] Move htmlToText from StringUtils to HtmlUtils.
+----
+Modified : service/LocaleService.class.php
+Modified : util/HtmlUtils.class.php
+Modified : util/StringUtils.class.php
+
+Revision: a6c6d2f577af87e0264af0362bbd3ab16afe097e
+Author: Gaël PORT
+Date: 20/03/2012 14:44:12
+Message:
+[NEW] getNavigationLabel and getTreeNodeLabel methods in DocumentService.
+
+[NEW] getNavigationLabel ans getNavigationLabelAsHtml in PersistentDocumentImpl.
+----
+Modified : builder/templates/models/DocumentClassBase.tpl
+Modified : persistentdocument/DocumentService.class.php
+Modified : persistentdocument/PersistentDocumentImpl.class.php
+
+Revision: 04c5f4d8639b23f7a7940a49d8866ff88556e2a2
+Author: Eric HAUSWALD
+Date: 20/03/2012 09:09:19
+Message:
+[UPDATE] Remove mailbox module dependency
+
+
+----
+Modified : change.xml
+
+Revision: 24541dd89c093ae365c4450dfd6e733ba9429edd  !!!!!!!!!!!!!!!!!!!!!!!!!!! 
+Author: Eric HAUSWALD
+Date: 20/03/2012 09:08:32
+Message:
+[FIX] Correction of invalid condition in PopMailMessage
+
+
+----
+Modified : mail/PopMailMessage.php  !!!!!!!!!!!!!!!!!!!!!!!!!!! 
+
+Revision: 9a41bb4b86787510cb652cb2367a38fd20236e16
+Author: Eric HAUSWALD
+Date: 16/03/2012 11:18:40
+Message:
+[NEW] Add long transaction log
+
+[REFACTOR] Remove debug log
+----
+Modified : builder/home/changecron.php
+Modified : builder/home/index.php
+Modified : builder/home/xul_controller.php
+Modified : persistentdocument/PersistentProvider.class.php
+Modified : persistentdocument/TransactionManager.class.php
+
+Revision: 897def053bfe5dfe7de98995f1b724d05e76f7a9
+Author: Eric HAUSWALD
+Date: 15/03/2012 15:48:18
+Message:
+[NEW] Add f_persistentdocument_DocumentService::getNavigationtitle
+
+
+----
+Modified : persistentdocument/DocumentService.class.php
+
+Revision: 3a551bb240c973fdf03a15515994056563b15ac9
+Author: Loïc Couturier
+Date: 14/03/2012 09:23:14
+Message:
+[NEW] Add unit text on StringUtils
+
+
+----
+Added : tests/unit/f_util_StringUtilsTest.php  !!!!!!!!!!!!!!!!!!!!!!!!!!! 
+Modified : util/MemoryUtils.class.php
+Modified : util/StringUtils.class.php
+
+Revision: 99b0452489dc35aa85359d812459fefb7c973118
+Author: Eric HAUSWALD
+Date: 13/03/2012 17:48:13
+Message:
+[UPDATE] use pear/Mail version 1.2.1 (PHP 5.3 compatibility)
+
+
+----
+Modified : change.xml
+
+Revision: aea018f50499b0dfeac962cd8f9bcefa2cf6ed06
+Author: Eric HAUSWALD
+Date: 12/03/2012 16:09:45
+Message:
+[FIX] Remove php warning in f_util_ProcessUtils::printBackTrace
+
+
+----
+Modified : util/ProcessUtils.class.php
+
+Revision: e02ba18978a49f36dea77ba21962ac5800f90a5c
+Author: Eric HAUSWALD
+Date: 12/03/2012 16:08:37
+Message:
+[DOC] fix TagService::hasTag documentation
+
+
+----
+Modified : service/TagService.php
+
+Revision: 30b26ce482ba6b688b3f0938ea3534fc1a5f1444
+Author: Eric HAUSWALD
+Date: 08/03/2012 09:41:18
+Message:
+[FIX] Fix 'doExcludeParams' calling syntax error
+
+
+----
+Modified : paginator/Paginator.class.php
+
+Revision: ed0dc9a3b165e965ff17d8d6b6b6654a9cb656b3
+Author: Gaël PORT
+Date: 05/03/2012 10:41:54
+Message:
+[DELETE] Delete old PublishListener (replaced by PublishTask in task module).
+
+
+----
+Modified : config/listeners.xml
+Deleted : listener/PublishListener.class.php
+
+Revision: 4a200a33d4d7fcdf6bd4f3a10e8530a04bdbb39f
+Author: Gaël PORT
+Date: 01/03/2012 16:43:25
+Message:
+[FIX] byTag attribute in xml import.
+
+
+----
+Modified : libs/pear/PHPTAL/Php/Attribute/CHANGE/Select.php
+Modified : persistentdocument/import/ScriptDocumentElement.class.php
+
+Revision: 089cfe2185e9e481a919b52bfca92f5880ef0283
+Author: Gaël PORT
+Date: 28/02/2012 15:02:44
+Message:
+[NEW] Handle "from=gmt" attribute in date: and datetime: PHPTAL keywords
+
+
+----
+Modified : object/TemplateObject.class.php
+
+
+
+Revision: b9540480f73098834a3d9d8374d40a3511c1e69f
+Author: Gael PORT
+Date: 27/02/2012 09:51:34
+Message:
+[FIX #54802] Impossibilité de surcharger "publish-on-day-change"
+
+
+----
+Modified : builder/generator/PersistentModel.class.php
+
+
+Revision: b9540480f73098834a3d9d8374d40a3511c1e69f
+Author: Gael PORT
+Date: 27/02/2012 09:51:34
+Message:
+[FIX #54802] Impossibilité de surcharger "publish-on-day-change"  !!!!!!!!!!!!!!!!!!!!!!!!!!! 
+
+
+----
+Modified : builder/generator/PersistentModel.class.php
+
+Revision: c8e8063b6e94899a004a92c485e7e3e3de5a6a77
+Author: Loïc Couturier
+Date: 28/02/2012 14:32:26
+Message:
+[UPDATE] Change the pagnitor to send only used items
+
+
+----
+Modified : paginator/Paginator.class.php
+
+Revision: 0cd9f3e99fb3c4fb6e07f9da6c1341a0fd400e88
+Author: Loïc Couturier
+Date: 23/02/2012 15:56:33
+Message:
+[UPDATE] Set the default solR schema to 3.0.3
+
+
+----
+Modified : indexer/SolrManager.class.php
+
+Revision: 221f669f37fac6e32f13fb40268bdcbdda68787a
+Author: Gaël PORT
+Date: 23/02/2012 10:57:46
+Message:
+[FIX #54901] Clarté du message d'erreur à l'import XML en cas de refid vide
+
+
+----
+Modified : persistentdocument/import/ScriptBaseElement.class.php
+Modified : persistentdocument/import/ScriptReader.class.php
+
+Revision: 6ba217a161b6760bd81ed8d739e66864cf75c1a6
+Author: Gaël PORT
+Date: 23/02/2012 09:27:01
+Message:
+[FIX #54706] Perte du contenu d'un bloc richtext
+
+
+----
+Modified : util/HtmlUtils.class.php
+
+Revision: 39b45d4b7416f01b8d442566d2625ca2d6b82a57
+Author: Gaël PORT
+Date: 17/02/2012 16:37:41
+Message:
+[FIX] add class="highlight" on highlighted results.
+
+
+----
+Modified : indexer/StandardSolrSeach.class.php
+
+Revision: 6a17e600e06f236b0a9f17a334efb1c692bd9319
+Author: Gaël PORT
+Date: 15/02/2012 17:53:00
+Message:
+[FIX #54063] Impossible de récupérer le message d'erreur dans HTTPClient  !!!!!!!!!!!!!!!!!!!!!!!!!!! 
+
+
+----
+Modified : service/HTTPClientService.php
+
+Revision: cb85eccf5715e03b795bf5a264f8ed7d63be0efb
+Author: Eric HAUSWALD
+Date: 15/02/2012 10:10:08
+Message:
+[FIX] Remove 'href' attribute on 'a' element with 'name' attribute
+
+
+----
+Modified : util/HtmlUtils.class.php
+
+Revision: 5528c438203ac363eba96ea79eefc2cb356acb7d
+Author: Eric HAUSWALD
+Date: 14/02/2012 09:09:51
+Message:
+[UPDATE] Modify init-webapp command
+
+
+----
+Modified : change-commands/InitWebapp.php
+
+Revision: 8296a2781a26cbabcb6949eef47b2a5aa05333bc
+Author: Eric HAUSWALD
+Date: 14/02/2012 09:08:35
+Message:
+[UPDATE] Modify default document root path
+
+
+----
+Modified : config/project.xml
+
+Revision: 27d6825d5e6742a5f58a8710b122dbb96b658ab5
+Author: Eric HAUSWALD
+Date: 10/02/2012 10:46:11
+Message:
+[UPDATE] Remove project "libs" folder from autoload
+
+
+----
+Modified : builder/Generator.class.php
+Modified : loader/ClassResolver.class.php
+
+Revision: 9d7753cba624094be22c59ba0b33604deb1454dd
+Author: Gaël PORT
+Date: 08/02/2012 17:15:47
+Message:
+[FIX] exists: PHPTAL keyword.  !!!!!!!!!!!!!!!!!!!!!!!!!!! 
+
+
+----
+Modified : libs/pear/PHPTAL/Context.php
+
+Revision: 9ae988cb3b2a537f2c67955332007e0a5492af8c
+Author: Gaël PORT
+Date: 08/02/2012 15:44:46
+Message:
+[UPDATE] Hide deprecated command init-generic-modules.
+
+
+----
+Modified : change-commands/InitGenericModules.php
+
+
+Revision: 1f88e3acceb3e1f4fb2338cc8740bda30bf93d88
+Author: Eric HAUSWALD
+Date: 07/02/2012 11:53:17
+Message:
+[UPDATE] Ajout d'une tâche de nettoyage des logs des actions utilisateurs
+
+
+----
+Modified : persistentdocument/PersistentProvider.class.php
+
+Revision: 7937a22254e6cfd296876a29ce129dba55555820
+Author: Gaël PORT
+Date: 03/02/2012 10:34:10
+Message:
+[NEW] TemplateResolver is now injectable.
+
+
+----
+Modified : loader/TemplateResolver.class.php
+
+
+Revision: de65cd25018cb6b0fc82e962ee59c53630a0e7db
+Author: Gaël PORT
+Date: 02/02/2012 10:27:20
+Message:
+[FIX #49212] Exception à l'import XML de comptes clients
+
+
+----
+Modified : builder/templates/models/DocumentClassBase.tpl
+
+Revision: fe13b3c55bdc4c14f7b943547fb4498dc5d261e0
+Author: Eric HAUSWALD
+Date: 02/02/2012 09:45:44
+Message:
+[UPDATE] update xml script 'execute' element.
+
+Add element attributes to executed function
+----
+Modified : persistentdocument/import/ScriptDocumentElement.class.php
+Modified : persistentdocument/import/ScriptExecuteElement.class.php
+
+Revision: 215f145ad3cff50e7550621646d6ccfbedbfea5a
+Author: Gaël PORT
+Date: 25/01/2012 17:23:07
+Message:
+[NEW] Add new getAvailableTagsInfoByModel method on TagService
+
+
+----
+Modified : service/TagService.php
+
+Revision: 1d061d97e71edca4d2376d5332e327b3aa08bfce
+Author: Gaël PORT
+Date: 24/01/2012 09:13:55
+Message:
+[FIX #49668] Indexer : nom des champs entiers multivalués
+
+
+----
+Modified : indexer/IndexedDocument.class.php
+
+
+Revision: 1580c7343e821e20f6acf90dcf676312bf097e0d
+Author: Gaël PORT
+Date: 23/01/2012 11:00:48
+Message:
+[FIX #50422] Entité html dans les CSS
+
+
+----
+Modified : f_web/css/CSSStylesheet.php
+
+Revision: 5b6359be65530b01474ebcfe8a28c78be794d89c
+Author: Gaël PORT
+Date: 20/01/2012 16:23:56
+Message:
+[FIX] Make sure that $id is an integer in f_persistentdocument_PersistentProvider::getDocumentModelName.
+
+
+----
+Modified : persistentdocument/PersistentProvider.class.php
+
+Revision: ad2cb872f94e64c5004463935dcc357dfde61889
+Author: Gaël PORT
+Date: 20/01/2012 16:23:18
+Message:
+[NEW] Add new getPublishedChildrenOf method on DocumentService.
+
+
+----
+Modified : persistentdocument/DocumentService.class.php
+
+Revision: 09c6bdd3067800aea8b3663ad41cdd7e135537d8
+Author: Gaël PORT
+Date: 20/01/2012 16:22:41
+Message:
+[NEW] Add new getDocumentInstanceIfExists method on DocumentHelper
+
+
+----
+Modified : persistentdocument/PersistentDocumentHelper.class.php
+
+Revision: 6f2d0bf3179ef9f8c65f5c594afb6b827c39b59d
+Author: Eric HAUSWALD
+Date: 12/01/2012 12:35:12
+Message:
+[FIX #49986] Erreur de chargement d'une localisation de document avec cache désactivé
+
+
+----
+Modified : persistentdocument/PersistentProvider.class.php
+
+
+Revision: 8a7d34ab1bab72f0c0bbae6be0249205f1edf3a8
+Author: Eric HAUSWALD
+Date: 18/01/2012 09:37:21
+Message:
+[UPDATE] Add try/catch on f_persistentdocument_PersistentProviderMySql::clearDB
+
+
+----
+Modified : persistentdocument/PersistentProviderMySql.class.php
+
+
+Revision: e0fc7a057609fe0e8dd46e5a0042bfb43f378a27
+Author: Eric HAUSWALD
+Date: 17/01/2012 12:01:16
+Message:
+[UPDATE] Remove clear-log from clear-all Command
+
+[UPDATE] Hide clear-cache Command
+----
+Modified : change-commands/ClearAll.php
+Modified : change-commands/ClearCache.php
+
+Revision: c976d2e6cb7fa006857b56ce9ec4c230efa7bb05
+Author: Eric HAUSWALD
+Date: 10/01/2012 11:03:15
+Message:
+[NEW] Add updater module dependency  !!!!!!!!!!!!!!!!!!!!!!!!!!! 
+
+
+----
+Modified : change.xml
+
+
+Revision: 498b137a5fc0e1e480422f61c0f590de41c37636
+Author: Eric HAUSWALD
+Date: 02/01/2012 09:44:26
+Message:
+[FIX] Add missing interface method
+
+
+----
+Modified : f_mvc/bean/BeanAggregatePropertyInfo.php
+Modified : mail/MailerMail.class.php   !!!!!!!!!!!!!!!!!!!!!!!!!!! 
+
+
+Revision: b064c3b74f21664fd890fc2c0e3f7875e93e1f10
+Author: Eric HAUSWALD
+Date: 05/01/2012 15:55:11
+Message:
+[FIX] Remove php warning
+
+
+----
+Modified : bin/changeHTTP.php
+
+Revision: 5eeec03b9235f4ae72076814936faf414f8d462a
+Author: Eric HAUSWALD
+Date: 09/01/2012 17:29:24
+Message:
+[FIX] Document id must be always and integer
+
+
+----
+Modified : persistentdocument/PersistentDocumentImpl.class.php
+
+Revision: 58e5f8cace356c00cf45d53d27f3de1c3a351ad6
+Author: Loïc Couturier
+Date: 30/12/2011 11:52:58
+Message:
+[DOC] Enhance the doc for the PHPDoc
+
+
+----
+Modified : Framework.php
+Modified : aop/AOP.php
+Modified : bin/includes/Zip.php
+Modified : builder/templates/command/command.tpl
+Modified : builder/templates/models/DocumentModel.tpl
+Modified : change-commands/CheckHotfix.php
+Modified : date/Calendar.class.php
+Modified : date/DateTime.class.php
+Modified : date/GregorianCalendar.class.php
+Modified : date/TimeSpan.class.php
+Modified : export/SparatedValuesExporter.php
+Modified : f_mvc/bean/BeanPropertyInfoImpl.php
+Modified : f_mvc/bean/BeanUtils.php
+Modified : import/SparatedValuesImporter.php
+Modified : indexer/SolrManager.class.php
+Modified : indexer/query/Query.class.php
+Modified : libs/mvc/BaseAction.class.php
+Modified : libs/pear/PHPTAL/Php/Attribute/CHANGE/ChangeTalAttribute.php
+Modified : libs/pear/PHPTAL/Php/Attribute/CHANGE/I18nattr.php
+Modified : loader/ClassResolver.class.php
+Modified : mail/Mailer.class.php
+Modified : object/ComponentTypeObject.class.php
+Modified : object/RequestContext.class.php
+Modified : patch/BasePatch.php
+Modified : permission/PermissionService.class.php
+Modified : persistentdocument/I18nInfo.class.php
+Modified : persistentdocument/PersistentDocumentHelper.class.php
+Modified : persistentdocument/PersistentDocumentModel.class.php
+Modified : persistentdocument/PersistentProvider.class.php
+Modified : persistentdocument/PersistentProviderMySql.class.php
+Modified : persistentdocument/PersistentTreeNode.class.php
+Modified : persistentdocument/criteria/Criterions.php
+Modified : persistentdocument/criteria/HavingRestrictions.class.php
+Modified : persistentdocument/criteria/Restrictions.class.php
+Modified : persistentdocument/filter/DocumentFilterRestrictionParameter.php
+Modified : service/LocaleService.class.php
+Modified : service/StyleService.class.php
+Modified : util/ClassUtils.class.php
+Modified : util/Convert.class.php
+Modified : util/FileUtils.class.php
+Modified : util/TypeValidator.class.php
+Modified : validation/parsers/ConstraintsParser.class.php
+
+Revision: ffcf5862dd4e60578ead06202e4262b875732689
+Author: Eric HAUSWALD
+Date: 28/12/2011 14:09:20
+Message:
+[FIX #48964] Date de fin de publication exclue de la plage de publication
+
+
+----
+Modified : persistentdocument/DocumentService.class.php
+
+Revision: 2e442f119af282adb014b9c4eb28c0b42cf08941
+Author: Eric HAUSWALD
+Date: 21/12/2011 11:08:44
+Message:
+[FIX #48790] Erreur de chargement de document avec cache désactivé
+
+
+----
+Modified : persistentdocument/PersistentProvider.class.php
+
+Revision: eb043c6bcbf6a12b90f03864252dd15f3d4311d9
+Author: Eric HAUSWALD
+Date: 21/12/2011 10:32:19
+Message:
+[FIX #48790] Erreur de chargement de document avec cache désactivé
+
+
+----
+Modified : persistentdocument/PersistentProvider.class.php
+
+Revision: b8234c21a23c17409aa9e61e23285817f270c057
+Author: Eric HAUSWALD
+Date: 21/12/2011 10:40:49
+Message:
+[NEW] add 'config/general/selfRequestProxy' configuration entry used in self http request (cron, script)
+
+
+----
+Modified : builder/home/changescriptexec.php
+Modified : config/project.xml
+Modified : util/System.php   !!!!!!!!!!!!!!!!!!!!!!!!!!! 
+
+
+Revision: 1420a3dc95ce7327493daa18f81aca62bc2870bc
+Author: Eric HAUSWALD
+Date: 21/12/2011 10:37:57
+Message:
+[REFACTOR] Remove deprecated method usage
+
+
+----
+Modified : persistentdocument/DocumentService.class.php
+
+
+Revision: 06ec6f36c2a1d352e487578f00a1cf617cfce706
+Author: Eric HAUSWALD
+Date: 15/12/2011 09:56:38
+Message:
+[UPDATE] Command init-project create "themes" folder
+
+
+----
+Modified : change-commands/InitProject.php
+
+Revision: a65558d137a06136df0d794c8c71357ae9815dc3
+Author: Eric HAUSWALD
+Date: 13/12/2011 10:21:30
+Message:
+[NEW] integration featurepackb
+
+
+----
+Modified : config/ProjectParser.class.php
+Modified : object/InitDataSetup.class.php
+Modified : patch/BasePatch.php
+
+
+

@@ -67,11 +67,18 @@ class import_ScriptReader extends BaseService
 		{
 			$attributes['template'] = Framework::getConfigurationValue('modules/website/sample/defaultPageTemplate');
 		}
+		if (!isset($attributes['templateNosidebar']))
+		{
+			$attributes['templateNosidebar'] = Framework::getConfigurationValue('modules/website/sample/defaultNosidebarTemplate');
+		}
 		if (!isset($attributes['templateHome']))
 		{
 			$attributes['templateHome'] = Framework::getConfigurationValue('modules/website/sample/defaultHomeTemplate');
 		}
-		
+		if (!isset($attributes['templatePopin']))
+		{
+			$attributes['templatePopin'] = Framework::getConfigurationValue('modules/website/sample/defaultPopinTemplate');
+		}		
 		$this->execute($path, $attributes);
 	}
 	
@@ -282,7 +289,7 @@ class import_ScriptReader extends BaseService
 			}
 			return $element;
 		}
-		throw new Exception('Identifiant ' . $id . ' introuvable');
+		throw new Exception('Identifiant "' . $id . '" introuvable');
 	}
 
 	/**

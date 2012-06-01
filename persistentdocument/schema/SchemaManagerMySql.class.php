@@ -174,14 +174,22 @@ class change_SchemaManagerMySql implements change_SchemaManager
 			}
 		}		
 	}
+	
 	/**
-	 * @throws Exception on error
+	 * Drop all tables from current configured database
 	 */
 	public function clearDB()
 	{
 		foreach ($this->getTables() as $table)
 		{
-			$this->execute('DROP TABLE `' . $table . '`');
+			try
+			{
+				$this->execute('DROP TABLE `' . $table . '`');
+			}
+			catch (Exception $e)
+			{
+				Framework::warn($e->getMessage());
+			}
 		}
 	}
 	

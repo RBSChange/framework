@@ -125,7 +125,7 @@ class indexer_StandardSolrSearch
 		//higlighting
 		if ($this->query->getHighlighting() === true)
 		{
-			$queryString.="&hl=true;&hl.fl=label_$lang,text_$lang";
+			$queryString.="&hl=true;&hl.fl=label_$lang,text_$lang&hl.simple.pre=" . urlencode('<em class="highlight">');
 		}
 		
 		// facets

@@ -8,7 +8,6 @@ class <{$className}> extends c_ChangescriptCommand
 {
 	/**
 	 * @return String
-	 * @example "<moduleName> <name>"
 	 */
 	public function getUsage()
 	{
@@ -30,7 +29,6 @@ class <{$className}> extends c_ChangescriptCommand
 
 	/**
 	 * @return String
-	 * @example "initialize a document"
 	 */
 //	public function getDescription()
 //	{

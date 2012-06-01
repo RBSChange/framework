@@ -30,7 +30,7 @@ class TagService extends BaseService
 	}
 
 	/**
-	 * @param String $pattern
+	 * @param string $pattern
 	 * @return Array<String => Array>
 	 */
 	public function getAllAvailableTags()
@@ -41,7 +41,7 @@ class TagService extends BaseService
 	/**
 	 * Find tags by pattern containing * wildcards ( eg: contextual_website_website_menu* )
 	 *
-	 * @param String $pattern
+	 * @param string $pattern
 	 * @return array
 	 */
 	public function getAvailableTagsByPattern($pattern)
@@ -177,10 +177,10 @@ class TagService extends BaseService
 	}
 
 	/**
-	 * @param String $tag
-	 * @param String $moduleName
-	 * @param String $documentName
-	 * @param String $functionName
+	 * @param string $tag
+	 * @param string $moduleName
+	 * @param string $documentName
+	 * @param string $functionName
 	 */
 	private function getFunctionalTagInfo($tag, &$moduleName = null, &$documentName = null, &$functionName = null)
 	{
@@ -206,7 +206,7 @@ class TagService extends BaseService
 	/**
 	 * This method is used to determine the context of a contextual tag.
 	 * @param string $tag The tag to check.
-	 * @return string or null
+	 * @return string|NULL
 	 */
 	public function getTagContext($tag)
 	{
@@ -230,14 +230,8 @@ class TagService extends BaseService
 
 	/**
 	 * Gets all the tags of $document.
-	 *
 	 * @param f_persistentdocument_PersistentDocument $document The documentId to get the tags of.
-	 * @return String[] Array with all the tags.
-	 *
-	 * @throws IllegalArgumentException
-	 *
-	 * @author  INTbonjF
-	 * @date    2007-01-29
+	 * @return string[] Array with all the tags.
 	 */
 	public function getTags($document)
 	{
@@ -251,7 +245,7 @@ class TagService extends BaseService
 	/**
 	 * Gets all the object_TagObjects of $document.
 	 * @param f_persistentdocument_PersistentDocument $document The document to get the tags of.
-	 * @return array<object_TagObjects> Array with all the object_TagObjects.
+	 * @return object_TagObjects[] Array with all the object_TagObjects.
 	 */
 	public function getTagObjects($document)
 	{
@@ -267,6 +261,10 @@ class TagService extends BaseService
 		return $tags;
 	}
 	
+	/**
+	 * @param string $tagName
+	 * @return object_TagObject|NULL
+	 */
 	private function getTagObject($tagName)
 	{
 		$avaiableTags = $this->getAvailableTagsInfo();
@@ -282,6 +280,9 @@ class TagService extends BaseService
 	/**
 	 * Checks wether the document has the specified tag. Returns true if the
 	 * document has the tag, otherwise returns false.
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param string $tag
+	 * @return boolean
 	 */
 	public function hasTag($document, $tag)
 	{
@@ -293,7 +294,6 @@ class TagService extends BaseService
 	 *
 	 * @param f_persistentdocument_PersistentDocument $document The document on which the tags are checked.
 	 * @param array $tags Array of the tags to check.
-	 *
 	 * @return boolean true if the document has ALL the listed tags.
 	 */
 	public function hasTags($document, $tags)
@@ -336,13 +336,8 @@ class TagService extends BaseService
 	 * @param f_persistentdocument_PersistentDocument $document The document on which to add the tag.
 	 * @param string $tag The tag to add.
 	 * @param boolean $auto
-	 *
 	 * @throws InvalidTagException
-	 * @throws IllegalArgumentException
-	 *
-	 * @author  INTbonjF
-	 * @date    2007-01-25
-	 */
+	 */ 
 	public function addTag($document, $tag, $auto = true)
 	{
 		if (!$this->isValidTag($tag))
@@ -377,9 +372,7 @@ class TagService extends BaseService
 	 *
 	 * @param f_persistentdocument_PersistentDocument $document
 	 * @param string $tag
-	 *
 	 * @throws InvalidFunctionalTagException
-	 * @throws IllegalArgumentException
 	 */
 	public function setFunctionalTag($document, $tag)
 	{
@@ -409,12 +402,7 @@ class TagService extends BaseService
 	 *
 	 * @param f_persistentdocument_PersistentDocument $document The document on which to set the exclusive tag.
 	 * @param string $tag The exclusive tag to set.
-	 *
 	 * @throws InvalidExclusiveTagException
-	 * @throws IllegalArgumentException
-	 *
-	 * @author  INTbonjF
-	 * @date    2007-01-25
 	 */
 	public function setExclusiveTag($document, $tag)
 	{
@@ -442,7 +430,6 @@ class TagService extends BaseService
 	 *
 	 * @throws InvalidContextualTagException
 	 * @throws TagException
-	 * @throws IllegalArgumentException
 	 * @return Boolean true if the tag was setted (can be false if $removeExisting equals false)
 	 */
 	public function setContextualTag($document, $tag, $removeExisting = true)
@@ -486,8 +473,9 @@ class TagService extends BaseService
 
 	/**
 	 * @param Integer $documentId
-	 * @param String $contextualTag
+	 * @param string $contextualTag
 	 * @return Integer
+	 * @throws TagException
 	 */
 	public function getContextualDocumentIdByTag($documentId, $contextualTag)
 	{
@@ -531,10 +519,6 @@ class TagService extends BaseService
 	 * @param string $tag The tag to remove.
 	 *
 	 * @throws InvalidTagException
-	 * @throws IllegalArgumentException
-	 *
-	 * @author  INTbonjF
-	 * @date    2007-01-29
 	 */
 	public function removeTag($document, $tag)
 	{
@@ -595,7 +579,7 @@ class TagService extends BaseService
 	/**
 	 * @param f_persistentdocument_PersistentDocument $fromDocument
 	 * @param f_persistentdocument_PersistentDocument $toDocument
-	 * @param String $tag
+	 * @param string $tag
 	 */
 	private function moveTag($fromDocument, $toDocument, $tag)
 	{
@@ -626,6 +610,13 @@ class TagService extends BaseService
 		}
 	}
 
+	/**
+	 * 
+	 * @param string $tag
+	 * @param string $moduleName
+	 * @param string $documentName
+	 * @return boolean
+	 */
 	public function isDetailPageTag($tag, &$moduleName = null, &$documentName = null)
 	{
 		if (preg_match('/^contextual_[a-z0-9]+_[a-z0-9]+_modules_([a-z0-9]+)_page\-detail$/', $tag, $matches))
@@ -634,7 +625,7 @@ class TagService extends BaseService
 			$documentName = null;
 			return true;
 		}
-
+		$functionName = null;
 		$this->getFunctionalTagInfo($tag, $moduleName, $documentName, $functionName);
 		if ($functionName == 'detail')
 		{
@@ -646,6 +637,13 @@ class TagService extends BaseService
 		return false;
 	}
 
+	/**
+	 * 
+	 * @param string $tag
+	 * @param string $moduleName
+	 * @param string $documentName
+	 * @return boolean
+	 */
 	public function isListPageTag($tag, &$moduleName = null, &$documentName = null)
 	{
 		if (preg_match('/^contextual_[a-z0-9]+_[a-z0-9]+_modules_([a-z0-9]+)_page\-list$/', $tag, $matches))
@@ -655,6 +653,7 @@ class TagService extends BaseService
 			return true;
 		}
 
+		$functionName = null;
 		$this->getFunctionalTagInfo($tag, $moduleName, $documentName, $functionName);
 		if ($functionName == 'list')
 		{
@@ -666,8 +665,15 @@ class TagService extends BaseService
 		return false;
 	}
 
+	/**
+	 * @param string $tag
+	 * @param string $moduleName
+	 * @param string $documentName
+	 * @return boolean
+	 */
 	public function isArchivePageTag($tag, &$moduleName = null, &$documentName = null)
 	{
+		$functionName = null;
 		$this->getFunctionalTagInfo($tag, $moduleName, $documentName, $functionName);
 		if ($functionName == 'archive')
 		{
@@ -780,6 +786,7 @@ class TagService extends BaseService
 	 * @param string $tag
 	 * @param f_persistentdocument_PersistentDocument $contextDocument
 	 * @return f_persistentdocument_PersistentDocument || null
+	 * @throws TagException
 	 */
 	private function findDocumentByContextualTag($tag, $contextDocument)
 	{
@@ -836,7 +843,7 @@ class TagService extends BaseService
 
 	/**
 	 * Returns the unique sibling Document that has the given $tag.
-	 * @param String $tag
+	 * @param string $tag
 	 * @param f_persistentdocument_PersistentDocument $siblingDocument
 	 * @param boolean $throwIfNotFound
 	 * @return f_persistentdocument_PersistentDocument
@@ -864,7 +871,7 @@ class TagService extends BaseService
 	}
 	
 	/**
-	 * @param String $tag
+	 * @param string $tag
 	 * @param f_persistentdocument_PersistentDocument $siblingDocument
 	 * @return boolean
 	 */
@@ -884,9 +891,10 @@ class TagService extends BaseService
 	}	
 	
 	/**
-	 * @param String $tag
+	 * @param string $tag
 	 * @param f_persistentdocument_PersistentDocument $siblingDocument
 	 * @return f_persistentdocument_PersistentDocument
+	 * @throws TagException
 	 */
 	private function findDocumentBySiblingTag($tag, $siblingDocument)
 	{
@@ -905,9 +913,9 @@ class TagService extends BaseService
 	}
 
 	/**
-	 * @param String $tag
+	 * @param string $tag
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @return array<f_persistentdocument_PersistentDocument>
+	 * @return f_persistentdocument_PersistentDocument[]
 	 */
 	private function getSiblingDocuments($tag, $document)
 	{
@@ -921,7 +929,7 @@ class TagService extends BaseService
 	 * Returns the Documents that have the given $tag.
 	 *
 	 * @param string $tag The tag.
-	 * @return array<f_persistentdocument_PersistentDocument>
+	 * @return f_persistentdocument_PersistentDocument[]
 	 *
 	 * @throws InvalidTagException If tag name is not valid
 	 */
@@ -976,7 +984,7 @@ class TagService extends BaseService
 	}
 	
 	/**
-	 * @return array<tag => array<tag, icon, label, package, component_type>>
+	 * @return array<tag => array<tag, icon, label, labeli18n, package, component_type>>
 	 */
 	private function getAvailableTagsInfo()
 	{
@@ -988,60 +996,75 @@ class TagService extends BaseService
 		return $this->tagsInfo;
 	}
 	
+	/**
+	 * @var array
+	 */
+	private $tagsInfosByModel;
+	
+	/**
+	 * @var array
+	 */
+	private $compatibleTagsInfosByModel;
+	
+	/**
+	 * @param string $modelName
+	 */
+	public function getAvailableTagsInfoByModel($modelName)
+	{
+		if (!isset($this->compatibleTagsInfosByModel[$modelName]))
+		{
+			if ($this->tagsInfosByModel === null)
+			{
+				$this->tagsInfosByModel = array();
+				foreach ($this->getAllAvailableTags() as $tagName => $tagInfos)
+				{
+					$this->tagsInfosByModel[$tagInfos['component_type']][$tagName] = $tagInfos;
+				}
+			}
+				
+			$tagsInfos = array();
+			$modelNames = f_persistentdocument_PersistentDocumentModel::getModelChildrenNames('modules_website/menu');
+			$modelNames[] = 'modules_website/menu';
+			foreach ($modelNames as $modelName)
+			{
+				if (isset($this->tagsInfosByModel[$modelName]))
+				{
+					$tagsInfos = array_merge($tagsInfos, $this->tagsInfosByModel[$modelName]);
+				}
+			}
+			$this->compatibleTagsInfosByModel[$modelName] = $tagsInfos;
+		}
+		return $this->compatibleTagsInfosByModel[$modelName];
+	}
+	
 	private function processModules()
 	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("[CompileTags] processModules BEGIN");
-		}
-
 		$modulesArray = ModuleService::getInstance()->getPackageNames();
 		foreach ($modulesArray as $moduleName)
 		{
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug("**** Processing module ".$moduleName." ****");
-			}
 			$dirsToProcess = array();
 			$configPaths = FileResolver::getInstance()->setPackageName($moduleName)->setDirectory('config')->getPaths('');
 					
-			// intbonjf 2007-06-01:
-			// fixing #194: process the files in the modules THEN in the webapp.
 			$configPaths = array_reverse($configPaths);
 
 			$count = count($configPaths);
 			foreach ($configPaths as $configPath)
 			{
-				// intbonjf 2007-01-10:
-				// We must check if there are tags definition files in each path
-				// to be sure to use the right ones.
-				// Here is the rule I will implement now:
-				// If there are 3 "config" dirs for a module (PEAR package, modules/ and webapp/modules)
-				// that contain tags definition files, the ones in the packaged modules are
-				// not taken into consideration.
-
 				// Search for tags definition file in each "config" directory...
 				$found = false;
-				if ($dh = opendir($configPath))
+				$dh = opendir($configPath);
+				if ($dh)
 				{
 					while (($file = readdir($dh)) !== false)
 					{
 						if (f_util_StringUtils::endsWith($file, 'tags.xml'))
 						{
-							if ( Framework::isDebugEnabled())
-							{
-								Framework::debug(" - FOUND tags definition files here (used): ".$configPath);
-							}
 							// Tags are found in this directory: we must process it!
 							$dirsToProcess[] = $configPath;
 							$found = true;
 							break;
 						}
 					}
-				}
-				if (! $found && Framework::isDebugEnabled())
-				{
-					Framework::debug(" - NO tags definition files here (skipped): ".$configPath);
 				}
 				closedir($dh);
 
@@ -1052,26 +1075,11 @@ class TagService extends BaseService
 			{
 				// If there are 3 directories containing tags definition files,
 				// skip the directory of the packaged module.
-				if ( ! ($count == 3 && f_util_StringUtils :: beginsWith($dir, PEAR_DIR) ) )
+				if ( ! ($count == 3 && f_util_StringUtils::beginsWith($dir, PEAR_DIR) ) )
 				{
-					if (Framework::isDebugEnabled())
-					{
-						Framework::debug(" - processing directory ".$dir);
-					}
 					$this->processDir($moduleName, $dir);
 				}
-				else if (Framework::isDebugEnabled())
-				{
-					Framework::debug(" - skipping directory ".$dir);
-				}
-
 			}
-		}
-
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("See generic/CompileTagsAction.class.php for more details about skipped directories.");
-			Framework::debug("[CompileTags] processModules END");
 		}
 	}
 
@@ -1079,7 +1087,8 @@ class TagService extends BaseService
 	{
 		if (is_dir($dir))
 		{
-			if ($dh = opendir($dir))
+			$dh = opendir($dir);
+			if ($dh)
 			{
 				while (($file = readdir($dh)) !== false)
 				{

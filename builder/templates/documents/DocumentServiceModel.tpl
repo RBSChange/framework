@@ -396,4 +396,25 @@ class <{$className}> extends <{$extendClass}>
 //	public function addFormProperties($document, $propertiesName, &$datas)
 //	{
 //	}
+
+	/**
+	 * @param <{$module}>_persistentdocument_<{$name}> $document (Read only)
+	 * @param array $defaultSynchroConfig string : string[]
+	 * @return array string : string[]
+	 */
+//	public function getI18nSynchroConfig($document, $defaultSynchroConfig)
+//	{
+//		return parent::getI18nSynchroConfig($document, $defaultSynchroConfig);
+//	}
+
+	/**
+	 * @param <{$module}>_persistentdocument_<{$name}> $document (Read only)
+	 * @param <{$module}>_persistentdocument_<{$name}>I18n $from (Read only)
+	 * @param <{$module}>_persistentdocument_<{$name}>I18n $to
+	 * @return boolean
+	 */
+//	public function synchronizeI18nProperties($document, $from, $to)
+//	{
+//		return parent::synchronizeI18nProperties($document, $from, $to);
+//	}	
 }

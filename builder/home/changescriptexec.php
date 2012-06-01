@@ -1,7 +1,6 @@
 <?php
 ignore_user_abort(true);
 define('PROJECT_HOME', dirname(realpath(__FILE__)));
-define('WEBEDIT_HOME', PROJECT_HOME);
 
 set_time_limit(0);
 
@@ -64,8 +63,7 @@ else
 {
 	$protocol = 'http://';
 }
-$currentUrl = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-
+$currentUrl = strpos($_SERVER['REQUEST_URI'], $protocol . $_SERVER['HTTP_HOST']) === 0 ? $_SERVER['REQUEST_URI'] : $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 $util = new Zend_Oauth_Http_Utility();
 
 $mergedParams = f_web_HttpLink::flattenArray(array_merge($_POST, $headers));

@@ -30,7 +30,6 @@ abstract class change_Patch
 	}
 	
 	/**
-	 * @example 0006
 	 * @return String
 	 */
 	public function getNumber()
@@ -258,5 +257,16 @@ abstract class change_Patch
 	protected function execChangeCommand($commandName, $arguments = array())
 	{
 		return f_util_System::execChangeCommand($commandName, $arguments);
+	}
+	
+	/**
+	 * @example set value to null for remove entry
+	 * @param string $path
+	 * @param string $value
+	 * @return string || false if return value != input value compile-config is required
+	 */
+	protected final function addProjectConfigurationEntry($path, $value)
+	{
+		return config_ProjectParser::addProjectConfigurationEntry($path, $value);
 	}
 }

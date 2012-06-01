@@ -28,25 +28,10 @@ abstract class BaseService
 	}
 	
 	/**
-	 * returns an instance of the service or a subclass indicated in injection config section
-	 * <pre>
-	 * <project>
-	 * 	<config>
-	 *   <injection>
-	 *	   <entry name="$selfClassName">anextensionmodule_aSubClassOfSelfClassName</entry>
-	 *   </injection>
-	 *  </config>
-	 * </project>
-	 * </pre>
-	 * @param String $selfClassName 
-	 * @return mixed an instance of the service or a subclass indicated in injection config section
-	 * @throws ConfigurationException if the overriden class is not a subclass of $selfClassName
 	 * @deprecated
 	 */
 	protected static final function getServiceClassInstance($selfClassName)
 	{
 		return new $selfClassName();
 	}
-	
-	
 }

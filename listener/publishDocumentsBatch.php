@@ -1,4 +1,6 @@
 <?php
+/* @var $arguments array */
+$arguments = isset($arguments) ? $arguments : array();
 $tm = f_persistentdocument_TransactionManager::getInstance();
 $rc = RequestContext::getInstance();
 try

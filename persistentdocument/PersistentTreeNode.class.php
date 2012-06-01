@@ -117,8 +117,7 @@ class f_persistentdocument_PersistentTreeNode implements tree_TreeNode
 	}
 	
 	/**
-	 * @return string
-	 * @example '/123/45/'
+	 * @return string For example: '/123/45/'
 	 */
 	public function getPath()
 	{
@@ -168,8 +167,7 @@ class f_persistentdocument_PersistentTreeNode implements tree_TreeNode
 	
 	/**
 	 * Obtient le model du document
-	 * @example 'modules_generic/folder'
-	 * @return String
+	 * @return String For example: 'modules_generic/folder'
 	 */
 	public function getDocumentModelName()
 	{

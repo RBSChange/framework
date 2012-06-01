@@ -20,18 +20,22 @@
 		<define name="CHANGE_CACHE_MAX_TIME">3600</define>
 		
 		<define name="SECURE_SESSION_BY_IP">false</define>
+		
+		<!-- Valid value: http | console | none -->
+		<define name="CHANGECRON_EXECUTION">http</define>
 	</defines>
 
 	<config>
 		<!-- GENERAL -->
 		<general>
+			<entry name="selfRequestProxy">127.0.0.1:80</entry>
 			<entry name="server-fqdn">fully-qualified-domain-name</entry>
 			<!-- What $_SERVER entry to use to detect https queries -->
 			<entry name="https-request-marker">HTTPS</entry>
 			<!-- What is the value of https-request-marker for https queries -->
 			<entry name="https-request-marker-value">on</entry>
 			
-			<entry name="projectName">RBS CHANGE 4.0</entry>
+			<entry name="projectName">RBS CHANGE 4.0</entry>	
 		</general>
 		
 		<i18n>

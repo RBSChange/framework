@@ -12,7 +12,7 @@ class HavingRestrictions
 
 	/**
 	 * Apply a "between" constraint to the named property
-	 * @example between("creationdate", "2007-01-31 00:00:00", "2007-02-28 00:00:00")
+	 * For example: between("creationdate", "2007-01-31 00:00:00", "2007-02-28 00:00:00")
 	 */
 	static function between($propertyName, $min, $max)
 	{
@@ -23,7 +23,7 @@ class HavingRestrictions
 	 * Apply an "equal" constraint to the named property
 	 * @param String $propertyName
 	 * @param mixed $value
-	 * @example eq("author", "me")
+	 * For example: eq("author", "me")
 	 * @return SimpleExpression
 	 */
 	static function eq($propertyName, $value)
@@ -33,7 +33,7 @@ class HavingRestrictions
 
 	/**
 	 * Apply a "greater than or equal" constraint to the named property
-	 * @example ge("creationdate", $today)
+	 * For example: ge("creationdate", $today)
 	 */
 	static function ge($propertyName, $value)
 	{
@@ -42,7 +42,7 @@ class HavingRestrictions
 
 	/**
 	 * Apply a "greater than" constraint to the named property
-	 * @example ge("creationdate", $today)
+	 *For example: gt("creationdate", $today)
 	 */
 	static function gt($propertyName, $value)
 	{

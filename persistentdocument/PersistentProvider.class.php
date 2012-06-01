@@ -66,6 +66,11 @@ abstract class f_persistentdocument_PersistentProvider
 	/**
 	 * @var array
 	 */
+	protected $timers;
+	
+	/**
+	 * @var array
+	 */
 	protected $connectionInfos;
 		
 	/**
@@ -120,11 +125,9 @@ abstract class f_persistentdocument_PersistentProvider
 
 			$instance = new self::$m_classByDriverName[$driverName];
 			$instance->connectionInfos = $connectionInfos;
-
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug(__METHOD__.'('. get_class($instance) .')');
-			}
+			$instance->timers = array('init' => microtime(true), 
+					'longTransaction' => isset($connectionInfos['longTransaction']) ? floatval($connectionInfos['longTransaction']) : 0.2);
+			
 			self::$m_instance = $instance;
 		}
 		return self::$m_instance;
@@ -228,7 +231,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @param array<Integer> $ids
+	 * @param integer[] $ids
 	 */
 	public function initDocumentCache($ids)
 	{
@@ -245,12 +248,11 @@ abstract class f_persistentdocument_PersistentProvider
 		{
 			$end = microtime(true);
 			Framework::debug('Time initDocumentCache '.($end-$begin).' s, '.count($this->m_documentInstances).' documents');
-			//Framework::debug('INITDOCUMENTCACHE '.var_export($this->m_documentInstances, true));
 		}
 	}
 
 	/**
-	 * @return array<Integer>
+	 * @return integer[]
 	 */
 	public function getCollectedDocumentIds()
 	{
@@ -263,6 +265,18 @@ abstract class f_persistentdocument_PersistentProvider
 	public function setDriver($driver)
 	{
 		$this->m_driver = $driver;
+		if ($driver === null)
+		{
+			$duration = microtime(true) - $this->timers['init'];
+			if ($duration > 60)
+			{
+				Framework::warn('Total DB connection: ' . round($duration, 4) . 's');
+			}
+			elseif (Framework::isDebugEnabled())
+			{
+				Framework::debug('Total DB connection: ' . round($duration, 4) . 's');
+			}
+		}
 	}
 
 	/**
@@ -796,13 +810,14 @@ abstract class f_persistentdocument_PersistentProvider
 				$cached = $this->getCacheService()->get($documentId);
 				if ($cached !== null)
 				{
-					$this->putInCache($id, $cached);
+					$this->putInCache($documentId, $cached);
 					return  $this->checkModelCompatibility($cached, $modelName);
 				}
 			}
 			if ($modelName === null)
 			{
 				$sql = $this->getDocumentInstanceQuery();
+				$lang = null;
 			}
 			else
 			{
@@ -810,10 +825,17 @@ abstract class f_persistentdocument_PersistentProvider
 				// TODO: not *, especially if a lang is requested
 				$sql = "select * from ".$model->getTableName()." inner join f_document using(document_id)";
 				$where = array($model->getTableName().".document_id = :document_id");
-				if ($lang !== null && $model->isLocalized())
+				if ($lang !== null)
 				{
-					$sql .= " inner join ".$model->getTableName() . $this->getI18nSuffix()." using(document_id)";
-					$where[] = "lang_i18n = :lang";
+					if ($model->isLocalized())
+					{
+						$sql .= " inner join ".$model->getTableName() . $this->getI18nSuffix()." using(document_id)";
+						$where[] = "lang_i18n = :lang";
+					}
+					else
+					{
+						$lang = null;
+					}
 				}
 				$sql .= " where ".join(" and ", $where);
 			}
@@ -839,8 +861,17 @@ abstract class f_persistentdocument_PersistentProvider
 			$document = $this->getDocumentInstanceWithModelName($documentId, $result['document_model'], $result['treeid'], $result, true);
 			if ($lang !== null && $result['document_lang'] != $lang)
 			{
-				$i18nDoc = $this->buildI18nDocument($document, $lang, $result);
+				$properties = array();
+				foreach ($document->getPersistentModel()->getPropertiesInfos() as $key => $propertyInfo)
+				{
+					if ($propertyInfo->isLocalized())
+					{
+						$properties[$key] = $result[$propertyInfo->getDbMapping() . $this->getI18nSuffix()];
+					}
+				}
+				$this->buildI18nDocument($document, $lang, $properties);
 			}
+			
 			$this->_loadDocument($document, $result);
 			if ($this->useDocumentCache)
 			{
@@ -898,44 +929,26 @@ abstract class f_persistentdocument_PersistentProvider
 		if ($documentId > 0)
 		{
 			$model = $doc->getPersistentModel();
-			// TODO : if isVo, get the data from the persistentDocument
-			if ($isVo && $doc->getDocumentPersistentState() === f_persistentdocument_PersistentDocument::PERSISTENTSTATE_LOADED)
+			$sql = $this->getI18nDocumentQuery($model->getTableName() . $this->getI18nSuffix());
+			$stmt = $this->prepareStatement($sql);
+			$stmt->bindValue(':document_id', $documentId, PersistentProviderConst::PARAM_INT);
+			$stmt->bindValue(':lang', $lang, PersistentProviderConst::PARAM_STR);
+
+			$this->executeStatement($stmt);
+			$results = $stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC);
+			if (count($results) > 0)
 			{
-				Framework::info(__METHOD__." could be optimized");
-				// argh !! the document does not have the vo properties !
-				/*
-				$properties = $doc->getDocumentProperties(false); // this can not be done as it checks for i18nObject ...
+				$dbresult = $results[0];
+				$properties = array();
 				foreach ($model->getPropertiesInfos() as $key => $propertyInfo)
 				{
-				if ($propertyInfo->isLocalized())
-				{
-				$properties[$key] = $documentProperties[$key];
-				}
-				}*/
-			}
-			// else
-			{
-				$sql = $this->getI18nDocumentQuery($model->getTableName() . $this->getI18nSuffix());
-				$stmt = $this->prepareStatement($sql);
-				$stmt->bindValue(':document_id', $documentId, PersistentProviderConst::PARAM_INT);
-				$stmt->bindValue(':lang', $lang, PersistentProviderConst::PARAM_STR);
-
-				$this->executeStatement($stmt);
-				$results = $stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC);
-				if (count($results) > 0)
-				{
-					$dbresult = $results[0];
-					$properties = array();
-					// TODO : $model::getLocalizedPropertiesInfos() to avoid the if
-					foreach ($model->getPropertiesInfos() as $key => $propertyInfo)
+					if ($propertyInfo->isLocalized())
 					{
-						if ($propertyInfo->isLocalized())
-						{
-							$properties[$key] = $dbresult[$propertyInfo->getDbMapping() . $this->getI18nSuffix()];
-						}
+						$properties[$key] = $dbresult[$propertyInfo->getDbMapping() . $this->getI18nSuffix()];
 					}
 				}
 			}
+
 		}
 
 		return $this->buildI18nDocument($doc, $lang, $properties);
@@ -1022,6 +1035,7 @@ abstract class f_persistentdocument_PersistentProvider
 	 */
 	public function getDocumentModelName($id)
 	{
+		$id = intval($id);
 		if ($this->isInCache($id))
 		{
 			return $this->getFromCache($id)->getDocumentModelName();
@@ -1194,15 +1208,7 @@ abstract class f_persistentdocument_PersistentProvider
 	 */
 	public function insertDocument($persistentDocument)
 	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("PersistentProvider::insertDocument : " .get_class($persistentDocument));
-		}
 		$documentId = $this->getNewDocumentId($persistentDocument);
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("PersistentProvider::insertDocument newId : " . $documentId);
-		}
 		$this->_insertDocument($documentId, $persistentDocument);
 	}
 
@@ -1215,11 +1221,6 @@ abstract class f_persistentdocument_PersistentProvider
 	public function loadDocument($persistentDocument)
 	{
 		$documentId = $persistentDocument->getId();
-
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("PersistentProvider::loadDocument ($documentId) ". get_class($persistentDocument));
-		}
 		$table = $persistentDocument->getPersistentModel()->getTableName();
 
 		$sql = $this->getLoadDocumentQuery($table);
@@ -1484,7 +1485,7 @@ abstract class f_persistentdocument_PersistentProvider
 			$this->bindValue($stmt, $properties[$propertyName], $documentModel->getProperty($propertyName));
 		}
 		$this->executeStatement($stmt);
-
+		$this->setI18nSynchroStatus($i18nDocument->getId(), $i18nDocument->getLang(), 'MODIFIED');
 		$i18nDocument->setIsPersisted();
 
 		$this->m_i18nDocumentInstances[$i18nDocument->getId()][$i18nDocument->getLang()] = $i18nDocument;
@@ -1505,8 +1506,10 @@ abstract class f_persistentdocument_PersistentProvider
 		$stmt->bindValue(':id', $i18nDocument->getId(), PersistentProviderConst::PARAM_INT);
 		$stmt->bindValue(':lang', $i18nDocument->getLang(), PersistentProviderConst::PARAM_STR);
 		$this->executeStatement($stmt);
-		$this->m_i18nDocumentInstances[$i18nDocument->getId()][$i18nDocument->getLang()] = null;
+		$this->deleteI18nSynchroStatus($i18nDocument->getId(), $i18nDocument->getLang());
+		unset($this->m_i18nDocumentInstances[$i18nDocument->getId()][$i18nDocument->getLang()]);
 	}
+	
 	/**
 	 * @param String $tableName
 	 * @return String
@@ -1530,33 +1533,48 @@ abstract class f_persistentdocument_PersistentProvider
 	{
 		$documentId = $persistentDocument->getId();
 		$lang = $persistentDocument->getLang();
-		
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("PersistentProvider::deleteDocument($documentId, $lang) ". get_class($persistentDocument));
-		}
+	
 		$documentModel = $persistentDocument->getPersistentModel();
 
 		$deleteDocumentInstance = true;
 		if ($documentModel->isLocalized())
 		{
-			if (!$persistentDocument->isContextLangAvailable())
+			$rc = RequestContext::getInstance();
+			$contextLang = $rc->getLang();	
+			if (!$persistentDocument->isLangAvailable($contextLang))
 			{
 				//Le document n'existe pas dans la langue du context on ne fait rien
 				return;
 			}
+		
+			if ($rc->hasI18nSynchro())
+			{
+				//Suppression de toute les versions de lang synchronisé
+				foreach ($this->getI18nSynchroStatus($documentId) as $stl => $stInfo)
+				{
+					if (isset($stInfo['from']) && $stInfo['from'] === $contextLang)
+					{
+						$i18nSyncDoc = $this->getI18nDocument($persistentDocument, $stl);
+						$this->_deleteI18nDocument($i18nSyncDoc, $documentModel);
+						unset($this->m_i18nDocumentInstances[$documentId][$stl]);
+						$persistentDocument->getI18nInfo()->removeLabel($stl);
+					}
+				}
+			}
+			
 			$langCount = $persistentDocument->removeContextLang();
 			$deleteDocumentInstance = ($langCount == 0);
-
+			
 			//On supprime physiquement la traduction
-			$contextLang = RequestContext::getInstance()->getLang();
+			
 			$i18nDocument = $this->getI18nDocument($persistentDocument, $contextLang);
 			$this->_deleteI18nDocument($i18nDocument, $documentModel);
-			unset($this->m_i18nDocumentInstances[$documentId][$contextLang]);
 		}
 
 		if (!$deleteDocumentInstance)
 		{
+			//Election d'une nouvelle VO
+			$this->setI18nSynchroStatus($documentId, $persistentDocument->getLang(), 'MODIFIED');
 			$this->updateDocument($persistentDocument);
 		}
 		else
@@ -1566,7 +1584,7 @@ abstract class f_persistentdocument_PersistentProvider
 				$persistentDocument->preCascadeDelete();
 			}
 
-			$table = $persistentDocument->getPersistentModel()->getTableName();
+			$table = $documentModel->getTableName();
 			$sql = $this->getDeleteDocumentQuery1();
 			$stmt = $this->prepareStatement($sql);
 			$stmt->bindValue(':document_id', $documentId, PersistentProviderConst::PARAM_INT);
@@ -1617,16 +1635,13 @@ abstract class f_persistentdocument_PersistentProvider
 
 	public function beginTransaction()
 	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("PersistentProvider::beginTransaction");
-		}
 		if ($this->m_inTransaction)
 		{
 			Framework::warn("PersistentProvider->beginTransaction() while already in transaction");
 		}
 		else
 		{
+			$this->timers['bt'] = microtime(true);
 			$this->beginTransactionInternal();
 			$this->m_inTransaction = true;
 			if ($this->useDocumentCache)
@@ -1642,10 +1657,6 @@ abstract class f_persistentdocument_PersistentProvider
 
 	public function commit()
 	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("PersistentProvider::commit");
-		}
 		if (!$this->m_inTransaction)
 		{
 			Framework::warn("PersistentProvider->commit() called while not in transaction");
@@ -1657,8 +1668,16 @@ abstract class f_persistentdocument_PersistentProvider
 				$this->getCacheService()->commit();
 			}
 			$this->commitInternal();
-			$this->m_inTransaction = false;		
-				
+			$duration = round(microtime(true) - $this->timers['bt'], 4);	
+			if ($duration > $this->timers['longTransaction'])
+			{			
+				Framework::warn('Long Transaction detected '.  number_format($duration, 3) . 's > ' . $this->timers['longTransaction']);
+				if (Framework::inDevelopmentMode())
+				{
+					Framework::warn(f_util_ProcessUtils::getBackTrace());
+				}
+			}
+			$this->m_inTransaction = false;
 			$this->commitIndexService();
 		}
 	}
@@ -1740,13 +1759,13 @@ abstract class f_persistentdocument_PersistentProvider
 	protected abstract function getLastInsertId($tableName);
 
 	/**
-	 * @example INSERT INTO f_document (document_model, lang_vo, label_fr, ...) VALUES (:document_model, :lang_vo, :label_fr, ...)
+	 * Query like INSERT INTO f_document (document_model, lang_vo, label_fr, ...) VALUES (:document_model, :lang_vo, :label_fr, ...)
 	 * @return String
 	 */
 	protected abstract function getNewDocumentIdQuery1();
 
 	/**
-	 * @example INSERT INTO f_document (document_id, document_model, lang_vo, label_fr, ...) VALUES (:document_id, :document_model, :lang_vo, :label_fr, ...)';
+	 * Query like INSERT INTO f_document (document_id, document_model, lang_vo, label_fr, ...) VALUES (:document_id, :document_model, :lang_vo, :label_fr, ...)';
 	 * @return String
 	 */
 	protected abstract function getNewDocumentIdQuery2();
@@ -1829,7 +1848,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @example INSERT INTO '.$table.' (' . implode(', ', $fieldsName) .') VALUES (' . implode(', ', $parameters) .')
+	 * Query like INSERT INTO '.$table.' (' . implode(', ', $fieldsName) .') VALUES (' . implode(', ', $parameters) .')
 	 * @return String
 	 */
 	protected abstract function get_insertDocumentQuery($table, $fieldsName, $parameters, $lobParameters = array());
@@ -1874,7 +1893,7 @@ abstract class f_persistentdocument_PersistentProvider
 			$this->bindValue($stmt, $propertyValue, $documentModel->getProperty($propertyName));
 		}
 		$this->executeStatement($stmt);
-
+		$this->setI18nSynchroStatus($i18nDocument->getId(), $i18nDocument->getLang(), 'MODIFIED');
 		$i18nDocument->setIsPersisted();
 	}
 
@@ -2108,7 +2127,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @example 'SELECT parent_id, node_order, node_level, node_path, children_count FROM f_tree_'.$treeId.' WHERE document_id = :document_id';
+	 * Query like 'SELECT parent_id, node_order, node_level, node_path, children_count FROM f_tree_'.$treeId.' WHERE document_id = :document_id';
 	 */
 	protected abstract function getNodeInfoQuery($treeId);
 
@@ -2139,7 +2158,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @example 'SELECT document_id, parent_id, node_order, node_level, node_path, children_count FROM f_tree_'.$treeId.' WHERE document_id in (:p0, ...)';
+	 * Query like 'SELECT document_id, parent_id, node_order, node_level, node_path, children_count FROM f_tree_'.$treeId.' WHERE document_id in (:p0, ...)';
 	 */
 	protected abstract function getNodesInfoQuery($treeId, $documentCount);
 
@@ -2165,7 +2184,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @example 'SELECT document_id, parent_id, node_order, node_level, node_path, children_count FROM f_tree_'.$treeId.'
+	 * Query like 'SELECT document_id, parent_id, node_order, node_level, node_path, children_count FROM f_tree_'.$treeId.'
 	 * 	WHERE parent_id = :parent_id ORDER BY node_order'
 	 */
 	protected abstract function getChildrenNodesInfoQuery($treeId);
@@ -2198,7 +2217,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @example 'SELECT document_id, parent_id, node_order, node_level, node_path, children_count FROM f_tree_'.$treeId
+	 * Query like 'SELECT document_id, parent_id, node_order, node_level, node_path, children_count FROM f_tree_'.$treeId
 	 * 	WHERE node_level > :min_level AND node_level <= :max_level AND node_path like :node_path ORDER BY node_level, node_order'
 	 */
 	protected abstract function getDescendantsNodesInfoQuery($treeId);
@@ -2224,7 +2243,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @example 'SELECT document_id FROM f_tree_'.$treeId.' WHERE parent_id = :parent_id ORDER BY node_order'
+	 * Query like 'SELECT document_id FROM f_tree_'.$treeId.' WHERE parent_id = :parent_id ORDER BY node_order'
 	 */
 	protected abstract function getChildrenIdQuery($treeId);
 
@@ -2250,7 +2269,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @example 'SELECT document_id FROM f_tree_'.$treeId.' WHERE node_level > :node_level and node_path like :node_path';
+	 * Query like 'SELECT document_id FROM f_tree_'.$treeId.' WHERE node_level > :node_level and node_path like :node_path';
 	 */
 	protected abstract function getDescendantsIdQuery($treeId);
 
@@ -2291,12 +2310,12 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @example 'UPDATE `f_document` SET `treeid` = NULL WHERE `treeid` = :treeid AND document_id <> :document_id'
+	 * Query like 'UPDATE `f_document` SET `treeid` = NULL WHERE `treeid` = :treeid AND document_id <> :document_id'
 	 */
 	protected abstract function getDeleteTreeDocumentQuery();
 
 	/**
-	 * @example 'DELETE FROM f_tree_'.$treeId
+	 * Query like 'DELETE FROM f_tree_'.$treeId
 	 */
 	protected abstract function getDeleteTreeQuery($treeId);
 
@@ -2334,13 +2353,13 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @example INSERT INTO `f_tree_'.$treeId.'` (`document_id`, `parent_id`, `node_order`, `node_level`, `node_path`, `children_count`)
+	 * Query like INSERT INTO `f_tree_'.$treeId.'` (`document_id`, `parent_id`, `node_order`, `node_level`, `node_path`, `children_count`)
 	 * 	VALUES (:document_id, :parent_id, :node_order, :node_level, :node_path, :children_count)'
 	 */
 	protected abstract function getInsertNodeQuery($treeId);
 
 	/**
-	 * @example 'UPDATE `f_document` SET `treeid` = :treeid WHERE `document_id` = :document_id';
+	 * Query like 'UPDATE `f_document` SET `treeid` = :treeid WHERE `document_id` = :document_id';
 	 */
 	protected abstract function getUpdateDocumentTreeQuery();
 
@@ -2369,12 +2388,12 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * UPDATE f_tree_'.$treeId . ' SET node_order = -node_order WHERE document_id in (:p0, ...)
+	 * Query like UPDATE f_tree_'.$treeId . ' SET node_order = -node_order WHERE document_id in (:p0, ...)
 	 */
 	protected abstract function orderNodesPrepareQuery($treeId, $countIds);
 
 	/**
-	 * 'UPDATE f_tree_'.$treeId. ' SET node_order = :node_order WHERE document_id = :document_id'
+	 * Query like 'UPDATE f_tree_'.$treeId. ' SET node_order = :node_order WHERE document_id = :document_id'
 	 */
 	protected abstract function orderNodesQuery($treeId);
 
@@ -2413,17 +2432,17 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @example 'DELETE FROM `f_tree_'.$treeId.'` WHERE `document_id` = :document_id'
+	 * Query like 'DELETE FROM `f_tree_'.$treeId.'` WHERE `document_id` = :document_id'
 	 */
 	protected abstract function deleteEmptyNodeDocumentQuery($treeId);
 
 	/**
-	 * @example 'UPDATE f_tree_'.$treeId.' SET children_count = children_count + :offest WHERE document_id = :document_id'
+	 * Query like 'UPDATE f_tree_'.$treeId.' SET children_count = children_count + :offest WHERE document_id = :document_id'
 	 */
 	protected abstract function updateChildenCountQuery($treeId);
 
 	/**
-	 * @example 'UPDATE f_tree_'.$treeId.' SET node_order = node_order + :offest WHERE parent_id = :parent_id AND node_order >= :node_order'
+	 * Query like 'UPDATE f_tree_'.$treeId.' SET node_order = node_order + :offest WHERE parent_id = :parent_id AND node_order >= :node_order'
 	 */
 	protected abstract function updateChildrenOrderQuery($treeId, $offset);
 
@@ -2458,13 +2477,13 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @example 'UPDATE `f_document` SET `treeid` = NULL WHERE
+	 * Query like 'UPDATE `f_document` SET `treeid` = NULL WHERE
 	 * 	`document_id` IN (SELECT document_id FROM f_tree_'.$treeId.' WHERE node_level > :node_level and node_path like :node_path)'
 	 */
 	protected abstract function getUpdateDocumentsTreeQuery($treeId);
 
 	/**
-	 * @example 'DELETE FROM f_tree_'.$treeId.' WHERE node_level > :node_level and node_path like :node_path)'
+	 * Query like 'DELETE FROM f_tree_'.$treeId.' WHERE node_level > :node_level and node_path like :node_path)'
 	 */
 	protected abstract function deleteNodeRecursivelyQuery($treeId);
 
@@ -2584,14 +2603,14 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 *'UPDATE f_tree_'.$treeId
+	 * Query like 'UPDATE f_tree_'.$treeId
 	 * SET parent_id = :parent_id, node_order = :node_order, node_level = node_level + :offestlvl, node_path = :node_path
 	 * WHERE document_id = :document_id
 	 */
 	protected abstract function moveNodeBaseQuery($treeId);
 
 	/**
-	 * 'UPDATE f_tree_'.$treeId
+	 * Query like 'UPDATE f_tree_'.$treeId
 	 * SET node_level = node_level + :offestlvl, node_path = REPLACE(node_path, :from_path, :to_path)'
 	 * WHERE node_level > :node_level AND node_path like :node_path'
 	 */
@@ -3406,7 +3425,50 @@ abstract class f_persistentdocument_PersistentProvider
 	 */
 	protected abstract function deleteI18nKeyQuery($id, $lcid);	
 
+	//I18nSynchro
 	
+	/**
+	 * @param integer $id
+	 * @param string $lang
+	 * @param string $synchroStatus 'MODIFIED'|'VALID'|'SYNCHRONIZED'
+	 * @param string|null $fromLang
+	 */
+	public abstract function setI18nSynchroStatus($id, $lang, $synchroStatus, $fromLang = null);
+	
+	/**
+	 * @param integer $id
+	 * @return array
+	 * 		- 'fr'|'en'|'??' : array
+	 * 			- status : 'MODIFIED'|'VALID'|'SYNCHRONIZED'
+	 * 			- from : fr'|'en'|'??'|null
+	*/
+	public abstract function getI18nSynchroStatus($id);
+	
+	/**
+	 * @return integer[]
+	*/
+	public abstract function getI18nSynchroIds();
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocumentModel $pm
+	 * @param integer $id
+	 * @param string $lang
+	 * @param string $fromLang
+	*/
+	public abstract function prepareI18nSynchro($pm, $documentId, $lang, $fromLang);
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocumentModel $pm
+	 * @param f_persistentdocument_I18nPersistentDocument $to
+	*/
+	public abstract function setI18nSynchro($pm, $to);
+	
+	/**
+	 * @param integer $id
+	 * @param string|null $lang
+	*/
+	public abstract function deleteI18nSynchroStatus($id, $lang = null);
+		
 
 	/**
 	 * @param integer $documentId
@@ -4001,7 +4063,7 @@ abstract class f_persistentdocument_PersistentProvider
 	 * @param Integer $documentId
 	 * @return void
 	 */
-	private function deleteFromCache($documentId)
+	protected function deleteFromCache($documentId)
 	{
 		if ($this->useDocumentCache)
 		{
@@ -4222,7 +4284,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @example INSERT INTO f_user_action_entry (entry_date , user_id , document_id , module_name , action_name, username, info)
+	 * Query like INSERT INTO f_user_action_entry (entry_date , user_id , document_id , module_name , action_name, username, info)
 	 * VALUES (:entry_date, :user_id, :document_id, :module_name, :action_name, :username, :info)
 	 * @return String
 	 */
@@ -4336,10 +4398,8 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 *
 	 * @param String $fieldName (document | module | action | [user])
-	 * @return String
-	 * @example SELECT $sqlName as distinctvalue FROM f_user_action_entry GROUP BY $sqlName
+	 * @return String Query like SELECT $sqlName as distinctvalue FROM f_user_action_entry GROUP BY $sqlName
 	 */
 	protected function getDistinctLogEntryQuery($fieldName)
 	{
@@ -4366,7 +4426,47 @@ abstract class f_persistentdocument_PersistentProvider
 		return $result;
 	}
 	
+	/**
+	 * @param string $date
+	 * @param string|null $moduleName
+	 */
+	public final function deleteUserActionEntries($date, $moduleName = null)
+	{
+		if ($moduleName !== null)
+		{
+			$sql = $this->deleteUserActionEntriesQuery(true);
+		}
+		else
+		{
+			$sql = $this->deleteUserActionEntriesQuery(false);
+		}
 	
+		$stmt = $this->prepareStatement($sql);
+		$stmt->bindValue(':entry_date', $date, PersistentProviderConst::PARAM_STR);
+	
+		if ($moduleName !== null)
+		{
+			$stmt->bindValue(':module_name', $moduleName, PersistentProviderConst::PARAM_STR);
+		}
+		$this->executeStatement($stmt);
+		return $stmt->rowCount();
+	}
+	
+	/**
+	 * @param boolean $addModuleFilter
+	 * @return string
+	 */
+	protected function deleteUserActionEntriesQuery($addModuleFilter)
+	{
+		if ($addModuleFilter)
+		{
+			return "DELETE FROM f_user_action_entry WHERE entry_date < :entry_date AND module_name = :module_name";
+		}
+		else
+		{
+			return "DELETE FROM f_user_action_entry WHERE entry_date < :entry_date";
+		}
+	}	
 	
 	
 	// Indexing function

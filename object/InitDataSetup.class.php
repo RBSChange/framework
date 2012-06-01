@@ -146,13 +146,33 @@ abstract class object_InitDataSetup
 	}
 	
 	/**
-	 * @example set value to null for remove entry
 	 * @param string $path
-	 * @param string $value
+	 * @param string $value Set value to null for remove entry
 	 * @return string || false if return value != input value compile-config is required
 	 */
 	protected function addProjectConfigurationEntry($path, $value)
 	{
 		return config_ProjectParser::addProjectConfigurationEntry($path, $value);
+	}
+	
+	/**
+	 * @param string $originalClass
+	 * @param string $newClass
+	 * @param string $section [class|document]
+	 * @return boolean
+	 */
+	protected final function addInjectionInProjectConfiguration($originalClass, $newClass, $section = 'class')
+	{
+		$nnsName = Framework::getConfigurationValue('injection/' . $section . '/' . $originalClass, $newClass);
+		if ($nnsName != $originalClass && $nnsName != $newClass)
+		{
+			$this->addWarning($nnsName . ' must extend ' . $newClass . ' !');
+			return false;
+		}
+		else
+		{
+			$this->addProjectConfigurationEntry('injection/' . $section . '/' . $originalClass, $newClass);
+			return true;
+		}
 	}
 }

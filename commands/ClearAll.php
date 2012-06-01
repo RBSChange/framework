@@ -28,7 +28,7 @@ class commands_ClearAll extends c_ChangescriptCommand
 		$this->executeCommand("update-autoload");
 		
 		$this->loadFramework();
-		$this->executeCommand("clear-log");
+
 		$this->executeCommand("clear-cache");
 		$this->executeCommand("clear-webapp-cache");
 		$this->executeCommand("clear-datacache");

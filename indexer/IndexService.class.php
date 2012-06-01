@@ -567,9 +567,7 @@ class indexer_IndexService extends BaseService
 		{
 			$websiteIds = $document->getDocumentService()->getWebsiteIds($document);
 			if (!is_array($websiteIds) || count($websiteIds) > 0)
-			{
-				
-				$userIds[] = self::PUBLIC_DOCUMENT_ACCESSOR_ID;				
+			{		
 				if (is_array($websiteIds))
 				{
 					$indexedDoc->setWebsiteIds($websiteIds);
@@ -583,6 +581,10 @@ class indexer_IndexService extends BaseService
 				else
 				{
 					$indexedDoc->setWebsiteIds(array(0));
+				}
+				if (count($userIds) == 0)
+				{
+					$userIds[] = self::PUBLIC_DOCUMENT_ACCESSOR_ID;	
 				}
 				$indexedDoc->foIndexable(true);				
 				$indexedDoc->setDateField('sortable_date', $document->getModificationdate());
@@ -658,11 +660,11 @@ class indexer_IndexService extends BaseService
 				{
 					if ($property->getIndexed() === 'description')
 					{
-						$textEntries[] = f_util_StringUtils::htmlToText($value, false);
+						$textEntries[] = f_util_HtmlUtils::htmlToText($value, false);
 					}
 					else
 					{
-						$aggregateEntries[] =  f_util_StringUtils::htmlToText($value, false);
+						$aggregateEntries[] =  f_util_HtmlUtils::htmlToText($value, false);
 						$indexedDoc->setStringField($property->getName(), $value);
 					}
 				}

@@ -13,7 +13,7 @@ class Restrictions
 	/**
 	 * Apply an "equals" constraint to each property in the key set of a Array
 	 * @param array $propertyNameValues
-	 * @example allEq(array("author" => "me", "contributor" => "you"))
+	 * For example: allEq(array("author" => "me", "contributor" => "you"))
 	 */
 	static function allEq($propertyNameValues)
 	{
@@ -27,7 +27,7 @@ class Restrictions
 
 	/**
 	 * Return the conjunction of 1..n expressions
-	 * @example andExp(Restrictions::eq("author", "me"), Restrictions::between("creationdate", "2007-01-31 00:00:00", "2007-02-28 00:00:00"))
+	 * For example: andExp(Restrictions::eq("author", "me"), Restrictions::between("creationdate", "2007-01-31 00:00:00", "2007-02-28 00:00:00"))
 	 */
 	static function andExp()
 	{
@@ -51,7 +51,7 @@ class Restrictions
 
 	/**
    	 * Apply a "between" constraint to the named property
-   	 * @example between("creationdate", "2007-01-31 00:00:00", "2007-02-28 00:00:00")
+   	 * For example: between("creationdate", "2007-01-31 00:00:00", "2007-02-28 00:00:00")
    	 */
 	static function between($propertyName, $min, $max)
 	{
@@ -63,7 +63,7 @@ class Restrictions
 	 * @param String $propertyName
 	 * @param mixed $value
 	 * @param boolean $ignoreCase deprecated, use ieq($propertyName, $value) instead of eq($propertyName, $value, true)
-	 * @example eq("author", "me")
+	 * For example: eq("author", "me")
 	 * @return SimpleExpression
 	 */
 	static function eq($propertyName, $value, $ignoreCase = false)
@@ -81,7 +81,7 @@ class Restrictions
 
 	/**
       * Apply a "greater than or equal" constraint to the named property
-      * @example ge("creationdate", $today)
+      * For example: ge("creationdate", $today)
       */
 	static function ge($propertyName, $value)
 	{
@@ -99,7 +99,7 @@ class Restrictions
 
 	/**
 	 * Apply a "greater than" constraint to the named property
-	 * @example ge("creationdate", $today)
+	 * For example: gt("creationdate", $today)
 	 */
 	static function gt($propertyName, $value)
 	{
@@ -117,7 +117,7 @@ class Restrictions
 
 	/**
 	 * Apply an "equal" constraint to the identifier property
-	 * @example idEq($documentId)
+	 * For example: idEq($documentId)
 	 */
 	static function idEq($value)
 	{
@@ -127,7 +127,7 @@ class Restrictions
 	/**
 	 * Apply an "equal ignore case" constraint to the named property,
 	 * ignoring case
-	 * @example ieq("author", mE)
+	 * For example: ieq("author", "mE")
 	 */
 	static function ieq($propertyName, $value)
 	{
@@ -139,7 +139,7 @@ class Restrictions
 	 * @param String $propertyName
 	 * @param String $value
 	 * @param MatchMode $matchMode
-	 * @example ilike("email", "@rBbS.fR", MatchMode::END)
+	 * For example: ilike("email", "@rBbS.fR", MatchMode::END)
 	 * @see MatchMode
 	 */
 	static function ilike($propertyName, $value, $matchMode = null)

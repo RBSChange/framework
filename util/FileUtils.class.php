@@ -165,7 +165,7 @@ abstract class f_util_FileUtils
 	 * @param String $pattern
 	 * @param String $fromPath
 	 * @return String[] the founded files as a "relative to $fromPath path" array
-	 * @example f_util_FileUtils::find("*.php", util_File_Utils::buildProjectPath("modules", "myModule"));
+	 * For example: f_util_FileUtils::find("*.php", util_File_Utils::buildProjectPath("modules", "myModule"));
 	 */
 	static public function find($pattern, $fromPath)
 	{
@@ -173,10 +173,10 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @param unknown_type $pattern
-	 * @param unknown_type $flags
-	 * @param unknown_type $path
-	 * @return unknown
+	 * @param string $pattern
+	 * @param integer $flags
+	 * @param string $path
+	 * @return string[]
 	 */
 	static private function rglob($pattern = '*', $flags = 0, $path = '')
 	{
@@ -219,7 +219,7 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @example f_util_FileUtils::buildRelativePath('home', 'toto') returns 'home/toto'
+	 * For example: f_util_FileUtils::buildRelativePath('home', 'toto') returns 'home/toto'
 	 * @return String the path builded using concatenated arguments
 	 */
 	public static function buildRelativePath()
@@ -229,8 +229,8 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @example f_util_FileUtils::buildPath('home', 'toto') returns 'home/toto'
-	 * @example f_util_FileUtils::buildPath('/home/titi/tutu', 'toto') returns '/home/titi/tutu/toto'
+	 * For example: f_util_FileUtils::buildPath('home', 'toto') returns 'home/toto'
+	 * For example: f_util_FileUtils::buildPath('/home/titi/tutu', 'toto') returns '/home/titi/tutu/toto'
 	 * @return String the path builded using concatenated arguments
 	 */
 	public static function buildPath()
@@ -240,8 +240,8 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @example f_util_FileUtils::buildAbsolutePath('home', 'toto') returns '/home/toto'
-	 * @example f_util_FileUtils::buildAbsolutePath('/home', 'toto') returns '/home/toto'
+	 * For example: f_util_FileUtils::buildAbsolutePath('home', 'toto') returns '/home/toto'
+	 * For example: f_util_FileUtils::buildAbsolutePath('/home', 'toto') returns '/home/toto'
 	 * @return String the path builded using concatenated arguments
 	 */
 	public static function buildAbsolutePath()
@@ -266,7 +266,7 @@ abstract class f_util_FileUtils
 
 	
 	/**
-	 * @example f_util_FileUtils::buildProjectPath('libs', 'icons')
+	 * For example: f_util_FileUtils::buildProjectPath('libs', 'icons')
 	 * @return String
 	 */
 	public static function buildProjectPath()
@@ -277,7 +277,7 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @example f_util_FileUtils::buildModulesPath('mymodule', 'config')
+	 * For example: f_util_FileUtils::buildModulesPath('mymodule', 'config')
 	 * @return String
 	 */
 	public static function buildModulesPath()
@@ -288,7 +288,7 @@ abstract class f_util_FileUtils
 	}
 	
 	/**
-	 * @example f_util_FileUtils::buildOverridePath('modules', 'mymodule', 'config')
+	 * For example: f_util_FileUtils::buildOverridePath('modules', 'mymodule', 'config')
 	 * @return String
 	 */
 	public static function buildOverridePath()
@@ -299,7 +299,7 @@ abstract class f_util_FileUtils
 	}
 
 	/**
- 	 * @example f_util_FileUtils::buildDocumentRootPath('index.php')
+ 	 * For example: f_util_FileUtils::buildDocumentRootPath('index.php')
 	 * @return String
 	 */
 	public static function buildDocumentRootPath()
@@ -340,7 +340,7 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @example FileUtils::buildLogPath('application.log')
+	 * For example: FileUtils::buildLogPath('application.log')
 	 * @return String
 	 */
 	public static function buildLogPath()
@@ -351,7 +351,7 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @example FileUtils::buildFrameworkPath('config', 'listeners.xml')
+	 * For example: FileUtils::buildFrameworkPath('config', 'listeners.xml')
 	 * @return String
 	 */
 	public static function buildFrameworkPath()
@@ -458,15 +458,24 @@ abstract class f_util_FileUtils
 	{
 		switch (strtolower($extension))
 		{
-			case 'flv': return 'video/x-flv';
-			case 'png': return 'image/png';
 			case 'gif': return 'image/gif';
 			case 'jpg':
 			case 'jpeg':
 				return 'image/jpeg';
-			case 'swf': return 'application/x-shockwave-flash';
-			case 'pdf': return 'application/pdf';
+			case 'png': return 'image/png';
 			case 'ico': return 'image/x-icon';
+			case 'pdf': return 'application/pdf';
+			case 'flv': return 'video/x-flv';
+			case 'swf': return 'application/x-shockwave-flash';
+			case 'mp3': return 'audio/mpeg';
+			case 'doc': return 'application/msword';
+			case 'docx': return 'application/vnd.openxmlformats-officedocument.WordprocessingML.document'; 
+			case 'xls': return 'application/vnd.ms-excel';
+			case 'xlsx': return 'application/vnd.openxmlformats-officedocument.SpreadsheetML.Sheet';
+			case 'ppt': return 'application/vnd.ms-powerpoint';
+			case 'pptx': return 'application/vnd.openxmlformats-officedocument.presentationml.Presentation';
+			case 'pps': return 'application/vnd.ms-powerpoint';
+			case 'ppsx': return 'application/vnd.openxmlformats-officedocument.presentationml.Slideshow';
 			default:
 				return 'application/octet-stream';
 		}
@@ -934,7 +943,7 @@ abstract class f_util_FileUtils
 	 * @param String|Integer $mode Cf. http://php.net/manual/en/function.chmod.php
 	 * @param Boolean $recursive
 	 * @param String|Integer $filesMode if recursive, you can specify a different mode than $mode for files
-	 * @example chmod(..., "2775") or chmod (..., 02775)
+	 * For example: chmod(..., "2775") or chmod (..., 02775)
 	 */
 	public static function chmod($file, $mode, $recursive = true, $filesMode = null)
 	{

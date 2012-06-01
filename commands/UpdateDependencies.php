@@ -135,12 +135,11 @@ class commands_UpdateDependencies extends c_ChangescriptCommand
 			if ($package->getVersion() == null) //Update version from download
 			{
 				$package->setVersion($downloadPackage->getVersion());
-				$package->setHotfix($downloadPackage->getHotfix());	
 				$bootstrap->updateProjectPackage($package);
 				$this->message("Update version of " . $package->getKey() . " in project install.xml");
 			}
 			
-			$this->message('Copy ' . $package->getKey() . '-' . $package->getHotfixedVersion() . ' in project...');
+			$this->message('Copy ' . $package->getKey() . '-' . $package->getVersion() . ' in project...');
 			f_util_FileUtils::rmdir($package->getPath());
 			f_util_FileUtils::cp($downloadPackage->getTemporaryPath(), $package->getPath());
 			f_util_FileUtils::rmdir($downloadPackage->getTemporaryPath());
@@ -148,10 +147,9 @@ class commands_UpdateDependencies extends c_ChangescriptCommand
 			return true;
 		}
 		
-		if ($package->getHotfixedVersion() !== $tmpPackage->getHotfixedVersion())
+		if ($package->getVersion() !== $tmpPackage->getVersion())
 		{		
 			$package->setVersion($tmpPackage->getVersion());
-			$package->setHotfix($tmpPackage->getHotfix());	
 			$bootstrap->updateProjectPackage($package);
 			$this->message("Update version of " . $package->getKey() . " in project install.xml");
 		}
@@ -215,9 +213,9 @@ class commands_UpdateDependencies extends c_ChangescriptCommand
 			f_util_FileUtils::rmdir($tmpPackage->getTemporaryPath());
 			return null;
 		}
-		elseif ($usePackageVersion && $tmpPackage->getHotfixedVersion() != $package->getHotfixedVersion())
+		elseif ($usePackageVersion && $tmpPackage->getVersion() != $package->getVersion())
 		{
-			$this->warnMessage('Invalid package version: ' . $tmpPackage->getHotfixedVersion());
+			$this->warnMessage('Invalid package version: ' . $tmpPackage->getVersion());
 			f_util_FileUtils::rmdir($tmpPackage->getTemporaryPath());
 			return null;
 		}

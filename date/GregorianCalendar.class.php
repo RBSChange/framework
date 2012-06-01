@@ -420,11 +420,7 @@ class date_GregorianCalendar extends date_Calendar
 	 * is the last day of the month; in that case, it will set the resulting
 	 * date to the last day of the resulting month.
 	 *
-	 * @example '2007-06-30' + 1 month = '2007-07-31' with smart end-of-month ON
-	 * @example '2007-06-30' + 1 month = '2007-07-30' with smart end-of-month OFF
-	 *
 	 * @param boolean $bool
-	 *
 	 * @return date_GregorianCalendar $this
 	 */
     public function useSmartEndOfMonth($bool)

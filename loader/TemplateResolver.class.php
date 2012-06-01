@@ -38,7 +38,7 @@ class TemplateResolver extends FileResolver implements ResourceResolver
 
 		if ( is_null(self::$instance) )
 		{
-			self::$instance = new TemplateResolver();
+			self::$instance = new self();
 
 		}
 		self::$instance->reset();

@@ -162,7 +162,7 @@ class commands_Indexer extends c_ChangescriptCommand
 		$indexerLogPath = f_util_FileUtils::buildLogPath('indexer.log');
 		$chunkSize = 100;
 		$chunkInfo = "* Start indexing documents.";
-		error_log("\n". gmdate('Y-m-d H:i:s')."\t".$chunkInfo, 3, $indexerLogPath);
+		error_log(gmdate('Y-m-d H:i:s')."\t".$chunkInfo . PHP_EOL, 3, $indexerLogPath);
 		$this->message($chunkInfo);
 		
 		foreach ($modelsName as $modelName) 
@@ -190,12 +190,12 @@ class commands_Indexer extends c_ChangescriptCommand
 					$progres = false;
 					$chunkInfo = "* $modelName processed Total: $documentIndex";
 				}
-				error_log("\n". gmdate('Y-m-d H:i:s')."\t".$chunkInfo, 3, $indexerLogPath);
+				error_log(gmdate('Y-m-d H:i:s')."\t".$chunkInfo . PHP_EOL, 3, $indexerLogPath);
 				$this->message($chunkInfo);
 			} 	
 		}
-		error_log("\n". gmdate('Y-m-d H:i:s')."\tTotal of indexed documents: $totalDocumentCount", 3, $indexerLogPath);
-		$this->message("Total of indexed documents: $totalDocumentCount");
+		error_log(gmdate('Y-m-d H:i:s')."\tTotal of indexed documents: " . $totalDocumentCount . PHP_EOL, 3, $indexerLogPath);
+		$this->message("Total of indexed documents: " . $totalDocumentCount);
 	}
 	
 	private function reIndexModelName($modelName)
@@ -224,7 +224,7 @@ class commands_Indexer extends c_ChangescriptCommand
 				$progres = false;
 				$chunkInfo = "* $modelName processed Total: $documentIndex";
 			}
-			error_log("\n". gmdate('Y-m-d H:i:s')."\t". $chunkInfo, 3, $indexerLogPath);
+			error_log(gmdate('Y-m-d H:i:s')."\t". $chunkInfo . PHP_EOL, 3, $indexerLogPath);
 			$this->message($chunkInfo);
 		}		
 	}

@@ -32,7 +32,7 @@ class PatchService extends BaseService
 	{
 		if (is_null(self::$instance))
 		{
-			self::$instance = new PatchService();
+			self::$instance = new self();
 		}
 		return self::$instance;
 	}

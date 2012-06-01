@@ -37,7 +37,7 @@ class ClassResolver implements ResourceResolver
 	{
 		if (is_null(self::$instance))
 		{	
-			self::$instance = new ClassResolver();
+			self::$instance = new self();
 		}
 		return self::$instance;
 	}
@@ -91,10 +91,7 @@ class ClassResolver implements ResourceResolver
 	{
 		 
 		$result = array(
-				array('path' => '%PROJECT_HOME%/framework', 'recursive' => 'true', 
-						'exclude' => array('deprecated', 'doc', 'module', 'home', 'patch')), 
-				array('path' => '%PROJECT_HOME%/libs', 'recursive' => 'true',
-					'exclude' => array('fckeditor', 'icons', 'pearlibs', 'zfminimal')),
+				array('path' => '%PROJECT_HOME%/framework', 'recursive' => 'true', 'exclude' => array('deprecated', 'doc', 'module', 'home', 'patch')), 
 				array('path' => '%PROJECT_HOME%/build/project', 'recursive' => 'true'), 
 				array('path' => '%PROJECT_HOME%/modules/*/actions'), 
 				array('path' => '%PROJECT_HOME%/modules/*/commands', 'recursive' => 'true'), 
@@ -104,11 +101,6 @@ class ClassResolver implements ResourceResolver
 				array('path' => '%PROJECT_HOME%/override/modules/*/actions'), 
 				array('path' => '%PROJECT_HOME%/override/modules/*/lib', 'recursive' => 'true'), 
 				array('path' => '%PROJECT_HOME%/override/modules/*/views'));
-				
-		if (defined('PEAR_DIR'))
-		{
-			array_unshift($result, array('path' => PEAR_DIR, 'recursive' => 'true'));
-		}
 		return $result;
 	}
 	
@@ -173,7 +165,6 @@ class ClassResolver implements ResourceResolver
 		{
 			$dh = opendir($phpPath);
 			$bp = $phpPath. DIRECTORY_SEPARATOR;
-			
 	        while ($fileName = readdir($dh))
 	        {
 	            if ($fileName === '.' || $fileName === '..') {continue;}

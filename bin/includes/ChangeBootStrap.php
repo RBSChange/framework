@@ -98,7 +98,7 @@ class c_ChangeBootStrap
 	 */
 	public function getReleaseRepository()
 	{
-		return 'http://repo.ssxb-wf-inthause.fr';
+		return 'http://update.rbschange.fr';
 	}
 	
 	/**
@@ -390,7 +390,7 @@ class c_ChangeBootStrap
 			if ($infos->getKey() == $updatedPackage->getKey())
 			{
 				$toAdd = false;
-				if ($infos->getHotfixedVersion() != $updatedPackage->getHotfixedVersion())
+				if ($infos->getVersion() != $updatedPackage->getVersion())
 				{
 					$isModified = true;
 					$updatedPackage->populateNode($node);
@@ -594,6 +594,69 @@ class c_ChangeBootStrap
 			return "Could not download $url: bad http status (" . $info["http_code"] . ")";
 		}
 		return true;
+	}
+	
+	
+	/**
+	 * @var boolean|array
+	 */
+	private $remoteError = false;
+	/**
+	 *
+	 * @param string $url
+	 * @param string $destFile
+	 * @return true array
+	 */
+	private function getRemoteFile($url, $destFile)
+	{
+		$this->remoteError = false;
+		$fp = fopen($destFile, "wb");
+		if ($fp === false)
+		{
+			$this->remoteError = array(-1, 'Fopen error for filename ', $destFile);
+			return $this->remoteError;
+		}
+	
+		$ch = curl_init($url);
+		if ($ch == false)
+		{
+			$this->remoteError = array(-2, 'Curl_init error for url ' . $url);
+			return $this->remoteError;
+		}
+	
+		curl_setopt($ch, CURLOPT_USERAGENT, $this->getInstanceProjectKey());
+		curl_setopt($ch, CURLOPT_AUTOREFERER, true);
+		curl_setopt($ch, CURLOPT_COOKIEFILE, '');
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+	
+		$proxy = $this->getProxy();
+		if ($proxy !== null)
+		{
+			curl_setopt($ch, CURLOPT_PROXY, $proxy);
+		}
+	
+		curl_setopt($ch, CURLOPT_FILE, $fp);
+		curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
+		if (curl_exec($ch) === false)
+		{
+			$this->remoteError = array(curl_errno($ch), curl_error($ch));
+			fclose($fp);
+			unlink($destFile);
+			curl_close($ch);
+			return $this->remoteError;
+		}
+	
+		fclose($fp);
+		$info = curl_getinfo($ch);
+		curl_close($ch);
+		if ($info["http_code"] != "200")
+		{
+			unlink($destFile);
+			$this->remoteError = array($info["http_code"], "Could not download " . $url . ": bad http status (" . $info["http_code"] . ")");
+			return $this->remoteError;
+		}
+	
+		return $this->remoteError === false;
 	}
 	
 	/**

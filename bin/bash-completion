@@ -1,6 +1,5 @@
 #!/bin/bash
 
-#
 # BASH Completion for change.php and changedev.php scripts.
 # To be placed at ~/.bash_completion or in BASH_COMPLETION_DIR
 # (usually /etc/bash_completion.d)
@@ -11,63 +10,30 @@
 _changephp()
 {
         local cur cmds cmdOpts
-
+        
         COMPREPLY=()
-		cur="${COMP_WORDS[COMP_CWORD]}"
+	cur="${COMP_WORDS[COMP_CWORD]}"
 
-        if [[ $COMP_CWORD -eq 1 ]] ; then
-        	cmds=$(change.php getCommands)
-            if [ $? -eq 0 ]; then
-            	COMPREPLY=( $( compgen -W "${cmds}" -- ${cur} ) )
+    	if [[ $COMP_CWORD -eq 1 ]] ; then
+        	cmds=$(echo "" | change.php getCommands)
+        	if [ $? -eq 0 ]; then
+            		COMPREPLY=( $( compgen -W "${cmds}" -- ${cur} ) )
         	fi
         elif [[ ${cur} == -* ]] ; then
-            cmd="${COMP_WORDS[1]}"
-            opts=$(change.php getOptions ${cmd})
-            if [ $? -eq 0 ]; then
-            	COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
-			fi
+        	cmd="${COMP_WORDS[1]}"
+        	opts=$(echo "" | change.php getOptions ${cmd})
+        	if [ $? -eq 0 ]; then
+	        	COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+	        fi
         else
-			cmd="${COMP_WORDS[1]}"
-			params=$(change.php getParameters ${cmd} $((${#COMP_WORDS[@]} - 3)) "${cur}" ${COMP_WORDS[@]})
-			if [ $? -eq 0 ]; then
-				COMPREPLY=( $(compgen -W "${params}" -- ${cur}) )
-			fi
-        fi
-
-        return 0
+        	cmd="${COMP_WORDS[1]}"
+        	params=$(echo "" | change.php getParameters ${cmd} $((${#COMP_WORDS[@]} - 3)) "${cur}" ${COMP_WORDS[@]})
+        	if [ $? -eq 0 ]; then
+        		COMPREPLY=( $(compgen -W "${params}" -- ${cur}) )
+        	fi
+    	fi
+    	
+    	return 0
 }
 
 complete -F _changephp -o "default" change.php
-
-# Completion for changedev.php
-
-_changedevphp()
-{
-        local cur cmds cmdOpts
-        
-        COMPREPLY=()
-		cur="${COMP_WORDS[COMP_CWORD]}"
-
-        if [[ $COMP_CWORD -eq 1 ]] ; then
-			cmds=$(changedev.php getCommands)
-			if [ $? -eq 0 ]; then
-				COMPREPLY=( $( compgen -W "${cmds}" -- ${cur} ) )
-			fi
-        elif [[ ${cur} == -* ]] ; then
-			cmd="${COMP_WORDS[1]}"
-			opts=$(changedev.php getOptions ${cmd})
-			if [ $? -eq 0 ]; then
-				COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
-			fi
-        else
-			cmd="${COMP_WORDS[1]}"
-			params=$(changedev.php getParameters ${cmd} $((${#COMP_WORDS[@]} - 3)) "${cur}" ${COMP_WORDS[@]})
-			if [ $? -eq 0 ]; then
-				COMPREPLY=( $(compgen -W "${params}" -- ${cur}) )
-			fi
-        fi
-        
-        return 0
-}
-
-complete -F _changedevphp -o "default" changedev.php

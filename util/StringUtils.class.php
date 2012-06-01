@@ -11,25 +11,6 @@ class f_util_StringUtils
 	const TO_UPPER_CASE = 2;
 	const STRIP_ACCENTS = 3;
 
-	// static $_cache_caseToUnderscore = array();
-	public static function return_bytes($val)
-	{
-	   $val = trim($val);
-	   $last = strtolower($val{strlen($val)-1});
-	   switch($last)
-	   {
-	       // Le modifieur 'G' est disponible depuis PHP 5.1.0
-	       case 'g':
-		   $val *= 1024;
-	       case 'm':
-		   $val *= 1024;
-	       case 'k':
-		   $val *= 1024;
-	   }
-
-	   return $val;
-	}
-
 	/**
 	 * @param String $value
 	 * @param String $fromEncoding
@@ -77,8 +58,7 @@ class f_util_StringUtils
 		{
 			return mb_substr($haystack, -$len, $len, "UTF-8") == $needle;
 		}
-		return mb_strtolower(mb_substr($haystack, -$len, $len, "UTF-8"), "UTF-8")
-			=== mb_strtolower($needle, "UTF-8");
+		return mb_strtolower(mb_substr($haystack, -$len, $len, "UTF-8"), "UTF-8") === mb_strtolower($needle, "UTF-8");
 	}
 
 	/**
@@ -93,8 +73,7 @@ class f_util_StringUtils
 		{
 			return mb_substr($haystack, 0, mb_strlen($needle, "UTF-8"), "UTF-8") == $needle;
 		}
-		return mb_strtolower(mb_substr($haystack, 0, mb_strlen($needle, "UTF-8"), "UTF-8"), "UTF-8")
-			=== mb_strtolower($needle, "UTF-8");
+		return mb_strtolower(mb_substr($haystack, 0, mb_strlen($needle, "UTF-8"), "UTF-8"), "UTF-8") === mb_strtolower($needle, "UTF-8");
 	}
 	
 	/**
@@ -186,8 +165,7 @@ class f_util_StringUtils
      */
 	 final static function transcodeStringsInArray($in_array = null)
 	 {
-		if (is_array($in_array) === false)
-			return $in_array;
+		if (is_array($in_array) === false) return $in_array;
 
 		if ($in_array != null && count($in_array) > 0)
 		{
@@ -198,10 +176,14 @@ class f_util_StringUtils
 			{
 				$l_element = $in_array[$l_keys[$i]];
 
-				if (is_array($l_element))
+				if (is_array($l_element)) 
+				{
 					$in_array[$l_keys[$i]] = self::transcodeStringsInArray($l_element);
-				else
+				}
+				else 
+				{
 					$in_array[$l_keys[$i]] = self::transcodeString($in_array[$l_keys[$i]]);
+				}
 			}
 		}
 
@@ -223,8 +205,10 @@ class f_util_StringUtils
 
 		if ($in_toTranscode != null && mb_strlen($in_toTranscode) > 0)
 		{
-			if (mb_strpos($in_toTranscode, "%u") === false)
+			if (mb_strpos($in_toTranscode, "%u") === false) 
+			{
 				$l_result = $in_toTranscode;
+			}
 			else
 			{
 				$l_separatedChars = explode("%u", $in_toTranscode);
@@ -253,7 +237,9 @@ class f_util_StringUtils
 		}
 
 		if (mb_strlen($l_result) == 0)
+		{
 			$l_result = $in_toTranscode;
+		}
 
 		return $l_result;
 	}
@@ -297,13 +283,16 @@ class f_util_StringUtils
     }
 
 	/**
-     * Test if sended string is hexadecimal
-	 *
-     * @return true or false
-     **/
-	public static function is_hexa($in_hexaTest = null)
+	 * Test if sended string is hexadecimal
+	 * @param string $in_hexaTest
+	 * @return true or false
+	 **/
+	public static function isHexa($in_hexaTest = null)
 	{
-		if (!is_string($in_hexaTest)) { return false; }
+		if (!is_string($in_hexaTest)) 
+		{ 
+			return false; 
+		}
 
 		$l_value = trim(strtolower($in_hexaTest));
 		$l_allowed = array("a","b","c","d","e","f","0","1","2","3","4","5","6","7","8","9");
@@ -311,184 +300,77 @@ class f_util_StringUtils
 		for($j = 0; $j < strlen($l_value); $j++)
 		{
 			if (!in_array($l_value[$j], $l_allowed))
+			{
 				return false;
+			}
 		}
 
 		return true;
 	}
-
-	 /**
-	  * The aim of this function is to return an associative array
-	  * from a given "associative" string :
-	  *
-	  *  "name1: value1; name2: value2;" --> array(
-	  *                                         0 => "name1: value1; name2: value2;"
-	  *                                         "name1" => "value1",
-	  *                                         "name2" => "value2"
-	  *                                      )
-	  *
-	  * @param mixed in_varToDump Variable to dump
-	  * @return string var_ump under string form
-	  */
-	 public static function parse_assoc_string($in_assoc_string = '')
-	 {
-	    if (!trim($in_assoc_string))
-	    {
-	        return array();
-	    }
-        $out_assoc_array = array($in_assoc_string);
-        $assoc_strings = explode(";", $in_assoc_string);
-        foreach ($assoc_strings as $assoc_string)
-        {
-            $declaration = explode(":", $assoc_string);
-            if (isset($declaration[0])
-            && isset($declaration[1]))
-            {
-                $property = trim($declaration[0]);
-                $value = trim($declaration[1]);
-                if ($property)
-                {
-                    $out_assoc_array[$property] = $value;
-                }
-            }
-            else if (trim($assoc_string))
-            {
-                $out_assoc_array[] = trim($assoc_string);
-            }
-        }
+	
+	/**
+	 * The aim of this function is to return an associative array
+	 * from a given "associative" string :
+	 *
+	 * "name1: value1; name2: value2;" --> array(
+	 * 0 => "name1: value1; name2: value2;"
+	 * "name1" => "value1",
+	 * "name2" => "value2"
+	 * )
+	 *
+	 * @param
+	 *        	mixed in_varToDump Variable to dump
+	 * @return string var_dump under string form
+	 */
+	public static function parseAssocString($in_assoc_string = '')
+	{
+		if (!trim($in_assoc_string))
+		{
+			return array();
+		}
+		$out_assoc_array = array($in_assoc_string);
+		$assoc_strings = explode(";", $in_assoc_string);
+		foreach ($assoc_strings as $assoc_string)
+		{
+			$declaration = explode(":", $assoc_string);
+			if (isset($declaration[0]) && isset($declaration[1]))
+			{
+				$property = trim($declaration[0]);
+				$value = trim($declaration[1]);
+				if ($property)
+				{
+					$out_assoc_array[$property] = $value;
+				}
+			}
+			else if (trim($assoc_string))
+			{
+				$out_assoc_array[] = trim($assoc_string);
+			}
+		}
 		return $out_assoc_array;
-	 }
-
-	public static function array_to_string($array)
-	{
-	    $string = "";
-	    foreach ($array as $key => $value)
-	    {
-	        if (trim($key))
-	        {
-    	        $string .= sprintf(
-    	            "%s: %s; ",
-    	            trim($key),
-    	            trim($value)
-    	        );
-	        }
-	    }
-	    return trim($string);
 	}
-	
+
 	/**
-	 * Remove every nl/crlf from the given string.
 	 * @param string $string
+	 * @param integer $maxLen
+	 * @param string $dots
 	 * @return string
-	 */
-	public static function stripnl($string)
-	{
-	    return trim(preg_replace('/\s+/', ' ', preg_replace('/[\r\n]/', ' ', $string)));
-	}
-	
-	/**
-	 * Properly quote the given string for direct JS use.
-	 * @param string $string
-	 * @return string
-	 */
-	public static function jsquote($string)
-	{
-	   return self::stripnl(self::quoteDouble($string));
-	}
-	
-	/**
-	 * @param Mixed $mixed
-	 * @param Boolean $convertArrayAsObject
-	 * @return String
-	 */
-	public static function php_to_js($mixed, $convertArrayAsObject = false)
-	{
-	    if (is_numeric($mixed))
-	    {
-	        $js = strval($mixed);
-	    }
-	    else if (is_string($mixed))
-	    {
-	        $js = sprintf('"%s"', self::stripnl(self::quoteDouble($mixed)));
-	    }
-	    else if (is_array($mixed))
-	    {
-	        $js = array();
-
-	        if ($convertArrayAsObject)
-	        {
-    	        foreach ($mixed as $key => $value)
-    	        {
-    	            if (!is_numeric($key))
-    	            {
-    	               $js[] = sprintf(
-    	                   '%s: %s',
-    	                   $key,
-    	                   self::php_to_js($value)
-    	               );
-    	            }
-    	        }
-
-    	        $js = '{' . implode(', ', $js) . '}';
-	        }
-	        else
-	        {
-	            $mixed = array_values($mixed);
-
-	            foreach ($mixed as $value)
-    	        {
-    	            $js[] = self::php_to_js($value);
-    	        }
-
-    	        $js = '[' . implode(', ', $js) . ']';
-	        }
-	    }
-	    else if (is_object($mixed))
-	    {
-	        // @fixme not implemented :
-            $js = 'undefined';
-	    }
-	    else if (is_null($mixed))
-	    {
-            $js = 'null';
-	    }
-	    else if ($mixed)
-	    {
-            $js = 'true';
-	    }
-	    else
-	    {
-            $js = 'false';
-	    }
-
-	    return $js;
-	}
-
-	/**
-	 * @param String $string
-	 * @param Integer $maxLen
-	 * @param String $dots
-	 * @return String
 	 */
 	public static function shortenString($string, $maxLen = f_persistentdocument_PersistentDocument::PROPERTYTYPE_STRING_DEAFULT_MAX_LENGTH, $dots = '...')
 	{
 	    if (self::strlen($string) > $maxLen)
 		{
-           $string = self::substr(
-                $string,
-                0,
-                $maxLen - self::strlen($dots)
-            ) . $dots;
+           $string = self::substr( $string, 0, $maxLen - self::strlen($dots)) . $dots;
         }
         return $string;
 	}
 
 	/**
-	 * @param String $string
-	 * @param Array<String> $highlights
-	 * @param String $begin
-	 * @param String $end
-	 * @return String
+	 * @param string $string
+	 * @param string[] $highlights
+	 * @param string $begin
+	 * @param string $end
+	 * @return string
 	 */
 	public static function highlightString($string, $highlights, $begin = '<strong>', $end = '</strong>')
 	{
@@ -498,11 +380,7 @@ class f_util_StringUtils
 	    }
 	    foreach ($highlights as $highlight)
         {
-           $string = preg_replace(
-              '/(' . $highlight . ')/i',
-              $begin . '$1' . $end,
-              $string
-           );
+           $string = preg_replace('/(' . $highlight . ')/i', $begin . '$1' . $end, $string);
         }
         return $string;
 	}
@@ -535,36 +413,41 @@ class f_util_StringUtils
         return mb_substr($string, $start, $length, "UTF-8");
     }
 
-    /**
+	private static $fromAccents = array('à', 'â', 'ä', 'á', 'ã', 'å', 'À', 'Â', 'Ä', 'Á', 'Ã', 'Å', 'æ', 'Æ', 'ç', 'Ç', 'è', 'ê', 'ë', 'é', 'È', 'Ê', 
+		'Ë', 'É', 'ð', 'Ð', 'ì', 'î', 'ï', 'í', 'Ì', 'Î', 'Ï', 'Í', 'ñ', 'Ñ', 'ò', 'ô', 'ö', 'ó', 'õ', 'ø', 'Ò', 'Ô', 'Ö', 'Ó', 'Õ', 'Ø', 'œ', 'Œ', 
+		'ù', 'û', 'ü', 'ú', 'Ù', 'Û', 'Ü', 'Ú', 'ý', 'ÿ', 'Ý', 'Ÿ');
+	private static $toAccents = array('a', 'a', 'a', 'a', 'a', 'a', 'A', 'A', 'A', 'A', 'A', 'A', 'ae', 'AE', 'c', 'C', 'e', 'e', 'e', 'e', 'E', 'E', 
+		'E', 'E', 'ed', 'ED', 'i', 'i', 'i', 'i', 'I', 'I', 'I', 'I', 'n', 'N', 'o', 'o', 'o', 'o', 'o', 'o', 'O', 'O', 'O', 'O', 'O', 'O', 'oe', 'OE', 
+		'u', 'u', 'u', 'u', 'U', 'U', 'U', 'U', 'y', 'y', 'Y', 'Y');
+	
+	/**
      * @param String $string
      * @return String
      */
-    public static function strip_accents($string)
+	public static function stripAccents($string)
 	{
-		return self::handleAccent($string, self::STRIP_ACCENTS);
+		return str_replace(self::$fromAccents, self::$toAccents, $string);
 	}
 
 	/**
 	 * UTF8-safe strtolower.
-	 *
-	 * @param String $string
-	 * @return String
+	 * @param string $string
+	 * @return string
 	 */
-    public static function strtolower($string)
-    {
-        return mb_strtolower($string, "UTF-8");
-    }
-
+	public static function toLower($string)
+	{
+		return mb_strtolower($string, "UTF-8");
+	}
+	
 	/**
 	 * UTF8-safe strtoupper.
-	 *
-	 * @param String $string
-	 * @return String
+	 * @param string $string
+	 * @return string
 	 */
-    public static function strtoupper($string)
-    {
-        return mb_strtoupper($string, "UTF-8");
-    }
+	public static function toUpper($string)
+	{
+		return mb_strtoupper($string, "UTF-8");
+	}
 
 	/**
 	 * UTF8-safe ucfirst.
@@ -574,7 +457,7 @@ class f_util_StringUtils
 	 */
     public static function ucfirst($string)
     {
-        return self::strtoupper(self::substr($string, 0, 1)) . self::substr($string, 1);
+        return self::toUpper(self::substr($string, 0, 1)) . self::substr($string, 1);
     }
 
 	/**
@@ -585,93 +468,7 @@ class f_util_StringUtils
 	 */
     public static function lcfirst($string)
     {
-        return self::strtolower(self::substr($string, 0, 1)) . self::substr($string, 1);
-    }
-
-    private static $from_accents = null, $to_accents = null;
-    private static $lower = null, $upper = null;
-
-    public static function handleAccent($string, $action)
-    {
-    	/*
-    	 Keep this here to be able to generate $accents,
-
-    		$accents = array();
-    		$accents[] = array(
-    		'lower' => array("à", "â", "ä", "á", "ã", "å"),
-    		'upper' => array("À", "Â", "Ä", "Á", "Ã", "Å"),
-    		'strip' => array("a", "A")
-    		);
-    		$accents[] = array(
-    		'lower' => array("æ"),
-    		'upper' => array("Æ"),
-    		'strip' => array("ae", "AE")
-    		);
-    		$accents[] = array(
-    		'lower' => array("ç"),
-    		'upper' => array("Ç"),
-    		'strip' => array("c", "C")
-    		);
-    		$accents[] = array(
-    		'lower' => array("è", "ê", "ë", "é"),
-    		'upper' => array("È", "Ê", "Ë", "É"),
-    		'strip' => array("e", "E")
-    		);
-    		$accents[] = array(
-    		'lower' => array("ð"),
-    		'upper' => array("Ð"),
-    		'strip' => array("ed", "ED")
-    		);
-    		$accents[] = array(
-    		'lower' => array("ì", "î", "ï", "í"),
-    		'upper' => array("Ì", "Î", "Ï", "Í"),
-    		'strip' => array("i", "I")
-    		);
-    		$accents[] = array(
-    		'lower' => array("ñ"),
-    		'upper' => array("Ñ"),
-    		'strip' => array("n", "N")
-    		);
-    		$accents[] = array(
-    		'lower' => array("ò", "ô", "ö", "ó", "õ", "ø"),
-    		'upper' => array("Ò", "Ô", "Ö", "Ó", "Õ", "Ø"),
-    		'strip' => array("o", "O")
-    		);
-    		$accents[] = array(
-    		'lower' => array("œ"),
-    		'upper' => array("Œ"),
-    		'strip' => array("oe", "OE")
-    		);
-    		$accents[] = array(
-    		'lower' => array("ù", "û", "ü", "ú"),
-    		'upper' => array("Ù", "Û", "Ü", "Ú"),
-    		'strip' => array("u", "U")
-    		);
-    		$accents[] = array(
-    		'lower' => array("ý", "ÿ"),
-    		'upper' => array("Ý", "Ÿ"),
-    		'strip' => array("y", "Y")
-    		);
-
-    	}
-    	*/
-
-        switch ($action)
-        {
-            case self::STRIP_ACCENTS:
-            	if (is_null(self::$from_accents))
-            	{
-            		self::$from_accents = array('à', 'â', 'ä', 'á', 'ã', 'å', 'À', 'Â', 'Ä', 'Á', 'Ã', 'Å', 'æ', 'Æ', 'ç', 'Ç', 'è', 'ê', 'ë', 'é', 'È', 'Ê', 'Ë', 'É', 'ð', 'Ð', 'ì', 'î', 'ï', 'í', 'Ì', 'Î', 'Ï', 'Í', 'ñ', 'Ñ', 'ò', 'ô', 'ö', 'ó', 'õ', 'ø', 'Ò', 'Ô', 'Ö', 'Ó', 'Õ', 'Ø', 'œ', 'Œ', 'ù', 'û', 'ü', 'ú', 'Ù', 'Û', 'Ü', 'Ú', 'ý', 'ÿ', 'Ý', 'Ÿ');
-					self::$to_accents = array('a', 'a', 'a', 'a', 'a', 'a', 'A', 'A', 'A', 'A', 'A', 'A', 'ae', 'AE', 'c', 'C', 'e', 'e', 'e', 'e', 'E', 'E', 'E', 'E', 'ed', 'ED', 'i', 'i', 'i', 'i', 'I', 'I', 'I', 'I', 'n', 'N', 'o', 'o', 'o', 'o', 'o', 'o', 'O', 'O', 'O', 'O', 'O', 'O', 'oe', 'OE', 'u', 'u', 'u', 'u', 'U', 'U', 'U', 'U', 'y', 'y', 'Y', 'Y');
-            	}
-				return str_replace(self::$from_accents, self::$to_accents, $string);
-            case self::TO_LOWER_CASE:
-                return mb_strtolower($string, "UTF-8");
-            case self::TO_UPPER_CASE:
-            	return mb_strtoupper($string, "UTF-8");
-            default :
-            	throw new Exception("Unkown handleAccent action $action");
-        }
+        return self::toLower(self::substr($string, 0, 1)) . self::substr($string, 1);
     }
 
     /**
@@ -691,8 +488,7 @@ class f_util_StringUtils
      */
     public static function quoteSingle($string)
     {
-    	// FIXME intbonjf 2007-11-06: I think "\'" should be '\'', right?
-    	return str_replace("'", "\'", $string);
+    	return str_replace("'", "\\'", $string);
     }
 
     /**
@@ -706,32 +502,6 @@ class f_util_StringUtils
 
     private static $htmlToTagsFrom = null, $htmlToTagsTo = null;
 
-    /**
-     * @param String $string
-     * @param Boolean $translateUri
-     * @param Boolean $convertNlToSpace
-     * @return String
-     */
-    public static function htmlToText($string, $translateUri = true, $convertNlToSpace = false)
-    {
-    	if ($string === null)
-    	{
-    		return "";
-    	}
-    	$string = self::addCrLfToHtml($string);
-    	if ($translateUri)
-        {
-            $string = preg_replace(
-            	array('/<a[^>]+href="([^"]+)"[^>]*>([^<]+)<\/a>/i', '/<img[^>]+alt="([^"]+)"[^>]*\/>/i'),
-            	array('$2 [$1]', PHP_EOL . '[$1]' . PHP_EOL), $string);
-        }
-        $string = trim(html_entity_decode(strip_tags($string), ENT_QUOTES, 'UTF-8'));
-        if ($convertNlToSpace)
-        {
-            $string = str_replace(PHP_EOL, ' ', $string);
-        }
-        return $string;
-    }
 
     /**
      * @param String $html
@@ -754,91 +524,6 @@ class f_util_StringUtils
         return $html;
 	}
     
-    public static function mergeAttributes($current, $new)
-    {
-        $current = explode(";", $current);
-        $new = explode(";", $new);
-        $mergeArray = array();
-        foreach ($new as $newDeclaration)
-        {
-            if ($newDeclaration)
-            {
-                list($attribute, $value) = explode(':', $newDeclaration);
-                $attribute = trim($attribute);
-                $value = trim($value);
-                $mergeArray[$attribute] = $value;
-            }
-        }
-        foreach ($current as $currentDeclaration)
-        {
-            if ($currentDeclaration)
-            {
-                list($attribute, $value) = explode(':', $currentDeclaration);
-                $attribute = trim($attribute);
-                $value = trim($value);
-                if (!isset($mergeArray[$attribute]))
-                {
-                    $mergeArray[$attribute] = $value;
-                }
-            }
-        }
-        $merge = '';
-        foreach ($mergeArray as $attribute => $value)
-        {
-            if ($attribute && $value)
-            {
-                $merge .= sprintf('%s: %s; ', $attribute, $value);
-            }
-        }
-        return trim($merge);
-    }
-
-    /**
-     * @param String $string
-     * @return String
-     */
-    public static function cleanString($string)
-    {
-        $string = self::htmlToText($string, false,true);
-        $string = self::strip_accents($string);
-        $string = preg_replace(array('/[^a-z0-9]/i', '/\s[a-z0-9]{1,2}\s/i'), array(' ', ' '), $string);
-        $string = str_replace('  ', ' ', $string);
-        return trim(strtolower($string));
-    }
-
-    /**
-     * @param String $string
-     * @return String
-     */
-	public static function ordString($string)
-    {
-	    $int = "";
-	    for($i=0;$i<strlen($string);$i++)
-		{
-			$int .= strval(ord($string[$i]));
-
-		}
-	   return $int;
-
-    }
-
-    /**
-     * This function takes a string and replace the prefix $old_prefix by $new_prefix.
-     * If the prefix doesn't exist in the string, nothing is done.
-     * @param String $old_prefix The prefix we want to change
-     * @param String $new_prefix The new prefix
-     * @param String $string The string to work on
-     * @return String
-     */
-    public static function prefixReplace($old_prefix, $new_prefix, $string)
-    {
-    	// if we found the prefix into the string, we replace, else we don't do anything.
-    	$len = mb_strlen($old_prefix);
-    	if (strncmp($string, $old_prefix, $len) == 0) {
-    		$string = $new_prefix . mb_substr($string, $len);
-    	}
-    	return ($string);
-    }
 
 	/**
      * Returns true if the given $string contains upper cased letters,
@@ -849,7 +534,7 @@ class f_util_StringUtils
      */
 	public static function containsUppercasedLetter($string)
 	{
-		return self::containsCharBetween($string, 'A', 'Z');
+		return preg_match('/[A-Z]+/', $string) != 0;
 	}
 
     /**
@@ -861,7 +546,7 @@ class f_util_StringUtils
      */
 	public static function containsLowercasedLetter($string)
 	{
-		return self::containsCharBetween($string, 'a', 'z');
+		return preg_match('/[a-z]+/', $string) != 0;
 	}
 
     /**
@@ -872,7 +557,7 @@ class f_util_StringUtils
      */
 	public static function containsDigit($string)
 	{
-		return self::containsCharBetween($string, '0', '9');
+		return preg_match('/[0-9]+/', $string) != 0;
 	}
 
     /**
@@ -883,108 +568,8 @@ class f_util_StringUtils
      */
 	public static function containsLetter($string)
 	{
-		return self::containsUppercasedLetter($string) || self::containsLowercasedLetter($string);
+		return preg_match('/[a-zA-Z]+/', $string) != 0;
 	}
-
-	/**
-	 * Returns true if the given $string contains chars between $first and $last.
-	 *
-	 * @param unknown_type $string
-	 * @param unknown_type $first
-	 * @param unknown_type $last
-	 * @return unknown
-	 */
-	public static function containsCharBetween($string, $first, $last)
-	{
-		$found = false;
-		for ($i=0 ; $i<self::strlen($string) && !$found ; $i++)
-		{
-			$char = self::substr($string, $i, 1);
-			if ($char >= $first && $char <= $last)
-			{
-				$found = true;
-			}
-		}
-		return $found;
-	}
-
-
-	/**
-	 * Performs a regular expression search on the given $subject with the given
-	 * $pattern. This method deals correctly with UTF-8 strings.
-	 *
-	 * @param String $pattern
-	 * @param String $subject
-	 * @param Array $matches
-	 * @return Integer
-	 */
-	public static function utf8Ereg($pattern, $subject, &$matches)
-	{
-		mb_regex_encoding('utf-8');
-		return mb_ereg($pattern, self::utf8Encode($subject), $matches);
-	}
-
-	/**
-	 * @param String $pattern
-	 * @param String $replacement
-	 * @param String $subject
-	 * @param String $option
-	 * @return String
-	 */
-	public static function utf8EregReplace($pattern, $replacement, $subject, $option = null)
-	{
-		mb_regex_encoding('utf-8');
-		return mb_ereg_replace($pattern, self::utf8Encode($replacement), self::utf8Encode($subject), $option);
-	}
-
-	/**
-	 * Performs a case-INsensitive regular expression search on the given
-	 * $subject with the given $pattern. This method deals correctly with UTF-8
-	 * strings.
-	 *
-	 * @param String $pattern
-	 * @param String $subject
-	 * @param Array $matches
-	 * @return Integer
-	 */
-	public static function utf8Eregi($pattern, $subject, &$matches)
-	{
-		mb_regex_encoding('utf-8');
-		return mb_eregi($pattern, self::utf8Encode($subject), $matches);
-	}
-
-
-	/**
-	 * Sent content usually involves "special tags", like {firstname} or {lastname}, used
-	 * to integrate personalized data (based on recipient's data).
-	 * This method is used to parse any kind of textual content in order to replace these tags
-	 * with the given contextual data.
-	 *
-	 * For example :
-	 *  - input : "Hello {fullname} !" and array("fullname" => "world")
-	 *  - output : "Hello world !"
-	 *
-	 * @param string $content Content (HTML or plain text) to parse for "special tags".
-	 * @param array $substData Associative array of content to match with "special tags".
-	 * @return string Parsed content
-	 */
-	public static function parseTextContent($content, $substData = array())
-    {
-    	if (!empty($substData))
-    	{
-    		$substitueFrom = array();
-    		$substitueTo = array();
-    		foreach ($substData as $name => $value)
-    		{
-    			$substitueFrom[] = '{' . $name . '}';
-    			$substitueTo[] = $value;
-    		}
-    		$content = str_replace($substitueFrom, $substitueTo, $content);
-    	}
-        $content = preg_replace('/\{[a-z0-9_-]+\}/i', '', $content);
-
-        return trim($content);
-    }
 
     /**
      * Returns true when the string contains only whitespaces or null.
@@ -1025,4 +610,20 @@ class f_util_StringUtils
     {
     	return JsonService::getInstance()->decode($string);
     }
+        
+    /**
+     * @deprecated use toLower
+     */
+    public static function strtolower($string)
+    {
+    	return mb_strtolower($string, "UTF-8");
+    }
+    
+    /**
+     * @deprecated use toUpper
+     */
+    public static function strtoupper($string)
+    {
+    	return mb_strtoupper($string, "UTF-8");
+    }   
 }

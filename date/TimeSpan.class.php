@@ -130,9 +130,7 @@ class date_TimeSpan
 
 	/**
 	 * Builds and returns a string representation of the TimeSpan object.
-	 *
-	 * @example years:0 months:0 days:3 hours:8 minutes:5 seconds:45
-	 * @return String
+	 * @return string For example: years:0 months:0 days:3 hours:8 minutes:5 seconds:45
 	 */
 	public function toString()
 	{
