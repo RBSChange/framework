@@ -77,7 +77,7 @@ class f_util_TagReplacer {
 	protected final function replaceConstants($content)
 	{
 		$matches = null;
-		if (preg_match_all("/{([A-Z0-9_:]+)}/", $content, $matches))
+		if (preg_match_all("/{([A-Z0-9_]+)}/", $content, $matches))
 		{
 			$constants = $matches[1];
 			foreach ($constants as $constant)
@@ -105,32 +105,6 @@ class f_util_TagReplacer {
 
 	protected final function replaceLocalizedStrings($content)
 	{
-		$matches = null;
-		$prefixes = f_Locale::getPrefixes();
-		if (preg_match_all('/&(?:amp;){0,1}('.join('|', $prefixes).')\.([a-zA-Z0-9_.-]+);/', $content, $matches))
-		{
-			$nb = count($matches[0]);
-			if ($nb > 0)
-			{
-				$toreplace = array();
-				$replacements = array();
-				$inBackOffice = RequestContext::getInstance()->getMode() == RequestContext::BACKOFFICE_MODE;
-				for ($i=0; $i<$nb; $i++)
-				{
-					$toreplace[] = $matches[0][$i];
-					if ($inBackOffice)
-					{
-						$replacement = f_Locale::translateUI('&' . $matches[1][$i].'.'.$matches[2][$i] . ';');	
-					}
-					else
-					{
-						$replacement = f_Locale::translate('&' . $matches[1][$i].'.'.$matches[2][$i] . ';');
-					}
-					$replacements[] = str_replace("\n", '\n', $replacement);
-				}
-				$content = str_replace($toreplace, $replacements, $content);
-			}
-		}
 		return LocaleService::getInstance()->translateText($content);
 	}
 

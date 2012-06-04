@@ -25,8 +25,8 @@ class validation_FloatValidator extends validation_ValidatorImpl implements vali
 			$value = $field->getValue();
 			if (!empty($value))
 			{
-				$regExp = f_Locale::translate('&framework.validation.validator.Float.regexp;');
-				if ($regExp == 'regexp') 
+				$regExp = LocaleService::getInstance()->trans('f.validation.validator.float.regexp');
+				if ($regExp === 'f.validation.validator.float.regexp') 
 				{
 					$regExp = '^([\\-+]?)(\\d{0,8})?[\\.,]?(\\d{0,8})?$';
 				}

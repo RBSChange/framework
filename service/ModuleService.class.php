@@ -582,7 +582,7 @@ class ModuleService extends BaseService
 	 */
 	public function getLocalizedModuleLabel($moduleName)
 	{
-		return f_Locale::translate("&modules.$moduleName.bo.general.Module-name;");
+		return LocaleService::getInstance()->trans('m.'.$moduleName.'.bo.general.module-name', array('ucf'));
 	}
 	
 	/**
@@ -593,7 +593,7 @@ class ModuleService extends BaseService
 	 */
 	public function getUILocalizedModuleLabel($moduleName)
 	{
-		return f_Locale::translateUI("&modules.$moduleName.bo.general.Module-name;");
+		return LocaleService::getInstance()->trans('m.'.$moduleName.'.bo.general.module-name', array('ucf'));
 	}
 		
 	/**

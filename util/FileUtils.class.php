@@ -920,12 +920,13 @@ abstract class f_util_FileUtils
 			$size = filesize($path);
 			$i = 0;
 			$iec = array("b", "kb", "mb", "gb", "tb", "pb", "eb", "zb", "yb");
-			while ( ($size / 1024) > 1)
+			while (($size / 1024) > 1)
 			{
 				$size = $size / 1024;
 				$i++;
 			}
-			$fileSize = sprintf("%.1f %s", $size, f_Locale::translate(self::LOCALE_PATH .ucfirst($iec[$i]).'-acronym;', null, $lang));
+			$unit = LocaleService::getInstance()->trans('m.media.download.' .$iec[$i].'-acronym', array('ucf'));
+			$fileSize = sprintf("%.1f %s", $size, $unit);
 		}
 
 		return $fileSize;
@@ -949,10 +950,6 @@ abstract class f_util_FileUtils
 	{
 		if (!function_exists('posix_getuid'))
 		{
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug(__METHOD__ . ' diasabled');
-			}
 			//Unable to execute this function
 			return;
 		}
@@ -1018,10 +1015,6 @@ abstract class f_util_FileUtils
 	{
 		if (!function_exists('posix_getuid'))
 		{
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug(__METHOD__ . ' diasabled');
-			}
 			//Unable to execute this function
 			return;
 		}

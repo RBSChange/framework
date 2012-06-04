@@ -40,14 +40,7 @@ class validation_MatchesValidator extends validation_ValidatorImpl implements va
 	{
 		if ($this->localizedErrorMessage !== null)
 		{
-			if ($this->localizedErrorMessage[0] != '&')
-			{
-				$this->localizedErrorMessage = '&' . $this->localizedErrorMessage;
-			}
-			if (f_Locale::isLocaleKey($this->localizedErrorMessage.';'))
-			{
-				return f_Locale::translate($this->localizedErrorMessage.';', array());
-			}
+			return LocaleService::getInstance()->trans($this->localizedErrorMessage);
 		}
 		return parent::getMessage();
 	}

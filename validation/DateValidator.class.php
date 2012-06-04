@@ -129,7 +129,7 @@ class validation_DateValidator extends validation_ValidatorImpl implements valid
 					{
 						$regexp .= '('.$this->formatToRegexp[$c].')';
 						$this->orderedParts[] = $c;
-						$this->humanReadableFormat .= f_Locale::translate('&framework.validation.validator.date.'.$c.';');
+						$this->humanReadableFormat .= LocaleService::getInstance()->trans('f.validation.validator.date.'.$c);
 					}
 					else if ($c == ' ')
 					{
@@ -160,13 +160,13 @@ class validation_DateValidator extends validation_ValidatorImpl implements valid
 				case 'min' :
 					$date = date_Calendar::getInstance($this->minDate);
 					$dateformated = date_Formatter::format($date, $this->originalFormat);
-					return f_Locale::translate('&framework.validation.validator.Date.Min.message;', array('mindate' => $dateformated));
+					return LocaleService::getInstance()->trans('f.validation.validator.date.min.message', array('ucf'), array('mindate' => $dateformated));
 				case 'max' :
 					$date = date_Calendar::getInstance($this->maxDate);
 					$dateformated = date_Formatter::format($date, $this->originalFormat);
-					return f_Locale::translate('&framework.validation.validator.Date.Max.message;', array('maxdate' => $dateformated));
+					return LocaleService::getInstance()->trans('f.validation.validator.date.max.message', array('ucf'), array('maxdate' => $dateformated));
 				default :
-					return f_Locale::translate($this->getMessageCode(), array('format' => $this->humanReadableFormat));
+					return LocaleService::getInstance()->trans($this->getMessageCode(), array('ucf'), array('format' => $this->humanReadableFormat));
 					
 			}
 		}

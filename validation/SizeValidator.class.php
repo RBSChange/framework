@@ -61,13 +61,7 @@ class validation_SizeValidator extends validation_ValidatorImpl implements valid
 
 	protected function getMessage()
 	{
-		return f_Locale::translate(
-			$this->getMessageCode(),
-			array(
-				'min' => $this->getParameter()->getMin(),
-				'max' => $this->getParameter()->getMax()
-				)
-			);
+		return LocaleService::getInstance()->trans($this->getMessageCode(), array(), array('min' => $this->getParameter()->getMin(), 'max' => $this->getParameter()->getMax()));
 	}
 }
 

@@ -1909,7 +1909,7 @@ class f_persistentdocument_DocumentService extends BaseService
 		{
 			if ($date >= $enddate)
 			{
-				$this->setActivePublicationStatusInfo($document, '&framework.persistentdocument.status.active.enddate;');
+				$this->setActivePublicationStatusInfo($document, 'f.persistentdocument.status.active.enddate');
 				return false;
 			}
 		}
@@ -1919,7 +1919,7 @@ class f_persistentdocument_DocumentService extends BaseService
 		{
 			if ($date < $startdate)
 			{
-				$this->setActivePublicationStatusInfo($document, '&framework.persistentdocument.status.active.startedate;');
+				$this->setActivePublicationStatusInfo($document, 'f.persistentdocument.status.active.startedate');
 				return false;
 			}
 		}
@@ -2057,7 +2057,7 @@ class f_persistentdocument_DocumentService extends BaseService
 		{
 			$substitutions = unserialize($document->getMeta('ActPubStatInfSubst'.$lang));
 		}
-		return f_Locale::translateUI($document->getMeta('ActPubStatInf'.$lang), $substitutions);
+		return LocaleService::getInstance()->trans($document->getMeta('ActPubStatInf'.$lang), array(), $substitutions);
 	}
 
 	/**
@@ -3029,7 +3029,7 @@ class f_persistentdocument_DocumentService extends BaseService
 				}
 				else
 				{
-					$tagsLabel = f_Locale::translateUI('&framework.persistentdocument.general.No-tag;');
+					$tagsLabel = LocaleService::getInstance()->trans('f.persistentdocument.general.no-tag', array('ucf'));
 				}
 				$data['tags'] = array('tagsaction' => array('label' => $tagsLabel, 'disablelock' => 'false'),
 									  'tags' => $tagsLabel);

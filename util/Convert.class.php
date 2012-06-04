@@ -211,7 +211,7 @@ abstract class f_util_Convert
 	{
 		if ($value !== null)
 		{
-			$separator = f_Locale::translateUI('&framework.validation.validator.Float.decimalseperator;');
+			$separator = LocaleService::getInstance()->trans('f.validation.validator.float.decimalseperator');
 			if ($separator == 'decimalseperator') {$separator = '.';}
 			return str_replace('.', $separator, strval($value));
 		}

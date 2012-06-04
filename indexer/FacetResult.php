@@ -80,7 +80,7 @@ class indexer_FacetResult extends ArrayObject
 		{
 			return $this->fieldLabel;
 		}
-		return f_Locale::translate("&framework.indexer.Facet-".$this->getSimpleFieldName()."-label;");
+		return LocaleService::getInstance()->trans('f.indexer.facet-'.$this->getSimpleFieldName().'-label', array('ucf'));
 	}
 	
 	function setFieldLabel($fieldLabel)

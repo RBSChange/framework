@@ -429,7 +429,7 @@ class f_persistentdocument_DocumentFilterService extends BaseService
 	 */
 	public function getRestrictionAsText($restriction)
 	{
-		return f_Locale::translateUI('&modules.filter.bo.restrictions.'.$restriction.'-text;');
+		return LocaleService::getInstance()->trans('m.filter.bo.restrictions.'.$restriction.'-text');
 	}
 	
 	/**

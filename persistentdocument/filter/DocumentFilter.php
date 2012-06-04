@@ -97,7 +97,7 @@ abstract class f_persistentdocument_DocumentFilterImpl implements f_persistentdo
 	public function getLabel()
 	{
 		list($moduleName, $filterName) = explode('_', get_class($this));
-		return f_Locale::translateUI('&modules.'.$moduleName.'.bo.documentfilters.'.strtolower($filterName).'-label;');
+		return LocaleService::getInstance()->trans('m.'.$moduleName.'.bo.documentfilters.'.strtolower($filterName).'-label');
 	}
 	
 	/**
@@ -133,7 +133,7 @@ abstract class f_persistentdocument_DocumentFilterImpl implements f_persistentdo
 				$replacements[$name] = $parameter->getValueAsText();
 			}
 		}
-		return f_Locale::translateUI('&modules.'.$moduleName.'.bo.documentfilters.'.strtolower($filterName).'-text;', $replacements);
+		return LocaleService::getInstance()->trans('m.'.$moduleName.'.bo.documentfilters.'.strtolower($filterName).'-text', $replacements);
 	}
 	
 	/**

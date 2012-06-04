@@ -60,8 +60,9 @@ class validation_PropEqBeanValidator implements validation_BeanValidator
 		$ret = f_util_ObjectUtils::equals($value1, $value2);
 		if (!$ret)
 		{
-			$substitution = array("field1" => f_Locale::translate($field1Label), "field2" => f_Locale::translate($field2Label));
-			$errorMsg = f_Locale::translate("&framework.validation.validator.Propeq.message;", $substitution);
+			$ls = LocaleService::getInstance();
+			$substitution = array("field1" => $ls->trans($field1Label), "field2" => $ls->trans($field2Label));
+			$errorMsg = $ls->trans('f.validation.validator.propeq.message', array('ucf'), $substitution);
 			if ($errors === null)
 			{
 				$errors = array();
@@ -123,8 +124,9 @@ class validation_RequiredIfBeanValidator implements validation_BeanValidator
 		$ret = f_util_ObjectUtils::isEmpty($value2) || !f_util_ObjectUtils::isEmpty($value1);
 		if (!$ret)
 		{
-			$substitution = array("field" => f_Locale::translate($field1Label), "fieldIf" => f_Locale::translate($field2Label));
-			$errorMsg = f_Locale::translate("&framework.validation.validator.RequiredIf.message;", $substitution);
+			$ls = LocaleService::getInstance();
+			$substitution = array("field" => $ls->trans($field1Label), "fieldIf" => $ls->trans($field2Label));
+			$errorMsg = $ls->trans('f.validation.validator.requiredif.message', array('ucf'), $substitution);
 			if ($errors === null)
 			{
 				$errors = array();

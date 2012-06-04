@@ -437,7 +437,7 @@ class f_persistentdocument_DocumentFilterRestrictionParameter extends f_persiste
 		$propertyLabel = '...';
 		if ($this->propertyInfo instanceof BeanPropertyInfo)
 		{
-			$propertyLabel = f_Locale::translateUI($this->propertyInfo->getLabelKey());
+			$propertyLabel = LocaleService::getInstance()->trans($this->propertyInfo->getLabelKey());
 		}
 		return $propertyLabel;
 	}

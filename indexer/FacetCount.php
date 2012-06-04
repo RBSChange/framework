@@ -99,17 +99,17 @@ class indexer_RangeFacetCount extends indexer_FacetCount
 		if ($this->min === null)
 		{
 			$substitution = array("max" => $this->max);
-			$this->setLabel(f_Locale::translate("&framework.indexer.To-rangefacet;", $substitution));
+			$this->setLabel(LocaleService::getInstance()->trans('f.indexer.to-rangefacet', array('ucf'), $substitution));
 		}
 		elseif ($this->max === null)
 		{
 			$substitution = array("min" => $this->min);
-			$this->setLabel(f_Locale::translate("&framework.indexer.From-rangefacet;", $substitution));
+			$this->setLabel(LocaleService::getInstance()->trans('f.indexer.from-rangefacet', array('ucf'), $substitution));
 		}
 		else
 		{
 			$substitution = array("min" => $this->min, "max" => $this->max);
-			$this->setLabel(f_Locale::translate("&framework.indexer.From-to-rangefacet;", $substitution));	
+			$this->setLabel(LocaleService::getInstance()->trans('f.indexer.from-to-rangefacet', array('ucf'), $substitution));
 		}
 		parent::__construct($value, $count);
 	}

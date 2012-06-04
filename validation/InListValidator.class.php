@@ -38,9 +38,6 @@ class validation_InListValidator extends validation_ValidatorImpl implements val
 	
 	protected function getMessage()
 	{
-		return f_Locale::translate(
-			$this->getMessageCode(),
-			array('param' => join(', ', $this->getParameter()))
-			);
+		return LocaleService::getInstance()->trans($this->getMessageCode(), array(), array('param' => join(', ', $this->getParameter())));
 	}
 }

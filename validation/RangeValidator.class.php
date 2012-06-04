@@ -41,12 +41,7 @@ class validation_RangeValidator extends validation_ValidatorImpl implements vali
 	
 	protected function getMessage()
 	{
-		return f_Locale::translate(
-			$this->getMessageCode(),
-			array(
-				'min' => $this->getParameter()->getMin(),
-				'max' => $this->getParameter()->getMax()
-				)
-			);
+		return LocaleService::getInstance()->trans($this->getMessageCode(), array(),
+			array('min' => $this->getParameter()->getMin(), 'max' => $this->getParameter()->getMax()));
 	}
 }

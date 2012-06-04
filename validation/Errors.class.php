@@ -18,11 +18,8 @@ class validation_Errors extends ArrayObject
 		{
 			$substitution = array_merge($substitution, $args);
 		}
-		if (f_Locale::isLocaleKey($message))
-		{
-			$this->append(f_Locale::translate($message, $substitution));
-		}
-		else
+		
+		if (strpos($message, '{') !== false)
 		{
 			$from = array();
 			$to = array();
@@ -32,6 +29,10 @@ class validation_Errors extends ArrayObject
 				$to[] = $value;
 			}
 			$this->append(str_replace($from, $to, $message));
+		}
+		else
+		{
+			$this->append(LocaleService::getInstance()->trans($message, array(), $substitution));
 		}
 	}
 

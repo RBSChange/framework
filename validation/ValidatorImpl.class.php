@@ -81,7 +81,7 @@ abstract class validation_ValidatorImpl implements validation_Validator
 		{
 			$substitution = array_merge($substitution, $args);
 		}
-		return f_Locale::translate($this->getMessageCode(),	$substitution);
+		return LocaleService::getInstance()->trans($this->getMessageCode(),	array('ucf'), $substitution);
 	}
 
 	/**
@@ -92,12 +92,8 @@ abstract class validation_ValidatorImpl implements validation_Validator
 	protected function getMessageCode()
 	{
 		// substr(get_class($this), 11, -9) to remove 'validation_' prefix and 'Validator' suffix
-		$key = 'framework.validation.validator.'.substr(get_class($this), 11, -9).'.Message';
-		if ($this->usesReverseMode)
-		{
-			$key .= '.Reversed';
-		}
-		return '&'.$key.';';
+		$key = 'f.validation.validator.'.substr(get_class($this), 11, -9).'.message';
+		return ($this->usesReverseMode) ? $key .= '.reversed' : $key;
 	}
 
 	/**
