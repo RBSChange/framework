@@ -42,12 +42,14 @@ class Framework
 				f_util_FileUtils::mkdir(dirname($filePath));
 			}
 			$writer = new Zend_Log_Writer_Stream($filePath);
-			$writer->setFormatter(new Zend_Log_Formatter_Simple('%timestamp% [%priorityName%] %sessionId%: %message%' . PHP_EOL));
+			$writer->setFormatter(new Zend_Log_Formatter_Simple('%timestamp% [%priorityName%] %sessionId%: %message% (in %file% at line %line%)' . PHP_EOL));
 			self::$log->addWriter($writer);
 			
 			$filter = new Zend_Log_Filter_Priority(LOGGING_PRIORITY);
 			self::$log->addFilter($filter);
 			self::$log->setEventItem('sessionId' , '');
+			self::$log->setEventItem('file' , '?');
+			self::$log->setEventItem('line' , '?');
 			self::$log->setTimestampFormat('Y-m-d H:i:s');
 			self::$log->registerErrorHandler();
 		}	
@@ -528,7 +530,7 @@ ini_set('include_path', ZEND_FRAMEWORK_PATH . (defined('INCLUDE_PATH') ? PATH_SE
 Framework::registerAutoload();
 
 ini_set('arg_separator.output',      '&amp;');
-ini_set('display_errors',            1);
+//ini_set('display_errors',            1);
 ini_set('magic_quotes_runtime',      0);
 
 
