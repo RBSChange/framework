@@ -16,7 +16,7 @@ class commands_ImportInitData extends c_ChangescriptCommand
 
 	function getOptions()
 	{
-		return array('force');
+		return array('--force');
 	}
 	
 	/**

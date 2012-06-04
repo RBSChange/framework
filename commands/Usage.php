@@ -19,7 +19,7 @@ class commands_Usage extends c_ChangescriptCommand
 	
 	function getOptions()
 	{
-		return array('dev', 'prod');
+		return array('--dev', '--prod');
 	}
 
 	/**

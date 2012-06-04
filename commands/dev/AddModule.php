@@ -12,7 +12,7 @@ class commands_AddModule extends c_ChangescriptCommand
 
 	public function getOptions()
 	{
-		return array('icon', 'hidden', 'category');
+		return array('--icon', '--hidden', '--category');
 	}
 	
 	/**

@@ -19,7 +19,7 @@ class commands_ResetDatabase extends c_ChangescriptCommand
 	 */
 	function getOptions()
 	{
-		return array('force');
+		return array('--force');
 	}
 
 	/**

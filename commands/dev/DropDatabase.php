@@ -19,7 +19,7 @@ class commands_DropDatabase extends c_ChangescriptCommand
 	 */
 	function getOptions()
 	{
-		return array('force');
+		return array('--force');
 	}
 
 	/**

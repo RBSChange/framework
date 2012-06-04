@@ -14,7 +14,7 @@ class commands_I18nSynchro extends c_ChangescriptCommand
 	 */
 	public function getOptions()
 	{
-		return array('reset', 'init');
+		return array('--reset', '--init');
 	}
 
 	/**

@@ -16,7 +16,7 @@ class commands_ApplyPatch extends c_ChangescriptCommand
 	
 	function getOptions()
 	{
-		return array('all', 'ignorecommands');
+		return array('--all', '--ignorecommands');
 	}
 
 	/**

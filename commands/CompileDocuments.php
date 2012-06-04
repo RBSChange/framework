@@ -24,7 +24,7 @@ class commands_CompileDocuments extends c_ChangescriptCommand
 	
 	function getOptions()
 	{
-		return array('verbose');
+		return array('--verbose');
 	}
 
 	/**

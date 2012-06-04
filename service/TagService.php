@@ -1066,9 +1066,6 @@ class TagService extends BaseService
 				closedir($dh);
 
 			}
-
-			var_export($dirsToProcess);
-			
 			foreach ($dirsToProcess as &$dir)
 			{
 				$this->processDir($moduleName, $dir);
