@@ -29,7 +29,9 @@ class commands_CompileAll extends c_ChangescriptCommand
 	 */
 	function _execute($params, $options)
 	{
-		$this->message("== Compile all ==");	
+		$this->message("== Compile all ==");
+		$this->executeCommand("compile-autoload");
+		
 		$this->executeCommand("compile-config");
 		
 		$this->loadFramework();
