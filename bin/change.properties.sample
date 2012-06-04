@@ -6,9 +6,7 @@ INCLUDE_PATH={PROJECT_HOME}/pear
 
 ZEND_FRAMEWORK_PATH={PROJECT_HOME}/libs/zfminimal/library
 
-WWW_GROUP=inthause
-
-DEVELOPMENT_MODE=true
+WWW_GROUP={USERNAME}
 
 PROJECT_LICENSE=OS
 
@@ -24,4 +22,10 @@ PHP_CLI_PATH=/usr/bin/php
 
 OUTGOING_HTTP_PROXY=
 
-RELEASE_DEVELOPEMENT=true
+
+#Development directives
+DEVELOPMENT_MODE=true
+
+#RELEASE_DEVELOPEMENT=true
+
+#FAKE_EMAIL=no-reply@rbschange.fr
