@@ -40,8 +40,13 @@ class commands_EnableSite extends c_ChangescriptCommand
 		if (!unlink($flagFile))
 		{
 			return $this->quitError("Unable to unlink $flagFile");
-		}	
-		f_util_System::execScript('changecron.php');
+		}
+		
+		if (defined('CHANGECRON_EXECUTION') && constant('CHANGECRON_EXECUTION') == 'http')
+		{
+			f_util_System::execScriptHTTP('changecron.php');
+		}
+		
 		return $this->quitOk("Site has been enabled. To disable it, use '" . CHANGE_COMMAND . " disable-site'.");
 	}
 }

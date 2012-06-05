@@ -8,7 +8,7 @@
 		<define name="UI_SUPPORTED_LANGUAGES">fr en</define>
 		
 		<define name="CHANGE_USE_CORRECTION">true</define>
-		<define name="CHANGE_USE_WORKFLOW">false</define>	
+		<define name="CHANGE_USE_WORKFLOW">true</define>	
 		
 		<define name="DEFAULT_UI_PROTOCOL">http</define>		
 		<define name="DEFAULT_TIMEZONE">Europe/Paris</define>
@@ -40,9 +40,13 @@
 		
 		<i18n>
 			<entry name="en">en_GB</entry>
-			<entry name="us">en_US</entry>
-			<entry name="ar">ar_KW</entry>
 		</i18n>
+		
+		<!-- 
+		<i18nsynchro>
+			<entry name="en">fr</entry>
+		</i18nsynchro>
+		 -->
 	
 		<charts>
 			<!--  This can be google directly or eastwood for instance -->
@@ -185,10 +189,9 @@
 				<entry name="trans">f_TalesI18n</entry>
 				<entry name="transdata">f_TalesI18n</entry>
 				<entry name="transui">f_TalesI18n</entry>
+				
 				<entry name="date">f_TalesDate</entry>
 				<entry name="datetime">f_TalesDate</entry>
-				<entry name="url">f_TalesUrl</entry>
-				<entry name="actionurl">f_TalesUrl</entry>
 			</prefix>
 		</tal>
 		

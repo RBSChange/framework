@@ -78,6 +78,9 @@ class commands_ResetDatabase extends c_ChangescriptCommand
 		$this->executeCommand("clear-datacache");
 		$this->executeCommand("compile-all");
 		$this->executeCommand("import-init-data");
+		
+		$this->executeCommand("theme.install");
+		
 		$this->executeCommand("init-patch-db");
 		
 		//enable bo and cron

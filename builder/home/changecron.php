@@ -11,6 +11,12 @@ if (file_exists(PROJECT_HOME."/site_is_disabled"))
 }
 
 require_once PROJECT_HOME . "/framework/Framework.php";
+if (!isset($_SERVER['REMOTE_ADDR']))
+{
+	Framework::info(__FILE__ . ' Invalid call');
+	exit(0);
+}
+
 if (defined('CHANGECRON_EXECUTION') && constant('CHANGECRON_EXECUTION') != 'http')
 {
 	Framework::info(__FILE__ . ' Disabled');

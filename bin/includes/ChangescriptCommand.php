@@ -602,7 +602,8 @@ abstract class c_ChangescriptCommand
 	 */
 	protected function executeCommand($cmdName, $args = array())
 	{	
-	    if (!class_exists("Framework", false))
+		$this->message('Execute Command: ' . $cmdName . '...');
+	    if (!class_exists('Framework', false))
 	    {
 	    	$this->executeCommandInProcess($cmdName, $args);
 	    	return;
