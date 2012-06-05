@@ -61,11 +61,14 @@ class Framework
 		self::getZendLog()->registerErrorHandler();
 	}
 	
+	/**
+	 * @param string $id
+	 */
 	public static function sessionStarted($id)
 	{
 		self::$log->setEventItem('sessionId' , '(' . $id . ')');
-		//self::info(__METHOD__);
 	}
+	
 	/**
 	 * @param string $message
 	 * @param integer $priority elementof {Zend_Log::DEBUG, Zend_Log::INFO, Zend_Log::NOTICE, Zend_Log::WARN, 
@@ -76,38 +79,56 @@ class Framework
 		self::getZendLog()->log($message, $priority);
 	}
 
+	/**
+	 * @param string $message
+	 */
 	public static function debug($message)
 	{
 		self::getZendLog()->log($message, Zend_Log::DEBUG);
 	}
 
+	/**
+	 * @param string $message
+	 */
 	public static function info($message)
 	{
 		self::getZendLog()->log($message, Zend_Log::INFO);
 	}
 
+	/**
+	 * @param string $message
+	 */
 	public static function warn($message)
 	{
 		self::getZendLog()->log($message, Zend_Log::WARN);
 	}
 
+	/**
+	 * @param string $message
+	 */
 	public static function error($message)
 	{
 		self::getZendLog()->log($message, Zend_Log::ERR);
 	}
 
+	/**
+	 * @param Exception $e
+	 */
 	public static function exception($e)
 	{
 		self::getZendLog()->log(get_class($e).": ".$e->getMessage()."\n".$e->getTraceAsString(), Zend_Log::ALERT);
 	}
 
+	/**
+	 * @param string $message
+	 */
 	public static function fatal($message)
 	{
 		self::getZendLog()->log($message, Zend_Log::EMERG);
 	}
 
 	/**
-	 * @return Boolean DEBUG if debug log is enabled
+	 * @return boolean DEBUG if debug log is enabled
 	 */
 	public static function isDebugEnabled()
 	{
@@ -115,7 +136,7 @@ class Framework
 	}
 
 	/**
-	 * @return Boolean true if INFO log is enabled
+	 * @return boolean true if INFO log is enabled
 	 */
 	public static function isInfoEnabled()
 	{
@@ -123,7 +144,7 @@ class Framework
 	}
 	
 	/**
-	 * @return Boolean true if WARN log is enabled
+	 * @return boolean true if WARN log is enabled
 	 */
 	public static function isWarnEnabled()
 	{
@@ -131,7 +152,7 @@ class Framework
 	}
 
 	/**
-	 * @return Boolean true if ERR log is enabled
+	 * @return boolean true if ERR log is enabled
 	 */
 	public static function isErrorEnabled()
 	{
@@ -139,7 +160,7 @@ class Framework
 	}
 
 	/**
-	 * @return Boolean true if EMERG log is enabled
+	 * @return boolean true if EMERG log is enabled
 	 */
 	public static function isFatalEnabled()
 	{
@@ -169,17 +190,17 @@ class Framework
 		return self::getZendBenchLog() !== false;
 	}	
 
-	
 	/**
-	 * Framework::startBench(); // begin bench process
-	 * $brands = $this->getBrandsList();
-	 * Framework::bench("getBrandList"); // debug time between this call and last call
-	 * foreach ($brands as $brand)
-	 * {
-	 *  $label = $brand->getLabel();
-	 *  $index[strtolower($label[0])][$label] = $brand;
-	 * }
-	 * Framework::endBench("getBrandList processing"); // debug time between this call and last call and end bench process
+	 * Example of usage:
+	 * 		Framework::startBench(); // begin bench process
+	 * 		$brands = $this->getBrandsList();
+	 * 		Framework::bench("getBrandList"); // debug time between this call and last call
+	 * 		foreach ($brands as $brand)
+	 * 		{
+	 * 			$label = $brand->getLabel();
+	 *			$index[strtolower($label[0])][$label] = $brand;
+	 *		}
+	 * 		Framework::endBench("getBrandList processing"); // debug time between this call and last call and end bench process
 	 * @param String $msg
 	 */
 	public static function startBench($start = null)
@@ -249,7 +270,6 @@ class Framework
 		self::$benchStepsIndex--;
 	}
 
-	
 	/**
 	 * @return String
 	 */
@@ -260,7 +280,7 @@ class Framework
 
 	/**
 	 * @see project config and DEVELOPMENT_MODE constant
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public static function inDevelopmentMode()
 	{
@@ -283,7 +303,7 @@ class Framework
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public static function isSiteEnabled()
 	{
@@ -292,7 +312,7 @@ class Framework
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public static function getBaseUrl()
 	{
@@ -305,7 +325,7 @@ class Framework
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public static function getUIBaseUrl()
 	{
@@ -313,7 +333,7 @@ class Framework
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public static function getUIProtocol()
 	{
@@ -321,7 +341,7 @@ class Framework
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public static function getUIDefaultHost()
 	{
@@ -361,10 +381,9 @@ class Framework
 		return self::$config;
 	}
 
-
 	/**
 	 * Return true if the $path configuration exist
-	 * @param String $path
+	 * @param string $path
 	 */
 	public static function hasConfiguration($path)
 	{
@@ -383,10 +402,10 @@ class Framework
 	/**
 	 * Return an array with part of configuration of Framework
 	 * or throw a Exception if the $path configuration does not exist
-	 * @param String $path
-	 * @param Boolean $strict
+	 * @param string $path
+	 * @param boolean $strict
 	 * @throws Exception if the $path configuration does not exist
-	 * @return String | false if the path was not founded and strict value if false
+	 * @return string | false if the path was not founded and strict value if false
 	 */
 	public static function getConfiguration($path, $strict = true)
 	{
@@ -409,8 +428,8 @@ class Framework
 	/**
 	 * Return an array with part of configuration of Framework
 	 * or null if the $path configuration does not exist
-	 * @param String $path
-	 * @param String $defaultValue
+	 * @param string $path
+	 * @param string $defaultValue
 	 * @return mixed | null
 	 */
 	public static function getConfigurationValue($path, $defaultValue = null)
@@ -443,7 +462,7 @@ class Framework
 	/**
 	 * Load the framework configuration. Use the file php auto generated in cache/config
 	 * You can specify an environnement to load a particular config file
-	 * @param Boolean $onlyConfig
+	 * @param boolean $onlyConfig
 	 */
 	public static function loadConfiguration($onlyConfig = false)
 	{
@@ -472,7 +491,7 @@ class Framework
 	}
 
 	/**
-	 * @param String $env
+	 * @param string $env
 	 */
 	public static function reloadConfiguration()
 	{
