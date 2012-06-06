@@ -369,7 +369,7 @@ abstract class f_util_FileUtils
 	{
 		if (is_dir($directoryPath))
 		{
-			foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directoryPath, RecursiveDirectoryIterator::KEY_AS_PATHNAME), RecursiveIteratorIterator::CHILD_FIRST) as $file => $info)
+			foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directoryPath, RecursiveDirectoryIterator::KEY_AS_PATHNAME | FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST) as $file => $info)
 			{
 				@unlink($file);
 				if (is_dir($file)) {rmdir($file);}
@@ -748,7 +748,7 @@ abstract class f_util_FileUtils
 		{
 			self::mkdir($dest);
 			$fromLength = strlen($from);
-			foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($from, RecursiveDirectoryIterator::KEY_AS_PATHNAME), RecursiveIteratorIterator::SELF_FIRST) as $file => $info)
+			foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($from, RecursiveDirectoryIterator::KEY_AS_PATHNAME | FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST) as $file => $info)
 			{
 				$relFile = substr($file, $fromLength+1);
 				$destFile = $dest."/".$relFile;
@@ -976,7 +976,7 @@ abstract class f_util_FileUtils
 		if ($recursive && is_dir($file))
 		{
 			//echo "Recursive chmod ".$this->file." ".$this->mode." ".$mode."\n";
-			$dir = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($file), RecursiveIteratorIterator::SELF_FIRST);
+			$dir = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($file, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
 			foreach ($dir as $fileInfo)
 			{
 				// http://bugs.php.net/bug.php?id=40548, fixed starting from 5.2.2: warning if broken link
@@ -1044,7 +1044,7 @@ abstract class f_util_FileUtils
 
 		if ($recursive && is_dir($file))
 		{
-			$dir = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($file), RecursiveIteratorIterator::SELF_FIRST);
+			$dir = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($file, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
 			foreach ($dir as $fileInfo)
 			{
 				if ($fileInfo->getOwner() !== $uid)

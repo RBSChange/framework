@@ -35,7 +35,7 @@ class validation_EmailValidator extends validation_ValidatorImpl implements vali
 
 
 	/**
-	 * Sets the value of the unique validator's parameter.
+	 * Sets the value of the mail validator's parameter.
 	 *
 	 * @param mixed $value
 	 */

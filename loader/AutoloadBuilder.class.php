@@ -120,7 +120,7 @@ class AutoloadBuilder
 	{
 		if (is_dir($directoryPath))
 		{
-			foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directoryPath, RecursiveDirectoryIterator::KEY_AS_PATHNAME), 
+			foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directoryPath, RecursiveDirectoryIterator::KEY_AS_PATHNAME | FilesystemIterator::SKIP_DOTS), 
 				RecursiveIteratorIterator::CHILD_FIRST) as $file => $info)
 			{
 				if (is_dir($file)) 

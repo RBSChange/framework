@@ -1,18 +1,16 @@
 <?php
-
-
 class change_MailService extends BaseService
 {
 	const TO = 'to';
 	const CC = 'cc';
 	const BCC = 'bcc';
+	
 	/**
 	 * @var change_MailService
 	 */
 	private static $instance;
 	
 	/**
-	 *
 	 * @var Zend_Mail_Transport_Abstract 
 	 */
 	private $mta;

@@ -134,7 +134,7 @@ class f_DataCacheFileService extends f_DataCacheService
 	{
 		$cachePath = f_util_FileUtils::buildChangeCachePath('simplecache');
 		$now = time();
-		foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($cachePath, RecursiveDirectoryIterator::KEY_AS_FILENAME), RecursiveIteratorIterator::LEAVES_ONLY) as $fileName => $info)
+		foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($cachePath, RecursiveDirectoryIterator::KEY_AS_FILENAME | FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::LEAVES_ONLY) as $fileName => $info)
 		{
 			if ($fileName === self::INVALID_CACHE_ENTRY && @filemtime($info->getPathname()) < $now)
 			{
