@@ -1,7 +1,7 @@
 <?php
 // Add to crontab
 // Replace {PROJECT_HOME} by path of your project
-// * * * * * /usr/bin/php {PROJECT_HOME}/changecronconsole.php 2>&1 >> /home/inthause/sites/site4/log/project/crontab.log
+// * * * * * /usr/bin/php {PROJECT_HOME}/changecronconsole.php 2>&1 >> {PROJECT_HOME}/log/project/crontab.log
 
 define('PROJECT_HOME', dirname(realpath(__FILE__)));
 if (file_exists(PROJECT_HOME."/site_is_disabled"))
