@@ -459,7 +459,7 @@ class ModuleService extends BaseService
 					
 					// create system folder
 					$systemFolder = $tm->getPersistentProvider()->getNewDocumentInstance('modules_generic/systemfolder');
-					$systemFolder->setLabel('&modules.' . $relatedModuleName . '.bo.general.System-folder-name;');
+					$systemFolder->setLabel('m.' . $relatedModuleName . '.bo.general.system-folder-name');
 					
 					$systemFolder->save(ModuleService::getInstance()->getRootFolderId($ownerModuleName));
 					
