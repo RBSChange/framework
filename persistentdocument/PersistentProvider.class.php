@@ -6,6 +6,7 @@ class PersistentProviderConst
 {
 	const FETCH_ASSOC = 'FETCH_ASSOC';
 	const FETCH_NUM = 'FETCH_NUM';
+	const FETCH_COLUMN = 'FETCH_COL';
 
 	const PARAM_INT = 'PARAM_INT';
 	const PARAM_NUM = 'PARAM_NUM';

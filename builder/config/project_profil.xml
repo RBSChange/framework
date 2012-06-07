@@ -1,43 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project>
 	<defines>
-		<!-- to switch to development mode, please use DEVELOPMENT_MODE=true in your change.properties file -->
 		<!-- 
-		<define name="LOGGING_LEVEL">DEBUG</define>
+			<define name="LOGGING_LEVEL">INFO</define>
+			
+			<define name="DISABLE_BLOCK_CACHE">true</define>
+			<define name="DISABLE_DATACACHE">true</define>
+			<define name="CHANGE_USE_WORKFLOW">false</define>	
+			<define name="CHANGECRON_EXECUTION">console</define>
 		-->
-    	 
-		<!--  
-		<define name="DISABLE_DATACACHE">true</define>
-		-->
-		
-		
-		
-		<!-- 
-		<define name="MOD_NOTIFICATION_SENDER">noreply@${serverHost}</define>
-		<define name="MOD_NOTIFICATION_SENDER_HOST">${serverHost}</define>
-		-->
-		
+			
 		<!-- WARNING: this id must be unique -->
-		<define name="PROJECT_ID">${project}_${author}</define>
+		<define name="PROJECT_ID">{PROJECTID}</define>
 	</defines>
 
 	<config>
 		<general>
-			<entry name="server-fqdn">${serverFqdn}</entry>
+			<entry name="server-fqdn">{PROJECTID}</entry>
 		</general>
 		
-		${solrDef}
+		<solr>
+			<entry name="url">http://127.0.0.1:8983/solr</entry>
+			<entry name="clientId">{PROJECTID}</entry>
+			<entry name="disable_document_cache">true</entry>
+		</solr>
 		
 		<databases>
 			<webapp>
-				<entry name="class">PDODatabase</entry>
-				<entry name="user">root</entry>
-				<entry name="password"></entry>
-				<entry name="database">${database}</entry>
-				<entry name="host">${database_host}</entry>
+				<entry name="user">{DATABASE_USER}</entry>
+				<entry name="password">{DATABASE_PASSWORD}</entry>
+				<entry name="database">{DATABASE}</entry>
+				<entry name="host">{DATABASE_HOST}</entry>
 				<entry name="protocol">mysql</entry>
 				<entry name="port">3306</entry>
+				<entry name="longTransaction">0.2</entry>
 			</webapp>
 		</databases>
 	</config>
+	
+	<modules>
+	    <notification>
+	    	<entry name="noreplySender">noreply@{SERVERHOST}</entry>
+	    </notification>
+	    
+		<media>
+		<!-- 
+		<domains> 
+			<entry name="m2a">m2a.localhost.fr</entry> 
+			<entry name="m2b">m2b.localhost.fr</entry> 
+			<entry name="m2c">m2c.localhost.fr</entry> 
+		</domains> 
+		-->
+		</media>
+	</modules>
 </project>

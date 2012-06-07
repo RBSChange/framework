@@ -1,52 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project>
-	<defines>		
-		<define name="SUPPORTED_LANGUAGES">fr en</define>
-		<define name="UI_SUPPORTED_LANGUAGES">fr en</define>  	
-		<define name="LOGGING_LEVEL">WARN</define>
-		<define name="CHANGE_USE_WORKFLOW">true</define>		
-	</defines>
-
+	<!-- 
+	@see framework/config/project.xml for default configuration value
+	 -->
 	<config>
 		<general>
-			<entry name="projectName">Project ${project} ${author}</entry>
+			<entry name="projectName">RBS CHANGE 4.0</entry>
 		</general>
 		
-		<databases>			
-			<connections>
-				<entry name="default">webapp</entry>
-			</connections>
-		</databases>
+		<i18nsynchro>
+			<entry name="en">fr</entry>
+		</i18nsynchro>
 		
-		<modules>		
-		    <media>
-			    <secureMediaStrategyClass>
-				    <entry name="default">media_DisplaySecuremediaDefaultStrategy</entry>
-			    </secureMediaStrategyClass>
-			    <!-- External icons library 
-			    <icons>
-				    <entry name="library">/usr/share/pear/rbs/webedit4/libs/icons-1.0</entry>
-			    </icons>
-			    -->
-		    </media>
-		    <!-- to change the default template for module samples, uncomment and modify the lines below -->
-		    <!--website>
-			<sample>
-			    <entry name="defaultPageTemplate">webfactory/tplTwo</entry>
-			    <entry name="defaultHomeTemplate">webfactory/tplOne</entry>
-			</sample>
-		    </website-->
-	     </modules> 
-	     <!-- Web browsers compatibility -->
-	     <browsers>
-	     	<frontoffice>
-	    	<!-- 
-	    		<browser name="ie">
-	    			<version name="0">7.0</version>
-	    			<version name="1">8.0</version>
-	    		</browser>	
-	    	 -->
-	    	</frontoffice>
-	     </browsers>    
+		<injection>
+			<class>
+			</class>
+		</injection>
+
+		<modules>
+			<media>
+				<secureMediaStrategyClass>
+					<entry name="default">media_DisplaySecuremediaDefaultStrategy</entry>
+				</secureMediaStrategyClass>
+			</media>
+		</modules>
+		
+		<!-- Web browsers compatibility -->
+		<browsers>
+			<frontoffice>
+				<browser name="ie">
+					<version name="0">9.0</version>
+				</browser>
+				<browser name="firefox">
+					<version name="0">13.0</version>
+				</browser>
+			</frontoffice>
+		</browsers>
 	</config>
 </project>

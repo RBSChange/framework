@@ -2550,6 +2550,8 @@ class MysqlStatment
 		{
 			case PersistentProviderConst::FETCH_NUM:
 				return PDO::FETCH_NUM;
+			case PersistentProviderConst::FETCH_COLUMN:
+				return PDO::FETCH_COLUMN;				
 			default:
 				return PDO::FETCH_ASSOC;
 		}

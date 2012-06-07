@@ -122,7 +122,6 @@ class commands_AddModule extends c_ChangescriptCommand
 		if (!$hidden)
 		{
 			$this->executeCommand("clear-webapp-cache");
-			$this->executeCommand("compile-editors-config");
 			$this->executeCommand("compile-roles");
 		}
 		

@@ -29,12 +29,14 @@
 		<!-- GENERAL -->
 		<general>
 			<entry name="selfRequestProxy">127.0.0.1:80</entry>
+			
 			<entry name="server-fqdn">fully-qualified-domain-name</entry>
+			
 			<!-- What $_SERVER entry to use to detect https queries -->
 			<entry name="https-request-marker">HTTPS</entry>
 			<!-- What is the value of https-request-marker for https queries -->
 			<entry name="https-request-marker-value">on</entry>
-			
+					
 			<entry name="projectName">RBS CHANGE 4.0</entry>	
 		</general>
 		
@@ -88,10 +90,6 @@
 			</server>
 		</datacache-redis>
     	<memcache>
-    		<authentication>
-        		<entry name="username"/>
-        		<entry name="password"/>
-      		</authentication>
       		<server>
         		<entry name="host">localhost</entry>
         		<entry name="port">11211</entry>
@@ -133,28 +131,16 @@
 		<databases>
 			<connections>
 				<entry name="default">webapp</entry>
-				<entry name="read-only">read-only</entry>
 			</connections>
 			<webapp>
-				<entry name="class">PDODatabase</entry>
-				<entry name="user">DatabaseUserAdmin</entry>
-				<entry name="password">UserPassword</entry>
-				<entry name="database">DatabaseName</entry>
-				<entry name="host">localhost</entry>
-				<entry name="protocol">mysql</entry>
+				<!--entry name="user">root</entry-->
+				<!--entry name="password"></entry-->
+				<!--entry name="database">rbschange</entry-->
+				<!--entry name="host">localhost</entry-->
+				<!--entry name="protocol">mysql</entry-->
 				<!--entry name="port">3306</entry-->
-				<entry name="log_level">0</entry>
+				<!--entry name="longTransaction">0.2</entry-->
 			</webapp>
-			<read-only>
-				<entry name="class">PDODatabase</entry>
-				<entry name="user">DatabaseUserAdmin</entry>
-				<entry name="password">UserPassword</entry>
-				<entry name="database">DatabaseName</entry>
-				<entry name="host">localhost</entry>
-				<entry name="protocol">mysql</entry>
-				<!--entry name="port">3306</entry-->
-				<entry name="log_level">0</entry>
-			</read-only>
 		</databases>
 
 		<!-- PERSISTENT PROVIDER -->
@@ -223,20 +209,10 @@
 	    
 		<!-- Web browsers compatibility -->
 		<browsers>
-				<!--
-				<frontoffice>
-	
-					<browser name="firefox">
-						<version name="0">3.0.3</version>
-						<version name="1">3.0.8</version>
-					</browser>
-	
-				</frontoffice>
-				-->	
 			<backoffice>
 				<browser name="firefox">
-					<version name="0">3.6.24</version>
-					<version name="1">8.0</version>
+					<version name="0">12.0</version>
+					<version name="1">13.0</version>
 				</browser>
 			</backoffice>
 		</browsers>

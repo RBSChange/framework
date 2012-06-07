@@ -348,29 +348,22 @@ class Framework
 		$general = self::$config['general'];
 		return isset($general['server-fqdn']) ? $general['server-fqdn'] : $_SERVER['HTTP_HOST'];
 	}
-
-	/**
-	 * @return string
-	 */
-	public static function getDefaultSenderHost()
-	{
-		if (!defined('DEFAULT_SENDER_HOST'))
-		{
-			define('DEFAULT_SENDER_HOST', self::getUIDefaultHost());
-		}
-		return DEFAULT_SENDER_HOST;
-	}
-
+	
 	/**
 	 * @return string
 	 */
 	public static function getDefaultNoReplySender()
 	{
-		if (!defined('NOREPLY_DEFAULT_EMAIL'))
-		{
-			define('NOREPLY_DEFAULT_EMAIL', 'noreply@' . self::getDefaultSenderHost());
-		}
-		return NOREPLY_DEFAULT_EMAIL;
+		return self::getConfigurationValue('modules/notification/noreplySender', 'noreply@' . self::getUIDefaultHost());
+	}
+	
+	/**
+	 * @return string
+	 */
+	public static function getDefaultSenderHost()
+	{
+		list(, $host) = explode('@', self::getDefaultNoReplySender());
+		return $host;
 	}
 
 	/**
@@ -549,10 +542,7 @@ ini_set('include_path', ZEND_FRAMEWORK_PATH . (defined('INCLUDE_PATH') ? PATH_SE
 Framework::registerAutoload();
 
 ini_set('arg_separator.output',      '&amp;');
-//ini_set('display_errors',            1);
 ini_set('magic_quotes_runtime',      0);
-
-
 
 Framework::registerLogErrorHandler();
 
