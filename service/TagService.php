@@ -66,80 +66,68 @@ class TagService extends BaseService
 		$modelsName = array();
 		while (true)
 		{
+			if ($model->isInjectedModel()) {$model = $model->getSourceInjectionModel();}
 			$modelsName[$model->getName()] = true;
 			if (!$model->hasParent()) {break;}
 			$model = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($model->getParentName());
 		}
 		
-		$allTags = $this->getPersistentProvider()->getAllTags();
+		$selfTags = $this->getTags($document);
 		$results = array();
+		
 		foreach ($this->getAvailableTagsInfo() as $tag => $tagInfo) 
 		{
 			if (isset($modelsName[$tagInfo['component_type']]))
 			{
-				$results[] = array('tag' => $tag, 'ids' => isset($allTags[$tag]) ? $allTags[$tag] : array());			
+				$results[$tag] = $tagInfo;			
 			}
 		}
 		
-		$parent = $document->getDocumentService()->getParentOf($document);	
-		$websiteId = $document->getDocumentService()->getWebsiteId($document);
-		
-		$documentId = $document->getId();
-		foreach ($results as $result)
+		if (count($results))
 		{
-			$tag = $result['tag'];
-			if (in_array($documentId, $result['ids']))
+			$parent = TreeService::getInstance()->getParentDocument($document);
+			
+			$websiteId = $document->getDocumentService()->getWebsiteId($document);
+			$website = $websiteId ? DocumentHelper::getDocumentInstance($websiteId) : null;
+			
+			$documentId = $document->getId();
+			foreach ($results as $tag => $tagInfo)
 			{
-				$tags[] = array('tag' => $tag, 'affected' => true, 'selfAffected' => true);
-			}
-			else if (count($result['ids']) > 0)
-			{
-				if ($this->isExclusiveTag($tag))
+				if (in_array($tag, $selfTags))
 				{
-					// Exclusive tags does not need context check.
-					$tags[] = array('tag' => $tag, 'affected' => true);
+					$tags[] = array('tag' => $tag, 'affected' => true, 'selfAffected' => true);
 				}
-				else if ($this->isContextualTag($tag))
+				elseif ($this->isExclusiveTag($tag))
+				{
+					if ($this->findDocumentByExclusiveTag($tag))
+					{
+						$tags[] = array('tag' => $tag, 'affected' => true);
+					}
+				}
+				elseif ($this->isContextualTag($tag))
 				{
 					// Check that the id is a descendent of the same website than the given document.
-					if ($websiteId)
+					if ($website)
 					{
-						foreach ($result['ids'] as $taggedDocumentId) 
+						if ($this->findDocumentByContextualTag($tag, $website))
 						{
-							$taggedDocument = DocumentHelper::getDocumentInstance($taggedDocumentId);
-							$taggedWebsiteId = $taggedDocument->getDocumentService()->getWebsiteId($taggedDocument);			
-							if ($taggedWebsiteId == $websiteId)
-							{
-								$tags[] = array('tag' => $tag, 'affected' => true);
-								break;
-							}
+							$tags[] = array('tag' => $tag, 'affected' => true);
 						}
 					}
 				}
-				else if ($this->isFunctionalTag($tag))
+				elseif ($this->isFunctionalTag($tag))
 				{
 					// Check that the id and the given document has the same parent.
-					if (isset($parent))
+					if ($parent)
 					{
-						foreach ($result['ids'] as $taggedDocumentId) 
+						if (count($this->getSiblingDocuments($tag, $document)))
 						{
-							$taggedDocument = DocumentHelper::getDocumentInstance($taggedDocumentId);
-							$taggedDocumentParent = $taggedDocument->getDocumentService()->getParentOf($taggedDocument);
-							if (DocumentHelper::equals($parent, $taggedDocumentParent))
-							{
-								$tags[] = array('tag' => $tag, 'affected' => true);
-								break;
-							}							
+							$tags[] = array('tag' => $tag, 'affected' => true);
 						}
 					}
-				}
-				else
-				{
-					// FIXME: What to do for free tags?
 				}
 			}
 		}
-
 		return array('models' => $modelsName, 'tags' => $tags) ;
 	}
 
