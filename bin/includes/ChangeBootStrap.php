@@ -436,10 +436,11 @@ class c_ChangeBootStrap
 			$this->localRepositories = array();
 			foreach (array_unique(explode(",", $this->getProperties()->getProperty("LOCAL_REPOSITORY", $this->wd . "/repository"))) as $localRepoPath)
 			{
-				if (!is_dir($localRepoPath))
-				{
-					continue;
-				}
+				$localRepoPath = trim($localRepoPath);
+				if ($localRepoPath == '') {continue;}
+				
+				if (!is_dir($localRepoPath)) {continue;}
+				
 				$writable = true;
 				$writableTmpPath = $localRepoPath . DIRECTORY_SEPARATOR . 'tmp';
 				if (!is_dir($writableTmpPath) && !mkdir($writableTmpPath, 0777, true))
@@ -1119,10 +1120,18 @@ class c_ChangeBootStrap
 		$this->remoteError = true;
 		if (!$destFile)
 		{
-			$tmpDir = $this->getWriteRepository() . '/tmp';
+			$wr = $this->getWriteRepository();
+			if ($wr === null)
+			{
+				$this->remoteError = array(-10, 'Invalid LOCAL_REPOSITORY configuration', $this->getProperties()->getProperty("LOCAL_REPOSITORY", $this->wd . "/repository"));
+				echo implode(', ', $this->remoteError), PHP_EOL;
+				return $this->remoteError;
+			}
+			$tmpDir = $wr . '/tmp';
 			if (!file_exists($tmpDir) && !mkdir($tmpDir, 0777, true))
 			{
 				$this->remoteError = array(-1, 'Can not create tmp directory ' . $tmpDir);
+				echo implode(', ', $this->remoteError), PHP_EOL;
 				return $this->remoteError;
 			}
 			$destFile = tempnam($tmpDir, 'tmp');
@@ -1132,6 +1141,7 @@ class c_ChangeBootStrap
 		if ($fp === false)
 		{
 			$this->remoteError = array(-1, 'Fopen error for filename ', $destFile);
+			echo implode(', ', $this->remoteError), PHP_EOL;
 			return $this->remoteError;
 		}
 	
@@ -1139,6 +1149,7 @@ class c_ChangeBootStrap
 		if ($ch == false)
 		{
 			$this->remoteError = array(-2, 'Curl_init error for url ' . $url);
+			echo implode(', ', $this->remoteError), PHP_EOL;
 			return $this->remoteError;
 		}
 	
@@ -1167,6 +1178,7 @@ class c_ChangeBootStrap
 			fclose($fp);
 			unlink($destFile);
 			curl_close($ch);
+			echo implode(', ', $this->remoteError), PHP_EOL;
 			return $this->remoteError;
 		}
 	
@@ -1177,6 +1189,7 @@ class c_ChangeBootStrap
 		{
 			unlink($destFile);
 			$this->remoteError = array($info["http_code"], "Could not download " . $url . ": bad http status (" . $info["http_code"] . ")");
+			echo implode(', ', $this->remoteError), PHP_EOL;
 			return $this->remoteError;
 		}
 	
