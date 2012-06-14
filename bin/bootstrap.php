@@ -51,17 +51,14 @@ function c_assert_php_version($version)
 // First thing we do is check PHP version, outside of any class (maybe running and old PHP4 version ?)
 c_assert_php_version("5.1.6");
 
+require_once FRAMEWORK_HOME .'/bin/includes/ChangeBootStrap.php';
+require_once FRAMEWORK_HOME .'/bin/includes/ClassDirAnalyzer.php';
+require_once FRAMEWORK_HOME .'/bin/includes/Configuration.php';
+require_once FRAMEWORK_HOME .'/bin/includes/Changescript.php';
+require_once FRAMEWORK_HOME .'/bin/includes/Changescripthttp.php';
+require_once FRAMEWORK_HOME .'/bin/includes/ChangescriptCommand.php';
 
-$binpath = dirname(__FILE__);
-require_once $binpath .'/includes/ChangeBootStrap.php';
-require_once $binpath .'/includes/ClassDirAnalyzer.php';
-require_once $binpath .'/includes/Configuration.php';
-require_once $binpath .'/includes/Changescript.php';
-require_once $binpath .'/includes/Changescripthttp.php';
-require_once $binpath .'/includes/ChangescriptCommand.php';
-
-$frameworkPath = dirname($binpath);
-require_once $frameworkPath .'/util/System.php';
-require_once $frameworkPath .'/util/StringUtils.class.php';
-require_once $frameworkPath .'/util/ArrayUtils.class.php';
-require_once $frameworkPath .'/util/DomUtils.php';
+require_once FRAMEWORK_HOME .'/util/System.php';
+require_once FRAMEWORK_HOME .'/util/StringUtils.class.php';
+require_once FRAMEWORK_HOME .'/util/ArrayUtils.class.php';
+require_once FRAMEWORK_HOME .'/util/DomUtils.php';

@@ -1,9 +1,9 @@
 <?php
 // Add to crontab
 // Replace {WEBEDIT_HOME} by path of your project and {PROFILE} by your profile name
-// * * * * * /usr/bin/php {WEBEDIT_HOME}/changecronconsole.php 2>&1 >> /home/inthause/sites/site4/log/{PROFILE}/crontab.log
+// * * * * * /usr/bin/php {WEBEDIT_HOME}/changecronconsole.php 2>&1 >> {WEBEDIT_HOME}/log/{PROFILE}/crontab.log
 
-define('WEBEDIT_HOME', dirname(realpath(__FILE__)));
+if (!defined('WEBEDIT_HOME')) {define('WEBEDIT_HOME', dirname(realpath(__FILE__)));}
 if (file_exists(WEBEDIT_HOME."/site_is_disabled"))
 {
 	exit(0);

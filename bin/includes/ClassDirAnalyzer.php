@@ -1,9 +1,8 @@
 <?php
-$frameworkPath = dirname(dirname(dirname(__FILE__)));
-require_once($frameworkPath . '/loader/ResourceResolver.class.php');
-require_once($frameworkPath . '/loader/ClassResolver.class.php');
-require_once($frameworkPath . '/util/FileUtils.class.php');
-require_once($frameworkPath . '/util/StringUtils.class.php');
+require_once(FRAMEWORK_HOME . '/loader/ResourceResolver.class.php');
+require_once(FRAMEWORK_HOME . '/loader/ClassResolver.class.php');
+require_once(FRAMEWORK_HOME . '/util/FileUtils.class.php');
+require_once(FRAMEWORK_HOME . '/util/StringUtils.class.php');
 
 class cboot_ClassDirAnalyzer extends ClassResolver
 {
