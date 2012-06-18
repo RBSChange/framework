@@ -62,6 +62,19 @@ class import_ScriptReader extends BaseService
 			throw new Exception("Could not find any script named $scriptName for module $moduleName");
 		}
 		
+		$this->execute($path, $attributes);
+	}
+
+	/**
+	 * @param String $fileName
+	 * @param attay $attributes
+	 */
+	public function execute($fileName, $attributes = array())
+	{		
+		$scriptInstance = self::getServiceClassInstance(get_class());
+		$scriptInstance->initialize();
+		if (!is_array($attributes)) {$attributes = array();}
+		
 		// Set default values of tempalte and templateHome attributes.
 		if (!isset($attributes['template']))
 		{
@@ -80,21 +93,8 @@ class import_ScriptReader extends BaseService
 			$attributes['templatePopin'] = Framework::getConfigurationValue('modules/website/sample/defaultPopinTemplate');
 		}
 		
-		$this->execute($path, $attributes);
-	}
-
-	/**
-	 * @param String $fileName
-	 * @param attay $attributes
-	 */
-	public function execute($fileName, $attributes = array())
-	{		
-		$scriptInstance = self::getServiceClassInstance(get_class());
-		$scriptInstance->initialize();
-		if (is_array($attributes))
-		{
-			$scriptInstance->attributes = $attributes;
-		}
+		$scriptInstance->attributes = $attributes;
+			
 		$scriptInstance->executeInternal($fileName);		
 	}
 
