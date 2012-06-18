@@ -62,16 +62,6 @@ class import_ScriptReader extends BaseService
 			throw new Exception("Could not find any script named $scriptName for module $moduleName");
 		}
 		
-		// Set default values of tempalte and templateHome attributes.
-		if (!isset($attributes['template']))
-		{
-			$attributes['template'] = Framework::getConfigurationValue('modules/website/sample/defaultPageTemplate');
-		}
-		if (!isset($attributes['templateHome']))
-		{
-			$attributes['templateHome'] = Framework::getConfigurationValue('modules/website/sample/defaultHomeTemplate');
-		}
-		
 		$this->execute($path, $attributes);
 	}
 
@@ -83,10 +73,19 @@ class import_ScriptReader extends BaseService
 	{		
 		$scriptInstance = self::getServiceClassInstance(get_class());
 		$scriptInstance->initialize();
-		if (is_array($attributes))
+		if (!is_array($attributes)) {$attributes = array();}
+		
+		// Set default values of tempalte and templateHome attributes.
+		if (!isset($attributes['template']))
 		{
-			$scriptInstance->attributes = $attributes;
+			$attributes['template'] = Framework::getConfigurationValue('modules/website/sample/defaultPageTemplate');
+		}		
+		if (!isset($attributes['templateHome']))
+		{
+			$attributes['templateHome'] = Framework::getConfigurationValue('modules/website/sample/defaultHomeTemplate');
 		}
+		$scriptInstance->attributes = $attributes;
+			
 		$scriptInstance->executeInternal($fileName);		
 	}
 
