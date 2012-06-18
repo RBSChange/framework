@@ -1,8 +1,8 @@
 <?php
-class AutoloadBuilder
+class change_AutoloadBuilder
 {
 	/**
-	 * @var AutoloadBuilder
+	 * @var change_AutoloadBuilder
 	 */
 	private static $instance = null;
 	
@@ -19,7 +19,7 @@ class AutoloadBuilder
 	}
 	
 	/**
-	 * @return AutoloadBuilder
+	 * @return change_AutoloadBuilder
 	 */
 	public static function getInstance()
 	{

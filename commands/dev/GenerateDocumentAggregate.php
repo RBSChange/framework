@@ -111,7 +111,7 @@ class commands_GenerateDocumentAggregate extends c_ChangescriptCommand
 		
 		bean_BeanAggregateGenerator::generate($moduleBeanPath, $beanClassName, $classes);
 		$this->message("adding $beanClassName to autoload\n");
-		AutoloadBuilder::getInstance()->appendFile($moduleBeanPath);
+		change_AutoloadBuilder::getInstance()->appendFile($moduleBeanPath);
 
 		return $this->quitOk($moduleBeanPath." file ready");
 	}

@@ -177,12 +177,12 @@ class builder_ModuleGenerator
 		// Generate setup file
 		$path = f_util_FileUtils::buildModulesPath($this->name, 'setup', 'initData.php');
 		f_util_FileUtils::write($path, $this->generateFile('initData'));
-		AutoloadBuilder::getInstance()->appendFile($path);
+		change_AutoloadBuilder::getInstance()->appendFile($path);
 
 		// Generate services files
 		$path = f_util_FileUtils::buildModulesPath($this->name, 'lib', 'services', 'ModuleService.class.php');
 		f_util_FileUtils::write($path, $this->generateFile('ModuleService.class.php'));
-		AutoloadBuilder::getInstance()->appendFile($path);
+		change_AutoloadBuilder::getInstance()->appendFile($path);
 		
 		if ($this->visibility)
 		{

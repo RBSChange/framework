@@ -28,7 +28,7 @@ class commands_CompileAutoload extends c_ChangescriptCommand
 		if (f_util_ArrayUtils::isEmpty($params))
 		{
 			$this->message("Scanning all the project. Please wait: this can be long.");
-			AutoloadBuilder::getInstance()->update();
+			change_AutoloadBuilder::getInstance()->update();
 		}
 		else
 		{
@@ -43,11 +43,11 @@ class commands_CompileAutoload extends c_ChangescriptCommand
 				if (is_dir($path))
 				{
 					$this->message("Adding $path directory to autoload");
-					AutoloadBuilder::getInstance()->appendDir($path);
+					change_AutoloadBuilder::getInstance()->appendDir($path);
 					continue;
 				}
 				$this->message("Adding $path file to autoload");
-				AutoloadBuilder::getInstance()->appendFile($path);
+				change_AutoloadBuilder::getInstance()->appendFile($path);
 			}
 		}
 		

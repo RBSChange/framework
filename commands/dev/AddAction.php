@@ -121,7 +121,7 @@ class commands_AddAction extends c_ChangescriptCommand
 		}
 		
 		f_util_FileUtils::write($actionPath, $result);
-		AutoloadBuilder::getInstance()->appendFile($actionPath);
+		change_AutoloadBuilder::getInstance()->appendFile($actionPath);
 		$this->quitOk("Action $actionName added in module $moduleName Please now edit $actionPath.");
 	}
 }

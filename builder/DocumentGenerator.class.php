@@ -171,7 +171,7 @@ class builder_DocumentGenerator
 			$fileContent[] = $this->modelObject->generatePhpI18nClass();
 		}
 		f_util_FileUtils::write($filePath, implode(PHP_EOL, $fileContent), f_util_FileUtils::OVERRIDE);	
-		AutoloadBuilder::getInstance()->appendFile($filePath);
+		change_AutoloadBuilder::getInstance()->appendFile($filePath);
 	}
 
 	/**
@@ -336,7 +336,7 @@ class builder_DocumentGenerator
 		// Execute template and return result
 		$result = $generator->fetch('DocumentServiceModel.tpl');
 		f_util_FileUtils::writeAndCreateContainer($filePath, $result, f_util_FileUtils::OVERRIDE);
-		AutoloadBuilder::getInstance()->appendFile($filePath);
+		change_AutoloadBuilder::getInstance()->appendFile($filePath);
 		return $filePath;
 	}
 	
@@ -365,7 +365,7 @@ class builder_DocumentGenerator
 		
 		$result = $generator->fetch('DocumentClass.tpl');
 		f_util_FileUtils::writeAndCreateContainer($filePath, $result, f_util_FileUtils::OVERRIDE);	
-		AutoloadBuilder::getInstance()->appendFile($filePath);
+		change_AutoloadBuilder::getInstance()->appendFile($filePath);
 		
 		if (!$inject)
 		{
@@ -377,7 +377,7 @@ class builder_DocumentGenerator
 			$generator->assign('importClassName', $importClassName);
 			$result = $generator->fetch('ImportDocumentClass.tpl');
 			f_util_FileUtils::writeAndCreateContainer($filePath, $result, f_util_FileUtils::OVERRIDE);	
-			AutoloadBuilder::getInstance()->appendFile($filePath);
+			change_AutoloadBuilder::getInstance()->appendFile($filePath);
 			
 			$filePath = f_util_FileUtils::buildModulesPath($moduleName, 'persistentdocument' , 'import' , $moduleName . '_binding.xml');
 			$files[] = $filePath;

@@ -173,7 +173,7 @@ class c_ChangeBootStrap
 	 */
 	function autoload($className)
 	{
-		$path = AutoloadBuilder::getInstance()->buildLinkPathByClass($className);
+		$path = change_AutoloadBuilder::getInstance()->buildLinkPathByClass($className);
 		if ($path !== false && is_readable($path))
 		{
 			require_once $path;
@@ -193,7 +193,7 @@ class c_ChangeBootStrap
 		$autoloadPath = $this->getAutoloadPath();
 		$autoloadedFlag = $autoloadPath . "/" . md5($componentPath) . ".autoloaded";
 		if (file_exists($autoloadedFlag)) {return;}
-		AutoloadBuilder::getInstance()->appendDir($componentPath);
+		change_AutoloadBuilder::getInstance()->appendDir($componentPath);
 		touch($autoloadedFlag);
 	}
 	

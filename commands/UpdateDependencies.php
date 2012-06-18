@@ -99,7 +99,7 @@ class commands_UpdateDependencies extends c_ChangescriptCommand
 			else
 			{
 				$this->log('Compile autoload. Please wait: this can be long.');
-				AutoloadBuilder::getInstance()->update();
+				change_AutoloadBuilder::getInstance()->update();
 				$this->rawMessage('Please execute: ' . $this->getChangeCmdName() . ' compile-config');
 			}
 		}

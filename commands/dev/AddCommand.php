@@ -137,7 +137,7 @@ class commands_AddCommand extends c_ChangescriptCommand
 		$result = $generator->fetch('command.tpl');
 		
 		f_util_FileUtils::writeAndCreateContainer($commandFile, $result);
-		AutoloadBuilder::getInstance()->appendFile($commandFile);
+		change_AutoloadBuilder::getInstance()->appendFile($commandFile);
 					
 		return $this->quitOk("Command $commandCallName successfully created!\nPlease now edit $commandFile.php");
 	}
