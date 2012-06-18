@@ -179,7 +179,7 @@ class InitDataService extends BaseService
 	 */
 	private function doImport($file, $className)
 	{
-		require_once($file);
+		require_once $file;
 		try
 		{
 			if (!class_exists($className, false)) 

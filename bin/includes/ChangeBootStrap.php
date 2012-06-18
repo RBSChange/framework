@@ -176,7 +176,7 @@ class c_ChangeBootStrap
 		$path = AutoloadBuilder::getInstance()->buildLinkPathByClass($className);
 		if ($path !== false && is_readable($path))
 		{
-			require_once($path);
+			require_once $path;
 		}
 	}
 	

@@ -256,7 +256,7 @@ abstract class f_util_FileUtils
 	 */
 	private static function buildAbsolutePathFromArray($args)
 	{
-		if (DIRECTORY_SEPARATOR !== '/' || f_util_StringUtils::beginsWith($args[0], DIRECTORY_SEPARATOR))
+		if (DIRECTORY_SEPARATOR !== '/' || substr($args[0], 0, strlen(DIRECTORY_SEPARATOR)) == DIRECTORY_SEPARATOR)
 		{
 			return join(DIRECTORY_SEPARATOR, $args);
 		}

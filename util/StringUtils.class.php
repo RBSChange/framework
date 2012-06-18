@@ -609,21 +609,5 @@ class f_util_StringUtils
     public static function JSONDecode($string)
     {
     	return JsonService::getInstance()->decode($string);
-    }
-        
-    /**
-     * @deprecated use toLower
-     */
-    public static function strtolower($string)
-    {
-    	return mb_strtolower($string, "UTF-8");
-    }
-    
-    /**
-     * @deprecated use toUpper
-     */
-    public static function strtoupper($string)
-    {
-    	return mb_strtoupper($string, "UTF-8");
-    }   
+    } 
 }

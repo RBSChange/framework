@@ -1,6 +1,6 @@
 <?php
-$PHPTALClassPath = f_util_FileUtils::buildWebeditPath('libs', 'phptal', 'PHPTAL.php');
-require_once($PHPTALClassPath);
+$PHPTALClassPath = f_util_FileUtils::buildProjectPath('libs', 'phptal', 'PHPTAL.php');
+require_once $PHPTALClassPath;
 
 /**
  * @package framework.object

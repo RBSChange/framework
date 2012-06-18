@@ -34,7 +34,7 @@ class commands_CompileAutoload extends c_ChangescriptCommand
 		{
 			foreach ($params as $param)
 			{
-				$path = f_util_FileUtils::buildProjectPath($param);
+				$path = PROJECT_HOME . DIRECTORY_SEPARATOR . $param;
 				if (!file_exists($path))
 				{
 					$this->errorMessage("Could not resolve $param as file, ignoring");

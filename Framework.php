@@ -428,7 +428,7 @@ class Framework
 	public static function getConfigurationValue($path, $defaultValue = null)
 	{
 		$value = self::getConfiguration($path, false);
-		if ($value === false || (is_string($value) && f_util_StringUtils::isEmpty($value)) || (is_array($value) && f_util_ArrayUtils::isEmpty($value)))
+		if ($value === false || (is_string($value) && empty($value)) || (is_array($value) && count($value) == 0))
 		{
 			return $defaultValue;
 		}
@@ -523,18 +523,19 @@ class Framework
     		die('Please execute '. CHANGE_COMMAND . ' compile-autoload');
     	}
     	$path =  $basePath . DIRECTORY_SEPARATOR . str_replace('_', DIRECTORY_SEPARATOR, $className) . DIRECTORY_SEPARATOR . "to_include";
-    	if (is_readable($path)) {require_once ($path);}
+    	if (is_readable($path)) {require_once $path;}
     	
     	if (strpos($className, 'Zend_') === 0 && defined("ZEND_FRAMEWORK_PATH"))
     	{
     		$path = ZEND_FRAMEWORK_PATH . DIRECTORY_SEPARATOR . str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
-    		if (is_readable($path)) {require_once ($path);}	
+    		if (is_readable($path)) {require_once $path;}	
     	}
     }
 }
 
 // Load configuration
 Framework::loadConfiguration();
+
 if (Framework::inDevelopmentMode()) {error_reporting(E_ALL);}
 
 ini_set('include_path', ZEND_FRAMEWORK_PATH . (defined('INCLUDE_PATH') ? PATH_SEPARATOR . INCLUDE_PATH : ''));

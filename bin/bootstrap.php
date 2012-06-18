@@ -14,16 +14,13 @@ if (version_compare(PHP_VERSION, '5.3.0' , '<'))
 	c_error("PHP version (".PHP_VERSION.") < 5.3.0", true);
 }
 
-$binpath = dirname(__FILE__);
-require_once $binpath .'/includes/ChangePackage.php';
-require_once $binpath .'/includes/ChangeBootStrap.php';
-require_once $binpath .'/includes/Configuration.php';
-require_once $binpath .'/includes/ChangescriptCommand.php';
+require_once PROJECT_HOME . '/framework/bin/includes/ChangePackage.php';
+require_once PROJECT_HOME . '/framework/bin/includes/ChangeBootStrap.php';
+require_once PROJECT_HOME . '/framework/bin/includes/Configuration.php';
+require_once PROJECT_HOME . '/framework/bin/includes/ChangescriptCommand.php';
 
-$frameworkPath = dirname($binpath);
-require_once($frameworkPath . '/util/FileUtils.class.php');
-require_once $frameworkPath . '/util/System.php';
-require_once $frameworkPath . '/util/StringUtils.class.php';
-require_once $frameworkPath . '/util/ArrayUtils.class.php';
-require_once $frameworkPath . '/util/DomUtils.php';
-require_once($frameworkPath . '/loader/AutoloadBuilder.class.php');
+require_once PROJECT_HOME . '/framework/util/FileUtils.class.php';
+require_once PROJECT_HOME . '/framework/util/System.php';
+require_once PROJECT_HOME . '/framework/util/ArrayUtils.class.php';
+require_once PROJECT_HOME . '/framework/util/DomUtils.php';
+require_once PROJECT_HOME . '/framework/loader/AutoloadBuilder.class.php';

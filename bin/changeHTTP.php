@@ -15,7 +15,7 @@ define("HTTP_MODE", true);
 ignore_user_abort(true);
 set_time_limit(0);
 
-require_once dirname(__FILE__) . '/bootstrap.php';
+require_once PROJECT_HOME . '/framework/bin/bootstrap.php';
 umask(0002);
 $bootStrap = new c_ChangeBootStrap(PROJECT_HOME);
 $argv = isset($_POST['argv']) ? $_POST['argv'] : array();

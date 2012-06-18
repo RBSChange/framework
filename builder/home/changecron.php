@@ -10,7 +10,7 @@ if (file_exists(PROJECT_HOME."/site_is_disabled"))
 	exit(0);
 }
 
-require_once PROJECT_HOME . "/framework/Framework.php";
+require_once PROJECT_HOME . '/framework/Framework.php';
 if (!isset($_SERVER['REMOTE_ADDR']))
 {
 	Framework::info(__FILE__ . ' Invalid call');

@@ -559,7 +559,7 @@ abstract class c_ChangescriptCommand
 					spl_autoload_unregister($fct);
 				}
 			}	
-			require_once(realpath(PROJECT_HOME."/framework/Framework.php"));
+			require_once PROJECT_HOME.'/framework/Framework.php';
 		}
 	}
 

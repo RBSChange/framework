@@ -11,7 +11,7 @@ if (file_exists($scriptPath) && is_readable($scriptPath) && strrpos($scriptPath,
 		{
 			define("PROJECT_HOME", getcwd());
 			clearstatcache();
-			require_once PROJECT_HOME . "/framework/Framework.php";
+			require_once PROJECT_HOME . '/framework/Framework.php';
 			
 		 	if (Framework::isInfoEnabled())
 		 	{

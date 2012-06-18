@@ -8,7 +8,7 @@ if ($profile === false || empty($profile))
 	exit(-1);
 }
 clearstatcache();
-require_once dirname(__FILE__) . '/bootstrap.php';
+require_once PROJECT_HOME . '/framework/bin/bootstrap.php';
 umask(0002);
 $bootStrap = new c_ChangeBootStrap(PROJECT_HOME);
 

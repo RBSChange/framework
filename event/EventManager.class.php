@@ -163,49 +163,24 @@ class f_event_EventManager
 	 */
 	public static function dispatchEvent ($eventName, $sender, $params = null)
 	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug('EventManager : dispatchEvent '.$eventName);
-		}
 		self::loadListenerConfigCache();
 
 		if (is_null(self::$m_eventHandlers) || !array_key_exists($eventName, self::$m_eventHandlers))
 		{
-			Framework::debug('EventManager : no listener registered for '.$eventName);
 			return;
 		}
 		foreach (self::$m_eventHandlers[$eventName] as $listenerInfo)
 		{
 			try
 			{
-				if (Framework::isDebugEnabled())
-				{
-					Framework::debug('EventManager : dispatch '.$eventName.' to '. get_class($listenerInfo[0]).'->'.$listenerInfo[1]);
-				}
 				$listenerInfo[0]->{$listenerInfo[1]}($sender, $params);
-				if (Framework::isDebugEnabled())
-				{
-					Framework::debug('EventManager : '.$eventName.' to '. get_class($listenerInfo[0]).'->'.$listenerInfo[1] . ' dispatched');
-				}
 			}
 			catch (Exception $e)
 			{
 				Framework::exception($e);
 				if (f_util_ClassUtils::propertyExists($listenerInfo[0], $listenerInfo[1]."Required"))
 				{
-					if (Framework::isDebugEnabled())
-					{
-						Framework::debug('EventManager : required listener failed => rethrow');
-					}
 					throw $e;
-				}
-				else
-				{
-					if (Framework::isDebugEnabled())
-					{
-						Framework::debug('EventManager : NOT required listener failed => ignoring');
-					}
-					// ignoring dispatch exception and try to dispatch to other listeners
 				}
 			}
 		}
@@ -232,9 +207,9 @@ class f_event_EventManager
 		if (!self::$isCacheLoaded)
 		{
 			$listenersFile = f_util_FileUtils::buildChangeBuildPath('listeners.php');
-			if (is_readable($listenersFile) )
+			if (is_readable($listenersFile))
 			{
-				require_once($listenersFile);
+				require_once $listenersFile;
 			}
 			self::$isCacheLoaded = true;
 		}
