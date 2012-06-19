@@ -23,6 +23,9 @@
 class f_persistentdocument_DocumentService extends change_BaseService
 {
 
+	/**
+	 * @deprecated
+	 */
 	public function __get($name)
 	{
 		switch ($name)
@@ -38,6 +41,9 @@ class f_persistentdocument_DocumentService extends change_BaseService
 		return null;
 	}
 	
+	/**
+	 * @deprecated
+	 */
 	public function __call($name, $args)
 	{
 		switch ($name)
@@ -237,11 +243,6 @@ class f_persistentdocument_DocumentService extends change_BaseService
 			$this->preInsert($document, $parentNodeId);
 
 			$modifiedPropertyNames = $document->getModifiedPropertyNames();
-						
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug("insertDocument ". get_class($document).' parentNodeId = '.$parentNodeId);
-			}
 
 			$this->setAuthor($document);
 
@@ -519,10 +520,6 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 		if ($document->isDeleted())
 		{
-			if (Framework::isDebugEnabled())
-			{
-				Framework::debug("Document " . $document->__toString() . " already deleted delete canceled");
-			}
 			return;
 		}
         $tm = $this->getTransactionManager();
@@ -541,11 +538,6 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 				//Effacements des tags du document
 				//Déplacement en tete site a la création des tag fonctionnel (le document doit toujours etre classé dans l'arbre)
-				if (Framework::isDebugEnabled())
-				{
-					Framework::debug('Effacement tags du document '.$document->getId());
-				}
-
 				$tagService = TagService::getInstance();
 				$tags  = $tagService->getTags($document);
 				if (count($tags) > 0)
@@ -557,20 +549,11 @@ class f_persistentdocument_DocumentService extends change_BaseService
 				}
 
 				// Effacement des noeuds [@document_id = $document->id]
-				if (Framework::isDebugEnabled())
-				{
-					Framework::debug('Effacement noeud du document '.$document->getId());
-				}
-				
 				$ts = TreeService::getInstance();
 				$node = $ts->getInstanceByDocument($document);
 				if ($node !== null) {$ts->deleteNode($node);}
 				
 				// Effacement des relations CHILD[@id2 = $document->id]
-				if (Framework::isDebugEnabled())
-				{
-					Framework::debug('Effacement relations child  du document '.$document->getId());
-				}
 				$relations = $pp->getChildRelationBySlaveDocumentId($document->getId());
 				$rc = RequestContext::getInstance();
 				foreach ($relations as $relation)
@@ -723,10 +706,6 @@ class f_persistentdocument_DocumentService extends change_BaseService
 				try
 				{
 					RequestContext::getInstance()->beginI18nWork($persistentDocument->getLang());
-					if (Framework::isDebugEnabled())
-					{
-						Framework::debug("Supression de la référence à la correction ". $persistentDocument->getId() . " du document " . $correctionOfId);
-					}
 					$original = $this->getDocumentInstance($correctionOfId);
 					$original->setCorrectionid(null);
 					
@@ -750,10 +729,6 @@ class f_persistentdocument_DocumentService extends change_BaseService
 				$results = $query->find();
 				foreach ($results as $correction)
 				{
-					if (Framework::isDebugEnabled())
-					{
-						Framework::debug("Effacement de la correction ". $correction->getId() . " du document " . $persistentDocument->getId());
-					}
 					$correction->delete();
 				}
 			}
@@ -997,23 +972,11 @@ class f_persistentdocument_DocumentService extends change_BaseService
 				if ($currentTreeNode === null)
 				{
 					$ts->newLastChildForNode($parentTreeNode, $document->getId());
-					if (Framework::isDebugEnabled())
-					{
-						Framework::debug("[DocumentService] document ($documentId) has been linked to its parent ($parentNodeId).");
-					}
 				}
 				else if ($currentTreeNode->getParent()->getId() != $parentNodeId)
 				{
 					$ts->moveToLastChildNode($currentTreeNode, $parentTreeNode);
-					if (Framework::isDebugEnabled())
-					{
-						Framework::debug("[DocumentService] document ($documentId) has been moved to its parent ($parentNodeId).");
-					}
 				}
-			}
-			else if (Framework::isDebugEnabled())
-			{
-				Framework::debug("[DocumentService] the parent node ($parentNodeId) can't exist.");
 			}
 		}
 		elseif (count($candidateComponentNames) == 1)
@@ -1579,10 +1542,6 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	 */
 	protected final function dispatchPublicationStatusChanged($document, $oldPublicationStatus, $eventName, $extraEventParams = null)
 	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug(__METHOD__ . "(" .$document->__toString().",$oldPublicationStatus, $eventName)");
-		}
 		$eventParams = array("document" => $document, 'oldPublicationStatus' => $oldPublicationStatus);
 		if (!is_null($extraEventParams))
 		{
@@ -1599,11 +1558,6 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	 */
 	public final function activate($documentId)
 	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("activate($documentId)");
-		}
-
 		$document = $this->getDocumentInstance($documentId);
 		$documentModel = $document->getPersistentModel();
 
@@ -1803,12 +1757,6 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	 */
 	public final function publishDocument($document, $extraEventParams = null)
 	{
-		if (Framework::isDebugEnabled())
-		{
-			$documentId = $document->getId();
-			Framework::debug("publishDocument($documentId)");
-		}
-
 		$currentStatus = $document->getPublicationstatus();
 		if (!$this->isPublishTransitionPossible($document))
 		{
@@ -2102,11 +2050,6 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	 */
 	public final function file($documentId)
 	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("file($documentId)");
-		}
-
 		$document = $this->getDocumentInstance($documentId);
 
 		$currentStatus = $document->getPublicationstatus();
@@ -2211,11 +2154,6 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	 */
 	public final function cancel($documentId)
 	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("cancel($documentId)");
-		}
-
 		$document = $this->getDocumentInstance($documentId);
 		$currentStatus = $document->getPublicationstatus();
 
@@ -2322,10 +2260,6 @@ class f_persistentdocument_DocumentService extends change_BaseService
 				$ts = TreeService::getInstance();
 				$parentTreeNode = $ts->getInstanceByDocumentId($folderId);
 				$ts->newLastChildForNode($parentTreeNode, $correction->getId());
-				if (Framework::isDebugEnabled())
-				{
-					Framework::debug("[DocumentService] correction document ($correctionId) has been linked to its parent ($folderId).");
-				}
 			}
 
 			$modifiedProperties = null;
@@ -2412,11 +2346,6 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	 */
 	public final function createWorkflowInstance($documentId, $startParameters = array())
 	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("createWorkflowInstance($documentId)");
-		}
-
 		$document = $this->getDocumentInstance($documentId);
 		$documentModel = $document->getPersistentModel();
 		$currentStatus = $document->getPublicationstatus();
@@ -2813,17 +2742,6 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	 */
 	public function getWebLink($urlRewritingService, $document, $website, $lang, $parameters)
 	{
-		/**
-		 * Compatibility check
-		 */
-		if (f_util_ClassUtils::methodExists($this, 'generateUrl'))
-		{
-			$url = $this->generateUrl($document, $lang, $parameters);
-			if ($url)
-			{
-				return LinkHelper::buildLinkFromUrl($url);
-			}
-		}
 		return null;
 	}
 	
