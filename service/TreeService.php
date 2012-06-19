@@ -1,16 +1,9 @@
 <?php
 /**
- * @package framework.service
- * TreeService
+ * @method TreeService getInstance()
  */
-class TreeService extends BaseService
+class TreeService extends change_BaseService
 {
-	/**
-	 * the singleton instance
-	 * @var TreeService
-	 */
-	private static $instance = null;
-
 	/**
 	 * @var boolean
 	 */
@@ -21,18 +14,6 @@ class TreeService extends BaseService
 	 * @var array<Integer, f_persistentdocument_PersistentTreeNode>
 	 */
 	private $persistentTreeNodes = array();
-	
-	/**
-	 * @return TreeService
-	 */
-	public static function getInstance()
-	{
-		if (is_null(self::$instance))
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
 	
 	/**
 	 * @param boolean $useTreeNodeCache

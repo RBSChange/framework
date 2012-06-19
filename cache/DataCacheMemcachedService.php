@@ -19,18 +19,6 @@ class f_DataCacheMemcachedService extends f_DataCacheService
 			Framework::info("DataCacheMemcachedService : could not obtain memcache instance");
 		}
 	}
-
-	/**
-	 * @return f_DataCacheService
-	 */
-	public static function getInstance()
-	{
-		if (self::$instance === null)
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
 	
 	/**
 	 * @param f_DataCacheItem $item

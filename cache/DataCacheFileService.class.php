@@ -11,18 +11,6 @@ class f_DataCacheFileService extends f_DataCacheService
 		$this->registrationFolder = f_util_FileUtils::buildChangeCachePath('simplecache', 'registration');
 		f_util_FileUtils::mkdir($this->registrationFolder);
 	}
-
-	/**
-	 * @return f_DataCacheFileService
-	 */
-	public static function getInstance()
-	{
-		if (self::$instance === null)
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
 	
 	/**
 	 * @param String $namespace

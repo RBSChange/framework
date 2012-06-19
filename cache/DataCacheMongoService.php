@@ -32,18 +32,6 @@ class f_DataCacheMongoService extends f_DataCacheService
 			}
 		}
 	}
-
-	/**
-	 * @return f_DataCacheService
-	 */
-	public static function getInstance()
-	{
-		if (self::$instance === null)
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
 	
 	/**
 	 * @param f_DataCacheItem $item

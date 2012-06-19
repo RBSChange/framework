@@ -1,8 +1,6 @@
 <?php
 class f_DataCacheMySqlService extends f_DataCacheService
-{
-	private static $instance;
-	
+{	
 	/**
 	 * @var PDO
 	 */
@@ -45,18 +43,6 @@ class f_DataCacheMySqlService extends f_DataCacheService
 		{
 			$this->pdo = $this->getPersistentProvider()->getDriver();
 		}
-	}
-
-	/**
-	 * @return f_DataCacheService
-	 */
-	public static function getInstance()
-	{
-		if (self::$instance === null)
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
 	}
 	
 	/**

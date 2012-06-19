@@ -309,7 +309,6 @@ class change_Controller
 		return $this->user;
 	}
 	
-	
 	/**
 	 *
 	 * @return change_Controller 

@@ -1,33 +1,14 @@
 <?php
 /**
- * @package framework.service
- * TagService
+ * @method TagService getInstance()
  */
-class TagService extends BaseService
+class TagService extends change_BaseService
 {
-	/**
-	 * the singleton instance
-	 * @var TagService
-	 */
-	private static $instance = null;
-
 	private $tagsInfo;
 	
 	private $availableTags;
 
 	const TAG_REGEXP = '/^[0-9a-z\-\._]+$/i';
-
-	/**
-	 * @return TagService
-	 */
-	public static function getInstance()
-	{
-		if (is_null(self::$instance))
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
 
 	/**
 	 * @param string $pattern

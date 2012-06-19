@@ -1,12 +1,10 @@
 <?php
-class change_PermissionService extends BaseService
+/**
+ * @method change_PermissionService getInstance()
+ */
+class change_PermissionService extends change_BaseService
 {
 	const ALL_PERMISSIONS = "allpermissions";
-
-	/**
-	 * @var change_PermissionService
-	 */
-	private static $instance;
 
 	/**
 	 * @return users_UserService
@@ -22,18 +20,6 @@ class change_PermissionService extends BaseService
 	private function getGroupService()
 	{
 		return users_GroupService::getInstance();
-	}
-
-	/**
-	 * @return change_PermissionService
-	 */
-	public static function getInstance()
-	{
-		if (is_null(self::$instance))
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
 	}
 
 	/**
@@ -1127,7 +1113,7 @@ class change_PermissionService extends BaseService
 				return $this->hasPermission($arguments[0], $arguments[1], $arguments[2], false);
 					
 			default: 
-				throw new Exception('No method ' . get_class($this) . '->' . $name);
+				throw new BadMethodCallException('No method ' . get_class($this) . '->' . $name);
 		}
 	}
 }

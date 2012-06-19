@@ -1,37 +1,15 @@
 <?php
-class InitDataService extends BaseService
+/**
+ * @method InitDataService getInstance()
+ */
+class InitDataService extends change_BaseService
 {
-	/**
-	 * @var InitDataService
-	 */
-	private static $instance;
-
 
 	/**
 	 * @var c_ChangescriptCommand
 	 */
 	private $logger;
 
-	/**
-	 * Constructor of InitDataService
-	 */
-	protected function __construct()
-	{
-		
-	}
-
-	/**
-	 * @return InitDataService
-	 */
-	public static function getInstance()
-	{
-		if (is_null(self::$instance))
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
-	
 	/**
 	 * Sets the logger to use to log messages. Generally, $logger is a Phing Task
 	 * instance, but it can be any object that implements a log($message, $level) method.

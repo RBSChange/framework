@@ -1,5 +1,8 @@
 <?php
-class f_util_StringUtils
+/**
+ * @package framework.util
+ */
+abstract class f_util_StringUtils
 {
 	const CASE_SENSITIVE   = true;
 	const CASE_INSENSITIVE = false;

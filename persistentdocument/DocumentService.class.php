@@ -17,28 +17,13 @@
  *  - persistentDocumentWorkflowInstanceCreated
  *  - persistentDocumentMoved
  *  - persistentDocumentDeprecated
+ *  
+ *  @method f_persistentdocument_DocumentService getInstance()
  */
-class f_persistentdocument_DocumentService extends BaseService
+class f_persistentdocument_DocumentService extends change_BaseService
 {
 
-	/**
-	 * @var f_persistentdocument_DocumentService
-	 */
-	private static $instance;
-
-	/**
-	 * @return f_persistentdocument_DocumentService
-	 */
-	public static function getInstance()
-	{
-		if (self::$instance === null)
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
-	
-	public function __get ($name)
+	public function __get($name)
 	{
 		switch ($name)
 		{
@@ -49,10 +34,11 @@ class f_persistentdocument_DocumentService extends BaseService
 				return $this->getTransactionManager();
 				break;
 		}
+		Framework::error('Invalid property: ' . get_class($this) . '->' . $name);
 		return null;
 	}
 	
-	public function __call ($name, $args)
+	public function __call($name, $args)
 	{
 		switch ($name)
 		{
@@ -66,14 +52,10 @@ class f_persistentdocument_DocumentService extends BaseService
 				Framework::error('Call to deleted ' . get_class($this) . '->' . $name . 'method');
 				return;
 			default:
-				throw new Exception('No method ' . get_class($this) . '->' . $name);
+				throw new BadMethodCallException('No method ' . get_class($this) . '->' . $name);
 		}
 	}
-	
-	protected function __construct()
-	{
-	}
-	
+
 	/**
 	 * @return f_persistentdocument_DocumentService
 	 */

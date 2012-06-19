@@ -104,7 +104,7 @@ class indexer_SearchResult
 			$propName = f_util_StringUtils::lcfirst(substr($method, 3));
 			return $this->hasProperty($propName);
 		}
-		throw new Exception('Unimplemented Method: ' . $method);
+		throw new BadMethodCallException('No method ' . get_class($this) . '->' . $method);
 	}
 
 	private function getHighlightedProperty($name)

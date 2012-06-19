@@ -1,27 +1,9 @@
 <?php
 /**
- * @author intportg
- * @package framework.persistentdocument.filter
+ * @method f_persistentdocument_DocumentFilterService getInstance()
  */
-class f_persistentdocument_DocumentFilterService extends BaseService
+class f_persistentdocument_DocumentFilterService extends change_BaseService
 {
-	/**
-	 * @var f_persistentdocument_DocumentFilterService
-	 */
-	private static $instance;
-
-	/**
-	 * @return f_persistentdocument_DocumentFilterService
-	 */
-	public static function getInstance()
-	{
-		if (is_null(self::$instance))
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
-
 	/**
 	 * @param String $json
 	 * @return f_persistentdocument_DocumentFilter

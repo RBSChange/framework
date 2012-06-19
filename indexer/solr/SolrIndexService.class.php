@@ -7,24 +7,7 @@ class indexer_SolrIndexService extends indexer_IndexService
 	private $manager = null;
 	
 	private $config = null;
-	
-	/**
-	 * @var indexer_SolrIndexService
-	 */
-	private static $instance = null;
-	
-	/**
-	 * @return indexer_SolrIndexService
-	 */
-	public static function getInstance()
-	{
-		if (null === self::$instance)
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
-	
+		
 	/**
 	 * @return indexer_SolrManager
 	 */

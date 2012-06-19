@@ -1,29 +1,14 @@
 <?php
-class LocaleService extends BaseService
+/**
+ * @method LocaleService getInstance()
+ */
+class LocaleService extends change_BaseService
 {
 	private $LCID_BY_LANG = null;
 	
 	private $ignoreTransform;
 	
 	protected $transformers;
-	
-	/**
-	 * The singleton instance
-	 * @var LocaleService
-	 */
-	private static $instance = null;
-	
-	/**
-	 * @return LocaleService
-	 */
-	public static function getInstance()
-	{
-		if (is_null(self::$instance))
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
 	
 	protected function __construct()
 	{

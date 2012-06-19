@@ -6,6 +6,18 @@ class change_AutoloadBuilder
 	 */
 	private static $instance = null;
 	
+	/**
+	 * @return change_AutoloadBuilder
+	 */
+	public static function getInstance()
+	{
+		if (is_null(self::$instance))
+		{
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+	
 	private $basePath = null;
 
 	private $keys;
@@ -16,18 +28,6 @@ class change_AutoloadBuilder
 		$this->keys = array('%PROJECT_HOME%');
 		$this->reps = array(PROJECT_HOME);
 		$this->basePath = PROJECT_HOME . '/build/autoload';
-	}
-	
-	/**
-	 * @return change_AutoloadBuilder
-	 */
-	public static function getInstance()
-	{
-		if (is_null(self::$instance))
-		{	
-			self::$instance = new self();
-		}
-		return self::$instance;
 	}
 	
 	/**

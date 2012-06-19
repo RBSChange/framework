@@ -1,14 +1,9 @@
 <?php
 /**
- * @package framework.service
+ * @method PatchService getInstance()
  */
-class PatchService extends BaseService
+class PatchService extends change_BaseService
 {
-	/**
-	 * @var PatchService
-	 */
-	private static $instance;
-	
 	/**
 	 * All patch into the project
 	 * @var array
@@ -18,32 +13,14 @@ class PatchService extends BaseService
 	
 	private $initialDbPatchList = null;
 	
-	/**
-	 * Constructor of PatchService
-	 */
-	protected function __construct()
-	{
-	}
-	
-	/**
-	 * @return PatchService
-	 */
-	public static function getInstance()
-	{
-		if (is_null(self::$instance))
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
 	
 	/**
 	 * @return PatchService
 	 */
 	public static function resetInstance()
 	{
-		self::$instance = null;
-		return self::getInstance();
+		self::clearInstanceByClassName(get_called_class());
+		return self::getInstanceByClassName(get_called_class());
 	}
 	
 	/**

@@ -1,27 +1,9 @@
 <?php
 /**
- * @package framework.service
+ * @method PHPTALService getInstance()
  */
-class PHPTALService extends BaseService
+class PHPTALService extends change_BaseService
 {
-	/**
-	 * the singleton instance
-	 * @var PHPTALService
-	 */
-	private static $instance = null;
-
-	/**
-	 * @return PHPTALService
-	 */
-	public static function getInstance()
-	{
-		if (self::$instance === null)
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
-	
 	private function getBuildFilePath()
 	{
 		return f_util_FileUtils::buildChangeBuildPath('PHPTAL_change.php');

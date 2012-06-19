@@ -1,26 +1,9 @@
 <?php
 /**
- * @package framework.service
+ * @method ApacheService getInstance()
  */
-class ApacheService extends BaseService
+class ApacheService extends change_BaseService
 {
-	/**
-	 * @var ApacheService
-	 */
-	private static $instance;
-
-	/**
-	 * @return ApacheService
-	 */
-	public static function getInstance()
-	{
-		if (is_null(self::$instance))
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
-
 	/**
 	 * @param String $module
 	 * @param String $content

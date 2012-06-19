@@ -295,7 +295,7 @@ abstract class change_View
 				return website_StyleService::getInstance();
 			
 			default: 
-				throw new Exception('No method ' . get_class($this) . '->' . $name);
+				throw new BadMethodCallException('No method ' . get_class($this) . '->' . $name);
 		}
 	}
 }

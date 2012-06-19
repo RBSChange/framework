@@ -1,26 +1,10 @@
 <?php
 /**
  * @package framework.persistentdocument
+ * @method f_persistentdocument_CacheService getInstance()
  */
-abstract class f_persistentdocument_CacheService
+abstract class f_persistentdocument_CacheService extends change_BaseService
 {
-	/**
-	 * @var f_persistentdocument_CacheService
-	 */
-	private static $serviceInstance;
-
-	/**
-	 * @return f_persistentdocument_CacheService
-	 */
-	public static function getInstance()
-	{
-		if (self::$serviceInstance === null)
-		{
-			self::$serviceInstance = new self();
-		}
-		return self::$serviceInstance;
-	}
-
 	/**
 	 * @param integer $key
 	 * @return mixed or null if not exists or on error
@@ -67,14 +51,6 @@ abstract class f_persistentdocument_CacheService
 
 class f_persistentdocument_NoopCacheService extends f_persistentdocument_CacheService
 {
-	/**
-	 * @return f_persistentdocument_CacheService
-	 */
-	public static function getInstance()
-	{
-		return new f_persistentdocument_NoopCacheService();
-	}
-
 	/**
 	 * @param integer $key
 	 * @return mixed or null if not exists or on error

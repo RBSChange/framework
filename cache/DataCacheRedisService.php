@@ -17,7 +17,7 @@
  */
 class f_DataCacheRedisService extends f_DataCacheService
 {
-	private static $instance;
+
 	private static $defaultRedisPort = 6379;
 	
 	/**
@@ -88,18 +88,6 @@ class f_DataCacheRedisService extends f_DataCacheService
 			$this->redis = $redis;
 		}
 		return $this->redis;
-	}
-	
-	/**
-	 * @return f_DataCacheService
-	 */
-	public static function getInstance()
-	{
-		if (self::$instance === null)
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
 	}
 	
 	public function clearCommand()

@@ -1,28 +1,13 @@
 <?php
-
-class change_HttpClientService extends BaseService
-{
-	/**
-	 * @var change_HttpClientService
-	 */
-	private static $instance;
-	
+/**
+ * @method change_HttpClientService getInstance()
+ */
+class change_HttpClientService extends change_BaseService
+{	
 	/**
 	 * @var array 
 	 */
 	private $config;
-
-	/**
-	 * @return change_HttpClientService
-	 */
-	public static function getInstance()
-	{
-		if (is_null(self::$instance))
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
 
 	/**
 	 * Return a Zend Framework compatible configuration for HTTP Clients - if you want

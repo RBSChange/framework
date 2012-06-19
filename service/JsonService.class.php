@@ -1,27 +1,9 @@
 <?php
 /**
- * @package framework.service
+ * @method JsonService getInstance()
  */
-class JsonService extends BaseService
+class JsonService extends change_BaseService
 {
-	/**
-	 * the singleton instance
-	 * @var JsonService
-	 */
-	private static $instance = null;
-
-	/**
-	 * @return JsonService
-	 */
-	public static function getInstance()
-	{
-		if (self::$instance === null)
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
-	
 	/**
 	 * @param mixed $value
 	 * @return string

@@ -1,27 +1,10 @@
 <?php
 /**
  * @package modules.<{$name}>.lib.services
+ * @method <{$name}>_ModuleService getInstance()
  */
 class <{$name}>_ModuleService extends ModuleBaseService
-{
-	/**
-	 * Singleton
-	 * @var <{$name}>_ModuleService
-	 */
-	private static $instance = null;
-
-	/**
-	 * @return <{$name}>_ModuleService
-	 */
-	public static function getInstance()
-	{
-		if (is_null(self::$instance))
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
-	
+{	
 	/**
 	 * @param Integer $documentId
 	 * @return f_persistentdocument_PersistentTreeNode
@@ -29,5 +12,28 @@ class <{$name}>_ModuleService extends ModuleBaseService
 //	public function getParentNodeForPermissions($documentId)
 //	{
 //		// Define this method to handle permissions on a virtual tree node. Example available in list module.
+//	}
+
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @return f_persistentdocument_PersistentDocument or null
+	 */
+//	public function getVirtualParentForBackoffice($document)
+//	{
+//		return null;
+//	}
+	
+	/**
+	 * @param website_UrlRewritingService $wsurs
+	 * @param string $moduleName
+	 * @param string $actionName
+	 * @param website_persistentdocument_website $website
+	 * @param string $lang
+	 * @param array $parameters
+	 * @return string or null
+	 */
+//	public function generateActionRewritePath($wsurs, $moduleName, $actionName, $website, $lang, &$parameters)
+//	{
+//		return $wsurs->getActionRulePath($moduleName, $actionName, $website, $lang, $parameters);
 //	}
 }

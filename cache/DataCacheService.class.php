@@ -301,14 +301,12 @@ class f_DataCacheItemImpl implements f_DataCacheItem
 	}
 }
 
-class f_DataCacheService extends BaseService
+/**
+ * @method f_DataCacheService getInstance()
+ */
+class f_DataCacheService extends change_BaseService
 {
 	const MAX_TIME_LIMIT = 86400;
-	
-	/**
-	 * @var f_DataCacheService
-	 */
-	private static $instance;
 	
 	protected $clearAll = false;
 	protected $idToClear = array();
@@ -316,18 +314,6 @@ class f_DataCacheService extends BaseService
 	protected $dispatch = true;
 	protected $shutdownRegistered = false;
 
-	/**
-	 * @return f_DataCacheService
-	 */
-	public static function getInstance()
-	{
-		if (self::$instance === null)
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
-	
 	/**
 	 * @param String $namespace
 	 * @param Mixed $keyParameters

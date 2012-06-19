@@ -1,26 +1,9 @@
 <?php
 /**
- * @package framework.service
+ * @method f_DataCacheService getInstance()
  */
-class f_FTPClientService extends BaseService
+class f_FTPClientService extends change_BaseService
 {
-	/**
-	 * @var f_FTPClientService
-	 */
-	private static $instance;
-
-	/**
-	 * @return f_FTPClientService
-	 */
-	public static function getInstance()
-	{
-		if (is_null(self::$instance))
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
-
 	/**
 	 * @return f_FTPClient
 	 * @param String $host

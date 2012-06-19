@@ -1,9 +1,8 @@
 <?php
 /**
- * @package framework.indexer
- * @author franck.stauffer
+ * @method indexer_IndexService getInstance()
  */
-class indexer_IndexService extends BaseService 
+class indexer_IndexService extends change_BaseService 
 {
 	const PUBLIC_DOCUMENT_ACCESSOR_ID = 0;
 	
@@ -18,12 +17,7 @@ class indexer_IndexService extends BaseService
 	const INDEXED = 'INDEXED';
 	
 	const DELETED = 'DELETED';
-	
-	/**
-	 * @var indexer_IndexService
-	 */
-	private static $instance = null;
-	
+		
 	/**
 	 * @var array
 	 */
@@ -33,18 +27,6 @@ class indexer_IndexService extends BaseService
 	 * @var array
 	 */
 	private $documentIdsToIndex;
-	
-	/**
-	 * @return indexer_IndexService
-	 */
-	public static function getInstance()
-	{
-		if (null === self::$instance)
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
 	
 	protected final function loadModelsInfos()
 	{

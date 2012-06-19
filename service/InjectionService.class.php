@@ -119,6 +119,10 @@ class change_InjectionService
 				$newInjectionInfos = array_merge($newInjectionInfos, $injection->generate());
 				$returnValue[$originalClassName] = $className; 
 			}
+			else
+			{
+				Framework::error('Invalid Injection of ' . $originalClassName . ' by ' . $className);
+			}
 		}
 
 		foreach (Framework::getConfigurationValue('injection/document', array()) as $originalModelName => $replacingModelName)

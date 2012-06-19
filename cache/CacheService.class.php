@@ -1,22 +1,9 @@
 <?php
-class CacheService extends BaseService
+/**
+ * @method CacheService getInstance()
+ */
+class CacheService extends change_BaseService
 {
-	/**
-	 * @var InitDataService
-	 */
-	private static $instance;
-
-	/**
-	 * @return CacheService
-	 */
-	public static function getInstance()
-	{
-		if (is_null(self::$instance))
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
 	
 	public function clearFrontofficeScriptsCache()
 	{

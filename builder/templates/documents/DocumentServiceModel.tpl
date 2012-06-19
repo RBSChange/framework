@@ -2,26 +2,10 @@
 /**
  * <{$className}>
  * @package modules.<{$moduleName}>
+ * @method <{$className}> getInstance()
  */
 class <{$className}> extends <{$extendClass}>
 {
-	/**
-	 * @var <{$className}>
-	 */
-	private static $instance;
-
-	/**
-	 * @return <{$className}>
-	 */
-	public static function getInstance()
-	{
-		if (self::$instance === null)
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
-
 <{if !$inject}>	
 	/**
 	 * @return <{$moduleName}>_persistentdocument_<{$documentName}>

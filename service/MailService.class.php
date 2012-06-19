@@ -1,32 +1,18 @@
 <?php
-class change_MailService extends BaseService
+/**
+ * @method change_MailService getInstance()
+ */
+class change_MailService extends change_BaseService
 {
 	const TO = 'to';
 	const CC = 'cc';
 	const BCC = 'bcc';
 	
 	/**
-	 * @var change_MailService
-	 */
-	private static $instance;
-	
-	/**
 	 * @var Zend_Mail_Transport_Abstract 
 	 */
 	private $mta;
 
-	/**
-	 * @return change_MailService
-	 */
-	public static function getInstance()
-	{
-		if (is_null(self::$instance))
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
-	
 	/**
 	 * @return Zend_Mail 
 	 */

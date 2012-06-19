@@ -2,24 +2,9 @@
 /**
  * <{$module}>_<{$name}>Service
  * @package modules.<{$module}>.lib.services
+ * @method <{$module}>_<{$name}>Service getInstance()
  */
-class <{$module}>_<{$name}>Service extends BaseService
+class <{$module}>_<{$name}>Service extends change_BaseService
 {
-	/**
-	 * Singleton
-	 * @var <{$module}>_<{$name}>Service
-	 */
-	private static $instance = null;
 
-	/**
-	 * @return <{$module}>_<{$name}>Service
-	 */
-	public static function getInstance()
-	{
-		if (is_null(self::$instance))
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
 }

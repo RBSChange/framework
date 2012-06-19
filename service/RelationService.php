@@ -1,27 +1,14 @@
 <?php
-class RelationService extends BaseService
+/**
+ * @method RelationService getInstance()
+ */
+class RelationService extends change_BaseService
 {
 	/**
-	 * the singleton instance
-	 * @var RelationService
+	 * @var array
 	 */
-	private static $instance = null;
-	
-	
-	private static $relations;
+	private $relations = null;
 
-	/**
-	 * @return RelationService
-	 */
-	public static function getInstance()
-	{
-		if (is_null(self::$instance))
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
-	
 	public final function compile()
 	{
 		$result = array();	
@@ -38,12 +25,12 @@ class RelationService extends BaseService
 		$relationsPath = f_util_FileUtils::buildChangeBuildPath('relations.php');
 		f_util_FileUtils::writeAndCreateContainer($relationsPath , '<?php $relations = unserialize('.var_export(serialize($result), true).');', f_util_FileUtils::OVERRIDE);
 						
-		self::$relations = $result;
+		$this->relations = $result;
 	}
 	
 	private function loadRelations()
 	{
-		if (self::$relations === null)
+		if ($this->relations === null)
 		{
 			$relationsPath = f_util_FileUtils::buildChangeBuildPath('relations.php');
 			if (!file_exists($relationsPath))
@@ -51,19 +38,19 @@ class RelationService extends BaseService
 				throw new Exception("$relationsPath does not exists, please run change generate-database");
 			}
 			include_once($relationsPath);
-			self::$relations = $relations;
+			$this->relations = $relations;
 		}
 	}
 
 	public final function getRelationId($propertyName)
 	{
 		$this->loadRelations();
-		if (!isset(self::$relations[$propertyName]))
+		if (!isset($this->relations[$propertyName]))
 		{
 			Framework::warn(f_util_ProcessUtils::getBackTrace());
 			return 0;
 		}
-		return self::$relations[$propertyName];
+		return $this->relations[$propertyName];
 	}
 	
 	/**

@@ -1514,7 +1514,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 				$v->setDocument($this);
 				return $v;
 			default:
-				throw new BadMethodCallException('No method ' . get_class($this) . '->' . $name . ' method');
+				throw new BadMethodCallException('No method ' . get_class($this) . '->' . $name);
 		}
 	}
 }

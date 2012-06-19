@@ -1,26 +1,9 @@
 <?php
 /**
- * @package framework.service
+ * @method ModuleBaseService getInstance()
  */
-class ModuleBaseService extends BaseService
+class ModuleBaseService extends change_BaseService
 {
-	/**
-	 * @var ModuleBaseService
-	 */
-	private static $instance;
-	
-	/**
-	 * @return ModuleBaseService
-	 */
-	public static function getInstance()
-	{
-		if (self::$instance === null)
-		{
-			self::$instance = new self();	
-		}
-		return self::$instance;
-	}
-	
 	/**
 	 * @param String $moduleName
 	 * @return ModuleBaseService

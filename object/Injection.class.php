@@ -2,9 +2,29 @@
 
 class change_Injection
 {
+	private static $injectedSuffix = array();
+	
 	const REPLACED_CLASS_SUFFIX = '_injected';
+	
+	public static function getInjectedClassName($className)
+	{
+		return isset(self::$injectedSuffix[$className]) ? end(self::$injectedSuffix[$className]) : $className;
+	}
+	
+	public static function addInjectedClassName($className)
+	{
+		if (!isset(self::$injectedSuffix[$className]))
+		{
+			self::$injectedSuffix[$className] = array($className . self::REPLACED_CLASS_SUFFIX);
+		}
+		else
+		{
+			self::$injectedSuffix[$className][] = $className . self::REPLACED_CLASS_SUFFIX . count(self::$injectedSuffix[$className]);
+		}
+		return self::getInjectedClassName($className);
+	}
+	
 	/**
-	 *
 	 * @var array 
 	 */
 	private $originalClassInfo;
@@ -279,6 +299,7 @@ class change_PhpCodeManipulation
 		$currentClassName = null;
 		$currentClassExtends = null;
 		$classDeclaration = false;
+		$currentClassComment = null;
 		$tokens = token_get_all($source);
 		$size = count($tokens);
 		for ($index = 0; $index < $size; $index ++)
@@ -306,7 +327,6 @@ class change_PhpCodeManipulation
 					if ($inClass && $inBrace == 0)
 					{
 						$inClass = false;
-						//$key = (isset($replacementInfos[$currentClassName]) && isset($replacementInfos[$currentClassName]['name'])) ? $replacementInfos[$currentClassName]['name'] : $currentClassName;
 						$classes[$currentClassName] = implode('', $currentClassContent);
 						$currentClassContent = array();
 						$currentClassName = null;
@@ -318,6 +338,12 @@ class change_PhpCodeManipulation
 			{
 				switch ($token[0])
 				{
+					case T_DOC_COMMENT:
+						if (! $inClass)
+						{
+							$currentClassComment = $token[1];
+						}
+						break;
 					case T_ABSTRACT:
 						if (! $inClass)
 						{
@@ -343,6 +369,13 @@ class change_PhpCodeManipulation
 				}
 				if ($classDeclaration || $inClass)
 				{
+					if ($currentClassComment)
+					{
+						$currentClassContent[] = $currentClassComment;
+						$currentClassContent[] = PHP_EOL;
+						$currentClassComment = null;
+						
+					}
 					$currentClassContent[] = $token[1];
 				}
 			}

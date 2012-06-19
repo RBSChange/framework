@@ -900,7 +900,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 				Framework::error('Call to deleted ' . get_class($this)  . '->'. $name .' method');
 				return array('id');
 			default: 
-				throw new Exception('No method ' . get_class($this) . '->' . $name);
+				throw new BadMethodCallException('No method ' . get_class($this) . '->' . $name);
 		}
 	}
 }

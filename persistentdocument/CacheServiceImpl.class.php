@@ -27,31 +27,13 @@ class f_persistentdocument_MemcachedExtCacheService extends f_persistentdocument
 	}
 
 	/**
-	 * @return f_persistentdocument_CacheService
-	 */
-	public static function getInstance()
-	{
-		$instance = new f_persistentdocument_MemcachedExtCacheService();
-		if ($instance->memcache === null)
-		{
-			return new f_persistentdocument_NoopCacheService();
-		}
-		return $instance;
-	}
-
-	/**
 	 * @param integer $key
 	 * @return mixed or null if not exists or on error
 	 */
 	public function get($key)
 	{
-		$begin = microtime(true);
+		if ($this->memcache === null) {return null;}
 		$object = $this->memcache->get($key);
-		if (Framework::isDebugEnabled())
-		{
-			$end = microtime(true);
-			Framework::debug("CacheService : time to get $key : ".($end-$begin)." ms");
-		}
 		return ($object === false) ? null : $object;
 	}
 
@@ -61,6 +43,7 @@ class f_persistentdocument_MemcachedExtCacheService extends f_persistentdocument
 	 */
 	public function getMultiple($keys)
 	{
+		if ($this->memcache === null) {return false;}
 		return $this->memcache->getMulti($keys);
 	}
 
@@ -71,6 +54,7 @@ class f_persistentdocument_MemcachedExtCacheService extends f_persistentdocument
 	 */
 	public function set($key, $object)
 	{
+		if ($this->memcache === null) {return false;}
 		if (!$this->inTransaction)
 		{
 			if ($object === null)
@@ -100,6 +84,7 @@ class f_persistentdocument_MemcachedExtCacheService extends f_persistentdocument
 	 */
 	public function update($key, $object)
 	{
+		if ($this->memcache === null) {return false;}
 		try
 		{
 			if (!$this->inTransaction)
@@ -124,6 +109,7 @@ class f_persistentdocument_MemcachedExtCacheService extends f_persistentdocument
 	 */
 	public function clear($pattern = null)
 	{
+		if ($this->memcache === null) {return false;}
 		if ($pattern === null)
 		{
 			return $this->memcache->flush();
@@ -131,10 +117,9 @@ class f_persistentdocument_MemcachedExtCacheService extends f_persistentdocument
 		return $this->memcache->delete($pattern);
 	}
 
-	// private methods
-
 	public function beginTransaction()
 	{
+		if ($this->memcache === null) {return;}
 		$this->inTransaction = true;
 		$this->deleteTransactionKeys = array();
 		$this->updateTransactionKeys = array();
@@ -142,6 +127,7 @@ class f_persistentdocument_MemcachedExtCacheService extends f_persistentdocument
 
 	public function commit()
 	{
+		if ($this->memcache === null) {return;}
 		if ($this->inTransaction)
 		{
 			$memcache = $this->memcache;
@@ -175,6 +161,7 @@ class f_persistentdocument_MemcachedExtCacheService extends f_persistentdocument
 
 	public function rollBack()
 	{
+		if ($this->memcache === null) {return;}
 		$this->deleteTransactionKeys = null;
 		$this->updateTransactionKeys = null;
 		$this->inTransaction = false;
@@ -210,31 +197,13 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 	}
 
 	/**
-	 * @return f_persistentdocument_CacheService
-	 */
-	public static function getInstance()
-	{
-		$instance = new f_persistentdocument_MemcachedCacheService();
-		if ($instance->memcache === null)
-		{
-			return new f_persistentdocument_NoopCacheService();
-		}
-		return $instance;
-	}
-
-	/**
 	 * @param integer $key
 	 * @return mixed or null if not exists or on error
 	 */
 	public function get($key)
 	{
-		$begin = microtime(true);
+		if ($this->memcache === null) {return null;}
 		$object = $this->memcache->get($key);
-		if (Framework::isDebugEnabled())
-		{
-			$end = microtime(true);
-			Framework::debug("CacheService : time to get $key : ".($end-$begin)." ms");
-		}
 		return ($object === false) ? null : $object;
 	}
 
@@ -244,6 +213,7 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 	 */
 	public function getMultiple($keys)
 	{
+		if ($this->memcache === null) {return false;}
 		return $this->memcache->get($keys);
 	}
 
@@ -254,6 +224,7 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 	 */
 	public function set($key, $object)
 	{
+		if ($this->memcache === null) {return false;}
 		if (!$this->inTransaction)
 		{
 			if ($object === null)
@@ -283,6 +254,7 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 	 */
 	public function update($key, $object)
 	{
+		if ($this->memcache === null) {return false;}
 		try
 		{
 			if (!$this->inTransaction)
@@ -307,6 +279,7 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 	 */
 	public function clear($pattern = null)
 	{
+		if ($this->memcache === null) {return false;}
 		if ($pattern === null)
 		{
 			return $this->memcache->flush();
@@ -314,10 +287,9 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 		return $this->memcache->delete($pattern, 0);
 	}
 
-	// private methods
-
 	public function beginTransaction()
 	{
+		if ($this->memcache === null) {return;}
 		$this->inTransaction = true;
 		$this->deleteTransactionKeys = array();
 		$this->updateTransactionKeys = array();
@@ -325,6 +297,7 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 
 	public function commit()
 	{
+		if ($this->memcache === null) {return;}
 		if ($this->inTransaction)
 		{
 			$memcache = $this->memcache;
@@ -358,6 +331,7 @@ class f_persistentdocument_MemcachedCacheService extends f_persistentdocument_Ca
 
 	public function rollBack()
 	{
+		if ($this->memcache === null) {return;}
 		$this->deleteTransactionKeys = null;
 		$this->updateTransactionKeys = null;
 		$this->inTransaction = false;
@@ -392,25 +366,12 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 	}
 
 	/**
-	 * @return f_persistentdocument_CacheService
-	 */
-	public static function getInstance()
-	{
-		$instance = new f_persistentdocument_MongoCacheService();
-		if ($instance->mongoCollection === null)
-		{
-			return new f_persistentdocument_NoopCacheService();
-		}
-		return $instance;
-	}
-
-	/**
 	 * @param integer $key
 	 * @return mixed or null if not exists or on error
 	 */
 	public function get($key)
 	{
-		$begin = microtime(true);		
+		if ($this->mongoCollection === null) {return null;}	
 		try
 		{
 			$object = $this->mongoCollection->findOne(array("_id" => $key));
@@ -419,11 +380,6 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 		{
 			Framework::exception($e);
 			return null;
-		}
-		if (Framework::isDebugEnabled())
-		{
-			$end = microtime(true);
-			Framework::debug("CacheService : time to get $key : ".($end-$begin)." ms");
 		}
 		return ($object === null) ? null : unserialize($object["object"]);
 	}
@@ -434,6 +390,7 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 	 */
 	public function getMultiple($keys)
 	{
+		if ($this->mongoCollection === null) {return false;}
 		$cursor = $this->mongoCollection->find(array("_id" => array('$in' => $keys)));
 		$returnArray = array();
 		
@@ -451,6 +408,7 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 	 */
 	public function set($key, $object)
 	{
+		if ($this->mongoCollection === null) {return false;}
 		if (!$this->inTransaction)
 		{
 			try
@@ -491,6 +449,7 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 	 */
 	public function update($key, $object)
 	{
+		if ($this->mongoCollection === null) {return false;}
 		if (!$this->inTransaction)
 		{
 			try
@@ -515,6 +474,7 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 	 */
 	public function clear($pattern = null)
 	{
+		if ($this->mongoCollection === null) {return false;}
 		if ($pattern === null)
 		{
 			$result = $this->mongoCollection->drop();
@@ -523,19 +483,9 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 		return $this->mongoCollection->remove(array("_id" => $pattern));
 	}
 
-	// private methods
-	
-	private function writeMode()
-	{
-		if (!$this->writeMode)
-		{
-			$this->writeMode = true;
-			$this->mongoCollection = $this->provider->getCollection('documentCache', true);			
-		}
-	}
-
 	public function beginTransaction()
 	{
+		if ($this->mongoCollection === null) {return;}
 		if (!$this->inTransaction)
 		{
 			$this->inTransaction = true;
@@ -549,6 +499,7 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 	 */
 	public function commit()
 	{
+		if ($this->mongoCollection === null) {return;}
 		if ($this->inTransaction)
 		{
 			if (count($this->deleteTransactionKeys) > 0)
@@ -592,9 +543,22 @@ class f_persistentdocument_MongoCacheService extends f_persistentdocument_CacheS
 
 	public function rollBack()
 	{
+		if ($this->mongoCollection === null) {return;}
 		$this->deleteTransactionKeys = null;
 		$this->updateTransactionKeys = null;
 		$this->inTransaction = false;
+	}
+	
+
+	// private methods
+	
+	private function writeMode()
+	{
+		if (!$this->writeMode)
+		{
+			$this->writeMode = true;
+			$this->mongoCollection = $this->provider->getCollection('documentCache', true);
+		}
 	}
 }
 
@@ -636,33 +600,13 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 	}
 
 	/**
-	 * @return f_persistentdocument_CacheService
-	 */
-	public static function getInstance()
-	{
-		$instance = new f_persistentdocument_RedisCacheService();
-		if ($instance->redis === null)
-		{
-			Framework::debug("CacheService : could not obtain redis instance");
-			return new f_persistentdocument_NoopCacheService();
-		}
-		return $instance;
-	}
-	/**
 	 * @param integer $key
 	 * @return mixed or null if not exists or on error
 	 */
 	public function get($key)
 	{
-		$begin = microtime(true);
-		
+		if ($this->redis === null) {return null;}
 		$object = $this->redis->get(self::REDIS_KEY_PREFIX.$key);
-		
-		if (Framework::isDebugEnabled())
-		{
-			$end = microtime(true);
-			Framework::debug("CacheService : time to get $key : ".($end-$begin)." ms");
-		}
 		return ($object === false) ? null : unserialize($object);
 	}
 
@@ -672,6 +616,7 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 	 */
 	public function getMultiple($keys)
 	{
+		if ($this->redis === null) {return false;}
 		$prefixedKeys = array();
 		
 		foreach ($keys as $key)
@@ -695,6 +640,7 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 	 */
 	public function set($key, $object)
 	{
+		if ($this->redis === null) {return false;}
 		if (!$this->inTransaction)
 		{
 			if ($object === null)
@@ -726,6 +672,7 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 	 */
 	public function update($key, $object)
 	{
+		if ($this->redis === null) {return false;}
 		if (!$this->inTransaction)
 		{
 			$serialized = serialize($object);
@@ -741,6 +688,7 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 	 */
 	public function clear($pattern = null)
 	{
+		if ($this->redis === null) {return false;}
 		if ($pattern === null)
 		{
 			return $this->redis->flushDB();
@@ -748,10 +696,9 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 		return $this->redis->delete(self::REDIS_KEY_PREFIX.$pattern);
 	}
 
-	// private methods
-
 	public function beginTransaction()
 	{
+		if ($this->redis === null) {return;}
 		$this->inTransaction = true;
 		$this->deleteTransactionKeys = array();
 		$this->updateTransactionKeys = array();
@@ -762,6 +709,7 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 	 */
 	public function commit()
 	{
+		if ($this->redis === null) {return;}
 		if ($this->inTransaction)
 		{
 			if (count($this->deleteTransactionKeys) > 0)
@@ -791,6 +739,7 @@ class f_persistentdocument_RedisCacheService extends f_persistentdocument_CacheS
 
 	public function rollBack()
 	{
+		if ($this->redis === null) {return;}
 		$this->deleteTransactionKeys = null;
 		$this->updateTransactionKeys = null;
 		$this->inTransaction = false;
@@ -802,19 +751,6 @@ class f_persistentdocument_DatabaseCacheService extends f_persistentdocument_Cac
 	private $inTransaction = false;
 	private $deleteTransactionKeys;
 	private $updateTransactionKeys;
-
-	protected function __construct()
-	{
-		// empty
-	}
-
-	/**
-	 * @return f_persistentdocument_CacheService
-	 */
-	public static function getInstance()
-	{
-		return new f_persistentdocument_DatabaseCacheService();
-	}
 
 	/**
 	 * @param integer $key
@@ -970,14 +906,5 @@ class f_persistentdocument_DatabaseCacheService extends f_persistentdocument_Cac
 		$this->deleteTransactionKeys = null;
 		$this->updateTransactionKeys = null;
 		$this->inTransaction = false;
-	}
-
-
-	/**
-	 * @return f_persistentdocument_PersistentProvider
-	 */
-	private function getPersistentProvider()
-	{
-		return f_persistentdocument_PersistentProvider::getInstance();
 	}
 }

@@ -1,8 +1,8 @@
 <?php
 /**
- * @package framework.service
+ * @method ModuleService getInstance()
  */
-class ModuleService extends BaseService
+class ModuleService extends change_BaseService
 {
 	const SETTING_ROOT_FOLDER_ID = 'root_folder_id';
 	const SETTING_SYSTEM_FOLDER_ID = 'system_folder_id';
@@ -12,12 +12,6 @@ class ModuleService extends BaseService
 	const NAME_PATTERN = '[a-z][a-z0-9]*';
 	
 	private $actionStack;
-	
-	/**
-	 * the singleton instance
-	 * @var ModuleService
-	 */
-	private static $instance = null;
 	
 	/**
 	 * Array of installed package
@@ -33,21 +27,10 @@ class ModuleService extends BaseService
 
 	private $rootNodeIds = null;
 	
-	/**
-	 * @return ModuleService
-	 */
-	public static function getInstance()
-	{
-		if (is_null(self::$instance))
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
-	
+
 	public static function clearInstance()
 	{
-		self::$instance = null;
+		self::clearInstanceByClassName(get_called_class());
 		self::getInstance()->initialize();
 	}
 	
@@ -640,7 +623,7 @@ class ModuleService extends BaseService
 				return array_keys($modules);
 			
 			default: 
-				throw new Exception('No method ' . get_class($this) . '->' . $name);
+				throw new BadMethodCallException('No method ' . get_class($this) . '->' . $name);
 		}
 	}
 }

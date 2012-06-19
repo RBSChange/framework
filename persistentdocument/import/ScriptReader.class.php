@@ -1,21 +1,14 @@
 <?php
-
-class import_ScriptReader extends BaseService
+/**
+ * @method import_ScriptReader getInstance()
+ */
+class import_ScriptReader extends change_BaseService
 {
-	/**
-	 * @var import_ScriptReader
-	 */
-	private static $instance;
-
 	private $elements = array();
 	
 	private $attributes = array();
 
 	private $regiteredElementsClass = array();
-
-	protected function __construct()
-	{
-	}
 
 	private function initialize()
 	{
@@ -30,18 +23,6 @@ class import_ScriptReader extends BaseService
 		$this->registerElementClass('attribute', 'import_ScriptAttributeElement');
 		$this->registerElementClass('i18n', 'import_ScriptI18nElement');
 		$this->registerElementClass('debug', 'import_ScriptDebugElement');
-	}
-
-	/**
-	 * @return import_ScriptReader
-	 */
-	public static function getInstance()
-	{
-		if (self::$instance === null)
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
 	}
 
 	public function registerElementClass($name, $className)
