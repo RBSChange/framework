@@ -489,6 +489,10 @@ class PropertyInfo
 		if (is_array($this->constraintArray))
 		{
 			$const = array();
+			if ($this->isRequired())
+			{
+				$const[] = 'blank:false';
+			}
 			foreach ($this->constraintArray as $name => $params) 
 			{
 				if (isset($params['reversed'])) 
