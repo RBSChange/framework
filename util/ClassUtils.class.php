@@ -3,7 +3,7 @@ abstract class f_util_ClassUtils
 {
 	/**
 	 *  For example: getMethodByName('util_f_util_ClassUtils::getMethod')
-	 * @param String $fullMethodName
+	 * @param string $fullMethodName
 	 * @return ReflectionMethod
 	 */
 	public static function getMethodByName($fullMethodName)
@@ -11,15 +11,15 @@ abstract class f_util_ClassUtils
 		$methodParts = explode('::', $fullMethodName);
 		if (count($methodParts) != 2)
 		{
-			throw new IllegalArgumentException("$fullMethodName is not a full static method name (className::methodName)");
+			throw new BadMethodCallException("$fullMethodName is not a full static method name (className::methodName)");
 		}
 		return self::getMethod($methodParts[0], $methodParts[1]);
 	}
 	
 	/**
 	 *  For example: getMethod('util_f_util_ClassUtils', 'getMethod')
-	 * @param String $fullMethodName
-	 * @param String $methodName
+	 * @param string $fullMethodName
+	 * @param string $methodName
 	 * @return ReflectionMethod
 	 */
 	public static function getMethod($fullClassName, $methodName)
@@ -32,76 +32,43 @@ abstract class f_util_ClassUtils
 		return $classObj->getMethod($methodName);
 	}
 	
-	/**
-	 * For example: callMethodByName('util_f_util_ClassUtils::getMethodByName', 'util_f_util_ClassUtils::getMethod')
-	 * @param String $fullMethodName
-	 * @param mixed $args
-	 * @return mixed
-	 */
-	public static function callMethodByName($fullMethodName)
-	{
-		$method = self::getMethodByName($fullMethodName);
-		if (is_null($method))
-		{
-			throw new IllegalArgumentException("Could not find $fullMethodName");
-		}
-		$args = func_get_args();
-		return $method->invokeArgs(null, array_splice($args, 1));
-	}
+
 	
 	/**
-	 *  For example: callMethod('util_f_util_ClassUtils', 'getMethod', 'util_f_util_ClassUtils', 'getMethod')
-	 * @param String $fullMethodName
-	 * @param mixed $args
+	 *  For example: callMethod('LocaleService', 'getInstance')
+	 * @param string $fullClassName
+	 * @param string $methodName
 	 * @return mixed
 	 */
 	public static function callMethod($fullClassName, $methodName)
 	{
-		$method = self::getMethod($fullClassName, $methodName);
-		if (is_null($method))
+		if (!method_exists($fullClassName, $methodName))
 		{
-			throw new IllegalArgumentException("Could not find $fullClassName::$methodName");
+			throw new BadMethodCallException("Could not find $fullClassName::$methodName");
 		}
-		$args = func_get_args();
-		return $method->invokeArgs(null, array_splice($args, 2));
+		return call_user_func(array($fullClassName, $methodName));
 	}
 	
 	/**
-	 * For example: callMethodArgsByName('util_f_util_ClassUtils::getMethod', array('util_f_util_ClassUtils::callMethod'))
-	 * @param String $fullMethodName 
-	 * @param array $args
-	 * @return mixed
-	 */
-	public static function callMethodArgsByName($fullMethodName, $args = array())
-	{
-		$method = self::getMethodByName($fullMethodName);
-		if (is_null($method))
-		{
-			throw new IllegalArgumentException("Could not find $fullMethodName");
-		}
-		return $method->invokeArgs(null, $args);
-	}
-	
-	/**
-	 * For example: callMethodArgs('util_f_util_ClassUtils', 'getMethod', array('util_f_util_ClassUtils::callMethod'))
-	 * @param String $fullMethodName 
+	 * For example: callMethodArgs('f_util_StringUtils', 'substr', array('test', 1, 2))
+	 * @param string $fullClassName 
+	 * @param string $methodName
 	 * @param array $args
 	 * @return mixed
 	 */
 	public static function callMethodArgs($fullClassName, $methodName, $args = array())
 	{
-		$method = self::getMethod($fullClassName, $methodName);
-		if (is_null($method))
+		if (!method_exists($fullClassName, $methodName))
 		{
-			throw new IllegalArgumentException("Could not find $fullMethodName");
+			throw new BadMethodCallException("Could not find $fullClassName::$methodName");
 		}
-		return $method->invokeArgs(null, $args);
+		return call_user_func_array(array($fullClassName, $methodName), $args);
 	}
 	
 	/**
 	 *  For example: callMethodOn($myInstance, $myMethodName, $arg1, $arg2, $arg3 ...)
-	 * @param Object $objectInstance
-	 * @param String $methodName
+	 * @param object $objectInstance
+	 * @param string $methodName
 	 * @return mixed
 	 */
 	public static function callMethodOn($objectInstance, $methodName)
@@ -113,8 +80,8 @@ abstract class f_util_ClassUtils
 	
 	/**
 	 *  For example: callMethodArgsOn($myInstance, $myMethodName, array($arg1, $arg2, $arg3 ...))
-	 * @param Object $objectInstance
-	 * @param String $methodName
+	 * @param object $objectInstance
+	 * @param string $methodName
 	 * @param array $args
 	 * @return mixed
 	 */
@@ -126,7 +93,7 @@ abstract class f_util_ClassUtils
 	
 	/**
 	 * For example: newInstance($className, $arg1, $arg2, $arg3 ...)
-	 * @param String $className
+	 * @param string $className
 	 * @return mixed
 	 */
 	public static function newInstance($className)
@@ -142,8 +109,8 @@ abstract class f_util_ClassUtils
 	
 	/**
 	 * For example: newInstanceSandbox($className, "mymodule_SomeClass", $arg1, $arg2, $arg3 ...)
-	 * @param String $className
-	 * @param String $expectedClassName
+	 * @param string $className
+	 * @param string $expectedClassName
 	 * @throws Exception if the $className is not compatible with $expectedClassName
 	 * @return mixed
 	 */
@@ -172,9 +139,19 @@ abstract class f_util_ClassUtils
 		return $classObj->newInstanceArgs($constructorArgs);
 	}
 	
+	/**
+	 * @param string $className
+	 * @return boolean
+	 */
 	public static function classExistsNoLoad($className)
 	{
-		return class_exists($className, false);
+		$result = class_exists($className, false);
+		if (!$result)
+		{
+			$path = change_AutoloadBuilder::getInstance()->buildLinkPathByClass($className);
+			$result = ($path !== false) && file_exists($path);
+		}
+		return $result;
 	}
 	
 	/**
@@ -341,6 +318,32 @@ abstract class f_util_ClassUtils
 	{
 		return class_exists($className);
 	}
+	
+	/**
+	 * @deprecated
+	 */
+	public static function callMethodArgsByName($fullMethodName, $args = array())
+	{
+		$methodParts = explode('::', $fullMethodName);
+		if (count($methodParts) === 2)
+		{
+			return self::callMethodArgs($methodParts[0], $methodParts[1], $args);
+		}
+		throw new BadMethodCallException("Could not find $fullMethodName");
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public static function callMethodByName($fullMethodName)
+	{
+		$methodParts = explode('::', $fullMethodName);
+		if (count($methodParts) === 2)
+		{
+			return self::callMethod($methodParts[0], $methodParts[1]);
+		}
+		throw new BadMethodCallException("Could not find $fullMethodName");
+	}
 }
 
 /**
@@ -362,7 +365,7 @@ class f_util_ReflectionObjWrapper
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getDocComment()
 	{
