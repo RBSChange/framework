@@ -1,29 +1,9 @@
 <?php
 
 class change_Injection
-{
-	private static $injectedSuffix = array();
-	
+{	
 	const REPLACED_CLASS_SUFFIX = '_injected';
-	
-	public static function getInjectedClassName($className)
-	{
-		return isset(self::$injectedSuffix[$className]) ? end(self::$injectedSuffix[$className]) : $className;
-	}
-	
-	public static function addInjectedClassName($className)
-	{
-		if (!isset(self::$injectedSuffix[$className]))
-		{
-			self::$injectedSuffix[$className] = array($className . self::REPLACED_CLASS_SUFFIX);
-		}
-		else
-		{
-			self::$injectedSuffix[$className][] = $className . self::REPLACED_CLASS_SUFFIX . count(self::$injectedSuffix[$className]);
-		}
-		return self::getInjectedClassName($className);
-	}
-	
+		
 	/**
 	 * @var array 
 	 */
@@ -32,7 +12,7 @@ class change_Injection
 	 *
 	 * @var array 
 	 */
-	private $replacingClassInfo;
+	private $replacingClassInfos;
 
 	/**
 	 * Checks the validity of the given injection :
@@ -44,27 +24,45 @@ class change_Injection
 	{
 		$infos = change_InjectionService::getInstance()->getInfos();
 		$declaredClasses = get_declared_classes();
-		if (in_array($this->originalClassInfo['name'], $declaredClasses) || in_array($this->replacingClassInfo['name'], $declaredClasses))
+		if (in_array($this->originalClassInfo['name'], $declaredClasses))
 		{
-			throw new Exception('Could not check injection validity at run time - please make sure that ' . $this->originalClassInfo['name'] . ' can be injected by ' . $this->replacingClassInfo['name']);
+			throw new Exception('Could not check injection validity at run time - please make sure that ' . $this->originalClassInfo['name'] . ' can be injected.');
 		}
+		
+		foreach ($this->replacingClassInfos as $replacingClassInfo)
+		{
+			if (in_array($replacingClassInfo['name'], $declaredClasses))
+			{
+				throw new Exception('Could not check injection validity at run time - please make sure that ' . $this->originalClassInfo['name'] . ' can be injected by ' . $replacingClassInfo['name']);
+			}
+		}
+		
 		if (isset($infos[$this->originalClassInfo['name']]['path']))
 		{
 			require_once $infos[$this->originalClassInfo['name']]['path'];
 		}
-		if (isset($infos[$this->replacingClassInfo['name']]['path']))
-		{
-			require_once $infos[$this->replacingClassInfo['name']]['path'];
-		}
 		$originalReflectionClass = new Zend_Reflection_Class($this->originalClassInfo['name']);
-		$reflectionClass = new Zend_Reflection_Class($this->replacingClassInfo['name']);
-		return $originalReflectionClass->isUserDefined() && $reflectionClass->getParentClass()->getName() == $originalReflectionClass->getName() && ! $originalReflectionClass->isFinal();
+		if (!$originalReflectionClass->isUserDefined() || $originalReflectionClass->isFinal()) {return false;}
+		
+		foreach ($this->replacingClassInfos as $replacingClassInfo)
+		{
+			if (isset($infos[$replacingClassInfo['name']]['path']))
+			{
+				require_once $infos[$replacingClassInfo['name']]['path'];
+			}
+			$reflectionClass = new Zend_Reflection_Class($replacingClassInfo['name']);
+			if ($reflectionClass->getParentClass()->getName() != $originalReflectionClass->getName())
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 
-	public function __construct($originalClassInfo, $classInfo)
+	public function __construct($originalClassInfo, $classInfos)
 	{
 		$this->originalClassInfo = $originalClassInfo;
-		$this->replacingClassInfo = $classInfo;
+		$this->replacingClassInfos = $classInfos;
 	}
 
 	/**
@@ -85,13 +83,15 @@ class change_Injection
 		{
 			throw new Exception('Your autoload seems to be corrupted - please run ' . CHANGE_COMMAND . 'compile-autoload');
 		}
-		$newClassName = $originalClassName . self::REPLACED_CLASS_SUFFIX;
+		$suffixIndex =  0;
+		$newClassName = $originalClassName . self::REPLACED_CLASS_SUFFIX . $suffixIndex;
+		
 		$infos = array();
+		
 		/**
 		 * Process the file containing the injected class and rename it - all other classes defined in the same file will remain untouched but will be
 		 * extracted in separate files
-		 */ 
-		
+		 */ 		
 		$classes = change_PhpCodeManipulation::processContentForInjection($originalFileContent, array($originalClassName => array('name' => $newClassName)));
 
 		foreach ($classes as $className => $classContent)
@@ -105,23 +105,32 @@ class change_Injection
 				f_util_FileUtils::writeAndCreateContainer($infos[$className]['link'], '<?php' . PHP_EOL . $classContent, f_util_FileUtils::OVERRIDE);
 			}
 		}
+		
 		// Process the combined file
 		$combinedContent = array('<?php', $classes[$originalClassName]);
-		$injectFileInfo = new SplFileInfo($this->replacingClassInfo['path']);
-		$injectFileContent = file_get_contents($injectFileInfo->getPathname());
-		$injectClassName = $this->replacingClassInfo['name'];
-		if (strpos($injectFileInfo->getPathname(), 'build' . DIRECTORY_SEPARATOR . 'injection') !== false)
+		
+		foreach ($this->replacingClassInfos as $replacingClassInfo)
 		{
-			throw new Exception('Your autoload seems to be corrupted - please run ' . CHANGE_COMMAND . 'compile-autoload');
+			$suffixIndex++;
+			$extendClassName = $newClassName;
+			$newClassName = ($suffixIndex < count($this->replacingClassInfos)) ? $originalClassName . self::REPLACED_CLASS_SUFFIX . $suffixIndex : $originalClassName;
+			
+			$injectFileInfo = new SplFileInfo($replacingClassInfo['path']);
+			$injectFileContent = file_get_contents($injectFileInfo->getPathname());
+			$injectClassName = $replacingClassInfo['name'];
+			if (strpos($injectFileInfo->getPathname(), 'build' . DIRECTORY_SEPARATOR . 'injection') !== false)
+			{
+				throw new Exception('Your autoload seems to be corrupted - please run ' . CHANGE_COMMAND . 'compile-autoload');
+			}		
+			$classes = change_PhpCodeManipulation::processContentForInjection($injectFileContent, array($injectClassName => array('name' => $newClassName, 'extends' => $extendClassName)));
+			$combinedContent[] = $classes[$injectClassName];
+			$combinedContent[] = 'class ' . $injectClassName . ' extends ' . $newClassName . ' {}';
+			$infos[$injectClassName]['path'] = $injectFileInfo->getPathname();
+			$infos[$injectClassName]['mtime'] = $injectFileInfo->getMTime();
+			$infos[$injectClassName]['link'] = f_util_FileUtils::buildProjectPath('build', 'injection', $originalClassName . '.class.php');
+			$infos[$injectClassName]['checkmtime'] = true;			
+			f_util_FileUtils::writeAndCreateContainer(f_util_FileUtils::buildProjectPath('build', 'injection', $originalClassName . '.class.php'), implode(PHP_EOL . PHP_EOL, $combinedContent), f_util_FileUtils::OVERRIDE);
 		}
-		$classes = change_PhpCodeManipulation::processContentForInjection($injectFileContent, array($injectClassName => array('name' => $originalClassName, 'extends' => $newClassName)));
-		$combinedContent[] = $classes[$injectClassName];
-		$combinedContent[] = 'class ' . $injectClassName . ' extends ' . $originalClassName . ' {}';
-		$infos[$injectClassName]['path'] = $injectFileInfo->getPathname();
-		$infos[$injectClassName]['mtime'] = $injectFileInfo->getMTime();
-		$infos[$injectClassName]['link'] = f_util_FileUtils::buildProjectPath('build', 'injection', $originalClassName . '.class.php');
-		$infos[$originalClassName]['checkmtime'] = true;
-		f_util_FileUtils::writeAndCreateContainer(f_util_FileUtils::buildProjectPath('build', 'injection', $originalClassName . '.class.php'), implode(PHP_EOL . PHP_EOL, $combinedContent), f_util_FileUtils::OVERRIDE);
 		return $infos;
 	}
 }

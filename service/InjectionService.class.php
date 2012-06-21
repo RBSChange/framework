@@ -108,30 +108,40 @@ class change_InjectionService
 		$returnValue = array();
 		$newInjectionInfos = array();
 
-		foreach (Framework::getConfigurationValue('injection/class', array()) as $originalClassName => $className)
-		{
-			$originalClassInfo = $this->buildClassInfo($originalClassName);
-			$replacingClassInfo = $this->buildClassInfo($className);
-
-		    $injection = new change_Injection($originalClassInfo, $replacingClassInfo);
-			if (!$checkValidity || ($checkValidity && $injection->isValid()))
-			{
-				$newInjectionInfos = array_merge($newInjectionInfos, $injection->generate());
-				$returnValue[$originalClassName] = $className; 
-			}
-			else
-			{
-				Framework::error('Invalid Injection of ' . $originalClassName . ' by ' . $className);
-			}
-		}
-
 		foreach (Framework::getConfigurationValue('injection/document', array()) as $originalModelName => $replacingModelName)
 		{
 			$docInject = new change_DocumentInjection($originalModelName, $replacingModelName);
 			if (!$checkValidity || ($checkValidity && $docInject->isValid()))
 			{
 				$newInjectionInfos = array_merge($newInjectionInfos, $docInject->generate());
-				$returnValue[$originalModelName] = $replacingModelName; 
+				$returnValue[$originalModelName] = $replacingModelName;
+			}
+		}
+		
+		$this->infos = $newInjectionInfos;
+				
+		foreach (Framework::getConfigurationValue('injection/class', array()) as $originalClassName => $classNames)
+		{
+			$originalClassInfo = $this->buildClassInfo($originalClassName);
+			
+			$replacingClassInfos = array();
+			foreach (explode(',', $classNames) as $className)
+			{
+				$className = trim($className);
+				if (empty($className)) {continue;}
+				$replacingClassInfos[] = $this->buildClassInfo($className);
+			}
+			
+			if (count($replacingClassInfos) === 0) {continue;}
+		    $injection = new change_Injection($originalClassInfo, $replacingClassInfos);
+			if (!$checkValidity || ($checkValidity && $injection->isValid()))
+			{
+				$newInjectionInfos = array_merge($newInjectionInfos, $injection->generate());
+				$returnValue[$originalClassName] = $classNames; 
+			}
+			else
+			{
+				Framework::error('Invalid Injection of ' . $originalClassName . ' by ' . $classNames);
 			}
 		}
 		
