@@ -412,13 +412,13 @@ abstract class f_util_HtmlUtils
 		{
 			return self::buildImage($attributes);
 		}
-
-		//return original image
-		return $matches[0];
 	}
 
-
-	private static function buildImage($attributes, $format)
+	/**
+	 * @param array $attributes
+	 * @param array $format
+	 */
+	private static function buildImage($attributes, $format = null)
 	{
 		$html = '<img';
 		$document = null;
@@ -433,7 +433,7 @@ abstract class f_util_HtmlUtils
 			}
 			if ($name == "zoom" && $value == "true")
 			{
-				$wantZoom = true;
+				$wantZoom = is_array($format);
 				continue;
 			}
 			$html .= ' ' . $name . '="' . $value . '"';
