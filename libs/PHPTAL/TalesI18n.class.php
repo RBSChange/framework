@@ -40,6 +40,7 @@ class f_TalesI18n implements PHPTAL_Tales
 	 */
 	static private function translate($src, $lang)
 	{
+		PHPTAL_Php_State::setStructuredTales(true);
 		list($key, $formatters, $replacements) = LocaleService::getInstance()->parseTransString($src);
 		
 		$formattersStr = array();
