@@ -15,7 +15,7 @@ abstract class f_util_FileUtils
 
 		if ($result>0)
 		{
-			if ($dh = opendir($filepath)) 
+			if (($dh = opendir($filepath)) !== false) 
 			{
 				while (($file = readdir($dh)) !== false) {
 					if ($file!='..' && $file!='.' && $file!='.svn' && is_dir($filepath.'/'.$file)) self::isDirectoryWritable($filepath.'/'.$file,$recurse);
@@ -571,7 +571,7 @@ abstract class f_util_FileUtils
 		}
 		if (is_dir($dir))
 		{
-			if ($dh = opendir($dir))
+			if (($dh = opendir($dir)) !== false)
 			{
 				while (($file = readdir($dh)) !== false)
 				{
