@@ -193,14 +193,6 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 	/**
 	 * @return boolean
 	 */
-	public function isLinkedToRootFolder()
-	{
-		return <{$model->escapeBoolean($model->isLinkedToRootModule())}>;
-	}
-
-	/**
-	 * @return boolean
-	 */
 	public function hasURL()
 	{
 		return <{$model->escapeBoolean($model->hasURL())}>;
@@ -299,8 +291,8 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 	/**
 	 * @return Boolean
 	 */
-	public function publishOnDayChange()
+	public function usePublicationDates()
 	{
-		return <{$model->escapeBoolean($model->hasPublishOnDayChange())}>;
+		return <{$model->escapeBoolean($model->usePublicationDates())}>;
 	}
 }

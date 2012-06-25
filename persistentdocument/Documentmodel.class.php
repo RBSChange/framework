@@ -110,15 +110,7 @@ class generic_persistentdocument_Documentmodel extends f_persistentdocument_Pers
 	{
 		return false;
 	}
-	
-	/**
-	 * @return boolean
-	 */
-	public final function isLinkedToRootFolder()
-	{
-		return false;
-	}
-	
+		
 	/**
 	 * @return boolean
 	 */
@@ -179,7 +171,7 @@ class generic_persistentdocument_Documentmodel extends f_persistentdocument_Pers
 	/**
 	 * @return Boolean
 	 */
-	public function publishOnDayChange()
+	public function usePublicationDates()
 	{
 		return false;
 	}

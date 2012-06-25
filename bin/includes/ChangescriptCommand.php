@@ -631,7 +631,6 @@ abstract class c_ChangescriptCommand
 	
 	/**
 	 * @deprecated use $this
-	 * @return c_ChangescriptCommand
 	 */
 	protected final function getParent()
 	{

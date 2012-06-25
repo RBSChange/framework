@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-	Attributs autorisés :
+	* Existing attributes:
 	
 	model-version="4.0"
 	icon="iconname"
-	linked-to-root-module="true | [false]"
 	use-correction="true | [false]"
 	table-name="tablename"
 	extend="[modules_generic/Document]"
@@ -12,18 +11,16 @@
 	use-rewrite-url="[true] | false"
 	indexable="true | [false]"	
 	backoffice-indexable="[true] | false"
-	publish-on-day-change="[true] | false"
-	
+	use-publication-dates="[true] | false"
 -->
 <document xmlns="http://www.rbs.fr/schema/change-document/1.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.rbs.fr/schema/change-document/1.0 http://www.rbschange.fr/static/schema/change-document/4.0.xsd"
-	model-version="4.0" has-url="false" use-rewrite-url="false">
+	xsi:schemaLocation="http://www.rbs.fr/schema/change-document/1.0 http://www.rbschange.fr/schema/persistentdocument-4.0.xsd"
+	model-version="4.0" has-url="false" use-rewrite-url="false" use-publication-dates="false">
 	<properties>
 		<!--
-			* Balise <property />
-			
-			* Attributs autorisés :
+			* Tag: <property />			
+			* Existing attributes:
 			
 			name="propertyName"
 			type="[String] | Boolean | Integer | Double | Decimal | DateTime | LongString | Lob | XHTMLFragment | BBCode | JSON | Object | DocumentId | modules_xxxxx/yyyyy"
@@ -38,6 +35,7 @@
 			localized="true | [false]"
 			inverse="true | [false]"
 			preserve-old-value="true | [false]"
+			indexed="none | property | description"
 			
 			default-value="xxxx"
 		-->
@@ -53,22 +51,21 @@
 		- L'activation d'un workflow implique 'use-correction="true"'
 		
 		<workflow start-task="VALIDATION">
-		<parameter name="USENOTIFICATION">false</parameter>
+			<parameter name="USENOTIFICATION">false</parameter>
 		</workflow>
 	-->
 
 	<!--
 		Exemples de relation arborescente
 		<children>
-		<child name="subDocuments" type="modules_generic/Document" />
+			<child name="subDocuments" type="modules_generic/Document" />
 		</children>
 	-->
 	
 	<serializedproperties>
 		<!--
-			* Balise <property />
-			
-			* Attributs autorisés :
+			* Tag: <property />
+			* Existing attributes:
 
 			name="propertyName"
 			type="String | Boolean | Integer | Double | DateTime | LongString | XHTMLFragment | modules_xxxxx/yyyyy"

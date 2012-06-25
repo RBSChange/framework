@@ -4,10 +4,8 @@
 	targetNamespace="http://www.rbs.fr/schema/change-document/1.0" xmlns="http://www.rbs.fr/schema/change-document/1.0">
 
 	<!--
-		This file is actually published on http://www.rbschange.fr/static/schema/change-document/4.0.xsd 
+		This file is published on http://www.rbschange.fr/schema/persistentdocument-4.0.xsd
 	-->
-
-	<!-- TODO: handle non permitted cases -->
 
 	<xs:simpleType name="propertyType">
 		<xs:annotation>
@@ -210,7 +208,6 @@
 			<xs:attribute name="model-version" type="xs:string" use="required" />
 			<xs:attribute name="icon" type="xs:string" />
 			<xs:attribute name="edit-module" type="xs:string" />
-			<xs:attribute name="linked-to-root-module" type="xs:boolean" default="false" />
 			<xs:attribute name="use-correction" type="xs:boolean" default="false" />
 			<xs:attribute name="table-name" type="xs:string" />
 			<xs:attribute name="extend" type="xs:string" />
@@ -220,7 +217,7 @@
 			<xs:attribute name="use-rewrite-url" type="xs:boolean" default="true" />
 			<xs:attribute name="indexable" type="xs:boolean" default="false" />
 			<xs:attribute name="backoffice-indexable" type="xs:boolean" default="true" />
-			<xs:attribute name="publish-on-day-change" type="xs:boolean" default="true" />
+			<xs:attribute name="use-publication-dates" type="xs:boolean" default="true" />
 		</xs:complexType>
 	</xs:element>
 </xs:schema>

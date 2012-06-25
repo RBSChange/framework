@@ -333,11 +333,6 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	/**
 	 * @return boolean
 	 */
-	abstract public function isLinkedToRootFolder();
-
-	/**
-	 * @return boolean
-	 */
 	abstract public function isIndexable();
 	
 	/**
@@ -861,7 +856,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	/**
 	 * @return Boolean
 	 */
-	abstract public function publishOnDayChange();
+	abstract public function usePublicationDates();
 	
 	/**
 	 * @return f_persistentdocument_DocumentService

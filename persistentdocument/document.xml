@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document xmlns="http://www.rbs.fr/schema/change-document/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.rbs.fr/schema/change-document/1.0 http://www.rbschange.fr/static/schema/change-document/4.0.xsd" 
-	model-version="4.0" icon="document" use-correction="false" linked-to-root-module="false" 
-	has-url="true" use-rewrite-url="true"
-	publish-on-day-change="true" indexable="false" backoffice-indexable="true">
+	xsi:schemaLocation="http://www.rbs.fr/schema/change-document/1.0 http://www.rbschange.fr/schema/persistentdocument-4.0.xsd" 
+	model-version="4.0" icon="document" use-correction="false" has-url="true" use-rewrite-url="true"
+	use-publication-dates="true" indexable="false" backoffice-indexable="true">
 	<properties>
 		<property name="label" type="String" min-occurs="1" db-mapping="document_label" db-size="255" />
 		<property name="author" type="String" db-mapping="document_author" db-size="100" indexed="none"/>

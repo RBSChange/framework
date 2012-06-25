@@ -257,11 +257,6 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 			$document->setDocumentversion(0);
 
-			if ($parentNodeId === null && $document->getPersistentModel()->isLinkedToRootFolder())
-			{
-				$parentNodeId = ModuleService::getInstance()->getRootFolderId($document->getPersistentModel()->getModuleName());
-			}
-
 			if ($parentNodeId !== null)
 			{
 				$parentDocument = $this->getDocumentInstance($parentNodeId);

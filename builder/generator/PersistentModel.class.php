@@ -31,7 +31,6 @@ class generator_PersistentModel
 	private $children = array();
 
 	private $icon;
-	private $linkedToRootModule;
 	private $hasUrl;
 	private $useRewriteUrl;
 	private $indexable;
@@ -47,7 +46,7 @@ class generator_PersistentModel
 	private $defaultStatus;
 	private $localized;
 
-	private $publishOnDayChange;
+	private $usePublicationDates;
 
 	/**
 	 * @var generator_Workflow
@@ -70,7 +69,6 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * TODO: remove when modulebuilder_ModuleService optimized
 	 * @return array<generator_PersistentModel>
 	 */
 	public static function reloadModels()
@@ -222,7 +220,7 @@ class generator_PersistentModel
 		foreach (self::loadModels() as $model)
 		{	
 			/* @var $model generator_PersistentModel */
-			if ($model->inject() || !$model->hasPublishOnDayChange()) {continue;}
+			if ($model->inject() || !$model->usePublicationDates()) {continue;}
 			
 			$modelName = $model->getName();
 			while ($model)
@@ -972,9 +970,9 @@ class generator_PersistentModel
 			$this->addProperty($property);
 		}
 
-		if ($this->publishOnDayChange === null)
+		if ($this->usePublicationDates === null)
 		{
-			$this->publishOnDayChange = $baseDocument->publishOnDayChange;
+			$this->usePublicationDates = $baseDocument->usePublicationDates;
 		}
 		
 		if ($this->icon === null)
@@ -1161,22 +1159,6 @@ class generator_PersistentModel
 		}
 	}
 
-
-	/**
-	 * @return Boolean
-	 */
-	public function isLinkedToRootModule()
-	{
-		if ($this->linkedToRootModule === null && $this->hasParentModel())
-		{
-			return $this->getParentModel()->isLinkedToRootModule();
-		}
-		else
-		{
-			return $this->linkedToRootModule;
-		}
-	}
-
 	/**
 	 * @return String
 	 */
@@ -1207,15 +1189,15 @@ class generator_PersistentModel
 	/**
 	 * @return Boolean
 	 */
-	public function hasPublishOnDayChange()
+	public function usePublicationDates()
 	{
-		if ($this->publishOnDayChange === null && $this->hasParentModel())
+		if ($this->usePublicationDates === null && $this->hasParentModel())
 		{
-			return $this->getParentModel()->hasPublishOnDayChange();
+			return $this->getParentModel()->usePublicationDates();
 		}
 		else
 		{
-			return $this->publishOnDayChange;
+			return $this->usePublicationDates;
 		}
 	}
 
@@ -1910,9 +1892,6 @@ class generator_PersistentModel
 				case "icon":
 					$this->icon = $value;
 					break;
-				case "linked-to-root-module":
-					$this->linkedToRootModule = self::getBoolean($value);
-					break;
 				case "has-url":
 					$this->hasUrl = self::getBoolean($value);
 					break;	
@@ -1934,8 +1913,8 @@ class generator_PersistentModel
 				case "use-correction":
 					$this->useCorrection = self::getBoolean($value);
 					break;
-				case "publish-on-day-change":
-					$this->publishOnDayChange = self::getBoolean($value);
+				case "use-publication-dates":
+					$this->usePublicationDates = self::getBoolean($value);
 					break;
 				case "xsi:schemaLocation":
 					// just ignore it

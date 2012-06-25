@@ -1,0 +1,1 @@
+Les version 4.0 des schémas doivent être mises à jour dans la médiathèque du site RBS Change, dossier "Schémas XSD Change".
