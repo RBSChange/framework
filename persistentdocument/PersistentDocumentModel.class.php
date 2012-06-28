@@ -36,7 +36,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 
 	const PRIMARY_KEY_ID = "id";
 	
-	const BASE_MODEL = 'modules_generic/Document';
+	const BASE_MODEL = 'modules_generic/document';
 
 	/**
 	 * @param String $moduleName
@@ -356,7 +356,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	{
 		switch ($modelName)
 		{
-			case 'modules_generic/Document':
+			case self::BASE_MODEL:
 			case $this->getName():
 				return true;			
 			default: 
@@ -415,6 +415,22 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	{
 		if ($this->m_properties === null){$this->loadProperties();}
 		return $this->m_properties;
+	}
+	
+	
+	/**
+	 * @return array<String, PropertyInfo> ie. <propName, propertyInfo>
+	 */
+	public final function getLocalizedPropertiesInfos()
+	{
+		if ($this->m_properties === null){$this->loadProperties();}
+		$result = array();
+		foreach ($this->m_properties as $name => $propertInfo)
+		{
+			/* @var $propertInfo PropertyInfo */
+			if ($propertInfo->getLocalized()) {$result[$name] = $propertInfo;}
+		}
+		return $result;
 	}
 	
 	/**

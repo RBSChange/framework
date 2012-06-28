@@ -6,7 +6,7 @@
 	<properties>
 		<property name="label" type="String" min-occurs="1" db-mapping="document_label" db-size="255" />
 		<property name="author" type="String" db-mapping="document_author" db-size="100" indexed="none"/>
-		<property name="authorid" type="DocumentId" db-mapping="document_authorid" />
+		<property name="authorid" type="DocumentId" document-type="modules_users/user" db-mapping="document_authorid" />
 		<property name="creationdate" type="DateTime" db-mapping="document_creationdate" />
 		<property name="modificationdate" type="DateTime" db-mapping="document_modificationdate" />
 		<property name="publicationstatus" type="String" db-mapping="document_publicationstatus" db-size="50" indexed="none"/>

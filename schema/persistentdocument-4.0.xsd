@@ -13,11 +13,25 @@
 			<xs:documentation source="description">
 				A property type : String | Boolean | Integer | Double | Decimal |
 				DateTime | LongString | XHTMLFragment | Lob | BBCode | JSON | Object
-				DocumentId | modules_xxxxx/yyyyy
+				DocumentId | Document | DocumentArray
 			</xs:documentation>
 		</xs:annotation>
-		<xs:restriction base="xs:string">
-			<xs:pattern value="String|Boolean|Integer|Double|Decimal|DateTime|LongString|XHTMLFragment|Lob|BBCode|JSON|Object|DocumentId|modules_[a-z]+/[A-Za-z]+" />
+		<xs:restriction base="xs:NMTOKEN">
+			<xs:enumeration value="String" />
+			<xs:enumeration value="Boolean" />
+			<xs:enumeration value="Integer" />
+			<xs:enumeration value="Double" />
+			<xs:enumeration value="Decimal" />
+			<xs:enumeration value="DateTime" />
+			<xs:enumeration value="LongString" />
+			<xs:enumeration value="XHTMLFragment" />
+			<xs:enumeration value="Lob" />
+			<xs:enumeration value="BBCode" />
+			<xs:enumeration value="JSON" />
+			<xs:enumeration value="Object" />
+			<xs:enumeration value="DocumentId" />
+			<xs:enumeration value="Document" />
+			<xs:enumeration value="DocumentArray" />
 		</xs:restriction>
 	</xs:simpleType>
 
@@ -122,6 +136,7 @@
 									</xs:sequence>
 									<xs:attribute name="name" use="required" type="xs:string" />
 									<xs:attribute name="type" use="optional" type="propertyType" default="String" />
+									<xs:attribute name="document-type" type="documentModel" />
 									<xs:attribute name="cascade-delete" type="xs:boolean" default="false" />
 									<xs:attribute name="min-occurs" type="xs:int" default="0" />
 									<xs:attribute name="max-occurs" type="xs:int" default="1" />
@@ -160,6 +175,7 @@
 									</xs:sequence>
 									<xs:attribute name="name" use="required" type="xs:string" />
 									<xs:attribute name="type" use="optional" type="propertyType" default="String" />
+									<xs:attribute name="document-type" type="documentModel" />
 									<xs:attribute name="min-occurs" type="xs:int" default="0" />
 									<xs:attribute name="max-occurs" type="xs:int" default="1" />
 									<xs:attribute name="from-list" type="xs:string" />

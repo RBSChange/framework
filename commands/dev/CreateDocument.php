@@ -88,7 +88,7 @@ class commands_CreateDocument extends c_ChangescriptCommand
 			return $this->quitError("Document $moduleName/$documentName already exists (check $to)");
 		}
 		
-		$from = f_util_FileUtils::buildFrameworkPath("builder", "resources", "base-document.xml");
+		$from = f_util_FileUtils::buildFrameworkPath("builder", "templates", "documents", "base-document.xml");
 		f_util_FileUtils::cp($from, $to);
 			
 		$this->log("You must now edit $to and later call add-document.");

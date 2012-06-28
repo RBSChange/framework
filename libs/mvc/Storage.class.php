@@ -137,7 +137,7 @@ class change_Storage
 	}
 
 	/**
-	 * @param String $class
+	 * @param string $class
 	 * @return change_Storage 
 	 */
 	public static function newInstance($class)
@@ -145,8 +145,7 @@ class change_Storage
 		$object = new $class();
 		if (!($object instanceof change_Storage))
 		{
-			$error = 'Class "' .$class .'" is not of the type ChangeSessionStorage';
-			$error = sprintf($error, $class);
+			$error = 'Class "' .$class .'" is not of the type change_Storage';
 			throw new Exception($error);
 		}
 		return $object;

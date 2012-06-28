@@ -7,6 +7,10 @@ class generator_PersistentProperty
 	const PROPERTY = 1;
 	const SERIALISED_PROPERTY = 2;
 	
+	protected static $TYPES = array('String', 'Boolean', 'Integer', 'Double', 'Decimal',
+				'DateTime', 'LongString', 'XHTMLFragment', 'Lob', 'BBCode', 'JSON', 'Object',
+				'DocumentId', 'Document', 'DocumentArray');
+	
 	/**
 	 * @var generator_PersistentModel
 	 */
@@ -16,7 +20,13 @@ class generator_PersistentProperty
 
 	private $name;
 	private $type;
+	private $documentType;
+	
+	/**
+	 * @var generator_PersistentModel
+	 */	
 	private $typeModel; // Used for inverse properties sorting and set only for them.
+	
 	private $minOccurs;
 	private $maxOccurs;
 	private $dbName;
@@ -105,7 +115,15 @@ class generator_PersistentProperty
 					$this->name = $value;
 					break;
 				case "type":
+					if (!in_array($value, self::$TYPES))
+					{
+						generator_PersistentModel::addMessage("Invalid property Type ". $this->model->getName() . " : $name => $value ");
+						$value = 'String';
+					}
 					$this->type = $value;
+					break;
+				case "document-type":
+					$this->documentType = $value;
 					break;
 				case "from-list":
 					$this->fromList = $value;
@@ -215,36 +233,9 @@ class generator_PersistentProperty
 					$this->constraintArray[$name] = $params;
 				}
 			}
-			elseif ($node->nodeName == 'constraints')
+			elseif ($node->nodeType == XML_ELEMENT_NODE)
 			{
-				$cp = new validation_ContraintsParser();
-				$defs = $cp->getConstraintArrayFromDefinition(strval($node->nodeValue));
-				foreach ($defs as $name => $parameter) 
-				{
-					switch ($name) {
-						case "min":
-						case "max":
-							$params = array($name => $parameter);
-							break;
-						case "maxSize":
-							$params = array("max" => $parameter);
-							break;
-						case "unique":
-							$params = array("propertyName" => $this->name, "modelName" => $this->model->getName());
-							break;
-						default:
-							$params = array('parameter' => $parameter);
-							break;
-					}
-					
-					if ($this->constraintArray === null) {$this->constraintArray = array();}
-					if ($name{0} == '!')
-					{
-						$name = substr($name, 1);
-						$params['reversed'] = true;
-					}
-					$this->constraintArray[$name] = $params;
-				}
+				generator_PersistentModel::addMessage("Invalid property children node ". $this->model->getName() . " : " . $this->getName() . ' -> ' . $node->nodeName);
 			}
 		}
 	}
@@ -334,11 +325,12 @@ class generator_PersistentProperty
 	 */
 	public static function generateInverseProperty($property)
 	{
-		$document = generator_PersistentModel::getModelByName($property->getType());
+		$document = generator_PersistentModel::getModelByName($property->getDocumentType());
 		$invertProperty = new generator_PersistentProperty($document);
 		$tmp = explode('/', $property->model->getName());
 		$invertProperty->name = $tmp[1];
-		$invertProperty->type = $property->model->getName();
+		$invertProperty->type = $property->type;
+		$invertProperty->documentType = $property->model->getName();
 		$invertProperty->typeModel = $property->model;
 		$invertProperty->minOccurs = $property->minOccurs;
 		$invertProperty->maxOccurs = $property->maxOccurs;
@@ -357,22 +349,14 @@ class generator_PersistentProperty
 	{
 		return $this->typeModel;
 	}
-	
-	/**
-	 * Used for inverse properties sorting.
-	 * @param generator_PersistentModel $model
-	 */
-	public function setTypeModel($model)
-	{
-		$this->typeModel = $model;
-	}
-	
+		
 	/**
 	 * @return Boolean
 	 */
 	public function isDocument()
 	{
-		return DocumentHelper::isDocumentProperty($this->type);
+		return $this->type === f_persistentdocument_PersistentDocument::PROPERTYTYPE_DOCUMENT || 
+			$this->type === f_persistentdocument_PersistentDocument::PROPERTYTYPE_DOCUMENTARRAY;
 	}
 
 	/**
@@ -438,6 +422,7 @@ class generator_PersistentProperty
 	public function mergeGeneric($property)
 	{
 		$this->type = $property->type;
+		$this->documentType = $property->documentType;
 		$this->dbMapping = $property->dbMapping;
 		$this->maxOccurs = $property->maxOccurs;
 		if (is_null($this->dbSize)) {$this->dbSize = $property->dbSize;}
@@ -510,6 +495,14 @@ class generator_PersistentProperty
 	public function getType()
 	{
 		return $this->type;
+	}
+	
+	/**
+	 * @return String
+	 */
+	public function getDocumentType()
+	{
+		return $this->documentType;
 	}
 
 	/**
@@ -646,7 +639,7 @@ class generator_PersistentProperty
 	 */
 	public function isArray()
 	{
-		return $this->getMaxOccurs() != 1 && $this->isDocument();
+		return ($this->type === f_persistentdocument_PersistentDocument::PROPERTYTYPE_DOCUMENTARRAY);
 	}
 	
 	/**
@@ -928,14 +921,14 @@ class generator_PersistentProperty
 	{
 		if ($this->isDocument())
 		{
-			if ($this->getType() == generator_PersistentModel::BASE_MODEL)
+			if ($this->getDocumentType() === generator_PersistentModel::BASE_MODEL)
 			{
 				return generator_PersistentModel::BASE_CLASS_NAME;
 			}
 			
-			list ($package, $docName) = explode('/', $this->getType());
+			list ($package, $docName) = explode('/', $this->getDocumentType());
 			list (, $packageName) = explode('_', $package);
-			return "" . $packageName . "_persistentdocument_" . $docName;
+			return $packageName . "_persistentdocument_" . $docName;
 		}
 		else
 		{
@@ -954,7 +947,24 @@ class generator_PersistentProperty
 			}
 		}
 	}
-
+	
+	/**
+	 * @return string|NULL
+	 */
+	public function getCommentaryDocumentType()
+	{
+		if ($this->getDocumentType() === generator_PersistentModel::BASE_MODEL)
+		{
+			return generator_PersistentModel::BASE_CLASS_NAME;
+		}
+		elseif ($this->getDocumentType() !== null)
+		{	
+			list ($package, $docName) = explode('/', $this->getDocumentType());
+			list (, $packageName) = explode('_', $package);
+			return "" . $packageName . "_persistentdocument_" . $docName;
+		}
+		return null;
+	}
 	/**
 	 * @return String
 	 */

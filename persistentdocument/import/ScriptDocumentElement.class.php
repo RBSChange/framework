@@ -447,7 +447,8 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 					{
 						$propertyValue = $this->parseXHTMLFragment($propertyValue);
 					}
-					else if ($property->getType() == f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER
+					else if (($property->getType() == f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER ||
+						$property->getType() == f_persistentdocument_PersistentDocument::PROPERTYTYPE_DOCUMENTID)
 						&& ($propertyValue instanceof f_persistentdocument_PersistentDocument))
 					{
 						$propertyValue = $propertyValue->getId();

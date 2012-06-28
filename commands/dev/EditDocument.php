@@ -143,7 +143,7 @@ class commands_EditDocument extends c_ChangescriptCommand
 			return null;
 		}
 		$props = array();
-		$genericProps = generic_persistentdocument_Documentmodel::getGenericDocumentPropertiesNames();
+		$genericProps = generic_persistentdocument_documentmodel::getGenericDocumentPropertiesNames();
 		foreach ($doc->find("//c:add") as $addElem)
 		{
 			$name = $addElem->getAttribute("name");

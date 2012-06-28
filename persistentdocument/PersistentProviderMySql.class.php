@@ -1362,6 +1362,10 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 					$propNameInfo = explode(".", $projection->getPropertyName());
 					$propNameInfoCount = count($propNameInfo);
 					$property = $qBuilder->getModel()->getProperty($propNameInfo[0]);
+					if ($property === null)
+					{
+						throw new Exception('Property [' . $propNameInfo[0] . '] not found on document: ' . $qBuilder->getModel()->getName());
+					}
 					if ($property->isDocument())
 					{
 						$relationAlias = 'ra' . $subdoc;
@@ -2174,7 +2178,7 @@ class f_persistentdocument_DocumentQueryBuilder
 				{
 					throw new Exception("$propName is not a document property");
 				}
-				$model = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($prop->getType());
+				$model = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($prop->getDocumentType());
 			}
 			if ($model->hasProperty($lastPropName))
 			{

@@ -1,58 +1,104 @@
 <?php
 class change_Request
 {
-	
-	public static function newInstance ($class)
+	/**
+	 * @param string $class
+	 * @throws Exception
+	 * @return change_Request
+	 */
+	public static function newInstance($class)
 	{
 		$object = new $class();
 		if (!($object instanceof change_Request))
 		{
-			$error = 'Class "'. $class.'" is not of the type ChangeRequest';
+			$error = 'Class "' . $class . '" is not of the type change_Request';
 			throw new Exception($error);
 		}
 		return $object;
 	}
 	
+	/**
+	 * @var integer
+	 */
 	const GET = 2;
-	const NONE = 1;
-	const POST = 4;
-	const CONSOLE = 8;
 	
+	/**
+	 * @var integer
+	 */
+	const POST = 4;	
+	
+	/**
+	 * @var integer
+	 */
+	const PUT = 8;	
+	
+	/**
+	 * @var integer
+	 */
+	const DELETE = 16;	
+	
+	/**
+	 * @var string
+	 */	
 	const DOCUMENT_ID = 'cmpref';
 
 	private $attributes = array();
 	private $errors     = array();
 	private $method     = null;	
 	
+	/**
+	 * @var array
+	 */
 	protected $parameters = array();
 
+	/**
+	 * @return void
+	 */
 	public function clearParameters()
 	{
 		$this->parameters = null;
 		$this->parameters = array();
 	}
 
+	/**
+	 * @param string $name
+	 * @param string $default
+	 * @return mixed
+	 */
 	public function getParameter($name, $default = null)
 	{
 		return (isset($this->parameters[$name])) ? $this->parameters[$name] : $default;
 	}
 
+	/**
+	 * @return string[]
+	 */
 	public function getParameterNames()
 	{
 		return array_keys($this->parameters);
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getParameters()
 	{
 		return $this->parameters;
 	}
 
+	/**
+	 * @param string $name
+	 * @return boolean
+	 */
 	public function hasParameter($name)
 	{
 		return isset($this->parameters[$name]);
-
 	}
 
+	/**
+	 * @param string $name
+	 * @return mixed old value
+	 */
 	public function removeParameter($name)
 	{
 		if (isset($this->parameters[$name]))
@@ -64,78 +110,72 @@ class change_Request
 		return null;
 	}
 
+	/**
+	 * @param string $name
+	 * @param mixed $value
+	 */
 	public function setParameter($name, $value)
 	{
 		$this->parameters[$name] = $value;
 	}
 
+	/**
+	 * @param string $name
+	 * @param mixed $value
+	 */
 	public function setParameterByRef($name, &$value)
 	{
 		$this->parameters[$name] = $value;
 	}
 
-	public function setParameters ($parameters)
+	/**
+	 * @param array $parameters
+	 */
+	public function setParameters($parameters)
 	{
 		$this->parameters = array_merge($this->parameters, $parameters);
 	}
-
-	public function setParametersByRef(&$parameters)
-	{
-		foreach ($parameters as $key => &$value)
-		{
-			if (is_array($value) && isset($this->parameters[$key]))
-			{
-				if (!is_array($this->parameters[$key]))
-				{
-					$this->parameters[$key] = array($this->parameters[$key]);
-				}
-				$this->parameters[$key] = array_merge($this->parameters[$key], f_util_StringUtils::doTranscode($value));
-			}
-			else
-			{
-				$this->parameters[$key] = f_util_StringUtils::doTranscode($value);
-			}
-		}
-	}
 	
-	public function extractParameters($names)
-	{
-		$array = array();
-		foreach ($this->parameters as $key => &$value)
-		{
-			if (in_array($key, $names))
-			{
-				$array[$key] = $value;
-			}
-		}
-		return $array;
-	}		
-
-
-
-	public function clearAttributes ()
+	/**
+	 * @return void
+	 */
+	public function clearAttributes()
 	{
 		$this->attributes = null;
 		$this->attributes = array();
 	}
 
-	public function getAttribute ($name)
+	/**
+	 * @param string $name
+	 * @return mixed
+	 */
+	public function getAttribute($name)
 	{
 		return (isset($this->attributes[$name])) ? $this->attributes[$name] : null;
 	}
 
-	public function getAttributeNames ()
+	/**
+	 * @return string[]
+	 */
+	public function getAttributeNames()
 	{
 		return array_keys($this->attributes);
 	}
-
-	public function hasAttribute ($name)
+	
+	/**
+	 * @param string $name
+	 * @return boolean
+	 */
+	public function hasAttribute($name)
 	{
 		return isset($this->attributes[$name]);
 	}
 	
-
-	public function removeAttribute ($name)
+	/**
+	 * @param string $name
+	 * @return mixed old value
+	 */
+	public function removeAttribute($name)
 	{
 		if (isset($this->attributes[$name]))
 		{
@@ -146,61 +186,79 @@ class change_Request
 		return null;
 	}
 	
-	public function setAttribute ($name, $value)
+	/**
+	 * @param string $name
+	 * @param mixed $value
+	 */
+	public function setAttribute($name, $value)
 	{
 		$this->attributes[$name] = $value;
 	}	
 	
+	/**
+	 * @param string $name
+	 * @param mixed $value
+	 */	
 	public function setAttributeByRef ($name, &$value)
 	{
 		$this->attributes[$name] = $value;
 	}
 		
+	/**
+	 * @param array $attributes
+	 */
 	public function setAttributes($attributes)
 	{
 		$this->attributes = array_merge($this->attributes, $attributes);
 	}
-		
-	public function setAttributesByRef (&$attributes)
-	{
-		foreach ($attributes as $key => &$value)
-		{
-			$this->attributes[$key] = $value;
-		}
-	}	
-	
-	
-	
-	
-	
-	public function getError ($name)
+			
+	/**
+	 * @param string $name
+	 * @return string|NULL
+	 */
+	public function getError($name)
 	{
 		return (isset($this->errors[$name])) ? $retval = $this->errors[$name] : null;
 	}
 	
-	public function getErrorNames ()
+	/**
+	 * @return string[]
+	 */
+	public function getErrorNames()
 	{
 		return array_keys($this->errors);
 	}
 
-	public function getErrors ()
+	/**
+	 * @return array
+	 */
+	public function getErrors()
 	{
-
 		return $this->errors;
-
 	}
 
-	public function hasError ($name)
+	/**
+	 * @param string $name
+	 * @return boolean
+	 */
+	public function hasError($name)
 	{
 		return isset($this->errors[$name]);
 	}
 	
-	public function hasErrors ()
+	/**
+	 * @return boolean
+	 */
+	public function hasErrors()
 	{
 		return (count($this->errors) > 0);
 	}
 	
-	public function removeError ($name)
+	/**
+	 * @param string $name
+	 * @return string|NULL old value
+	 */
+	public function removeError($name)
 	{
 		if (isset($this->errors[$name]))
 		{
@@ -211,124 +269,136 @@ class change_Request
 		return null;	
 	}
 		
-	public function setError ($name, $message)
+	/**
+	 * @param string $name
+	 * @param string $message
+	 */
+	public function setError($name, $message)
 	{
 		$this->errors[$name] = $message;
 	}
 		
-	public function setErrors ($errors)
+	/**
+	 * @param array $errors
+	 */
+	public function setErrors($errors)
 	{
 		$this->errors = array_merge($this->errors, $errors);
-
 	}	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	public function getMethod ()
+	/**
+	 * @return integer|NULL change_Request::[GET | POST | PUT | DELETE]
+	 */
+	public function getMethod()
 	{
 		return $this->method;
 	}
 	
-	public function setMethod ($method)
+	/**
+	 * @param integer $method change_Request::[GET | POST | PUT | DELETE]
+	 * @throws Exception
+	 */
+	public function setMethod($method)
 	{
-		if ($method == self::GET || $method == self::POST || $method == self::CONSOLE)
+		if ($method == self::GET || $method == self::POST || $method == self::PUT || $method == self::DELETE)
 		{
 			$this->method = $method;
 			return;
 		}
-		// invalid method type
-		$error = 'Invalid request method: %s';
-		$error = sprintf($error, $method);
-		throw new Exception($error);
-	}
-
-	public function getFile($name)
-	{
-		if (isset($_FILES[$name]))
-		{
-			return $_FILES[$name];
-		}
-		return null;
+		throw new Exception('Invalid request method: ' . $method);
 	}
 
 	// -------------------------------------------------------------------------
+	
+	/**
+	 * @param string $name
+	 * @return array|NULL
+	 */
+	public function getFile($name)
+	{
+		return (isset($_FILES[$name])) ? $_FILES[$name] : null;
+	}
 
 	/**
 	 * @param string $name
-	 * @return int One of the following error codes:
+	 * @return intger One of the following error codes:
 	 *  - UPLOAD_ERR_OK (no error)
 	 *  - UPLOAD_ERR_INI_SIZE (the uploaded file exceeds the upload_max_filesize directive in php.ini)
 	 *  - UPLOAD_ERR_FORM_SIZE (the uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form)
 	 *  - UPLOAD_ERR_PARTIAL (the uploaded file was only partially uploaded)
 	 *  - UPLOAD_ERR_NO_FILE (no file was uploaded)
 	 */
-	public function getFileError ($name)
+	public function getFileError($name)
 	{
-		if (isset($_FILES[$name]))
-		{
-			return $_FILES[$name]['error'];
-		}
-		return UPLOAD_ERR_NO_FILE;
+		return (isset($_FILES[$name])) ? $_FILES[$name]['error'] : UPLOAD_ERR_NO_FILE;
 	}
 
+	/**
+	 * @param string $name
+	 * @return string|NULL
+	 */
 	public function getFileName($name)
 	{
-		if (isset($_FILES[$name]))
-		{
-			return $_FILES[$name]['name'];
-		}
-		return null;
+		return (isset($_FILES[$name])) ? $_FILES[$name]['name'] : null;
 	}
 	
-	public function getFileNames ()
+	/**
+	 * @return string[]
+	 */
+	public function getFileNames()
 	{
 		return array_keys($_FILES);
 	}
 
-	public function getFiles ()
+	/**
+	 * @return array
+	 */
+	public function getFiles()
 	{
 		return $_FILES;
 	}
 
-	public function getFilePath ($name)
+	/**
+	 * @param string $name
+	 * @return string|NULL
+	 */
+	public function getFilePath($name)
 	{
-		if (isset($_FILES[$name]))
-		{
-			return $_FILES[$name]['tmp_name'];
-		}
-		return null;
+		return (isset($_FILES[$name])) ? $_FILES[$name]['tmp_name'] : null;
 	}
 
-	public function getFileSize ($name)
+	/**
+	 * @param string $name
+	 * @return integer|NULL
+	 */
+	public function getFileSize($name)
 	{
-		if (isset($_FILES[$name]))
-		{
-			return $_FILES[$name]['size'];
-		}
-		return null;
+		return (isset($_FILES[$name])) ? $_FILES[$name]['size'] : null;
+	}
+	
+	/**
+	 * @param string $name
+	 * @return string|NULL
+	 */
+	public function getFileType($name)
+	{
+		return (isset($_FILES[$name])) ? $_FILES[$name]['type'] : null;
 	}
 
-	public function getFileType ($name)
+	/**
+	 * @param string $name
+	 * @return boolean
+	 */
+	public function hasFile($name)
 	{
-		if (isset($_FILES[$name]))
-		{
-			return $_FILES[$name]['type'];
-		}
-		return null;
+		return isset($_FILES[$name]) ? true : false;
 	}
 
-	public function hasFile ($name)
-	{
-		return isset($_FILES[$name]);
-	}
-
-	public function hasFileError ($name)
+	/**
+	 * @param string $name
+	 * @return boolean
+	 */
+	public function hasFileError($name)
 	{
 		if (isset($_FILES[$name]))
 		{
@@ -336,8 +406,11 @@ class change_Request
 		}
 		return false;
 	}
-
-	public function hasFileErrors ()
+	
+	/**
+	 * @return boolean
+	 */
+	public function hasFileErrors()
 	{
 		foreach ($_FILES as &$file)
 		{
@@ -349,45 +422,67 @@ class change_Request
 		return false;
 	}
 
-	public function hasFiles ()
+	/**
+	 * @return boolean
+	 */
+	public function hasFiles()
 	{
 		return (count($_FILES) > 0);
 	}
 
-	public function initialize ($context, $parameters = null)
-	{
+	/**
+	 * 
+	 * @param change_Context $context
+	 * @param array $parameters
+	 */
+	public function initialize($context, $parameters = null)
+	{		
 		if (isset($_SERVER['REQUEST_METHOD']))
 		{
+			$this->setParameters($_GET);
 			switch ($_SERVER['REQUEST_METHOD'])
 			{
-
-				case 'GET':
-				    $this->setMethod(self::GET);
-				    break;
-
 				case 'POST':
 				    $this->setMethod(self::POST);
+				    $this->setParameters($_POST);
 				    break;
-
-				default:
-				    $this->setMethod(self::GET);
-
+			    case 'PUT':
+			    	$this->setMethod(self::PUT);
+			    	break;
+			    case 'DELETE':
+		    		$this->setMethod(self::DELETE);
+		    		break;
+		    	default:
+		    		$this->setMethod(self::GET);
+		    		break;
 			}
 		} 
 		else
 		{
 			$this->setMethod(self::GET);
+			if (isset($_SERVER['argv']))
+			{
+				$this->setParameters($_SERVER['argv']);
+			}
 		}
-		$this->loadParameters();
+		
+		if (is_array($parameters))
+		{
+			$this->setParameters($parameters);
+		}
 	}
 
-	private function loadParameters()
-	{
-		$this->setParametersByRef($_GET);
-		$this->setParametersByRef($_POST);
-	}
-
-	public function moveFile($name, $file, $fileMode = 0666, $create = true, $dirMode = 0777)
+	/**
+	 * 
+	 * @param string $name
+	 * @param string $file
+	 * @param integer $fileMode
+	 * @param boolean $create
+	 * @param integer $dirMode
+	 * @throws Exception
+	 * @return boolean
+	 */
+	public function moveFile($name, $file, $fileMode = 0775, $create = true, $dirMode = 0775)
 	{
 		if (isset($_FILES[$name]) && $_FILES[$name]['error'] == UPLOAD_ERR_OK)
 		{
@@ -483,7 +578,10 @@ class change_Request
 		setcookie($key, '', time() - 3600, '/');
 	}
 	
-
+	/**
+	 * @param string $paramName
+	 * @return boolean
+	 */
 	public function hasNonEmptyParameter($paramName)
 	{
 		return $this->hasParameter($paramName) && f_util_StringUtils::isNotEmpty($this->getParameter($paramName));
@@ -498,7 +596,7 @@ class change_Request
     public function getModuleParameter($moduleName, $paramName)
     {
         $moduleParams = $this->getModuleParameters($moduleName);
-        if ($moduleParams !== null && isset($moduleParams[$paramName]))
+        if (is_array($moduleParams) && isset($moduleParams[$paramName]))
         {
             return $moduleParams[$paramName];
         }
@@ -533,15 +631,67 @@ class change_Request
     public function hasModuleParameter($moduleName, $paramName)
     {
         $moduleParams = $this->getModuleParameters($moduleName);
-        return $moduleParams !== null &&  isset($moduleParams[$paramName]);
+        return is_array($moduleParams) &&  isset($moduleParams[$paramName]);
     }
     
     /**
      * Retrieve all the parameters defined for the given module.
      * @param string $moduleName The module name.
+     * @return array|NULL
      */
     public function getModuleParameters($moduleName)
     {
         return $this->getParameter($moduleName."Param");
+    }
+    
+    //DEPRECATED 
+    
+    /**
+     * @deprecated
+     */
+    public function setParametersByRef(&$parameters)
+    {
+    	foreach ($parameters as $key => &$value)
+    	{
+    		if (is_array($value) && isset($this->parameters[$key]))
+    		{
+    			if (!is_array($this->parameters[$key]))
+    			{
+    				$this->parameters[$key] = array($this->parameters[$key]);
+    			}
+    			$this->parameters[$key] = array_merge($this->parameters[$key], f_util_StringUtils::doTranscode($value));
+    		}
+    		else
+    		{
+    			$this->parameters[$key] = f_util_StringUtils::doTranscode($value);
+    		}
+    	}
+    }
+    
+    /**
+     * @deprecated
+     */
+    public function extractParameters($names)
+    {
+    	$array = array();
+    	foreach ($this->parameters as $key => &$value)
+    	{
+    		if (in_array($key, $names))
+    		{
+    			$array[$key] = $value;
+    		}
+    	}
+    	return $array;
+    }
+    
+    /**
+     * @deprecated
+     */
+    public function setAttributesByRef (&$attributes)
+    {
+    	foreach ($attributes as $key => &$value)
+    	{
+    		$this->attributes[$key] = $value;
+    	}
     }
 }

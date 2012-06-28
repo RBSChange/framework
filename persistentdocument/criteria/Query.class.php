@@ -619,9 +619,9 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 		{
 			$subModel = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($documentModelName);
 			$property = $subModel->getProperty($relationName);
-			if ($property !== null && !$this->model->isModelCompatible($property->getType()))
+			if ($property !== null && !$this->model->isModelCompatible($property->getDocumentType()))
 			{
-				throw new Exception($documentModelName . ' Is not compatible with '. $property->getType() . ' for property ' . $relationName);	
+				throw new Exception($documentModelName . ' Is not compatible with '. $property->getDocumentType() . ' for property ' . $relationName);	
 			}
 		}
 		
@@ -636,12 +636,12 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 		
 		if ($documentModelName === null)
 		{
-			$documentModelName = $property->getType();
+			$documentModelName = $property->getDocumentType();
 		}
 		else if ($subModel === null && !f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($documentModelName)
-				->isModelCompatible($property->getType()))
+				->isModelCompatible($property->getDocumentType()))
 		{
-			throw new Exception($documentModelName . ' Is not compatible with '. $property->getType() . ' for property ' . $relationName);	
+			throw new Exception($documentModelName . ' Is not compatible with '. $property->getDocumentType() . ' for property ' . $relationName);	
 		}
 		$c->setDocumentModelName($documentModelName);
 		$c->setParentQuery($this);
@@ -743,7 +743,7 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 			{
 				if ($property->isDocument())
 				{
-					$documentModelName = $property->getType();
+					$documentModelName = $property->getDocumentType();
 					$subModel = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($documentModelName);
 				}
 				else
@@ -784,7 +784,7 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 		{
 			throw new Exception('Can not create criteria on scalare property '.$relationName);
 		}
-		$c->setDocumentModelName($property->getType());
+		$c->setDocumentModelName($property->getDocumentType());
 		$c->setParentQuery($this);
 		$c->setProvider($this->getProvider());
 		return array($relationName, $c);

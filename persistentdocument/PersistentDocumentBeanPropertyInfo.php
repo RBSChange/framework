@@ -130,7 +130,7 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 			if ($this->propertyInfo->isDocument())
 			{
 				$this->type = BeanPropertyType::DOCUMENT;
-				$this->documentType = $this->propertyInfo->getType();
+				$this->documentType = $this->propertyInfo->getDocumentType();
 				$matches = null;
 				if (preg_match('/^modules_(\w+)\/(\w+)$/', $this->documentType, $matches))
 				{

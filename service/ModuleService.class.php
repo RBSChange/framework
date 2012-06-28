@@ -578,54 +578,6 @@ class ModuleService extends change_BaseService
 	{
 		return LocaleService::getInstance()->trans('m.'.$moduleName.'.bo.general.module-name', array('ucf'));
 	}
-		
-	/**
-	 * @param string $name
-	 * @param array $arguments
-	 * @deprecated
-	 */
-	public function __call($name, $arguments)
-	{
-		switch ($name)
-		{
-			case 'getLinkedModules': 
-				Framework::error('Call to deleted ' . get_class($this) . '->getLinkedModules method');
-				$moduleName = $arguments[0];
-				$modules = array();
-				$models = f_persistentdocument_PersistentDocumentModel::getDocumentModels();
-				foreach ($models as $model)
-				{
-					if ($model->getModuleName() == $moduleName)
-					{
-						foreach ($model->getPropertiesInfos() as $property)
-						{
-							if ($property->isDocument() && $property->getType() && isset($models[$property->getType()]))
-							{
-								$linkedModel = $models[$property->getType()];
-								if (!is_null($linkedModel))
-								{
-									$modules[$linkedModel->getModuleName()] = true;
-								}
-							}
-						}
-					}
-				}
-				$ps = change_PermissionService::getInstance();
-				if (!is_null($ps->getRoleServiceByModuleName($moduleName)))
-				{
-					$modules['users'] = true;
-				}
-				$cModule = $this->getModule($moduleName);
-				if ($cModule->isTopicBased())
-				{
-					$modules['website'] = true;
-				}
-				return array_keys($modules);
-			
-			default: 
-				throw new BadMethodCallException('No method ' . get_class($this) . '->' . $name);
-		}
-	}
 }
 
 class c_Module

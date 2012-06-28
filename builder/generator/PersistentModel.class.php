@@ -4,7 +4,7 @@
  */
 class generator_PersistentModel
 {
-	const BASE_MODEL = 'modules_generic/Document';
+	const BASE_MODEL = 'modules_generic/document';
 	const BASE_CLASS_NAME = 'f_persistentdocument_PersistentDocument';
 
 	private static $m_models;
@@ -375,7 +375,7 @@ class generator_PersistentModel
 		$inversePropertiesByModel = array();
 		
 		$xmlDoc = self::loadFile(f_util_FileUtils::buildFrameworkPath('persistentdocument','document.xml'));
-		$virtualModel = new generator_PersistentModel($xmlDoc, 'generic', 'Document');
+		$virtualModel = new generator_PersistentModel($xmlDoc, 'generic', 'document');
 										
 		// Set common properties.
 		foreach ($models as $model)
@@ -435,7 +435,7 @@ class generator_PersistentModel
 				$property->applyDefaultConstraints();
 				if ($property->isInverse() && $property->isDocument())
 				{
-					$destModel = $property->getType();
+					$destModel = $property->getDocumentType();
 					if (!array_key_exists($destModel, $inversePropertiesByModel))
 					{
 						$inversePropertiesByModel[$destModel] = array();

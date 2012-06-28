@@ -444,20 +444,11 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 <{if $property->getType() == "DocumentId"}>
 
 	/**
-	 * @return f_persistentdocument_PersistentDocument
+	 * @return <{$property->getCommentaryDocumentType()}>|NULL
 	 */
 	public function get<{$property->getPhpName()}>Instance()
 	{
-		$val = $this->get<{$property->getPhpName()}>();
-		if ($val !== null)
-		{
-			$m = f_persistentdocument_PersistentProvider::getInstance()->getDocumentModelName($val);
-			if ($m !== null)
-			{
-				return f_persistentdocument_PersistentProvider::getInstance()->getDocumentInstance($val, $m);
-			}
-		}
-		return null;
+		return DocumentHelper::getDocumentInstanceIfExists($this->get<{$property->getPhpName()}>());
 	}
 <{/if}>
 <{if $property->getFromList()}>
@@ -1008,20 +999,11 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 <{if $property->getType() == "DocumentId"}>
 
 	/**
-	 * @return f_persistentdocument_PersistentDocument
+	 * @return <{$property->getCommentaryDocumentType()}>|NULL
 	 */
 	public function get<{$property->getPhpName()}>Instance()
 	{
-		$val = $this->get<{$property->getPhpName()}>();
-		if ($val !== null)
-		{
-			$m = f_persistentdocument_PersistentProvider::getInstance()->getDocumentModelName($val);
-			if ($m !== null)
-			{
-				return f_persistentdocument_PersistentProvider::getInstance()->getDocumentInstance($val, $m);
-			}
-		}
-		return null;
+		return DocumentHelper::getDocumentInstanceIfExists($this->get<{$property->getPhpName()}>());
 	}
 <{/if}>
 <{if $property->getFromList()}>
@@ -1427,7 +1409,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	public function get<{$property->getPhpName()}>ArrayInverse($offset = 0, $nbDocuments = -1)
 	{
 		$provider = $this->getProvider();
-		$query = $provider->createQuery('<{$property->getType()}>')
+		$query = $provider->createQuery('<{$property->getDocumentType()}>')
 			->add(Restrictions::eq('<{$property->getRelationName()}>.id', $this->getId()))
 			->addOrder(Order::asc('document_label'))
 			->setFirstResult($offset)->setMaxResults($nbDocuments);
@@ -1441,7 +1423,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	public function getPublished<{$property->getPhpName()}>ArrayInverse($offset = 0, $nbDocuments = -1)
 	{
 		$provider = $this->getProvider();
-		$query = $provider->createQuery('<{$property->getType()}>')
+		$query = $provider->createQuery('<{$property->getDocumentType()}>')
 			->add(Restrictions::eq('<{$property->getRelationName()}>.id', $this->getId()))
 			->add(Restrictions::published())
 			->addOrder(Order::asc('document_label'))
@@ -1455,7 +1437,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	public function get<{$property->getPhpName()}>CountInverse()
 	{
 		$provider = $this->getProvider();
-		$query = $provider->createQuery('<{$property->getType()}>')
+		$query = $provider->createQuery('<{$property->getDocumentType()}>')
 			->add(Restrictions::eq('<{$property->getRelationName()}>.id', $this->getId()))
 			->setProjection(Projections::rowCount('rows'));
 		$result = $query->find();
@@ -1469,7 +1451,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	public function getPublished<{$property->getPhpName()}>CountInverse()
 	{
 		$provider = $this->getProvider();
-		$query = $provider->createQuery('<{$property->getType()}>')
+		$query = $provider->createQuery('<{$property->getDocumentType()}>')
 			->add(Restrictions::eq('<{$property->getRelationName()}>.id', $this->getId()))
 			->add(Restrictions::published())
 			->setProjection(Projections::rowCount('rows'));
@@ -1503,7 +1485,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	public function removeAll<{$property->getPhpName()}>Inverse()
 	{
 		$provider = $this->getProvider();
-		$query = $provider->createQuery('<{$property->getType()}>')
+		$query = $provider->createQuery('<{$property->getDocumentType()}>')
 			->add(Restrictions::eq('<{$property->getRelationName()}>.id', $this->getId()));
 
 		foreach ($query->find() as $value)

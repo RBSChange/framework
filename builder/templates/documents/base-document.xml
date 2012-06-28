@@ -6,7 +6,7 @@
 	icon="iconname"
 	use-correction="true | [false]"
 	table-name="tablename"
-	extend="[modules_generic/Document]"
+	extend="[modules_generic/document]"
 	has-url="[true] | false"
 	use-rewrite-url="[true] | false"
 	indexable="true | [false]"	
@@ -23,7 +23,8 @@
 			* Existing attributes:
 			
 			name="propertyName"
-			type="[String] | Boolean | Integer | Double | Decimal | DateTime | LongString | Lob | XHTMLFragment | BBCode | JSON | Object | DocumentId | modules_xxxxx/yyyyy"
+			type="[String] | Boolean | Integer | Double | Decimal | DateTime | LongString | Lob | XHTMLFragment | BBCode | JSON | Object | DocumentId | Document | DocumentArray"
+			document-type="modules_xxxxx/yyyyy"
 			cascade-delete="true | [false]"
 			min-occurs="[0]..n"
 			max-occurs="[1]..n | -1"
@@ -58,7 +59,7 @@
 	<!--
 		Exemples de relation arborescente
 		<children>
-			<child name="subDocuments" type="modules_generic/Document" />
+			<child name="subDocuments" type="modules_generic/document" />
 		</children>
 	-->
 	

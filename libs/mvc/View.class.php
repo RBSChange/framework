@@ -276,26 +276,4 @@ abstract class change_View
 	{
 		$this->forceModuleName = $moduleName;
 	}
-	
-	/**
-	 * @param string $name
-	 * @param array $arguments
-	 * @deprecated
-	 */
-	public function __call($name, $arguments)
-	{
-		switch ($name)
-		{
-			case 'getJsService': 
-				Framework::error('Call to deleted ' . get_class($this) . '->getJsService method');
-				return website_JsService::getInstance();
-				
-			case 'getStyleService': 
-				Framework::error('Call to deleted ' . get_class($this) . '->getStyleService method');
-				return website_StyleService::getInstance();
-			
-			default: 
-				throw new BadMethodCallException('No method ' . get_class($this) . '->' . $name);
-		}
-	}
 }

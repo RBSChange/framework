@@ -6,6 +6,7 @@ class PropertyInfo
 {
 	private $name;
 	private $type = f_persistentdocument_PersistentDocument::PROPERTYTYPE_STRING;
+	private $documentType = null;
 	private $minOccurs = 0;
 	private $maxOccurs = 1;
 	private $dbMapping;
@@ -38,6 +39,14 @@ class PropertyInfo
 	public function getName()
 	{
 		return $this->name;
+	}
+	
+	/**
+	 * @return string|NULL
+	 */
+	public function getDocumentType()
+	{
+		return $this->documentType;
 	}
 	
 	/**
@@ -116,6 +125,8 @@ class PropertyInfo
 	{
 		return $this->localized;
 	}
+	
+	
 
 	/**
 	 * @return string [none], property, description
@@ -134,13 +145,13 @@ class PropertyInfo
 	}
 
 	/**
-	 * @return f_persistentdocument_PersistentDocumentModel || null
+	 * @return f_persistentdocument_PersistentDocumentModel|NULL
 	 */
 	public function getPersistentModel()
 	{
-		if ($this->isDocument)
+		if ($this->documentType)
 		{
-			return f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($this->type);
+			return f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($this->documentType);
 		}
 		return null;
 	}
@@ -150,11 +161,15 @@ class PropertyInfo
 	 * Returns the type of subdocuments with the slash replaced by an underscore
 	 * for use on the backoffice side.
 	 *
-	 * @return string
+	 * @return string|NULL
 	 */
 	public function getTypeForBackofficeWidgets()
 	{
-		return f_persistentdocument_PersistentDocumentModel::convertModelNameToBackoffice($this->type);
+		if ($this->documentType)
+		{
+			return f_persistentdocument_PersistentDocumentModel::convertModelNameToBackoffice($this->documentType);
+		}
+		return null;
 	}
 
 	/**
@@ -164,7 +179,11 @@ class PropertyInfo
 	 */
 	public function acceptType($type)
 	{
-		return f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($type)->isModelCompatible($this->type);
+		if ($this->documentType)
+		{
+			return f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($type)->isModelCompatible($this->documentType);
+		}
+		return false;
 	}
 
 	/**
@@ -174,7 +193,11 @@ class PropertyInfo
 	 */
 	public function acceptAllTypes()
 	{
-		return $this->type === 'modules_generic/Document';
+		if ($this->isDocument())
+		{
+			return $this->documentType === f_persistentdocument_PersistentDocumentModel::BASE_MODEL;
+		}
+		return false;
 	}
 	
 	/**
@@ -202,6 +225,24 @@ class PropertyInfo
 			case f_persistentdocument_PersistentDocument::PROPERTYTYPE_OBJECT:
 			case f_persistentdocument_PersistentDocument::PROPERTYTYPE_LONGSTRING:
 			case f_persistentdocument_PersistentDocument::PROPERTYTYPE_XHTMLFRAGMENT:
+				return true;
+			default:
+				return false;
+		}
+	}
+	
+	/**
+	 * Indicates whether the property is a number.
+	 *
+	 * @return boolean
+	 */
+	public function isNumeric()
+	{
+		switch ($this->type)
+		{
+			case f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER:
+			case f_persistentdocument_PersistentDocument::PROPERTYTYPE_DECIMAL:
+			case f_persistentdocument_PersistentDocument::PROPERTYTYPE_DOUBLE:
 				return true;
 			default:
 				return false;
@@ -325,7 +366,27 @@ class PropertyInfo
 	public function setType($type)
 	{
 		$this->type = $type;
-		$this->isDocument = (strpos($this->type, 'modules_') === 0);
+		$this->isDocument = ($this->type === f_persistentdocument_PersistentDocument::PROPERTYTYPE_DOCUMENT || 
+			$this->type === f_persistentdocument_PersistentDocument::PROPERTYTYPE_DOCUMENTARRAY);
+		
+		if ($this->maxOccurs === 1 && $this->type === f_persistentdocument_PersistentDocument::PROPERTYTYPE_DOCUMENTARRAY)
+		{
+			$this->setMaxOccurs(-1);
+		}
+		if ($this->documentType === null && ($this->isDocument || $this->type === f_persistentdocument_PersistentDocument::PROPERTYTYPE_DOCUMENTID))
+		{
+			$this->setDocumentType(f_persistentdocument_PersistentDocumentModel::BASE_MODEL);
+		}	
+		return $this;
+	}
+	
+	/**
+	 * @param string $documentType
+	 * @return PropertyInfo
+	 */
+	public function setDocumentType($documentType)
+	{
+		$this->documentType = $documentType;
 		return $this;
 	}
 
@@ -458,7 +519,7 @@ class PropertyInfo
 	 */
 	public function isCascadeDelete()
 	{
-		return $this->cascadeDelete;
+		return $this->getCascadeDelete();
 	}
 	
 	/**
@@ -466,7 +527,7 @@ class PropertyInfo
 	 */
 	public function isLocalized()
 	{
-		return $this->localized;
+		return $this->getLocalized();
 	}
 	
 	/**
@@ -474,11 +535,7 @@ class PropertyInfo
 	 */
 	public function getDocumentModel()
 	{
-		if (!$this->isDocument())
-		{
-			throw new Exception("Invalid call to ".__METHOD__.": ".$this->name." is not a document property");
-		}
-		return f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($this->type);
+		return $this->getPersistentModel();
 	}
 	
 	/**

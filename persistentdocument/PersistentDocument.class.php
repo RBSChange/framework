@@ -21,6 +21,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	const PROPERTYTYPE_LONGSTRING = 'LongString';
 	const PROPERTYTYPE_XHTMLFRAGMENT = 'XHTMLFragment';
 	const PROPERTYTYPE_DOCUMENT = 'Document';
+	const PROPERTYTYPE_DOCUMENTARRAY = 'DocumentArray';
 	
 	const PROPERTYTYPE_DECIMAL = 'Decimal';
 	const PROPERTYTYPE_JSON = 'JSON';

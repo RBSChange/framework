@@ -36,7 +36,8 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 <{foreach from=$model->getProperties() item=property}>
 		$p = new PropertyInfo(<{$model->escapeString($property->getName())}>, <{$model->escapeString($property->getType())}>);
 		$p->setDbTable(<{$model->escapeString($model->getTableName())}>)->setDbMapping(<{$model->escapeString($property->getDbName())}>)<{if ($property->getMinOccurs() != 0)}>->setMinOccurs(<{$property->getMinOccurs()}>)<{/if}>
-<{if ($property->getMaxOccurs() != 1)}>->setMaxOccurs(<{$property->getMaxOccurs()}>)<{/if}>
+<{if (abs($property->getMaxOccurs()) != 1)}>->setMaxOccurs(<{$property->getMaxOccurs()}>)<{/if}>
+<{if ($property->getDocumentType() != null)}>->setDocumentType(<{$model->escapeString($property->getDocumentType())}>)<{/if}>
 <{if ($property->isCascadeDelete())}>->setCascadeDelete(true)<{/if}>
 <{if ($property->isTreeNode())}>->setTreeNode(true)<{/if}>
 <{if ($property->getDefaultValue() != null)}>->setDefaultValue(<{$model->escapeString($property->getDefaultValue())}>)<{/if}>
@@ -56,7 +57,8 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 <{foreach from=$model->getSerializedProperties() item=property}>
 		$p = new PropertyInfo(<{$model->escapeString($property->getName())}>);
 		$p->setType(<{$model->escapeString($property->getType())}>)<{if ($property->getMinOccurs() != 0)}>->setMinOccurs(<{$property->getMinOccurs()}>)<{/if}>
-<{if ($property->getMaxOccurs() != 1)}>->setMaxOccurs(<{$property->getMaxOccurs()}>)<{/if}>
+<{if (abs($property->getMaxOccurs()) != 1)}>->setMaxOccurs(<{$property->getMaxOccurs()}>)<{/if}>
+<{if ($property->getDocumentType() != null)}>->setDocumentType(<{$model->escapeString($property->getDocumentType())}>)<{/if}>
 <{if ($property->getDefaultValue() != null)}>->setDefaultValue(<{$model->escapeString($property->getDefaultValue())}>)<{/if}>
 <{if ($property->getConstraintArray() != null)}>->setConstraints(<{$property->buildPhpConstraintArray()}>)<{/if}>
 <{if ($property->isLocalized())}>->setLocalized(true)<{/if}>
@@ -75,7 +77,8 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 		$p = new PropertyInfo(<{$model->escapeString($property->getName())}>);
 		$p->setDbTable(<{$model->escapeString($property->getTableName())}>)->setDbMapping(<{$model->escapeString($property->getRelationName())}>)<{if ($property->getType() != null)}>->setType(<{$model->escapeString($property->getType())}>)<{/if}>
 <{if ($property->getMinOccurs() != 0)}>->setMinOccurs(<{$property->getMinOccurs()}>)<{/if}>
-<{if ($property->getMaxOccurs() != 1)}>->setMaxOccurs(<{$property->getMaxOccurs()}>)<{/if}>
+<{if (abs($property->getMaxOccurs()) != 1)}>->setMaxOccurs(<{$property->getMaxOccurs()}>)<{/if}>
+<{if ($property->getDocumentType() != null)}>->setDocumentType(<{$model->escapeString($property->getDocumentType())}>)<{/if}>
 <{if ($property->isCascadeDelete())}>->setCascadeDelete(true)<{/if}>
 <{if ($property->isTreeNode())}>->setTreeNode(true)<{/if}>
 <{if ($property->getDefaultValue() != null)}>->setDefaultValue(<{$model->escapeString($property->getDefaultValue())}>)<{/if}>

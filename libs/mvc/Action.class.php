@@ -368,7 +368,7 @@ abstract class change_Action
 	 */
 	public function getRequestMethods()
 	{
-		return change_Request::POST | change_Request::GET;
+		return change_Request::POST | change_Request::GET | change_Request::PUT |  change_Request::DELETE;
 	}
 
 

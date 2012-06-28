@@ -1,12 +1,13 @@
 <?php
 /**
- * generic_persistentdocument_Documentmodel
+ * generic_persistentdocument_documentmodel
  * @package generic
  */
-class generic_persistentdocument_Documentmodel extends f_persistentdocument_PersistentDocumentModel
+class generic_persistentdocument_documentmodel extends f_persistentdocument_PersistentDocumentModel
 {
+
 	/**
-	 * Constructor of generic_persistentdocument_Documentmodel
+	 * Constructor of generic_persistentdocument_documentmodel
 	 */
 	protected function __construct()
 	{
@@ -48,11 +49,11 @@ class generic_persistentdocument_Documentmodel extends f_persistentdocument_Pers
 	}
 	
 	/**
-	 * @return string For example: modules_generic/Document
+	 * @return string 'modules_generic/document'
 	 */
 	public final function getName()
 	{
-		return 'modules_generic/Document';
+		return f_persistentdocument_PersistentDocumentModel::BASE_MODEL;
 	}
 
 	/**

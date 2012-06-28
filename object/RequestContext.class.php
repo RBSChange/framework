@@ -604,8 +604,24 @@ class RequestContext
 		if (is_null($this->m_os))
 		{
 			$this->m_os = self::OS_OTHER;
-
-			if (change_Controller::getInstance()->getContext()->getRequest()->getMethod() == change_Request::CONSOLE)
+			if (isset($_SERVER['HTTP_USER_AGENT']))
+			{
+				$ua = strtolower($_SERVER['HTTP_USER_AGENT']);
+			
+				if (strpos($ua, 'windows') !== false)
+				{
+					$this->m_os = self::OS_WIN;
+				}
+				else if(strpos($ua, 'macintosh') !== false)
+				{
+					$this->m_os = self::OS_MAC;
+				}
+				else if(strpos($ua, 'linux') !== false)
+				{
+					$this->m_os = self::OS_LINUX;
+				}
+			}
+			else
 			{
 				$os = strtolower(PHP_OS);
 
@@ -622,23 +638,6 @@ class RequestContext
 					$this->m_os = self::OS_WIN;
 				}
 			}
-			else if (isset($_SERVER['HTTP_USER_AGENT']))
-			{
-				$ua = strtolower($_SERVER['HTTP_USER_AGENT']);
-				
-				if (strpos($ua, 'windows') !== false)
-				{
-					$this->m_os = self::OS_WIN;
-				}
-				else if(strpos($ua, 'macintosh') !== false)
-				{
-					$this->m_os = self::OS_MAC;
-				}
-				else if(strpos($ua, 'linux') !== false)
-				{
-					$this->m_os = self::OS_LINUX;
-				}
-			}
 		}
 
 		return $this->m_os;
@@ -653,14 +652,7 @@ class RequestContext
 		if (is_null($this->m_userAgentType))
 		{
 			$request = change_Controller::getInstance()->getContext()->getRequest();
-			if ($request->getMethod() == change_Request::CONSOLE)
-			{
-				$userAgentType = $request->getParameter('force-user-agent-type');
-			}
-			else
-			{
-				$userAgentType = $this->getBrowser()->GraphicalEngine;
-			}
+			$userAgentType = $this->getBrowser()->GraphicalEngine;
 
 			if (is_null($userAgentType) || $userAgentType == '')
 			{
@@ -681,14 +673,7 @@ class RequestContext
 		if (is_null($this->m_userAgentTypeVersion))
 		{
 			$request = change_Controller::getInstance()->getContext()->getRequest();
-			if ($request->getMethod()==change_Request::CONSOLE)
-			{
-				$userAgentTypeVersion = $request->getParameter('force-user-agent-typeversion');
-			}
-			else
-			{
-				$userAgentTypeVersion = self::getBrowser()->GraphicalEngineVer;
-			}
+			$userAgentTypeVersion = $this->getBrowser()->GraphicalEngineVer;
 
 			if (is_null($userAgentTypeVersion) || $userAgentTypeVersion == '')
 			{

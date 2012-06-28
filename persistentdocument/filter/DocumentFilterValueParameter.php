@@ -116,12 +116,12 @@ class f_persistentdocument_DocumentFilterValueParameter extends f_persistentdocu
 							{
 								Framework::exception($e);
 							}
-							$value = $ls->transBO('m.uixul.bo.general.document-not-found', array('ucf'));
+							$value = $ls->trans('m.uixul.bo.general.document-not-found', array('ucf'));
 						}
 						break;
 						
 					case BeanPropertyType::BOOLEAN: 
-						$value = $ls->transBO('m.uixul.bo.general.' . ($tmpValue == 'true' ? 'yes' : 'no'));
+						$value = $ls->trans('m.uixul.bo.general.' . ($tmpValue == 'true' ? 'yes' : 'no'));
 						break;
 						
 					default : 
