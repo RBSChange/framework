@@ -91,7 +91,7 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 	 */
 	public function getLabelKey()
 	{
-		return '&modules.' . $this->moduleName . '.document.' . $this->documentName . '.' . ucfirst($this->getName()) . ';';
+		return 'm.' . $this->moduleName . '.document.' . $this->documentName . '.' . strtolower($this->getName());
 	}
 	
 	/**
@@ -101,7 +101,7 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 	 */
 	public function getHelpKey()
 	{
-		return '&modules.' . $this->moduleName . '.document.' . $this->documentName . '.' . ucfirst($this->getName()) . '-help;';
+		return 'm.' . $this->moduleName . '.document.' . $this->documentName . '.' . strtolower($this->getName()) . '-help';
 	}
 	
 	/**

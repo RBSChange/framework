@@ -4,7 +4,7 @@ abstract class f_util_FileUtils
 	const OVERRIDE = 2;
 	const APPEND = 4;
 
-	const LOCALE_PATH =  '&modules.media.download.';
+	const LOCALE_PATH =  'm.media.download.';
 
 	static public function isDirectoryWritable($filepath,$recurse=false)
 	{

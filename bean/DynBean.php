@@ -234,7 +234,7 @@ class f_mvc_DynBeanModel implements f_mvc_BeanModel
 		$matches = null;
 		if (preg_match('/^(\w+)_(.*)$/', $class->getName(), $matches))
 		{
-			$localePrefix = 'modules.'.$matches[1].'.document.'.strtolower($matches[2]);
+			$localePrefix = 'm.'.$matches[1].'.document.'.strtolower($matches[2]);
 		}
 		else
 		{
@@ -332,7 +332,7 @@ class f_mvc_DynBeanModel implements f_mvc_BeanModel
 					$propertyInfo = new BeanPropertyInfoImpl($propName, $paramType);
 					if ($localePrefix !== null)
 					{
-						$propertyInfo->setLabelKey('&'.$localePrefix.".".$propName.';');
+						$propertyInfo->setLabelKey($localePrefix.".".$propName);
 					}
 					$this->addProperty($propertyInfo);
 				}
@@ -399,8 +399,8 @@ class f_mvc_DynBeanModel implements f_mvc_BeanModel
 		{
 			if ($localePrefix !== null)
 			{
-				$propertyInfo->setLabelKey('&'.$localePrefix.".".$propName.';');
-				$propertyInfo->setHelpKey('&'.$localePrefix.".".$propName.'-help;');
+				$propertyInfo->setLabelKey($localePrefix.".".$propName);
+				$propertyInfo->setHelpKey($localePrefix.".".$propName.'-help');
 			}
 			$this->addProperty($propertyInfo);
 		}

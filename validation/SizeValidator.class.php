@@ -188,12 +188,12 @@ abstract class validation_AbstractSizeValidator extends validation_ValidatorImpl
 		{
 			return parent::getMessageCode();
 		}
-		$key = 'framework.validation.validator.'.substr(get_class($this), 11, -9).'-'.$this->fieldType.'.message';
+		$key = 'f.validation.validator.'.substr(get_class($this), 11, -9).'-'.$this->fieldType.'.message';
 		if ($this->usesReverseMode)
 		{
 			$key .= '.reversed';
 		}
-		return '&'.$key.';';
+		return $key;
 	}
 }
 

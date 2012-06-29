@@ -2987,7 +2987,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	// Deprecated.
 	
 	/**
-	 * @deprecated (will be removed in 5.0) use DocumentHelper::completeBOAttributes() instead.
+	 * @deprecated (will be removed in 5.0) implement completeBOAttributes instead.
 	 */
 	public function addTreeAttributes($document, $moduleName, $treeType, &$nodeAttributes)
 	{
