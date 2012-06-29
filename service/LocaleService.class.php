@@ -876,16 +876,20 @@ class LocaleService extends change_BaseService
 	public function formatKey($lang, $cleanKey, $formatters = array(), $replacements = array())
 	{
 		list ($keyPath, $id) = $this->explodeKey($cleanKey);
-		if ($keyPath === false)
+		if ($keyPath !== false)
 		{
-			return $cleanKey;
+			$lcid = $this->getLCID($lang);
+			list($content, $format) = f_persistentdocument_PersistentProvider::getInstance()->translate($lcid, $id, $keyPath);
+			if ($content === null)
+			{
+				$this->logKeyNotFound($keyPath.'.'.$id, $lcid);
+				return $cleanKey;
+			}
 		}
-		$lcid = $this->getLCID($lang);
-		list($content, $format) = f_persistentdocument_PersistentProvider::getInstance()->translate($lcid, $id, $keyPath);
-		if ($content === null)
+		else
 		{
-			$this->logKeyNotFound($keyPath.'.'.$id, $lcid);
-			return $cleanKey;
+			$content = $cleanKey;
+			$format = 'TEXT';
 		}
 		
 		if (count($replacements))
@@ -1048,7 +1052,7 @@ class LocaleService extends change_BaseService
 		if ($this->logFilePath !== false)
 		{
 			$mode =  RequestContext::getInstance()->getMode() === RequestContext::FRONTOFFICE_MODE ? 'fo' : 'bo';
-			error_log("\n". gmdate('Y-m-d H:i:s')."\t" . $mode ."\t" .  $lang. "\t" . $key, 3, $this->logFilePath);
+			error_log(gmdate('Y-m-d H:i:s'). "\t" . $mode ."\t" .  $lang. "\t" . $key . PHP_EOL, 3, $this->logFilePath);
 		}
 	}
 	
