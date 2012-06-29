@@ -325,8 +325,8 @@ class generator_PersistentProperty
 	 */
 	public static function generateInverseProperty($property)
 	{
-		$document = generator_PersistentModel::getModelByName($property->getDocumentType());
-		$invertProperty = new generator_PersistentProperty($document);
+		$model = generator_PersistentModel::getModelByName($property->getDocumentTypeRecursive());
+		$invertProperty = new generator_PersistentProperty($model);
 		$tmp = explode('/', $property->model->getName());
 		$invertProperty->name = $tmp[1];
 		$invertProperty->type = $property->type;
@@ -503,6 +503,22 @@ class generator_PersistentProperty
 	public function getDocumentType()
 	{
 		return $this->documentType;
+	}
+	
+	/**
+	 * @return String
+	 */
+	public function getDocumentTypeRecursive()
+	{
+		if ($this->documentType !== null)
+		{
+			return $this->documentType;
+		}
+		elseif ($this->parentProperty)
+		{
+			return $this->parentProperty->getDocumentTypeRecursive();
+		}
+		throw new Exception('no document type defined');
 	}
 
 	/**

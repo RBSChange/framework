@@ -435,7 +435,7 @@ class generator_PersistentModel
 				$property->applyDefaultConstraints();
 				if ($property->isInverse() && $property->isDocument())
 				{
-					$destModel = $property->getDocumentType();
+					$destModel = $property->getDocumentTypeRecursive();
 					if (!array_key_exists($destModel, $inversePropertiesByModel))
 					{
 						$inversePropertiesByModel[$destModel] = array();
