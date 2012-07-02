@@ -218,7 +218,9 @@ abstract class f_mvc_Action
 	}
 
 	/**
-	 * @param String $parameterName
+	 * @param string $parameterName
+	 * @param string $contextOrder C=Configuration Parameter, A=Request Attribute, S=Session Attribute, P=Request Parameter, G=Request Global Parameter, D=Block Default getter
+	 * @return mixed|NULL
 	 */
-	abstract protected function findParameterValue($parameterName);
+	abstract protected function findParameterValue($parameterName, $contextOrder = 'CASPGD');
 }
