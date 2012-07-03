@@ -260,7 +260,10 @@ class StyleService extends BaseService
 		return null;
 	}
 	
-	private $currentThemeName = false;
+	/**
+	 * @var string
+	 */
+	protected $currentThemeName = false;
 
 	/**
 	 * @param string $id For example: 'modules.catalog.frontoffice'
