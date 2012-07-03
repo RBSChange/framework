@@ -259,42 +259,65 @@ class StyleService extends BaseService
 		}
 		return null;
 	}
+	
+	private $currentThemeName = false;
 
 	/**
-	 * @param String $id For example: 'modules.catalog.frontoffice'
-	 * @return String | null the path of the xml source file
+	 * @param string $id For example: 'modules.catalog.frontoffice'
+	 * @param string $suffix For example: '.image.all'
+	 * @return string | null the path of the css source file
 	 */
-	public function getSourceLocation($id)
-	{
+	public function getSourceLocation($id, $suffix = '')
+	{	
 		$styleRessource = explode('.', $id);
-		$path = null;
 		if (count($styleRessource) > 2)
 		{
-			$path = array_slice($styleRessource, 2, -1);
-			if (count($path))
+			$fileResolver = FileResolver::getInstance();
+			
+			
+			if ($styleRessource[0] === 'modules')
 			{
-				$path = 'style' . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $path);
+				//Add Theme override
+				if ($this->currentThemeName === false)
+				{
+					$this->currentThemeName = null;
+					$currentPageId = website_WebsiteModuleService::getInstance()->getCurrentPageId();
+					if ($currentPageId)
+					{
+						$currentPage = DocumentHelper::getDocumentInstance($currentPageId, "modules_website/page");
+						list($this->currentThemeName, ) = explode('/', $currentPage->getTemplate());
+					}
+				}
+				
+				if ($this->currentThemeName !== null)
+				{
+					$fileResolver->addPotentialDirectory(f_util_FileUtils::buildWebeditPath('themes', $this->currentThemeName));
+					$fileResolver->addPotentialDirectory(f_util_FileUtils::buildOverridePath('themes', $this->currentThemeName));
+				}
+
+	
+			}			
+							
+			$relativePath = array_slice($styleRessource, 2, -1);
+			if (count($relativePath))
+			{
+				$relativePath = 'style' . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $relativePath);
 			}
 			else
 			{
-				$path = 'style';
+				$relativePath = 'style';
 			}
-
-			$file = end($styleRessource);		
-			$cssPath = FileResolver::getInstance()
-				->setPackageName($styleRessource[0] . '_' . $styleRessource[1])
-				->setDirectory($path)->getPath($file . '.css');
-			if ($cssPath !== null) 
+			$fileName = end($styleRessource) . $suffix . '.css';
+				
+			$path = $fileResolver->setPackageName($styleRessource[0] . '_' . $styleRessource[1])->setDirectory('style')->getPath($fileName);
+			if ($path !== null) 
 			{
-				return $cssPath;
+				return $path;
 			}
-	
-			$path = FileResolver::getInstance()
-				->setPackageName($styleRessource[0] . '_' . $styleRessource[1])
-				->setDirectory($path)->getPath($file . '.xml');
 		}
-		return $path;
+		return null;
 	}
+	
 	
 	/**
 	 * @param integer|f_web_CSSVariables|null $skin
@@ -456,44 +479,19 @@ class StyleService extends BaseService
 	    return $xml;
 	}
 	
-	/**
-	 * @param String $id For example: 'modules.catalog.frontoffice'
-	 * @return String | null the path of the xml source file
-	 */
-	private function getImageSourceLocation($id)
-	{
-		$styleRessource = explode('.', $id);
-		$path = null;
-		if (count($styleRessource) > 2)
-		{
-			$path = array_slice($styleRessource, 2, -1);
-			if (count($path))
-			{
-				$path = 'style' . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $path);
-			}
-			else
-			{
-				$path = 'style';
-			}
-
-			$file = end($styleRessource);		
-			$path = FileResolver::getInstance()
-				->setPackageName($styleRessource[0] . '_' . $styleRessource[1])
-				->setDirectory($path)->getPath($file . '.image.all.css');
-		}
-		return $path;
-	}
 	
 	/**
-	 * @param String $moduleName
+	 * @param string $stylesheetName
+	 * @return array
 	 */
 	public function getImageFormats($stylesheetName)
 	{
-		$sourceLocation = $this->getImageSourceLocation($stylesheetName);
+		$sourceLocation = $this->getSourceLocation($stylesheetName, '.image.all');
 		if (!$sourceLocation)
 		{
 			return array();
 		}
+		
 		$formats = array();
 		$css = f_web_CSSStylesheet::getInstanceFromFile($sourceLocation);
 		foreach ($css->getCSSRules() as $rule) 
@@ -528,7 +526,7 @@ class StyleService extends BaseService
 		{
 			$bindingUrl = uixul_lib_BindingObject::getUrl($binding);
 		}
-		catch (AutoloadException $e)
+		catch (Exception $e)
 		{
 		    Framework::exception($e);
 		}
