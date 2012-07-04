@@ -716,6 +716,63 @@ class f_persistentdocument_DocumentService extends BaseService
 			}
 		}
 	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @return void
+	 */
+	public function purgeDocument($document)
+	{
+		if ($this !== $document->getDocumentService())
+		{
+			$document->getDocumentService()->purgeDocument($document);
+			return;
+		}
+	
+		$tm = $this->getTransactionManager();
+		try
+		{
+			$tm->beginTransaction();
+			
+			if (!$document->getPersistentModel()->isLocalized())
+			{
+				$this->purgeDocumentForLang($document, $document->getLang());
+			}
+			else
+			{
+				foreach (array_reverse($document->getI18nInfo()->getLangs()) as $lang)
+				{
+					$this->purgeDocumentForLang($document, $lang);
+				}
+			}
+			$tm->commit();
+		} 
+		catch (Exception $e) 
+		{
+			$tm->rollback($e);
+			throw $e;
+		}
+	}	
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param string $lang
+	 * @return void
+	 */	
+	protected function purgeDocumentForLang($document, $lang)
+	{
+		$rc = RequestContext::getInstance();
+		try
+		{
+			$rc->beginI18nWork($lang);
+			$this->delete($document);
+			$rc->endI18nWork();
+		}
+		catch (Exception $e)
+		{
+			$rc->endI18nWork($e);
+		}
+	}
 
 	/**
 	 * Returns a document instance from its ID.
