@@ -616,6 +616,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
+	 * @return void
 	 */
 	public function purgeDocument($document)
 	{
@@ -624,27 +625,49 @@ class f_persistentdocument_DocumentService extends change_BaseService
 			$document->getDocumentService()->purgeDocument($document);
 			return;
 		}
-		
-		if (!$document->getPersistentModel()->isLocalized())
+	
+		$tm = $this->getTransactionManager();
+		try
 		{
-			$this->delete($document);
-			return;
-		}
-		
-		$requestContext = RequestContext::getInstance();
-		$langs = array_reverse($document->getI18nInfo()->getLangs());
-		foreach ($langs as $lang)
-		{
-			try
+			$tm->beginTransaction();
+			
+			if (!$document->getPersistentModel()->isLocalized())
 			{
-				$requestContext->beginI18nWork($lang);
-				$this->delete($document);
-				$requestContext->endI18nWork();
+				$this->purgeDocumentForLang($document, $document->getLang());
 			}
-			catch (Exception $e)
+			else
 			{
-				$requestContext->endI18nWork($e);
-			}			
+				foreach (array_reverse($document->getI18nInfo()->getLangs()) as $lang)
+				{
+					$this->purgeDocumentForLang($document, $lang);
+				}
+			}
+			$tm->commit();
+		} 
+		catch (Exception $e) 
+		{
+			$tm->rollback($e);
+			throw $e;
+		}
+	}	
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param string $lang
+	 * @return void
+	 */	
+	protected function purgeDocumentForLang($document, $lang)
+	{
+		$rc = RequestContext::getInstance();
+		try
+		{
+			$rc->beginI18nWork($lang);
+			$this->delete($document);
+			$rc->endI18nWork();
+		}
+		catch (Exception $e)
+		{
+			$rc->endI18nWork($e);
 		}
 	}
 

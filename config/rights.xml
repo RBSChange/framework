@@ -21,6 +21,7 @@
 			<action name="Deactivated" />
 			<action name="ReActivate" />
 			<action name="Delete" />
+			<action name="PurgeDocument" />
 			<action name="File" />
 			<action name="PutInTrash" />
 
