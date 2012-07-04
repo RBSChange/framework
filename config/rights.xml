@@ -31,6 +31,7 @@ sur les documents les actions de bases sont automatiquements importées
 			<action name="Deactivated" />
 			<action name="ReActivate" back-office-name="reactivate"/>
 			<action name="Delete" />
+			<action name="PurgeDocument" />
 			<action name="File" />
 			<action name="PutInTrash" />
 
