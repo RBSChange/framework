@@ -46,4 +46,5 @@
 	<key id="hostnamelocalnamenotallowed">'%value%' semble être un nom réseau local mais les noms locaux sont interdits</key>
 	<key id="hostnameundecipherabletld">'%value%' semble être un nom d'hôte DNS mais l'extension TLD ne peut être extraite</key>
 	<key id="hostnameunknowntld">'%value%' semble être un nom d'hôte DNS mais son extension TLD semble inconnue</key>
+	<key id="notdigits">'%value%' ne doit contenir que des chiffres</key>
 </i18n>

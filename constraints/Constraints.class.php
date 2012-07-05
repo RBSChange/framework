@@ -311,7 +311,20 @@ abstract class change_Constraints
 			}		
 		$c->setDisableTranslator(true);
 		return $c;
+		
+
 	}
+	
+	/**
+	 * @param array $params
+	 * @return Zend_Validate_Interface
+	 */
+	public static function integer($params = array())
+	{
+		$c = new Zend_Validate_Digits($params);
+		$c->setMessage(self::getI18nConstraintValue(Zend_Validate_Digits::NOT_DIGITS), Zend_Validate_Digits::NOT_DIGITS);
+		return $c;		
+	}	
 }
 
 class change_WrappedValidatorConstraint implements Zend_Validate_Interface

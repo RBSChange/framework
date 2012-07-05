@@ -41,4 +41,5 @@
   <key id="hostnamelocalnamenotallowed">'%value%' appears to be a local network name but local network names are not allowed</key>
   <key id="hostnameundecipherabletld">'%value%' appears to be a DNS hostname but cannot extract TLD part</key>
   <key id="hostnameunknowntld">'%value%' appears to be a DNS hostname but cannot match TLD against known list</key>
+  <key id="notdigits">'%value%' must contain only digits</key>
 </i18n>
