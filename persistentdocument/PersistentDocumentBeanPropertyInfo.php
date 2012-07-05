@@ -203,11 +203,7 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 	 */
 	public function isRequired()
 	{
-		if ($this->propertyInfo->getMinOccurs() > 0)
-		{
-			return true;
-		}
-		return false;
+		return $this->propertyInfo->isRequired();
 	}
 	
 	/**

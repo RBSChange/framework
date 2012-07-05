@@ -19,15 +19,16 @@
 	model-version="4.0" has-url="false" use-rewrite-url="false" use-publication-dates="false">
 	<properties>
 		<!--
-			* Tag: <property />			
+			* Tag: <property />
 			* Existing attributes:
 			
 			name="propertyName"
 			type="[String] | Boolean | Integer | Double | Decimal | DateTime | LongString | Lob | XHTMLFragment | BBCode | JSON | Object | DocumentId | Document | DocumentArray"
 			document-type="modules_xxxxx/yyyyy"
 			cascade-delete="true | [false]"
-			min-occurs="[0]..n"
-			max-occurs="[1]..n | -1"
+			required="true | [false]"
+			min-occurs="2..n"
+			max-occurs="2..n | [-1]"
 			from-list="xxxxxxxx"
 			
 			db-mapping="fieldName"
@@ -73,8 +74,8 @@
 			min-occurs="[0]..n"
 			max-occurs="[1]..n | -1"
 			from-list="xxxxxxxx"
-			localized="true | [false]"		
+			localized="true | [false]"
 			default-value="xxxx"
-		-->		
+		-->
 	</serializedproperties>
 </document>

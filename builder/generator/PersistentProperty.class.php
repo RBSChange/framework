@@ -24,9 +24,10 @@ class generator_PersistentProperty
 	
 	/**
 	 * @var generator_PersistentModel
-	 */	
+	 */
 	private $typeModel; // Used for inverse properties sorting and set only for them.
 	
+	private $required;
 	private $minOccurs;
 	private $maxOccurs;
 	private $dbName;
@@ -133,6 +134,9 @@ class generator_PersistentProperty
 					break;
 				case "default-value":
 					$this->defaultValue = $value;
+					break;
+				case "required":
+					$this->required = generator_PersistentModel::getBoolean($value);
 					break;
 				case "min-occurs":
 					$this->minOccurs = intval($value);
@@ -249,8 +253,7 @@ class generator_PersistentProperty
 		$property->cascadeDelete = false;
 		$property->name = 'id';
 		$property->dbMapping = 'document_id';
-		$property->minOccurs = 1;
-		$property->maxOccurs = 1;
+		$property->required = true;
 		$property->type = f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER;
 		$property->localized = false;
 		return $property;
@@ -265,8 +268,7 @@ class generator_PersistentProperty
 		$property->cascadeDelete = false;
 		$property->name = 'model';
 		$property->dbMapping = 'document_model';
-		$property->minOccurs = 1;
-		$property->maxOccurs = 1;
+		$property->required = true;
 		$property->type = f_persistentdocument_PersistentDocument::PROPERTYTYPE_STRING;
 		$property->localized = false;
 		$property->indexed = 'none';
@@ -282,8 +284,7 @@ class generator_PersistentProperty
 		$property->cascadeDelete = false;
 		$property->name = 'correctionid';
 		$property->dbMapping = 'document_correctionid';
-		$property->maxOccurs = 1;
-		$property->minOccurs = 0;
+		$property->required = false;
 		$property->type = f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER;
 		$property->localized = false;
 		return $property;
@@ -298,8 +299,7 @@ class generator_PersistentProperty
 		$property->cascadeDelete = false;
 		$property->name = 'correctionofid';
 		$property->dbMapping = 'document_correctionofid';
-		$property->maxOccurs = 1;
-		$property->minOccurs = 0;
+		$property->required = false;
 		$property->type = f_persistentdocument_PersistentDocument::PROPERTYTYPE_INTEGER;
 		$property->localized = false;
 		return $property;
@@ -314,8 +314,7 @@ class generator_PersistentProperty
 		$property->cascadeDelete = false;
 		$property->name = 's18s';
 		$property->dbMapping = 'document_s18s';
-		$property->maxOccurs = 1;
-		$property->minOccurs = 0;
+		$property->required = false;
 		$property->type = f_persistentdocument_PersistentDocument::PROPERTYTYPE_LOB;
 		return $property;
 	}	
@@ -332,6 +331,7 @@ class generator_PersistentProperty
 		$invertProperty->type = $property->type;
 		$invertProperty->documentType = $property->model->getName();
 		$invertProperty->typeModel = $property->model;
+		$invertProperty->required = $property->required;
 		$invertProperty->minOccurs = $property->minOccurs;
 		$invertProperty->maxOccurs = $property->maxOccurs;
 		$invertProperty->dbMapping = $property->getDbName();
@@ -408,7 +408,7 @@ class generator_PersistentProperty
 				case 'String':
 				case 'LongString':
 				case 'XHTMLFragment':
-					return 'property';		
+					return 'property';
 				default:
 					return 'none';
 			}
@@ -426,6 +426,7 @@ class generator_PersistentProperty
 		$this->dbMapping = $property->dbMapping;
 		$this->maxOccurs = $property->maxOccurs;
 		if (is_null($this->dbSize)) {$this->dbSize = $property->dbSize;}
+		if (is_null($this->required)) {$this->required = $property->required;}
 		if (is_null($this->minOccurs)) {$this->minOccurs = $property->minOccurs;}
 		if (is_null($this->indexed)) {$this->indexed = $property->indexed;}
 	}
@@ -663,7 +664,11 @@ class generator_PersistentProperty
 	 */
 	public function isRequired()
 	{
-		return $this->getMinOccurs() > 0;
+		if ($this->required === null && !is_null($this->parentProperty))
+		{
+			return $this->parentProperty->isRequired();
+		}
+		return $this->required === null ? false : $this->required;
 	}
 
 	/**
@@ -795,7 +800,7 @@ class generator_PersistentProperty
 		$name = $this->name;
 		if (in_array($name, array('id', 'model', 'lang'))) {return;}
 		$constraintArray = $this->getConstraintArray();
-		$required = $this->isRequired();		
+		$required = $this->isRequired();
 		if (!is_array($constraintArray) && !$required && $this->getMaxOccurs() <= 1)
 		{
 			return;
@@ -815,21 +820,21 @@ class generator_PersistentProperty
 				}
 				
 				$if = array();
-				if ($required) {$if[] =  $this->getMinOccurs() .' > $count';}
+				if ($required) {$if[] = max($this->getMinOccurs(), 1) .' > $count';}
 				if ($this->getMaxOccurs() > 1 ) {$if[] =  $this->getMaxOccurs() .' < $count';}			
 				$phpScript[] = '		$count = $this->get'.$uName .'Count();';
 				$phpScript[] = '		if ('. implode(' || ', $if) .') {';	
 				$phpScript[] = '			$args = array(\'minOccurs\' => '. $this->getMinOccurs() .', \'maxOccurs\' => '. $this->getMaxOccurs() .', \'count\' => $count);';
 				$phpScript[] = '			$this->addPropertyErrors(\''.$name.'\', LocaleService::getInstance()->trans(\'f.constraints.notbetweendocumentarray\', array(\'ucf\'), array($args)));';
 				$phpScript[] = '			return false;';
-				$phpScript[] = '		}';			
+				$phpScript[] = '		}';
 			}
-			elseif ($this->getMinOccurs() > 0)
+			elseif ($required)
 			{
 				$phpScript[] = '		if ($this->get'.$uName .'() === null) {';	
 				$phpScript[] = '			$this->addPropertyErrors(\''.$name.'\', LocaleService::getInstance()->trans(\'f.constraints.isempty\', array(\'ucf\')));';
 				$phpScript[] = '			return false;';
-				$phpScript[] = '		}';				
+				$phpScript[] = '		}';
 			}
 			
 			if (is_array($constraintArray))
@@ -889,9 +894,9 @@ class generator_PersistentProperty
 			$php[] = '			$c = change_Constraints::getByName($name, $params);';		
 			$php[] = '			if (!$c->isValid($value)) {';		
 			$php[] = '				$this->addPropertyErrors(\''.$name.'\', change_Constraints::formatMessages($c));';
-			$php[] = '				return false;';					
-			$php[] = '			}';		
-			$php[] = '		}';	
+			$php[] = '				return false;';
+			$php[] = '			}';
+			$php[] = '		}';
 		}
 		$php[] = '		return true;';
 		return join(PHP_EOL, $php);
@@ -974,7 +979,7 @@ class generator_PersistentProperty
 			return generator_PersistentModel::BASE_CLASS_NAME;
 		}
 		elseif ($this->getDocumentType() !== null)
-		{	
+		{
 			list ($package, $docName) = explode('/', $this->getDocumentType());
 			list (, $packageName) = explode('_', $package);
 			return "" . $packageName . "_persistentdocument_" . $docName;

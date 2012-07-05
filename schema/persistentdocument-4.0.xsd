@@ -138,6 +138,7 @@
 									<xs:attribute name="type" use="optional" type="propertyType" default="String" />
 									<xs:attribute name="document-type" type="documentModel" />
 									<xs:attribute name="cascade-delete" type="xs:boolean" default="false" />
+									<xs:attribute name="required" type="xs:boolean" default="false" />
 									<xs:attribute name="min-occurs" type="xs:int" default="0" />
 									<xs:attribute name="max-occurs" type="xs:int" default="1" />
 									<xs:attribute name="from-list" type="xs:string" />				

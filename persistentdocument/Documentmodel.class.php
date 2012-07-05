@@ -18,10 +18,10 @@ class generic_persistentdocument_documentmodel extends f_persistentdocument_Pers
 	{
 		parent::loadProperties();
 		$p = new PropertyInfo('id');
-		$p->setDbTable('f_document')->setDbMapping('document_id')->setType('Integer')->setMinOccurs(1);
+		$p->setDbTable('f_document')->setDbMapping('document_id')->setType('Integer')->setRequired(true);
 		$this->m_properties[$p->getName()] = $p;
 		$p = new PropertyInfo('model');
-		$p->setDbTable('f_document')->setDbMapping('document_model')->setType('String')->setMinOccurs(1);
+		$p->setDbTable('f_document')->setDbMapping('document_model')->setType('String')->setRequired(true);
 		$this->m_properties[$p->getName()] = $p;
 	}
 	

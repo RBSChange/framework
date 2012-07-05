@@ -7,6 +7,7 @@ class PropertyInfo
 	private $name;
 	private $type = f_persistentdocument_PersistentDocument::PROPERTYTYPE_STRING;
 	private $documentType = null;
+	private $required = false;
 	private $minOccurs = 0;
 	private $maxOccurs = 1;
 	private $dbMapping;
@@ -91,7 +92,7 @@ class PropertyInfo
 	 */
 	public function getMinOccurs()
 	{
-		return $this->minOccurs;
+		return max($this->minOccurs, $this->isRequired() ? 1 : 0);
 	}
 
 	/**
@@ -280,11 +281,29 @@ class PropertyInfo
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isRequired()
 	{
-		return $this->minOccurs > 0;
+		return $this->getRequired();
+	}
+	
+	/**
+	 * @return boolean
+	 */
+	public function getRequired()
+	{
+		return $this->required;
+	}
+	
+	/**
+	 * @param boolean $value
+	 * @return PropertyInfo
+	 */
+	public function setRequired($value)
+	{
+		$this->required = ($value == true);
+		return $this;
 	}
 	
 	/**
