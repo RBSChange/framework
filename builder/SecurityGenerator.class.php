@@ -215,9 +215,7 @@ class ModuleRoles
 					case 'import':
 						$module = $node->getAttribute('modulename');
 						$fileName = $node->hasAttribute('configfilename') ? $node->getAttribute('configfilename') . '.xml' : 'rights.xml';
-						$path = FileResolver::getInstance()
-							->setPackageName('modules_' . $module)
-							->setDirectory('config')->getPath($fileName);
+						$path = change_FileResolver::getNewInstance()->getPath('modules', $module, 'config', $fileName);
 						if ($path !== null)
 						{
 							$doc = f_util_DOMUtils::fromPath($path);

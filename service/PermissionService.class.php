@@ -1060,9 +1060,7 @@ class change_PermissionService extends change_BaseService
 		$destPath = f_util_FileUtils::buildOverridePath('modules', $forModuleName, 'config', 'rights.xml');
 		$result = array('action' => 'ignore', 'path' => $destPath);
 		
-		$path = FileResolver::getInstance()->setPackageName('modules_' . $fromModuleName)
-			->setDirectory('config')->getPath($configFileName .'.xml');
-			
+		$path = change_FileResolver::getNewInstance()->getPath('modules', $fromModuleName, 'config', $configFileName .'.xml');		
 		if ($path === null)
 		{
 			throw new Exception(__METHOD__ . ' file ' . $fromModuleName . '/config/' . $configFileName . '.xml not found');

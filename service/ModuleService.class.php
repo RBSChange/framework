@@ -77,7 +77,7 @@ class ModuleService extends change_BaseService
 	 *
 	 * @see FileResolver::getPath()
 	 */
-	public function getModulePath($moduleName, $relativePath = '/', $mode = null)
+	public function getModulePath($moduleName, $relativePath = '', $mode = null)
 	{
 		if (!$this->moduleExists($moduleName))
 		{
@@ -92,7 +92,7 @@ class ModuleService extends change_BaseService
 		{
 			$method = 'getPath';
 		}
-		return FileResolver::getInstance()->setPackageName('modules_' . $moduleName)->setDirectory($relativePath)->$method('');
+		return change_FileResolver::getNewInstance()->$method('modules', $moduleName, $relativePath);
 	}
 	
 	/**

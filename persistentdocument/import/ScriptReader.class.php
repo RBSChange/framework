@@ -37,11 +37,35 @@ class import_ScriptReader extends change_BaseService
 	 */
 	public function executeModuleScript($moduleName, $scriptName, $attributes = array())
 	{
-		$path = FileResolver::getInstance()->setPackageName('modules_' . $moduleName)->setDirectory('setup')->getPath($scriptName);
+		$path = change_FileResolver::getNewInstance()->getPath('modules', $moduleName, 'setup', $scriptName);
 		if ($path === null)
 		{
 			throw new Exception("Could not find any script named $scriptName for module $moduleName");
 		}
+		$this->execute($path, $attributes);
+	}
+	
+	/**
+	 * @param String $themeName ex : developer
+	 * @param String $scriptName ex : init.xml
+	 * @param array $attributes
+	 */
+	public function executeThemeScript($themeName, $scriptName, $attributes = array())
+	{
+		$path = change_FileResolver::getNewInstance()->getPath('themes', $themeName, 'setup', $scriptName);
+		if ($path === null)
+		{
+			throw new Exception("Could not find any script named $scriptName for theme $themeName");
+		}	
+		$this->execute($path, $attributes);		
+	}
+	/**
+	 * @param String $fileName
+	 * @param attay $attributes
+	 */
+	public function execute($fileName, $attributes = array())
+	{		
+		if (!is_array($attributes)) {$attributes = array();}
 		
 		// Set default values of tempalte and templateHome attributes.
 		if (!isset($attributes['template']))
@@ -60,45 +84,10 @@ class import_ScriptReader extends change_BaseService
 		{
 			$attributes['templatePopin'] = Framework::getConfigurationValue('modules/website/sample/defaultPopinTemplate');
 		}		
-		$this->execute($path, $attributes);
-	}
-	
-	/**
-	 * @param String $themeName ex : developer
-	 * @param String $scriptName ex : init.xml
-	 * @param array $attributes
-	 */
-	public function executeThemeScript($themeName, $scriptName, $attributes = array())
-	{
-		$path = FileResolver::getInstance()->setPackageName('themes_' . $themeName)->setDirectory('setup')->getPath($scriptName);
-		if ($path === null)
-		{
-			throw new Exception("Could not find any script named $scriptName for theme $themeName");
-		}
 		
-		// Set default values of tempalte and templateHome attributes.
-		if (!isset($attributes['template']))
-		{
-			$attributes['template'] = Framework::getConfigurationValue('modules/website/sample/defaultPageTemplate');
-		}
-		if (!isset($attributes['templateHome']))
-		{
-			$attributes['templateHome'] = Framework::getConfigurationValue('modules/website/sample/defaultHomeTemplate');
-		}		
-		$this->execute($path, $attributes);		
-	}
-	/**
-	 * @param String $fileName
-	 * @param attay $attributes
-	 */
-	public function execute($fileName, $attributes = array())
-	{		
 		$scriptInstance = new self();
 		$scriptInstance->initialize();
-		if (is_array($attributes))
-		{
-			$scriptInstance->attributes = $attributes;
-		}
+		$scriptInstance->attributes = $attributes;
 		$scriptInstance->executeInternal($fileName);		
 	}
 

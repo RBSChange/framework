@@ -428,11 +428,8 @@ class LocaleService extends change_BaseService
 	 */
 	private function processModule($moduleName)
 	{
-		$availablePaths = FileResolver::getInstance()
-			->setPackageName('modules_' . $moduleName)
-			->setDirectory('i18n')->getPaths('');
-			
-		if ($availablePaths === null)
+		$availablePaths = change_FileResolver::getNewInstance()->getPaths('modules', $moduleName, 'i18n');
+		if (!count($availablePaths))
 		{
 			return;
 		}
@@ -451,9 +448,8 @@ class LocaleService extends change_BaseService
 	 */
 	private function processTheme($themeName)
 	{
-		$availablePaths = FileResolver::getInstance()->setPackageName('themes_' . $themeName)->setDirectory(
-				'i18n')->getPaths('');
-		if ($availablePaths === null)
+		$availablePaths = change_FileResolver::getNewInstance()->getPaths('themes', $themeName, 'i18n');
+		if (!count($availablePaths))
 		{
 			return;
 		}

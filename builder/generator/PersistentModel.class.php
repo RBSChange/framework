@@ -550,7 +550,7 @@ class generator_PersistentModel
 	 */
 	private function workflowHook($xml, $moduleName, $documentName)
 	{
-		$path = FileResolver::getInstance()->setPackageName('modules_' . $moduleName)->getPath('config'.DIRECTORY_SEPARATOR.$documentName.'.workflow.xml');
+		$path = change_FileResolver::getNewInstance()->getPath('modules', $moduleName, 'config', $documentName.'.workflow.xml');
 		if ($path !== null && is_readable($path))
 		{
 			$workflowDoc = new DOMDocument();

@@ -16,12 +16,12 @@ class f_util_Iso639
 		}
 		else
 		{
-			$fileResolver = FileResolver::getInstance()->setDirectory("util/iso639")->setPackageName("framework");
-			$isoFile = $fileResolver->getPath("iso-639-".$lang.".txt");
+			$fileResolver = change_FileResolver::getNewInstance();
+			$isoFile = $fileResolver->getPath('framework', 'util', 'iso639', 'iso-639-'.$lang.'.txt');
 			if ($isoFile === null)
 			{
 				$file = "iso-639-".Framework::getConfigurationValue("framework/util/iso639-defaultlang", "fr").".txt";
-				$isoFile = $fileResolver->getPath($file);
+				$isoFile = $fileResolver->getPath('framework', 'util', 'iso639', $file);
 				if ($isoFile === null)
 				{
 					throw new Exception("Could not find ".$file." file");

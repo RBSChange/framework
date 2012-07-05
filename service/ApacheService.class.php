@@ -182,7 +182,7 @@ class ApacheService extends change_BaseService
 	 */
 	private function getApacheDirectoryByPackage($package)
 	{
-		return FileResolver::getInstance()->setPackageName($package)->getPath('apache');
+		return change_FileResolver::getNewInstance()->getPath(str_replace('_', DIRECTORY_SEPARATOR, $package), 'apache');
 	}
 	
 	/**

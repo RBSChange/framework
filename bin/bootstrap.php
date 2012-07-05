@@ -23,4 +23,4 @@ require_once PROJECT_HOME . '/framework/util/FileUtils.class.php';
 require_once PROJECT_HOME . '/framework/util/System.php';
 require_once PROJECT_HOME . '/framework/util/ArrayUtils.class.php';
 require_once PROJECT_HOME . '/framework/util/DomUtils.php';
-require_once PROJECT_HOME . '/framework/loader/AutoloadBuilder.class.php';
+require_once PROJECT_HOME . '/framework/object/AutoloadBuilder.class.php';

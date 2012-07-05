@@ -1009,10 +1009,8 @@ class TagService extends change_BaseService
 		foreach ($modulesArray as $moduleName)
 		{
 			$dirsToProcess = array();
-			$configPaths = FileResolver::getInstance()->setPackageName($moduleName)->setDirectory('config')->getPaths('');
-					
+			$configPaths = change_FileResolver::getNewInstance()->getPaths(str_replace('_', DIRECTORY_SEPARATOR, $moduleName), 'config');			
 			$configPaths = array_reverse($configPaths);
-
 			$count = count($configPaths);
 			foreach ($configPaths as $configPath)
 			{

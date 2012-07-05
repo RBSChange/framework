@@ -26,8 +26,8 @@ class PHPTAL_Php_Attribute_CHANGE_Include extends ChangeTalAttribute
 		{
 			$params["type"] = "html";
 		}
-		$template = TemplateLoader::getInstance()->setPackageName("modules_" . $params['module'])->setMimeContentType($params['type'])
-		->load($params['template']);
+		$template = change_TemplateLoader::getNewInstance()->setExtension($params['type'])
+			->load('modules', $params['module'], 'templates', $params['template']);
 		unset($params['module']);
 		unset($params['type']);
 		unset($params['template']);

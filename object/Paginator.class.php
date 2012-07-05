@@ -521,8 +521,9 @@ class paginator_Paginator extends ArrayObject
 	 */
 	public final function getTemplate()
 	{
-		$loader = TemplateLoader::getInstance()->setPackageName('modules_' . $this->templateModuleName)->setDirectory('templates')->setMimeContentType('html');
-		$template = $loader->load($this->templateFileName);
+		$loader = change_TemplateLoader::getNewInstance()->setExtension('html');
+		$template = $loader->load('modules', $this->templateModuleName, 'templates', $this->templateFileName);
+		if ($template === null) {throw new Exception('Template not found');}
 		$template->setAttribute('paginator', $this);
 		return $template;
 	}

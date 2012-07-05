@@ -106,15 +106,13 @@ abstract class change_View
 		{
 			$moduleName = $this->forceModuleName;
 		}
-		$templateLoader = TemplateLoader::getInstance('template')->setMimeContentType($mimeType);
-		$templateLoader->setDirectory('templates');
-		try
+		
+		$templateLoader = change_TemplateLoader::getNewInstance('template')->setExtension($mimeType);
+		$this->engine = $templateLoader->load('modules', $moduleName, 'templates', $templateName);
+		if ($this->engine === null)
 		{
-			$this->engine = $templateLoader->setPackageName('modules_' . $moduleName)->load($templateName);
-		}
-		catch (TemplateNotFoundException $e)
-		{
-			$this->engine = $templateLoader->setPackageName('modules_' . 'generic')->load($templateName);
+			$this->engine = $templateLoader->load('modules', 'generic', 'templates', $templateName);
+			if ($this->engine === null) {throw new Exception('Template not found');}
 		}
 	}
 

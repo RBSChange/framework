@@ -469,7 +469,7 @@ class f_persistentdocument_DocumentFilterService extends change_BaseService
 	 */
 	private function getFiltersDirectoryByPackage($package)
 	{
-		return FileResolver::getInstance()->setPackageName($package)->setDirectory('persistentdocument')->getPath('filters');
+		return change_FileResolver::getNewInstance()->getPath(str_replace('_', DIRECTORY_SEPARATOR, $package), 'persistentdocument', 'filters');
 	}
 	
 	/**
