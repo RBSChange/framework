@@ -333,7 +333,7 @@ abstract class WebController extends Controller
 	 * @param string $url
 	 * @param integer $delay
 	 */
-	public function redirect($url, $delay = 0)
+	public function redirectToUrl($url, $delay = 0)
 	{		
 		// shutdown the controller
 		$this->shutdown();
@@ -537,10 +537,5 @@ class HttpController extends WebController
 	protected function generateRedirectUrl($urlParams)
 	{
 		return $this->genURL('http://' . $_SERVER['HTTP_HOST'] . '/index.php', $urlParams);
-	}
-	
-	public function redirectToUrl($url)
-	{
-		parent::redirect($url);
 	}
 }
