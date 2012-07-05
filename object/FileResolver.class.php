@@ -78,9 +78,15 @@ class change_FileResolver
 	public function addThemePotentialDirectories($themeName)
 	{
 		$themeDir = f_util_FileUtils::buildProjectPath('themes', $themeName);
-		$this->addPotentialDirectory($themeDir);
-		$overrideThemeDir = f_util_FileUtils::buildOverridePath('themes', $themeName);
-		$this->addPotentialDirectory($overrideThemeDir);
+		if (is_dir($themeDir))
+		{
+			$this->addPotentialDirectory($themeDir);
+			$overrideThemeDir = f_util_FileUtils::buildOverridePath('themes', $themeName);
+			if (is_dir($overrideThemeDir))
+			{
+				$this->addPotentialDirectory($overrideThemeDir);
+			}
+		}
 		return $this;
 	}
 	
@@ -248,6 +254,7 @@ class change_FileResolverExtensionStrategy extends change_Singleton
 				$requestContext = RequestContext::getInstance();
 				return $requestContext->getUserAgentType() . '.all';
 			case 'html':
+			case 'xul':
 				$requestContext = RequestContext::getInstance();
 				return $requestContext->getUserAgentType() . '.' . $requestContext->getUserAgentTypeVersion();
 			default:
