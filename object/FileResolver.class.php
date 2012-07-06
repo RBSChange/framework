@@ -253,9 +253,11 @@ class change_FileResolverExtensionStrategy extends change_Singleton
 			case 'php':
 				$requestContext = RequestContext::getInstance();
 				return $requestContext->getUserAgentType() . '.all';
+				
 			case 'html':
 			case 'xul':
 			case 'xml':
+			case 'txt':
 				$requestContext = RequestContext::getInstance();
 				return $requestContext->getUserAgentType() . '.' . $requestContext->getUserAgentTypeVersion();
 			default:
