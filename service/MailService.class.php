@@ -31,7 +31,7 @@ class change_MailService extends change_BaseService
 			if ($this->mta === null)
 			{
 				$config = Framework::getConfiguration('mail');
-				if (defined('FAKE_EMAIL') && f_util_StringUtils::isEmpty(FAKE_EMAIL))
+				if (defined('FAKE_EMAIL') && !f_util_StringUtils::isEmpty(FAKE_EMAIL))
 				{
 					$config['type'] = "File";
 				}
