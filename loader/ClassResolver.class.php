@@ -217,6 +217,10 @@ class ClassResolver implements ResourceResolver
 	 */
 	public function initialize()
 	{
+		$htAccess = f_util_FileUtils::buildWebeditPath("framework", "builder", "home", "bin", ".htaccess");
+		$to = $this->cacheDir . DIRECTORY_SEPARATOR . ".htaccess";		
+		f_util_FileUtils::cp($htAccess, $to, f_util_FileUtils::OVERRIDE);
+		
 		$ini = $this->getPathsToAnalyse();
 
 		// let's do our fancy work
