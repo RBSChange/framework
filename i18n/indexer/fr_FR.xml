@@ -3,4 +3,5 @@
   <key id="from-rangefacet">plus de {min}</key>
   <key id="to-rangefacet">moins de {max}</key>
   <key id="from-to-rangefacet">de {min} à {max}</key>
+  <key id="exact-rangefacet">{min}</key>
 </i18n>

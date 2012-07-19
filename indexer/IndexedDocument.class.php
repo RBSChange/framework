@@ -33,6 +33,7 @@ final class indexer_Field
 	const INTEGER_VOLATILE = '_vol_int';
 	const INTEGER_MULTI_VOLATILE = '_vol_mul_int';
 	const FLOAT_VOLATILE = '_vol_float';
+	const FLOAT_MULTI_VOLATILE = '_vol_mul_float';
 	
 	const PARENT_WEBSITE = '__solrsearch_parentwebsite_id';
 	const PARENT_TOPIC = 'parentTopicId';
@@ -221,6 +222,38 @@ class indexer_IndexedDocument
 	private $fields = array();
 	
 	/**
+	 * @param string $fullName
+	 * @return boolean
+	 */
+	public function hasField($fullName)
+	{
+		return (isset($this->fields[$fullName]));
+	}
+	
+	/**
+	 * @param string $fullName
+	 * @param mixed $value
+	 * @param integer $type
+	 */
+	public function setField($fullName, $value, $type = indexer_Field::INDEXED)
+	{
+		if (!is_int($type)) {$type = indexer_Field::INDEXED;}
+		
+		if ($value === null || (is_array($value) && count($value) === 0))
+		{
+			if (isset($this->fields[$fullName]))
+			{
+				unset($this->fields[$fullName]);
+				return;
+			}
+		}
+		else
+		{
+			$this->fields[$fullName] = array('value' => $value, 'type' => $type);
+		}
+	}
+	
+	/**
 	 * Set the Field named $name to $value and treat it as a simple string 
 	 *
 	 * @param String $name
@@ -240,6 +273,7 @@ class indexer_IndexedDocument
 				$type = indexer_Field::INDEXED | indexer_Field::STORED;
 				$suffix = indexer_Field::STRING;
 			}
+			
 			$this->fields[$name . $suffix] = array('value' => $value, 'type' => $type);
 		}
 	}
