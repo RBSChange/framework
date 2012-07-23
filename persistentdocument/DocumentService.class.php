@@ -2778,29 +2778,13 @@ class f_persistentdocument_DocumentService extends BaseService
 	{
 		return $urlRewritingService->getDocumentRulePath($document, $website, $lang, $parameters);
 	}
-	
-
-	
-	/**
-	 * @param Order $order
-	 * @return f_persistentdocument_PersistentDocument
-	 */
-	function getPublished($order = null)
-	{
-		$query = $this->createQuery()->add(Restrictions::published());
-		if ($order !== null)
-		{
-			$query->addOrder($order);
-		}
-		return $query->find();
-	}
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
 	 * @param string $forModuleName
 	 * @return array
 	 */
-	private function getPermissions($document, $forModuleName)
+	protected function getPermissions($document, $forModuleName)
 	{
 		$ps = f_permission_PermissionService::getInstance();
 		$defPointId = $ps->getDefinitionPointForPackage($document->getId(), "modules_" . $forModuleName);
@@ -3087,5 +3071,18 @@ class f_persistentdocument_DocumentService extends BaseService
 		$websiteId = $this->getWebsiteId($document);
 		$website = ($websiteId === null) ? website_WebsiteModuleService::getInstance()->getCurrentWebsite() : DocumentHelper::getDocumentInstance($websiteId);
 		return website_UrlRewritingService::getInstance()->getCustomPath($document, $website, $lang);
+	}
+	
+	/**
+	 * @deprecated create explicitely the query you really nead instead of using this (with pagination, restrictions, etc)
+	 */
+	public function getPublished($order = null)
+	{
+		$query = $this->createQuery()->add(Restrictions::published());
+		if ($order !== null)
+		{
+			$query->addOrder($order);
+		}
+		return $query->find();
 	}
 }

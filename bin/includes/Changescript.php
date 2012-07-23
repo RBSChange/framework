@@ -697,7 +697,14 @@ class c_Changescript
 	 */
 	public final function message($message, $color = null)
 	{
-		$this->echoMessage($message."\n", $color);
+		if ($color !== null)
+		{
+			$this->echoMessage($message . self::END_COLORED_MESSAGE . "\n", $color);
+		}
+		else
+		{
+			$this->echoMessage($message . "\n");
+		}
 	}
 	
 	/**
@@ -776,6 +783,7 @@ class c_Changescript
 	const SUFFIX = "m";
 	const SEPARATOR = ';';
 	const END_COLOR = "\x1b[m";
+	const END_COLORED_MESSAGE = "\033[0m";
 	
 	
 	protected function echoMessage($message, $color = null)
@@ -786,7 +794,7 @@ class c_Changescript
 		}
 		else
 		{
-			echo self::PREFIX . self::ATTR_DIM . self::SEPARATOR.$color. self::SUFFIX . $message. self::END_COLOR;
+			echo self::PREFIX . self::ATTR_DIM . self::SEPARATOR.$color. self::SUFFIX . $message . self::END_COLOR;
 		}
 	}
 }
