@@ -24,13 +24,9 @@ define('CHANGE_BUILD_DIR', WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'build' . DIRECT
 
 class Framework
 {
-	/**
-	 * The project config compiled
-	 */
-	private static $config = null;
 	static $logLevel = null;
 	private static $debugEnabled, $infoEnabled, $warnEnabled, $errorEnabled, $fatalEnabled;
-
+	
 	/**
 	 * @var Float[]
 	 */
@@ -313,86 +309,66 @@ class Framework
 		return NOREPLY_DEFAULT_EMAIL;
 	}
 
+	
+	// Deprecated
+	
 	/**
-	 * Return an array with configuration of Framework
+	 * @deprecated use change_ConfigurationService::getAllConfiguration()
 	 */
 	public static function getAllConfiguration()
 	{
-		return self::$config;
+		return change_ConfigurationService::getInstance()->getAllConfiguration();
 	}
 
 
 	/**
 	 * Return true if the $path configuration exist
-	 * @param String $path
+	 *
+	 * @param String $path        	
 	 */
 	public static function hasConfiguration($path)
 	{
-		$current = self::$config;
-		foreach (explode('/', $path) as $part)
-		{
-			if (!isset($current[$part]))
-			{
-				return false;
-			}
-			$current = $current[$part];
-		}
-		return true;
+		return change_ConfigurationService::getInstance()->hasConfiguration($path);
 	}
 
 	/**
 	 * Return an array with part of configuration of Framework
 	 * or throw a Exception if the $path configuration does not exist
-	 * @param String $path
-	 * @param Boolean $strict
+	 *
+	 * @param String $path        	
+	 * @param Boolean $strict        	
 	 * @throws Exception if the $path configuration does not exist
-	 * @return String | false if the path was not founded and strict value if false
+	 * @return String | false if the path was not founded and strict value if
+	 *         false
 	 */
 	public static function getConfiguration($path, $strict = true)
 	{
-		$current = self::$config;
-		foreach (explode('/', $path) as $part)
-		{
-			if (!isset($current[$part]))
-			{
-				if ($strict)
-				{
-					throw new Exception('Part of configuration ' . $part . ' not found.');
-				}
-				return false;
-			}
-			$current = $current[$part];
-		}
-		return $current;
+		return change_ConfigurationService::getInstance()->getConfiguration($path, $strict);
 	}
 
 	/**
 	 * Return an array with part of configuration of Framework
 	 * or null if the $path configuration does not exist
-	 * @param String $path
-	 * @param String $defaultValue
+	 *
+	 * @param String $path        	
+	 * @param String $defaultValue        	
 	 * @return mixed | null
 	 */
 	public static function getConfigurationValue($path, $defaultValue = null)
 	{
-		$value = self::getConfiguration($path, false);
-		if ($value === false || (is_string($value) && f_util_StringUtils::isEmpty($value)) || (is_array($value) && f_util_ArrayUtils::isEmpty($value)))
-		{
-			return $defaultValue;
-		}
-		return $value;
+		return change_ConfigurationService::getInstance()->getConfigurationValue($path, $defaultValue);
 	}
 
 	/**
-	 * Only used by ModuleGenerator. TODO: remove it.
-	 * @param string $packageName 'modules_xxxx'
-	 * @param array $infos
+	 * @deprecated
 	 */
 	public static function addPackageConfiguration($packageName, $infos)
 	{
-		if (isset(self::$config) && isset(self::$config['packageversion']))
+		$cs = change_ConfigurationService::getInstance();
+		$config = $cs->getAllConfiguration();
+		if ($config != null && isset($config['packageversion']))
 		{
-			self::$config['packageversion'][$packageName] = $infos;
+			$cs->addVolatileProjectConfigurationNamedEntry('packageversion/' . $packageName, $infos);
 		}
 		else
 		{
@@ -401,76 +377,20 @@ class Framework
 	}
 
 	/**
-	 * Load the framework configuration. Use the file php auto generated in cache/config
-	 * You can specify an environnement to load a particular config file
-	 *
-	 * @param string $env
-	 * @param Boolean $onlyConfig
+	 * @deprecated use change_ConfigurationService::loadConfiguration()
 	 */
 	public static function loadConfiguration($env = '', $onlyConfig = false)
 	{
-		// If configuration not yet loaded, load it
-		if (self::$config === null)
-		{
-			// If specific environnement add a dot to complet in path file
-			if ( $env != '' )
-			{
-				$env .= '.';
-			}
-
-			$fileName = 'project.'.$env.'xml.php';
-			$pathOfConfigFile = WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'build' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . $fileName;
-			self::$config = array();
-			if (!is_file($pathOfConfigFile))
-			{
-				throw new Exception("Could not find $pathOfConfigFile. You must compile your configuration.");
-			}
-			if (!$onlyConfig)
-			{
-				require($pathOfConfigFile);
-			}
-			else
-			{
-				$config = file($pathOfConfigFile);
-				if ($config === false)
-				{
-					throw new Exception("Could not read $pathOfConfigFile");
-				}
-				unset($config[0]); // first line is php tag
-				foreach ($config as $key => $value)
-				{
-					if (preg_match('/^define\(\'([^\']+)\', .*$/', $value, $matches))
-					{
-						 $constantName = $matches[1];
-						 if (defined($constantName)) // ignore define as we can not redeclare a constant
-						 {
-						 	unset($config[$key]);
-						 }
-					}
-				}
-				eval(join("\n", $config));
-			}
-		}
+		change_ConfigurationService::getInstance()->loadConfiguration($env, $onlyConfig);
 	}
 
 	/**
-	 * @param String $env
+	 * @deprecated use change_ConfigurationService::loadConfiguration()
 	 */
 	public static function reloadConfiguration($env = '')
 	{
-		if (self::$config !== null)
-		{
-			self::$config = null;
-			self::loadConfiguration($env, true);
-			// TODO: inverse dependences
-			ModuleService::clearInstance();
-			generator_PersistentModel::reloadModels();
-		}
+		change_ConfigurationService::getInstance()->loadConfiguration($env);
 	}
-
-
-	
-	// Deprecated
 	
 	/**
 	 * @deprecated
@@ -523,7 +443,8 @@ class Framework
 }
 
 // Load configuration
-Framework::loadConfiguration(PROFILE);
+require_once(FRAMEWORK_HOME . '/service/ConfigurationService.class.php');
+change_ConfigurationService::getInstance()->loadConfiguration(PROFILE);
 
 require_once(FRAMEWORK_HOME . '/loader/ResourceResolver.class.php');
 require_once(FRAMEWORK_HOME . '/loader/ClassResolver.class.php');
@@ -531,8 +452,6 @@ require_once(FRAMEWORK_HOME . '/loader/Resolver.class.php');
 require_once(FRAMEWORK_HOME . '/loader/ResourceLoader.class.php');
 require_once(FRAMEWORK_HOME . '/loader/ClassLoader.class.php');
 require_once(FRAMEWORK_HOME . '/loader/Loader.class.php');
-
-
 
 function f_errorHandler($errno, $errstr, $errfile, $errline)
 {

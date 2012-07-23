@@ -33,15 +33,11 @@ Where options in:
 	{
 		$this->message("== Compile config ==");
 		
-		$projectParser = new config_ProjectParser();
-		$oldAndCurrent = $projectParser->execute($this->getComputedDeps());
+		$oldAndCurrent = change_ConfigurationService::getInstance()->compile($this->getComputedDeps());
 		$this->getParent()->setEnvVar("commands_CompileConfig_oldAndCurrent", $oldAndCurrent);
 		
-		if (defined("FRAMEWORK_HOME"))
-		{
-			// Framework is loaded and configuration may have changed
-			Framework::reloadConfiguration(PROFILE);
-		}
+		// Framework is loaded and configuration may have changed
+		change_ConfigurationService::getInstance()->loadConfiguration(PROFILE);
 		
 		//OAuth identification files
 		if (!is_dir(WEBEDIT_HOME . '/build/config/oauth/script'))

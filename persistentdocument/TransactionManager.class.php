@@ -83,8 +83,9 @@ class f_persistentdocument_TransactionManager
 		}
 		else
 		{
+			$embededTransaction = intval(change_ConfigurationService::getInstance()->getConfigurationValue('databases/webapp/embededTransaction', '5'));
 			$this->transactionCount++;
-			if ($this->transactionCount > 5)
+			if ($this->transactionCount > $embededTransaction)
 			{
 				Framework::warn('embeded transaction: ' . $this->transactionCount);
 			}

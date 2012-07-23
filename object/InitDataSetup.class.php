@@ -154,7 +154,7 @@ abstract class object_InitDataSetup
 	 */
 	protected final function addProjectConfigurationEntry($path, $value)
 	{
-		return config_ProjectParser::addProjectConfigurationEntry($path, $value);
+		return change_ConfigurationService::getInstance()->addProjectConfigurationEntry($path, $value);
 	}
 	
 	/**
