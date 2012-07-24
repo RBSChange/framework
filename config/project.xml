@@ -193,6 +193,8 @@
 				<entry name="protocol">mysql</entry>
 				<!--entry name="port">3306</entry-->
 				<entry name="log_level">0</entry>
+				<entry name="embededTransaction">5</entry>
+				<entry name="longTransaction">0.2</entry>
 			</webapp>
 			<read-only>
 				<entry name="class">PDODatabase</entry>
