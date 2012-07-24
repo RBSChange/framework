@@ -30,6 +30,14 @@ class commands_UpdateAutoload extends commands_AbstractChangeCommand
 	function _execute($params, $options)
 	{
 		$this->message("== Update autoload ==");
+		if (!defined('PEAR_DIR'))
+		{
+			$pearInfos = $this->getParent()->getBootStrap()->loadPearInfo();
+			if (isset($pearInfos['include_path']))
+			{
+				define('PEAR_DIR', $pearInfos['include_path']);
+			}
+		}
 	
 		if (f_util_ArrayUtils::isEmpty($params))
 		{

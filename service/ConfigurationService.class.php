@@ -159,14 +159,11 @@ class change_ConfigurationService
 			{
 				if (is_string($value))
 				{
-					//Match WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'config'
-					//Or CHANGE_CONFIG_DIR . 'toto'
-					//But not Fred's Directory
-					if (preg_match('/^(([A-Z][A-Z_0-9]+)|(\'[^\']*\'))(\s*\.\s*(([A-Z][A-Z_0-9]+)|(\'[^\']*\')))+$/', $value))
+					if (strpos($value, 'return ') === 0 && substr($value, -1) === ';')
 					{
-						$value = eval('return ' . $value . ';');
+						$value = eval($value);
 					}
-				}	
+				}
 				define($name, $value);
 			}
 		}
@@ -370,6 +367,7 @@ class change_ConfigurationService
 		}
 		
 		$content = "<?php // change_ConfigurationService::setDefineArray PART // \n";
+		$configDefineArray = $this->prepareToExportDefineArray($configDefineArray);
 		$content .= "change_ConfigurationService::getInstance()->setDefineArray(" . var_export($configDefineArray, true) . ');';		
 		$this->writeFile($cacheConfigDir . $currentProfile . ".define.php", $content);
 		$this->defines = $configDefineArray;
@@ -387,6 +385,8 @@ class change_ConfigurationService
 		return ($oldConfig !== null) ? array("old" => array("defines" => $oldDefines, "config" => $oldConfig), 
 				"current" => array("config" => $configArray['config'], "defines" => $configDefineArray)) : null;
 	}
+	
+	
 	
 	private function writeFile($path, $content)
 	{
@@ -409,6 +409,28 @@ class change_ConfigurationService
 		$globalConstants[$name] = $value;
 	}
 	
+	/**
+	 * 
+	 * @param array $configDefineArray
+	 * @return array
+	 */
+	private function prepareToExportDefineArray($configDefineArray)
+	{
+		foreach ($configDefineArray as $name => $value)
+		{
+			if (is_string($value))
+			{
+				//Match WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'config'
+				//Or CHANGE_CONFIG_DIR . 'toto'
+				//But not Fred's Directory
+				if (preg_match('/^(([A-Z][A-Z_0-9]+)|(\'[^\']*\'))(\s*\.\s*(([A-Z][A-Z_0-9]+)|(\'[^\']*\')))+$/', $value))
+				{
+					$configDefineArray[$name] = 'return ' . $value . ';';
+				}
+			}
+		}
+		return $configDefineArray;
+	}
 	/**
 	 *
 	 * @return Array<String, String>
@@ -752,12 +774,9 @@ class change_ConfigurationService
 			$defval = var_export($value, true);
 			if (is_string($value))
 			{
-				//Match WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'config'
-				//Or CHANGE_CONFIG_DIR . 'toto'
-				//But not Fred's Directory
-				if (preg_match('/^(([A-Z][A-Z_0-9]+)|(\'[^\']*\'))(\s*\.\s*(([A-Z][A-Z_0-9]+)|(\'[^\']*\')))+$/', $value))
+				if (strpos($value, 'return ') === 0 && substr($value, -1) === ';')
 				{
-					$defval = $value;
+					$defval = substr($value, 7, strlen($value) - 8);
 				}
 			}
 			$content .= "define('".$key. "', " .  $defval . ");" . PHP_EOL;
