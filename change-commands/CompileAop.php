@@ -29,11 +29,14 @@ class commands_CompileAop extends commands_AbstractChangeCommand
 	 */
 	function _execute($params, $options)
 	{
-		$this->message("== Compile AOP ==");
-		
-		$this->loadFramework();
-		ClassResolver::getInstance()->compileAOP();
-		
-		$this->quitOk("AOP compiled");
+		if (class_exists('change_ConfigurationService') && change_ConfigurationService::getInstance()->isCompiled())
+		{
+			$this->message("== Compile AOP ==");
+			$this->loadFramework();
+			ClassResolver::getInstance()->compileAOP();
+			return $this->quitOk("AOP compiled");
+		}	
+		$this->warnMessage('Config is not compiled');
+		return $this->quitOk("AOP NOT compiled");
 	}
 }

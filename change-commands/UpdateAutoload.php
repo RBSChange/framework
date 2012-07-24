@@ -30,8 +30,7 @@ class commands_UpdateAutoload extends commands_AbstractChangeCommand
 	function _execute($params, $options)
 	{
 		$this->message("== Update autoload ==");
-		$this->loadFramework();
-		
+	
 		if (f_util_ArrayUtils::isEmpty($params))
 		{
 			$this->message("Scanning all the project. Please wait: this can be long.");

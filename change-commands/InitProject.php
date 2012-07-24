@@ -89,6 +89,8 @@ class commands_InitProject extends commands_AbstractChangeCommand
 		f_util_FileUtils::mkdir("themes");
 		
 		$this->getParent()->executeCommand("compile-config");
+		
+		$this->getParent()->executeCommand("update-autoload");
 		$this->loadFramework();
 
 		// init-file-policy

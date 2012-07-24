@@ -43,7 +43,7 @@ class ClassResolver implements ResourceResolver
 	{
 		if (is_null(self::$instance))
 		{
-			if (AG_DEVELOPMENT_MODE)
+			if (defined('AG_DEVELOPMENT_MODE') && AG_DEVELOPMENT_MODE)
 			{
 				self::$instance = new ClassResolverDevMode();
 			}

@@ -31,6 +31,15 @@ class change_ConfigurationService
 	}
 	
 	/**
+	 * @return boolean
+	 */
+	public function isCompiled()
+	{
+		$configFileDir = implode(DIRECTORY_SEPARATOR, array(WEBEDIT_HOME, 'build', 'config', PROFILE . '.php'));
+		return is_file($configFileDir);
+	}
+	
+	/**
 	 * Return an array with part of configuration of Framework
 	 * or throw a Exception if the $path configuration does not exist
 	 *
