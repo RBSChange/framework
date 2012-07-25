@@ -1,6 +1,10 @@
 <?php
 class f_util_System
 {
+	/**
+	 * @param string $cmd
+	 * @return string
+	 */
 	public static function escapeCmd($cmd)
 	{
 		$cmd = mb_ereg_replace(", ", "\\, ", $cmd);
@@ -9,11 +13,12 @@ class f_util_System
 	}
 
 	/**
-	 * @param String $cmd
-	 * @param String $msg
-	 * @param Boolean $captureStdout
-	 * @param String input
-	 * @return String the output result of execution
+	 * @param string $cmd
+	 * @param string $msg
+	 * @param boolean $captureStdout
+	 * @param string input
+	 * @return string the output result of execution
+	 * @throws Exception
 	 */
 	public static function exec($cmd, $msg = null, $captureStdout = true, $input = null)
 	{
@@ -66,13 +71,14 @@ class f_util_System
 		}
 		return trim($output);
 	}
-
+	
 	/**
-	 * @param String $cmd
-	 * @param String $msg
-	 * @param Boolean $captureStdout
-	 * @param String input
-	 * @return array the output result of execution
+	 * @param string $cmd
+	 * @param string $msg
+	 * @param boolean $captureStdout
+	 * @param string input
+	 * @return string[] the output result of execution
+	 * @throws Exception
 	 */
 	public static function execArray($cmd, $msg = null, $captureStdout = true, $input = null)
 	{
@@ -81,18 +87,55 @@ class f_util_System
 		{
 			return array();
 		}
-		return explode("\n", $out);
+		return explode(PHP_EOL, $out);
 	}
-	
 	
 	/**
-	 * @deprecated use f_util_System::execScript
+	 * @param string $cmd
+	 * @return string
 	 */
-	public static function execHTTPScript($relativeScriptPath, $arguments = array(), $noFramework = false, $baseUrl = null)
+	public static function execAsString($cmd)
 	{
-		return self::execScript($relativeScriptPath, $arguments, $noFramework, $baseUrl);
-	}
-	
+		$outputArray = array();
+		$command = $cmd . " 2>&1";
+		$descriptorspec = array(
+			0 => array('pipe', 'r'), // stdin
+			1 => array('pipe', 'w'), // stdout
+			2 => array('pipe', 'w') // stderr
+		);
+		$proc = proc_open($command, $descriptorspec, $pipes);
+		if (!is_resource($proc))
+		{
+			$outputArray[] = PHP_EOL . 'ERROR: Can not execute ' . $cmd;
+		}
+		else
+		{
+			stream_set_blocking($pipes[2], 0);
+			fclose($pipes[0]);
+			
+			while (!feof($pipes[1]))
+			{
+				$s = fread($pipes[1], 512);
+				if ($s === false)
+				{
+					$outputArray[] = PHP_EOL . 'ERROR: while executing ' . $cmd .': could not read further execution result';
+					break;
+				}
+				else
+				{
+					$outputArray[] = $s;
+				}
+			}
+		
+			$retVal = proc_close($proc);
+			if (0 != $retVal)
+			{
+				$outputArray[] =  PHP_EOL . 'ERROR: invalid exit code ' . $retVal . ' on execute ' . $cmd;
+			}
+		}
+		return implode('', $outputArray);
+	}	
+		
 	/**
 	 * @param string $relativeScriptPath to WEBEDIT_HOME
 	 * @param array $arguments
@@ -115,18 +158,29 @@ class f_util_System
 	 * @param string $baseUrl
 	 * @return string | false
 	 */
-	protected static function execScriptConsole($relativeScriptPath, $arguments = array(), $noFramework = false, $baseUrl = null)
+	public static function execScriptConsole($relativeScriptPath, $arguments = array(), $noFramework = false, $baseUrl = null)
 	{
-		try 
+		if (defined('PHP_CLI_PATH') && PHP_CLI_PATH != '')
 		{
-			$cmd = PHP_CLI_PATH . ' framework/bin/consoleScript.php ' . $relativeScriptPath . ' ' . ($noFramework ? '1' : '0') . ' ' . implode(" ", $arguments);
-			return self::exec($cmd);
+			if (is_array($arguments) && count($arguments) > 0)
+			{
+				$tmpFilePath = f_util_FileUtils::getTmpFile('exec');
+				f_util_FileUtils::write($tmpFilePath, serialize($arguments), f_util_FileUtils::OVERRIDE);
+				$cmd = PHP_CLI_PATH . ' framework/bin/consoleScript.php ' . $relativeScriptPath . ' ' . ($noFramework ? '1' : '0') . ' "' . $tmpFilePath . '"';
+				$result = self::execAsString($cmd);
+				unlink($tmpFilePath);
+			}
+			else
+			{
+				$cmd = PHP_CLI_PATH . ' framework/bin/consoleScript.php ' . $relativeScriptPath . ' ' . ($noFramework ? '1' : '0');
+				$result = self::execAsString($cmd);
+			}
 		}
-		catch (Exception $e)
+		else
 		{
-			Framework::exception($e);
-		}
-		return false;
+			$result = PHP_EOL . 'ERROR: Invalid PHP_CLI_PATH';
+		}	
+		return $result;
 	}	
 		
 	/**
@@ -136,7 +190,7 @@ class f_util_System
 	 * @param string $baseUrl
 	 * @return string
 	 */
-	protected static function execScriptHTTP($relativeScriptPath, $arguments = array(), $noFramework = false, $baseUrl = null)
+	public static function execScriptHTTP($relativeScriptPath, $arguments = array(), $noFramework = false, $baseUrl = null)
 	{
 		list($name, $secret) = explode('#', file_get_contents(WEBEDIT_HOME . '/build/config/oauth/script/consumer.txt'));
 		$consumer = new f_web_oauth_Consumer($name, $secret);
@@ -206,6 +260,20 @@ class f_util_System
 	 */
 	public static function execChangeConsoleCommand($commandName, $arguments = array())
 	{
-		return self::exec(PHP_CLI_PATH . " framework/bin/change.php $commandName " . implode(" ", $arguments)); 
+		if (defined('PHP_CLI_PATH') && PHP_CLI_PATH != '')
+		{
+			return self::execAsString(PHP_CLI_PATH . " framework/bin/change.php $commandName " . implode(" ", $arguments));
+		}
+		return PHP_EOL . 'ERROR: Invalid PHP_CLI_PATH'; 
+	}
+	
+	//DEPRECATED
+	
+	/**
+	 * @deprecated use f_util_System::execScript
+	 */
+	public static function execHTTPScript($relativeScriptPath, $arguments = array(), $noFramework = false, $baseUrl = null)
+	{
+		return self::execScript($relativeScriptPath, $arguments, $noFramework, $baseUrl);
 	}
 }
