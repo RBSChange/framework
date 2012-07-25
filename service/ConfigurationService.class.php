@@ -586,6 +586,7 @@ class change_ConfigurationService
 	/**
 	 * @param string $path
 	 * @param string $value
+	 * @return boolean
 	 */
 	public function addVolatileProjectConfigurationNamedEntry($path, $value)
 	{
@@ -614,6 +615,7 @@ class change_ConfigurationService
 		}
 		
 		$this->config = $this->array_merge_configuration($this->config, $config);
+		return true;
 	}
 	
 	/**
