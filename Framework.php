@@ -24,20 +24,27 @@ define('CHANGE_BUILD_DIR', WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'build' . DIRECT
 
 class Framework
 {
+	/**
+	 * @var integer
+	 */
 	static $logLevel = null;
+	
+	/**
+	 * @var boolean
+	 */
 	private static $debugEnabled, $infoEnabled, $warnEnabled, $errorEnabled, $fatalEnabled;
 	
 	/**
-	 * @var Float[]
+	 * @var float[]
 	 */
 	private static $benchSteps = array();
 	/**
-	 * @var Integer
+	 * @var integer
 	 */
 	private static $benchStepsIndex = -1;
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public static function getVersion()
 	{
@@ -45,8 +52,8 @@ class Framework
 	}
 
 	/**
-	 * @see project config and AG_DEVELOPMENT_MODE constant
-	 * @return Boolean
+	 * @see project config and DEVELOPMENT_MODE constant
+	 * @return boolean
 	 */
 	public static function inDevelopmentMode()
 	{
@@ -54,7 +61,7 @@ class Framework
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public static function isSiteEnabled()
 	{
@@ -63,10 +70,9 @@ class Framework
 	}
 
 	/**
-	 * @param String $message
-	 * @see Logger
-	 * @param Integer $priority elementof {Logger::DEBUG, ...}
-	 * @param String $loggerGroup
+	 * @param string $message
+	 * @param integer $priority elementof {Logger::DEBUG, ...}
+	 * @param string $loggerGroup
 	 */
 	public static function log($message, $priority, $loggerGroup = "webapp")
 	{
@@ -76,36 +82,71 @@ class Framework
 		}
 	}
 
+	/**
+	 * @param string $message
+	 * @param string $loggerGroup
+	 */
 	public static function debug($message, $loggerGroup = "webapp")
 	{
 		self::log("[DEBUG]\t".$message, Logger::DEBUG, $loggerGroup);
 	}
 
+	/**
+	 * @param string $message
+	 * @param string $loggerGroup
+	 */
 	public static function info($message, $loggerGroup = "webapp")
 	{
 		self::log("[INFO]\t".$message, Logger::INFO, $loggerGroup);
 	}
 
+	/**
+	 * @param string $message
+	 * @param string $loggerGroup
+	 */
 	public static function warn($message, $loggerGroup = "webapp")
 	{
 		self::log("[WARN]\t".$message, Logger::WARN, $loggerGroup);
 	}
 
+	/**
+	 * @param string $message
+	 * @param string $loggerGroup
+	 */
 	public static function error($message, $loggerGroup = "webapp")
 	{
 		self::log("[ERROR]\t".$message, Logger::ERROR, $loggerGroup);
 	}
 
+	/**
+	 * @param Exception $e
+	 * @param string $loggerGroup
+	 */
 	public static function exception($e, $loggerGroup = "webapp")
 	{
 		self::log("[EXCEPTION]\t".get_class($e).": ".$e->getMessage()."\n".$e->getTraceAsString(), Logger::ERROR, $loggerGroup);
 	}
 
+	/**
+	 * @param string $message
+	 * @param string $loggerGroup
+	 */
 	public static function fatal($message, $loggerGroup = "webapp")
 	{
 		self::log("[FATAL]\t".$message, Logger::FATAL, $loggerGroup);
 	}
 
+	/**
+	 * @param string $message
+	 */
+	public static function deprecated($message)
+	{
+		if (self::inDevelopmentMode()) {trigger_error($message, E_USER_DEPRECATED);}
+	}
+
+	/**
+	 * @return integer
+	 */
 	private static function getLogLevel()
 	{
 		if (self::$logLevel === null)
@@ -117,9 +158,8 @@ class Framework
 	}
 
 	/**
-	 * @see Logger
-	 * @param Integer $priority elementof {Logger::DEBUG, ...}
-	 * @return Boolean true if log of priority $priority is enabled
+	 * @param integer $priority elementof {Logger::DEBUG, ...}
+	 * @return boolean true if log of priority $priority is enabled
 	 */
 	private static function isLogEnabled($priority)
 	{
@@ -127,7 +167,7 @@ class Framework
 	}
 
 	/**
-	 * @return Boolean true if debug log is enabled
+	 * @return boolean true if debug log is enabled
 	 */
 	public static function isDebugEnabled()
 	{
@@ -139,7 +179,7 @@ class Framework
 	}
 
 	/**
-	 * @return Boolean true if info log is enabled
+	 * @return boolean true if info log is enabled
 	 */
 	public static function isInfoEnabled()
 	{
@@ -151,7 +191,7 @@ class Framework
 	}
 
 	/**
-	 * @return Boolean true if warn log is enabled
+	 * @return boolean true if warn log is enabled
 	 */
 	public static function isWarnEnabled()
 	{
@@ -163,7 +203,7 @@ class Framework
 	}
 
 	/**
-	 * @return Boolean true if error log is enabled
+	 * @return boolean true if error log is enabled
 	 */
 	public static function isErrorEnabled()
 	{
@@ -175,7 +215,7 @@ class Framework
 	}
 
 	/**
-	 * @return Boolean true if fatal log is enabled
+	 * @return boolean true if fatal log is enabled
 	 */
 	public static function isFatalEnabled()
 	{
@@ -197,7 +237,6 @@ class Framework
 	 *  $index[strtolower($label[0])][$label] = $brand;
 	 * }
 	 * Framework::endBench("getBrandList processing"); // debug time between this call and last call and end bench process
-	 * @param String $msg
 	 */
 	public static function startBench()
 	{
@@ -207,7 +246,7 @@ class Framework
 
 	/**
 	 * @see Framework::startBench($msg)
-	 * @param String $msg
+	 * @param string $msg
 	 */
 	public static function bench($msg)
 	{
@@ -221,7 +260,7 @@ class Framework
 
 	/**
 	 * @see Framework::startBench($msg)
-	 * @param String $msg
+	 * @param string $msg
 	 */
 	public static function endBench($msg = null)
 	{
@@ -234,7 +273,7 @@ class Framework
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public static function getBaseUrl()
 	{
@@ -247,7 +286,7 @@ class Framework
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public static function getUIBaseUrl()
 	{
@@ -255,7 +294,7 @@ class Framework
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public static function getUIProtocol()
 	{
@@ -263,7 +302,7 @@ class Framework
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public static function getUIDefaultHost()
 	{
@@ -309,22 +348,9 @@ class Framework
 		return NOREPLY_DEFAULT_EMAIL;
 	}
 
-	
-	// Deprecated
-	
-	/**
-	 * @deprecated use change_ConfigurationService::getAllConfiguration()
-	 */
-	public static function getAllConfiguration()
-	{
-		return change_ConfigurationService::getInstance()->getAllConfiguration();
-	}
-
-
 	/**
 	 * Return true if the $path configuration exist
-	 *
-	 * @param String $path        	
+	 * @param string $path        	
 	 */
 	public static function hasConfiguration($path)
 	{
@@ -335,11 +361,10 @@ class Framework
 	 * Return an array with part of configuration of Framework
 	 * or throw a Exception if the $path configuration does not exist
 	 *
-	 * @param String $path        	
-	 * @param Boolean $strict        	
+	 * @param string $path        	
+	 * @param boolean $strict        	
 	 * @throws Exception if the $path configuration does not exist
-	 * @return String | false if the path was not founded and strict value if
-	 *         false
+	 * @return string|false if the path was not founded and strict value if  false
 	 */
 	public static function getConfiguration($path, $strict = true)
 	{
@@ -350,15 +375,25 @@ class Framework
 	 * Return an array with part of configuration of Framework
 	 * or null if the $path configuration does not exist
 	 *
-	 * @param String $path        	
-	 * @param String $defaultValue        	
-	 * @return mixed | null
+	 * @param string $path        	
+	 * @param mixed $defaultValue        	
+	 * @return mixed|null
 	 */
 	public static function getConfigurationValue($path, $defaultValue = null)
 	{
 		return change_ConfigurationService::getInstance()->getConfigurationValue($path, $defaultValue);
 	}
+	
+	//DEPRECATED
 
+	/**
+	 * @deprecated use change_ConfigurationService::getAllConfiguration()
+	 */
+	public static function getAllConfiguration()
+	{
+		return change_ConfigurationService::getInstance()->getAllConfiguration();
+	}
+	
 	/**
 	 * @deprecated
 	 */
@@ -453,25 +488,6 @@ require_once(FRAMEWORK_HOME . '/loader/ResourceLoader.class.php');
 require_once(FRAMEWORK_HOME . '/loader/ClassLoader.class.php');
 require_once(FRAMEWORK_HOME . '/loader/Loader.class.php');
 
-function f_errorHandler($errno, $errstr, $errfile, $errline)
-{
-	$message = "(type $errno,line $errline) $errstr in file ($errfile)";
-	switch ($errno)
-	{
-		case E_USER_ERROR:
-		case E_USER_WARNING:
-			LoggingService::getInstance()->errorLog($message, 'error');
-			throw new Exception($message);
-			break;
-		case E_STRICT:
-			//do nothing
-			break;
-		case E_USER_NOTICE:
-		default:
-			LoggingService::getInstance()->errorLog($message, 'error');
-			break;
-	}
-}
 
 if (spl_autoload_register(array(ClassLoader::getInstance(), "autoload")) === false)
 {
@@ -483,10 +499,8 @@ define('AG_WEBAPP_DIR', PROJECT_OVERRIDE);
 ini_set('include_path', FRAMEWORK_HOME . '/libs/pear' . PATH_SEPARATOR . PEAR_DIR);
 
 ini_set('arg_separator.output',      '&amp;');
-ini_set('display_errors',            1);
 ini_set('magic_quotes_runtime',      0);
 
-error_reporting(E_ALL);
 require_once(FRAMEWORK_HOME.'/libs/mvc/Context.class.php');
 require_once(FRAMEWORK_HOME.'/libs/mvc/Controller.class.php');
 require_once(FRAMEWORK_HOME.'/libs/mvc/Request.class.php');
@@ -503,13 +517,7 @@ $ms = ModuleService::getInstance();
 $ms->loadCacheFile();
 
 require_once(FRAMEWORK_HOME . '/service/LoggingService.class.php');
-
-// +---------------------------------------------------------------------------+
-// | error handler
-// +---------------------------------------------------------------------------+
-// Configuration du gestionnaire d'erreurs
-set_error_handler("f_errorHandler");
-
+LoggingService::getInstance()->registerErrorHandler();
 
 // Set the locale.
 $localResult = setlocale(LC_ALL, 'en_US.UTF-8');

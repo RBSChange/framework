@@ -36,10 +36,10 @@ abstract class f_util_ProcessUtils
 		}
 	}
 	
-	public static function getBackTrace($html = false)
+	public static function getBackTrace($html = false, $nbSkip = 2)
 	{
 		ob_start();
-		self::printBackTrace($html, 2);
+		self::printBackTrace($html, $nbSkip);
 		return ob_get_clean();
 	}
 	
