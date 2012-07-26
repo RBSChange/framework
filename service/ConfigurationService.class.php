@@ -358,6 +358,10 @@ class change_ConfigurationService
 		{
 			$configDefineArray['AG_DEVELOPMENT_MODE'] = true;
 		}
+		else
+		{
+			$configDefineArray['AG_DEVELOPMENT_MODE'] = false;
+		}
 		
 		$configDefineArray['PHP_CLI_PATH'] = (isset($computedDeps["PHP_CLI_PATH"])) ? $computedDeps["PHP_CLI_PATH"] : '';
 		
@@ -426,6 +430,18 @@ class change_ConfigurationService
 				if (preg_match('/^(([A-Z][A-Z_0-9]+)|(\'[^\']*\'))(\s*\.\s*(([A-Z][A-Z_0-9]+)|(\'[^\']*\')))+$/', $value))
 				{
 					$configDefineArray[$name] = 'return ' . $value . ';';
+				}
+				elseif ($value === 'true')
+				{
+					$configDefineArray[$name] = true;
+				}
+				elseif ($value === 'false')
+				{
+					$configDefineArray[$name] = false;
+				}
+				elseif (is_numeric($value))
+				{
+					$configDefineArray[$name] = floatval($value);
 				}
 			}
 		}
