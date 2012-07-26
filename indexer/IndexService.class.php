@@ -538,8 +538,8 @@ class indexer_IndexService extends change_BaseService
 		$indexedDoc->setId($document->getId());
 		$indexedDoc->setDocumentModel($document->getDocumentModelName());
 		$indexedDoc->setLang(RequestContext::getInstance()->getLang());
-		$indexedDoc->setLabel($document->getLabel());
-		$indexedDoc->setText($document->getLabel());
+		$indexedDoc->setLabel($document->getTreeNodeLabel());
+		$indexedDoc->setText($document->getTreeNodeLabel());
 		$indexedDoc->setStringField('module', $pm->getModuleName());
 		$indexedDoc->setDateField('modificationdate', $document->getModificationdate());
 		$indexedDoc->setDateField('creationdate', $document->getCreationdate());
@@ -569,6 +569,7 @@ class indexer_IndexService extends change_BaseService
 					$userIds[] = self::PUBLIC_DOCUMENT_ACCESSOR_ID;	
 				}
 				$indexedDoc->foIndexable(true);				
+				$indexedDoc->setLabel($document->getNavigationLabel());
 				$indexedDoc->setDateField('sortable_date', $document->getModificationdate());
 				$returnIndexedDoc = true;			
 			}
