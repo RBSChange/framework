@@ -78,7 +78,7 @@ if (isset($_POST['phpscript']) && (!isset($_POST['argv']) || is_array($_POST['ar
 	
 	if (file_exists($scriptPath) && is_readable($scriptPath) && strrpos($scriptPath, '.php') === strlen($scriptPath) - 4)
 	{
-		$argv = $_POST['argv'];
+		$argv = isset($_POST['argv']) ? $_POST['argv'] : array();
 		include_once $scriptPath;
 		exit();
 	}
