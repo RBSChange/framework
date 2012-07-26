@@ -36,7 +36,11 @@ class validation_MatchesValidator extends validation_ValidatorImpl implements va
 		}
 	}
 	
-	protected function getMessage()
+	/**
+	 * Returns the error message.
+	 * @return string
+	 */
+	protected function getMessage($args = null)
 	{
 		if ($this->localizedErrorMessage !== null)
 		{
@@ -49,6 +53,6 @@ class validation_MatchesValidator extends validation_ValidatorImpl implements va
 				return f_Locale::translate($this->localizedErrorMessage.';', array());
 			}
 		}
-		return parent::getMessage();
+		return parent::getMessage($args);
 	}
 }

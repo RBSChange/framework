@@ -388,10 +388,11 @@ class <{$module}>_<{$nameUCFirst}>Service extends <{$model->getBaseServiceClassN
 	
 	/**
 	 * @param <{$module}>_persistentdocument_<{$name}> $document
-	 * @param String[] $propertiesName
-	 * @param Array $datas
+	 * @param string[] $propertiesName
+	 * @param array $datas
+	 * @param integer $parentId
 	 */
-//	public function addFormProperties($document, $propertiesName, &$datas)
+//	public function addFormProperties($document, $propertiesName, &$datas, $parentId = null)
 //	{
 //	}
 

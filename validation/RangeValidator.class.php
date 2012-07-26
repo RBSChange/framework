@@ -39,7 +39,11 @@ class validation_RangeValidator extends validation_ValidatorImpl implements vali
 		parent::setParameter($value);
 	}
 	
-	protected function getMessage()
+	/**
+	 * Returns the error message.
+	 * @return string
+	 */
+	protected function getMessage($args = null)
 	{
 		return f_Locale::translate(
 			$this->getMessageCode(),

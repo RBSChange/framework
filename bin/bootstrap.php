@@ -49,7 +49,7 @@ function c_assert_php_version($version)
 }
 
 // First thing we do is check PHP version, outside of any class (maybe running and old PHP4 version ?)
-c_assert_php_version("5.1.6");
+c_assert_php_version("5.3.0");
 
 require_once FRAMEWORK_HOME .'/bin/includes/ChangeBootStrap.php';
 require_once FRAMEWORK_HOME .'/bin/includes/ClassDirAnalyzer.php';

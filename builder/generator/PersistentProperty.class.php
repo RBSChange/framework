@@ -285,7 +285,7 @@ class generator_PersistentProperty
 	/**
 	 * @param generator_PersistentProperty $property
 	 */
-	public function generateInverseProperty($property)
+	public static function generateInverseProperty($property)
 	{
 		$document = generator_PersistentModel::getModelByName($property->getType());
 		$invertProperty = new generator_PersistentProperty($document);

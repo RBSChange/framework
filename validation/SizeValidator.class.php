@@ -59,7 +59,11 @@ class validation_SizeValidator extends validation_ValidatorImpl implements valid
 	}
 
 
-	protected function getMessage()
+	/**
+	 * Returns the error message.
+	 * @return string
+	 */
+	protected function getMessage($args = null)
 	{
 		return f_Locale::translate(
 			$this->getMessageCode(),
