@@ -57,12 +57,22 @@ class LoggingService extends BaseService
 	 */
 	protected $errLogFilePath;
 	
+	
+	/**
+	 * @var array
+	 */
+	protected $errortype;
+	
+	
 	protected function __construct()
 	{
 		$this->stdLogFilePath = CHANGE_LOG_DIR . DIRECTORY_SEPARATOR . 'application.log';
 		$this->errLogFilePath = CHANGE_LOG_DIR . DIRECTORY_SEPARATOR . 'phperror.log';
 	}
 	
+	/**
+	 * @return void
+	 */
 	public function registerErrorHandler()
 	{
 		ini_set('display_errors', 1);
@@ -89,11 +99,6 @@ class LoggingService extends BaseService
 		set_exception_handler(array($this, "defaultExceptionHandler"));
 	}
 	
-	/**
-	 * @var array
-	 */
-	protected $errortype;
-
 	/**
 	 * @param integer $errno
 	 * @param string $errstr
@@ -142,13 +147,39 @@ class LoggingService extends BaseService
 		echo $message . PHP_EOL;
 	}
 	
+	/**
+	 * @param string $stringLine
+	 * @param string $loggerGroup
+	 */
 	public function log($stringLine, $loggerGroup)
 	{
 		error_log(gmdate('Y-m-d H:i:s')."\t".$stringLine . PHP_EOL, 3, $this->stdLogFilePath);
 	}
 	
+	/**
+	 * @param string $stringLine
+	 * @param string $loggerGroup
+	 */
 	public function errorLog($stringLine, $loggerGroup)
 	{
 		error_log(gmdate('Y-m-d H:i:s')."\t".$stringLine . PHP_EOL, 3, $this->errLogFilePath);
+	}
+	
+	/**
+	 * @param string $stringLine
+	 * @param string $logName
+	 */
+	public function namedLog($stringLine, $logName)
+	{
+		$logFilePath = f_util_FileUtils::buildWebeditPath('log', $logName , $logName.'.log');
+		try
+		{
+			f_util_FileUtils::mkdir(dirname($logFilePath));
+			error_log(gmdate('Y-m-d H:i:s')."\t".$stringLine . PHP_EOL, 3, $logFilePath);
+		} 
+		catch (Exception $e) 
+		{
+			$this->defaultExceptionHandler($e);
+		}
 	}
 }
