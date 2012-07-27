@@ -176,7 +176,7 @@ abstract class f_util_HtmlUtils
 		if (! empty($string))
 		{
 			$matches = array();
-			preg_match_all("/\s*([\w:]*)\s*=\s*\"(.*?)\"/i", $string, $matches, PREG_SET_ORDER);
+			preg_match_all('/\s*([\w:]*)\s*=\s*\"(.*?)\"/i', $string, $matches, PREG_SET_ORDER);
 			foreach ($matches as $matche)
 			{
 				$attributeArray[strtolower($matche[1])] = isset($matche[3]) ? $matche[3] : $matche[2];
@@ -569,7 +569,7 @@ abstract class f_util_HtmlUtils
 	 * @param Array $attributes
 	 * @return String
 	 */
-	private function buildImageSrc($document, &$attributes)
+	private static function buildImageSrc($document, &$attributes)
 	{
 		$lang = RequestContext::getInstance()->getLang();
 		$urlLang = $lang;
