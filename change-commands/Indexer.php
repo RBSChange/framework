@@ -168,12 +168,12 @@ class commands_Indexer extends commands_AbstractChangeCommand
 	
 	private function processModels($modelsName, $mode)
 	{
+		$logs = LoggingService::getInstance();
 		$totalDocumentCount = 0;
 		$scriptPath = 'framework/indexer/chunkDocumentIndexer.php';
-		$indexerLogPath = f_util_FileUtils::buildLogPath('indexer.log');
 		$chunkSize = 100;
 		$chunkInfo = "* Start indexing $mode documents.";
-		error_log(gmdate('Y-m-d H:i:s')."\t".$chunkInfo . PHP_EOL, 3, $indexerLogPath);
+		$logs->namedLog($chunkInfo, 'indexer');
 		$this->message($chunkInfo);
 		
 		foreach ($modelsName as $modelName) 
@@ -201,17 +201,17 @@ class commands_Indexer extends commands_AbstractChangeCommand
 					$progres = false;
 					$chunkInfo = "* $modelName processed Total: $documentIndex";
 				}
-				error_log(gmdate('Y-m-d H:i:s')."\t".$chunkInfo . PHP_EOL, 3, $indexerLogPath);
+				$logs->namedLog($chunkInfo, 'indexer');
 				$this->message($chunkInfo);
 			} 	
 		}
-		error_log(gmdate('Y-m-d H:i:s')."\tTotal of indexed documents: $totalDocumentCount" . PHP_EOL, 3, $indexerLogPath);
+		$logs->namedLog('Total of indexed documents: ' . $totalDocumentCount, 'indexer');
 		$this->message("Total of indexed documents: $totalDocumentCount");
 	}
 	
 	private function reIndexModelName($modelName)
 	{
-		$indexerLogPath = f_util_FileUtils::buildLogPath('indexer.log');
+		$logs = LoggingService::getInstance();		
 		$scriptPath = 'framework/indexer/backgroundDocumentIndexer.php';
 		$documentIndex = 0;
 		$progres = true;
@@ -235,7 +235,7 @@ class commands_Indexer extends commands_AbstractChangeCommand
 				$progres = false;
 				$chunkInfo = "* $modelName processed Total: $documentIndex";
 			}
-			error_log(gmdate('Y-m-d H:i:s')."\t". $chunkInfo . PHP_EOL, 3, $indexerLogPath);
+			$logs->namedLog($chunkInfo, 'indexer');
 			$this->message($chunkInfo);
 		}		
 	}

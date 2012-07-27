@@ -361,17 +361,6 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * FileUtils::buildFrameworkPath('indexer.log') returns CHANGE_LOG_DIR.DIRECTORY_SEPARATOR.'indexer.log'
-	 * @return String
-	 */
-	public static function buildLogPath()
-	{
-		$args = func_get_args();
-		array_unshift($args, CHANGE_LOG_DIR);
-		return self::buildAbsolutePathFromArray($args);
-	}
-
-	/**
 	 * FileUtils::buildFrameworkPath('config', 'listeners.xml') returns FRAMEWORK_HOME.DIRECTORY_SEPARATOR.'config'.DIRECTORY_SEPARATOR.'listeners.xml'
 	 * @return String
 	 */
@@ -1132,6 +1121,16 @@ abstract class f_util_FileUtils
 		$args = func_get_args();
 		Framework::warn(__METHOD__);
 		array_unshift($args, PROJECT_OVERRIDE);
+		return self::buildAbsolutePathFromArray($args);
+	}
+	
+	/**
+	 * @deprecated (will be removed in 4.0)
+	 */
+	public static function buildLogPath()
+	{
+		$args = func_get_args();
+		array_unshift($args, CHANGE_LOG_DIR);
 		return self::buildAbsolutePathFromArray($args);
 	}
 	
