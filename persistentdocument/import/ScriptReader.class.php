@@ -103,29 +103,46 @@ class import_ScriptReader extends BaseService
 	 */
 	public function executeInternal($fileName)
 	{
-		error_reporting(E_ERROR | E_WARNING | E_PARSE);
-
+		$this->errors = null;
 		set_error_handler(array($this, "errorReport"));
 		$reader = new XMLReader();
+		$pe = null;
+		
 		if (!$reader->open($fileName))
 		{
-			throw new Exception('Could not open ' . $fileName . ' for reading');
+			$this->errors = array('Could not open ' . $fileName . ' for reading');
 		}
-		$this->parse($reader);
-		$reader->close();
+		else
+		{
+			try
+			{
+				$this->parse($reader);
+			} 
+			catch (Exception $e) 
+			{
+				$pe = $e;
+				if ($this->errors === null)
+				{
+					$this->errors = array();
+				}
+				$this->errors[] = $e->getMessage();
+				$this->errors[] = $e->getTraceAsString();
+			}
+			$reader->close();
+		}
 		restore_error_handler();
+			
 		if ($this->errors !== null)
 		{
-			$message = join("\n", $this->errors);
-			$this->errors = null;
-			Framework::error(__METHOD__ . "Error while processing $fileName:\n$message");
-			throw new Exception($message);
+			$message = implode("\n", $this->errors);
+			Framework::error(__METHOD__ . "Error while processing $fileName:\n$message");		
+			throw new Exception($message, 0, $pe);
 		}
 	}
 
 	private $errors;
 
-	function errorReport($errno, $errstr, $errfile, $errline)
+	public function errorReport($errno, $errstr, $errfile, $errline)
 	{
 		switch ($errno)
 		{
@@ -141,7 +158,8 @@ class import_ScriptReader extends BaseService
 				$this->errors[] = $errstr;
 				break;
 		}
-		return f_errorHandler($errno, $errstr, $errfile, $errline);
+		LoggingService::getInstance()->defaultErrorHandler($errno, $errstr, $errfile, $errline, null);
+		return true;
 	}
 
 	/**
