@@ -40,7 +40,7 @@ class MailerSendmail extends Mailer
 		$body = $this->getMimeObject()->get();
 		$hdrs = $this->getMimeObject()->headers($this->getHeaders());
 
-		$mailObject =& Mail::factory('sendmail', $this->getFactoryParams());
+		$mailObject = Mail::factory('sendmail', $this->getFactoryParams());
 
 		return $mailObject->send($this->getAllRecipientEmail(), $hdrs, $body);
 	}	

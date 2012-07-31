@@ -153,7 +153,7 @@ class validation_DateValidator extends validation_ValidatorImpl implements valid
 		}
 
 
-		protected function getMessage()
+		protected function getMessage($args = null)
 		{
 			switch ($this->errorType)
 			{

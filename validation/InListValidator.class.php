@@ -36,7 +36,7 @@ class validation_InListValidator extends validation_ValidatorImpl implements val
 	}
 	
 	
-	protected function getMessage()
+	protected function getMessage($args = null)
 	{
 		return f_Locale::translate(
 			$this->getMessageCode(),

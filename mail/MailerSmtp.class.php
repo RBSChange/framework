@@ -48,7 +48,7 @@ class MailerSmtp extends Mailer
 		$body = $this->getMimeObject()->get();
 		$hdrs = $this->getMimeObject()->headers($this->getHeaders());
 
-		$mailObject =& Mail::factory('smtp', $this->getFactoryParams());
+		$mailObject = Mail::factory('smtp', $this->getFactoryParams());
 
 		return $mailObject->send($this->getAllRecipientEmail(), $hdrs, $body);
 	}
