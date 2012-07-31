@@ -20,7 +20,7 @@ class <{$model->getDocumentClassName()}> extends <{$model->getDocumentClassName(
 		// - please set text value.
 		$indexedDoc->setId($this->getId());
 		$indexedDoc->setDocumentModel('<{$model->getName()}>');
-		$indexedDoc->setLabel($this->getLabel());
+		$indexedDoc->setLabel($this->getNavigationLabel());
 <{if $model->isInternationalized() }>
 		$indexedDoc->setLang(RequestContext::getInstance()->getLang());
 <{else}>

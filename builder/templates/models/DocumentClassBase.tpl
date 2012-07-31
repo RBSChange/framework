@@ -1503,7 +1503,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		$indexedDoc = new indexer_BackofficeIndexedDocument();
 		$indexedDoc->setId($this->getId());
 		$indexedDoc->setDocumentModel($this->getDocumentModelName());
-		$indexedDoc->setLabel($this->getLabel());
+		$indexedDoc->setLabel($this->getTreeNodeLabel());
 		$indexedDoc->setDateField('startpublicationdate', $this->getStartpublicationdate());
 		$indexedDoc->setDateField('endpublicationdate', $this->getEndpublicationdate());
 		$indexedDoc->setDateField('modificationdate', $this->getModificationdate());
