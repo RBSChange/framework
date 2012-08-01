@@ -57,6 +57,7 @@ class commands_ResetDatabase extends commands_AbstractChangeCommand
 		$parent->executeCommand("clearSimplecache");
 		$parent->executeCommand("clearDatacache");
 		$parent->executeCommand("compileAll");
+		$parent->executeCommand("indexer", array('clear'));
 		$parent->executeCommand("importInitData");
 		$parent->executeCommand("initPatchDb");
 		
