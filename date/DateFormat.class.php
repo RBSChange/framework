@@ -38,7 +38,7 @@ class date_DateFormat
     /**
      * @deprecated with no replacement
      */
-    public function smartFormat($date, $options = 0, $lang = null)
+    public static function smartFormat($date, $options = 0, $lang = null)
     {
     	if ( is_null($date) )
     	{
