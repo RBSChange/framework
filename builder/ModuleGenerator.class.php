@@ -170,6 +170,9 @@ class builder_ModuleGenerator
 		$editorPath = $pathBase . 'forms' . DIRECTORY_SEPARATOR . 'editor' . DIRECTORY_SEPARATOR;
 		
 		// Generate configuration files
+		$licensePath = f_util_FileUtils::buildFrameworkPath('builder', 'templates', 'modules', 'LICENSE.txt');
+		f_util_FileUtils::cp($licensePath, $pathBase . 'LICENSE.txt');
+		
 		f_util_FileUtils::write($pathBase . 'change.xml', $this->generateFile('change.xml'));
 		f_util_FileUtils::write($configPath . 'module.xml', $this->generateFile('config_module.xml'));
 		f_util_FileUtils::write($configPath . 'actions.xml', $this->generateFile('config_actions.xml'));

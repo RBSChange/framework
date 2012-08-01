@@ -24,7 +24,27 @@ class commands_AddModule extends commands_AbstractChangedevCommand
 	 */
 	protected function validateArgs($params, $options)
 	{
-		return count($params) >= 1;
+		if (count($params) == 1 || count($params) == 2)
+		{
+			$moduleName = strtolower($params[0]);
+			if (file_exists(f_util_FileUtils::buildWebeditPath('modules', $moduleName)))
+			{
+				$this->errorMessage('Module "' . $moduleName . '" already exist.');
+				return false;
+			}
+			if (!preg_match('/^[a-z0-9]+$/', $moduleName))
+			{
+				$this->errorMessage('Name "' . $moduleName . '" is not valid for a module');
+				return false;
+			}
+			return true;
+		}
+		elseif (count($params) > 2)
+		{
+			$this->errorMessage('Too many arguments.');
+			return false;
+		}
+		return false;
 	}
 
 	/**
@@ -36,16 +56,11 @@ class commands_AddModule extends commands_AbstractChangedevCommand
 	{
 		$this->message("== Add module ==");
 
-		$moduleName = $params[0];
+		$moduleName = strtolower($params[0]);
 		$icon = isset($params[1]) ? $params[1] : "package";
 		
 		$this->loadFramework();
-		$modulePath = f_util_FileUtils::buildWebeditPath("modules", $moduleName);
-		if (file_exists($modulePath))
-		{
-			return $this->quitError("Module $moduleName already exists");
-		}
-		f_util_FileUtils::mkdir($modulePath);
+		f_util_FileUtils::mkdir(f_util_FileUtils::buildWebeditPath('modules', $moduleName));
 
 		// Make auto generated file
 		$moduleGenerator = new builder_ModuleGenerator($moduleName);
@@ -60,8 +75,6 @@ class commands_AddModule extends commands_AbstractChangedevCommand
 
 		$this->changecmd("clear-webapp-cache");
 		$this->changecmd("compile-config");
-		$this->changecmd("compile-documents");
-		$this->changecmd("compile-editors-config");
 		$this->changecmd("compile-roles");
 		 
 		return $this->quitOk('Module ' . $moduleName . ' ready');
