@@ -16,7 +16,7 @@ class f_web_oauth_HTTPClient
 	public function __construct(f_web_oauth_Request $request)
 	{
 		$this->mOauthRequest = $request;
-		$this->mBackend = HTTPClientService::getNewHTTPClient();
+		$this->mBackend = HTTPClientService::getInstance()->getNewHTTPClient();
 		$this->mBackend->setTimeOut(5);
 	}
 	
