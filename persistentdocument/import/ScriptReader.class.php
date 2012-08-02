@@ -12,6 +12,8 @@ class import_ScriptReader extends BaseService
 	private $attributes = array();
 
 	private $regiteredElementsClass = array();
+	
+	private $xmlFilePaths = array();
 
 	protected function __construct()
 	{
@@ -103,6 +105,7 @@ class import_ScriptReader extends BaseService
 	 */
 	public function executeInternal($fileName)
 	{
+		array_push($this->xmlFilePaths, $fileName);
 		$this->errors = null;
 		set_error_handler(array($this, "errorReport"));
 		$reader = new XMLReader();
@@ -131,13 +134,22 @@ class import_ScriptReader extends BaseService
 			$reader->close();
 		}
 		restore_error_handler();
-			
+		array_pop($this->xmlFilePaths);
+		
 		if ($this->errors !== null)
 		{
 			$message = implode("\n", $this->errors);
 			Framework::error(__METHOD__ . "Error while processing $fileName:\n$message");		
 			throw new Exception($message, 0, $pe);
 		}
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getCurrentXmlFilePath()
+	{
+		return end($this->xmlFilePaths);
 	}
 
 	private $errors;
@@ -215,7 +227,7 @@ class import_ScriptReader extends BaseService
 				}
 				elseif ($reader->nodeType == XMLReader::TEXT || $reader->nodeType == XMLReader::CDATA)
 				{
-					if ($value = trim($reader->value))
+					if (($value = trim($reader->value)) != '')
 					{
 						$currentElement->addContent($value);
 					}
