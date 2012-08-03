@@ -23,7 +23,28 @@ class commands_CreateDocument extends commands_AbstractChangedevCommand
 	 */
 	protected function validateArgs($params, $options)
 	{
-		return count($params) == 2;
+		if (count($params) != 2)
+		{
+			return false;
+		}
+		$moduleName = strtolower($params[0]);
+		if (!file_exists(f_util_FileUtils::buildWebeditPath('modules', $moduleName)))
+		{
+			$this->errorMessage('Module "' . $moduleName . '" not found.');
+			return false;
+		}
+		$documentName = strtolower($params[1]);
+		if (file_exists(f_util_FileUtils::buildWebeditPath('modules', $moduleName, 'persistentdocument', $documentName . '.xml')))
+		{
+			$this->errorMessage('Document "' . $moduleName . '/' .$documentName. '" already exist.');
+			return false;
+		}
+		if (!preg_match('/^[a-z0-9]+$/', $documentName))
+		{
+			$this->errorMessage('Name "' . $documentName . '" is not valid for a dacument');
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -37,7 +58,8 @@ class commands_CreateDocument extends commands_AbstractChangedevCommand
 		if ($completeParamCount == 0)
 		{
 			$components = array();
-			foreach (glob("modules/*", GLOB_ONLYDIR) as $module)
+			$baseDir = f_util_FileUtils::buildWebeditPath('modules', '*');
+			foreach (glob($baseDir, GLOB_ONLYDIR) as $module)
 			{
 				$components[] = basename($module);
 			}
@@ -53,18 +75,14 @@ class commands_CreateDocument extends commands_AbstractChangedevCommand
 	 */
 	function _execute($params, $options)
 	{
+	
+		$moduleName = strtolower($params[0]);
+		$documentName = strtolower($params[1]);
+		
 		$this->message("== Create document ==");
-
-		$moduleName = $params[0];
-		$documentName = $params[1];
 		
 		$this->loadFramework();
-		$to = f_util_FileUtils::buildWebeditPath("modules", $moduleName, "persistentdocument", "$documentName.xml");
-		if (file_exists($to))
-		{
-			return $this->quitError("Document $moduleName/$documentName already exists (check $to)");
-		}
-		
+		$to = f_util_FileUtils::buildWebeditPath("modules", $moduleName, "persistentdocument", "$documentName.xml");		
 		$from = f_util_FileUtils::buildFrameworkPath("builder", "resources", "base-document.xml");
 		f_util_FileUtils::cp($from, $to);
 			
