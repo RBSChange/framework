@@ -1,16 +1,5 @@
 <?php
-/**
-<{if $module == 'framework'}>
- * commands_<{$name}>
- * @package framework.command<{$type}>
- */
-class commands_<{$name}> extends commands_AbstractChange<{$type}>Command
-<{else}>
- * commands_<{$module}>_<{$name}>
- * @package modules.<{$module}>.command<{$type}>
- */
-class commands_<{$module}>_<{$name}> extends commands_AbstractChange<{$type}>Command
-<{/if}>
+class <{$className}> extends <{$extend}>
 {
 	/**
 	 * @return String

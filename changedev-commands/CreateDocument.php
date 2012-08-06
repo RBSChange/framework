@@ -41,7 +41,7 @@ class commands_CreateDocument extends commands_AbstractChangedevCommand
 		}
 		if (!preg_match('/^[a-z0-9]+$/', $documentName))
 		{
-			$this->errorMessage('Name "' . $documentName . '" is not valid for a dacument');
+			$this->errorMessage('Name "' . $documentName . '" is not valid for a document');
 			return false;
 		}
 		return true;
