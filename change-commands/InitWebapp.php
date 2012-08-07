@@ -123,21 +123,23 @@ class commands_InitWebapp extends commands_AbstractChangeCommand
 	private function addRootLink($targetDir)
 	{
 		$targetDir .= DIRECTORY_SEPARATOR;
+		$defautLinks = "cache,changeicons,fckeditor,fckeditorbrowser,media,publicmedia,migration,install,". 
+		"index.php,xchrome_controller.php,xul_controller.php,site-disabled.php,sessionKeepAlive.php,".
+		"listener.php,changecron.php,changescriptexec.php";
 		
-		$exclude = array('apache', 'bin', 'log', 'build', 'config', 'framework', 'libs', 'modules', 'securemedia', 
-			'themes', 'override', 'profile', 'change.xml', 'change.properties', 'changecronconsole.php', 'repository',
-			'installedpatch', 'pear', 'target', 'mockup', 'mailbox');
-		
+		$links = explode(',', Framework::getConfigurationValue('general/linkToDocumentRoot', $defautLinks));
+		$links = array_unique(array_map('trim', $links));
+
 		$dh = opendir($targetDir);
 		$this->message("Generate symlink on DOCUMENT_ROOT: " . f_util_FileUtils::buildDocumentRootPath());
 		while (($file = readdir($dh)) !== false)
 		{
-			if (strpos($file, '.') === 0) {continue;}
-			if (in_array($file, $exclude)) {continue;}
-			
-			$target = $targetDir.$file;
-			if (is_file($target) && substr($target, -4) !=  '.php') {continue;}
-			
+			if (!in_array($file, $links)) 
+			{
+				continue;
+			}
+	
+			$target = $targetDir.$file;			
 			$link = f_util_FileUtils::buildDocumentRootPath($file);
 			if (strpos($link, $target) !== 0)
 			{

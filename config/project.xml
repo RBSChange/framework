@@ -89,7 +89,8 @@
 		<general>
 			<entry name="os">linux</entry>
 			<entry name="server-fqdn">fully-qualified-domain-name</entry>
-			<entry name="server-ip">serveur.ip.address</entry>
+			<entry name="server-ip">127.0.0.1</entry>
+			
 			<!-- What $_SERVER entry to use to detect https queries -->
 			<entry name="https-request-marker">HTTPS</entry>
 			<!-- What is the value of https-request-marker for https queries -->
@@ -99,6 +100,10 @@
 
 			<!-- Phase can be : production, integration, development -->
             <entry name="phase">production</entry>
+            
+     		<!--
+            <entry name="linkToDocumentRoot">cache,changeicons,fckeditor,fckeditorbrowser,media,publicmedia,migration,install,changecron.php,changePHPUnit.php,index.php,site-disabled.php,xchrome_controller.php,changescriptexec.php,listener.php,sessionKeepAlive.php,xul_controller.php</entry>
+             -->
 		</general>
 		
 		<i18n>
