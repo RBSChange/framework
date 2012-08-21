@@ -744,7 +744,11 @@ abstract class f_persistentdocument_PersistentProvider
 	 */
 	public final function findUnique($query)
 	{
-		$docs = $this->find($query->setMaxResults(2));
+		if ($query->getMaxResults() != 1)
+		{
+			$query->setMaxResults(2);
+		}
+		$docs = $this->find($query);
 
 		$nbDocs = count($docs);
 		if ($nbDocs > 0)

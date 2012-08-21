@@ -2,9 +2,6 @@
 /**
  * @package framework.indexer
  */
-/**
- * @deprecated
- */
 interface indexer_IndexableDocument
 {
 	/**
