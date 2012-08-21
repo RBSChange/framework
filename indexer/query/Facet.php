@@ -67,8 +67,8 @@ class indexer_Facet
 		if (($mic === '[' || $mic === ']') and ($mac === '[' || $mac === ']') && strpos($rangeTxt, ','))
 		{
 			list($min, $max) = explode(',', str_replace(array(']', '[', ' '), '', $rangeTxt));
-			if ($max !== '*' && $mac === '[') {$max = intval($max) - $precision;}
-			if ($min !== '*' && $mic === ']') {$min = intval($min) + $precision;}
+			if ($max !== '*' && $mac === '[') {$max = floatval($max) - $precision;}
+			if ($min !== '*' && $mic === ']') {$min = floatval($min) + $precision;}
 			$this->addRange($min, $max);
 		}
 		return $this;	
