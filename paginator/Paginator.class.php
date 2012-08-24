@@ -1,7 +1,4 @@
 <?php
-/**
- * @deprecated
- */
 class paginator_PaginatorItem
 {
 	/**
@@ -64,9 +61,6 @@ class paginator_PaginatorItem
 	}
 }
 
-/**
- * @deprecated
- */
 class paginator_Paginator extends ArrayObject
 {
 	/**
