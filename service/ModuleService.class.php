@@ -489,8 +489,7 @@ class ModuleService extends BaseService
 			$package = 'modules_' . $ownerModuleName . '/modules_' . $relatedModuleName;
 			
 			$systemNodeId = $this->getPersistentProvider()->getSettingValue($package, self::SETTING_SYSTEM_FOLDER_ID);
-			
-			if (is_null($systemNodeId))
+			if (!$systemNodeId)
 			{
 				// setting not found: create system folder and save setting information
 				try
@@ -500,7 +499,6 @@ class ModuleService extends BaseService
 					// create system folder
 					$systemFolder = $tm->getPersistentProvider()->getNewDocumentInstance('modules_generic/systemfolder');
 					$systemFolder->setLabel('m.' . $relatedModuleName . '.bo.general.system-folder-name');
-					
 					$systemFolder->save(ModuleService::getInstance()->getRootFolderId($ownerModuleName));
 					
 					// save system folder id in f_settings table
