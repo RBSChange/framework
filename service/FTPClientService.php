@@ -6,8 +6,8 @@ class f_FTPClientService extends change_BaseService
 {
 	/**
 	 * @return f_FTPClient
-	 * @param String $host
-	 * @param Integer $port
+	 * @param string $host
+	 * @param integer $port
 	 */
 	public function getNewClient($host, $port = 21)
 	{
@@ -15,8 +15,8 @@ class f_FTPClientService extends change_BaseService
 	}
 	
 	/**
-	 * @param String $localPath
-	 * @param String $fullRemotePath "ftp://username:password@server:port/path"
+	 * @param string $localPath
+	 * @param string $fullRemotePath "ftp://username:password@server:port/path"
 	 */
 	public function put($localPath, $fullRemotePath)
 	{
@@ -49,8 +49,8 @@ class f_FTPClient
 	private $currentDir;
 	
 	/**
-	 * @param String $host
-	 * @param Integer $port
+	 * @param string $host
+	 * @param integer $port
 	 */
 	public function __construct($host, $port = 21)
 	{
@@ -72,8 +72,8 @@ class f_FTPClient
 	}
 	
 	/**
-	 * @param String $username
-	 * @param String $password
+	 * @param string $username
+	 * @param string $password
 	 */
 	public function login($username, $password)
 	{
@@ -98,8 +98,8 @@ class f_FTPClient
 	}
 	
 	/**
-	 * @param String $localPath
-	 * @param String $remotePath
+	 * @param string $localPath
+	 * @param string $remotePath
 	 */
 	public function put($localPath, $remotePath)
 	{
@@ -111,8 +111,8 @@ class f_FTPClient
 	}
 	
 	/**
-	 * @param String $folder
-	 * @return String[]
+	 * @param string $folder
+	 * @return string[]
 	 */
 	public function ls($folder = ".")
 	{
@@ -121,7 +121,7 @@ class f_FTPClient
 	}
 	
 	/**
-	 * @param String $folder
+	 * @param string $folder
 	 */
 	public function chdir($folder) 
 	{
@@ -134,7 +134,7 @@ class f_FTPClient
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getwd()
 	{
@@ -152,8 +152,8 @@ class f_FTPClient
 	}
 	
 	/**
-	 * @param String $remotePath
-	 * @param String $localPath
+	 * @param string $remotePath
+	 * @param string $localPath
 	 */
 	public function get($remotePath, $localPath)
 	{

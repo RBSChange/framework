@@ -171,10 +171,10 @@ class generator_PersistentProperty
 
 		// When the "inverse" property is set to "true", the "tree-node" property
 		// may have one of the following values:
-		// - both    : both properties will be virtual tree nodes
+		// - both	: both properties will be virtual tree nodes
 		// - direct  : only this property will be a virtual tree node
 		// - inverse : only the inverse property will be a virtual node
-		// - none    : no virtual tree node
+		// - none	: no virtual tree node
 		// For compatibility purpose, 'true' equals to 'both' and 'false' equals to 'none'.
 		if ($this->inverse)
 		{
@@ -351,7 +351,7 @@ class generator_PersistentProperty
 	}
 		
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isDocument()
 	{
@@ -360,7 +360,7 @@ class generator_PersistentProperty
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isLocalized()
 	{
@@ -377,7 +377,7 @@ class generator_PersistentProperty
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isInverse()
 	{
@@ -385,7 +385,7 @@ class generator_PersistentProperty
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getName()
 	{
@@ -454,7 +454,7 @@ class generator_PersistentProperty
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isOverride()
 	{
@@ -491,7 +491,7 @@ class generator_PersistentProperty
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getType()
 	{
@@ -499,7 +499,7 @@ class generator_PersistentProperty
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getDocumentType()
 	{
@@ -507,7 +507,7 @@ class generator_PersistentProperty
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getDocumentTypeRecursive()
 	{
@@ -523,7 +523,7 @@ class generator_PersistentProperty
 	}
 
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getMinOccurs()
 	{
@@ -535,7 +535,7 @@ class generator_PersistentProperty
 	}
 
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getMaxOccurs()
 	{
@@ -547,7 +547,7 @@ class generator_PersistentProperty
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getDbName()
 	{
@@ -560,7 +560,7 @@ class generator_PersistentProperty
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getDefaultValue()
 	{
@@ -627,7 +627,7 @@ class generator_PersistentProperty
 	}	
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isCascadeDelete()
 	{
@@ -635,7 +635,7 @@ class generator_PersistentProperty
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function hasCascadeDelete()
 	{
@@ -644,7 +644,7 @@ class generator_PersistentProperty
 
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isTreeNode()
 	{
@@ -652,7 +652,7 @@ class generator_PersistentProperty
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isArray()
 	{
@@ -660,7 +660,7 @@ class generator_PersistentProperty
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isRequired()
 	{
@@ -672,7 +672,7 @@ class generator_PersistentProperty
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getFromList()
 	{
@@ -684,7 +684,7 @@ class generator_PersistentProperty
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getTableName()
 	{
@@ -703,7 +703,7 @@ class generator_PersistentProperty
 
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getPhpDefaultValue()
 	{
@@ -733,7 +733,7 @@ class generator_PersistentProperty
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getPhpI18nDefaultValue()
 	{
@@ -755,8 +755,8 @@ class generator_PersistentProperty
 		return $ret . ');';
 	}
 	/**
-	 * @param String $value
-	 * @return String
+	 * @param string $value
+	 * @return string
 	 */
 	private function getPhpValue($value)
 	{
@@ -787,7 +787,7 @@ class generator_PersistentProperty
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getPhpName()
 	{
@@ -936,7 +936,7 @@ class generator_PersistentProperty
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getCommentaryType()
 	{
@@ -987,7 +987,7 @@ class generator_PersistentProperty
 		return null;
 	}
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getRelationName()
 	{

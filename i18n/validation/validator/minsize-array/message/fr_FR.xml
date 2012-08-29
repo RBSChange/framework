@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.validation.validator.minsize-array.message" lcid="fr_FR">
-  <key id="reversed">le champ ″{field}″ doit avoir au plus {param} éléments.</key>
+<?xml version="1.0" encoding="UTF-8"?>
+<i18n baseKey="m.framework.validation.validator.minsize-array.message" lcid="fr_FR">
+	<key id="reversed">le champ ″{field}″ doit avoir au plus {param} éléments.</key>
 </i18n>

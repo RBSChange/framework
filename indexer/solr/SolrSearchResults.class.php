@@ -27,7 +27,7 @@ class indexer_SolrSearchResults extends ArrayObject implements indexer_SearchRes
 	private $suggestion;
 
 	/**
-	 * @param String $data
+	 * @param string $data
 	 * @param indexer_StandardSolrSearch $solrSearch
 	 */
 	public function __construct($data = null, $solrSearch = null)
@@ -213,7 +213,7 @@ class indexer_SolrSearchResults extends ArrayObject implements indexer_SearchRes
 	}
 	
 	/**
-	 * @param String $fieldName
+	 * @param string $fieldName
 	 * @return array
 	 * @see http://wiki.apache.org/solr/StatsComponent
 	 */
@@ -271,7 +271,7 @@ class indexer_SolrSearchResults extends ArrayObject implements indexer_SearchRes
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getSuggestion()
 	{

@@ -56,7 +56,7 @@ class BeanAggregateModel implements f_mvc_BeanModel
 	/**
 	 * @see f_mvc_BeanModel::getBeanConstraints()
 	 *
-	 * @return String
+	 * @return string
 	 */
 	function getBeanConstraints()
 	{
@@ -65,7 +65,7 @@ class BeanAggregateModel implements f_mvc_BeanModel
 	private $beanName;
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getBeanName()
 	{

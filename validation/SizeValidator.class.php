@@ -176,9 +176,9 @@ abstract class validation_AbstractSizeValidator extends validation_ValidatorImpl
 	}
 	
 	/**
-	 * @param Integer $len
-	 * @param Integer $size
-	 * @return Boolean
+	 * @param integer $len
+	 * @param integer $size
+	 * @return boolean
 	 */
 	abstract protected function isValidLen($len, $size);
 
@@ -200,9 +200,9 @@ abstract class validation_AbstractSizeValidator extends validation_ValidatorImpl
 class validation_MaxSizeValidator extends validation_AbstractSizeValidator
 {
 	/**
-	 * @param Integer $len
-	 * @param Integer $maxSize
-	 * @return Boolean
+	 * @param integer $len
+	 * @param integer $maxSize
+	 * @return boolean
 	 */
 	protected function isValidLen($len, $maxSize)
 	{
@@ -223,9 +223,9 @@ class validation_MaxSizeValidator extends validation_AbstractSizeValidator
 class validation_MinSizeValidator extends validation_AbstractSizeValidator
 {
 	/**
-	 * @param Integer $len
-	 * @param Integer $size
-	 * @return Boolean
+	 * @param integer $len
+	 * @param integer $size
+	 * @return boolean
 	 */
 	protected function isValidLen($len, $size)
 	{

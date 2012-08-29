@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.validation.validator.maxsize.message" lcid="en_GB">
-  <key id="reversed">the ″{field}″ field does not have to have a maximum length of {param} characters.</key>
+<?xml version="1.0" encoding="UTF-8"?>
+<i18n baseKey="m.framework.validation.validator.maxsize.message" lcid="en_GB">
+	<key id="reversed">the ″{field}″ field does not have to have a maximum length of {param} characters.</key>
 </i18n>

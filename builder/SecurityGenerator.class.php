@@ -118,9 +118,9 @@ class builder_SecurityGenerator
 	/**
 	 * Generate cached {$moduleName}RoleService.class.php, {$moduleName}RoleService.class.php in cache/config
 	 *
-	 * @param String $moduleName SHORT target moduleName
-	 * @param String $baseRightsPath FULL qualified path to rights.xml for the original module.
-	 * @param String $overrideRightsPath FULL qualified path to rights.xml for overrided the module.
+	 * @param string $moduleName SHORT target moduleName
+	 * @param string $baseRightsPath FULL qualified path to rights.xml for the original module.
+	 * @param string $overrideRightsPath FULL qualified path to rights.xml for overrided the module.
 	 */
 
 	private function generateRoleSystemFiles($moduleName, $baseRightsPath, $overrideRightsPath)
@@ -314,7 +314,7 @@ class ModuleRoles
 	/**
 	 * @param string $name
 	 * @param string $documentName
-	 * @return ActionInfo
+	 * @return change_ActionInfo
 	 */
 	private function getActionInfo($name, $documentName = null)
 	{
@@ -334,8 +334,8 @@ class ModuleRoles
 	}
 
 	/**
-	 * @param String $string
-	 * @return Boolean
+	 * @param string $string
+	 * @return boolean
 	 */
 	public static function strtoboolean($string)
 	{

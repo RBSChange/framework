@@ -8,7 +8,7 @@ class bean_DateTimeConverter implements BeanValueConverter
 	
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getDateFormat()
 	{
@@ -20,7 +20,7 @@ class bean_DateTimeConverter implements BeanValueConverter
 	}
 	
 	/**
-	 * @param String $dateFormat
+	 * @param string $dateFormat
 	 */
 	public function setDateFormat($dateFormat)
 	{
@@ -68,7 +68,7 @@ class bean_DateTimeConverter implements BeanValueConverter
 	 * @see BeanValueConverter::isValidRequestValue()
 	 *
 	 * @param Mixed $value
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isValidRequestValue($value)
 	{
@@ -83,9 +83,9 @@ class bean_DateTimeConverter implements BeanValueConverter
 	/**
 	 * TODO Capitalize date format validation
 	 *
-	 * @param String $dateString
-	 * @param String $format
-	 * @return Boolean
+	 * @param string $dateString
+	 * @param string $format
+	 * @return boolean
 	 */
 	private function isValidFormat($dateString, $format)
 	{

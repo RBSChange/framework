@@ -62,7 +62,7 @@ class c_ChangeBootStrap
 	private $releaseDocuments = array();
 	
 	/**
-	 * @param String $path
+	 * @param string $path
 	 */
 	function __construct($path)
 	{
@@ -71,7 +71,7 @@ class c_ChangeBootStrap
 	
 	/**
 	 * Return the path of project install.xml
-	 * @return String
+	 * @return string
 	 */
 	public function getDescriptorPath()
 	{
@@ -146,7 +146,7 @@ class c_ChangeBootStrap
 	}
 	
 	/**
-	 * @param String $name
+	 * @param string $name
 	 */
 	function setName($name)
 	{
@@ -503,7 +503,7 @@ class c_ChangeBootStrap
 	}
 		
 	/**
-	 * @return String
+	 * @return string
 	 */
 	private function getProxy()
 	{
@@ -627,8 +627,8 @@ class c_ChangeBootStrap
 		if ($zip->open($zipPath) === true) 
 		{		
 			if (is_dir($tmpPath)) {f_util_FileUtils::rmdir($tmpPath);}		
-		    for($i = 0; $i < $zip->numFiles; $i++) 
-		    {
+			for($i = 0; $i < $zip->numFiles; $i++) 
+			{
 				$name = $zip->getNameIndex($i);
 				$zip->extractTo($tmpPath, array($name));
 				if ($name === 'install.xml')
@@ -636,9 +636,9 @@ class c_ChangeBootStrap
 					$xmlDoc = f_util_DOMUtils::fromPath($tmpPath . '/' . $name);
 					$package = $this->getPackageFromXML($xmlDoc);
 					if ($package) {$package->setTemporaryPath($tmpPath);}
-				}          
-		    }             
-		    $zip->close();
+				}		  
+			}			 
+			$zip->close();
 		}
 		return $package;
 	}
@@ -683,9 +683,9 @@ class c_ChangeBootStrap
 	}
 	
 	/**
-	 * @param String $path
-	 * @param String $sectionName
-	 * @param Boolean $devCommand
+	 * @param string $path
+	 * @param string $sectionName
+	 * @param boolean $devCommand
 	 */
 	private function addCommandDir($path, $sectionName, $devCommand)
 	{
@@ -791,7 +791,7 @@ class c_ChangeBootStrap
 	}
 		
 	/**
-	 * @param String[] $args
+	 * @param string[] $args
 	 */
 	function execute($args)
 	{
@@ -850,8 +850,8 @@ class c_ChangeBootStrap
 	}
 		
 	/**
-	 * @param String $cmdName
-	 * @param String[] $args
+	 * @param string $cmdName
+	 * @param string[] $args
 	 * @return boolean
 	 */
 	protected function _executeCommand($cmdName, $args = array())
@@ -874,7 +874,7 @@ class c_ChangeBootStrap
 	
 	/**
 	 * Get the value of options (--<optionName>[=value])
-	 * @param String[] $args
+	 * @param string[] $args
 	 * @return array("options" => array<String, String>, "params" => String[]) where the option array key is the option name, the potential option value or true
 	 */
 	public function parseArgs($args)

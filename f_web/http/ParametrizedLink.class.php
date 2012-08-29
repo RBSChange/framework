@@ -1,35 +1,35 @@
 <?php
 class f_web_ParametrizedLink extends f_web_HttpLink
-{      
+{	  
 	private $queryParameters = array();
 	 
-    private $scheme;
-    private $host;
-    private $path;  
+	private $scheme;
+	private $host;
+	private $path;  
 
-    private $fragment;
-    private $argSeparator;
-    
-    private static $NULLLINK;
-    
-    /**
-     * @return f_web_ParametrizedLink
-     */
-    public static function getNullLink()
-    {
-    	if (self::$NULLLINK === null)
-    	{
-    		self::$NULLLINK = new self(null, null, null);
-    	}
-    	return self::$NULLLINK;
-    }
-    
-    public function __construct($protocol, $domaine, $path = self::SITE_PATH)
-    {
-        $this->scheme = $protocol;
-        $this->host = $domaine;
-        $this->path = $path;
-    }
+	private $fragment;
+	private $argSeparator;
+	
+	private static $NULLLINK;
+	
+	/**
+	 * @return f_web_ParametrizedLink
+	 */
+	public static function getNullLink()
+	{
+		if (self::$NULLLINK === null)
+		{
+			self::$NULLLINK = new self(null, null, null);
+		}
+		return self::$NULLLINK;
+	}
+	
+	public function __construct($protocol, $domaine, $path = self::SITE_PATH)
+	{
+		$this->scheme = $protocol;
+		$this->host = $domaine;
+		$this->path = $path;
+	}
 	
 	/**
 	 * @return array
@@ -39,26 +39,26 @@ class f_web_ParametrizedLink extends f_web_HttpLink
 		return $this->queryParameters;
 	}
 	
-    /**
-     * @param String $fragment
-     * @return f_web_ParametrizedLink
-     */
-    public function setFragment($fragment)
-    {
-        $this->fragment = $fragment;
-        return $this;
-    }
-    
-    /**
-     * @param String $argSeparator
-     * @return f_web_ParametrizedLink
-     */
-    public function setArgSeparator($argSeparator)
-    {
-        $this->argSeparator = $argSeparator;
-        return $this;
-    }
-    
+	/**
+	 * @param string $fragment
+	 * @return f_web_ParametrizedLink
+	 */
+	public function setFragment($fragment)
+	{
+		$this->fragment = $fragment;
+		return $this;
+	}
+	
+	/**
+	 * @param string $argSeparator
+	 * @return f_web_ParametrizedLink
+	 */
+	public function setArgSeparator($argSeparator)
+	{
+		$this->argSeparator = $argSeparator;
+		return $this;
+	}
+	
 
 	/**
 	 * @param array $queryParameters
@@ -78,8 +78,8 @@ class f_web_ParametrizedLink extends f_web_HttpLink
 	}
 	
 	/**
-	 * @param String $key
-	 * @param String|array $value
+	 * @param string $key
+	 * @param string|array $value
 	 * @return f_web_ParametrizedLink
 	 */
 	public function setQueryParameter($key, $value)
@@ -102,18 +102,18 @@ class f_web_ParametrizedLink extends f_web_HttpLink
 		return $this;
 	}
 
-    /**
-	 * @return String
+	/**
+	 * @return string
 	 */
 	public function getUrl()
 	{
 		if ($this->path === null) {return null;}
-	    return $this->buildUrl($this->scheme, $this->host, $this->path, $this->getQueryParametres()
-	            , $this->fragment, $this->argSeparator);
+		return $this->buildUrl($this->scheme, $this->host, $this->path, $this->getQueryParametres()
+				, $this->fragment, $this->argSeparator);
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getPath()
 	{
@@ -121,7 +121,7 @@ class f_web_ParametrizedLink extends f_web_HttpLink
 	}	
 
 	/**
-	 * @param String $url
+	 * @param string $url
 	 * @return f_web_HttpLink
 	 */
 	public function setParametersFromUrl($url)
@@ -142,11 +142,11 @@ class f_web_ParametrizedLink extends f_web_HttpLink
 
 class f_web_ChromeParametrizedLink extends f_web_ParametrizedLink
 {
-    public function __construct($domaine)
-    {
-    	parent::__construct('xchrome', $domaine, '/');
-    }
-    
+	public function __construct($domaine)
+	{
+		parent::__construct('xchrome', $domaine, '/');
+	}
+	
 	public function getUrl()
 	{
 		$params = $this->getQueryParametres();
@@ -154,6 +154,6 @@ class f_web_ChromeParametrizedLink extends f_web_ParametrizedLink
 		{
 			$this->setQueryParameter('uilang', RequestContext::getInstance()->getUILang());
 		}
-	    return str_replace('/?', '/', parent::getUrl());
+		return str_replace('/?', '/', parent::getUrl());
 	}   
 }

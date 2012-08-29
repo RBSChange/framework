@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.validation.validator.password" lcid="en_GB">
-  <key id="message">The ″{field}″ field must be a valid password.</key>
+<?xml version="1.0" encoding="UTF-8"?>
+<i18n baseKey="m.framework.validation.validator.password" lcid="en_GB">
+	<key id="message">The ″{field}″ field must be a valid password.</key>
 </i18n>

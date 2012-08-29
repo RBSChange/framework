@@ -164,12 +164,12 @@ class DocumentHelper
 	 * Return the orignal document for the $correctionId if exist. 
 	 * If has no correction return the document instance of $correctionId
 	 *
-	 * @param Integer $correctionId
+	 * @param integer $correctionId
 	 * @return f_persistentdocument_PersistentDocument
 	 */
 	public static function getByCorrectionId($correctionId)
 	{
-	    return self::getByCorrection(self::getDocumentInstance($correctionId));
+		return self::getByCorrection(self::getDocumentInstance($correctionId));
 	}
 
 	/**
@@ -179,27 +179,27 @@ class DocumentHelper
 	 * @param f_persistentdocument_PersistentDocument $correction
 	 * @return f_persistentdocument_PersistentDocument
 	 */
-    public static function getByCorrection($correction)
+	public static function getByCorrection($correction)
 	{
-	    if ($correction instanceof f_persistentdocument_PersistentDocument) 
-	    {
-	    	$model = $correction->getPersistentModel();
-    	    if ($model->useCorrection())
-    	    {
-    	    	if ($correction->getCorrectionofid() > 0)
-    	    	{
-    	        	return self::getDocumentInstance($correction->getCorrectionofid());
-    	    	}
-    	    }  
-	    }
-	    return $correction;
+		if ($correction instanceof f_persistentdocument_PersistentDocument) 
+		{
+			$model = $correction->getPersistentModel();
+			if ($model->useCorrection())
+			{
+				if ($correction->getCorrectionofid() > 0)
+				{
+					return self::getDocumentInstance($correction->getCorrectionofid());
+				}
+			}  
+		}
+		return $correction;
 	}
 
 	/**
 	 * Return the correction document for the $documentId if exist. 
 	 * If has no correction return the originadocument document 
 	 * 
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 * @return f_persistentdocument_PersistentDocument
 	 */
 	public static function getCorrectionById($documentId)
@@ -297,10 +297,10 @@ class DocumentHelper
 
 		foreach ($properties as $propertyName => $propertyValue)
 		{
-		    if (($propertyName == 'lang') && ($propertyValue != $document->getI18nInfo()->getVo()) )
-		    {
-		        continue;
-		    }
+			if (($propertyName == 'lang') && ($propertyValue != $document->getI18nInfo()->getVo()) )
+			{
+				continue;
+			}
 
 			// If the value is REALLY empty, set it to null (and not empty array, empty string...)
 			if ( empty($propertyValue) && $propertyValue !== "0" )
@@ -411,11 +411,11 @@ class DocumentHelper
 						
 						if ($uiValues && $property->getType() == f_persistentdocument_PersistentDocument::PROPERTYTYPE_DATETIME)
 						{
-						     $document->{'setUI' . ucfirst($propertyName)}($propertyValue);  
+							 $document->{'setUI' . ucfirst($propertyName)}($propertyValue);  
 						} 
 						else if ($uiValues && $property->getType() == f_persistentdocument_PersistentDocument::PROPERTYTYPE_DOUBLE)
 						{
-						     $document->{'set' . ucfirst($propertyName)}(f_util_Convert::parseUIDouble($propertyValue));  
+							 $document->{'set' . ucfirst($propertyName)}(f_util_Convert::parseUIDouble($propertyValue));  
 						} 
 						else if ($uiValues && $property->getType() == f_persistentdocument_PersistentDocument::PROPERTYTYPE_XHTMLFRAGMENT)
 						{
@@ -424,7 +424,7 @@ class DocumentHelper
 						}
 						else
 						{
-						    $document->{'set' . ucfirst($propertyName)}($propertyValue);
+							$document->{'set' . ucfirst($propertyName)}($propertyValue);
 						}
 					}
 				}
@@ -478,34 +478,34 @@ class DocumentHelper
 	
 
 	
-    /**
-     * @param f_persistentdocument_PersistentDocumentModel $model
-     */	
-    private static function getNoneLocalizedProperties($model)
-    {      
-        $properties = array();  
-	    foreach ($model->getPropertiesInfos() as $name => $infos)
+	/**
+	 * @param f_persistentdocument_PersistentDocumentModel $model
+	 */	
+	private static function getNoneLocalizedProperties($model)
+	{	  
+		$properties = array();  
+		foreach ($model->getPropertiesInfos() as $name => $infos)
 		{
 			if (!$infos->isLocalized())
 			{
-			    $properties[] = $name;
+				$properties[] = $name;
 			}
 		}
-	    return $properties;
-    }
-    
-    /**
-     * @return String[] properties that are handled by system and normally not edited by user
-     */
-    public static function getSystemPropertyNames()
-    {
-    	return array("author", "authorid", "creationdate", "modificationdate", "modelversion", "documentversion", "metastring", "publicationstatus", "si18n");
-    }
+		return $properties;
+	}
+	
+	/**
+	 * @return string[] properties that are handled by system and normally not edited by user
+	 */
+	public static function getSystemPropertyNames()
+	{
+		return array("author", "authorid", "creationdate", "modificationdate", "modelversion", "documentversion", "metastring", "publicationstatus", "si18n");
+	}
 
 	/**
 	 * Check if type property is document
-	 * @param String $type
-	 * @return Boolean
+	 * @param string $type
+	 * @return boolean
 	 */
 	public static function isDocumentProperty($type)
 	{
@@ -514,8 +514,8 @@ class DocumentHelper
 
 	/**
 	 * Check if property type is a long field
-	 * @param String $type
-	 * @return Boolean
+	 * @param string $type
+	 * @return boolean
 	 */
 	public static function isLobProperty($type)
 	{
@@ -528,11 +528,11 @@ class DocumentHelper
 	 * Return the vo label if the $document has not the translation for the $lang
 	 *
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param String $lang
+	 * @param string $lang
 	 */
 	public static function getLabelForDisplay($document, $lang)
 	{
-    	return $document->isLangAvailable($lang) ? $document->getLabel() : $document->getVoLabel();
+		return $document->isLangAvailable($lang) ? $document->getLabel() : $document->getVoLabel();
 	}
 	
 	/**

@@ -92,7 +92,7 @@ class f_DataCacheMongoService extends f_DataCacheService
 	}
 	
 	/**
-	 * @param String $pattern
+	 * @param string $pattern
 	 */
 	public function getCacheIdsForPattern($pattern)
 	{

@@ -8,7 +8,7 @@ abstract class change_View
 	const NONE = null;
 	const SUCCESS = 'Success';
 
-	const STATUS_OK    = 'OK';
+	const STATUS_OK	= 'OK';
 	const STATUS_ERROR = 'ERROR';
 	
 	/**

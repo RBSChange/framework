@@ -4,8 +4,8 @@
  * <code>
  * class AListener
  * {
- *    public onAnEvent($source, $params);
- *    public onAnEvent2($source, $params);
+ *	public onAnEvent($source, $params);
+ *	public onAnEvent2($source, $params);
  * }
  * $listener = new AListener();
  * f_event_EventManager::register($listener);
@@ -59,8 +59,8 @@ class f_event_EventManager
 	private static $isCacheLoaded = false;
 
 	/**
-	 * @param String $methodName
-	 * @return String eventName or null
+	 * @param string $methodName
+	 * @return string eventName or null
 	 */
 	private static function getEventNameFromMethodName($methodName)
 	{
@@ -73,8 +73,8 @@ class f_event_EventManager
 
 	/**
 	 * @param Object $listener the listener instance
-	 * @param String $eventName
-	 * @param String $methodName
+	 * @param string $eventName
+	 * @param string $methodName
 	 */
 	public static function register($listener, $eventName = null, $methodName = null)
 	{
@@ -157,7 +157,7 @@ class f_event_EventManager
 	}
 
 	/**
-	 * @param String $eventName
+	 * @param string $eventName
 	 * @param Object $sender the source of event
 	 * @param array<String, mixed> $params
 	 */
@@ -188,7 +188,7 @@ class f_event_EventManager
 
 	/**
 	 * Load a "listeners.xml" file
-	 * @param String $path absolute path of the file to load
+	 * @param string $path absolute path of the file to load
 	 */
 	public static function loadListenerConfig($path)
 	{

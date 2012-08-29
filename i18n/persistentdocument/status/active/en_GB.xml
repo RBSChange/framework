@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.persistentdocument.status.active" lcid="en_GB">
-  <key id="enddate">the document can no longer be published</key>
-  <key id="startedate">the document can not be published yet</key>
+<?xml version="1.0" encoding="UTF-8"?>
+<i18n baseKey="m.framework.persistentdocument.status.active" lcid="en_GB">
+	<key id="enddate">the document can no longer be published</key>
+	<key id="startedate">the document can not be published yet</key>
 </i18n>

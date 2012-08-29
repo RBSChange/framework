@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.validation.validator.xml.message" lcid="de_DE">
-  <key id="reversed">das Feld ″{field}″ muss nicht eine gültige XML.</key>
+<?xml version="1.0" encoding="UTF-8"?>
+<i18n baseKey="m.framework.validation.validator.xml.message" lcid="de_DE">
+	<key id="reversed">das Feld ″{field}″ muss nicht eine gültige XML.</key>
 </i18n>

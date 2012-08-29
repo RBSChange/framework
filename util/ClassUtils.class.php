@@ -99,10 +99,10 @@ abstract class f_util_ClassUtils
 	public static function newInstance($className)
 	{
 		$classObj = new ReflectionClass($className);
-        $args = array_slice(func_get_args(), 1);
-        if (empty($args))
-        {
-        	return $classObj->newInstance();
+		$args = array_slice(func_get_args(), 1);
+		if (empty($args))
+		{
+			return $classObj->newInstance();
 		}
 		return $classObj->newInstanceArgs($args);
 	}
@@ -199,9 +199,9 @@ abstract class f_util_ClassUtils
 	}
 	
 	/**
-	 * @param String $metaName
+	 * @param string $metaName
 	 * @param ReflectionMethod|ReflectionProperty|ReflectionClass $methodOrPropertyOrClass
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public static function hasMeta($metaName, $methodOrPropertyOrClass)
 	{
@@ -210,9 +210,9 @@ abstract class f_util_ClassUtils
 	}
 	
 	/**
-	 * @param String $metaName
+	 * @param string $metaName
 	 * @param ReflectionMethod|ReflectionProperty|ReflectionClas $methodOrPropertyOrClass
-	 * @return String
+	 * @return string
 	 */
 	public static function getMetaValue($metaName, $methodOrPropertyOrClass)
 	{
@@ -227,10 +227,10 @@ abstract class f_util_ClassUtils
 	}
 	
 	/**
-	 * @param String $metaName
+	 * @param string $metaName
 	 * @param ReflectionMethod $method
 	 * @param ReflectionProperty $property
-	 * @return String
+	 * @return string
 	 */
 	public static function getFieldMetaValue($metaName, $method, $property)
 	{
@@ -255,7 +255,7 @@ abstract class f_util_ClassUtils
 	
 	/**
 	 * @param ReflectionMethod $method
-	 * @return String
+	 * @return string
 	 */
 	public static function getReturnType($method)
 	{
@@ -270,8 +270,8 @@ abstract class f_util_ClassUtils
 	
 	/**
 	 * @param ReflectionMethod $method
-	 * @param String $paramName
-	 * @return String
+	 * @param string $paramName
+	 * @return string
 	 */
 	public static function getParamType($method, $paramName)
 	{

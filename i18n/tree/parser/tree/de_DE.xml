@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.tree.parser.tree" lcid="de_DE">
-  <key id="correction">Korrigierung</key>
+<?xml version="1.0" encoding="UTF-8"?>
+<i18n baseKey="m.framework.tree.parser.tree" lcid="de_DE">
+	<key id="correction">Korrigierung</key>
 </i18n>

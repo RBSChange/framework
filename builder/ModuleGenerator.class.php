@@ -64,7 +64,7 @@ class builder_ModuleGenerator
 
 	/**
 	 * Author setter
-	 * @param String $value
+	 * @param string $value
 	 * @return builder_ModuleGenerator
 	 */
 	public function setAuthor($value)
@@ -75,7 +75,7 @@ class builder_ModuleGenerator
 
 	/**
 	 * Version setter
-	 * @param String $value
+	 * @param string $value
 	 * @return builder_ModuleGenerator
 	 */
 	public function setVersion($value)
@@ -86,7 +86,7 @@ class builder_ModuleGenerator
 
 	/**
 	 * Icon setter
-	 * @param String $value
+	 * @param string $value
 	 * @return builder_ModuleGenerator
 	 */
 	public function setIcon($value)
@@ -96,7 +96,7 @@ class builder_ModuleGenerator
 	}
 	
 	/**
-	 * @param String $value
+	 * @param string $value
 	 * @return builder_ModuleGenerator
 	 */
 	public function setCategory($category)
@@ -253,9 +253,9 @@ class builder_ModuleGenerator
 	/**
 	 * Generate a service
 	 *
-	 * @param String $name
-	 * @param String $module
-	 * @return String
+	 * @param string $name
+	 * @param string $module
+	 * @return string
 	 */
 	public function generateService($name, $module)
 	{
@@ -269,8 +269,8 @@ class builder_ModuleGenerator
 	/**
 	 * Generate an action
 	 *
-	 * @param String $name
-	 * @return String
+	 * @param string $name
+	 * @return string
 	 */
 	public function generateFrontAction($name)
 	{
@@ -284,8 +284,8 @@ class builder_ModuleGenerator
 	/**
 	 * Generate a JSON action
 	 *
-	 * @param String $name
-	 * @return String
+	 * @param string $name
+	 * @return string
 	 */
 	public function generateJSONAction($name)
 	{

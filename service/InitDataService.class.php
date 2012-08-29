@@ -44,8 +44,8 @@ class InitDataService extends change_BaseService
 	/**
 	 * Imports the initialization data for the given $packageName.
 	 *
-	 * @param String $packageName
-	 * @param Boolean $clearMessages
+	 * @param string $packageName
+	 * @param boolean $clearMessages
 	 */
 	public function import($packageName)
 	{
@@ -133,7 +133,7 @@ class InitDataService extends change_BaseService
 	
 	/**
 	 * Imports the initialization data for the given $moduleName.
-	 * @param String $moduleName
+	 * @param string $moduleName
 	 * @return boolean
 	 */
 	private function importDataForModule($moduleName)
@@ -151,8 +151,8 @@ class InitDataService extends change_BaseService
 	/**
 	 * Imports the initialization data.
 	 *
-	 * @param String $file
-	 * @param String $className
+	 * @param string $file
+	 * @param string $className
 	 * @return boolean
 	 */
 	private function doImport($file, $className)

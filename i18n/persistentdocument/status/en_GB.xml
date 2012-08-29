@@ -1,13 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.persistentdocument.status" lcid="en_GB">
-  <key id="publicated">published</key>
-  <key id="active">active</key>
-  <key id="deactivated">disabled</key>
-  <key id="draft">draft</key>
-  <key id="correction">correcting</key>
-  <key id="deprecated">deprecated</key>
-  <key id="filed">filed</key>
-  <key id="workflow">workflow</key>
-  <key id="label">Publication status</key>
-  <key id="trash">trash can</key>
+<?xml version="1.0" encoding="UTF-8"?>
+<i18n baseKey="m.framework.persistentdocument.status" lcid="en_GB">
+	<key id="publicated">published</key>
+	<key id="active">active</key>
+	<key id="deactivated">disabled</key>
+	<key id="draft">draft</key>
+	<key id="correction">correcting</key>
+	<key id="deprecated">deprecated</key>
+	<key id="filed">filed</key>
+	<key id="workflow">workflow</key>
+	<key id="label">Publication status</key>
+	<key id="trash">trash can</key>
 </i18n>

@@ -7,7 +7,7 @@ abstract class object_InitDataSetup
 	abstract public function install();
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	private function getModule()
 	{
@@ -62,7 +62,7 @@ abstract class object_InitDataSetup
 	/**
 	 * Registers a message to log.
 	 *
-	 * @param String $message
+	 * @param string $message
 	 * @param string $level [info | warn | error]
 	 */
 	protected function addMessage($message, $level = null)
@@ -73,7 +73,7 @@ abstract class object_InitDataSetup
 	/**
 	 * Registers an error message to log.
 	 *
-	 * @param String $message
+	 * @param string $message
 	 */
 	protected function addError($message)
 	{
@@ -83,7 +83,7 @@ abstract class object_InitDataSetup
 	/**
 	 * Registers a warning message to log.
 	 *
-	 * @param String $message
+	 * @param string $message
 	 */
 	protected function addWarning($message)
 	{
@@ -93,7 +93,7 @@ abstract class object_InitDataSetup
 	/**
 	 * Registers an information message to log.
 	 *
-	 * @param String $message
+	 * @param string $message
 	 */
 	protected function addInfo($message)
 	{
@@ -121,9 +121,9 @@ abstract class object_InitDataSetup
 	}
 
 	/**
-	 * @param String $scriptName
-	 * @param String $module
-	 * @return Boolean
+	 * @param string $scriptName
+	 * @param string $module
+	 * @return boolean
 	 */
 	protected final function executeModuleScript($scriptName, $module = null)
 	{

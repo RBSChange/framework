@@ -28,7 +28,7 @@ class tree_DefaultTreeModel implements tree_TreeModel
 	 * Enter description here...
 	 *
 	 * @param tree_TreeNode $treeNode
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isLeaf($treeNode)
 	{
@@ -39,7 +39,7 @@ class tree_DefaultTreeModel implements tree_TreeModel
 	 * Enter description here...
 	 *
 	 * @param tree_TreeNode $treeNode
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getChildCount($treeNode)
 	{
@@ -50,7 +50,7 @@ class tree_DefaultTreeModel implements tree_TreeModel
 	 * Enter description here...
 	 *
 	 * @param tree_TreeNode $treeNode
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getIndex($treeNode)
 	{

@@ -12,7 +12,7 @@ class indexer_FacetCount
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getValue()
 	{
@@ -20,7 +20,7 @@ class indexer_FacetCount
 	}
 	
 	/**
-	 * @param String $value
+	 * @param string $value
 	 */
 	function setValue($value)
 	{
@@ -28,7 +28,7 @@ class indexer_FacetCount
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getLabel()
 	{
@@ -40,7 +40,7 @@ class indexer_FacetCount
 	}
 	
 	/**
-	 * @param String $label
+	 * @param string $label
 	 */
 	function setLabel($label)
 	{
@@ -48,7 +48,7 @@ class indexer_FacetCount
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getValueUcFirst()
 	{
@@ -115,7 +115,7 @@ class indexer_RangeFacetCount extends indexer_FacetCount
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getMin()
 	{
@@ -123,7 +123,7 @@ class indexer_RangeFacetCount extends indexer_FacetCount
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getMax()
 	{

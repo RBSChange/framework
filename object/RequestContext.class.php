@@ -5,7 +5,7 @@
 class RequestContext
 {
 	/**
-	 * @var RequestContext
+	 * @var change_RequestContext
 	 */
 	private static $m_instance;
 
@@ -104,7 +104,7 @@ class RequestContext
 	/**
 	 * @param string $supportedLanguages
 	 * @param string $ui_supportedLanguages
-	 * @return RequestContext
+	 * @return change_RequestContext
 	 */
 	public static function getInstance($supportedLanguages = null, $ui_supportedLanguages = null)
 	{
@@ -212,7 +212,7 @@ class RequestContext
 	}
 	
 	/**
-	 * @return String (http | https)
+	 * @return string (http | https)
 	 */
 	public function getProtocol()
 	{
@@ -257,8 +257,8 @@ class RequestContext
 	private $ajaxFromURL;
 	
 	/**
-	 * @param Boolean $ajaxMode
-	 * @param String $fromURL
+	 * @param boolean $ajaxMode
+	 * @param string $fromURL
 	 * @return void
 	 */
 	public function setAjaxMode($ajaxMode, $fromURL)
@@ -268,7 +268,7 @@ class RequestContext
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function getAjaxMode()
 	{
@@ -276,7 +276,7 @@ class RequestContext
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getAjaxFromURL()
 	{
@@ -284,7 +284,7 @@ class RequestContext
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getAjaxFromURI()
 	{
@@ -317,13 +317,13 @@ class RequestContext
 	 */
 	public function getLang()
 	{
-	    if (count($this->m_workLang) > 0)
+		if (count($this->m_workLang) > 0)
 		{
 			$lang = end($this->m_workLang);
 		}
 		else
 		{
-		    $lang = $this->m_lang;
+			$lang = $this->m_lang;
 		}
 		return $lang;
 	}
@@ -349,21 +349,21 @@ class RequestContext
 	 */
 	public function setLang($lang)
 	{
-	    if (Framework::isDebugEnabled())
-	    {
-	        Framework::debug(__METHOD__ . '(' . $lang . ')');
-	    }
-	    
-	    if (count($this->m_workLang) > 0)
-	    {
-	        throw new BadInitializationException("The current language is already defined to :" . $this->m_lang);
-	    }
-	    
-	    if (in_array($lang, $this->getSupportedLanguages()))
-	    {
-	        $this->m_lang = $lang;
-	        $this->m_isLangDefined = true;
-	    }
+		if (Framework::isDebugEnabled())
+		{
+			Framework::debug(__METHOD__ . '(' . $lang . ')');
+		}
+		
+		if (count($this->m_workLang) > 0)
+		{
+			throw new BadInitializationException("The current language is already defined to :" . $this->m_lang);
+		}
+		
+		if (in_array($lang, $this->getSupportedLanguages()))
+		{
+			$this->m_lang = $lang;
+			$this->m_isLangDefined = true;
+		}
 	}
 
 	/**
@@ -432,9 +432,9 @@ class RequestContext
 	 */
 	public function getUserAgentLanguage()
 	{
-	    $lang = null;
+		$lang = null;
 
-	    if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']))
+		if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']))
 		{
 			$lang = preg_split('/[,;]+/', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
 			$lang = strtolower(substr(trim($lang[0]), 0, 2));
@@ -442,10 +442,10 @@ class RequestContext
 
 		if ($lang === null || !in_array($lang, $this->getUISupportedLanguages()))
 		{
-		    $lang = $this->getUIDefaultLang();
+			$lang = $this->getUIDefaultLang();
 		}
 
-	    return $lang;
+		return $lang;
 	}
 
 	public function beginI18nWork($lang)
@@ -532,26 +532,26 @@ class RequestContext
 	 	return $this->profile['date'][$lang];
 	}
 	
-    /**
-     * @return String
-     */
-    public function getTimeZone()
-    {
-        if (!isset($this->profile['timezone']))
-        {
-        	$prefs = $this->getProfileValues();
+	/**
+	 * @return string
+	 */
+	public function getTimeZone()
+	{
+		if (!isset($this->profile['timezone']))
+		{
+			$prefs = $this->getProfileValues();
 			if ($prefs !== null && isset($prefs['timezone']) && !empty($prefs['timezone']))
 			{
 				$this->profile['timezone'] = $prefs['timezone'];
 			}
-        	else
-        	{
-        	    $this->profile['timezone'] = DEFAULT_TIMEZONE;
-        	}   
-        }
-        return $this->profile['timezone'];       
-    }
-    
+			else
+			{
+				$this->profile['timezone'] = DEFAULT_TIMEZONE;
+			}   
+		}
+		return $this->profile['timezone'];	   
+	}
+	
 	/**
 	 * @var Object
 	 */
@@ -597,7 +597,7 @@ class RequestContext
 
 	/**
 	 * Get the current operating system
-	 * @return String ("windows", "macos", "linux", "other")
+	 * @return string ("windows", "macos", "linux", "other")
 	 */
 	public function getOperatingSystem()
 	{
@@ -645,7 +645,7 @@ class RequestContext
 
 	/**
 	 * Get the current graphical engine type
-	 * @return String (all, gecko, trident, presto, khtml ...)
+	 * @return string (all, gecko, trident, presto, khtml ...)
 	 */
 	public function getUserAgentType()
 	{
@@ -696,7 +696,7 @@ class RequestContext
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getCompleteUserAgent()
 	{
@@ -925,7 +925,7 @@ class RequestContext
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getClientIp()
 	{

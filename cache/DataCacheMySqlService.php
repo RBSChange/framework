@@ -80,7 +80,7 @@ class f_DataCacheMySqlService extends f_DataCacheService
 	}
 	
 	/**
-	 * @param String $pattern
+	 * @param string $pattern
 	 */
 	public function clearCacheByPattern($pattern)
 	{

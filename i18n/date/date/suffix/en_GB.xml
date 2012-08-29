@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.date.date.suffix" lcid="en_GB">
-  <key id="st">st</key>
-  <key id="nst">st</key>
-  <key id="nd">nd</key>
-  <key id="nnd">nd</key>
-  <key id="rd">rd</key>
-  <key id="nrd">rd</key>
-  <key id="th">th</key>
+<?xml version="1.0" encoding="UTF-8"?>
+<i18n baseKey="m.framework.date.date.suffix" lcid="en_GB">
+	<key id="st">st</key>
+	<key id="nst">st</key>
+	<key id="nd">nd</key>
+	<key id="nnd">nd</key>
+	<key id="rd">rd</key>
+	<key id="nrd">rd</key>
+	<key id="th">th</key>
 </i18n>

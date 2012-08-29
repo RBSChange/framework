@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.validation.validator.maxsize-array" lcid="fr_FR">
-  <key id="message">veuillez sélectionner au plus {param} éléments pour le champ ″{field}″.</key>
+<?xml version="1.0" encoding="UTF-8"?>
+<i18n baseKey="m.framework.validation.validator.maxsize-array" lcid="fr_FR">
+	<key id="message">veuillez sélectionner au plus {param} éléments pour le champ ″{field}″.</key>
 </i18n>

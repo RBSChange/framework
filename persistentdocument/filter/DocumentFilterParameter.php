@@ -11,17 +11,17 @@ abstract class f_persistentdocument_DocumentFilterParameter
 	abstract public function getValueForQuery();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	abstract public function getValueAsText();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	abstract public function getValueForXul();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	abstract public function getValueForJson();
 	

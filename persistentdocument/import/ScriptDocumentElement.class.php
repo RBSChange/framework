@@ -128,7 +128,7 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 	}
 
 	/**
-	 * @param String $tag
+	 * @param string $tag
 	 */
 	public function addTag($tag)
 	{
@@ -186,7 +186,7 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 
 	/**
 	 * @see DocumentService::save($parentId)
-	 * @return Integer id of the document has to be the parent document
+	 * @return integer id of the document has to be the parent document
 	 */
 	protected function getParentNodeId()
 	{
@@ -236,8 +236,8 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 	}
 	
 	/**
-	 * @param String $label
-	 * @param String $type
+	 * @param string $label
+	 * @param string $type
 	 * @return f_persistentdocument_PersistentDocument
 	 */
 	protected function getChildDocumentByProperty($propName, $propValue, $type)
@@ -279,7 +279,7 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 	// Private methods.
 
 	/**
-	 * @param String $tag
+	 * @param string $tag
 	 * @return f_persistentdocument_PersistentDocument
 	 */
 	private function getDocumentByTag($tag)
@@ -338,7 +338,7 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 	}
 
 	/**
-	 * @param String $type
+	 * @param string $type
 	 * @return f_persistentdocument_PersistentDocument
 	 */
 	private function getAncestorDocumentByType($type)
@@ -532,7 +532,7 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 	
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 * @param Mixed $propertyValue
 	 */
 	private function addValueToDocumentProperty($document, $propertyName, $propertyValue)

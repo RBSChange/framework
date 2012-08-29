@@ -19,7 +19,7 @@ class paginator_PaginatorItem
 	/**
 	 * Get the label of the paginator link
 	 *
-	 * @return String
+	 * @return string
 	 */
 	public function getLabel()
 	{
@@ -29,7 +29,7 @@ class paginator_PaginatorItem
 	/**
 	 * Set the label of the paginator link
 	 *
-	 * @param String
+	 * @param string
 	 * @return paginator_PaginatorItem
 	 */
 	public function setLabel($value)
@@ -41,7 +41,7 @@ class paginator_PaginatorItem
 	/**
 	 * Get the url of the paginator link
 	 *
-	 * @return String
+	 * @return string
 	 */
 	public function getUrl()
 	{
@@ -51,7 +51,7 @@ class paginator_PaginatorItem
 	/**
 	 * Set the url of the paginator link
 	 *
-	 * @param String
+	 * @param string
 	 * @return paginator_PaginatorItem
 	 */
 	public function setUrl($value)
@@ -189,7 +189,7 @@ class paginator_Paginator extends ArrayObject
 	}
 	
 	/**
-	 * @param String $pageIndexParameterName
+	 * @param string $pageIndexParameterName
 	 */
 	public function setPageIndexParameterName($pageIndexParameterName)
 	{
@@ -197,7 +197,7 @@ class paginator_Paginator extends ArrayObject
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getPageIndexParameterName()
 	{
@@ -205,7 +205,7 @@ class paginator_Paginator extends ArrayObject
 	}
 	
 	/**
-	 * @param Integer $itemCount
+	 * @param integer $itemCount
 	 */
 	public function setItemCount($itemCount)
 	{

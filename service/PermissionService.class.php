@@ -25,7 +25,7 @@ class change_PermissionService extends change_BaseService
 	/**
 	 * Get the RoleService instance handling the role $fullRoleName.
 	 *
-	 * @param String $fullRoleName
+	 * @param string $fullRoleName
 	 * @return change_RoleService
 	 */
 	public static function getRoleServiceByRole($fullRoleName)
@@ -36,7 +36,7 @@ class change_PermissionService extends change_BaseService
 	/**
 	 * Get the Modu instance handling the role $fullRoleName.
 	 *
-	 * @param String $fullRoleName
+	 * @param string $fullRoleName
 	 * @return change_RoleService
 	 */
 	public static function getModuleNameByRole($fullRoleName)
@@ -53,7 +53,7 @@ class change_PermissionService extends change_BaseService
 	}
 
 	/**
-	 * @param String $moduleName
+	 * @param string $moduleName
 	 * @return change_RoleService
 	 */
 	public static function getRoleServiceByModuleName($moduleName)
@@ -68,9 +68,9 @@ class change_PermissionService extends change_BaseService
 
 	/**
 	 * Try to resolve a role given a $roleName and $documentId.
-	 * @param String $roleName
-	 * @param Integer $documentId
-	 * @return String
+	 * @param string $roleName
+	 * @param integer $documentId
+	 * @return string
 	 */
 	public static function resolveRole($roleName, $documentId = null)
 	{
@@ -113,7 +113,7 @@ class change_PermissionService extends change_BaseService
 	 * For example: getPermissionsInfoByNode($nodeId) returns
 	 * 			array(	'users' => array(userId => array('role1', 'role2'),
 	 * 					'groups' => array(groupId => array('role3', 'role4')))
-	 * @param Integer $nodeId
+	 * @param integer $nodeId
 	 * @return array< String, array< String, String > >
 	 */
 	public function getPermissionsInfoByNode($nodeId)
@@ -164,8 +164,8 @@ class change_PermissionService extends change_BaseService
 
 	/**
 	 * Get the list of accessors for a given role on a given node.
-	 * @param String $roleName
-	 * @param Integer $nodeId
+	 * @param string $roleName
+	 * @param integer $nodeId
 	 * @return array
 	 */
 	public function getACLForNode($nodeId)
@@ -189,7 +189,7 @@ class change_PermissionService extends change_BaseService
 	 *
 	 * For example: addRoleToUser(users_persistentdocument_user, 'modules_news.developper', array($permissionModuleRootNodeId))
 	 * @param users_persistentdocument_user $user
-	 * @param String $roleName
+	 * @param string $roleName
 	 * @param array<Integer> $domain node identifiers
 	 */
 	public function addRoleToUser($user, $roleName, $domain)
@@ -222,9 +222,9 @@ class change_PermissionService extends change_BaseService
 		
 	/**
 	 * @param users_persistentdocument_user $user
-	 * @param String $roleName
-	 * @param Integer $nodeId
-	 * @return Boolean
+	 * @param string $roleName
+	 * @param integer $nodeId
+	 * @return boolean
 	 */
 	private function userHasRole($user, $roleName, $nodeId)
 	{
@@ -243,7 +243,7 @@ class change_PermissionService extends change_BaseService
 	 *
 	 * For example: removeUserPermission(users_persistentdocument_user, 'aRole', array($nodeId1, $nodeId2))
 	 * @param users_persistentdocument_user $user
-	 * @param String $roleName
+	 * @param string $roleName
 	 * @param array<Integer> $domain
 	 */
 	public function removeUserPermission($user, $roleName = null, $domain = null)
@@ -282,7 +282,7 @@ class change_PermissionService extends change_BaseService
 	 *
 	 * For example: addRoleToGroup(users_persistentdocument_group, 'modules_news.developper', array($permissionModuleRootNode))
 	 * @param users_persistentdocument_group $group
-	 * @param String $rolename
+	 * @param string $rolename
 	 * @param array<Integer> $domain
 	 */
 	public function addRoleToGroup($group, $roleName, $domain)
@@ -315,9 +315,9 @@ class change_PermissionService extends change_BaseService
 	
 	/**
 	 * @param users_persistentdocument_group $group
-	 * @param String $roleName
-	 * @param Integer $nodeId
-	 * @return Boolean
+	 * @param string $roleName
+	 * @param integer $nodeId
+	 * @return boolean
 	 */
 	private function groupHasRole($group, $roleName, $nodeId)
 	{
@@ -335,7 +335,7 @@ class change_PermissionService extends change_BaseService
 	 * If $roleName is null, $domain is ignored and all groupAcls matching $group are deleted.
 	 *
 	 * @param users_persistentdocument_group $group
-	 * @param String $roleName if null, remove all permissions entries attached to the group $group
+	 * @param string $roleName if null, remove all permissions entries attached to the group $group
 	 * @param array<Integer> $domain node identifiers.
 	 */
 	public function removeGroupPermission($group, $roleName = null, $domain = null)
@@ -371,8 +371,8 @@ class change_PermissionService extends change_BaseService
 	}
 	
 	/**
-	 * @param String $permission
-	 * @param Integer $nodeId
+	 * @param string $permission
+	 * @param integer $nodeId
 	 * @param boolean $onMissingPermission returned value if permission does not exist
 	 */
 	public function currentUserHasPermission($permission, $nodeId, $onMissingPermission = true)
@@ -434,8 +434,8 @@ class change_PermissionService extends change_BaseService
 
 	/**
 	 * @param users_persistentdocument_user $user
-	 * @param String $permission
-	 * @param Integer $nodeId element of a possible domain
+	 * @param string $permission
+	 * @param integer $nodeId element of a possible domain
 	 * @param boolean $onMissingPermission returned value if permission does not exist
 	 */
 	public function checkPermission($user, $permission, $nodeId, $onMissingPermission = true)
@@ -461,8 +461,8 @@ class change_PermissionService extends change_BaseService
 	/**
 	 * Clear all permissions defined on node $nodeId.
 	 *
-	 * @param Integer $nodeId
-	 * @param String $packageName (ex: modules_website)
+	 * @param integer $nodeId
+	 * @param string $packageName (ex: modules_website)
 	 * @return Array<String>
 	 */
 	public function clearNodePermissions($nodeId, $packageName = null)
@@ -515,7 +515,7 @@ class change_PermissionService extends change_BaseService
 	/**
 	 * Apply first "upstream" permissions on nodeId. Exisiting permissions are wiped out.
 	 *
-	 * @param Integer $nodeId
+	 * @param integer $nodeId
 	 */
 	public function setPermissionsFromParent($nodeId)
 	{
@@ -573,7 +573,7 @@ class change_PermissionService extends change_BaseService
 	 * 			array( 	'modules_news.writer' => array( 10, 11, 17)
 	 * 					'modules_news.validator' => array(11, 17)  ).
 	 * @param users_persistentdocument_user $user
-	 * @param String $module
+	 * @param string $module
 	 * @return array<String, array<Integer>> where the array key is a qualified roleName.
 	 */
 	public function getRolesByUser($user, $module = null)
@@ -639,7 +639,7 @@ class change_PermissionService extends change_BaseService
 	/**
 	 * Checks if permissions are explicitely defined on $nodeId.
 	 *
-	 * @param Integer $nodeId
+	 * @param integer $nodeId
 	 * @return boolean
 	 */
 	public function isDefinitionPoint($nodeId)
@@ -650,8 +650,8 @@ class change_PermissionService extends change_BaseService
 	/**
 	 * Finds the first "upstream" permission definition point or null if no permissions are defined on the tree.
 	 * 
-	 * @param Integer $nodeId
-	 * @return Integer
+	 * @param integer $nodeId
+	 * @return integer
 	 */
 	public function getDefinitionPoint($nodeId)
 	{
@@ -685,9 +685,9 @@ class change_PermissionService extends change_BaseService
 	}
 
 	/**
-	 * @param Integer $nodeId
-	 * @param String $packageName
-	 * @return Integer
+	 * @param integer $nodeId
+	 * @param string $packageName
+	 * @return integer
 	 */
 	public function isDefinitionPointForPackage($nodeId, $packageName)
 	{
@@ -695,9 +695,9 @@ class change_PermissionService extends change_BaseService
 	}
 
 	/**
-	 * @param Integer $nodeId
-	 * @param String $packageName
-	 * @return Integer
+	 * @param integer $nodeId
+	 * @param string $packageName
+	 * @return integer
 	 */
 	public function getDefinitionPointForPackage($nodeId, $packageName)
 	{
@@ -758,8 +758,8 @@ class change_PermissionService extends change_BaseService
 	/**
 	 * Get the root node Id for the document id $docId.
 	 *
-	 * @param Integer $docId
-	 * @return Integer
+	 * @param integer $docId
+	 * @return integer
 	 */
 	private function getRootNodeIdByDocumentId($docId)
 	{
@@ -776,7 +776,7 @@ class change_PermissionService extends change_BaseService
 	/**
 	 * Recompiles all ACLs for $nodeId
 	 *
-	 * @param Integer $nodeId
+	 * @param integer $nodeId
 	 */
 	private function compileACLForNode($nodeId)
 	{
@@ -837,8 +837,8 @@ class change_PermissionService extends change_BaseService
 	/**
 	 * Returns the array of users having role $roleName on the document $documentId
 	 *
-	 * @param String $roleName
-	 * @param Integer $documentId
+	 * @param string $roleName
+	 * @param integer $documentId
 	 * @return Array<Integer>
 	 */
 	public function getUsersByRoleAndDocumentId($roleName,  $documentId = null)
@@ -894,8 +894,8 @@ class change_PermissionService extends change_BaseService
 	/**
 	 * Returns the array of raw accessor id's having the role $roleName on document ID $documentId.
 	 *
-	 * @param String $roleName
-	 * @param Integer $documentId
+	 * @param string $roleName
+	 * @param integer $documentId
 	 * @return Array<Integer>
 	 */
 	public function getAccessorIdsForRoleByDocumentId($roleName, $documentId)
@@ -936,8 +936,8 @@ class change_PermissionService extends change_BaseService
 	/**
 	 * Returns the array of raw accessor id's having the permission $permissionName on document ID $documentId.
 	 *
-	 * @param String $permissionName
-	 * @param String $documentId
+	 * @param string $permissionName
+	 * @param string $documentId
 	 * @return array<int>
 	 */
 	public function getAccessorIdsForPermissionAndDocumentId($permissionName, $documentId)
@@ -949,8 +949,8 @@ class change_PermissionService extends change_BaseService
 	/**
 	 * Predicate on the existence of role $roleName.
 	 *
-	 * @param String $roleName
-	 * @return Boolean
+	 * @param string $roleName
+	 * @return boolean
 	 */
 	public static function roleExists($roleName)
 	{
@@ -1091,7 +1091,7 @@ class change_PermissionService extends change_BaseService
 	}
 	
 	/**
-	 * @param String $name
+	 * @param string $name
 	 * @param array $arguments
 	 */
 	public function __call($name, $arguments)

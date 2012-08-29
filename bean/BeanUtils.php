@@ -26,7 +26,7 @@ class BeanUtils
 
 	/**
 	 * @param Object $bean
-	 * @param String $expectedClassName
+	 * @param string $expectedClassName
 	 * @return void
 	 * @throws Exception if $bean is not an instance of expected class
 	 */
@@ -97,7 +97,7 @@ class BeanUtils
 
 	/**
 	 * @param ReflectionClass $reflectionClass
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 * @return Object
 	 */
 	static function getBeanInstance($reflectionClass, $beanId)
@@ -214,8 +214,8 @@ class BeanUtils
 	}
 	
 	/**
-	 * @param String|Object $beanClassNameOrObject
-	 * @param String $propertyName
+	 * @param string|Object $beanClassNameOrObject
+	 * @param string $propertyName
 	 * @return BeanPropertyInfo
 	 */
 	static function getBeanPropertyInfo($beanClassNameOrObject, $propertyName)
@@ -235,7 +235,7 @@ class BeanUtils
 
 	/**
 	 * @param f_mvc_Bean $beanInstance
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 */
 	static function hasProperty($beanInstance, $propertyName)
 	{
@@ -249,7 +249,7 @@ class BeanUtils
 
 	/**
 	 * @param f_mvc_Bean $beanInstance
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 * @return array : f_mvc_Bean, propertyName
 	 */
 	private static function resolveModel($beanInstance, $propertyName)
@@ -291,7 +291,7 @@ class BeanUtils
 
 	/**
 	 * @param f_mvc_Bean $beanInstance
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 * @return BeanPropertyInfo
 	 */
 	static function getPropertyInfo($beanInstance, $propertyName)
@@ -305,9 +305,9 @@ class BeanUtils
 	}
 
 	/**
-	 * @param String $beanClassName
-	 * @param String $propertyName
-	 * @return String
+	 * @param string $beanClassName
+	 * @param string $propertyName
+	 * @return string
 	 */
 	static function getBeanPropertyValidationRules($beanClassName, $propertyName)
 	{
@@ -315,10 +315,10 @@ class BeanUtils
 	}
 
 	/**
-	 * @param String|Object $beanClassNameOrObject
-	 * @param String[] $include
-	 * @param String[] $exclude
-	 * @return String[]
+	 * @param string|Object $beanClassNameOrObject
+	 * @param string[] $include
+	 * @param string[] $exclude
+	 * @return string[]
 	 */
 	static function getBeanValidationRules($beanClassNameOrObject, $include = null, $exclude = null)
 	{
@@ -341,10 +341,10 @@ class BeanUtils
 	}
 
 	/**
-	 * @param String|Object $beanClassNameOrObject
-	 * @param String[] $include
-	 * @param String[] $exclude
-	 * @return String[]
+	 * @param string|Object $beanClassNameOrObject
+	 * @param string[] $include
+	 * @param string[] $exclude
+	 * @return string[]
 	 */
 	private static function _getBeanValidationRules($beanClassNameOrObject, $include = null, $exclude = null, $suffix = null)
 	{
@@ -421,7 +421,7 @@ class BeanUtils
 
 	/**
 	 * @param stdClass $bean
-	 * @param String $name
+	 * @param string $name
 	 * @param ReflectionClass $class deprecated parameter
 	 * @return Mixed
 	 */
@@ -433,7 +433,7 @@ class BeanUtils
 
 	/**
 	 * @param stdClass $bean
-	 * @param String $name
+	 * @param string $name
 	 * @param ReflectionClass $class
 	 * @return Mixed
 	 */
@@ -490,10 +490,10 @@ class BeanUtils
 
 	/**
 	 * @param stdClass $bean
-	 * @param String $name
+	 * @param string $name
 	 * @param mixed $value empty strings are considered as null
 	 * @param ReflectionClass $class
-	 * @return Boolean
+	 * @return boolean
 	 */
 	static function setProperty($bean, $name, $value, ReflectionClass $class = null)
 	{
@@ -503,10 +503,10 @@ class BeanUtils
 
 	/**
 	 * @param stdClass $bean
-	 * @param String $name
+	 * @param string $name
 	 * @param mixed $value empty strings are considered as null or empty array, depending on the type of the property
 	 * @param ReflectionClass $class
-	 * @return Boolean
+	 * @return boolean
 	 */
 	private static function setDirectProperty($bean, $name, $value, ReflectionClass $class = null)
 	{
@@ -570,8 +570,8 @@ class BeanUtils
 
 	/**
 	 * @param ReflectionMethod $method
-	 * @param Integer $parameterIndex the parameter index, starting with 0
-	 * @param String $beanName
+	 * @param integer $parameterIndex the parameter index, starting with 0
+	 * @param string $beanName
 	 * @return ReflectionClas|null
 	 */
 	static function getBeanClass(ReflectionMethod $method, $parameterIndex, &$beanName)

@@ -7,21 +7,21 @@ interface indexer_SearchResults
 	/**
 	 * Get the total number of hits found.
 	 *
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getTotalHitsCount();
 	
 	/**
 	 * Get the number of hits effectively returned.
 	 * 
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getReturnedHitsCount();
 
 	/**
 	 * Get the pagination offset.
 	 *
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getFirstHitOffset();
 	

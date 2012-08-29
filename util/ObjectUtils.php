@@ -4,7 +4,7 @@ abstract class f_util_ObjectUtils
 	/**
 	 * @param mixed $value1
 	 * @param mixed $value2
-	 * @return Boolean
+	 * @return boolean
 	 */
 	static function equals($value1, $value2)
 	{
@@ -26,7 +26,7 @@ abstract class f_util_ObjectUtils
 	
 	/**
 	 * @param mixed $value
-	 * @return Boolean
+	 * @return boolean
 	 */
 	static function isEmpty($value)
 	{

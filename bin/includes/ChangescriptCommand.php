@@ -1,7 +1,6 @@
 <?php
 abstract class c_ChangescriptCommand
 {
-	
 	/**
 	 * @var c_ChangeBootStrap
 	 */	
@@ -43,7 +42,7 @@ abstract class c_ChangescriptCommand
 	}
 		
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getName()
 	{
@@ -52,7 +51,7 @@ abstract class c_ChangescriptCommand
 	}
 	
 	/**
-	 * @return Boolean default false
+	 * @return boolean default false
 	 */
 	function httpOutput($httpOutput = null)
 	{
@@ -65,7 +64,7 @@ abstract class c_ChangescriptCommand
 	}
 		
 	/**
-	 * @return Boolean default false
+	 * @return boolean default false
 	 */
 	function isHidden()
 	{
@@ -73,7 +72,7 @@ abstract class c_ChangescriptCommand
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getCallName()
 	{
@@ -89,7 +88,7 @@ abstract class c_ChangescriptCommand
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getAlias()
 	{
@@ -136,12 +135,12 @@ abstract class c_ChangescriptCommand
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	abstract function getUsage();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getDescription()
 	{
@@ -184,14 +183,14 @@ abstract class c_ChangescriptCommand
 	}
 
 	/**
-	 * @param String[] $params
+	 * @param string[] $params
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
 	 * @see c_Changescript::parseArgs($args)
 	 */
 	abstract function _execute($params, $options);
 
 	/**
-	 * @return String[]
+	 * @return string[]
 	 */
 	function getOptions()
 	{
@@ -212,11 +211,11 @@ abstract class c_ChangescriptCommand
 
 	
 	/**
-	 * @param Integer $completeParamCount the parameters that are already complete in the command line
-	 * @param String[] $params
+	 * @param integer $completeParamCount the parameters that are already complete in the command line
+	 * @param string[] $params
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
-	 * @param String $current current parameter that is being completed (can be empty)
-	 * @return String[] or null
+	 * @param string $current current parameter that is being completed (can be empty)
+	 * @return string[] or null
 	 */
 	function getParameters($completeParamCount, $params, $options, $current)
 	{
@@ -295,7 +294,7 @@ abstract class c_ChangescriptCommand
 	}
 
 	/**
-	 * @param String $message
+	 * @param string $message
 	 * @param const $color one of the constants, optional
 	 */
 	protected function message($message, $color = null)
@@ -363,7 +362,7 @@ abstract class c_ChangescriptCommand
 	
 	/**
 	 * print colorized message (red)
-	 * @param String $message
+	 * @param string $message
 	 */
 	protected function errorMessage($message, $increment = true)
 	{
@@ -381,7 +380,7 @@ abstract class c_ChangescriptCommand
 	
 	/**
 	 * print colorized message (magenta)
-	 * @param String $message
+	 * @param string $message
 	 */
 	protected function warnMessage($message)
 	{
@@ -390,7 +389,7 @@ abstract class c_ChangescriptCommand
 	
 	/**
 	 * print colorized message (green)
-	 * @param String $message
+	 * @param string $message
 	 */
 	protected function okMessage($message)
 	{
@@ -399,7 +398,7 @@ abstract class c_ChangescriptCommand
 	
 	/**
 	 * print colorized message (green)
-	 * @param String $message
+	 * @param string $message
 	 */
 	protected function rawMessage($message)
 	{
@@ -407,7 +406,7 @@ abstract class c_ChangescriptCommand
 	}
 	
 	/**
-	 * @param String[] $params
+	 * @param string[] $params
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
 	 * @return boolean
 	 */
@@ -417,10 +416,10 @@ abstract class c_ChangescriptCommand
 	}
 
 	/**
-	 * @param String $question
-	 * @param String $defaultValue
-	 * @param Boolean $toLowerCase
-	 * @return String the answer the user typed in, lowercase or the defaultValue
+	 * @param string $question
+	 * @param string $defaultValue
+	 * @param boolean $toLowerCase
+	 * @return string the answer the user typed in, lowercase or the defaultValue
 	 */
 	protected final function question($question, $defaultValue = null, $toLowerCase = true)
 	{
@@ -434,8 +433,8 @@ abstract class c_ChangescriptCommand
 	}
 
 	/**
-	 * @param String $question
-	 * @return Boolean true if setAutoY or if the user entered y
+	 * @param string $question
+	 * @return boolean true if setAutoY or if the user entered y
 	 */
 	protected final function yesNo($question)
 	{
@@ -443,8 +442,8 @@ abstract class c_ChangescriptCommand
 	}
 
 	/**
-	 * @param String[] $args
-	 * @return Boolean true if the command runned correctly
+	 * @param string[] $args
+	 * @return boolean true if the command runned correctly
 	 */
 	final function execute($params, $options)
 	{
@@ -508,7 +507,7 @@ abstract class c_ChangescriptCommand
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected function getAuthor()
 	{
@@ -521,7 +520,7 @@ abstract class c_ChangescriptCommand
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected function getUser()
 	{
@@ -529,7 +528,7 @@ abstract class c_ChangescriptCommand
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected function getApacheGroup()
 	{
@@ -564,7 +563,7 @@ abstract class c_ChangescriptCommand
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected function getProfile()
 	{
@@ -597,27 +596,27 @@ abstract class c_ChangescriptCommand
 	}
 	
 	/**
-	 * @param String $cmdName
-	 * @param String[] $args
+	 * @param string $cmdName
+	 * @param string[] $args
 	 */
 	protected function executeCommand($cmdName, $args = array())
 	{	
 		$this->message('Execute Command: ' . $cmdName . '...');
-	    if (!class_exists('Framework', false))
-	    {
-	    	$this->executeCommandInProcess($cmdName, $args);
-	    	return;
-	    }
-	    
-	    ob_start();
-	    $fixedCommandName = $this->fixCommandName($cmdName);
+		if (!class_exists('Framework', false))
+		{
+			$this->executeCommandInProcess($cmdName, $args);
+			return;
+		}
+		
+		ob_start();
+		$fixedCommandName = $this->fixCommandName($cmdName);
 	   	echo f_util_System::execChangeCommand($fixedCommandName, $args);
-	    $this->rawMessage(trim(ob_get_clean()) . PHP_EOL);
+		$this->rawMessage(trim(ob_get_clean()) . PHP_EOL);
 	}
 
 	/**
-	 * @param String $cmdName
-	 * @param String[] $args
+	 * @param string $cmdName
+	 * @param string[] $args
 	 */
 	protected function executeCommandInProcess($cmdName, $args = array())
 	{
@@ -625,8 +624,8 @@ abstract class c_ChangescriptCommand
 		$fixedCommandName = $this->fixCommandName($cmdName);
 		if (!is_array($args)) {$args = array();}
 		array_unshift($args, $fixedCommandName);
-	    $this->getBootStrap()->execute($args);
-	    $this->rawMessage(trim(ob_get_clean()) . PHP_EOL);		
+		$this->getBootStrap()->execute($args);
+		$this->rawMessage(trim(ob_get_clean()) . PHP_EOL);		
 	}
 	
 	/**
@@ -653,21 +652,5 @@ abstract class c_ChangescriptCommand
 		ob_start();
 		echo f_util_System::exec($cmd, $msg);
 		$this->rawMessage(trim(ob_get_clean()));
-	}
-}
-
-abstract class commands_AbstractChangeCommand extends c_ChangescriptCommand
-{
-	
-}
-
-abstract class commands_AbstractChangedevCommand extends c_ChangescriptCommand
-{
-	/**
-	 * @deprecated use executeCommand
-	 */
-	protected function changecmd($cmdName, $params = array())
-	{
-		$this->executeCommand($cmdName, $params);
 	}
 }

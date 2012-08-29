@@ -5,7 +5,7 @@
 class f_persistentdocument_DocumentFilterService extends change_BaseService
 {
 	/**
-	 * @param String $json
+	 * @param string $json
 	 * @return f_persistentdocument_DocumentFilter
 	 */
 	public function getFilterInstanceFromJson($json)
@@ -15,7 +15,7 @@ class f_persistentdocument_DocumentFilterService extends change_BaseService
 	}
 
 	/**
-	 * @param String $json
+	 * @param string $json
 	 * @return f_persistentdocument_DocumentFilter[]
 	 */
 	public function getFilterArrayFromJson($json)
@@ -113,7 +113,7 @@ class f_persistentdocument_DocumentFilterService extends change_BaseService
 	}
 	
 	/**
-	 * @param String $json
+	 * @param string $json
 	 * @return f_persistentdocument_criteria_QueryIntersection
 	 */
 	public function getQueryIntersectionFromJson($json)
@@ -292,9 +292,9 @@ class f_persistentdocument_DocumentFilterService extends change_BaseService
 	private $filtersByModel = null;
 	
 	/**
-	 * @param String $modelName
-	 * @param String[] $methods
-	 * @return String[]
+	 * @param string $modelName
+	 * @param string[] $methods
+	 * @return string[]
 	 */
 	public function getFiltersByModelName($modelName, $methods = array())
 	{
@@ -309,9 +309,9 @@ class f_persistentdocument_DocumentFilterService extends change_BaseService
 	}
 	
 	/**
-	 * @param String[] $keys
-	 * @param String[] $methods
-	 * @return String[]
+	 * @param string[] $keys
+	 * @param string[] $methods
+	 * @return string[]
 	 */
 	public function getFiltersByKeys($keys, $methods = array())
 	{
@@ -406,8 +406,8 @@ class f_persistentdocument_DocumentFilterService extends change_BaseService
 	}
 	
 	/**
-	 * @param String $restriction
-	 * @return String
+	 * @param string $restriction
+	 * @return string
 	 */
 	public function getRestrictionAsText($restriction)
 	{
@@ -415,7 +415,7 @@ class f_persistentdocument_DocumentFilterService extends change_BaseService
 	}
 	
 	/**
-	 * @param String $name like that: "modules_<moduleName>/<documentName>.<propertyName>"
+	 * @param string $name like that: "modules_<moduleName>/<documentName>.<propertyName>"
 	 * @return BeanPropertyInfo
 	 */
 	public function getPropertyInfoByName($name)
@@ -426,7 +426,7 @@ class f_persistentdocument_DocumentFilterService extends change_BaseService
 	}
 	
 	/**
-	 * @param String $modeAsString 'start', 'end', 'anywhere' or 'exact'.
+	 * @param string $modeAsString 'start', 'end', 'anywhere' or 'exact'.
 	 * @return MatchMode
 	 */
 	public function getMatchMode($modeAsString)
@@ -464,8 +464,8 @@ class f_persistentdocument_DocumentFilterService extends change_BaseService
 	}
 	
 	/**
-	 * @param String $package
-	 * @return String
+	 * @param string $package
+	 * @return string
 	 */
 	private function getFiltersDirectoryByPackage($package)
 	{
@@ -473,7 +473,7 @@ class f_persistentdocument_DocumentFilterService extends change_BaseService
 	}
 	
 	/**
-	 * @param String $dir
+	 * @param string $dir
 	 * @return Array<String, String>
 	 */
 	private function getFiltersInDirectory($dir, $package)

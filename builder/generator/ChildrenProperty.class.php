@@ -65,7 +65,7 @@ class generator_ChildrenProperty
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getName()
 	{
@@ -86,7 +86,7 @@ class generator_ChildrenProperty
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getPhpName()
 	{
@@ -94,7 +94,7 @@ class generator_ChildrenProperty
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getCommentaryType()
 	{

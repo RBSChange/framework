@@ -24,8 +24,8 @@ class indexer_Facet
 	}
 	
 	/**
-	 * @param String $min
-	 * @param String $max
+	 * @param string $min
+	 * @param string $max
 	 */
 	function addRange($min, $max)
 	{

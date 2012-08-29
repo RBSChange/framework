@@ -40,7 +40,7 @@ class indexer_BooleanQuery extends indexer_QueryBase implements indexer_Query
 	}
 	
 	/**
-	 * @param String $opStr "AND" or "OR"
+	 * @param string $opStr "AND" or "OR"
 	 * @return indexer_BooleanQuery
 	 */
 	public static function byStringInstance($opStr)
@@ -81,7 +81,7 @@ class indexer_BooleanQuery extends indexer_QueryBase implements indexer_Query
 	/**
 	 * Returns the number of subqueries added.
 	 *
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getSubqueryCount()
 	{
@@ -89,7 +89,7 @@ class indexer_BooleanQuery extends indexer_QueryBase implements indexer_Query
 	}
 	
 	/**
-	 * @return String[]
+	 * @return string[]
 	 */
 	public function getTerms()
 	{
@@ -102,7 +102,7 @@ class indexer_BooleanQuery extends indexer_QueryBase implements indexer_Query
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isEmpty()
 	{
@@ -118,7 +118,7 @@ class indexer_BooleanQuery extends indexer_QueryBase implements indexer_Query
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function toSolrString()
 	{

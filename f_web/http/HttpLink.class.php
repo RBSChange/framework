@@ -1,23 +1,23 @@
 <?php
 abstract class f_web_HttpLink implements f_web_Link
 {	
-    const SITE_PATH = '/index.php';
-    const UI_PATH = '/xul_controller.php';
-    const REWRITING_PATH = '/';
-    
-    const STANDARD_SEPARATOR = '&';
-    const ESCAPE_SEPARATOR = '&amp;';
-      
-       
-    /**
-     * @param String $scheme
-     * @param String $host
-     * @param String $path
-     * @param array $queryParameters
-     * @param String $fragment
-     * @param String $port
-     * @return String
-     */
+	const SITE_PATH = '/index.php';
+	const UI_PATH = '/xul_controller.php';
+	const REWRITING_PATH = '/';
+	
+	const STANDARD_SEPARATOR = '&';
+	const ESCAPE_SEPARATOR = '&amp;';
+	  
+	   
+	/**
+	 * @param string $scheme
+	 * @param string $host
+	 * @param string $path
+	 * @param array $queryParameters
+	 * @param string $fragment
+	 * @param string $port
+	 * @return string
+	 */
 	protected final function buildUrl($scheme, $host, $path = null, $queryParameters = array(), $fragment = null, $argSeparator = null, $port = null)
 	{
 		$url = array('scheme' => $scheme, 'host' => $host, 'path' => $path);
@@ -28,16 +28,16 @@ abstract class f_web_HttpLink implements f_web_Link
 		if (count($queryParameters) > 0)
 		{
 			self::sortQueryParamerters($queryParameters);
-		    if ($argSeparator === null) {$argSeparator = self::STANDARD_SEPARATOR;}
+			if ($argSeparator === null) {$argSeparator = self::STANDARD_SEPARATOR;}
 			$query = http_build_query($queryParameters, '', $argSeparator);
 			if (!empty($query)) {$url['query'] = $query;}
 		}
-		return  self::http_build_url($url);	    
+		return  self::http_build_url($url);		
 	}
 	
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function __toString()
 	{
@@ -110,7 +110,7 @@ abstract class f_web_HttpLink implements f_web_Link
 	 * Transforms an multi-dimensonnial query parameter array into a flat array
 	 * 
 	 * @param array $array
-	 * @param String $key
+	 * @param string $key
 	 * @return array 
 	 */
 	public static function flattenArray($array, $key = null)

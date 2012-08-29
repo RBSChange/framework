@@ -112,7 +112,7 @@ class CacheService extends change_BaseService
 	}
 
 	/**
-	 * @param String $directory
+	 * @param string $directory
 	 */
 	private function clearWebCache($directory)
 	{
@@ -153,9 +153,9 @@ class CacheService extends change_BaseService
 	}
 	
 	/**
-	 * @param String $directory
-	 * @param Boolean $includeDir
-	 * @param String $ignoredDir
+	 * @param string $directory
+	 * @param boolean $includeDir
+	 * @param string $ignoredDir
 	 */
 	private function deleteRecursively($directory, $includeDir = false, $ignoredDir = null)
 	{

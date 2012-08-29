@@ -4,7 +4,7 @@ interface BeanValueConverter
 	
 	/**
 	 * @param Mixed $value
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isValidRequestValue($value);
 	

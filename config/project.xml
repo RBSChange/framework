@@ -67,21 +67,21 @@
 		
 		<!-- 
 		<mongoDB>
-      		<authentication>
+	  		<authentication>
 				<entry name="username"></entry>
 				<entry name="password"></entry>
 			</authentication>
-      		<database>
-        		<entry name="name">db</entry>
-      		</database>
-      		<serversRead>
+	  		<database>
+				<entry name="name">db</entry>
+	  		</database>
+	  		<serversRead>
 				<entry name="default">localhost:27017</entry>
 			</serversRead>
-      		<serversWrite>
-        		<entry name="default">localhost:27017</entry>
-      		</serversWrite>
-    	</mongoDB>
-    	<datacache-redis>
+	  		<serversWrite>
+				<entry name="default">localhost:27017</entry>
+	  		</serversWrite>
+		</mongoDB>
+		<datacache-redis>
 			<server>
 				<entry name="host">...</entry>
 				<entry name="port">...</entry>
@@ -89,13 +89,13 @@
 				<entry name="password">...(optionnal)</entry>
 			</server>
 		</datacache-redis>
-    	<memcache>
-      		<server>
-        		<entry name="host">localhost</entry>
-        		<entry name="port">11211</entry>
-      		</server>
-    	</memcache> 
-    	-->
+		<memcache>
+	  		<server>
+				<entry name="host">localhost</entry>
+				<entry name="port">11211</entry>
+	  		</server>
+		</memcache> 
+		-->
 
 		<injection>
 			<class>
@@ -105,12 +105,12 @@
 		</injection>
 		
 		<modules>		
-	     	<uixul>
+		 	<uixul>
 				<disableRichtextTtoolbarButtons>
 					<entry name="ruby">true</entry>
 				</disableRichtextTtoolbarButtons>
 			</uixul>
-	     </modules>
+		 </modules>
 
 		<!-- MAIL -->
 		<mail>
@@ -185,28 +185,28 @@
 			<entry name="enabled">false</entry>
 		</bench>
 		
-	    <solr>
-	        <entry name="schemaVersion">3.0.3</entry>
-	        
-	        <!-- SOLR_INDEXER_CLIENT -->
-	        <entry name="clientId">change4</entry>
-	        
-	        <!-- SOLR_INDEXER_URL -->
-	        <entry name="url">http://127.0.0.1:8983/solr</entry>
-	        
-	        <!-- SOLR_INDEXER_DISABLE_BATCH_MODE -->
-	        <entry name="batch_mode">true</entry>
-	        
-	        <!-- SOLR_USE_POST_QUERIES -->
-	        <entry name="request_method">GET</entry>
-	        
-	        <!-- SOLR_INDEXER_DISABLE_COMMIT -->
-	        <entry name="disable_commit">false</entry>
-	        
-	        <!-- SOLR_INDEXER_DISABLE_DOCUMENTCACHE -->
-	        <entry name="disable_document_cache">false</entry>
-	    </solr>
-	    
+		<solr>
+			<entry name="schemaVersion">3.0.3</entry>
+			
+			<!-- SOLR_INDEXER_CLIENT -->
+			<entry name="clientId">change4</entry>
+			
+			<!-- SOLR_INDEXER_URL -->
+			<entry name="url">http://127.0.0.1:8983/solr</entry>
+			
+			<!-- SOLR_INDEXER_DISABLE_BATCH_MODE -->
+			<entry name="batch_mode">true</entry>
+			
+			<!-- SOLR_USE_POST_QUERIES -->
+			<entry name="request_method">GET</entry>
+			
+			<!-- SOLR_INDEXER_DISABLE_COMMIT -->
+			<entry name="disable_commit">false</entry>
+			
+			<!-- SOLR_INDEXER_DISABLE_DOCUMENTCACHE -->
+			<entry name="disable_document_cache">false</entry>
+		</solr>
+		
 		<!-- Web browsers compatibility -->
 		<browsers>
 			<backoffice>

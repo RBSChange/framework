@@ -9,8 +9,8 @@ interface change_RoleService
 	
 	/**
 	 * replace isBackEndRole isFrontEndRole
-	 * @param String $roleName
-	 * @return Boolean
+	 * @param string $roleName
+	 * @return boolean
 	 */
 	function hasRole($roleName);	
 
@@ -23,8 +23,8 @@ interface change_RoleService
 	
 	
 	/**
-	 * @param String $actionName
-	 * @return Boolean
+	 * @param string $actionName
+	 * @return boolean
 	 */
 	function hasAction($actionName);
 
@@ -34,8 +34,8 @@ interface change_RoleService
 	function getPermissions();
 	
 	/**
-	 * @param String $permissionName
-	 * @return Boolean
+	 * @param string $permissionName
+	 * @return boolean
 	 */
 	function hasPermission($permissionName);
 
@@ -44,7 +44,7 @@ interface change_RoleService
 	 * returns the list of permissions attributed to each roles defined for 
 	 * the module in config/roles.xml.
 	 * 
-	 * @param String $roleName full role name
+	 * @param string $roleName full role name
 	 * @return string[]
 	 */
 	function getPermissionsByRole($roleName);
@@ -53,8 +53,8 @@ interface change_RoleService
 	 * returns the list of permissions attributed to each roles defined for 
 	 * the module in config/roles.xml.
 	 * 
-	 * @param String $roleName
-	 * @return String
+	 * @param string $roleName
+	 * @return string
 	 */
 	function getRoleLabelKey($roleName);
 	
@@ -62,7 +62,7 @@ interface change_RoleService
 	 * returns the list of permissions attributed to each roles defined for 
 	 * the module in config/right.xml.
 	 * 
-	 * @param String $roleName
+	 * @param string $roleName
 	 * @return string[]
 	 */
 	function getPermissionsByAction($actionName);

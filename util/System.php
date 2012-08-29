@@ -9,11 +9,11 @@ class f_util_System
 	}
 
 	/**
-	 * @param String $cmd
-	 * @param String $msg
-	 * @param Boolean $captureStdout
-	 * @param String input
-	 * @return String the output result of execution
+	 * @param string $cmd
+	 * @param string $msg
+	 * @param boolean $captureStdout
+	 * @param string input
+	 * @return string the output result of execution
 	 */
 	public static function exec($cmd, $msg = null, $captureStdout = true, $input = null)
 	{
@@ -68,10 +68,10 @@ class f_util_System
 	}
 
 	/**
-	 * @param String $cmd
-	 * @param String $msg
-	 * @param Boolean $captureStdout
-	 * @param String input
+	 * @param string $cmd
+	 * @param string $msg
+	 * @param boolean $captureStdout
+	 * @param string input
 	 * @return array the output result of execution
 	 */
 	public static function execArray($cmd, $msg = null, $captureStdout = true, $input = null)
@@ -140,7 +140,7 @@ class f_util_System
 			{	
 				$baseUrl = "http://".$_SERVER['HTTP_HOST'];
 				if (strpos($_SERVER['HTTP_HOST'], ':') === false && isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] != '80')
-                {
+				{
 					$baseUrl .= ':' . $_SERVER['SERVER_PORT'];
 				}
 			}

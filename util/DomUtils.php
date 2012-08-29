@@ -2,7 +2,7 @@
 abstract class f_util_DOMUtils
 {
 	/**
-	 * @param String $path
+	 * @param string $path
 	 * @return f_util_DOMDocument
 	 */
 	static function fromPath($path)
@@ -73,7 +73,7 @@ abstract class f_util_DOMUtils
 
 	/**
 	 * @param DOMDocument $document
-	 * @param String $path
+	 * @param string $path
 	 */
 	static function save($document, $path)
 	{
@@ -101,8 +101,8 @@ class f_util_DOMDocument extends DOMDocument
 	}
 
 	/**
-	 * @param String $prefix
-	 * @param String $namespaceURI
+	 * @param string $prefix
+	 * @param string $namespaceURI
 	 * @return f_util_DOMDocument
 	 */
 	function registerNamespace($prefix, $namespaceURI)
@@ -115,9 +115,9 @@ class f_util_DOMDocument extends DOMDocument
 	}
 
 	/**
-	 * @param String $xPathExpression
+	 * @param string $xPathExpression
 	 * @param DOMNode $context
-	 * @return Boolean
+	 * @return boolean
 	 */
 	function exists($xPathExpression, $context = null)
 	{
@@ -133,7 +133,7 @@ class f_util_DOMDocument extends DOMDocument
 	}
 	
 	/**
-	 * @param String $xPathExpression
+	 * @param string $xPathExpression
 	 * @param DOMNode $context
 	 * @return DOMElement
 	 */
@@ -167,7 +167,7 @@ class f_util_DOMDocument extends DOMDocument
 	}
 
 	/**
-	 * @param String $xPathExpression
+	 * @param string $xPathExpression
 	 * @param DOMNode $context
 	 * @return DOMNode
 	 */
@@ -190,7 +190,7 @@ class f_util_DOMDocument extends DOMDocument
 	}
 
 	/**
-	 * @param String $xPathExpression
+	 * @param string $xPathExpression
 	 * @param DOMNode $context
 	 * @return DOMNodeList
 	 */
@@ -204,9 +204,9 @@ class f_util_DOMDocument extends DOMDocument
 	}
 
 	/**
-	 * @param String $xPathExpression
+	 * @param string $xPathExpression
 	 * @param DOMNode $context
-	 * @return Integer the number of deleted nodes
+	 * @return integer the number of deleted nodes
 	 */
 	function findAndRemove($xPathExpression, $context = null)
 	{

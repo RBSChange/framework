@@ -39,9 +39,9 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	const BASE_MODEL = 'modules_generic/document';
 
 	/**
-	 * @param String $moduleName
-	 * @param String $documentName
-	 * @return String
+	 * @param string $moduleName
+	 * @param string $documentName
+	 * @return string
 	 */
 	public static function buildDocumentModelName($moduleName, $documentName)
 	{
@@ -49,8 +49,8 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 
 	/**
-	 * @param String $modelName
-	 * @return String
+	 * @param string $modelName
+	 * @return string
 	 */
 	public static function convertModelNameToBackoffice($modelName)
 	{
@@ -58,7 +58,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 	
 	/**
-	 * @param String $modelName modules_<module>/<document>
+	 * @param string $modelName modules_<module>/<document>
 	 * @return array<String, String> keys module & document
 	 */
 	public static function getModelInfo($modelName)
@@ -89,8 +89,8 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 	
 	/**
-	 * @param String $documentModelName For example: "modules_mymodule/mydocument"
-	 * @return String the corresponding document class name For example: mymodule_persistentdocument_mydocument
+	 * @param string $documentModelName For example: "modules_mymodule/mydocument"
+	 * @return string the corresponding document class name For example: mymodule_persistentdocument_mydocument
 	 */
 	public static function documentModelNameToDocumentClassName($documentModelName)
 	{
@@ -143,8 +143,8 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 
 	/**
-	 * @param String $moduleName
-	 * @param String $documentName
+	 * @param string $moduleName
+	 * @param string $documentName
 	 * @return f_persistentdocument_PersistentDocumentModel
 	 */
 	static function getNewModelInstance($moduleName, $documentName)
@@ -166,8 +166,8 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 
 	/**
-	 * @param String $documentModelName
-	 * @return Boolean
+	 * @param string $documentModelName
+	 * @return boolean
 	 */
 	public static function exists($documentModelName)
 	{
@@ -238,12 +238,12 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	abstract public function getFilePath();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	abstract public function getIcon();
 
@@ -252,7 +252,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	 */
 	public function getLabel()
 	{
-		return LocaleService::getInstance()->transFO($this->getLabelKey());
+		return LocaleService::getInstance()->trans($this->getLabelKey());
 	}
 
 	/**
@@ -365,7 +365,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 
 	/**********************************************************/
-	/* Document Status Informations                            */
+	/* Document Status Informations							*/
 	/**********************************************************/
 
 	/**
@@ -400,7 +400,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 
 
 	/**********************************************************/
-	/* Properties Informations                                */
+	/* Properties Informations								*/
 	/**********************************************************/
 	
 	protected function loadProperties()
@@ -718,8 +718,8 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 	
 	/**
-	 * @param String $name
-	 * @return Boolean
+	 * @param string $name
+	 * @return boolean
 	 */
 	public final function hasInverseProperty($name)
 	{
@@ -728,7 +728,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 
 	/**
-	 * @param String $name
+	 * @param string $name
 	 * @return PropertyInfo
 	 */
 	public final function getInverseProperty($name)
@@ -750,8 +750,8 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	}
 
 	/**
-	 * @param String $name
-	 * @return Boolean
+	 * @param string $name
+	 * @return boolean
 	 */
 	public final function isPreservedProperty($name)
 	{
@@ -763,7 +763,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	/**
 	 * @see f_mvc_BeanModel::getBeanName()
 	 *
-	 * @return String
+	 * @return string
 	 */
 	function getBeanName()
 	{
@@ -818,8 +818,8 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	/**
 	 * @see f_mvc_BeanModel::hasBeanProperty()
 	 *
-	 * @param String $propertyName
-	 * @return Boolean
+	 * @param string $propertyName
+	 * @return boolean
 	 */
 	function hasBeanProperty($propertyName)
 	{
@@ -850,17 +850,17 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 
 	/**
 	 * Return if the document has 2 special properties (correctionid, correctionofid)
-	 * @return Boolean
+	 * @return boolean
 	 */
 	abstract public function useCorrection();
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	abstract public function hasWorkflow();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	abstract public function getWorkflowStartTask();
 
@@ -870,7 +870,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	abstract public function getWorkflowParameters();
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	abstract public function usePublicationDates();
 	
@@ -880,7 +880,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	abstract public function getDocumentService();
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function __toString()
 	{

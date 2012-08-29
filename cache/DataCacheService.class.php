@@ -2,22 +2,22 @@
 interface f_DataCacheItem
 {
 	/**
-	 * @return Integer (timestamp) or null
+	 * @return integer (timestamp) or null
 	 */
 	public function getCreationTime();
 	
 	/**
-	 * @param Integer (timestamp) $timestamp
+	 * @param integer (timestamp) $timestamp
 	 */
 	public function setCreationTime($timestamp);
 
 	/**
-	 * @param Integer $seconds
+	 * @param integer $seconds
 	 */
 	public function setTTL($seconds);
 	
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getTTL();
 
@@ -28,7 +28,7 @@ interface f_DataCacheItem
 	public function setValue($key, $value);
 	
 	/**
-	 * @param String $key
+	 * @param string $key
 	 * @return Mixed
 	 */
 	public function getValue($key);
@@ -44,32 +44,32 @@ interface f_DataCacheItem
 	public function getValues();
 	
 	/**
-	 * @param String $key
+	 * @param string $key
 	 */
 	public function setRegistrationPath($key);
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getRegistrationPath();
 	
 	/**
-	 * @param String $key
+	 * @param string $key
 	 */
 	public function setCachePath($key);
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getCachePath();
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getNamespace();
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getKeyParameters();
 	
@@ -81,12 +81,12 @@ interface f_DataCacheItem
 	public function setInvalid();
 	
 	/**
-	 * @param Boolean $isValid
+	 * @param boolean $isValid
 	 */
 	public function setValidity($isValid);
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isValid();
 }
@@ -108,7 +108,7 @@ class f_DataCacheItemImpl implements f_DataCacheItem
 	private $data;
 		
 	/**
-	 * @param String $namespace
+	 * @param string $namespace
 	 * @param Mixed $keyParameters
 	 * @param Array $patterns
 	 */
@@ -138,7 +138,7 @@ class f_DataCacheItemImpl implements f_DataCacheItem
 	/**
 	 * @see f_DataCacheItem::getCreationTime()
 	 *
-	 * @return Integer (timestamp) or null
+	 * @return integer (timestamp) or null
 	 */
 	public function getCreationTime()
 	{
@@ -150,7 +150,7 @@ class f_DataCacheItemImpl implements f_DataCacheItem
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getNamespace()
 	{
@@ -158,7 +158,7 @@ class f_DataCacheItemImpl implements f_DataCacheItem
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getKeyParameters()
 	{
@@ -166,7 +166,7 @@ class f_DataCacheItemImpl implements f_DataCacheItem
 	}
 	
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getTTL()
 	{
@@ -184,7 +184,7 @@ class f_DataCacheItemImpl implements f_DataCacheItem
 	/**
 	 * @see f_DataCacheItem::getValue()
 	 *
-	 * @param String $key
+	 * @param string $key
 	 * @return Mixed
 	 */
 	public function getValue($key)
@@ -209,7 +209,7 @@ class f_DataCacheItemImpl implements f_DataCacheItem
 	/**
 	 * @see f_DataCacheItem::setTTL()
 	 *
-	 * @param Integer $seconds
+	 * @param integer $seconds
 	 */
 	public function setTTL($seconds)
 	{
@@ -226,7 +226,7 @@ class f_DataCacheItemImpl implements f_DataCacheItem
 	/**
 	 * @see f_DataCacheItem::setCreationTime()
 	 *
-	 * @param Integer $timestamp
+	 * @param integer $timestamp
 	 */
 	public function setCreationTime($timestamp)
 	{
@@ -256,7 +256,7 @@ class f_DataCacheItemImpl implements f_DataCacheItem
 	/**
 	 * @see f_DataCacheItem::setValue()
 	 *
-	 * @param String $key
+	 * @param string $key
 	 * @param Mixed $value
 	 */
 	public function setValue($key, $value)
@@ -275,7 +275,7 @@ class f_DataCacheItemImpl implements f_DataCacheItem
 	}
 	
 	/**
-	 * @param Boolean $isValid
+	 * @param boolean $isValid
 	 */
 	public function setValidity($isValid)
 	{
@@ -283,7 +283,7 @@ class f_DataCacheItemImpl implements f_DataCacheItem
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isValid()
 	{
@@ -315,7 +315,7 @@ class f_DataCacheService extends change_BaseService
 	protected $shutdownRegistered = false;
 
 	/**
-	 * @param String $namespace
+	 * @param string $namespace
 	 * @param Mixed $keyParameters
 	 * @param Array $patterns
 	 * @return f_DataCacheItem
@@ -326,7 +326,7 @@ class f_DataCacheService extends change_BaseService
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isEnabled()
 	{
@@ -334,9 +334,9 @@ class f_DataCacheService extends change_BaseService
 	}
 	
 	/**
-	 * @param String $namespace
+	 * @param string $namespace
 	 * @param Mixed $keyParameters
-	 * @param String $subCache (optional)
+	 * @param string $subCache (optional)
 	 * @param Array	$newPatterns
 	 * @return f_DataCacheItem or null or String
 	 */
@@ -379,8 +379,8 @@ class f_DataCacheService extends change_BaseService
 	
 	/**
 	 * @param f_DataCacheItem $item
-	 * @param String $subCache
-	 * @return Boolean
+	 * @param string $subCache
+	 * @return boolean
 	 */
 	public function exists($item, $subCache = null)
 	{
@@ -393,7 +393,7 @@ class f_DataCacheService extends change_BaseService
 	}
 	
 	/**
-	 * @param String $pattern
+	 * @param string $pattern
 	 */
 	public function clearCacheByPattern($pattern)
 	{
@@ -419,7 +419,7 @@ class f_DataCacheService extends change_BaseService
 	}
 	
 	/**
-	 * @param String $namespace
+	 * @param string $namespace
 	 */
 	public function clearCacheByNamespace($namespace)
 	{
@@ -427,7 +427,7 @@ class f_DataCacheService extends change_BaseService
 	}
 	
 	/**
-	 * @param String $id
+	 * @param string $id
 	 */
 	public function clearCacheByDocId($id)
 	{
@@ -448,7 +448,7 @@ class f_DataCacheService extends change_BaseService
 	}
 
 	/**
-	 * @param String $tag
+	 * @param string $tag
 	 */
 	public function clearCacheByTag($tag)
 	{
@@ -548,7 +548,7 @@ class f_DataCacheService extends change_BaseService
 	}
 	
 	/**
-	 * @param String $id
+	 * @param string $id
 	 */
 	protected function clear($id = null)
 	{
@@ -593,7 +593,7 @@ class f_DataCacheService extends change_BaseService
 		return $item;
 	}
 	/**
-	 * @param Boolean $dispatch
+	 * @param boolean $dispatch
 	 */
 	public function setDispatch($dispatch = true)
 	{

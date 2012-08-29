@@ -12,7 +12,7 @@ class f_persistentdocument_DocumentFilterRestrictionParameter extends f_persiste
 	
 	/**
 	 * @param BeanPropertyInfo $propertyInfo
-	 * @param String $restriction
+	 * @param string $restriction
 	 */
 	protected function __construct($propertyInfo = null, $restriction = null)
 	{
@@ -31,7 +31,7 @@ class f_persistentdocument_DocumentFilterRestrictionParameter extends f_persiste
 	
 	/**
 	 * @param BeanPropertyInfo $propertyInfo
-	 * @param String $restriction
+	 * @param string $restriction
 	 * @return f_persistentdocument_DocumentFilterRestrictionParameter
 	 */
 	static function getNewInstance($propertyInfo = null, $restriction = null, $restrictionType = 'Restrictions')
@@ -43,7 +43,7 @@ class f_persistentdocument_DocumentFilterRestrictionParameter extends f_persiste
 	
 	/**
 	 * @param BeanPropertyInfo $propertyInfo
-	 * @param String $restriction
+	 * @param string $restriction
 	 * @return f_persistentdocument_DocumentFilterRestrictionParameter
 	 */
 	static function getNewHavingInstance($propertyInfo = null, $restriction = null)
@@ -98,7 +98,7 @@ class f_persistentdocument_DocumentFilterRestrictionParameter extends f_persiste
 	
 	/**
 	 * modules_<moduleName>/<documentName>.<propertyName>
-	 * @param String $name
+	 * @param string $name
 	 */
 	public function setPropertyName($name)
 	{
@@ -117,7 +117,7 @@ class f_persistentdocument_DocumentFilterRestrictionParameter extends f_persiste
 	
 	/**
 	 * modules_<moduleName>/<documentName>.<propertyName>
-	 * @param String[] $names
+	 * @param string[] $names
 	 */
 	public function setAllowedPropertyNames($names)
 	{
@@ -130,7 +130,7 @@ class f_persistentdocument_DocumentFilterRestrictionParameter extends f_persiste
 	}
 	
 	/**
-	 * @param String $name
+	 * @param string $name
 	 * @param BeanPropertyInfo $beanPropertyInfo
 	 * @return f_persistentdocument_DocumentFilterRestrictionParameter $this
 	 */
@@ -177,7 +177,7 @@ class f_persistentdocument_DocumentFilterRestrictionParameter extends f_persiste
 	private $restriction;
 	
 	/**
-	 * @param String $value
+	 * @param string $value
 	 */
 	public function setRestriction($value)
 	{
@@ -189,7 +189,7 @@ class f_persistentdocument_DocumentFilterRestrictionParameter extends f_persiste
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getRestriction()
 	{
@@ -205,8 +205,8 @@ class f_persistentdocument_DocumentFilterRestrictionParameter extends f_persiste
 	private $allowedRestrictions = array();
 	
 	/**
-	 * @param String $name
-	 * @param String[] $restrictions
+	 * @param string $name
+	 * @param string[] $restrictions
 	 */
 	public function setAllowedRestrictions($name, $restrictions)
 	{
@@ -214,8 +214,8 @@ class f_persistentdocument_DocumentFilterRestrictionParameter extends f_persiste
 	}
 	
 	/**
-	 * @param String $name
-	 * @return String[]
+	 * @param string $name
+	 * @return string[]
 	 */
 	public function getAllowedRestrictions($name)
 	{
@@ -308,7 +308,7 @@ class f_persistentdocument_DocumentFilterRestrictionParameter extends f_persiste
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getValueAsText()
 	{
@@ -365,7 +365,7 @@ class f_persistentdocument_DocumentFilterRestrictionParameter extends f_persiste
 	}	
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getValueForJson()
 	{
@@ -392,8 +392,8 @@ class f_persistentdocument_DocumentFilterRestrictionParameter extends f_persiste
 	}
 	
 	/**
-	 * @param Boolean $throwException
-	 * @return Boolean
+	 * @param boolean $throwException
+	 * @return boolean
 	 * @throws ValidationException
 	 */
 	public function validate($throwException)
@@ -430,7 +430,7 @@ class f_persistentdocument_DocumentFilterRestrictionParameter extends f_persiste
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	private function getPropertyLabelAsText()
 	{
@@ -443,7 +443,7 @@ class f_persistentdocument_DocumentFilterRestrictionParameter extends f_persiste
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	private function getRestrictionLabelAsText()
 	{
@@ -456,7 +456,7 @@ class f_persistentdocument_DocumentFilterRestrictionParameter extends f_persiste
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	private function getValueLabelAsText()
 	{

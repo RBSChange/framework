@@ -13,9 +13,9 @@ class f_DataCacheFileService extends f_DataCacheService
 	}
 	
 	/**
-	 * @param String $namespace
+	 * @param string $namespace
 	 * @param Mixed $keyParameters
-	 * @param String $subCache (optional)
+	 * @param string $subCache (optional)
 	 * @param Array	$newPatterns
 	 * @return f_DataCacheItem or null or String
 	 */
@@ -90,8 +90,8 @@ class f_DataCacheFileService extends f_DataCacheService
 	
 	/**
 	 * @param f_DataCacheItem $item
-	 * @param String $subCache
-	 * @return Boolean
+	 * @param string $subCache
+	 * @return boolean
 	 */
 	public function exists($item, $subCache = null)
 	{
@@ -274,7 +274,7 @@ class f_DataCacheFileService extends f_DataCacheService
 	
 	/**
 	 * @param f_DataCacheItem $item
-	 * @return String
+	 * @return string
 	 */
 	public function getCachePath($item, $subCache = null)
 	{
@@ -294,7 +294,7 @@ class f_DataCacheFileService extends f_DataCacheService
 	
 	/**
 	 * @param f_DataCacheItem $item
-	 * @return Boolean
+	 * @return boolean
 	 */
 	protected function isValid($item)
 	{
@@ -314,7 +314,7 @@ class f_DataCacheFileService extends f_DataCacheService
 
 	/**
 	 * @param f_DataCacheItem $item
-	 * @return String
+	 * @return string
 	 */
 	protected function getRegistrationPath($item)
 	{

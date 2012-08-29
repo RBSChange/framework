@@ -43,8 +43,8 @@ class change_Request
 	const DOCUMENT_ID = 'cmpref';
 
 	private $attributes = array();
-	private $errors     = array();
-	private $method     = null;	
+	private $errors	 = array();
+	private $method	 = null;	
 	
 	/**
 	 * @var array
@@ -443,18 +443,18 @@ class change_Request
 			switch ($_SERVER['REQUEST_METHOD'])
 			{
 				case 'POST':
-				    $this->setMethod(self::POST);
-				    $this->setParameters($_POST);
-				    break;
-			    case 'PUT':
-			    	$this->setMethod(self::PUT);
-			    	break;
-			    case 'DELETE':
-		    		$this->setMethod(self::DELETE);
-		    		break;
-		    	default:
-		    		$this->setMethod(self::GET);
-		    		break;
+					$this->setMethod(self::POST);
+					$this->setParameters($_POST);
+					break;
+				case 'PUT':
+					$this->setMethod(self::PUT);
+					break;
+				case 'DELETE':
+					$this->setMethod(self::DELETE);
+					break;
+				default:
+					$this->setMethod(self::GET);
+					break;
 			}
 		} 
 		else
@@ -587,111 +587,111 @@ class change_Request
 		return $this->hasParameter($paramName) && f_util_StringUtils::isNotEmpty($this->getParameter($paramName));
 	}
 
-    /**
-     * Retrieve a module parameter.
-     *
-     * @param string $moduleName The module name.
-     * @param string $paramName The parameter name.
-     */
-    public function getModuleParameter($moduleName, $paramName)
-    {
-        $moduleParams = $this->getModuleParameters($moduleName);
-        if (is_array($moduleParams) && isset($moduleParams[$paramName]))
-        {
-            return $moduleParams[$paramName];
-        }
-        return null;
-    }
+	/**
+	 * Retrieve a module parameter.
+	 *
+	 * @param string $moduleName The module name.
+	 * @param string $paramName The parameter name.
+	 */
+	public function getModuleParameter($moduleName, $paramName)
+	{
+		$moduleParams = $this->getModuleParameters($moduleName);
+		if (is_array($moduleParams) && isset($moduleParams[$paramName]))
+		{
+			return $moduleParams[$paramName];
+		}
+		return null;
+	}
 
    /**
-     * set a module parameter.
-     * @param string $moduleName The module name.
-     * @param string $paramName The parameter name.
-     * @param mixed $paramValue
-     */
-    public function setModuleParameter($moduleName, $paramName, $paramValue)
-    {
-        if (!isset($this->parameters[$moduleName."Param"]))
-        {
-        	$this->parameters[$moduleName."Param"] = array($paramName => $paramValue);
-        }
-        else
-        {
-        	$this->parameters[$moduleName."Param"][$paramName] = $paramValue;
-        }
-    }
-    
-    /**
-     * Indicates whether the request has the given module parameter or not.
-     *
-     * @param string $moduleName The module name.
-     * @param string $paramName The parameter name.
-     * @return boolean true if the module parameter exists, false otherwise.
-     */
-    public function hasModuleParameter($moduleName, $paramName)
-    {
-        $moduleParams = $this->getModuleParameters($moduleName);
-        return is_array($moduleParams) &&  isset($moduleParams[$paramName]);
-    }
-    
-    /**
-     * Retrieve all the parameters defined for the given module.
-     * @param string $moduleName The module name.
-     * @return array|NULL
-     */
-    public function getModuleParameters($moduleName)
-    {
-        return $this->getParameter($moduleName."Param");
-    }
-    
-    //DEPRECATED 
-    
-    /**
-     * @deprecated
-     */
-    public function setParametersByRef(&$parameters)
-    {
-    	foreach ($parameters as $key => &$value)
-    	{
-    		if (is_array($value) && isset($this->parameters[$key]))
-    		{
-    			if (!is_array($this->parameters[$key]))
-    			{
-    				$this->parameters[$key] = array($this->parameters[$key]);
-    			}
-    			$this->parameters[$key] = array_merge($this->parameters[$key], f_util_StringUtils::doTranscode($value));
-    		}
-    		else
-    		{
-    			$this->parameters[$key] = f_util_StringUtils::doTranscode($value);
-    		}
-    	}
-    }
-    
-    /**
-     * @deprecated
-     */
-    public function extractParameters($names)
-    {
-    	$array = array();
-    	foreach ($this->parameters as $key => &$value)
-    	{
-    		if (in_array($key, $names))
-    		{
-    			$array[$key] = $value;
-    		}
-    	}
-    	return $array;
-    }
-    
-    /**
-     * @deprecated
-     */
-    public function setAttributesByRef (&$attributes)
-    {
-    	foreach ($attributes as $key => &$value)
-    	{
-    		$this->attributes[$key] = $value;
-    	}
-    }
+	 * set a module parameter.
+	 * @param string $moduleName The module name.
+	 * @param string $paramName The parameter name.
+	 * @param mixed $paramValue
+	 */
+	public function setModuleParameter($moduleName, $paramName, $paramValue)
+	{
+		if (!isset($this->parameters[$moduleName."Param"]))
+		{
+			$this->parameters[$moduleName."Param"] = array($paramName => $paramValue);
+		}
+		else
+		{
+			$this->parameters[$moduleName."Param"][$paramName] = $paramValue;
+		}
+	}
+	
+	/**
+	 * Indicates whether the request has the given module parameter or not.
+	 *
+	 * @param string $moduleName The module name.
+	 * @param string $paramName The parameter name.
+	 * @return boolean true if the module parameter exists, false otherwise.
+	 */
+	public function hasModuleParameter($moduleName, $paramName)
+	{
+		$moduleParams = $this->getModuleParameters($moduleName);
+		return is_array($moduleParams) &&  isset($moduleParams[$paramName]);
+	}
+	
+	/**
+	 * Retrieve all the parameters defined for the given module.
+	 * @param string $moduleName The module name.
+	 * @return array|NULL
+	 */
+	public function getModuleParameters($moduleName)
+	{
+		return $this->getParameter($moduleName."Param");
+	}
+	
+	//DEPRECATED 
+	
+	/**
+	 * @deprecated
+	 */
+	public function setParametersByRef(&$parameters)
+	{
+		foreach ($parameters as $key => &$value)
+		{
+			if (is_array($value) && isset($this->parameters[$key]))
+			{
+				if (!is_array($this->parameters[$key]))
+				{
+					$this->parameters[$key] = array($this->parameters[$key]);
+				}
+				$this->parameters[$key] = array_merge($this->parameters[$key], f_util_StringUtils::doTranscode($value));
+			}
+			else
+			{
+				$this->parameters[$key] = f_util_StringUtils::doTranscode($value);
+			}
+		}
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function extractParameters($names)
+	{
+		$array = array();
+		foreach ($this->parameters as $key => &$value)
+		{
+			if (in_array($key, $names))
+			{
+				$array[$key] = $value;
+			}
+		}
+		return $array;
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function setAttributesByRef (&$attributes)
+	{
+		foreach ($attributes as $key => &$value)
+		{
+			$this->attributes[$key] = $value;
+		}
+	}
 }

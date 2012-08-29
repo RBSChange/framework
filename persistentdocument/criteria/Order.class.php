@@ -15,8 +15,8 @@ class Order
 	private $ignoreCase = false;
 
 	/**
-	 * @param String $propertyName
-	 * @param Boolean $ascending
+	 * @param string $propertyName
+	 * @param boolean $ascending
 	 */
 	private function __construct($propertyName, $ascending)
 	{
@@ -34,7 +34,7 @@ class Order
 	}
 
 	/**
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 * @return Order
 	 */
 	public static function asc($propertyName)
@@ -44,7 +44,7 @@ class Order
 
 	/**
 	 * Same as asc, ignoring case
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 * @return Order
 	 */
 	public static function iasc($propertyName)
@@ -55,7 +55,7 @@ class Order
 	}
 
 	/**
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 * @return Order
 	 */
 	public static function desc($propertyName)
@@ -65,7 +65,7 @@ class Order
 
 	/**
 	 * Same as desc, ignoring case
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 * @return Order
 	 */
 	public static function idesc($propertyName)
@@ -75,8 +75,8 @@ class Order
 	}
 
 	/**
-	 * @param String $propertyName
-	 * @param String $orderType "asc" | "desc" | "iasc" | "idesc"
+	 * @param string $propertyName
+	 * @param string $orderType "asc" | "desc" | "iasc" | "idesc"
 	 * @return Order
 	 */
 	public static function byString($propertyName, $orderType)
@@ -105,7 +105,7 @@ class Order
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getPropertyName()
 	{
@@ -124,7 +124,7 @@ class Order
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function getAscending()
 	{
@@ -132,7 +132,7 @@ class Order
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function getIgnorecase()
 	{

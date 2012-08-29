@@ -33,7 +33,7 @@ class generic_persistentdocument_documentmodel extends f_persistentdocument_Pers
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public final function getFilePath()
 	{
@@ -41,7 +41,7 @@ class generic_persistentdocument_documentmodel extends f_persistentdocument_Pers
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public final function getIcon()
 	{
@@ -129,7 +129,7 @@ class generic_persistentdocument_documentmodel extends f_persistentdocument_Pers
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public final function getDefaultNewInstanceStatus()
 	{
@@ -138,7 +138,7 @@ class generic_persistentdocument_documentmodel extends f_persistentdocument_Pers
 	
 	/**
 	 * Return if the document has 2 special properties (correctionid, correctionofid)
-	 * @return Boolean
+	 * @return boolean
 	 */	
 	public final function useCorrection()
 	{
@@ -146,7 +146,7 @@ class generic_persistentdocument_documentmodel extends f_persistentdocument_Pers
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */		
 	public final function hasWorkflow()
 	{
@@ -154,7 +154,7 @@ class generic_persistentdocument_documentmodel extends f_persistentdocument_Pers
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */	
 	public final function getWorkflowStartTask()
 	{
@@ -170,7 +170,7 @@ class generic_persistentdocument_documentmodel extends f_persistentdocument_Pers
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function usePublicationDates()
 	{
@@ -188,7 +188,7 @@ class generic_persistentdocument_documentmodel extends f_persistentdocument_Pers
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public final function hasURL()
 	{
@@ -196,7 +196,7 @@ class generic_persistentdocument_documentmodel extends f_persistentdocument_Pers
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public final function useRewriteURL()
 	{

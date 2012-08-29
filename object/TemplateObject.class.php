@@ -78,7 +78,7 @@ class TemplateObject
 	
 	/**
 	 * Used for debug purpose : if defined, the result of execute is completed with XML commented "<!-- END $path -->"
-	 * @param String $path
+	 * @param string $path
 	 */
 	public function setOriginalPath($path)
 	{
@@ -191,7 +191,7 @@ class TemplateObject
 	{
 		switch($this->mimeContentType)
 		{
-		    case 'xul' :
+			case 'xul' :
 				$header = 'application/vnd.mozilla.xul+xml';
 				break;
 

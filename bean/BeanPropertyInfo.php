@@ -18,29 +18,29 @@ class BeanPropertyType
 interface BeanPropertyInfo
 {
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getName();
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getType();
 	
 	/**
 	 * If the property type is BeanPropertyType::DOCUMENT,
 	 * returns the linked document model
-	 * @return String
+	 * @return string
 	 */
 	public function getDocumentType();
 	
 	/**
 	 * If the property type if DOCUMENT, BEAN or CLASS
-	 * @return String
+	 * @return string
 	 */
 	public function getClassName();
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getValidationRules();
 	
@@ -50,27 +50,27 @@ interface BeanPropertyInfo
 	public function getDefaultValue();
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getLabelKey();
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getHelpKey();
 	
 	/**
-	 * @return Integer >=1 | -1, meaning "infinite"
+	 * @return integer >=1 | -1, meaning "infinite"
 	 */
 	public function getCardinality();
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isRequired();
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isHidden();
 	
@@ -80,7 +80,7 @@ interface BeanPropertyInfo
 	public function getConverter();
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function hasList();
 	
@@ -91,22 +91,22 @@ interface BeanPropertyInfo
 	public function getList();
 	
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getMaxOccurs();
 	
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getMinOccurs();
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getSetterName();
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getGetterName();
 }

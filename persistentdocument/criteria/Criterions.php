@@ -14,11 +14,11 @@ class f_persistentdocument_criteria_BetweenExpression implements f_persistentdoc
 	private $max;
 
 	/**
-         * Default constructor
-         * @param String $String
-         * @param Integer $Integer
-         * @param Integer $Integer
-         */
+		 * Default constructor
+		 * @param string $String
+		 * @param integer $Integer
+		 * @param integer $Integer
+		 */
 	public function __construct($propertyName, $min, $max)
 	{
 		$this->propertyName = $propertyName;
@@ -27,8 +27,8 @@ class f_persistentdocument_criteria_BetweenExpression implements f_persistentdoc
 	}
 
 	/**
-     * @return String
-     */
+	 * @return string
+	 */
 	public function getPropertyName()
 	{
 		return $this->propertyName;
@@ -46,16 +46,16 @@ class f_persistentdocument_criteria_BetweenExpression implements f_persistentdoc
 	}
 	
 	/**
-     * @return Integer
-     */
+	 * @return integer
+	 */
 	public function getMin()
 	{
 		return $this->min;
 	}
 
 	/**
-         * @return Integer
-         */
+		 * @return integer
+		 */
 	public function getMax()
 	{
 		return $this->max;
@@ -79,9 +79,9 @@ class f_persistentdocument_criteria_EmptyExpression implements f_persistentdocum
 		$this->propertyName = $propertyName;
 	}
 	
-    /**
-     * @return String
-     */
+	/**
+	 * @return string
+	 */
 	public function getPropertyName()
 	{
 		return $this->propertyName;
@@ -121,8 +121,8 @@ class f_persistentdocument_criteria_HasTagExpression implements f_persistentdocu
 	}
 	
 	/**
-     * @return String
-     */
+	 * @return string
+	 */
 	public function getTagName()
 	{
 		return $this->tagName;
@@ -141,7 +141,7 @@ class f_persistentdocument_criteria_InExpression implements f_persistentdocument
 	private $not;
 	
 	/**
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 * @param array $values
 	 */
 	public function __construct($propertyName, $values, $not = false)
@@ -160,8 +160,8 @@ class f_persistentdocument_criteria_InExpression implements f_persistentdocument
 	}
 	
 	/**
-     * @return String
-     */
+	 * @return string
+	 */
 	public function getPropertyName()
 	{
 		return $this->propertyName;
@@ -179,8 +179,8 @@ class f_persistentdocument_criteria_InExpression implements f_persistentdocument
 	}	
 
 	/**
-     * @return array
-     */
+	 * @return array
+	 */
 	public function getValues()
 	{
 		return $this->values;
@@ -264,12 +264,12 @@ class f_persistentdocument_criteria_LikeExpression implements f_persistentdocume
 	private $not;
 	
 	/**
-     * Default constructor
-     * @param String $String
-     * @param mixed $mixed
-     * @param MatchMode $MatchMode by default, MatchMode is MatchMode::ANYWHERE()
-     * @param Boolean $Boolean
-     */
+	 * Default constructor
+	 * @param string $String
+	 * @param mixed $mixed
+	 * @param MatchMode $MatchMode by default, MatchMode is MatchMode::ANYWHERE()
+	 * @param boolean $Boolean
+	 */
 	public function __construct($propertyName, $value, $matchMode = null, $ignoreCase = false, $not = false)
 	{
 		$this->propertyName = $propertyName;
@@ -287,8 +287,8 @@ class f_persistentdocument_criteria_LikeExpression implements f_persistentdocume
 	}
 
 	/**
-     * @return String
-     */
+	 * @return string
+	 */
 	public function getPropertyName()
 	{
 		return $this->propertyName;
@@ -306,24 +306,24 @@ class f_persistentdocument_criteria_LikeExpression implements f_persistentdocume
 	}	
 
 	/**
-     * @return mixed
-     */
+	 * @return mixed
+	 */
 	public function getValue()
 	{
 		return $this->value;
 	}
 
 	/**
-     * @return MatchMode
-     */
+	 * @return MatchMode
+	 */
 	public function getMatchMode()
 	{
 		return $this->matchMode;
 	}
 
 	/**
-     * @return Boolean
-     */
+	 * @return boolean
+	 */
 	public function getIgnoreCase()
 	{
 		return $this->ignoreCase;
@@ -356,8 +356,8 @@ class f_persistentdocument_criteria_NotEmptyExpression implements f_persistentdo
 	}
 	
 	/**
-     * @return String
-     */
+	 * @return string
+	 */
 	public function getPropertyName()
 	{
 		return $this->propertyName;
@@ -390,8 +390,8 @@ class f_persistentdocument_criteria_NotNullExpression implements f_persistentdoc
 	}
 	
 	/**
-     * @return String
-     */
+	 * @return string
+	 */
 	public function getPropertyName()
 	{
 		return $this->propertyName;
@@ -424,8 +424,8 @@ class f_persistentdocument_criteria_NullExpression implements f_persistentdocume
 	}
 	
 	/**
-     * @return String
-     */
+	 * @return string
+	 */
 	public function getPropertyName()
 	{
 		return $this->propertyName;
@@ -455,9 +455,9 @@ class f_persistentdocument_criteria_PropertyExpression implements f_persistentdo
 	private $op;
 	
 	/**
-	 * @param String $propertyName
-	 * @param String $otherPropertyName
-	 * @param String $op
+	 * @param string $propertyName
+	 * @param string $otherPropertyName
+	 * @param string $op
 	 */
 	public function __construct($propertyName, $otherPropertyName, $op)
 	{
@@ -467,8 +467,8 @@ class f_persistentdocument_criteria_PropertyExpression implements f_persistentdo
 	}
 	
 	/**
-     * @return String
-     */
+	 * @return string
+	 */
 	public function getPropertyName()
 	{
 		return $this->propertyName;
@@ -486,22 +486,22 @@ class f_persistentdocument_criteria_PropertyExpression implements f_persistentdo
 	}
 	
 	/**
-     * @return String
-     */
-    public function getOtherPropertyName()
-    {
-        return $this->otherPropertyName;
-    }
+	 * @return string
+	 */
+	public function getOtherPropertyName()
+	{
+		return $this->otherPropertyName;
+	}
 
-    /**
-     * @return String
-     */
-    public function getOp()
-    {
-        return $this->op;
-    }
-    
-    function __toString()
+	/**
+	 * @return string
+	 */
+	public function getOp()
+	{
+		return $this->op;
+	}
+	
+	function __toString()
 	{
 		return $this->propertyName." ".$this->op." ".$this->otherPropertyName;
 	}
@@ -519,10 +519,10 @@ class f_persistentdocument_criteria_SimpleExpression implements f_persistentdocu
 	private $ignoreCase;
 
 	/**
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 * @param mixed $value
-	 * @param String $op
-	 * @param Boolean $ignoreCase
+	 * @param string $op
+	 * @param boolean $ignoreCase
 	 */
 	public function __construct($propertyName, $value, $op, $ignoreCase = false)
 	{
@@ -546,8 +546,8 @@ class f_persistentdocument_criteria_SimpleExpression implements f_persistentdocu
 	}
 	
 	/**
-     * @return String
-     */
+	 * @return string
+	 */
 	public function getPropertyName()
 	{
 		return $this->propertyName;
@@ -565,15 +565,15 @@ class f_persistentdocument_criteria_SimpleExpression implements f_persistentdocu
 	}
 	
 	/**
-     * @return mixed
-     */
-    public function getValue()
-    {
-        return $this->value;
-    }
+	 * @return mixed
+	 */
+	public function getValue()
+	{
+		return $this->value;
+	}
 
-    /**
-	 * @return String
+	/**
+	 * @return string
 	 */
 	public function getOp()
 	{
@@ -581,13 +581,13 @@ class f_persistentdocument_criteria_SimpleExpression implements f_persistentdocu
 	}
 	
 	/**
-     * @return Boolean
-     */
-    public function getIgnoreCase()
-    {
-        return $this->ignoreCase;
-    }
-    
+	 * @return boolean
+	 */
+	public function getIgnoreCase()
+	{
+		return $this->ignoreCase;
+	}
+	
  	function __toString()
 	{
 		$str = $this->propertyName." ";
@@ -708,7 +708,7 @@ class Example implements f_persistentdocument_criteria_Criterion
 	}
 
 	/**
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 * @return Example
 	 */
 	public function excludeProperty($propertyName)
@@ -728,8 +728,8 @@ class Example implements f_persistentdocument_criteria_Criterion
 	}
 
 	/**
-     * @return array ('scalars' => array(), 'documents' => array())
-     */
+	 * @return array ('scalars' => array(), 'documents' => array())
+	 */
 	public function getDocumentInstanceProperties()
 	{
 		$props = array();
@@ -767,32 +767,32 @@ class Example implements f_persistentdocument_criteria_Criterion
 	}
 
 	/**
-     * @return MatchMode
-     */
+	 * @return MatchMode
+	 */
 	public function getMatchMode()
 	{
 		return $this->matchMode;
 	}
 
 	/**
-     * @return Boolean
-     */
+	 * @return boolean
+	 */
 	public function getIgnoreCase()
 	{
 		return $this->ignoreCase;
 	}
 
 	/**
-     * @return Boolean
-     */
+	 * @return boolean
+	 */
 	public function getLikeEnabled()
 	{
 		return $this->likeEnabled;
 	}
 
 	/**
-     * @return Boolean
-     */
+	 * @return boolean
+	 */
 	public function getPrimaryOnly()
 	{
 		return $this->primaryOnly;

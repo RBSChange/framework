@@ -296,7 +296,7 @@ class change_PhpCodeManipulation
 {
 
 	/**
-	 * @param String $source
+	 * @param string $source
 	 * @param Array $replacementInfos
 	 */
 	public static function processContentForInjection($source, $replacementInfos)

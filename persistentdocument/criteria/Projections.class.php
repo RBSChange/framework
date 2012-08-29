@@ -104,7 +104,7 @@ class f_persistentdocument_criteria_OperationProjection extends f_persistentdocu
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getPropertyName()
 	{
@@ -112,7 +112,7 @@ class f_persistentdocument_criteria_OperationProjection extends f_persistentdocu
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getOperation()
 	{
@@ -157,7 +157,7 @@ class f_persistentdocument_criteria_PropertyProjection extends f_persistentdocum
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getPropertyName()
 	{
@@ -165,7 +165,7 @@ class f_persistentdocument_criteria_PropertyProjection extends f_persistentdocum
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function getGroup()
 	{

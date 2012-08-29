@@ -392,11 +392,11 @@ class TagService extends change_BaseService
 	 *
 	 * @param f_persistentdocument_PersistentDocument $document The document on which to set the contextual tag.
 	 * @param string $tag The contextual tag to set.
-	 * @param Boolean $removeExisting
+	 * @param boolean $removeExisting
 	 *
 	 * @throws InvalidContextualTagException
 	 * @throws TagException
-	 * @return Boolean true if the tag was setted (can be false if $removeExisting equals false)
+	 * @return boolean true if the tag was setted (can be false if $removeExisting equals false)
 	 */
 	public function setContextualTag($document, $tag, $removeExisting = true)
 	{
@@ -438,9 +438,9 @@ class TagService extends change_BaseService
 	}
 
 	/**
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 * @param string $contextualTag
-	 * @return Integer
+	 * @return integer
 	 * @throws TagException
 	 */
 	public function getContextualDocumentIdByTag($documentId, $contextualTag)
@@ -457,7 +457,7 @@ class TagService extends change_BaseService
 	}
 
 	/**
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 * @param string $modelName Restrict to model $modelName.
 	 *
 	 * @return array<Integer>

@@ -37,7 +37,7 @@ class f_RedisProvider
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isAvailable()
 	{

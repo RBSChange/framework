@@ -144,8 +144,8 @@ class PatchService extends change_BaseService
 	}
 	
 	/**
-	 * @param String $module
-	 * @return String
+	 * @param string $module
+	 * @return string
 	 */
 	public function getNextPatchFolderName($componentName)
 	{
@@ -319,9 +319,9 @@ class PatchService extends change_BaseService
 	/**
 	 * Return the content of the README file patch
 	 *
-	 * @param String $moduleName
-	 * @param String $patchName
-	 * @return String
+	 * @param string $moduleName
+	 * @param string $patchName
+	 * @return string
 	 */
 	public function patchInfo($moduleName, $patchName)
 	{
@@ -380,8 +380,8 @@ class PatchService extends change_BaseService
 	}
 	
 	/**
-	 * @param String $shortName
-	 * @return String
+	 * @param string $shortName
+	 * @return string
 	 */
 	private function getPatchFolder($componentName)
 	{

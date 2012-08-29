@@ -24,7 +24,7 @@ class f_web_http_Header
 	'500' => '500 Internal Server Error', '501' => '501 Not Implemented', '502' => '502 Bad Gateway', '503' => '503 Service Unavailable', '504' => '504 Gateway Time-out', '505' => '505 HTTP Version not supported', '507' => '507 Insufficient Storage');
 	
 	/**
-	 * @param Integer $statusCode
+	 * @param integer $statusCode
 	 */
 	public static function setStatus($statusCode)
 	{

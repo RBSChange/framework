@@ -39,10 +39,10 @@
 	</config>
 	
 	<modules>
-	    <notification>
-	    	<entry name="noreplySender">noreply@{SERVERHOST}</entry>
-	    </notification>
-	    
+		<notification>
+			<entry name="noreplySender">noreply@{SERVERHOST}</entry>
+		</notification>
+		
 		<media>
 		<!-- 
 		<domains> 

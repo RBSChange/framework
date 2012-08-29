@@ -29,9 +29,9 @@ class indexer_RangeQuery extends indexer_QueryBase implements indexer_Query
 
 	/**
 	 * Construct a range, including min and max. Use <code>setExclusive()</code> to exclude min and max
-	 * @param String $field
-	 * @param String $min
-	 * @param String $max
+	 * @param string $field
+	 * @param string $min
+	 * @param string $max
 	 */
 	public function __construct($field, $min = null, $max = null)
 	{
@@ -93,7 +93,7 @@ class indexer_RangeQuery extends indexer_QueryBase implements indexer_Query
 	}
 	
 	/**
-	 * @param Boolean $bool
+	 * @param boolean $bool
 	 */
 	public function setIsProhibited($bool = true)
 	{
@@ -101,7 +101,7 @@ class indexer_RangeQuery extends indexer_QueryBase implements indexer_Query
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function toSolrString()
 	{
@@ -118,7 +118,7 @@ class indexer_RangeQuery extends indexer_QueryBase implements indexer_Query
 	 * Insert wildcard if needed for null min/max arguments
 	 *
 	 * @param mixed $val
-	 * @return String
+	 * @return string
 	 */
 	private function wildCardIfNull($val)
 	{

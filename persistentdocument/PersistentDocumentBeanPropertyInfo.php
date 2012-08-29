@@ -41,7 +41,7 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 	}
 	
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getMaxOccurs()
 	{
@@ -49,7 +49,7 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 	}
 	
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getMinOccurs()
 	{
@@ -59,7 +59,7 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 	/**
 	 * @see BeanPropertyInfo::getCardinality()
 	 *
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getCardinality()
 	{
@@ -87,7 +87,7 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 	/**
 	 * @see BeanPropertyInfo::getLabelKey()
 	 *
-	 * @return String
+	 * @return string
 	 */
 	public function getLabelKey()
 	{
@@ -97,7 +97,7 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 	/**
 	 * @see BeanPropertyInfo::getHelpKey()
 	 *
-	 * @return String
+	 * @return string
 	 */
 	public function getHelpKey()
 	{
@@ -107,7 +107,7 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 	/**
 	 * @see BeanPropertyInfo::getName()
 	 *
-	 * @return String
+	 * @return string
 	 */
 	public function getName()
 	{
@@ -121,7 +121,7 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 	/**
 	 * @see BeanPropertyInfo::getType()
 	 *
-	 * @return String
+	 * @return string
 	 */
 	public function getType()
 	{
@@ -152,7 +152,7 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 	/**
 	 * If the property type is BeanPropertyType::DOCUMENT,
 	 * returns the linked document model
-	 * @return String
+	 * @return string
 	 */
 	public function getDocumentType()
 	{
@@ -164,7 +164,7 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 	
 	/**
 	 * If the property type if DOCUMENT, BEAN or CLASS
-	 * @return String
+	 * @return string
 	 */
 	public function getClassName()
 	{
@@ -177,7 +177,7 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 	/**
 	 * @see BeanPropertyInfo::getValidationRules()
 	 *
-	 * @return String
+	 * @return string
 	 */
 	public function getValidationRules()
 	{
@@ -199,7 +199,7 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 	/**
 	 * @see BeanPropertyInfo::isRequired()
 	 *
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isRequired()
 	{
@@ -209,7 +209,7 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 	/**
 	 * @see BeanPropertyInfo::isHidden()
 	 *
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isHidden()
 	{
@@ -295,7 +295,7 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 	/**
 	 * @see BeanPropertyInfo::hasList()
 	 *
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function hasList()
 	{
@@ -308,7 +308,7 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 	
 	/**
 	 * @see BeanPropertyInfo::getSetterName()
-	 * @return String
+	 * @return string
 	 */
 	public function getSetterName()
 	{
@@ -321,7 +321,7 @@ class f_persistentdocument_PersistentDocumentBeanPropertyInfo implements BeanPro
 	
 	/**
 	 * @see BeanPropertyInfo::getGetterName()
-	 * @return String
+	 * @return string
 	 */
 	public function getGetterName()
 	{

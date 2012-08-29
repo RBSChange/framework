@@ -39,7 +39,7 @@ class f_DataCacheMemcachedService extends f_DataCacheService
 	}
 	
 	/**
-	 * @param String $pattern
+	 * @param string $pattern
 	 */
 	public function getCacheIdsForPattern($pattern)
 	{
@@ -198,7 +198,7 @@ class f_DataCacheMemcachedService extends f_DataCacheService
 	 * @param f_DataCacheItem $item
 	 * @param unknown_type $spec
 	 * @param unknown_type $keyParameters
-	 * @return Boolean
+	 * @return boolean
 	 */
 	protected function isRegistered($item, $spec = null, $keyParameters = null)
 	{

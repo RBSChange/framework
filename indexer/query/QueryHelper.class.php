@@ -23,7 +23,7 @@ class indexer_QueryHelper
 	}
 	
 	/**
-	 * @param Integer $id
+	 * @param integer $id
 	 * @return indexer_Query
 	 */
 	public static function descendantOfInstance($id)
@@ -74,7 +74,7 @@ class indexer_QueryHelper
 	/**
 	 * Build a restricion on the lang of the documents searched to be passed as filter on the query
 	 *
-	 * @param String $lang
+	 * @param string $lang
 	 * @return indexer_Query
 	 */
 	public static function langRestrictionInstance($lang=null)
@@ -93,7 +93,7 @@ class indexer_QueryHelper
 	/**
 	 * Get a simple indexer_TermQuery for a localized field $name on the value $value
 	 *
-	 * @param String $name
+	 * @param string $name
 	 * @param mixed $value
 	 * @return indexer_TermQuery
 	 */
@@ -137,7 +137,7 @@ class indexer_QueryHelper
 	/**
 	 * Term query on a dynamic string field $name with $value
 	 *
-	 * @param String $name
+	 * @param string $name
 	 * @param Mixed $value
 	 * @return indexer_TermQuery
 	 */
@@ -149,7 +149,7 @@ class indexer_QueryHelper
 	/**
 	 * Term query on a dynamic date field $name with $value
 	 *
-	 * @param String $name
+	 * @param string $name
 	 * @param date_Calendar $value
 	 * @return indexer_TermQuery
 	 */
@@ -161,9 +161,9 @@ class indexer_QueryHelper
 	/**
 	 * Term query on a dynamic integer field $name with $value
 	 *
-	 * @param String $name
-	 * @param Integer $value
-	 * @param Boolean $multivalued
+	 * @param string $name
+	 * @param integer $value
+	 * @param boolean $multivalued
 	 * @return indexer_TermQuery
 	 */
 	public static function integerFieldInstance($name, $value, $multivalued = false)
@@ -175,7 +175,7 @@ class indexer_QueryHelper
 	/**
 	 * Term query on a dynamic float field $name with $value
 	 *
-	 * @param String $name
+	 * @param string $name
 	 * @param Float $value
 	 * @return indexer_TermQuery
 	 */

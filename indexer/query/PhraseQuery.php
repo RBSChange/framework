@@ -15,7 +15,7 @@ class indexer_PhraseQuery extends indexer_TermQuery
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function __toString()
 	{
@@ -44,7 +44,7 @@ class indexer_PhraseQuery extends indexer_TermQuery
 	}
 	
 	/**
-	 * @return String[]
+	 * @return string[]
 	 */
 	public function getTerms()
 	{

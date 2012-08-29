@@ -6,7 +6,7 @@
 interface f_persistentdocument_DocumentFilter
 {
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public static function getDocumentModelName();
 	
@@ -16,12 +16,12 @@ interface f_persistentdocument_DocumentFilter
 	public static function isHidden();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getLabel();
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getText();
 	
@@ -31,19 +31,19 @@ interface f_persistentdocument_DocumentFilter
 	public function getParameters();
 	
 	/**
-	 * @param String $name
+	 * @param string $name
 	 * @return f_persistentdocument_DocumentFilterParameter
 	 */
 	public function getParameter($name);
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getAsJson();
 	
 	/**
-	 * @param Boolean $throwException
-	 * @return Boolean
+	 * @param boolean $throwException
+	 * @return boolean
 	 * @throws ValidationException
 	 */
 	public function validate($throwException);
@@ -92,7 +92,7 @@ abstract class f_persistentdocument_DocumentFilterImpl implements f_persistentdo
 	private $parameters = array();
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getLabel()
 	{
@@ -101,8 +101,8 @@ abstract class f_persistentdocument_DocumentFilterImpl implements f_persistentdo
 	}
 	
 	/**
-	 * @param Boolean $addMarkers
-	 * @return String
+	 * @param boolean $addMarkers
+	 * @return string
 	 */
 	public function getText($addMarkers = false)
 	{
@@ -169,7 +169,7 @@ abstract class f_persistentdocument_DocumentFilterImpl implements f_persistentdo
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getAsJson()
 	{
@@ -182,8 +182,8 @@ abstract class f_persistentdocument_DocumentFilterImpl implements f_persistentdo
 	}
 		
 	/**
-	 * @param Boolean $throwException
-	 * @return Boolean
+	 * @param boolean $throwException
+	 * @return boolean
 	 * @throws ValidationException
 	 */
 	public function validate($throwException)
@@ -201,10 +201,10 @@ abstract class f_persistentdocument_DocumentFilterImpl implements f_persistentdo
 	// Basic methods that may be used in checkValue method.
 	
 	/**
-	 * @param String $testVal
-	 * @param String $restriction
-	 * @param String $val
-	 * @return Boolean
+	 * @param string $testVal
+	 * @param string $restriction
+	 * @param string $val
+	 * @return boolean
 	 */
 	protected function evalRestriction($testVal, $restriction, $val)
 	{
@@ -262,7 +262,7 @@ abstract class f_persistentdocument_DocumentFilterImpl implements f_persistentdo
 	
 	/**
 	 * @param f_mvc_Bean $bean
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 * @return Mixed
 	 */
 	protected function getTestValueForPropertyName($bean, $propertyName)

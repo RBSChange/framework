@@ -71,7 +71,7 @@ class ModuleService extends change_BaseService
 	 * @param string $moduleName The module name.
 	 * @param string $relativePath The path to append to the module path.
 	 * @param string $mode If $mode="all", returns all the paths defined for
-	 *        the given module (overridden resources).
+	 *		the given module (overridden resources).
 	 *
 	 * @return array The absolute paths of the module $moduleName.
 	 *
@@ -96,7 +96,7 @@ class ModuleService extends change_BaseService
 	}
 	
 	/**
-	 * @param String $shortModuleName
+	 * @param string $shortModuleName
 	 * @return c_Module
 	 */
 	public function getModule($shortModuleName)
@@ -389,8 +389,8 @@ class ModuleService extends change_BaseService
 	
 	/**
 	 * 
-	 * @param String $moduleName the module name (eg : youpi)
-	 * @return String or null the package's import-init-data date
+	 * @param string $moduleName the module name (eg : youpi)
+	 * @return string or null the package's import-init-data date
 	 */
 	public function getImportInitDataDate($moduleName)
 	{
@@ -491,9 +491,9 @@ class ModuleService extends change_BaseService
 	 * Returns the value of the property $fieldName of the preferences document
 	 * of module $moduleName.
 	 *
-	 * @param String $moduleName
-	 * @param String $fieldName
-	 * @return String
+	 * @param string $moduleName
+	 * @param string $fieldName
+	 * @return string
 	 */
 	public static function getPreferenceValue($moduleName, $fieldName)
 	{
@@ -620,7 +620,7 @@ class c_Module
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getLabel()
 	{
@@ -628,7 +628,7 @@ class c_Module
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getUILabel()
 	{
@@ -636,7 +636,7 @@ class c_Module
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getName()
 	{
@@ -645,7 +645,7 @@ class c_Module
 	
 	/**
 	 * (Une belle absurdit‚àö¬© qu'on va se d‚àö¬©p‚àö¬©cher d'enlever...)
-	 * @return String "modules_<Name>"
+	 * @return string "modules_<Name>"
 	 */
 	function getFullName()
 	{
@@ -654,7 +654,7 @@ class c_Module
 	
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getPath()
 	{
@@ -662,7 +662,7 @@ class c_Module
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	function isVisible()
 	{
@@ -670,7 +670,7 @@ class c_Module
 	}
 		
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	function isFolderBased()
 	{
@@ -679,7 +679,7 @@ class c_Module
 	
 	/**
 	 * Module based on new perspective (3.0.0)
-	 * @return Boolean
+	 * @return boolean
 	 */
 	function hasPerspectiveConfigFile()
 	{
@@ -688,7 +688,7 @@ class c_Module
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 *
 	 */
 	function getVersion()
@@ -697,7 +697,7 @@ class c_Module
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getIconName()
 	{
@@ -705,7 +705,7 @@ class c_Module
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getCategory()
 	{
@@ -713,7 +713,7 @@ class c_Module
 	}
 	
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	function getRootFolderId()
 	{
@@ -730,7 +730,7 @@ class c_Module
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 * @deprecated
 	 */
 	function isTopicBased()

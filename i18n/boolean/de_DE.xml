@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.boolean" lcid="de_DE">
-  <key id="true">Ja</key>
-  <key id="false">Nein</key>
+<?xml version="1.0" encoding="UTF-8"?>
+<i18n baseKey="m.framework.boolean" lcid="de_DE">
+	<key id="true">Ja</key>
+	<key id="false">Nein</key>
 </i18n>

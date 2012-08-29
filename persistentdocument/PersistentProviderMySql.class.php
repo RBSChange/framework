@@ -68,7 +68,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getType()
 	{
@@ -176,7 +176,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 	
 	
 	/**
-	 * @param String $script
+	 * @param string $script
 	 * @return PDOStatement
 	 */
 	public function executeSQLSelect($script)
@@ -190,9 +190,9 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 
 	/**
 	 * @param mysqli_stmt $statement
-	 * @param String $name
+	 * @param string $name
 	 * @param mixed $value
-	 * @param String $propertyType
+	 * @param string $propertyType
 	 */
 	protected function bindStatmentValue($statement, $name, $value, $propertyType)
 	{
@@ -281,7 +281,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 
 		/**
-		 * @return String
+		 * @return string
 		 */
 		protected function mutateFrameworkQuery()
 		{
@@ -289,14 +289,14 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 
 		/**
-		 * @return String
+		 * @return string
 		 */
 		protected function mutateRelationId1Query()
 		{
 			return 'UPDATE `f_relation` SET `document_model_id1` = :destmodelname WHERE `relation_id1` = :id AND `document_model_id1` = :sourcemodelname';
 		}
 		/**
-		 * @return String
+		 * @return string
 		 */
 		protected function mutateRelationId2Query()
 		{
@@ -304,7 +304,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 
 		/**
-		 * @return String
+		 * @return string
 		 */
 		protected function mutateDocumentQuery($table)
 		{
@@ -312,7 +312,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 
 		/**
-		 * @return String
+		 * @return string
 		 */
 		protected function mutateDocumentI18NQuery($tableI18N)
 		{
@@ -342,8 +342,8 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 
 		/**
-		 * @param String $tableName
-		 * @return String
+		 * @param string $tableName
+		 * @return string
 		 */
 		protected function getUpdateI18nDocumentQuery($table, $mapping, $lobParameters = array())
 		{
@@ -356,8 +356,8 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 
 		/**
-		 * @param String $tableName
-		 * @return String
+		 * @param string $tableName
+		 * @return string
 		 */
 		protected function getI18nDocumentQuery($tableName)
 		{
@@ -639,7 +639,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 
 		/**
-		 * @return String
+		 * @return string
 		 */
 		protected function getAllTagsTagsQuery()
 		{
@@ -708,7 +708,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		/**
 		 * ACL Compilation query
 		 *
-		 * @return String
+		 * @return string
 		 */
 		protected function getCompileACLQuery()
 		{
@@ -718,7 +718,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		/**
 		 * ACL check exists for node query
 		 *
-		 * @return String
+		 * @return string
 		 */
 		protected function getCheckACLQuery($accessors)
 		{
@@ -733,7 +733,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		/**
 		 * ACL check entry compiled
 		 *
-		 * @return String
+		 * @return string
 		 */
 		protected function getHasPermissionACLQuery()
 		{
@@ -753,7 +753,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		/**
 		 * ACL remove compiled node entries
 		 *
-		 * @return String
+		 * @return string
 		 */
 		protected function getRemoveACLForNodeQuery()
 		{
@@ -763,7 +763,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		/**
 		 * ACL remove compiled node entries for a package
 		 *
-		 * @return String
+		 * @return string
 		 */
 		protected function getRemovePackageACLForNodeQuery()
 		{
@@ -772,7 +772,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 
 
 		/**
-		 * @return String
+		 * @return string
 		 */
 		protected function getACLDefinitionPointQuery()
 		{
@@ -784,7 +784,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 
 
 		/**
-		 * @return String
+		 * @return string
 		 */
 		protected function getRelationsQuery($documentId1, $documentId2, $relationId, $documentModel1, $documentModel2)
 		{
@@ -800,7 +800,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 
 		/**
-		 * @return String
+		 * @return string
 		 */
 		protected function getFromFrameworkCacheQuery()
 		{
@@ -808,7 +808,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 
 		/**
-		 * @return String
+		 * @return string
 		 */
 		protected function getMultipleFromFrameworkCacheQuery($keys)
 		{
@@ -816,7 +816,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 
 		/**
-		 * @return String
+		 * @return string
 		 */
 		protected function deleteFrameworkCacheKeysQuery($keys)
 		{
@@ -824,7 +824,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 
 		/**
-		 * @return String
+		 * @return string
 		 */
 		protected function setInFrameworkCacheDeleteQuery()
 		{
@@ -832,7 +832,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 
 		/**
-		 * @return String
+		 * @return string
 		 */
 		protected function setInFrameworkCacheQuery()
 		{
@@ -840,7 +840,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 
 		/**
-		 * @return String
+		 * @return string
 		 */
 		protected function setInFrameworkCacheInsertQuery()
 		{
@@ -848,7 +848,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 
 		/**
-		 * @return String
+		 * @return string
 		 */
 		protected function setInFrameworkCacheUpdateQuery()
 		{
@@ -856,7 +856,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 
 		/**
-		 * @return String
+		 * @return string
 		 */
 		protected function clearFrameworkCacheDeleteQuery()
 		{
@@ -864,7 +864,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 
 		/**
-		 * @return String
+		 * @return string
 		 */
 		protected function clearFrameworkCacheTruncateQuery()
 		{
@@ -1156,7 +1156,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		/**
 		 * @param f_persistentdocument_criteria_ExecutableQuery $query
 		 * @param array $params the parameters for the query, created and filled by buildQueryString
-		 * @return String the queryString as a preparedStatement
+		 * @return string the queryString as a preparedStatement
 		 */
 		protected function buildQueryString($query, &$params)
 		{
@@ -1265,7 +1265,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		/**
 		 *
 		 * @param f_persistentdocument_criteria_HavingCriterion $havingCriterion
-		 * @return String
+		 * @return string
 		 */
 		private function resolveHavingCriterionPropName($havingCriterion, $qBuilder)
 		{
@@ -2025,9 +2025,9 @@ class f_persistentdocument_DocumentQueryBuilder
 	
 	
 	/**
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 * @param mixed $value
-	 * @return String
+	 * @return string
 	 */
 	public function addParam($propertyName, $value)
 	{
@@ -2037,7 +2037,7 @@ class f_persistentdocument_DocumentQueryBuilder
 	}
 
 	/**
-	 * @param String $sql
+	 * @param string $sql
 	 */
 	public function addHaving($sql)
 	{
@@ -2112,7 +2112,7 @@ class f_persistentdocument_DocumentQueryBuilder
 	}
 
 	/**
-	 * @param String $field
+	 * @param string $field
 	 */
 	public function addField($field)
 	{
@@ -2121,7 +2121,7 @@ class f_persistentdocument_DocumentQueryBuilder
 	}
 
 	/**
-	 * @param String $from
+	 * @param string $from
 	 */
 	public function addFrom($from)
 	{
@@ -2129,7 +2129,7 @@ class f_persistentdocument_DocumentQueryBuilder
 	}
 
 	/**
-	 * @param String $where
+	 * @param string $where
 	 */
 	public function addWhere($where)
 	{
@@ -2144,7 +2144,7 @@ class f_persistentdocument_DocumentQueryBuilder
 	}
 
 	/**
-	 * @param String $groupBy
+	 * @param string $groupBy
 	 */
 	public function addGroupBy($groupBy)
 	{
@@ -2245,7 +2245,7 @@ class f_persistentdocument_DocumentQueryBuilder
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getTableAlias()
 	{
@@ -2261,7 +2261,7 @@ class f_persistentdocument_DocumentQueryBuilder
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getQueryString()
 	{
@@ -2274,7 +2274,7 @@ class f_persistentdocument_DocumentQueryBuilder
 		}
 		$query .= (!empty($this->where)? ' where '.implode(' and ', $this->where) : '').
 			(!empty($this->groupBy)? ' group by '.implode(',', $this->groupBy) : '').
-			(!empty($this->having)? ' having '.implode(' and ', $this->having) : '').                                     
+			(!empty($this->having)? ' having '.implode(' and ', $this->having) : '').									 
 			((!empty($this->order))? ' order by '.implode(', ', $this->order) : '').
 			(($this->maxResults == -1)? '' : ' LIMIT '.$this->firstResult.', '.$this->maxResults);
 		return $query;
@@ -2406,7 +2406,7 @@ class MysqlStatment
 
 
 	/**
-	 * @param String $sql
+	 * @param string $sql
 	 * @param PDO $driver
 	 */
 	function __construct($sql, $driver)

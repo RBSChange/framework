@@ -11,7 +11,7 @@ interface tree_TreeModel
 	 * Enter description here...
 	 *
 	 * @param tree_TreeNode $treeNode
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isLeaf($treeNode);
 	
@@ -19,7 +19,7 @@ interface tree_TreeModel
 	 * Enter description here...
 	 *
 	 * @param tree_TreeNode $treeNode
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getChildCount($treeNode);
 	

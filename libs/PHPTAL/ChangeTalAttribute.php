@@ -15,8 +15,8 @@ class ChangeTalAttribute extends PHPTAL_Php_Attribute
 	}
 
 	/**
-	 * @param String $name
-	 * @return Boolean
+	 * @param string $name
+	 * @return boolean
 	 */
 	protected function hasParameter($name)
 	{
@@ -24,7 +24,7 @@ class ChangeTalAttribute extends PHPTAL_Php_Attribute
 	}
 
 	/**
-	 * @param String $name
+	 * @param string $name
 	 * @param Mixed $defaultValue
 	 * @return Mixed
 	 */
@@ -38,19 +38,19 @@ class ChangeTalAttribute extends PHPTAL_Php_Attribute
 	}
 
 	/**
-     * Called before element printing.
-     */
-    public function before(PHPTAL_Php_CodeWriter $codewriter)
-    {
+	 * Called before element printing.
+	 */
+	public function before(PHPTAL_Php_CodeWriter $codewriter)
+	{
 		$parametersString = $this->initParams($codewriter);
 		$this->getRenderMethodCall($codewriter, $parametersString);
 	}
 	
 	/**
-     * Called after element printing.
-     */
-    public function after(PHPTAL_Php_CodeWriter $codewriter)
-    {
+	 * Called after element printing.
+	 */
+	public function after(PHPTAL_Php_CodeWriter $codewriter)
+	{
 
 	}
 
@@ -190,19 +190,19 @@ class ChangeTalAttribute extends PHPTAL_Php_Attribute
 	 * Add [ ] char in parameter name
 	 * @see PHPTAL_Php_Attribute::parseSetExpression()
 	 */
-    protected function parseSetExpression($exp)
-    {
-        $exp = trim($exp);
-        // (dest) (value)
-        if (preg_match('/^([a-z0-9:\[\]\-_]+)\s+(.*?)$/si', $exp, $m)) {
-            return array($m[1], trim($m[2]));
-        }
-        // (dest)
-        return array($exp, null);
-    }
+	protected function parseSetExpression($exp)
+	{
+		$exp = trim($exp);
+		// (dest) (value)
+		if (preg_match('/^([a-z0-9:\[\]\-_]+)\s+(.*?)$/si', $exp, $m)) {
+			return array($m[1], trim($m[2]));
+		}
+		// (dest)
+		return array($exp, null);
+	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected function getRenderClassName()
 	{
@@ -210,7 +210,7 @@ class ChangeTalAttribute extends PHPTAL_Php_Attribute
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected function getRenderMethodName()
 	{
@@ -240,7 +240,7 @@ class ChangeTalAttribute extends PHPTAL_Php_Attribute
 	 * @see ChangeTalAttribute::buildAttribute()
 	 * For example: ChangeTalAttribute::buildAttributes(array("attrName" => "attrValue")) renders ' attrName="attrValue"'
 	 * @param array<String, String> $attributes
-	 * @return String
+	 * @return string
 	 */
 	protected static function buildAttributes($attributes)
 	{
@@ -255,9 +255,9 @@ class ChangeTalAttribute extends PHPTAL_Php_Attribute
 	/**
 	 * You should always use this method to output an attribute so it is safe
 	 * For example: ChangeTalAttribute::buildAttribute("attrName", "attrValue") renders 'attrName="attrValue"'
-	 * @param String $attrName
-	 * @param String $attrValue
-	 * @return String
+	 * @param string $attrName
+	 * @param string $attrValue
+	 * @return string
 	 */
 	protected static function buildAttribute($attrName, $attrValue)
 	{
@@ -265,7 +265,7 @@ class ChangeTalAttribute extends PHPTAL_Php_Attribute
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected function getDefaultParameterName()
 	{
@@ -273,7 +273,7 @@ class ChangeTalAttribute extends PHPTAL_Php_Attribute
 	}
 
 	/**
-	 * @param String $parametersString
+	 * @param string $parametersString
 	 */
 	protected function getRenderMethodCall(PHPTAL_Php_CodeWriter $codeWriter, $parametersString)
 	{
@@ -281,7 +281,7 @@ class ChangeTalAttribute extends PHPTAL_Php_Attribute
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	protected function evaluateAll()
 	{

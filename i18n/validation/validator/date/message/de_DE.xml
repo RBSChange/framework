@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.validation.validator.date.message" lcid="de_DE">
-  <key id="reversed">das Feld ″{field}″ soll nicht ein gültiges Datum sein (format: {format})</key>
+<?xml version="1.0" encoding="UTF-8"?>
+<i18n baseKey="m.framework.validation.validator.date.message" lcid="de_DE">
+	<key id="reversed">das Feld ″{field}″ soll nicht ein gültiges Datum sein (format: {format})</key>
 </i18n>

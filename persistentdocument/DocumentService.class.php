@@ -100,7 +100,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	 * the document in the tree (during the same transaction) if $parentNodeId is given.
 	 *
 	 * @param f_persistentdocument_PersistentDocument $document The document to save.
-	 * @param Integer $parentNodeId Parent node ID where to save the document (optionnal).
+	 * @param integer $parentNodeId Parent node ID where to save the document (optionnal).
 	 *
 	 * @throws IllegalArgumentException
 	 * @throws ValidationException
@@ -128,15 +128,15 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 	/**
 	 * persist only metastring field in database
-	 * @return Boolean true if something was modified
+	 * @return boolean true if something was modified
 	 */
 	public final function saveMeta($document)
 	{
 		$document->applyMetas();
 		if ($document->isPropertyModified("metastring"))
 		{
-		    $tm = $this->getTransactionManager();
-		    $pp = $this->getPersistentProvider();
+			$tm = $this->getTransactionManager();
+			$pp = $this->getPersistentProvider();
 			try
 			{
 				$tm->beginTransaction();
@@ -154,7 +154,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	}
 
 	/**
-	 * @param Integer $parentId
+	 * @param integer $parentId
 	 * @return f_persistentdocument_PersistentDocument[]
 	 */
 	public function getByParentId($parentId)
@@ -226,7 +226,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document The document to insert.
-	 * @param Integer $parentNodeId Parent node ID where to save the document (optionnal).
+	 * @param integer $parentNodeId Parent node ID where to save the document (optionnal).
 	 *
 	 * @throws IllegalArgumentException
 	 * @throws ValidationException
@@ -234,7 +234,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	 */
 	private function insert($document, $parentNodeId = null)
 	{
-	    $tm = $this->getTransactionManager();
+		$tm = $this->getTransactionManager();
 		$pp = $this->getPersistentProvider();
 		try
 		{
@@ -373,7 +373,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document The document to update.
-	 * @param Integer $parentNodeId Parent node ID where to save the document (optionnal).
+	 * @param integer $parentNodeId Parent node ID where to save the document (optionnal).
 	 *
 	 * @throws IllegalArgumentException
 	 * @throws ValidationException
@@ -408,8 +408,8 @@ class f_persistentdocument_DocumentService extends change_BaseService
 		{
 			Framework::debug("updateDocument (". $document->getId() .") ". get_class($document));
 		}
-        $tm = $this->getTransactionManager();
-        $pp = $this->getPersistentProvider();
+		$tm = $this->getTransactionManager();
+		$pp = $this->getPersistentProvider();
 		try
 		{
 			$tm->beginTransaction();
@@ -517,8 +517,8 @@ class f_persistentdocument_DocumentService extends change_BaseService
 		{
 			return;
 		}
-        $tm = $this->getTransactionManager();
-        $pp = $this->getPersistentProvider();
+		$tm = $this->getTransactionManager();
+		$pp = $this->getPersistentProvider();
 		try
 		{
 			$tm->beginTransaction();
@@ -673,7 +673,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $persistentDocument
-	 * @return Boolean
+	 * @return boolean
 	 */
 	protected final function checkDeleteDocument($persistentDocument)
 	{
@@ -713,7 +713,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	 */
 	private function deleteCorrection($persistentDocument)
 	{
-        $pp = $this->getPersistentProvider();
+		$pp = $this->getPersistentProvider();
 		$documentModel = $persistentDocument->getPersistentModel();
 		if ($documentModel->useCorrection())
 		{
@@ -759,7 +759,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	 * you will save queries, except if you only load model or the label
 	 * of the document (directly stored in f_document table)
 	 * @param integer $documentId
-	 * @param String $modelName the expected model name
+	 * @param string $modelName the expected model name
 	 * @return f_persistentdocument_PersistentDocument
 	 */
 	public final function getDocumentInstance($documentId, $modelName = null)
@@ -789,9 +789,9 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	}
 
 	///////////////////////////////////////////////////////////////////////////
-	//                                                                       //
-	// TAGS MANAGEMENT METHODS                                               //
-	//                                                                       //
+	//																	   //
+	// TAGS MANAGEMENT METHODS											   //
+	//																	   //
 	///////////////////////////////////////////////////////////////////////////
 
 	/**
@@ -880,7 +880,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param String $tag
+	 * @param string $tag
 	 * @return void
 	 */
 	public function tagAdded($document, $tag)
@@ -890,7 +890,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param String $tag
+	 * @param string $tag
 	 * @return void
 	 */
 	public function tagRemoved($document, $tag)
@@ -901,7 +901,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	/**
 	 * @param f_persistentdocument_PersistentDocument $fromDocument
 	 * @param f_persistentdocument_PersistentDocument $toDocument
-	 * @param String $tag
+	 * @param string $tag
 	 * @return void
 	 */
 	public function tagMovedFrom($fromDocument, $toDocument, $tag)
@@ -912,7 +912,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	/**
 	 * @param f_persistentdocument_PersistentDocument $fromDocument
 	 * @param f_persistentdocument_PersistentDocument $toDocument
-	 * @param String $tag
+	 * @param string $tag
 	 * @return void
 	 */
 	public function tagMovedTo($fromDocument, $toDocument, $tag)
@@ -963,9 +963,9 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	}
 
 	///////////////////////////////////////////////////////////////////////////
-	//                                                                       //
-	// TREE MANAGEMENT METHODS                                               //
-	//                                                                       //
+	//																	   //
+	// TREE MANAGEMENT METHODS											   //
+	//																	   //
 	///////////////////////////////////////////////////////////////////////////
 
 	/**
@@ -1180,7 +1180,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param Integer $destId
+	 * @param integer $destId
 	 */
 	private function documentMoved($document, $destId, $oldContainerId, $newContainerId)
 	{
@@ -1213,7 +1213,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 	/**
 	 * Mark the document as modified
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 * @return void
 	 */
 	function touch($documentId)
@@ -1228,7 +1228,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	 * transaction.
 	 *
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param Integer $destId
+	 * @param integer $destId
 	 */
 	protected function onDocumentMoved($document, $destId)
 	{
@@ -1240,7 +1240,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	 * transaction.
 	 *
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param Integer $destId
+	 * @param integer $destId
 	 */
 	protected function onMoveToStart($document, $destId)
 	{
@@ -1249,7 +1249,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $parentDocument
-	 * @param Integer $childDocmunentId
+	 * @param integer $childDocmunentId
 	 */
 	public function removeDocumentId($parentDocument, $childDocmunentId)
 	{
@@ -1341,7 +1341,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	/**
 	 * Generate the path string of ancestor document (excluding the rootfolder).
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param String $separator ' > ' by default
+	 * @param string $separator ' > ' by default
 	 * @return string
 	 */
 	public function getPathOf($document, $separator = ' > ')
@@ -1400,7 +1400,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	}
 
 	/**
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 * @return f_persistentdocument_PersistentDocument or null if no parent exists
 	 */
 	public function getParentOfById($documentId)
@@ -1421,7 +1421,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param Integer $parentNodeId Parent node ID where to save the document (optionnal).
+	 * @param integer $parentNodeId Parent node ID where to save the document (optionnal).
 	 * @return void
 	 */
 	protected function preSave($document, $parentNodeId)
@@ -1432,7 +1432,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param Integer $parentNodeId Parent node ID where to save the document (optionnal).
+	 * @param integer $parentNodeId Parent node ID where to save the document (optionnal).
 	 * @return void
 	 */
 	protected function preInsert($document, $parentNodeId)
@@ -1442,7 +1442,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param Integer $parentNodeId Parent node ID where to save the document (optionnal).
+	 * @param integer $parentNodeId Parent node ID where to save the document (optionnal).
 	 * @return void
 	 */
 	protected function postInsert($document, $parentNodeId)
@@ -1452,7 +1452,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param Integer $parentNodeId Parent node ID where to save the document (optionnal).
+	 * @param integer $parentNodeId Parent node ID where to save the document (optionnal).
 	 * @return void
 	 */
 	protected function preUpdate($document, $parentNodeId)
@@ -1462,7 +1462,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param Integer $parentNodeId Parent node ID where to save the document (optionnal).
+	 * @param integer $parentNodeId Parent node ID where to save the document (optionnal).
 	 * @return void
 	 */
 	protected function postUpdate($document, $parentNodeId)
@@ -1472,7 +1472,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param Integer $parentNodeId Parent node ID where to save the document (optionnal).
+	 * @param integer $parentNodeId Parent node ID where to save the document (optionnal).
 	 * @return void
 	 */
 	protected function postSave($document, $parentNodeId)
@@ -1543,7 +1543,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	 * Methode à surcharger pour effectuer des post traitement apres le changement de status du document
 	 * utiliser $document->getPublicationstatus() pour retrouver le nouveau status du document.
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param String $oldPublicationStatus
+	 * @param string $oldPublicationStatus
 	 * @param array $params
 	 * @return void
 	 */
@@ -1554,8 +1554,8 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param String $oldPublicationStatus
-	 * @param String $eventName
+	 * @param string $oldPublicationStatus
+	 * @param string $eventName
 	 * @param array $extraEventParams
 	 */
 	protected final function dispatchPublicationStatusChanged($document, $oldPublicationStatus, $eventName, $extraEventParams = null)
@@ -1572,7 +1572,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	/**
 	 * Rend actif le document
 	 * @exception IllegalTransitionException si le document n'est pas dans l'état DRAFT, CORRECTION ou WORKFLOW
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 */
 	public final function activate($documentId)
 	{
@@ -1710,7 +1710,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 	/**
 	 * Publie le document
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 * @see publishDocument
 	 * @return mixed true if published, false if unpublished, null if nothing changed
 	 * @throws IllegalTransitionException if transition to PUBLISHED status is not permitted
@@ -1722,7 +1722,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 	/**
 	 * Publie le document si possible
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 * @see publishDocument
 	 * @return mixed true if published, false if unpublished, null if nothing changed
 	 */
@@ -1754,7 +1754,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @return Boolean
+	 * @return boolean
 	 */
 	private final function isPublishTransitionPossible($document)
 	{
@@ -2011,7 +2011,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	/**
 	 * Désactive le document
 	 *
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 */
 	public final function deactivate($documentId)
 	{
@@ -2064,7 +2064,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	/**
 	 * Archive le document
 	 * @exception IllegalTransitionException si le document n'est pas dans l'état ACTIVE
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 */
 	public final function file($documentId)
 	{
@@ -2115,7 +2115,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	/**
 	 * Met le document à la corbeille
 	 * @exception IllegalTransitionException si le document n'est pas dans l'état ACTIVE ou FILED
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 */
 	public final function putInTrash($documentId)
 	{
@@ -2139,8 +2139,8 @@ class f_persistentdocument_DocumentService extends change_BaseService
 		}
 
 		$eventName = null;
-        $tm = $this->getTransactionManager();
-        $pp = $this->getPersistentProvider();
+		$tm = $this->getTransactionManager();
+		$pp = $this->getPersistentProvider();
 		try
 		{
 			$tm->beginTransaction();
@@ -2168,7 +2168,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	/**
 	 * Met le document à l'état bouillon, ou correction (si le document est une correction)
 	 * @exception IllegalTransitionException si le document n'est pas dans l'état WORKFLOW
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 */
 	public final function cancel($documentId)
 	{
@@ -2188,8 +2188,8 @@ class f_persistentdocument_DocumentService extends change_BaseService
 		$eventName = null;
 
 		$documentModel = $document->getPersistentModel();
-        $tm = $this->getTransactionManager();
-        $pp = $this->getPersistentProvider();
+		$tm = $this->getTransactionManager();
+		$pp = $this->getPersistentProvider();
 		try
 		{
 			$tm->beginTransaction();
@@ -2239,7 +2239,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	public final function createDocumentCorrection($document)
 	{
 		$tm = $this->getTransactionManager();
-        $pp = $this->getPersistentProvider();
+		$pp = $this->getPersistentProvider();
 		try
 		{
 			$tm->beginTransaction();
@@ -2330,8 +2330,8 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 	/**
 	 * Creer un nouveau document dans l'etat correction
-	 * @param Integer $documentId
-	 * @return Integer
+	 * @param integer $documentId
+	 * @return integer
 	 */
 	public final function createCorrection($documentId)
 	{
@@ -2347,7 +2347,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	/**
 	 * Retourne l'identifiant du noeud ou la correction sera ajouter
 	 * @param f_persistentdocument_PersistentDocument $correction
-	 * @return Integer
+	 * @return integer
 	 */
 	protected function getCorrectionParentNodeId($correction)
 	{
@@ -2358,9 +2358,9 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	 * Creer une instance de workflow sur le document
 	 * @exception IllegalTransitionException si le document n'est pas dans l'état DRAFT ou CORRECTION
 	 * @exception IllegalOperationException si aucun workflow n'a pu etre initializé.
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 * @param array $startParameters
-	 * @return Integer Identifiant de l'instance du workflow null si l'instance n'a pas pu etre créée
+	 * @return integer Identifiant de l'instance du workflow null si l'instance n'a pas pu etre créée
 	 */
 	public final function createWorkflowInstance($documentId, $startParameters = array())
 	{
@@ -2375,8 +2375,8 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 		$eventName = null;
 		$caseId = null;
-        $tm = $this->getTransactionManager();
-        $pp = $this->getPersistentProvider();
+		$tm = $this->getTransactionManager();
+		$pp = $this->getPersistentProvider();
 		try
 		{
 			$tm->beginTransaction();
@@ -2423,8 +2423,8 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	/**
 	 * Duplicate a document vo and all localized version
 	 *
-	 * @param Integer $documentId
-	 * @param Integer $parentNodeId
+	 * @param integer $documentId
+	 * @param integer $parentNodeId
 	 */
 	public final function duplicate($documentId, $parentNodeId = null)
 	{
@@ -2528,10 +2528,10 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	}
 
 	/**
-	 * @param String $label
-	 * @param Integer $parentNodeId
-	 * @param Integer $size
-	 * @return String
+	 * @param string $label
+	 * @param integer $parentNodeId
+	 * @param integer $size
+	 * @return string
 	 */
 	private function updateDuplicateLabel($label, $parentNodeId, $size = -1)
 	{
@@ -2577,7 +2577,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	 *
 	 * @param f_persistentdocument_PersistentDocument $newDocument
 	 * @param f_persistentdocument_PersistentDocument $originalDocument
-	 * @param Integer $parentNodeId
+	 * @param integer $parentNodeId
 	 *
 	 * @throws IllegalOperationException
 	 */
@@ -2593,7 +2593,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	 *
 	 * @param f_persistentdocument_PersistentDocument $newDocument
 	 * @param f_persistentdocument_PersistentDocument $originalDocument
-	 * @param Integer $parentNodeId
+	 * @param integer $parentNodeId
 	 *
 	 * @throws IllegalOperationException
 	 */
@@ -2604,14 +2604,14 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param String $destModelName
+	 * @param string $destModelName
 	 * @param f_persistentdocument_transformer_Transformer $transformer
 	 * @return f_persistentdocument_PersistentDocument
 	 */
 	public final function transform($document, $destModelName, $transformer = null)
 	{
 		$tm = $this->getTransactionManager();
-        $pp = $this->getPersistentProvider();
+		$pp = $this->getPersistentProvider();
 		try
 		{
 			$tm->beginTransaction();
@@ -2634,7 +2634,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @return Integer or -1 if $document is not a PersistentDocument
+	 * @return integer or -1 if $document is not a PersistentDocument
 	 */
 	public final function countReferences($document)
 	{

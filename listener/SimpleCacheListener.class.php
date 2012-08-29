@@ -17,7 +17,7 @@ class listener_SimpleCacheListener
 	 */
 	public function onPersistentDocumentUpdated ($sender, $params)
 	{
-	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentUpdated");}
+		if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentUpdated");}
 		$document = $params['document'];
 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
 		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
@@ -29,7 +29,7 @@ class listener_SimpleCacheListener
 	 */
 	public function onTagAdded ($sender, $params)
 	{
-	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: ontagAdded ".$params["tag"]);}
+		if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: ontagAdded ".$params["tag"]);}
 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getTagPattern($params["tag"]));
 	}
 	/**
@@ -38,7 +38,7 @@ class listener_SimpleCacheListener
 	 */
 	public function onTagRemoved ($sender, $params)
 	{
-	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: ontagRemoved ".$params["tag"]);}
+		if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: ontagRemoved ".$params["tag"]);}
 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getTagPattern($params["tag"]));
 	}
 	/**
@@ -47,7 +47,7 @@ class listener_SimpleCacheListener
 	 */
 	public function onTagMoved ($sender, $params)
 	{
-	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: ontagMoved ".$params["tag"]);}
+		if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: ontagMoved ".$params["tag"]);}
 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getTagPattern($params["tag"]));
 	}
 
@@ -57,7 +57,7 @@ class listener_SimpleCacheListener
 	 */
 	public function onPersistentDocumentDeleted($sender, $params)
 	{
-	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentDeleted");}
+		if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentDeleted");}
 		$document = $params['document'];
 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
 		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
@@ -69,7 +69,7 @@ class listener_SimpleCacheListener
 	 */
 	public function onPersistentDocumentPublished($sender, $params)
 	{
-	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentPublished");}
+		if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentPublished");}
 		$document = $params['document'];
 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
 		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
@@ -81,7 +81,7 @@ class listener_SimpleCacheListener
 	 */
 	public function onPersistentDocumentDeactivated ($sender, $params)
 	{
-	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentDeactivated");}
+		if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentDeactivated");}
 		$document = $params['document'];
 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
 		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
@@ -105,7 +105,7 @@ class listener_SimpleCacheListener
 	 */
 	public function onPersistentDocumentFiled ($sender, $params)
 	{
-	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentFiled");}
+		if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentFiled");}
 		$document = $params['document'];
 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
 		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
@@ -117,7 +117,7 @@ class listener_SimpleCacheListener
 	 */
 	public function onPersistentDocumentInTrash ($sender, $params)
 	{
-	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentInTrash");}
+		if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onPersistentDocumentInTrash");}
 		$document = $params['document'];
 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
 		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
@@ -129,7 +129,7 @@ class listener_SimpleCacheListener
 	 */
 	public function onChildrenOrdered ($sender, $params)
 	{
-	    if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onChildrenOrdered");}
+		if (Framework::isDebugEnabled()) {Framework::debug("[". __CLASS__ . "]: onChildrenOrdered");}
 		$document = $params['parent'];
 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
 		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
@@ -143,13 +143,13 @@ class listener_SimpleCacheListener
 		f_DataCacheService::getInstance()->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($document->getDocumentModelName()));
 		f_DataCacheService::getInstance()->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($document->getId()));
 	}
-	    
+		
 	/**
 	 * @param Object $sender
 	 * @param Array $params
-	 */    
-    public function onDayChange($sender, $params)
-    {
-    	f_DataCacheService::getInstance()->cleanExpiredCache();
-    }
+	 */	
+	public function onDayChange($sender, $params)
+	{
+		f_DataCacheService::getInstance()->cleanExpiredCache();
+	}
 }

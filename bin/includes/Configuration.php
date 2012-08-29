@@ -116,7 +116,7 @@ class cboot_Properties
 	}
 
 	/**
-	 * @param String $path
+	 * @param string $path
 	 */
 	function load($path)
 	{
@@ -128,7 +128,7 @@ class cboot_Properties
 	}
 	
 	/**
-	 * @param String $path
+	 * @param string $path
 	 */
 	function save($path)
 	{
@@ -145,7 +145,7 @@ class cboot_Properties
 
 	/**
 	 * (by defaults, comments are not preserved)
-	 * @param Boolean $preserveComments
+	 * @param boolean $preserveComments
 	 */
 	function setPreserveComments($preserveComments)
 	{
@@ -154,7 +154,7 @@ class cboot_Properties
 
 	/**
 	 * (by defaults, comments are not preserved)
-	 * @param Boolean $preserveComments
+	 * @param boolean $preserveComments
 	 */
 	function setPreserveEmptyLines($preserveEmptyLines)
 	{
@@ -162,7 +162,7 @@ class cboot_Properties
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function __toString()
 	{
@@ -312,7 +312,7 @@ class cboot_Properties
 	// private methods
 
 	/**
-	 * @param String $filePath
+	 * @param string $filePath
 	 */
 	private function parse($filePath)
 	{

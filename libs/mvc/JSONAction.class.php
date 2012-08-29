@@ -5,8 +5,8 @@ abstract class change_JSONAction extends change_Action
 	/**
 	 * @param change_Request $request
 	 * @param Exception $e
-	 * @param Boolean $popupAlert
-	 * @return String
+	 * @param boolean $popupAlert
+	 * @return string
 	 */
 	protected function onBackOfficeException($request, $e, $popupAlert)
 	{
@@ -33,7 +33,7 @@ abstract class change_JSONAction extends change_Action
 	}
 	
 	/**
-	 * @param String $message
+	 * @param string $message
 	 * @return unknown
 	 */
 	protected function sendJSONError($message, $popupAlert = true)
@@ -83,7 +83,7 @@ abstract class change_JSONAction extends change_Action
 	
 	/**
 	 * @see f_action_BaseAction::getActionName()
-	 * @return String
+	 * @return string
 	 */
 	protected function getActionName()
 	{

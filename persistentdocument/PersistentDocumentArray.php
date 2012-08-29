@@ -28,9 +28,9 @@ class f_persistentdocument_PersistentDocumentArray extends ArrayObject
 	 * Enter description here...
 	 *
 	 * @param f_persistentdocument_PersistentDocument $parentDocument
-	 * @param String $relationName
-	 * @param String $relationType element of {RELATION_CHILD, RELATION_TREE} defaults RELATION_CHILD
-	 * @param String $storageTable defaults DEFAULT_RELATION_CHILD_STORAGE
+	 * @param string $relationName
+	 * @param string $relationType element of {RELATION_CHILD, RELATION_TREE} defaults RELATION_CHILD
+	 * @param string $storageTable defaults DEFAULT_RELATION_CHILD_STORAGE
 	 */
 	public function __construct($parentDocument, $relationName,
 			$relationType = self::RELATION_CHILD, $storageTable = self::DEFAULT_RELATION_CHILD_STORAGE,
@@ -43,26 +43,26 @@ class f_persistentdocument_PersistentDocumentArray extends ArrayObject
 		$this->m_preserveOldValue = $preserveOldValue;
 	}
 
-    public function __destruct()
-    {
-        $this->m_parentDocument = null;
-    }
-    
-    /**
-     * Called to indicate the array was just persisted (used by persistentProvider)
-     */
-    public function setIsPersisted()
-    {
-    	$this->m_modified = false;
-    	if ($this->m_preserveOldValue)
-    	{
-    		$this->m_oldValues = array();
-    		foreach ($this as $document)
-    		{
-    			$this->m_oldValues[] = $document->getId();
-    		}
-    	}
-    }
+	public function __destruct()
+	{
+		$this->m_parentDocument = null;
+	}
+	
+	/**
+	 * Called to indicate the array was just persisted (used by persistentProvider)
+	 */
+	public function setIsPersisted()
+	{
+		$this->m_modified = false;
+		if ($this->m_preserveOldValue)
+		{
+			$this->m_oldValues = array();
+			foreach ($this as $document)
+			{
+				$this->m_oldValues[] = $document->getId();
+			}
+		}
+	}
 
 	/**
 	 * Obtient le document contenant la relation
@@ -76,7 +76,7 @@ class f_persistentdocument_PersistentDocumentArray extends ArrayObject
 
 	/**
 	 * Retourne le nom de la relation
-	 * @return String
+	 * @return string
 	 */
 	public function getRelationName()
 	{
@@ -85,7 +85,7 @@ class f_persistentdocument_PersistentDocumentArray extends ArrayObject
 	
 	/**
 	 * Retourne l'id de la relation
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getRelationId()
 	{
@@ -100,7 +100,7 @@ class f_persistentdocument_PersistentDocumentArray extends ArrayObject
 	 * Retourne le type de la relation
 	 * f_persistentdocument_PersistentDocumentArray::RELATION_CHILD
 	 *
-	 * @return String
+	 * @return string
 	 */
 	public function getRelationType()
 	{
@@ -110,7 +110,7 @@ class f_persistentdocument_PersistentDocumentArray extends ArrayObject
 	/**
 	 * Retourne la table de stockage des elements de la relation
 	 *
-	 * @return String
+	 * @return string
 	 */
 	public function getStorageTable()
 	{
@@ -118,7 +118,7 @@ class f_persistentdocument_PersistentDocumentArray extends ArrayObject
 	}
 
 	/**
-	 * @param Integer $index
+	 * @param integer $index
 	 * @param f_persistentdocument_PersistentDocument $newval
 	 */
 	public function offsetSet($index, $newval)
@@ -158,7 +158,7 @@ class f_persistentdocument_PersistentDocumentArray extends ArrayObject
 
 
 	/**
-	 * @param Integer $index
+	 * @param integer $index
 	 * @return f_persistentdocument_PersistentDocument
 	 */
 	public function offsetGet($index)
@@ -193,7 +193,7 @@ class f_persistentdocument_PersistentDocumentArray extends ArrayObject
 
 	/**
 	 * @param mixed $value
-	 * @return Integer
+	 * @return integer
 	 */
 	private function getIdValue($value)
 	{
@@ -241,10 +241,10 @@ class f_persistentdocument_PersistentDocumentArray extends ArrayObject
 
 
 	/**
-	 * @param Integer $minOccurence
-	 * @param Integer $maxOccurence
-	 * @param Integer $accceptType
-	 * @return Boolean
+	 * @param integer $minOccurence
+	 * @param integer $maxOccurence
+	 * @param integer $accceptType
+	 * @return boolean
 	 *
 	 */
 	public function isValid($minOccurence = 0, $maxOccurence = 1, $accceptType = "*", $cascade = false)
@@ -299,7 +299,7 @@ class f_persistentdocument_PersistentDocumentArray extends ArrayObject
 	}
 
 	/**
-	 * @param Integer $documentId the id of the document to found
+	 * @param integer $documentId the id of the document to found
 	 * @return f_persistentdocument_PersistentDocument document founded or null
 	 */
 	public function getById($documentId)
@@ -333,7 +333,7 @@ class f_persistentdocument_PersistentDocumentArray extends ArrayObject
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document the document to search
-	 * @return Integer index of the founded document or -1
+	 * @return integer index of the founded document or -1
 	 */
 	public function indexOf($document)
 	{
@@ -345,8 +345,8 @@ class f_persistentdocument_PersistentDocumentArray extends ArrayObject
 	}
 
 	/**
-	 * @param Integer $documentId the id of the document to found
-	 * @return Integer index of the founded document or -1
+	 * @param integer $documentId the id of the document to found
+	 * @return integer index of the founded document or -1
 	 */
 	public function indexOfById($documentId)
 	{
@@ -404,7 +404,7 @@ class f_persistentdocument_PersistentDocumentArray extends ArrayObject
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isModified()
 	{
@@ -459,7 +459,7 @@ class f_persistentdocument_PersistentDocumentArray extends ArrayObject
 
 	/**
 	 * @internal used by PersistentDocument only
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 */
 	public function loadDocumentId($documentId)
 	{

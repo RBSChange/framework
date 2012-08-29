@@ -70,18 +70,18 @@ class change_ActionStack
 class change_ActionStackEntry
 {
 	private $actionInstance = null;
-	private $actionName     = null;
-	private $microtime      = null;
-	private $moduleName     = null;
+	private $actionName	 = null;
+	private $microtime	  = null;
+	private $moduleName	 = null;
 	private $presentation   = null;
 	
 	public function __construct ($moduleName, $actionName, $actionInstance)
 	{
 		
-		$this->actionName     = $actionName;
+		$this->actionName	 = $actionName;
 		$this->actionInstance = $actionInstance;
-		$this->microtime      = microtime();
-		$this->moduleName     = $moduleName;
+		$this->microtime	  = microtime();
+		$this->moduleName	 = $moduleName;
 		
 	}
 	

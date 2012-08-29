@@ -28,7 +28,7 @@ class indexer_SolrServerRequest
 		$this->setMethod(self::METHOD_GET);
 	}
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getMethod()
 	{
@@ -36,7 +36,7 @@ class indexer_SolrServerRequest
 	}
 
 	/**
-	 * @param String $method
+	 * @param string $method
 	 */
 	public function setMethod($method)
 	{
@@ -44,7 +44,7 @@ class indexer_SolrServerRequest
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function execute()
 	{
@@ -73,7 +73,7 @@ class indexer_SolrServerRequest
 	}
 
 	/**
-	 * @param String $type
+	 * @param string $type
 	 */
 	public function setContentType($type)
 	{
@@ -82,7 +82,7 @@ class indexer_SolrServerRequest
 	}
 
 	/**
-	 * @param String $data
+	 * @param string $data
 	 */
 	public function setPostData($data)
 	{
@@ -90,14 +90,14 @@ class indexer_SolrServerRequest
 	}
 
 	/**
-	 * @param Integer $secs
+	 * @param integer $secs
 	 */
 	public function setTimeout($secs)
 	{
 		$this->timeout = $secs;
 	}
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getTimeout()
 	{

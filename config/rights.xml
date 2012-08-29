@@ -30,7 +30,7 @@
 			<action name="Remove"/>
 			
 			<action name="Load" />
-		    <action name="LoadForTranslation" />
+			<action name="LoadForTranslation" />
 			
 			<action name="Save" />
 			<action name="Insert" />

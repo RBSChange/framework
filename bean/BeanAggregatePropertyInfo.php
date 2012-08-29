@@ -19,7 +19,7 @@ class BeanAggregatePropertyInfo implements BeanPropertyInfo
 	/**
 	 * @see BeanPropertyInfo::hasList()
 	 *
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function hasList()
 	{
@@ -37,7 +37,7 @@ class BeanAggregatePropertyInfo implements BeanPropertyInfo
 
 	/**
 	 *
-	 * @return Integer >=1 | -1, meaning "infinite"
+	 * @return integer >=1 | -1, meaning "infinite"
 	 * @see BeanPropertyInfo::getCardinality()
 	 */
 	public function getCardinality()
@@ -57,7 +57,7 @@ class BeanAggregatePropertyInfo implements BeanPropertyInfo
 
 	/**
 	 *
-	 * @return String
+	 * @return string
 	 * @see BeanPropertyInfo::getLabelKey()
 	 */
 	public function getLabelKey()
@@ -67,7 +67,7 @@ class BeanAggregatePropertyInfo implements BeanPropertyInfo
 
 	/**
 	 *
-	 * @return String
+	 * @return string
 	 * @see BeanPropertyInfo::getName()
 	 */
 	public function getName()
@@ -77,7 +77,7 @@ class BeanAggregatePropertyInfo implements BeanPropertyInfo
 
 	/**
 	 *
-	 * @return String
+	 * @return string
 	 * @see BeanPropertyInfo::getType()
 	 */
 	public function getType()
@@ -88,7 +88,7 @@ class BeanAggregatePropertyInfo implements BeanPropertyInfo
 	/**
 	 * If the property type is BeanPropertyType::DOCUMENT,
 	 * returns the linked document model
-	 * @return String
+	 * @return string
 	 */
 	public function getDocumentType()
 	{
@@ -97,7 +97,7 @@ class BeanAggregatePropertyInfo implements BeanPropertyInfo
 	
 	/**
 	 * If the property type if DOCUMENT, BEAN or CLASS
-	 * @return String
+	 * @return string
 	 */
 	public function getClassName()
 	{
@@ -105,7 +105,7 @@ class BeanAggregatePropertyInfo implements BeanPropertyInfo
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getHelpKey()
 	{
@@ -116,22 +116,22 @@ class BeanAggregatePropertyInfo implements BeanPropertyInfo
 
 	/**
 	 *
-	 * @return String
+	 * @return string
 	 * @see BeanPropertyInfo::getValidationRules()
 	 */
 	public function getValidationRules()
 	{
 		$rules = $this->wrappedBeanPropertyInfo->getValidationRules();
-        if (!f_util_StringUtils::isEmpty($rules))
-        {
-        	return $this->beanName . ucfirst($rules);
-        }
-        return null;
+		if (!f_util_StringUtils::isEmpty($rules))
+		{
+			return $this->beanName . ucfirst($rules);
+		}
+		return null;
 	}
 
 	/**
 	 *
-	 * @return Boolean
+	 * @return boolean
 	 * @see BeanPropertyInfo::isRequired()
 	 */
 	public function isRequired()
@@ -142,7 +142,7 @@ class BeanAggregatePropertyInfo implements BeanPropertyInfo
 	/**
 	 * @see BeanPropertyInfo::isHidden()
 	 *
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isHidden()
 	{
@@ -163,7 +163,7 @@ class BeanAggregatePropertyInfo implements BeanPropertyInfo
 	/**
 	 * @see BeanPropertyInfo::getGetterName()
 	 *
-	 * @return String
+	 * @return string
 	 */
 	public function getGetterName()
 	{
@@ -173,7 +173,7 @@ class BeanAggregatePropertyInfo implements BeanPropertyInfo
 	/**
 	 * @see BeanPropertyInfo::getMaxOccurs()
 	 *
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getMaxOccurs()
 	{
@@ -183,7 +183,7 @@ class BeanAggregatePropertyInfo implements BeanPropertyInfo
 	/**
 	 * @see BeanPropertyInfo::getMinOccurs()
 	 *
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getMinOccurs()
 	{
@@ -193,7 +193,7 @@ class BeanAggregatePropertyInfo implements BeanPropertyInfo
 	/**
 	 * @see BeanPropertyInfo::getSetterName()
 	 *
-	 * @return String
+	 * @return string
 	 */
 	public function getSetterName()
 	{

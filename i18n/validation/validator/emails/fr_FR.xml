@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.validation.validator.emails" lcid="fr_FR">
-  <key id="message">le champ ″{field}″ doit contenir des adresses e-mail valides séparées par des virgules.</key>
+<?xml version="1.0" encoding="UTF-8"?>
+<i18n baseKey="m.framework.validation.validator.emails" lcid="fr_FR">
+	<key id="message">le champ ″{field}″ doit contenir des adresses e-mail valides séparées par des virgules.</key>
 </i18n>

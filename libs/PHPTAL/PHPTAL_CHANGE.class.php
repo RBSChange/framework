@@ -6,6 +6,6 @@ class framework_PHPTAL_CHANGE
 	 */
 	public static function addAttributes($namespaceCHANGE)
 	{
-        $namespaceCHANGE->addAttribute(new PHPTAL_NamespaceAttributeReplace('include', 10));
+		$namespaceCHANGE->addAttribute(new PHPTAL_NamespaceAttributeReplace('include', 10));
 	}
 }

@@ -30,7 +30,7 @@ class bean_XHTMLFragmentConverter implements BeanValueConverter
 	 * @see BeanValueConverter::isValidRequestValue()
 	 *
 	 * @param Mixed $value
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isValidRequestValue($value)
 	{

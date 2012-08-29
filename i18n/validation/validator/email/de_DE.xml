@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.validation.validator.email" lcid="de_DE">
-  <key id="message">Das Feld "{field}" soll eine kültige E-Mail-Adresse sein.</key>
+<?xml version="1.0" encoding="UTF-8"?>
+<i18n baseKey="m.framework.validation.validator.email" lcid="de_DE">
+	<key id="message">Das Feld "{field}" soll eine kültige E-Mail-Adresse sein.</key>
 </i18n>

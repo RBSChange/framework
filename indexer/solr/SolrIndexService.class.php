@@ -123,7 +123,7 @@ class indexer_SolrIndexService extends indexer_IndexService
 	 * (search on label and full text with a boost on the label). 
 	 * 
 	 * @param indexer_Query $query
-	 * @param String[] $suggestionTerms
+	 * @param string[] $suggestionTerms
 	 * @return indexer_SolrSearchResults
 	 */
 	public function search(indexer_Query $query, $suggestionTerms = null)
@@ -174,9 +174,9 @@ class indexer_SolrIndexService extends indexer_IndexService
 	/**
 	 * Get an array of at most $count suggestions for the word $word from the spellchecker for $lang. 
 	 *
-	 * @param String $word
-	 * @param String $lang
-	 * @param String $count
+	 * @param string $word
+	 * @param string $lang
+	 * @param string $count
 	 * @return Array<String>
 	 */
 	public function getSuggestionArrayForWord($word, $lang = null, $count = null)

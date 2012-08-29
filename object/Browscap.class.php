@@ -10,21 +10,21 @@
  * Alike 2.5 License that is available through the world-wide-web at the following
  * URI: http://creativecommons.org/licenses/by-sa/2.5/legalcode.
  *
- * @package    Browscap
- * @author     Jonathan Stoppani <st.jonathan@gmail.com>
+ * @package	Browscap
+ * @author	 Jonathan Stoppani <st.jonathan@gmail.com>
  * @copyright  Copyright (c) 2006 Jonathan Stoppani
- * @version    0.4
- * @license    http://creativecommons.org/licenses/by-sa/2.5/ Attribution-ShareAlike 2.5
- * @link       http://garetjax.info/projects/browscap/
+ * @version	0.4
+ * @license	http://creativecommons.org/licenses/by-sa/2.5/ Attribution-ShareAlike 2.5
+ * @link	   http://garetjax.info/projects/browscap/
  */
 class Browscap
 {
 	/**
-     * Options for regex patterns.
-     *
-     * REGEX_DELIMITER:  Delimiter of all the regex patterns in the whole class.
-     * REGEX_MODIFIERS:  Regex modifiers.
-     */
+	 * Options for regex patterns.
+	 *
+	 * REGEX_DELIMITER:  Delimiter of all the regex patterns in the whole class.
+	 * REGEX_MODIFIERS:  Regex modifiers.
+	 */
 	const REGEX_DELIMITER	= '@';
 	const REGEX_MODIFIERS	= 'i';
 
@@ -52,11 +52,11 @@ class Browscap
 	 * Options for auto update capabilities
 	 *
 	 * $_remoteVerUrl:  The location to use to check out if a new version of the
-	 *                  browscap.ini file is available.
+	 *				  browscap.ini file is available.
 	 * $_remoteIniUrl:  The location from which download the ini file.
-	 *                  The placeholder for the file should be represented by a %s.
-	 * $_iniVersion:    The version of the ini file to download, will be inserted
-	 *                  into the REMOTE_INI_URL value.
+	 *				  The placeholder for the file should be represented by a %s.
+	 * $_iniVersion:	The version of the ini file to download, will be inserted
+	 *				  into the REMOTE_INI_URL value.
 	 * $_timeout:		The timeout for the requests.
 	 */
 	public $remoteIniUrl  	= 'http://browsers.garykeith.com/stream.asp?PHP_BrowsCapINI';
@@ -79,10 +79,10 @@ class Browscap
 	public $iniFilename 	= 'browscap.ini';
 
 	/**
-     * Path to the cache directory
-     *
-     * @var string
-     */
+	 * Path to the cache directory
+	 *
+	 * @var string
+	 */
 	public $cacheDir 		= null;
 
 	/**
@@ -93,10 +93,10 @@ class Browscap
 	protected $_cacheLoaded	= false;
 
 	/**
-     * Where to store the value of the included php cache file
-     *
-     * @var array
-     */
+	 * Where to store the value of the included php cache file
+	 *
+	 * @var array
+	 */
 	protected $_userAgents	= array();
 	protected $_browsers	= array();
 	protected $_patterns	= array();
@@ -130,7 +130,7 @@ class Browscap
 	 * @param string $user_agent   the user agent string
 	 * @param bool   $return_array whether return an array or an object
 	 * @return stdObject the object containing the browsers details. Array if
-	 *                   $return_array is set to true.
+	 *				   $return_array is set to true.
 	 */
 	public function getBrowser($user_agent = null, $return_array = false)
 	{
@@ -158,8 +158,8 @@ class Browscap
 				$browser = $value = $browser + $this->_browsers[$key];
 				while (array_key_exists(2, $value)) 
 				{
-					$value      =   $this->_browsers[$value[2]];
-					$browser    +=  $value;
+					$value	  =   $this->_browsers[$value[2]];
+					$browser	+=  $value;
 				}
 
 				if (!empty($browser[2])) 
@@ -199,8 +199,8 @@ class Browscap
 			$browser = $value;
 			while (array_key_exists(2, $value))
 			{
-				$value      =   $this->_browsers[$value[2]];
-				$browser    +=  $value;
+				$value	  =   $this->_browsers[$value[2]];
+				$browser	+=  $value;
 			}
 
 			if (array_key_exists($ek, $browser) && array_key_exists($ekv, $browser))
@@ -255,12 +255,12 @@ class Browscap
 		$properties_keys	= array_flip($this->_properties);
 
 		$search				= array('\*', '\?', '\|', '\\\\\(', '\\\\\)');
-    	$replace			= array('.*', '.', '|', '(', ')');
+		$replace			= array('.*', '.', '|', '(', ')');
 
 		foreach ($this->_userAgents as $user_agent) {
 			$pattern = preg_quote($user_agent, self::REGEX_DELIMITER);
 			$this->_patterns[] 	= self::REGEX_DELIMITER
-							    . '^'
+								. '^'
 						  		. str_replace($search, $replace, $pattern)
 						 	 	. '$'
 						  		. self::REGEX_DELIMITER;
@@ -277,8 +277,8 @@ class Browscap
 
 			$this->_browsers[] = $browser;
 			unset($browser);
-        }
-        unset($user_agents_keys, $properties_keys, $browsers);
+		}
+		unset($user_agents_keys, $properties_keys, $browsers);
 
 		$cache = $this->_buildCache();
 
@@ -473,11 +473,11 @@ class Browscap
 /**
  * Browscap.ini parsing class exception
  *
- * @package    Browscap
- * @author     Jonathan Stoppani <st.jonathan@gmail.com>
+ * @package	Browscap
+ * @author	 Jonathan Stoppani <st.jonathan@gmail.com>
  * @copyright  Copyright (c) 2006 Jonathan Stoppani
- * @license    http://creativecommons.org/licenses/by-sa/2.5/ Attribution-ShareAlike 2.5
- * @link       http://garetjax.info/projects/browscap/
+ * @license	http://creativecommons.org/licenses/by-sa/2.5/ Attribution-ShareAlike 2.5
+ * @link	   http://garetjax.info/projects/browscap/
  */
 class Browscap_Exception extends Exception
 {}

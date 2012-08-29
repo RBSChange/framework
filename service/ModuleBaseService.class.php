@@ -5,7 +5,7 @@
 class ModuleBaseService extends change_BaseService
 {
 	/**
-	 * @param String $moduleName
+	 * @param string $moduleName
 	 * @return ModuleBaseService
 	 */
 	public static function getInstanceByModuleName($moduleName)
@@ -18,7 +18,7 @@ class ModuleBaseService extends change_BaseService
 	}
 	
 	/**
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 * @return f_persistentdocument_PersistentTreeNode
 	 */
 	public function getParentNodeForPermissions($documentId)
@@ -38,7 +38,7 @@ class ModuleBaseService extends change_BaseService
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
 	 * @param string $moduleName
-	 * @return Integer[] id of documents that define the path of the document
+	 * @return integer[] id of documents that define the path of the document
 	 */
 	public function getPathTo($document, $moduleName = null)
 	{

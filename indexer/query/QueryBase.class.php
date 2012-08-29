@@ -57,7 +57,7 @@ abstract class indexer_QueryBase
 	
 	/**
 	 * @param indexer_QueryBase $query 
-	 * @param String $tag A filter query can be tagged ; Cf. http://wiki.apache.org/solr/SimpleFacetParameters#Tagging_and_excluding_Filters
+	 * @param string $tag A filter query can be tagged ; Cf. http://wiki.apache.org/solr/SimpleFacetParameters#Tagging_and_excluding_Filters
 	 */
 	public function addFilterQuery($query, $tag = null)
 	{
@@ -65,7 +65,7 @@ abstract class indexer_QueryBase
 	}
 	
 	/**
-	 * @param String|indexer_Facet $fieldNameOrFacetObject
+	 * @param string|indexer_Facet $fieldNameOrFacetObject
 	 * @return indexer_Facet
 	 */
 	public function addFacet($fieldNameOrFacetObject)
@@ -83,7 +83,7 @@ abstract class indexer_QueryBase
 	}
 	
 	/**
-	 * @param String $fieldName
+	 * @param string $fieldName
 	 * @return indexer_Facet
 	 */
 	public function addStringFacet($fieldName)
@@ -92,7 +92,7 @@ abstract class indexer_QueryBase
 	}
 	
 	/**
-	 * @param String $fieldName
+	 * @param string $fieldName
 	 * @return indexer_Facet
 	 */
 	public function addVolatileStringFacet($fieldName)
@@ -101,7 +101,7 @@ abstract class indexer_QueryBase
 	}
 	
 	/**
-	 * @param String $fieldName
+	 * @param string $fieldName
 	 * @return indexer_Facet
 	 */
 	public function addIntegerFacet($fieldName)
@@ -110,8 +110,8 @@ abstract class indexer_QueryBase
 	}
 	
 	/**
-	 * @param String $fieldName
-	 * @param Boolean $multiple
+	 * @param string $fieldName
+	 * @param boolean $multiple
 	 * @return indexer_Facet
 	 */
 	public function addVolatileIntegerFacet($fieldName, $multiple = false)
@@ -124,7 +124,7 @@ abstract class indexer_QueryBase
 	}
 	
 	/**
-	 * @param String $fieldName
+	 * @param string $fieldName
 	 * @return indexer_Facet
 	 */
 	public function addVolatileIntegerMultiFacet($fieldName)
@@ -133,7 +133,7 @@ abstract class indexer_QueryBase
 	}
 	
 	/**
-	 * @param String $fieldName
+	 * @param string $fieldName
 	 * @return indexer_Facet
 	 */
 	public function addFloatFacet($fieldName)
@@ -142,7 +142,7 @@ abstract class indexer_QueryBase
 	}
 	
 	/**
-	 * @param String $fieldName
+	 * @param string $fieldName
 	 * @return indexer_Facet
 	 */
 	public function addVolatileFloatFacet($fieldName)
@@ -151,7 +151,7 @@ abstract class indexer_QueryBase
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function hasFacet()
 	{
@@ -180,7 +180,7 @@ abstract class indexer_QueryBase
 	private $stats = null;
 	
 	/**
-	 * @param String $fieldName
+	 * @param string $fieldName
 	 */
 	public function addStatsOnField($fieldName)
 	{
@@ -192,7 +192,7 @@ abstract class indexer_QueryBase
 	}
 	
 	/**
-	 * @return String[]
+	 * @return string[]
 	 */
 	public function getStats()
 	{
@@ -200,7 +200,7 @@ abstract class indexer_QueryBase
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function hasStats()
 	{
@@ -342,7 +342,7 @@ abstract class indexer_QueryBase
 	}
 	
 	/**
-	 * @return String[]
+	 * @return string[]
 	 */
 	public function getTerms()
 	{

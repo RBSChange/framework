@@ -78,7 +78,7 @@ class bean_BeanAggregateGenerator
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getClassName()
 	{
@@ -86,7 +86,7 @@ class bean_BeanAggregateGenerator
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getModelClassName()
 	{
@@ -94,7 +94,7 @@ class bean_BeanAggregateGenerator
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getBeanClassNames()
 	{

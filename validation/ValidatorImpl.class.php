@@ -131,7 +131,7 @@ abstract class validation_ValidatorImpl implements validation_Validator
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	protected function canBeReversed()
 	{

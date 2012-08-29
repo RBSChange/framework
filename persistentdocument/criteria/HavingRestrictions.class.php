@@ -21,7 +21,7 @@ class HavingRestrictions
 
 	/**
 	 * Apply an "equal" constraint to the named property
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 * @param mixed $value
 	 * For example: eq("author", "me")
 	 * @return SimpleExpression
@@ -68,7 +68,7 @@ class HavingRestrictions
 	/**
 	 * Apply a "less than or equal" constraint to the named property
 	 *
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 * @param mixed $value
 	 */
 	static function le($propertyName, $value)
@@ -79,7 +79,7 @@ class HavingRestrictions
 	/**
 	 * Apply a "less than" constraint to the named property
 	 *
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 * @param mixed $value
 	 */
 	static function lt($propertyName, $value)
@@ -90,7 +90,7 @@ class HavingRestrictions
 	/**
 	 * Apply a "not equal" constraint to the named property
 	 *
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 */
 	static function ne($propertyName, $value)
 	{
@@ -115,10 +115,10 @@ class f_persistentdocument_criteria_HavingSimpleExpression implements f_persiste
 	private $ignoreCase;
 
 	/**
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 * @param mixed $value
-	 * @param String $op
-	 * @param Boolean $ignoreCase
+	 * @param string $op
+	 * @param boolean $ignoreCase
 	 */
 	public function __construct($propertyName, $value, $op, $ignoreCase = false)
 	{
@@ -134,7 +134,7 @@ class f_persistentdocument_criteria_HavingSimpleExpression implements f_persiste
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getPropertyName()
 	{
@@ -150,7 +150,7 @@ class f_persistentdocument_criteria_HavingSimpleExpression implements f_persiste
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getOp()
 	{
@@ -158,7 +158,7 @@ class f_persistentdocument_criteria_HavingSimpleExpression implements f_persiste
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function getIgnoreCase()
 	{
@@ -179,9 +179,9 @@ class f_persistentdocument_criteria_HavingBetweenExpression implements f_persist
 
 	/**
 	 * min <= value <= max
-	 * @param String $String
-	 * @param Integer $Integer
-	 * @param Integer $Integer
+	 * @param string $String
+	 * @param integer $Integer
+	 * @param integer $Integer
 	 */
 	public function __construct($propertyName, $min, $max)
 	{
@@ -201,7 +201,7 @@ class f_persistentdocument_criteria_HavingBetweenExpression implements f_persist
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getPropertyName()
 	{
@@ -209,7 +209,7 @@ class f_persistentdocument_criteria_HavingBetweenExpression implements f_persist
 	}
 
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getMin()
 	{
@@ -217,7 +217,7 @@ class f_persistentdocument_criteria_HavingBetweenExpression implements f_persist
 	}
 
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getMax()
 	{
@@ -225,7 +225,7 @@ class f_persistentdocument_criteria_HavingBetweenExpression implements f_persist
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isStrict()
 	{
@@ -240,7 +240,7 @@ class f_persistentdocument_criteria_HavingInExpression implements f_persistentdo
 	private $not;
 
 	/**
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 * @param array $values
 	 */
 	public function __construct($propertyName, $values, $not = false)
@@ -251,7 +251,7 @@ class f_persistentdocument_criteria_HavingInExpression implements f_persistentdo
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getPropertyName()
 	{

@@ -27,17 +27,17 @@
 		<useCompoundFile>false</useCompoundFile>
 		<mergeFactor>${solr.mergefactor:10}</mergeFactor>
 		<!-- Sets the amount of RAM that may be used by Lucene indexing
-      		for buffering added documents and deletions before they are
-      		flushed to the Directory.  -->
-    	<ramBufferSizeMB>${solr.ramBufferSizeMB:32}</ramBufferSizeMB>
+	  		for buffering added documents and deletions before they are
+	  		flushed to the Directory.  -->
+		<ramBufferSizeMB>${solr.ramBufferSizeMB:32}</ramBufferSizeMB>
 		<maxFieldLength>10000</maxFieldLength>
 		<writeLockTimeout>1000</writeLockTimeout>
 		<commitLockTimeout>10000</commitLockTimeout>
 		<luceneAutoCommit>${solr.autocommit:false}</luceneAutoCommit>
 		<lockType>native</lockType>
 		<!-- If both ramBufferSizeMB and maxBufferedDocs is set, then Lucene will flush
-     		based on whichever limit is hit first.  -->
-    	<!--<maxBufferedDocs>1000</maxBufferedDocs>-->
+	 		based on whichever limit is hit first.  -->
+		<!--<maxBufferedDocs>1000</maxBufferedDocs>-->
 	</indexDefaults>
 
 	<mainIndex>
@@ -51,7 +51,7 @@
 			used with care. -->
 		<unlockOnStartup>${solr.unlockonstartup:false}</unlockOnStartup>
 		<!-- If true, IndexReaders will be reopened (often more efficient) instead
-         of closed and then opened.  -->
+		 of closed and then opened.  -->
 		<reopenReaders>true</reopenReaders>
 	</mainIndex>
 
@@ -104,9 +104,9 @@
 
 
 		<!-- If a search request comes in and there is no current registered searcher,
-         then immediately register the still warming searcher and use it.  If
-         "false" then all requests will block until the first searcher is done
-         warming. -->
+		 then immediately register the still warming searcher and use it.  If
+		 "false" then all requests will block until the first searcher is done
+		 warming. -->
 		<useColdSearcher>false</useColdSearcher>
 
 		<!-- Maximum number of searchers that may be warming in the background
@@ -126,7 +126,7 @@
 		<requestParsers enableRemoteStreaming="false" multipartUploadLimitInKB="2048" />
 		
 		 <httpCaching lastModifiedFrom="openTime"
-                 etagSeed="Solr" />
+				 etagSeed="Solr" />
 	</requestDispatcher>
 
 
@@ -146,201 +146,201 @@
 	<!-- ***** BEGIN Change spellchecker definition ******* -->
 	
 	<!-- spellcheck de -->
-    <searchComponent name="spellcheck_de" class="solr.SpellCheckComponent">
-      <str name="queryAnalyzerFieldType">textSpell</str>
-      <lst name="spellchecker">
-        <str name="name">default</str>
-        <str name="field">de_words</str>
-        <str name="spellcheckIndexDir">./changespell_de</str>
-        <!--
-        <str name="buildOnCommit">true</str>
-          -->
-        <str name="buildOnOptimize">true</str>
-      </lst>
-    </searchComponent>
-    
-    <requestHandler name="/spellchecker_de" class="solr.SearchHandler" lazy="true">
-	    <lst name="defaults">
-	      <!-- omp = Only More Popular -->
-	      <str name="spellcheck.onlyMorePopular">false</str>
-	      <!-- exr = Extended Results -->
-	      <str name="spellcheck.extendedResults">false</str>
-	      <!--  The number of suggestions to return -->
-	      <str name="spellcheck.count">1</str>
-	    </lst>
-	    <arr name="last-components">
-	      <str>spellcheck_de</str>
-	    </arr>
+	<searchComponent name="spellcheck_de" class="solr.SpellCheckComponent">
+	  <str name="queryAnalyzerFieldType">textSpell</str>
+	  <lst name="spellchecker">
+		<str name="name">default</str>
+		<str name="field">de_words</str>
+		<str name="spellcheckIndexDir">./changespell_de</str>
+		<!--
+		<str name="buildOnCommit">true</str>
+		  -->
+		<str name="buildOnOptimize">true</str>
+	  </lst>
+	</searchComponent>
+	
+	<requestHandler name="/spellchecker_de" class="solr.SearchHandler" lazy="true">
+		<lst name="defaults">
+		  <!-- omp = Only More Popular -->
+		  <str name="spellcheck.onlyMorePopular">false</str>
+		  <!-- exr = Extended Results -->
+		  <str name="spellcheck.extendedResults">false</str>
+		  <!--  The number of suggestions to return -->
+		  <str name="spellcheck.count">1</str>
+		</lst>
+		<arr name="last-components">
+		  <str>spellcheck_de</str>
+		</arr>
   	</requestHandler>
   
 	<!-- spellcheck en -->
-    <searchComponent name="spellcheck_en" class="solr.SpellCheckComponent">
-      <str name="queryAnalyzerFieldType">textSpell</str>
-      <lst name="spellchecker">
-        <str name="name">default</str>
-        <str name="field">en_words</str>
-        <str name="spellcheckIndexDir">./changespell_en</str>
-        <!--
-        <str name="buildOnCommit">true</str>
-          -->
-        <str name="buildOnOptimize">true</str>
-      </lst>
-    </searchComponent>
-    
-    <requestHandler name="/spellchecker_en" class="solr.SearchHandler" lazy="true">
-	    <lst name="defaults">
-	      <!-- omp = Only More Popular -->
-	      <str name="spellcheck.onlyMorePopular">false</str>
-	      <!-- exr = Extended Results -->
-	      <str name="spellcheck.extendedResults">false</str>
-	      <!--  The number of suggestions to return -->
-	      <str name="spellcheck.count">1</str>
-	    </lst>
-	    <arr name="last-components">
-	      <str>spellcheck_en</str>
-	    </arr>
+	<searchComponent name="spellcheck_en" class="solr.SpellCheckComponent">
+	  <str name="queryAnalyzerFieldType">textSpell</str>
+	  <lst name="spellchecker">
+		<str name="name">default</str>
+		<str name="field">en_words</str>
+		<str name="spellcheckIndexDir">./changespell_en</str>
+		<!--
+		<str name="buildOnCommit">true</str>
+		  -->
+		<str name="buildOnOptimize">true</str>
+	  </lst>
+	</searchComponent>
+	
+	<requestHandler name="/spellchecker_en" class="solr.SearchHandler" lazy="true">
+		<lst name="defaults">
+		  <!-- omp = Only More Popular -->
+		  <str name="spellcheck.onlyMorePopular">false</str>
+		  <!-- exr = Extended Results -->
+		  <str name="spellcheck.extendedResults">false</str>
+		  <!--  The number of suggestions to return -->
+		  <str name="spellcheck.count">1</str>
+		</lst>
+		<arr name="last-components">
+		  <str>spellcheck_en</str>
+		</arr>
   	</requestHandler>
   	
   	<!-- spellcheck es -->
-    <searchComponent name="spellcheck_es" class="solr.SpellCheckComponent">
-      <str name="queryAnalyzerFieldType">textSpell</str>
-      <lst name="spellchecker">
-        <str name="name">default</str>
-        <str name="field">es_words</str>
-        <str name="spellcheckIndexDir">./changespell_es</str>
-        <!--
-        <str name="buildOnCommit">true</str>
-          -->
-        <str name="buildOnOptimize">true</str>
-      </lst>
-    </searchComponent>
-    
-    <requestHandler name="/spellchecker_es" class="solr.SearchHandler" lazy="true">
-	    <lst name="defaults">
-	      <!-- omp = Only More Popular -->
-	      <str name="spellcheck.onlyMorePopular">false</str>
-	      <!-- exr = Extended Results -->
-	      <str name="spellcheck.extendedResults">false</str>
-	      <!--  The number of suggestions to return -->
-	      <str name="spellcheck.count">1</str>
-	    </lst>
-	    <arr name="last-components">
-	      <str>spellcheck_es</str>
-	    </arr>
+	<searchComponent name="spellcheck_es" class="solr.SpellCheckComponent">
+	  <str name="queryAnalyzerFieldType">textSpell</str>
+	  <lst name="spellchecker">
+		<str name="name">default</str>
+		<str name="field">es_words</str>
+		<str name="spellcheckIndexDir">./changespell_es</str>
+		<!--
+		<str name="buildOnCommit">true</str>
+		  -->
+		<str name="buildOnOptimize">true</str>
+	  </lst>
+	</searchComponent>
+	
+	<requestHandler name="/spellchecker_es" class="solr.SearchHandler" lazy="true">
+		<lst name="defaults">
+		  <!-- omp = Only More Popular -->
+		  <str name="spellcheck.onlyMorePopular">false</str>
+		  <!-- exr = Extended Results -->
+		  <str name="spellcheck.extendedResults">false</str>
+		  <!--  The number of suggestions to return -->
+		  <str name="spellcheck.count">1</str>
+		</lst>
+		<arr name="last-components">
+		  <str>spellcheck_es</str>
+		</arr>
   	</requestHandler>
-    
-    <!-- spellcheck fr -->
-    <searchComponent name="spellcheck_fr" class="solr.SpellCheckComponent">
-      <str name="queryAnalyzerFieldType">textSpell</str>
-      <lst name="spellchecker">
-        <str name="name">default</str>
-        <str name="field">fr_words</str>
-        <str name="spellcheckIndexDir">./changespell_fr</str>
-        <!--
-        <str name="buildOnCommit">true</str>
-          -->
-        <str name="buildOnOptimize">true</str>
-      </lst>
-    </searchComponent>
-    
-    <requestHandler name="/spellchecker_fr" class="solr.SearchHandler" lazy="true">
-	    <lst name="defaults">
-	      <!-- omp = Only More Popular -->
-	      <str name="spellcheck.onlyMorePopular">false</str>
-	      <!-- exr = Extended Results -->
-	      <str name="spellcheck.extendedResults">false</str>
-	      <!--  The number of suggestions to return -->
-	      <str name="spellcheck.count">1</str>
-	    </lst>
-	    <arr name="last-components">
-	      <str>spellcheck_fr</str>
-	    </arr>
+	
+	<!-- spellcheck fr -->
+	<searchComponent name="spellcheck_fr" class="solr.SpellCheckComponent">
+	  <str name="queryAnalyzerFieldType">textSpell</str>
+	  <lst name="spellchecker">
+		<str name="name">default</str>
+		<str name="field">fr_words</str>
+		<str name="spellcheckIndexDir">./changespell_fr</str>
+		<!--
+		<str name="buildOnCommit">true</str>
+		  -->
+		<str name="buildOnOptimize">true</str>
+	  </lst>
+	</searchComponent>
+	
+	<requestHandler name="/spellchecker_fr" class="solr.SearchHandler" lazy="true">
+		<lst name="defaults">
+		  <!-- omp = Only More Popular -->
+		  <str name="spellcheck.onlyMorePopular">false</str>
+		  <!-- exr = Extended Results -->
+		  <str name="spellcheck.extendedResults">false</str>
+		  <!--  The number of suggestions to return -->
+		  <str name="spellcheck.count">1</str>
+		</lst>
+		<arr name="last-components">
+		  <str>spellcheck_fr</str>
+		</arr>
   	</requestHandler>
-    
-    <!-- spellcheck it -->
-    <searchComponent name="spellcheck_it" class="solr.SpellCheckComponent">
-      <str name="queryAnalyzerFieldType">textSpell</str>
-      <lst name="spellchecker">
-        <str name="name">default</str>
-        <str name="field">it_words</str>
-        <str name="spellcheckIndexDir">./changespell_it</str>
-        <!--
-        <str name="buildOnCommit">true</str>
-          -->
-        <str name="buildOnOptimize">true</str>
-      </lst>
-    </searchComponent>
-    
-    <requestHandler name="/spellchecker_it" class="solr.SearchHandler" lazy="true">
-	    <lst name="defaults">
-	      <!-- omp = Only More Popular -->
-	      <str name="spellcheck.onlyMorePopular">false</str>
-	      <!-- exr = Extended Results -->
-	      <str name="spellcheck.extendedResults">false</str>
-	      <!--  The number of suggestions to return -->
-	      <str name="spellcheck.count">1</str>
-	    </lst>
-	    <arr name="last-components">
-	      <str>spellcheck_it</str>
-	    </arr>
+	
+	<!-- spellcheck it -->
+	<searchComponent name="spellcheck_it" class="solr.SpellCheckComponent">
+	  <str name="queryAnalyzerFieldType">textSpell</str>
+	  <lst name="spellchecker">
+		<str name="name">default</str>
+		<str name="field">it_words</str>
+		<str name="spellcheckIndexDir">./changespell_it</str>
+		<!--
+		<str name="buildOnCommit">true</str>
+		  -->
+		<str name="buildOnOptimize">true</str>
+	  </lst>
+	</searchComponent>
+	
+	<requestHandler name="/spellchecker_it" class="solr.SearchHandler" lazy="true">
+		<lst name="defaults">
+		  <!-- omp = Only More Popular -->
+		  <str name="spellcheck.onlyMorePopular">false</str>
+		  <!-- exr = Extended Results -->
+		  <str name="spellcheck.extendedResults">false</str>
+		  <!--  The number of suggestions to return -->
+		  <str name="spellcheck.count">1</str>
+		</lst>
+		<arr name="last-components">
+		  <str>spellcheck_it</str>
+		</arr>
   	</requestHandler>
-    
-    <!-- spellcheck nl -->
-    <searchComponent name="spellcheck_nl" class="solr.SpellCheckComponent">
-      <str name="queryAnalyzerFieldType">textSpell</str>
-      <lst name="spellchecker">
-        <str name="name">default</str>
-        <str name="field">nl_words</str>
-        <str name="spellcheckIndexDir">./changespell_nl</str>
-        <!--
-        <str name="buildOnCommit">true</str>
-          -->
-        <str name="buildOnOptimize">true</str>
-      </lst>
-    </searchComponent>
-    
-    <requestHandler name="/spellchecker_nl" class="solr.SearchHandler" lazy="true">
-	    <lst name="defaults">
-	      <!-- omp = Only More Popular -->
-	      <str name="spellcheck.onlyMorePopular">false</str>
-	      <!-- exr = Extended Results -->
-	      <str name="spellcheck.extendedResults">false</str>
-	      <!--  The number of suggestions to return -->
-	      <str name="spellcheck.count">1</str>
-	    </lst>
-	    <arr name="last-components">
-	      <str>spellcheck_nl</str>
-	    </arr>
+	
+	<!-- spellcheck nl -->
+	<searchComponent name="spellcheck_nl" class="solr.SpellCheckComponent">
+	  <str name="queryAnalyzerFieldType">textSpell</str>
+	  <lst name="spellchecker">
+		<str name="name">default</str>
+		<str name="field">nl_words</str>
+		<str name="spellcheckIndexDir">./changespell_nl</str>
+		<!--
+		<str name="buildOnCommit">true</str>
+		  -->
+		<str name="buildOnOptimize">true</str>
+	  </lst>
+	</searchComponent>
+	
+	<requestHandler name="/spellchecker_nl" class="solr.SearchHandler" lazy="true">
+		<lst name="defaults">
+		  <!-- omp = Only More Popular -->
+		  <str name="spellcheck.onlyMorePopular">false</str>
+		  <!-- exr = Extended Results -->
+		  <str name="spellcheck.extendedResults">false</str>
+		  <!--  The number of suggestions to return -->
+		  <str name="spellcheck.count">1</str>
+		</lst>
+		<arr name="last-components">
+		  <str>spellcheck_nl</str>
+		</arr>
   	</requestHandler>
-    
-    <!-- spellcheck pt -->
-    <searchComponent name="spellcheck_pt" class="solr.SpellCheckComponent">
-      <str name="queryAnalyzerFieldType">textSpell</str>
-      <lst name="spellchecker">
-        <str name="name">default</str>
-        <str name="field">pt_words</str>
-        <str name="spellcheckIndexDir">./changespell_pt</str>
-        <!--
-        <str name="buildOnCommit">true</str>
-          -->
-        <str name="buildOnOptimize">true</str>
-      </lst>
-    </searchComponent>
-    
-    <requestHandler name="/spellchecker_pt" class="solr.SearchHandler" lazy="true">
-	    <lst name="defaults">
-	      <!-- omp = Only More Popular -->
-	      <str name="spellcheck.onlyMorePopular">false</str>
-	      <!-- exr = Extended Results -->
-	      <str name="spellcheck.extendedResults">false</str>
-	      <!--  The number of suggestions to return -->
-	      <str name="spellcheck.count">1</str>
-	    </lst>
-	    <arr name="last-components">
-	      <str>spellcheck_pt</str>
-	    </arr>
+	
+	<!-- spellcheck pt -->
+	<searchComponent name="spellcheck_pt" class="solr.SpellCheckComponent">
+	  <str name="queryAnalyzerFieldType">textSpell</str>
+	  <lst name="spellchecker">
+		<str name="name">default</str>
+		<str name="field">pt_words</str>
+		<str name="spellcheckIndexDir">./changespell_pt</str>
+		<!--
+		<str name="buildOnCommit">true</str>
+		  -->
+		<str name="buildOnOptimize">true</str>
+	  </lst>
+	</searchComponent>
+	
+	<requestHandler name="/spellchecker_pt" class="solr.SearchHandler" lazy="true">
+		<lst name="defaults">
+		  <!-- omp = Only More Popular -->
+		  <str name="spellcheck.onlyMorePopular">false</str>
+		  <!-- exr = Extended Results -->
+		  <str name="spellcheck.extendedResults">false</str>
+		  <!--  The number of suggestions to return -->
+		  <str name="spellcheck.count">1</str>
+		</lst>
+		<arr name="last-components">
+		  <str>spellcheck_pt</str>
+		</arr>
   	</requestHandler>
-    
+	
 	<!-- ***** END Change spellchecker definition ******* -->
 
 	<searchComponent name="termsComponent" class="org.apache.solr.handler.component.TermsComponent"/>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.validation.validator.minsize" lcid="fr_FR">
-  <key id="message">le champ ″{field}″ doit avoir une taille minimale de {param} caractères.</key>
+<?xml version="1.0" encoding="UTF-8"?>
+<i18n baseKey="m.framework.validation.validator.minsize" lcid="fr_FR">
+	<key id="message">le champ ″{field}″ doit avoir une taille minimale de {param} caractères.</key>
 </i18n>

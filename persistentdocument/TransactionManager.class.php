@@ -88,7 +88,7 @@ class f_persistentdocument_TransactionManager
 	}
 
 	/**
-	 * @param Boolean $isolatedWrite make sense in the context of read-write separated database. Set to true if the next client request does not care about the data you wrote. It will then perform reads on read database. 
+	 * @param boolean $isolatedWrite make sense in the context of read-write separated database. Set to true if the next client request does not care about the data you wrote. It will then perform reads on read database. 
 	 * @throws Exception if bad transaction count
 	 * @return void
 	 */
@@ -153,7 +153,7 @@ class f_persistentdocument_TransactionManager
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function hasTransaction()
 	{
@@ -161,7 +161,7 @@ class f_persistentdocument_TransactionManager
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isDirty()
 	{

@@ -15,23 +15,23 @@ class date_Formatter
 		{
 			$format = self::getDefaultDateTimeFormat($lang);
 		}
-    	if (is_string($date) && $date !== '')
-    	{
-    		$date = date_Calendar::getInstance($date);
-    	}
-    	elseif (is_integer($date))
-    	{
-    		$date = date_Calendar::getInstanceFromTimestamp($date);
-    	}
-    	elseif (!($date instanceof date_Calendar))
-    	{
-    		return '';
-    	}
+		if (is_string($date) && $date !== '')
+		{
+			$date = date_Calendar::getInstance($date);
+		}
+		elseif (is_integer($date))
+		{
+			$date = date_Calendar::getInstanceFromTimestamp($date);
+		}
+		elseif (!($date instanceof date_Calendar))
+		{
+			return '';
+		}
 	if ($format === 'c')
 	{
-	    return date('c', $date->getTimestamp());
+		return date('c', $date->getTimestamp());
 	}
-    	$ls = LocaleService::getInstance();
+		$ls = LocaleService::getInstance();
 		$result = '';
 		$escaped = false;
 		$formatLength = strlen($format);

@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.date" lcid="en_GB">
-  <key id="short">Y-m-d</key>
-  <key id="js-format">yy-mm-dd</key>
-  <key id="human-format">yyyy-mm-dd</key>
+<?xml version="1.0" encoding="UTF-8"?>
+<i18n baseKey="m.framework.date" lcid="en_GB">
+	<key id="short">Y-m-d</key>
+	<key id="js-format">yy-mm-dd</key>
+	<key id="human-format">yyyy-mm-dd</key>
 </i18n>

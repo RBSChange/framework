@@ -2,8 +2,8 @@
 class f_DataCachePatternHelper
 {
 	/**
-	 * @param String $modelName valid model name with optionnal '[]' decorator
-	 * @return String
+	 * @param string $modelName valid model name with optionnal '[]' decorator
+	 * @return string
 	 */
 	public static function getModelPattern($modelName)
 	{
@@ -11,8 +11,8 @@ class f_DataCachePatternHelper
 	}
 	
 	/**
-	 * @param String $tagName
-	 * @return String
+	 * @param string $tagName
+	 * @return string
 	 */
 	public static function getTagPattern($tagName)
 	{
@@ -20,8 +20,8 @@ class f_DataCachePatternHelper
 	}
 	
 	/**
-	 * @param Integer $docId
-	 * @return String
+	 * @param integer $docId
+	 * @return string
 	 */
 	public static function getIdPattern($docId)
 	{
@@ -29,8 +29,8 @@ class f_DataCachePatternHelper
 	}
 	
 	/**
-	 * @param Integer $docId
-	 * @return String
+	 * @param integer $docId
+	 * @return string
 	 */
 	public static function getTTLPattern($seconds)
 	{

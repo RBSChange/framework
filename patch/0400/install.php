@@ -13,9 +13,9 @@ class framework_patch_0400 extends change_Patch
 		return dirname(__FILE__);
 	}
 	
-    /**
-     * @return false
-     */
+	/**
+	 * @return false
+	 */
 	public function isCodePatch()
 	{
 		return true;

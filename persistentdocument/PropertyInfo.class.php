@@ -261,7 +261,7 @@ class PropertyInfo
 	}
 
 	/**
-	 * @param Integer $value
+	 * @param integer $value
 	 * @return PropertyInfo
 	 */
 	public function setMinOccurs($value)
@@ -271,7 +271,7 @@ class PropertyInfo
 	}
 
 	/**
-	 * @param Integer $value
+	 * @param integer $value
 	 * @return PropertyInfo
 	 */
 	public function setMaxOccurs($value)
@@ -329,7 +329,7 @@ class PropertyInfo
 	/* Information de présentation */
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getDefaultValue()
 	{
@@ -337,7 +337,7 @@ class PropertyInfo
 	}
 
 	/**
-	 * @param String $value
+	 * @param string $value
 	 * @return PropertyInfo
 	 */
 	public function setDefaultValue($value)
@@ -357,7 +357,7 @@ class PropertyInfo
 	}
 
 	/**
-	 * @return Integer or -1
+	 * @return integer or -1
 	 */
 	public function getMaxSize()
 	{

@@ -92,7 +92,7 @@ class f_persistentdocument_PersistentTreeNode implements tree_TreeNode
 	
 	/**
 	 * Obtient le niveau du noeud
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getLevel()
 	{
@@ -101,7 +101,7 @@ class f_persistentdocument_PersistentTreeNode implements tree_TreeNode
 	
 	/**
 	 * Obtient l'id du document géré par le noeud
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getId()
 	{
@@ -109,7 +109,7 @@ class f_persistentdocument_PersistentTreeNode implements tree_TreeNode
 	}
 	
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getTreeId()
 	{
@@ -158,7 +158,7 @@ class f_persistentdocument_PersistentTreeNode implements tree_TreeNode
 	
 	/**
 	 * Obtient le label du noeud
-	 * @return String
+	 * @return string
 	 */
 	public function getLabel()
 	{
@@ -167,7 +167,7 @@ class f_persistentdocument_PersistentTreeNode implements tree_TreeNode
 	
 	/**
 	 * Obtient le model du document
-	 * @return String For example: 'modules_generic/folder'
+	 * @return string For example: 'modules_generic/folder'
 	 */
 	public function getDocumentModelName()
 	{
@@ -182,7 +182,7 @@ class f_persistentdocument_PersistentTreeNode implements tree_TreeNode
 	 * Verifie si les noeud sont identique
 	 * (du point de vu de la persistance)
 	 * @param f_persistentdocument_PersistentTreeNode $node
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function equals($node)
 	{
@@ -192,7 +192,7 @@ class f_persistentdocument_PersistentTreeNode implements tree_TreeNode
 	/**
 	 * Test si le noeud est le noeud racine
 	 *
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isRoot()
 	{
@@ -202,7 +202,7 @@ class f_persistentdocument_PersistentTreeNode implements tree_TreeNode
 	/**
 	 * Test si le noeud possede des fils
 	 *
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function hasChildren()
 	{

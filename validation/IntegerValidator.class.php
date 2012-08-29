@@ -41,8 +41,8 @@ class validation_IntegerValidator extends validation_ValidatorImpl implements va
 	}
 	
 	/**
-	 * @param String $value
-	 * @return String
+	 * @param string $value
+	 * @return string
 	 */
 	private function stripZeros($value)
 	{

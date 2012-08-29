@@ -6,7 +6,7 @@ class f_event_Event
 	private $params;
 	
 	/**
-	 * @param String $name the event name (aka identifier)
+	 * @param string $name the event name (aka identifier)
 	 * @param Mixed $sender the source of the event
 	 * @param Array $params the parameters as a (paramName => paramValue) array, optional
 	 */
@@ -28,7 +28,7 @@ class f_event_Event
 	}
 	
 	/**
-	 * @param String $paramName
+	 * @param string $paramName
 	 * @return Mixed param value or null
 	 */
 	

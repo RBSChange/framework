@@ -35,8 +35,8 @@ class indexer_SuggestionSolrSearch
 	private $multiple;
 	
 	/**
-	 * @param String|String[] $wordOrWords can be an array only if Solr1.4 & change schema 3.0.3 used
-	 * @param String $lang
+	 * @param string|String[] $wordOrWords can be an array only if Solr1.4 & change schema 3.0.3 used
+	 * @param string $lang
 	 */
 	public function __construct($wordOrWords, $lang = null)
 	{
@@ -52,7 +52,7 @@ class indexer_SuggestionSolrSearch
 	/**
 	 * Get the actual solr query string.
 	 * 
-	 * @return String
+	 * @return string
 	 */
 	public function getQueryString()
 	{
@@ -73,7 +73,7 @@ class indexer_SuggestionSolrSearch
 	/**
 	 * Getter for $suggestionCount
 	 *
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getSuggestionCount()
 	{
@@ -83,7 +83,7 @@ class indexer_SuggestionSolrSearch
 	/**
 	 * Setter for $suggestionCount
 	 *
-	 * @param Integer $count
+	 * @param integer $count
 	 */
 	public function setSuggestionCount($count)
 	{
@@ -91,7 +91,7 @@ class indexer_SuggestionSolrSearch
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getClientId()
 	{
@@ -99,7 +99,7 @@ class indexer_SuggestionSolrSearch
 	}
 	
 	/**
-	 * @param String $clientId
+	 * @param string $clientId
 	 */
 	public function setClientId($clientId)
 	{

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.validation.validator.max.message" lcid="de_DE">
-  <key id="reversed">das Feld ″{field}″ soll nicht einen maximalen Wert von {param} haben.</key>
+<?xml version="1.0" encoding="UTF-8"?>
+<i18n baseKey="m.framework.validation.validator.max.message" lcid="de_DE">
+	<key id="reversed">das Feld ″{field}″ soll nicht einen maximalen Wert von {param} haben.</key>
 </i18n>

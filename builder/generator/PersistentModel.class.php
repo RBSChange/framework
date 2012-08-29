@@ -59,9 +59,9 @@ class generator_PersistentModel
 	private $inverseProperties = array();
 
 	/**
-	 * @param String $moduleName
-	 * @param String $documentName
-	 * @return String
+	 * @param string $moduleName
+	 * @param string $documentName
+	 * @return string
 	 */
 	public static function buildModelName($moduleName, $documentName)
 	{
@@ -351,9 +351,9 @@ class generator_PersistentModel
 	}
 	
 	/**
-	 * @param String $xml
-	 * @param String $module
-	 * @param String $name
+	 * @param string $xml
+	 * @param string $module
+	 * @param string $name
 	 * @return generator_PersistentModel
 	 */
 	static function loadModelFromString($xml, $moduleName, $documentName)
@@ -504,7 +504,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @param String $modelName
+	 * @param string $modelName
 	 * @return generator_PersistentModel
 	 */
 	public static function getModelByName($modelName)
@@ -514,7 +514,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @param String $message
+	 * @param string $message
 	 */
 	public static function addMessage($message)
 	{
@@ -522,8 +522,8 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @param Boolean $value
-	 * @return String
+	 * @param boolean $value
+	 * @return string
 	 */
 	public static function escapeBoolean($value)
 	{
@@ -531,8 +531,8 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @param String $value
-	 * @return String
+	 * @param string $value
+	 * @return string
 	 */
 	public static function escapeString($value)
 	{
@@ -545,8 +545,8 @@ class generator_PersistentModel
 
 	/**
 	 * @param DOMElement $xml
-	 * @param String $moduleName
-	 * @param String $documentName
+	 * @param string $moduleName
+	 * @param string $documentName
 	 */
 	private function workflowHook($xml, $moduleName, $documentName)
 	{
@@ -592,8 +592,8 @@ class generator_PersistentModel
 
 	/**
 	 * @param DomElement $filePath
-	 * @param String $moduleName
-	 * @param String $documentName
+	 * @param string $moduleName
+	 * @param string $documentName
 	 */
 	protected function __construct($xml, $moduleName, $documentName)
 	{
@@ -649,7 +649,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @param String $filePath
+	 * @param string $filePath
 	 * @return DomElement
 	 */
 	private static function loadFile($filePath)
@@ -666,8 +666,8 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @param String $value
-	 * @return Boolean
+	 * @param string $value
+	 * @return boolean
 	 */
 	public static function getBoolean($value)
 	{
@@ -685,7 +685,7 @@ class generator_PersistentModel
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function hasParentModel()
 	{
@@ -713,7 +713,7 @@ class generator_PersistentModel
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isParentModelBackofficeIndexable()
 	{
@@ -729,7 +729,7 @@ class generator_PersistentModel
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getName()
 	{
@@ -737,7 +737,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getModuleName()
 	{
@@ -745,7 +745,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getDocumentName()
 	{
@@ -761,8 +761,8 @@ class generator_PersistentModel
 	}
 	
 	/**
-	 * @param String[] $models
-	 * @return String[]
+	 * @param string[] $models
+	 * @return string[]
 	 */
 	public function getCompatibleModel($models = null)
 	{
@@ -779,8 +779,8 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @param String[] $models
-	 * @return String[]
+	 * @param string[] $models
+	 * @return string[]
 	 */
 	public function getAncestorModels($models = null)
 	{
@@ -800,7 +800,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return String[]
+	 * @return string[]
 	 */
 	function getChildren()
 	{
@@ -808,7 +808,7 @@ class generator_PersistentModel
 	}
 	
 	/**
-	 * @param String $name
+	 * @param string $name
 	 * @return generator_PersistentProperty
 	 */
 	function getPropertyByName($name)
@@ -817,7 +817,7 @@ class generator_PersistentModel
 	}
 	
 	/**
-	 * @param String $name
+	 * @param string $name
 	 * @return generator_PersistentProperty
 	 */
 	function getAncestorPropertyByName($name)
@@ -832,7 +832,7 @@ class generator_PersistentModel
 	}	
 
 	/**
-	 * @param String $name
+	 * @param string $name
 	 * @return generator_ChildrenProperty
 	 */
 	private function getChildrenPropertyByName($name)
@@ -841,7 +841,7 @@ class generator_PersistentModel
 	}
 	
 	/**
-	 * @param String $name
+	 * @param string $name
 	 * @return generator_ChildrenProperty
 	 */
 	function getAncestorChildrenPropertyByName($name)
@@ -857,7 +857,7 @@ class generator_PersistentModel
 	
 
 	/**
-	 * @param String $name
+	 * @param string $name
 	 * @return generator_PersistentProperty
 	 */
 	private function getSerializedPropertyByName($name)
@@ -866,7 +866,7 @@ class generator_PersistentModel
 	}
 	
 	/**
-	 * @param String $name
+	 * @param string $name
 	 * @return generator_PersistentProperty
 	 */
 	function getAncestorSerializedPropertyByName($name)
@@ -881,7 +881,7 @@ class generator_PersistentModel
 	}	
 
 	/**
-	 * @param String $name
+	 * @param string $name
 	 * @return generator_ChildrenProperty
 	 */
 	private function getInversePropertyByName($name)
@@ -1072,7 +1072,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isLocalized()
 	{
@@ -1080,7 +1080,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getDocumentClassName()
 	{
@@ -1088,7 +1088,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getImportScriptDocumentClassName()
 	{
@@ -1096,7 +1096,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function hasURL()
 	{
@@ -1111,7 +1111,7 @@ class generator_PersistentModel
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function useRewriteURL()
 	{
@@ -1126,7 +1126,7 @@ class generator_PersistentModel
 	}	
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isIndexable()
 	{
@@ -1141,7 +1141,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isBackofficeIndexable()
 	{
@@ -1160,7 +1160,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getDefaultStatus()
 	{
@@ -1175,7 +1175,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function hasCorrection()
 	{
@@ -1187,7 +1187,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function usePublicationDates()
 	{
@@ -1217,7 +1217,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function hasWorkflow()
 	{
@@ -1233,7 +1233,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getWorkflowStartTask()
 	{
@@ -1245,7 +1245,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getSerializedWorkflowParameters()
 	{
@@ -1257,7 +1257,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getTableName()
 	{
@@ -1316,7 +1316,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getBaseClassName()
 	{
@@ -1346,7 +1346,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getBaseServiceClassName()
 	{
@@ -1359,7 +1359,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getServiceClassName()
 	{
@@ -1367,7 +1367,7 @@ class generator_PersistentModel
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getIcon()
 	{
@@ -1382,7 +1382,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getBaseName()
 	{
@@ -1396,7 +1396,7 @@ class generator_PersistentModel
 
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function generatePhpModel()
 	{
@@ -1407,7 +1407,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function generatePhpBaseClass()
 	{
@@ -1418,7 +1418,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function generatePhpI18nClass()
 	{
@@ -1604,7 +1604,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	private function getModelVersion()
 	{
@@ -1616,7 +1616,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getPhpDefaultValues()
 	{
@@ -1749,7 +1749,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function hasCascadeDelete()
 	{
@@ -1764,7 +1764,7 @@ class generator_PersistentModel
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function hasChildrenProperties()
 	{
@@ -1772,7 +1772,7 @@ class generator_PersistentModel
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getPhpDefaultI18nValues()
 	{

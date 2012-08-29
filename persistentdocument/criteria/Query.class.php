@@ -65,7 +65,7 @@ interface f_persistentdocument_criteria_Query // extends f_persistentdocument_cr
 	function setProjection();
 		
 	/**
-	 * @param String $documentModelName
+	 * @param string $documentModelName
 	 * @return f_persistentdocument_criteria_Query
 	 */
 	function setDocumentModelName($documentModelName);
@@ -84,13 +84,13 @@ interface f_persistentdocument_criteria_Query // extends f_persistentdocument_cr
 	function addOrder($order);
 
 	/**
-	 * @param Integer $firstResult
+	 * @param integer $firstResult
 	 * @return f_persistentdocument_criteria_Query
 	 */
 	function setFirstResult($firstResult);
 
 	/**
-	 * @param Integer $maxResult
+	 * @param integer $maxResult
 	 * @return f_persistentdocument_criteria_Query
 	 */
 	function setMaxResults($maxResult);
@@ -143,14 +143,14 @@ interface f_persistentdocument_criteria_Query // extends f_persistentdocument_cr
 	 * If the query has some projection, retrieve one of them into a dedicated array
 	 * Shortcut for <code>$persitentProviderInstance->findColumn($this, $columnName)</code>
 	 * @see f_persistentdocument_PersistentProvider#findColumn
-	 * @param String $columnName  the name of the projection
+	 * @param string $columnName  the name of the projection
 	 * @return mixed[]
 	 */
 	function findColumn($columnName);
 
 	/**
 	 * Delete all the document matching the query
-	 * @return Integer number of deleted documents
+	 * @return integer number of deleted documents
 	 */
 	function delete();
 
@@ -165,7 +165,7 @@ interface f_persistentdocument_criteria_ExecutableQuery extends f_persistentdocu
 {
 
 	/**
-	 * @param String $name
+	 * @param string $name
 	 */
 	function addDocumentProjection($name);
 
@@ -210,18 +210,18 @@ interface f_persistentdocument_criteria_ExecutableQuery extends f_persistentdocu
 	public function hasOrders();
 
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getFirstResult();
 	
 	/**
-	 * @param String $columnName
+	 * @param string $columnName
 	 * @return f_persistentdocument_criteria_Query
 	 */
 	public function setFetchColumn($columnName);
 
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getMaxResults();
 
@@ -358,7 +358,7 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 	}
 	
 	/**
-	 * @param String $columnName
+	 * @param string $columnName
 	 * @return f_persistentdocument_criteria_Query
 	 */
 	public function setFetchColumn($columnName)
@@ -377,7 +377,7 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 	}
 
 	/**
-	 * @param String $documentModel
+	 * @param string $documentModel
 	 * @see persistentdocument/criteria/f_persistentdocument_criteria_Query#setDocumentModelName($documentModelName)
 	 */
 	public function setDocumentModelName($documentModelName, $includeChildren = true)
@@ -579,7 +579,7 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	function hasHavingCriterion()
 	{
@@ -823,7 +823,7 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 	}
 
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getFirstResult()
 	{
@@ -831,7 +831,7 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 	}
 
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getMaxResults()
 	{
@@ -932,7 +932,7 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 	 * If the query has some projection, retrieve one of them into a dedicated array
 	 * Shortcut for <code>$persitentProviderInstance->findColumn($this, $columnName)</code>
 	 * @see f_persistentdocument_PersistentProvider#findColumn
-	 * @param String $columnName  the name of the projection
+	 * @param string $columnName  the name of the projection
 	 * @return mixed[]
 	 */
 	function findColumn($columnName)
@@ -953,7 +953,7 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 	/**
 	 * Delete all the documents matching the query.<br/>
 	 * <strong>Note</strong> : only for queries returning documents (of course...)
-	 * @return Integer number of deleted documents
+	 * @return integer number of deleted documents
 	 */
 	function delete()
 	{
@@ -1022,7 +1022,7 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 	}
 
 	/**
-	 * @param String $relationName
+	 * @param string $relationName
 	 * @param f_persistentdocument_criteria_Criteria $criteria
 	 */
 	private function addCriteria($relationName, $criteria)
@@ -1047,7 +1047,7 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function hasParent()
 	{
@@ -1183,7 +1183,7 @@ class f_persistentdocument_criteria_QueryIntersection
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	function isEmpty()
 	{
@@ -1199,7 +1199,7 @@ class f_persistentdocument_criteria_QueryIntersection
 	}
 	
 	/**
-	 * @return Integer[]
+	 * @return integer[]
 	 */
 	function findIds()
 	{
@@ -1212,8 +1212,8 @@ class f_persistentdocument_criteria_QueryIntersection
 	}
 	
 	/**
-	 * @param Integer $offset
-	 * @param Integer $count
+	 * @param integer $offset
+	 * @param integer $count
 	 * @param string $orderByIds [null] | 'ASC' | 'DESC'
 	 * @return f_persistentdocument_PersistentDocument[]
 	 */
@@ -1327,7 +1327,7 @@ class f_persistentdocument_criteria_QueryUnion
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	function isEmpty()
 	{
@@ -1343,7 +1343,7 @@ class f_persistentdocument_criteria_QueryUnion
 	}
 	
 	/**
-	 * @return Integer[]
+	 * @return integer[]
 	 */
 	function findIds()
 	{
@@ -1351,7 +1351,7 @@ class f_persistentdocument_criteria_QueryUnion
 	}
 	
 	/**
-	 * @return Integer[]
+	 * @return integer[]
 	 */
 	function getIds()
 	{
@@ -1359,8 +1359,8 @@ class f_persistentdocument_criteria_QueryUnion
 	}
 	
 	/**
-	 * @param Integer $offset
-	 * @param Integer $count
+	 * @param integer $offset
+	 * @param integer $count
 	 * @param string $orderByIds [null] | 'ASC' | 'DESC'
 	 * @return f_persistentdocument_PersistentDocument[]
 	 */

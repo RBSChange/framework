@@ -592,9 +592,9 @@ class change_SchemaManagerMySql implements change_SchemaManager
 			UNIQUE KEY `tree_node` (`parent_id`, `node_order`),
 			UNIQUE KEY `descendant` (`node_level`,`node_order`,`node_path`)
 			) ENGINE=InnoDB CHARACTER SET latin1 COLLATE latin1_general_ci';
-        
-        $this->execute($sql);
-        return $dropSQL . $sql . ';' . PHP_EOL;
+		
+		$this->execute($sql);
+		return $dropSQL . $sql . ';' . PHP_EOL;
 	}
 
 	/**

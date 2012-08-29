@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.validation.validator.date" lcid="de_DE">
-  <key id="message">das Feld ″{field}″ soll ein gültiges Datum sein (format: {format})</key>
-  <key id="d">tt</key>
-  <key id="m">mm</key>
-  <key id="y">jjjj</key>
-  <key id="h">uu</key>
-  <key id="i">mn</key>
-  <key id="s">ss</key>
+<?xml version="1.0" encoding="UTF-8"?>
+<i18n baseKey="m.framework.validation.validator.date" lcid="de_DE">
+	<key id="message">das Feld ″{field}″ soll ein gültiges Datum sein (format: {format})</key>
+	<key id="d">tt</key>
+	<key id="m">mm</key>
+	<key id="y">jjjj</key>
+	<key id="h">uu</key>
+	<key id="i">mn</key>
+	<key id="s">ss</key>
 </i18n>

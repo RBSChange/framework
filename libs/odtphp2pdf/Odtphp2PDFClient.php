@@ -11,7 +11,7 @@ class Odtphp2PDFClient
 	private $serviceUrl;
 
 	/**
-	 * @param String $serviceUrl URL of an odtphp2pdf installation
+	 * @param string $serviceUrl URL of an odtphp2pdf installation
 	 */
 	function __construct($serviceUrl)
 	{
@@ -19,9 +19,9 @@ class Odtphp2PDFClient
 	}
 
 	/**
-	 * @param String $template
+	 * @param string $template
 	 * @param array $model
-	 * @return String the pdf content
+	 * @return string the pdf content
 	 * @throws Exception
 	 */
 	function getPdf($template, $model)
@@ -37,9 +37,9 @@ class Odtphp2PDFClient
 	}
 
 	/**
-	 * @param String $template
+	 * @param string $template
 	 * @param array $model
-	 * @return String the modified ODT content
+	 * @return string the modified ODT content
 	 * @throws Exception
 	 */
 	function getOdt($template, $model)
@@ -105,7 +105,7 @@ class Odtphp2PDFClient
 
 	/**
 	 * @param array|String $arrayOrString
-	 * @param String $currentKey
+	 * @param string $currentKey
 	 * @param array $postData
 	 */
 	private function toPostData($arrayOrString, $currentKey, &$postData)

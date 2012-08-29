@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.pdf.messages" lcid="de_DE">
-  <key id="error">PDF-Erstellung fiel aus, bitte probieren Sie noch mal später.</key>
+<?xml version="1.0" encoding="UTF-8"?>
+<i18n baseKey="m.framework.pdf.messages" lcid="de_DE">
+	<key id="error">PDF-Erstellung fiel aus, bitte probieren Sie noch mal später.</key>
 </i18n>

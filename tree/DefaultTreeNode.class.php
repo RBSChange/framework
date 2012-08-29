@@ -13,7 +13,7 @@ class tree_DefaultTreeNode implements tree_TreeNode
 	}
 	
 	/**
-	 * @param Integer $index
+	 * @param integer $index
 	 * @return tree_TreeNode
 	 */
 	public function getChildAt($index)
@@ -26,7 +26,7 @@ class tree_DefaultTreeNode implements tree_TreeNode
 	}
 	
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getChildCount()
 	{
@@ -34,7 +34,7 @@ class tree_DefaultTreeNode implements tree_TreeNode
 	}
 	
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getIndex()
 	{
@@ -62,7 +62,7 @@ class tree_DefaultTreeNode implements tree_TreeNode
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isRoot()
 	{
@@ -70,7 +70,7 @@ class tree_DefaultTreeNode implements tree_TreeNode
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isLeaf()
 	{
@@ -78,7 +78,7 @@ class tree_DefaultTreeNode implements tree_TreeNode
 	}
 	
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getLevel()
 	{
@@ -124,7 +124,7 @@ class tree_DefaultTreeNode implements tree_TreeNode
 	public function addChild($treeNode)
 	{
 		$treeNode->parentNode = $this;
-		$treeNode->index      = count($this->childNodes);
+		$treeNode->index	  = count($this->childNodes);
 		$this->childNodes[]   = $treeNode;
 	}
 		

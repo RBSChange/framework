@@ -376,7 +376,7 @@ class f_mvc_DynBeanModel implements f_mvc_BeanModel
 	}
 
 	/**
-	 * @param String $propName
+	 * @param string $propName
 	 * @param ReflectionClass $class
 	 * @return BeanPropertyInfoImpl
 	 */
@@ -408,7 +408,7 @@ class f_mvc_DynBeanModel implements f_mvc_BeanModel
 	}
 
 	/**
-	 * @param String $docType
+	 * @param string $docType
 	 * @return mixed[] BeanPropertyType, ReflectionClass
 	 */
 	private function normalizeType($docType)
@@ -478,7 +478,7 @@ class f_mvc_DynBeanModel implements f_mvc_BeanModel
 	/**
 	 * Used as getter/setter prefix in the context of BeanAggregateModel
 	 * @see BeanAggregateModel
-	 * @return String
+	 * @return string
 	 */
 	function getBeanName()
 	{
@@ -486,7 +486,7 @@ class f_mvc_DynBeanModel implements f_mvc_BeanModel
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getBeanConstraints()
 	{
@@ -494,7 +494,7 @@ class f_mvc_DynBeanModel implements f_mvc_BeanModel
 	}
 	
 	/**
-	 * @param String $beanConstraints
+	 * @param string $beanConstraints
 	 */
 	function setBeanConstraints($beanConstraints)
 	{
@@ -502,7 +502,7 @@ class f_mvc_DynBeanModel implements f_mvc_BeanModel
 	}
 	
 	/**
-	 * @param String $beanConstraint
+	 * @param string $beanConstraint
 	 */
 	function addBeanConstraint($beanConstraint)
 	{

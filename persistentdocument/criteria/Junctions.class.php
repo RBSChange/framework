@@ -16,7 +16,7 @@ class f_persistentdocument_criteria_Junction
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getOp()
 	{
@@ -34,12 +34,12 @@ class f_persistentdocument_criteria_Junction
 	}
 	
 	/**
-     * @return array
-     */
-    public function getCriterions()
-    {
-        return $this->criterions;
-    }
+	 * @return array
+	 */
+	public function getCriterions()
+	{
+		return $this->criterions;
+	}
 }
 
 class f_persistentdocument_criteria_Conjunction extends f_persistentdocument_criteria_Junction

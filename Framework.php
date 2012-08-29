@@ -201,7 +201,7 @@ class Framework
 	 *			$index[strtolower($label[0])][$label] = $brand;
 	 *		}
 	 * 		Framework::endBench("getBrandList processing"); // debug time between this call and last call and end bench process
-	 * @param String $msg
+	 * @param string $msg
 	 */
 	public static function startBench($start = null)
 	{
@@ -238,7 +238,7 @@ class Framework
 	
 	/**
 	 * @see Framework::startBench($msg)
-	 * @param String $msg
+	 * @param string $msg
 	 */
 	public static function bench($msg)
 	{
@@ -258,7 +258,7 @@ class Framework
 
 	/**
 	 * @see Framework::startBench($msg)
-	 * @param String $msg
+	 * @param string $msg
 	 */
 	public static function endBench($msg = null)
 	{
@@ -271,7 +271,7 @@ class Framework
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public static function getVersion()
 	{
@@ -511,26 +511,26 @@ class Framework
 		spl_autoload_register(array(__CLASS__, "autoload"));
 	}
 	
-    /**
-     * @param string $className
-     * @return void
-     */
-    public static function autoload($className)
-    {
-    	$basePath = PROJECT_HOME . '/build/autoload';
-    	if (!is_dir($basePath))
-    	{
-    		die('Please execute '. CHANGE_COMMAND . ' compile-autoload');
-    	}
-    	$path =  $basePath . DIRECTORY_SEPARATOR . str_replace('_', DIRECTORY_SEPARATOR, $className) . DIRECTORY_SEPARATOR . "to_include";
-    	if (is_readable($path)) {require_once $path;}
-    	
-    	if (strpos($className, 'Zend_') === 0 && defined("ZEND_FRAMEWORK_PATH"))
-    	{
-    		$path = ZEND_FRAMEWORK_PATH . DIRECTORY_SEPARATOR . str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
-    		if (is_readable($path)) {require_once $path;}	
-    	}
-    }
+	/**
+	 * @param string $className
+	 * @return void
+	 */
+	public static function autoload($className)
+	{
+		$basePath = PROJECT_HOME . '/build/autoload';
+		if (!is_dir($basePath))
+		{
+			die('Please execute '. CHANGE_COMMAND . ' compile-autoload');
+		}
+		$path =  $basePath . DIRECTORY_SEPARATOR . str_replace('_', DIRECTORY_SEPARATOR, $className) . DIRECTORY_SEPARATOR . "to_include";
+		if (is_readable($path)) {require_once $path;}
+		
+		if (strpos($className, 'Zend_') === 0 && defined("ZEND_FRAMEWORK_PATH"))
+		{
+			$path = ZEND_FRAMEWORK_PATH . DIRECTORY_SEPARATOR . str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
+			if (is_readable($path)) {require_once $path;}	
+		}
+	}
 }
 
 // Load configuration
@@ -542,8 +542,8 @@ ini_set('include_path', ZEND_FRAMEWORK_PATH . (defined('INCLUDE_PATH') ? PATH_SE
 
 Framework::registerAutoload();
 
-ini_set('arg_separator.output',      '&amp;');
-ini_set('magic_quotes_runtime',      0);
+ini_set('arg_separator.output',	  '&amp;');
+ini_set('magic_quotes_runtime',	  0);
 
 Framework::registerLogErrorHandler();
 

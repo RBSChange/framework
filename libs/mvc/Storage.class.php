@@ -118,7 +118,7 @@ class change_Storage
 	}
 	
 	/**
-	 * @param String $oldSessionId 
+	 * @param string $oldSessionId 
 	 */
 	protected function sessionIdChanged($oldSessionId)
 	{
@@ -152,7 +152,7 @@ class change_Storage
 	}
 	
 	/**
-	 * @param String $key
+	 * @param string $key
 	 * @param Zend_Session_Namespace $ns
 	 * @return Mixed 
 	 */
@@ -168,8 +168,8 @@ class change_Storage
 	}
 	
 	/**
-	 * @param String $key
-	 * @return String 
+	 * @param string $key
+	 * @return string 
 	 */
 	public function &read($key)
 	{
@@ -177,8 +177,8 @@ class change_Storage
 	}
 	
 	/**
-	 * @param String $key
-	 * @return String 
+	 * @param string $key
+	 * @return string 
 	 */
 	public function &readForUser($key)
 	{
@@ -199,7 +199,7 @@ class change_Storage
 	}
 	
 	/**
-	 * @param String $key
+	 * @param string $key
 	 * @return Mixed
 	 */
 	public function remove($key)
@@ -208,7 +208,7 @@ class change_Storage
 	}
 	
 	/**
-	 * @param String $key
+	 * @param string $key
 	 * @return Mixed
 	 */
 	public function removeForUser($key)
@@ -218,7 +218,7 @@ class change_Storage
 
 
 	/**
-	 * @param String $key
+	 * @param string $key
 	 * @param Mixed $data
 	 * @param Zend_Session_Namespace $ns 
 	 */
@@ -232,7 +232,7 @@ class change_Storage
 	}
 	
 	/**
-	 * @param String $key
+	 * @param string $key
 	 * @param Mixed $data
 	 */
 	public function write($key, &$data)
@@ -241,7 +241,7 @@ class change_Storage
 	}
 	
 	/**
-	 * @param String $key
+	 * @param string $key
 	 * @param Mixed $data
 	 */
 	public function writeForUser($key, &$data)

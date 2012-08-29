@@ -85,7 +85,7 @@ class indexer_SolrManager
 	 * 
 	 * @throws IndexException
 	 * @param indexer_StandardSolrSearch $solrSearch
-	 * @return String (raw server answer)
+	 * @return string (raw server answer)
 	 */
 	public function query($solrSearch)
 	{
@@ -120,7 +120,7 @@ class indexer_SolrManager
 	/**
 	 * Delete an Indexable Document fron the indexer given it's id (eg: 10006/fr)
 	 *
-	 * @param String $id
+	 * @param string $id
 	 */
 	public function delete($id)
 	{
@@ -258,8 +258,8 @@ class indexer_SolrManager
 	}
 	
 	/**
-	 * @param String $postString
-	 * @return String
+	 * @param string $postString
+	 * @return string
 	 */
 	public function sendUpdate($postString)
 	{
@@ -269,8 +269,8 @@ class indexer_SolrManager
 	}
 	
 	/**
-	 * @param String $id
-	 * @return String
+	 * @param string $id
+	 * @return string
 	 */
 	public function sendDelete($id)
 	{
@@ -279,7 +279,7 @@ class indexer_SolrManager
 		return $this->sendXMLData("<delete><query>finalId:$id</query></delete>");
 	}
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function sendCommit()
 	{
@@ -290,7 +290,7 @@ class indexer_SolrManager
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function sendOptimize()
 	{
@@ -309,8 +309,8 @@ class indexer_SolrManager
 	}
 	
 	/**
-	 * @param String $name
-	 * @param String $data
+	 * @param string $name
+	 * @param string $data
 	 * @return array()
 	 */
 	public function getArrayPropertyFromData($name, $data)
@@ -330,7 +330,7 @@ class indexer_SolrManager
 	}
 	
 	/**
-	 * @param Boolean $bool
+	 * @param boolean $bool
 	 */
 	public function setAutoCommit($bool)
 	{
@@ -345,7 +345,7 @@ class indexer_SolrManager
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isDirty()
 	{
@@ -373,7 +373,7 @@ class indexer_SolrManager
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected function getUrl()
 	{
@@ -411,7 +411,7 @@ class indexer_SolrManager
 	/**
 	 * Set the indexer's 'Task' we want to perform
 	 * For example: $task->setTask('update') means the URL used for communication will be http://<serverurl>/update
-	 * @param String $string
+	 * @param string $string
 	 */
 	protected function setTask($string)
 	{
@@ -421,7 +421,7 @@ class indexer_SolrManager
 	/**
 	 * Get the Task
 	 *
-	 * @return String
+	 * @return string
 	 */
 	protected function getTask()
 	{
@@ -432,8 +432,8 @@ class indexer_SolrManager
 	 * Send the raw text/xml content to the server when in "update" mode.
 	 *
 	 * @throws IndexException
-	 * @param String $xmlData
-	 * @return String
+	 * @param string $xmlData
+	 * @return string
 	 */
 	protected function sendXMLData($xmlData, $timeout = null)
 	{
@@ -464,7 +464,7 @@ class indexer_SolrManager
 	}
 	
 	/**
-	 * @param String $url
+	 * @param string $url
 	 * @return indexer_SolrServerRequest
 	 */
 	protected function getReadSolrRequest($url)
@@ -476,7 +476,7 @@ class indexer_SolrManager
 	/**
 	 * Analyses the raw server answer
 	 *
-	 * @param String $data
+	 * @param string $data
 	 */
 	private function parseServerAnswer($data)
 	{
@@ -500,8 +500,8 @@ class indexer_SolrManager
 	/**
 	 * Converts to xml entities (borrowed from SolrUpdate.php)
 	 *
-	 * @param String $string
-	 * @return String
+	 * @param string $string
+	 * @return string
 	 */
 	private function xmlentities($string)
 	{
@@ -511,7 +511,7 @@ class indexer_SolrManager
 	/**
 	 * Get the base indexer URL
 	 *
-	 * @return String
+	 * @return string
 	 */
 	private function getBaseURL()
 	{

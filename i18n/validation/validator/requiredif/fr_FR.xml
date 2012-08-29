@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.validation.validator.requiredif" lcid="fr_FR">
-  <key id="message">Le champ ″{field}″ est obligatoire si le champ ″{fieldIf}″ est renseigné.</key>
+<?xml version="1.0" encoding="UTF-8"?>
+<i18n baseKey="m.framework.validation.validator.requiredif" lcid="fr_FR">
+	<key id="message">Le champ ″{field}″ est obligatoire si le champ ″{fieldIf}″ est renseigné.</key>
 </i18n>

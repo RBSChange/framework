@@ -5,11 +5,11 @@
 class UserActionLoggerService extends change_BaseService
 {
 	/**
-	 * @param String $actionName
+	 * @param string $actionName
 	 * @param f_persistentdocument_PersistentDocument $document
 	 * @param array $info
-	 * @param String $moduleName
-	 * @return Integer the log entry id
+	 * @param string $moduleName
+	 * @return integer the log entry id
 	 */
 	public function addCurrentUserDocumentEntry($actionName, $document, $info, $moduleName)
 	{
@@ -18,11 +18,11 @@ class UserActionLoggerService extends change_BaseService
 	
 	/**
 	 * @param users_persistentdocument_user $user
-	 * @param String $actionName
+	 * @param string $actionName
 	 * @param f_persistentdocument_PersistentDocument $document
 	 * @param array $info
-	 * @param String $moduleName
-	 * @return Integer the log entry id
+	 * @param string $moduleName
+	 * @return integer the log entry id
 	 */
 	public function addUserDocumentEntry($user, $actionName, $document, $info, $moduleName)
 	{

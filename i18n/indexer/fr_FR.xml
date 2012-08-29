@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.indexer" lcid="fr_FR">
-  <key id="from-rangefacet">plus de {min}</key>
-  <key id="to-rangefacet">moins de {max}</key>
-  <key id="from-to-rangefacet">de {min} à {max}</key>
+<?xml version="1.0" encoding="UTF-8"?>
+<i18n baseKey="m.framework.indexer" lcid="fr_FR">
+	<key id="from-rangefacet">plus de {min}</key>
+	<key id="to-rangefacet">moins de {max}</key>
+	<key id="from-to-rangefacet">de {min} à {max}</key>
 </i18n>

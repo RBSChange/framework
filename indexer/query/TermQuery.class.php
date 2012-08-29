@@ -25,7 +25,7 @@ class indexer_TermQuery extends indexer_QueryBase implements indexer_Query
 	protected $fieldName;
 	
 	/**
-	 * @param String $fieldName
+	 * @param string $fieldName
 	 */
 	function __construct($fieldName, $value = null)
 	{
@@ -77,7 +77,7 @@ class indexer_TermQuery extends indexer_QueryBase implements indexer_Query
 	/**
 	 * When set to true, the term is required.
 	 *
-	 * @param Boolean $bool
+	 * @param boolean $bool
 	 * @return indexer_TermQuery
 	 */
 	public function setIsRequired($bool = true)
@@ -88,7 +88,7 @@ class indexer_TermQuery extends indexer_QueryBase implements indexer_Query
 	/**
 	 * When set to true, the term is prohibited.
 	 *
-	 * @param Boolean $bool
+	 * @param boolean $bool
 	 * @return indexer_TermQuery
 	 */
 	public function setIsProhibited($bool = true)
@@ -97,7 +97,7 @@ class indexer_TermQuery extends indexer_QueryBase implements indexer_Query
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	function isEmpty()
 	{
@@ -107,7 +107,7 @@ class indexer_TermQuery extends indexer_QueryBase implements indexer_Query
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function __toString()
 	{
@@ -115,7 +115,7 @@ class indexer_TermQuery extends indexer_QueryBase implements indexer_Query
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected function toStringPrefix()
 	{
@@ -134,7 +134,7 @@ class indexer_TermQuery extends indexer_QueryBase implements indexer_Query
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected function toStringSuffix()
 	{
@@ -146,7 +146,7 @@ class indexer_TermQuery extends indexer_QueryBase implements indexer_Query
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function toSolrString()
 	{
@@ -157,12 +157,12 @@ class indexer_TermQuery extends indexer_QueryBase implements indexer_Query
 	{
 		return str_replace(
 			array('\\', '+', '-', '(', ')', '{', '}', '^', '"', '~', '?', ':', '[', ']'),
-            array('\\\\', '\\+', '\\-', '\\(', '\\)', '\\{', '\\}', '\\^', '\\"', '\\~', '\\?', '\\:', '\\[', '\\]'),
+			array('\\\\', '\\+', '\\-', '\\(', '\\)', '\\{', '\\}', '\\^', '\\"', '\\~', '\\?', '\\:', '\\[', '\\]'),
 			$value);
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */	
 	public function getValue()
 	{
@@ -170,7 +170,7 @@ class indexer_TermQuery extends indexer_QueryBase implements indexer_Query
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */	
 	public function getFieldName()
 	{
@@ -178,7 +178,7 @@ class indexer_TermQuery extends indexer_QueryBase implements indexer_Query
 	}
 	
 	/**
-	 * @return String[]
+	 * @return string[]
 	 */
 	public function getTerms()
 	{
@@ -189,7 +189,7 @@ class indexer_TermQuery extends indexer_QueryBase implements indexer_Query
 class indexer_StringTermQuery extends indexer_TermQuery
 {
 	/**
-	 * @param String $fieldName
+	 * @param string $fieldName
 	 */
 	function __construct($fieldName, $value = null)
 	{
@@ -200,7 +200,7 @@ class indexer_StringTermQuery extends indexer_TermQuery
 class indexer_VolatileStringTermQuery extends indexer_TermQuery
 {
 	/**
-	 * @param String $fieldName
+	 * @param string $fieldName
 	 */
 	function __construct($fieldName, $value = null)
 	{
@@ -211,7 +211,7 @@ class indexer_VolatileStringTermQuery extends indexer_TermQuery
 class indexer_VolatileIntegerTermQuery extends indexer_TermQuery
 {
 	/**
-	 * @param String $fieldName
+	 * @param string $fieldName
 	 */
 	function __construct($fieldName, $value = null)
 	{
@@ -222,7 +222,7 @@ class indexer_VolatileIntegerTermQuery extends indexer_TermQuery
 class indexer_VolatileFloatTermQuery extends indexer_TermQuery
 {
 	/**
-	 * @param String $fieldName
+	 * @param string $fieldName
 	 */
 	function __construct($fieldName, $value = null)
 	{

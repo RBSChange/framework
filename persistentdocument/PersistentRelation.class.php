@@ -18,13 +18,13 @@ class f_persistentdocument_PersistentRelation
 	const RELATION_TABLE_NAME = "f_relation";
 
 	/**
-	 * @param Integer $documentId1
-	 * @param String $documentModel1
-	 * @param Integer $documentId2
-	 * @param String $documentModel2
-	 * @param String $type 'CHILD'
-	 * @param String $name
-	 * @param Integer $order
+	 * @param integer $documentId1
+	 * @param string $documentModel1
+	 * @param integer $documentId2
+	 * @param string $documentModel2
+	 * @param string $type 'CHILD'
+	 * @param string $name
+	 * @param integer $order
 	 */
 	public function __construct($documentId1, $documentModel1, $documentId2, $documentModel2, $type, $name, $order)
 	{

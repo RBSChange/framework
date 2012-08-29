@@ -15,9 +15,9 @@ class exception_HtmlRenderer extends exception_Renderer
 	{
 		$traceData = $exception->getTrace();
 
-		$code    = ($exception->getCode() > 0) ? $exception->getCode() : 'N/A';
-		$file    = ($exception->getFile() != null) ? $exception->getFile() : 'N/A';
-		$line    = ($exception->getLine() != null) ? $exception->getLine() : 'N/A';
+		$code	= ($exception->getCode() > 0) ? $exception->getCode() : 'N/A';
+		$file	= ($exception->getFile() != null) ? $exception->getFile() : 'N/A';
+		$line	= ($exception->getLine() != null) ? $exception->getLine() : 'N/A';
 		$message = ($exception->getMessage() != null) ? $exception->getMessage() : 'N/A';
 		$class   = (isset($traceData[0]["class"])) ? $traceData[0]["class"] : 'N/A';
 
@@ -29,22 +29,22 @@ class exception_HtmlRenderer extends exception_Renderer
 			{
 				if (!isset($traceData[$i]['file']))
 				{
-				    // no file key exists, skip this index
-				    continue;
+					// no file key exists, skip this index
+					continue;
 				}
 				
 				$tClass   = (isset($traceData[$i]["class"])) ? $traceData[$i]["class"] : null;
-				$tFile      = $traceData[$i]['file'];
+				$tFile	  = $traceData[$i]['file'];
 				$tFunction  = $traceData[$i]['function'];
-				$tLine      = $traceData[$i]['line'];
+				$tLine	  = $traceData[$i]['line'];
 
 				if ($tClass != null)
 				{
-				    $tFunction = $tClass . '::' . $tFunction . '()';
+					$tFunction = $tClass . '::' . $tFunction . '()';
 				}
 				else
 				{
-				    $tFunction = $tFunction . '()';
+					$tFunction = $tFunction . '()';
 				}
 
 				$data = 'at %s in [%s:%s]';
@@ -142,15 +142,15 @@ class exception_HtmlRenderer extends exception_Renderer
 
 		if (count($trace) > 0)
 		{
-		    $html[] = '<tr>
+			$html[] = '<tr>
 				      <th colspan="2">Stack Trace</th>
 				  </tr>';
-		    foreach ($trace as $line)
-		    {
+			foreach ($trace as $line)
+			{
 				$html[] = '<tr>
 					  <td colspan="2">' . $line . '</td>
 				      </tr>';
-		    }
+			}
 		}
 
 		$html[] = '

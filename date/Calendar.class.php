@@ -13,28 +13,28 @@ abstract class date_Calendar
 	const SECOND = 0;
 	const MINUTE = 1;
 	const HOUR   = 2;
-	const DAY    = 3;
+	const DAY	= 3;
 	const MONTH  = 4;
 	const YEAR   = 5;
 
 	// Days of the week.
-	const SUNDAY    = 0;
-	const MONDAY    = 1;
+	const SUNDAY	= 0;
+	const MONDAY	= 1;
 	const TUESDAY   = 2;
 	const WEDNESDAY = 3;
 	const THRUSDAY  = 4;
-	const FRIDAY    = 5;
+	const FRIDAY	= 5;
 	const SATURDAY  = 6;
 
 	// Months.
 	const JANUARY   = 1;
 	const FEBRUARY  = 2;
-	const MARCH     = 3;
-	const APRIL     = 4;
-	const MAY       = 5;
-	const JUNE      = 6;
-	const JULY      = 7;
-	const AUGUST    = 8;
+	const MARCH	 = 3;
+	const APRIL	 = 4;
+	const MAY	   = 5;
+	const JUNE	  = 6;
+	const JULY	  = 7;
+	const AUGUST	= 8;
 	const SEPTEMBER = 9;
 	const OCTOBER   = 10;
 	const NOVEMBER  = 11;
@@ -42,9 +42,9 @@ abstract class date_Calendar
 
 
 	////////////////////////////////////////////////////////////////////////////
-	//                                                                        //
-	// Initialization methods                                                 //
-	//                                                                        //
+	//																		//
+	// Initialization methods												 //
+	//																		//
 	////////////////////////////////////////////////////////////////////////////
 
 
@@ -91,7 +91,7 @@ abstract class date_Calendar
 	 * Builds a new date_Calendar instance initialized from the given date as a
 	 * timestamp.
 	 *
-	 * @param Integer $dateString
+	 * @param integer $dateString
 	 * @param string $impl Desired implementation (only Gregorian is implemented for now).
 	 *
 	 * @return date_Calendar
@@ -112,9 +112,9 @@ abstract class date_Calendar
 	 * Returns a date_Calendar instance initialized from a given $dateString
 	 * that is in the given $format.
 	 *
-	 * @param String $dateString
-	 * @param String $format a string that contains Y, y, m, d, D, h, H, i, s and uses '.', '/', '-', ' ', ':' for separator. If no separator is used, it acts like getInstanceFromPhpFormat 
-	 * @param String $impl
+	 * @param string $dateString
+	 * @param string $format a string that contains Y, y, m, d, D, h, H, i, s and uses '.', '/', '-', ' ', ':' for separator. If no separator is used, it acts like getInstanceFromPhpFormat 
+	 * @param string $impl
 	 *
 	 * @return date_Calendar
 	 *
@@ -139,7 +139,7 @@ abstract class date_Calendar
 		// Set default values
 		$year   = date('Y');
 		$month  = date('m');
-		$day    = date('d');
+		$day	= date('d');
 		$hour   = date('00');
 		$minute = date('00');
 		$second = date('00');
@@ -179,10 +179,10 @@ abstract class date_Calendar
 	 * Returns a date_Calendar instance initialized from a given $dateString
 	 * that is in the given $format.
 	 *
-	 * @param String $dateString
-	 * @param String $format a PHP date() function format. Only 'Y', 'y', 'm', 'd', 'D', 'H', 'h', 'i', 's' and 'a' are supported
+	 * @param string $dateString
+	 * @param string $format a PHP date() function format. Only 'Y', 'y', 'm', 'd', 'D', 'H', 'h', 'i', 's' and 'a' are supported
 	 * @link http://php.net/manual/en/function.date.php
-	 * @param String $impl
+	 * @param string $impl
 	 *
 	 * @return date_Calendar
 	 * @throws InvalidDateException
@@ -191,7 +191,7 @@ abstract class date_Calendar
 	{
 		$year   = null;
 		$month  = null;
-		$day    = null;
+		$day	= null;
 		$hour   = null;
 		$minute = null;
 		$second = null;
@@ -351,24 +351,24 @@ abstract class date_Calendar
 
 	/**
 	 * Sets the time of the current date_Calendar to midnight.
-     *
-     * @return date_Calendar $this
+	 *
+	 * @return date_Calendar $this
 	 */
 	public abstract function toMidnight();
 
 
 	/**
 	 * Sets the time of the current date_Calendar to midday.
-     *
-     * @return date_Calendar $this
+	 *
+	 * @return date_Calendar $this
 	 */
 	public abstract function toMidday();
 
 
 	////////////////////////////////////////////////////////////////////////////
-	//                                                                        //
-	// Basic getters and setters                                              //
-	//                                                                        //
+	//																		//
+	// Basic getters and setters											  //
+	//																		//
 	////////////////////////////////////////////////////////////////////////////
 
 
@@ -382,113 +382,113 @@ abstract class date_Calendar
 	public abstract function getTimestamp();
 
 
-    /**
-     * @param integer $second
-     *
-     * @return date_Calendar $this
-     */
-    public function setSecond($second)
-    {
-    	$this->second = $second;
-    }
+	/**
+	 * @param integer $second
+	 *
+	 * @return date_Calendar $this
+	 */
+	public function setSecond($second)
+	{
+		$this->second = $second;
+	}
 
-    /**
-     * @return integer
-     */
-    final public function getSecond()
-    {
-    	return $this->second;
-    }
+	/**
+	 * @return integer
+	 */
+	final public function getSecond()
+	{
+		return $this->second;
+	}
 
-    /**
-     * @param integer $minute
-     *
-     * @return date_Calendar $this
-     */
-    public function setMinute($minute)
-    {
-    	$this->minute = $minute;
-    }
+	/**
+	 * @param integer $minute
+	 *
+	 * @return date_Calendar $this
+	 */
+	public function setMinute($minute)
+	{
+		$this->minute = $minute;
+	}
 
-    /**
-     * @return integer
-     */
-    final public function getMinute()
-    {
+	/**
+	 * @return integer
+	 */
+	final public function getMinute()
+	{
 		return $this->minute;
-    }
+	}
 
-    /**
-     * @param integer $hour
-     *
-     * @return date_Calendar $this
-     */
-    public function setHour($hour)
-    {
-    	$this->hour = $hour;
-    }
+	/**
+	 * @param integer $hour
+	 *
+	 * @return date_Calendar $this
+	 */
+	public function setHour($hour)
+	{
+		$this->hour = $hour;
+	}
 
-    /**
-     * @return integer
-     */
-    final public function getHour()
-    {
+	/**
+	 * @return integer
+	 */
+	final public function getHour()
+	{
 		return $this->hour;
-    }
+	}
 
-    /**
-     * @param integer $day
-     *
-     * @return date_Calendar $this
-     */
-    public function setDay($day)
-    {
-    	$this->day = $day;
-    }
+	/**
+	 * @param integer $day
+	 *
+	 * @return date_Calendar $this
+	 */
+	public function setDay($day)
+	{
+		$this->day = $day;
+	}
 
-    /**
-     * @return integer
-     */
-    final public function getDay()
-    {
-    	return $this->day;
-    }
+	/**
+	 * @return integer
+	 */
+	final public function getDay()
+	{
+		return $this->day;
+	}
 
-    /**
-     * @param integer $month
-     *
-     * @return date_Calendar $this
-     */
-    public function setMonth($month)
-    {
-    	$this->month = $month;
-    }
+	/**
+	 * @param integer $month
+	 *
+	 * @return date_Calendar $this
+	 */
+	public function setMonth($month)
+	{
+		$this->month = $month;
+	}
 
-    /**
-     * @return integer
-     */
-    final public function getMonth()
-    {
-    	return $this->month;
-    }
+	/**
+	 * @return integer
+	 */
+	final public function getMonth()
+	{
+		return $this->month;
+	}
 
-    /**
-     * @param integer $year
-     *
-     * @return date_Calendar $this
-     */
-    public function setYear($year)
-    {
-    	$this->year = $year;
-    }
+	/**
+	 * @param integer $year
+	 *
+	 * @return date_Calendar $this
+	 */
+	public function setYear($year)
+	{
+		$this->year = $year;
+	}
 
-    /**
-     * @return integer
-     */
-    final public function getYear()
-    {
-    	return $this->year;
-    }
+	/**
+	 * @return integer
+	 */
+	final public function getYear()
+	{
+		return $this->year;
+	}
 
 
 	/**
@@ -516,16 +516,16 @@ abstract class date_Calendar
 
 
 	////////////////////////////////////////////////////////////////////////////
-	//                                                                        //
-	// Formatting methods                                                     //
-	//                                                                        //
+	//																		//
+	// Formatting methods													 //
+	//																		//
 	////////////////////////////////////////////////////////////////////////////
 
 
 	/**
 	 * Builds and returns a string representation of the date_Calendar object.
 	 *
-	 * @return String
+	 * @return string
 	 */
 	public function toString()
 	{
@@ -541,40 +541,40 @@ abstract class date_Calendar
 	 *
 	 * @see toString()
 	 *
-	 * @return String
+	 * @return string
 	 */
-    public final function __toString()
-    {
-    	return $this->toString();
-    }
-    
-    /**
-     * @return string
-     */
+	public final function __toString()
+	{
+		return $this->toString();
+	}
+	
+	/**
+	 * @return string
+	 */
 	public function toFormattedDate()
 	{
 		return date_Formatter::toDefaultDate($this);
 	}
 	
-    /**
-     * @return string
-     */	
+	/**
+	 * @return string
+	 */	
 	public function toFormattedDateBO()
 	{
 		return date_Formatter::toDefaultDateBO($this);
 	}
 	
-    /**
-     * @return string
-     */	
+	/**
+	 * @return string
+	 */	
 	public function toFormattedDateTime()
 	{
 		return date_Formatter::toDefaultDateTime($this);
 	}
 		
-    /**
-     * @return string
-     */	
+	/**
+	 * @return string
+	 */	
 	public function toFormattedDateTimeBO()
 	{
 		return date_Formatter::toDefaultDateTimeBO($this);
@@ -607,7 +607,7 @@ abstract class date_Calendar
 	 *
 	 * @param date_TimeSpan $timeSpan
 	 * @param boolean $returnNewInstance If true, returns a new instance and
-	 *    does not modify the current one.
+	 *	does not modify the current one.
 	 *
 	 * @return date_DateGregorianCalendar $this or new instance
 	 */
@@ -629,7 +629,7 @@ abstract class date_Calendar
 	 *
 	 * @param date_TimeSpan $timeSpan
 	 * @param boolean $returnNewInstance If true, returns a new instance and
-	 *    does not modify the current one.
+	 *	does not modify the current one.
 	 *
 	 * @return date_DateGregorianCalendar $this or new instance
 	 */
@@ -647,116 +647,116 @@ abstract class date_Calendar
 
 
 	////////////////////////////////////////////////////////////////////////////
-	//                                                                        //
-	// Comparison methods                                                     //
-	//                                                                        //
+	//																		//
+	// Comparison methods													 //
+	//																		//
 	////////////////////////////////////////////////////////////////////////////
 
 
 	/**
-     * Indicates whether the current date is before the given $dateTime or not.
-     *
-     * @param date_Calendar $calendar
-     * @param boolean $strict If true (default), strict comparison is done.
-     *
-     * @return boolean
-     */
-    public final function isBefore($calendar, $strict = true)
-    {
+	 * Indicates whether the current date is before the given $dateTime or not.
+	 *
+	 * @param date_Calendar $calendar
+	 * @param boolean $strict If true (default), strict comparison is done.
+	 *
+	 * @return boolean
+	 */
+	public final function isBefore($calendar, $strict = true)
+	{
 		$thisString = sprintf('%04d%02d%02d%02d%02d%02d', $this->getYear(), $this->getMonth(), $this->getDay(), $this->getHour(), $this->getMinute(), $this->getSecond());
 		$compString = sprintf('%04d%02d%02d%02d%02d%02d', $calendar->getYear(), $calendar->getMonth(), $calendar->getDay(), $calendar->getHour(), $calendar->getMinute(), $calendar->getSecond());
 		$comp = strcmp($thisString, $compString);
 		return ($comp < 0) || ($comp == 0 && ! $strict);
-    }
+	}
 
 
-    /**
-     * Indicates whether the current date is after the given $calendar or not.
-     *
-     * @param date_Calendar $calendar
-     * @param boolean $strict If true (default), strict comparison is done.
-     *
-     * @return boolean
-     */
-    public final function isAfter($calendar, $strict = true)
-    {
+	/**
+	 * Indicates whether the current date is after the given $calendar or not.
+	 *
+	 * @param date_Calendar $calendar
+	 * @param boolean $strict If true (default), strict comparison is done.
+	 *
+	 * @return boolean
+	 */
+	public final function isAfter($calendar, $strict = true)
+	{
 		$thisString = sprintf('%04d%02d%02d%02d%02d%02d', $this->getYear(), $this->getMonth(), $this->getDay(), $this->getHour(), $this->getMinute(), $this->getSecond());
 		$compString = sprintf('%04d%02d%02d%02d%02d%02d', $calendar->getYear(), $calendar->getMonth(), $calendar->getDay(), $calendar->getHour(), $calendar->getMinute(), $calendar->getSecond());
 		$comp = strcmp($thisString, $compString);
 		return ($comp > 0) || ($comp == 0 && ! $strict);
-    }
+	}
 
 
-    /**
-     * Indicates whether the current date is between $dt1 and $dt2 or not.
-     *
-     * @param date_Calendar $dt1
-     * @param date_Calendar $dt2
-     * @param boolean $strict If true (default), strict comparisons are done.
-     *
-     * @return boolean
-     */
-    public final function isBetween($c1, $c2, $strict = true)
-    {
+	/**
+	 * Indicates whether the current date is between $dt1 and $dt2 or not.
+	 *
+	 * @param date_Calendar $dt1
+	 * @param date_Calendar $dt2
+	 * @param boolean $strict If true (default), strict comparisons are done.
+	 *
+	 * @return boolean
+	 */
+	public final function isBetween($c1, $c2, $strict = true)
+	{
 		return $this->isAfter($c1, $strict) && $this->isBefore($c2, $strict);
-    }
+	}
 
 
-    /**
-     * Indicates if the current date belongs to the past or not.
-     *
-     * @return boolean
-     */
-    public function belongsToPast()
-    {
-    	return $this->isBefore(date_Calendar::now());
-    }
+	/**
+	 * Indicates if the current date belongs to the past or not.
+	 *
+	 * @return boolean
+	 */
+	public function belongsToPast()
+	{
+		return $this->isBefore(date_Calendar::now());
+	}
 
 
-    /**
-     * Indicates if the current date belongs to the future or not.
-     *
-     * @return boolean
-     */
-    public function belongsToFuture()
-    {
-    	return $this->isAfter(date_Calendar::now());
-    }
+	/**
+	 * Indicates if the current date belongs to the future or not.
+	 *
+	 * @return boolean
+	 */
+	public function belongsToFuture()
+	{
+		return $this->isAfter(date_Calendar::now());
+	}
 
 
-    /**
-     * Indicates if the current date is today (time is not taken into consideration).
-     *
-     * @return boolean
-     */
-    public function isToday()
-    {
-    	$now = date_Calendar::now();
-    	return true
-    		&& $this->getYear() == $now->year
-    		&& $this->getMonth() == $now->month
-    		&& $this->getDay() == $now->day;
-    }
+	/**
+	 * Indicates if the current date is today (time is not taken into consideration).
+	 *
+	 * @return boolean
+	 */
+	public function isToday()
+	{
+		$now = date_Calendar::now();
+		return true
+			&& $this->getYear() == $now->year
+			&& $this->getMonth() == $now->month
+			&& $this->getDay() == $now->day;
+	}
 
 
-    /**
-     * Indicates whether the current date equals the given $dateTime or not.
-     *
-     * @param date_Calendar $calendar
-     *
-     * @return boolean
-     */
-    public function equals($calendar)
-    {
-    	return true
-    		&& $this->year == $calendar->year
-    		&& $this->month == $calendar->month
-    		&& $this->day == $calendar->day
-    		&& $this->hour == $calendar->hour
-    		&& $this->minute == $calendar->minute
-    		&& $this->second == $calendar->second;
-    }
-    
+	/**
+	 * Indicates whether the current date equals the given $dateTime or not.
+	 *
+	 * @param date_Calendar $calendar
+	 *
+	 * @return boolean
+	 */
+	public function equals($calendar)
+	{
+		return true
+			&& $this->year == $calendar->year
+			&& $this->month == $calendar->month
+			&& $this->day == $calendar->day
+			&& $this->hour == $calendar->hour
+			&& $this->minute == $calendar->minute
+			&& $this->second == $calendar->second;
+	}
+	
 	// Private stuff.
 
 	/**

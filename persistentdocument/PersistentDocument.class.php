@@ -129,9 +129,9 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	abstract public function getPersistentModel();
 
 	/**
-	 * @param Integer $id
+	 * @param integer $id
 	 * @param I18nInfo $i18nInfo
-	 * @param Integer $treeId
+	 * @param integer $treeId
 	 */
 	public function __construct($id = 0, $i18nInfo = null, $treeId = null)
 	{
@@ -179,7 +179,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 	
 	/**
-	 * @return String[] the property names to be serialized. Other properties will be ignored 
+	 * @return string[] the property names to be serialized. Other properties will be ignored 
 	 */
 	protected function __getSerializedPropertyNames()
 	{
@@ -190,7 +190,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 
 	/**
 	 * Used by provider where document inserted in tree
-	 * @param Integer $treeId or null
+	 * @param integer $treeId or null
 	 */
 	public function setProviderTreeId($treeId)
 	{
@@ -226,7 +226,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 
 	/**
-	 * @param Boolean $insertInTree
+	 * @param boolean $insertInTree
 	 */
 	public function setInsertInTree($insertInTree)
 	{
@@ -246,7 +246,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	/**
 	 * @see f_persistentdocument_PersistentDocument::getTreeId()
 	 *
-	 * @return Integer or NULL
+	 * @return integer or NULL
 	 */
 	public function getTreeId()
 	{
@@ -254,7 +254,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function canInsertInTree()
 	{
@@ -349,7 +349,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 
 	/**
-	 * @return String the parent node label | null
+	 * @return string the parent node label | null
 	 */
 	function getParentNodeLabel()
 	{
@@ -362,7 +362,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 
 	/**
-	 * @return String the path of the document, ie all the ancestors labels separated by '/' | null
+	 * @return string the path of the document, ie all the ancestors labels separated by '/' | null
 	 */
 	function getPath()
 	{
@@ -375,7 +375,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected final function getContextLang()
 	{
@@ -391,7 +391,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isLocalized()
 	{
@@ -448,7 +448,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isContextLangAvailable()
 	{
@@ -461,7 +461,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isLangAvailable($lang)
 	{
@@ -516,7 +516,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 
 	/**
 	 * @internal ONLY for PersistentProvider usage
-	 * @param Boolean $loadAll if all data must be retrieved (by default)
+	 * @param boolean $loadAll if all data must be retrieved (by default)
 	 * @return array
 	 */
 	public function getDocumentProperties($loadAll = true)
@@ -608,7 +608,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	/**
 	 * Obtient l'id du document
 	 *
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getId()
 	{
@@ -618,7 +618,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	/**
 	 * Obtient l'id du bean
 	 *
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getBeanId()
 	{
@@ -626,7 +626,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public final function getLang()
 	{
@@ -634,7 +634,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 
 	/**
-	 * @param String $lang
+	 * @param string $lang
 	 * @return void
 	 */
 	public final function setLang($lang)
@@ -651,7 +651,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 
 	/**
-	 * @param String $label
+	 * @param string $label
 	 * @return void
 	 */
 	public function setLabel($label)
@@ -664,7 +664,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	protected function setLabelInternal($label)
 	{
@@ -701,7 +701,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isI18InfoModified()
 	{
@@ -709,7 +709,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getLabel()
 	{
@@ -782,7 +782,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function hasCorrection()
 	{
@@ -790,7 +790,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isCorrection()
 	{
@@ -964,9 +964,9 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 	
 	/**
-	 * @param String $name
+	 * @param string $name
 	 * @param mixed $value
-	 * @param String $lang
+	 * @param string $lang
 	 */
 	protected final function setOldValue($name, $value, $lang = null)
 	{
@@ -988,8 +988,8 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 
 	/**
-	 * @param String $name
-	 * @param String $lang
+	 * @param string $name
+	 * @param string $lang
 	 * @return mixed
 	 */
 	protected final function getOldValue($name, $lang = null)
@@ -1050,7 +1050,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 
 	/**
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 * @return boolean
 	 */
 	public function isPropertyModified($propertyName)
@@ -1089,7 +1089,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function __toString()
 	{
@@ -1142,7 +1142,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 
 	/**
-	 * @param Boolean $recursive
+	 * @param boolean $recursive
 	 * @return f_persistentdocument_PersistentDocument
 	 */
 	public function duplicate($recursive = false)
@@ -1154,7 +1154,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param Boolean $copyToVo
+	 * @param boolean $copyToVo
 	 * @return f_persistentdocument_PersistentDocument
 	 */
 	public function copyPropertiesTo($document, $copyToVo = true)
@@ -1166,7 +1166,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
 	 * @param array<String> $propertiesNames
-	 * @param Boolean $copyToVo
+	 * @param boolean $copyToVo
 	 * @return f_persistentdocument_PersistentDocument
 	 */
 	public function copyPropertiesListTo($document, $propertiesNames, $copyToVo = true)
@@ -1205,8 +1205,8 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	/**
 	 * Copy properties values for the current context lang to the document
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param Boolean $transfertToVo
-	 * @param Boolean $recursive
+	 * @param boolean $transfertToVo
+	 * @param boolean $recursive
 	 */
 	private function transfertProperties($document, $recursive = false, $transfertToVo = true)
 	{
@@ -1243,7 +1243,7 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	/**
 	 * @param PropertyInfo $propertyInfo
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @param Boolean $recursive
+	 * @param boolean $recursive
 	 */
 	private function transfertProperty($propertyInfo, $document, $recursive)
 	{
@@ -1299,8 +1299,8 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	// Metadata management
 
 	/**
-	 * @param String $name
-	 * @return Boolean
+	 * @param string $name
+	 * @return boolean
 	 */
 	public function hasMeta($name)
 	{
@@ -1309,8 +1309,8 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 
 	/**
-	 * @param String $name
-	 * @return String[]
+	 * @param string $name
+	 * @return string[]
 	 */
 	public function getMetaMultiple($name)
 	{
@@ -1319,8 +1319,8 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 
 	/**
-	 * @param String $name
-	 * @return String
+	 * @param string $name
+	 * @return string
 	 */
 	public function getMeta($name)
 	{
@@ -1329,8 +1329,8 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 
 	/**
-	 * @param String $name
-	 * @param String|String[] $value
+	 * @param string $name
+	 * @param string|String[] $value
 	 */
 	public function setMeta($name, $value)
 	{
@@ -1347,8 +1347,8 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 
 	/**
-	 * @param String $name
-	 * @param String[] $values
+	 * @param string $name
+	 * @param string[] $values
 	 */
 	public function setMetaMultiple($name, $values)
 	{
@@ -1366,8 +1366,8 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 
 	/**
-	 * @param String $name
-	 * @param String $value
+	 * @param string $name
+	 * @param string $value
 	 */
 	public function addMetaValue($name, $value)
 	{
@@ -1385,9 +1385,9 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	}
 
 	/**
-	 * @param String $name
-	 * @param String $value
-	 * @return Boolean if value was founded
+	 * @param string $name
+	 * @param string $value
+	 * @return boolean if value was founded
 	 */
 	public function hasMetaValue($name, $value)
 	{
@@ -1406,9 +1406,9 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 
 	/**
 	 * Remove a value from a multi-valued meta
-	 * @param String $name
-	 * @param String $value
-	 * @return Boolean true if meta value was founded
+	 * @param string $name
+	 * @param string $value
+	 * @return boolean true if meta value was founded
 	 */
 	public function removeMetaValue($name, $value)
 	{

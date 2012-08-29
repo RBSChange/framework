@@ -11,7 +11,7 @@ interface indexer_Query
 	 * Sort results according to field named $name. If $descending is set to true, results 
 	 * are sorted in descending order and ascending otherwise.  Returns $this.
 	 * 
-	 * @param String $name
+	 * @param string $name
 	 * @param boolean $descending
 	 * @return indexer_Query
 	 */
@@ -44,7 +44,7 @@ interface indexer_Query
 	/**
 	 * Set the pagination offset. Returns $this.
 	 *
-	 * @param Integer $offset
+	 * @param integer $offset
 	 * @return indexer_Query
 	 */
 	public function setFirstHitOffset($offset);
@@ -52,14 +52,14 @@ interface indexer_Query
 	/**
 	 * Get the pagination offset.
 	 * 
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getFirstHitOffset();
 	
 	/**
 	 * Set the maximum number of hits the query should return (pagination).  Returns $this.
 	 *
-	 * @param Integer $value
+	 * @param integer $value
 	 * @return indexer_Query
 	 */
 	public function setReturnedHitsCount($value);
@@ -72,12 +72,12 @@ interface indexer_Query
 	public function getReturnedHitsCount();
 	
 	/**
-	 * @return String[] 
+	 * @return string[] 
 	 */
 	public function getFacets();
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function hasFacet();
 	
@@ -116,21 +116,21 @@ interface indexer_Query
 	/**
 	 * Set the higlighting status.  Returns $this.
 	 *
-	 * @param Boolean $bool
+	 * @param boolean $bool
 	 * @return indexer_Query
 	 */
 	public function setHighlighting($bool);
 	/**
 	 * Get the highling status.
 	 * 
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function getHighlighting();
 	
 	/**
 	 * Set the lang.
 	 *
-	 * @param String $lang
+	 * @param string $lang
 	 * @return indexer_Query
 	 */
 	public function setLang($lang);
@@ -138,7 +138,7 @@ interface indexer_Query
 	/**
 	 * Get the lang.
 	 * 
-	 * @return String
+	 * @return string
 	 */
 	public function getLang();
 	
@@ -159,14 +159,14 @@ interface indexer_Query
 	public function getBoost();
 	
 	/**
-	 * @return String[]
+	 * @return string[]
 	 */
 	public function getTerms();
 	
 	/**
 	 * Get a Solr compatible query string.
 	 * 
-	 * @return String
+	 * @return string
 	 */
 	public function toSolrString();
 	

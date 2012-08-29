@@ -19,7 +19,7 @@ class date_GregorianCalendar extends date_Calendar
 	 * is optionnal, so "Y-m-d" is a valid argument.
 	 *
 	 * @param string $dateString The date string.
-	 * @param Integer $timestamp
+	 * @param integer $timestamp
 	 */
 	protected function __construct($dateString = null, $timestamp = null)
 	{
@@ -47,11 +47,11 @@ class date_GregorianCalendar extends date_Calendar
 		$this->setYear($matches[1]);
 		try
 		{
-			$this->setMonth($matches[2]);       // may throw IllegalArgumentException
-			$this->setDay($matches[3]);         // may throw IllegalArgumentException
+			$this->setMonth($matches[2]);	   // may throw IllegalArgumentException
+			$this->setDay($matches[3]);		 // may throw IllegalArgumentException
 			if (count($matches) == 8)
 			{
-				$this->setHour($matches[5]);    // may throw IllegalArgumentException
+				$this->setHour($matches[5]);	// may throw IllegalArgumentException
 				$this->setMinute($matches[6]);  // may throw IllegalArgumentException
 				$this->setSecond($matches[7]);  // may throw IllegalArgumentException
 			}
@@ -71,9 +71,9 @@ class date_GregorianCalendar extends date_Calendar
 
 
 	////////////////////////////////////////////////////////////////////////////
-	//                                                                        //
-	// Initialization methods                                                 //
-	//                                                                        //
+	//																		//
+	// Initialization methods												 //
+	//																		//
 	////////////////////////////////////////////////////////////////////////////
 
 	/**
@@ -86,7 +86,7 @@ class date_GregorianCalendar extends date_Calendar
 	}
 	
 	/**
-	 * @param Integer $timestamp
+	 * @param integer $timestamp
 	 * @return date_GregorianCalendar
 	 */
 	public static function getInstanceFromTimestamp($timestamp)
@@ -96,8 +96,8 @@ class date_GregorianCalendar extends date_Calendar
 
 	/**
 	 * Sets the time of the current date_Calendar to midnight.
-     *
-     * @return date_Calendar $this
+	 *
+	 * @return date_Calendar $this
 	 */
 	public function toMidnight()
 	{
@@ -109,8 +109,8 @@ class date_GregorianCalendar extends date_Calendar
 
 	/**
 	 * Sets the time of the current date_Calendar to midday.
-     *
-     * @return date_Calendar $this
+	 *
+	 * @return date_Calendar $this
 	 */
 	public function toMidday()
 	{
@@ -122,9 +122,9 @@ class date_GregorianCalendar extends date_Calendar
 
 
 	////////////////////////////////////////////////////////////////////////////
-	//                                                                        //
-	// Basic getters and setters                                              //
-	//                                                                        //
+	//																		//
+	// Basic getters and setters											  //
+	//																		//
 	////////////////////////////////////////////////////////////////////////////
 
 	/**
@@ -140,125 +140,125 @@ class date_GregorianCalendar extends date_Calendar
 	}
 
 
-    /**
-     * @param integer $second
-     *
-     * @return date_Calendar $this
-     */
-    public function setSecond($second)
-    {
-    	if (!is_integer($second) || $second < 0 || $second > 59)
-    	{
-    		throw new IllegalArgumentException("Second must be an integer between 0 and 59.");
-    	}
-    	if ($this->getSecond() != $second)
-    	{
-    		parent::setSecond($second);
-	    	$this->update();
-    	}
+	/**
+	 * @param integer $second
+	 *
+	 * @return date_Calendar $this
+	 */
+	public function setSecond($second)
+	{
+		if (!is_integer($second) || $second < 0 || $second > 59)
+		{
+			throw new IllegalArgumentException("Second must be an integer between 0 and 59.");
+		}
+		if ($this->getSecond() != $second)
+		{
+			parent::setSecond($second);
+			$this->update();
+		}
 		return $this;
-    }
+	}
 
-    /**
-     * @param integer $minute
-     *
-     * @return date_Calendar $this
-     */
-    public function setMinute($minute)
-    {
-    	if (!is_integer($minute) || $minute < 0 || $minute > 59)
-    	{
-    		throw new IllegalArgumentException("Minute must be an integer between 0 and 59.");
-    	}
-    	if ($this->getMinute() != $minute)
-    	{
-    		parent::setMinute($minute);
-	    	$this->update();
-    	}
+	/**
+	 * @param integer $minute
+	 *
+	 * @return date_Calendar $this
+	 */
+	public function setMinute($minute)
+	{
+		if (!is_integer($minute) || $minute < 0 || $minute > 59)
+		{
+			throw new IllegalArgumentException("Minute must be an integer between 0 and 59.");
+		}
+		if ($this->getMinute() != $minute)
+		{
+			parent::setMinute($minute);
+			$this->update();
+		}
 		return $this;
-    }
+	}
 
-    /**
-     * @param integer $hour
-     *
-     * @return date_Calendar $this
-     */
-    public function setHour($hour)
-    {
-    	if (!is_integer($hour) || $hour < 0 || $hour > 23)
-    	{
-    		throw new IllegalArgumentException("Hour must be an integer between 0 and 23.");
-    	}
-    	if ($this->getHour() != $hour)
-    	{
-    		parent::setHour($hour);
-	    	$this->update();
-    	}
+	/**
+	 * @param integer $hour
+	 *
+	 * @return date_Calendar $this
+	 */
+	public function setHour($hour)
+	{
+		if (!is_integer($hour) || $hour < 0 || $hour > 23)
+		{
+			throw new IllegalArgumentException("Hour must be an integer between 0 and 23.");
+		}
+		if ($this->getHour() != $hour)
+		{
+			parent::setHour($hour);
+			$this->update();
+		}
 		return $this;
-    }
+	}
 
-    /**
-     * @param integer $day
-     *
-     * @return date_Calendar $this
-     */
-    public function setDay($day)
-    {
-    	if (!is_integer($day) || $day < 1 || $day > $this->getDaysInMonth())
-    	{
-    		throw new IllegalArgumentException("Day must be an integer between 1 and ".$this->getDaysInMonth().".");
-    	}
-    	if ($this->getDay() != $day)
-    	{
-    		parent::setDay($day);
-    		$this->update();
-    	}
+	/**
+	 * @param integer $day
+	 *
+	 * @return date_Calendar $this
+	 */
+	public function setDay($day)
+	{
+		if (!is_integer($day) || $day < 1 || $day > $this->getDaysInMonth())
+		{
+			throw new IllegalArgumentException("Day must be an integer between 1 and ".$this->getDaysInMonth().".");
+		}
+		if ($this->getDay() != $day)
+		{
+			parent::setDay($day);
+			$this->update();
+		}
 		return $this;
-    }
+	}
 
-    /**
-     * @param integer $month
-     *
-     * @return date_Calendar $this
-     */
-    public function setMonth($month)
-    {
-    	if (!is_integer($month) || $month < 1 || $month > 12)
-    	{
-    		throw new IllegalArgumentException("Month must be an integer between 1 and 12.");
-    	}
-    	if ($this->getMonth() != $month)
-    	{
-    		parent::setMonth($month);
-	    	$this->update();
-    	}
+	/**
+	 * @param integer $month
+	 *
+	 * @return date_Calendar $this
+	 */
+	public function setMonth($month)
+	{
+		if (!is_integer($month) || $month < 1 || $month > 12)
+		{
+			throw new IllegalArgumentException("Month must be an integer between 1 and 12.");
+		}
+		if ($this->getMonth() != $month)
+		{
+			parent::setMonth($month);
+			$this->update();
+		}
 		return $this;
-    }
+	}
 
-    /**
-     * @param integer $year
-     *
-     * @return date_Calendar $this
-     */
-    public function setYear($year)
-    {
-    	if (!is_integer($year) || $year < 0 || $year > 9999)
-    	{
-    		throw new IllegalArgumentException("Year must be an integer between 0 and 9999.");
-    	}
-    	if ($this->getYear() != $year)
-    	{
-	    	parent::setYear($year);
-	    	$this->update();
-    	}
+	/**
+	 * @param integer $year
+	 *
+	 * @return date_Calendar $this
+	 */
+	public function setYear($year)
+	{
+		if (!is_integer($year) || $year < 0 || $year > 9999)
+		{
+			throw new IllegalArgumentException("Year must be an integer between 0 and 9999.");
+		}
+		if ($this->getYear() != $year)
+		{
+			parent::setYear($year);
+			$this->update();
+		}
 		return $this;
-    }
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////
-	//                                                                        //
-	// Advanced getters                                                       //
-	//                                                                        //
+	//																		//
+	// Advanced getters													   //
+	//																		//
 	////////////////////////////////////////////////////////////////////////////
 
 	/**
@@ -266,15 +266,15 @@ class date_GregorianCalendar extends date_Calendar
 	 *
 	 * @return integer
 	 */
-    public function getCentury()
-    {
-    	$century = intval($this->getYear() / 100);
-    	if ($this->getYear() % 100)
-    	{
-    		$century++;
-    	}
-    	return $century;
-    }
+	public function getCentury()
+	{
+		$century = intval($this->getYear() / 100);
+		if ($this->getYear() % 100)
+		{
+			$century++;
+		}
+		return $century;
+	}
 
 	/**
 	 * Returns the number of days in the the current date's month.
@@ -341,16 +341,16 @@ class date_GregorianCalendar extends date_Calendar
 	 *
 	 * @return boolean
 	 */
-    public function isLastDayOfMonth()
-    {
-    	return $this->getDay() == $this->getDaysInMonth();
-    }
+	public function isLastDayOfMonth()
+	{
+		return $this->getDay() == $this->getDaysInMonth();
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////
-	//                                                                        //
-	// Arithmetical methods for adding and substracting time to the date      //
-	//                                                                        //
+	//																		//
+	// Arithmetical methods for adding and substracting time to the date	  //
+	//																		//
 	////////////////////////////////////////////////////////////////////////////
 
 	/**
@@ -423,11 +423,11 @@ class date_GregorianCalendar extends date_Calendar
 	 * @param boolean $bool
 	 * @return date_GregorianCalendar $this
 	 */
-    public function useSmartEndOfMonth($bool)
-    {
-    	$this->smartEndOfMonth = (bool)$bool;
-    	return $this;
-    }
+	public function useSmartEndOfMonth($bool)
+	{
+		$this->smartEndOfMonth = (bool)$bool;
+		return $this;
+	}
 
 
 // --- PRIVATE STUFF -----------------------------------------------------------
@@ -489,11 +489,11 @@ class date_GregorianCalendar extends date_Calendar
 
 
 	////////////////////////////////////////////////////////////////////////////
-	//                                                                        //
+	//																		//
 	// The three following methods are used to manage the perpetual calendar. //
-	//                                                                        //
-	// http://fr.wikipedia.org/wiki/Calendrier_perp%C3%A9tuel                 //
-	//                                                                        //
+	//																		//
+	// http://fr.wikipedia.org/wiki/Calendrier_perp%C3%A9tuel				 //
+	//																		//
 	////////////////////////////////////////////////////////////////////////////
 
 
@@ -547,19 +547,19 @@ class date_GregorianCalendar extends date_Calendar
 	 */
 	private function getMensualNumber()
 	{
-		/*             leap
-		janvier		4    3   !=
-		février		0    6   !=
-		mars		0    0
-		avril		3    3
-		mai			5    5
-		juin		1    1
-		juillet		3    3
-		aout		6    6
-		septembre	2    2
-		octobre		4    4
-		novembre	0    0
-		décembre	2    2
+		/*			 leap
+		janvier		4	3   !=
+		février		0	6   !=
+		mars		0	0
+		avril		3	3
+		mai			5	5
+		juin		1	1
+		juillet		3	3
+		aout		6	6
+		septembre	2	2
+		octobre		4	4
+		novembre	0	0
+		décembre	2	2
 		*/
 		$mensualNumberArray = array(4, 0, 0, 3, 5, 1, 3, 6, 2, 4, 0, 2);
 		if ($this->isLeapYear())
@@ -606,8 +606,8 @@ class date_GregorianCalendar extends date_Calendar
 	 * Adds seconds to the current date and updates it so that it is always correct.
 	 *
 	 * @param integer $amount Amount of seconds to add.
-     *
-     * @return date_Calendar $this
+	 *
+	 * @return date_Calendar $this
 	 */
 	private function addSeconds($amount)
 	{
@@ -633,8 +633,8 @@ class date_GregorianCalendar extends date_Calendar
 	 * Adds minutes to the current date and updates it so that it is always correct.
 	 *
 	 * @param integer $amount Amount of minutes to add.
-     *
-     * @return date_Calendar $this
+	 *
+	 * @return date_Calendar $this
 	 */
 	private function addMinutes($amount)
 	{
@@ -660,8 +660,8 @@ class date_GregorianCalendar extends date_Calendar
 	 * Adds hours to the current date and updates it so that it is always correct.
 	 *
 	 * @param integer $amount Amount of hours to add.
-     *
-     * @return date_Calendar $this
+	 *
+	 * @return date_Calendar $this
 	 */
 	private function addHours($amount)
 	{
@@ -687,8 +687,8 @@ class date_GregorianCalendar extends date_Calendar
 	 * Adds days to the current date and updates it so that it is always correct.
 	 *
 	 * @param integer $amount Amount of days to add.
-     *
-     * @return date_Calendar $this
+	 *
+	 * @return date_Calendar $this
 	 */
 	private function addDays($amount)
 	{
@@ -711,8 +711,8 @@ class date_GregorianCalendar extends date_Calendar
 	 * Adds weeks to the current date and updates it so that it is always correct.
 	 *
 	 * @param integer $amount Amount of weeks to add.
-     *
-     * @return date_Calendar $this
+	 *
+	 * @return date_Calendar $this
 	 */
 	private function addWeeks($amount)
 	{
@@ -724,8 +724,8 @@ class date_GregorianCalendar extends date_Calendar
 	 * Adds months to the current date and updates it so that it is always correct.
 	 *
 	 * @param integer $amount Amount of months to add.
-     *
-     * @return date_Calendar $this
+	 *
+	 * @return date_Calendar $this
 	 */
 	private function addMonths($amount)
 	{
@@ -767,8 +767,8 @@ class date_GregorianCalendar extends date_Calendar
 	 * Adds years to the current date and updates it so that it is always correct.
 	 *
 	 * @param integer $amount Amount of years to add.
-     *
-     * @return date_Calendar $this
+	 *
+	 * @return date_Calendar $this
 	 */
 	private function addYears($amount)
 	{
@@ -792,8 +792,8 @@ class date_GregorianCalendar extends date_Calendar
 	 * Removes seconds from the current date and updates it so that it is always correct.
 	 *
 	 * @param integer $amount Amount of seconds to remove.
-     *
-     * @return date_Calendar $this
+	 *
+	 * @return date_Calendar $this
 	 */
 	private function subSeconds($amount)
 	{
@@ -821,8 +821,8 @@ class date_GregorianCalendar extends date_Calendar
 	 * Removes minutes from the current date and updates it so that it is always correct.
 	 *
 	 * @param integer $amount Amount of minutes to remove.
-     *
-     * @return date_Calendar $this
+	 *
+	 * @return date_Calendar $this
 	 */
 	private function subMinutes($amount)
 	{
@@ -850,8 +850,8 @@ class date_GregorianCalendar extends date_Calendar
 	 * Removes hours from the current date and updates it so that it is always correct.
 	 *
 	 * @param integer $amount Amount of hours to remove.
-     *
-     * @return date_Calendar $this
+	 *
+	 * @return date_Calendar $this
 	 */
 	private function subHours($amount)
 	{
@@ -879,8 +879,8 @@ class date_GregorianCalendar extends date_Calendar
 	 * Removes days from the current date and updates it so that it is always correct.
 	 *
 	 * @param integer $amount Amount of days to remove.
-     *
-     * @return date_Calendar $this
+	 *
+	 * @return date_Calendar $this
 	 */
 	private function subDays($amount)
 	{
@@ -903,8 +903,8 @@ class date_GregorianCalendar extends date_Calendar
 	 * Removes weeks from the current date and updates it so that it is always correct.
 	 *
 	 * @param integer $amount Amount of weeks to remove.
-     *
-     * @return date_Calendar $this
+	 *
+	 * @return date_Calendar $this
 	 */
 	private function subWeeks($amount)
 	{
@@ -916,8 +916,8 @@ class date_GregorianCalendar extends date_Calendar
 	 * Removes months from the current date and updates it so that it is always correct.
 	 *
 	 * @param integer $amount Amount of months to remove.
-     *
-     * @return date_Calendar $this
+	 *
+	 * @return date_Calendar $this
 	 */
 	private function subMonths($amount)
 	{
@@ -959,8 +959,8 @@ class date_GregorianCalendar extends date_Calendar
 	 * Removes years from the current date and updates it so that it is always correct.
 	 *
 	 * @param integer $amount Amount of years to remove.
-     *
-     * @return date_Calendar $this
+	 *
+	 * @return date_Calendar $this
 	 */
 	private function subYears($amount)
 	{

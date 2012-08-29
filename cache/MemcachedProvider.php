@@ -14,7 +14,7 @@ class f_MemcachedProvider
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isAvailable()
 	{

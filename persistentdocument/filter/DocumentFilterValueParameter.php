@@ -57,7 +57,7 @@ class f_persistentdocument_DocumentFilterValueParameter extends f_persistentdocu
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getType()
 	{
@@ -76,7 +76,7 @@ class f_persistentdocument_DocumentFilterValueParameter extends f_persistentdocu
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getValueAsText()
 	{
@@ -95,7 +95,7 @@ class f_persistentdocument_DocumentFilterValueParameter extends f_persistentdocu
 				switch ($this->propertyInfo->getType())
 				{
 					case BeanPropertyType::DATETIME: 
-						$value = date_Formatter::format(date_Calendar::getInstance($tmpValue), $ls->transBO('m.filter.bo.general.date-format'));
+						$value = date_Formatter::format(date_Calendar::getInstance($tmpValue), $ls->trans('m.filter.bo.general.date-format'));
 						break;
 						
 					case BeanPropertyType::DOCUMENT:
@@ -145,7 +145,7 @@ class f_persistentdocument_DocumentFilterValueParameter extends f_persistentdocu
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getValueForJson()
 	{
@@ -153,8 +153,8 @@ class f_persistentdocument_DocumentFilterValueParameter extends f_persistentdocu
 	}
 	
 	/**
-	 * @param Boolean $throwException
-	 * @return Boolean
+	 * @param boolean $throwException
+	 * @return boolean
 	 * @throws ValidationException
 	 */
 	public function validate($throwException)
@@ -180,7 +180,7 @@ class f_persistentdocument_DocumentFilterValueParameter extends f_persistentdocu
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	protected final function checkType(&$value)
 	{

@@ -18,19 +18,19 @@ class ChildPropertyInfo
 		$this->type = $type;
 	}
 	
-    /**
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-    
-    /**
-     * @return string
-     */
-    public function getType()
-    {
-        return $this->type;
-    }
+	/**
+	 * @return string
+	 */
+	public function getName()
+	{
+		return $this->name;
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getType()
+	{
+		return $this->type;
+	}
 }

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.validation.validator.size" lcid="en_GB">
-  <key id="message">The ″{field}″ field must have a length between {min} and {max}.</key>
+<?xml version="1.0" encoding="UTF-8"?>
+<i18n baseKey="m.framework.validation.validator.size" lcid="en_GB">
+	<key id="message">The ″{field}″ field must have a length between {min} and {max}.</key>
 </i18n>

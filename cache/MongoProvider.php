@@ -65,7 +65,7 @@ class f_MongoProvider
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isAvailable()
 	{

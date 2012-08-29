@@ -7,8 +7,8 @@ class indexer_SearchResult
 	private $fields = array();
 		
 	/**
-	 * @param String $name
-	 * @param String $value
+	 * @param string $name
+	 * @param string $value
 	 */
 	public function setProperty($name, $value)
 	{
@@ -24,8 +24,8 @@ class indexer_SearchResult
 	}
 	
 	/**
-	 * @param String $name
-	 * @return Boolean
+	 * @param string $name
+	 * @return boolean
 	 */
 	function hasProperty($name)
 	{
@@ -35,8 +35,8 @@ class indexer_SearchResult
 	/**
 	 * Private getProperty
 	 *
-	 * @param String $name
-	 * @return String
+	 * @param string $name
+	 * @return string
 	 */
 	private function getProperty($name)
 	{
@@ -58,7 +58,7 @@ class indexer_SearchResult
 	}
 	
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getDocumentId()
 	{

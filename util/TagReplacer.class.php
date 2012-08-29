@@ -43,11 +43,11 @@ class f_util_TagReplacer {
 
 	public function run($content, $localize = false)
 	{
-	    $this->content = $content;
+		$this->content = $content;
 
-	    $this->preRun();
+		$this->preRun();
 
-	    $this->content = $this->replaceConstants($this->content);
+		$this->content = $this->replaceConstants($this->content);
 
 		// rebuild the two arrays for str_replace() if needed
 		if ($this->modified)

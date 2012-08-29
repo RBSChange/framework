@@ -199,7 +199,7 @@ abstract class change_Action
 
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected final function getModuleName()
 	{
@@ -208,7 +208,7 @@ abstract class change_Action
 
 	/**
 	 * Returns the name of the action.
-	 * @return String
+	 * @return string
 	 */
 	protected function getActionName()
 	{
@@ -429,8 +429,8 @@ abstract class change_Action
 	
 	/**
 	 * Retourne le nom de l'action permissionnée
-	 * @param Integer $documentId
-	 * @param Boolean $addDocumentName
+	 * @param integer $documentId
+	 * @param boolean $addDocumentName
 	 * @return string For example: modules_website.RewriteUrl
 	 */
 	protected function getSecureActionName($documentId)
@@ -446,7 +446,7 @@ abstract class change_Action
 	/**
 	 * Tell the permission system this action is a document action ie. the permission
 	 * depends on the document the action acts on.
-	 * @return Boolean by default false
+	 * @return boolean by default false
 	 */
 	protected function isDocumentAction()
 	{
@@ -460,9 +460,9 @@ abstract class change_Action
 
 	/**
 	 * Traitement absence de permission
-	 * @param String $login
-	 * @param String $permission
-	 * @param Integer $nodeId
+	 * @param string $login
+	 * @param string $permission
+	 * @param integer $nodeId
 	 * @throw BaseExeption(modules.[MODULENAME].errors.[ESCAPEDPERMISSION ex : modules-photoalbum-move-topic])
 	 */
 	protected function onMissingPermission($login, $permission, $nodeId)
@@ -474,8 +474,8 @@ abstract class change_Action
 	/**
 	 * @param change_Request $request
 	 * @param Exception $e
-	 * @param Boolean $popupAlert
-	 * @return String
+	 * @param boolean $popupAlert
+	 * @return string
 	 */
 	protected function onBackOfficeException($request, $e, $popupAlert)
 	{

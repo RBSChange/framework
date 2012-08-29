@@ -35,7 +35,7 @@ class indexer_StandardSolrSearch
 	/**
 	 * Get the actual solr query string
 	 *
-	 * @return String
+	 * @return string
 	 */
 	public function getQueryString()
 	{
@@ -152,7 +152,7 @@ class indexer_StandardSolrSearch
 	
 	/**
 	 * Enable suggestion
-	 * @param String[] $suggestionTerms
+	 * @param string[] $suggestionTerms
 	 */
 	function doSuggestion($suggestionTerms)
 	{
@@ -161,7 +161,7 @@ class indexer_StandardSolrSearch
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	function getDoSuggestion()
 	{
@@ -169,7 +169,7 @@ class indexer_StandardSolrSearch
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	private function getBaseQueryString()
 	{
@@ -191,7 +191,7 @@ class indexer_StandardSolrSearch
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getClientId()
 	{
@@ -199,7 +199,7 @@ class indexer_StandardSolrSearch
 	}
 	
 	/**
-	 * @param String $clientId
+	 * @param string $clientId
 	 */
 	public function setClientId($clientId)
 	{

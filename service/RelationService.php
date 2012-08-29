@@ -54,9 +54,9 @@ class RelationService extends change_BaseService
 	}
 	
 	/**
-	 * @param Integer $docId
-	 * @param String $relationName
-	 * @param String $documentModel
+	 * @param integer $docId
+	 * @param string $relationName
+	 * @param string $documentModel
 	 * @return f_persistentdocument_PersistentRelation[] the relations that documentId has
 	 */
 	public function getRelations($documentId, $relationName = null, $documentModel = null)
@@ -65,9 +65,9 @@ class RelationService extends change_BaseService
 	}
 	
 	/**
-	 * @param Integer $docId
-	 * @param String $relationName
-	 * @param String $documentModel
+	 * @param integer $docId
+	 * @param string $relationName
+	 * @param string $documentModel
 	 * @return f_persistentdocument_PersistentRelation[] the relations that use documentId
 	 */
 	public function getUsageRelations($documentId, $relationName = null, $documentModel = null)

@@ -40,8 +40,8 @@
 		<fieldtype name="text_ws" class="solr.TextField" positionIncrementGap="100">
 			<analyzer>
 				<tokenizer class="solr.StandardTokenizerFactory" />
-        		<filter class="solr.LowerCaseFilterFactory" />
-        		<filter class="solr.ASCIIFoldingFilterFactory" />
+				<filter class="solr.LowerCaseFilterFactory" />
+				<filter class="solr.ASCIIFoldingFilterFactory" />
 			</analyzer>
 		</fieldtype>
 		
@@ -125,8 +125,8 @@
 		<fieldtype name="text_ws_aggr" class="solr.TextField">
 			<analyzer>
 				<tokenizer class="solr.StandardTokenizerFactory" />
-        		<filter class="solr.LowerCaseFilterFactory" />
-        		<filter class="solr.ASCIIFoldingFilterFactory" />
+				<filter class="solr.LowerCaseFilterFactory" />
+				<filter class="solr.ASCIIFoldingFilterFactory" />
 			</analyzer>
 		</fieldtype>
 		

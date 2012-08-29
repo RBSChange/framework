@@ -5,9 +5,9 @@
 class ApacheService extends change_BaseService
 {
 	/**
-	 * @param String $module
-	 * @param String $content
-	 * @param Integer $priority between 0 and 99
+	 * @param string $module
+	 * @param string $content
+	 * @param integer $priority between 0 and 99
 	 * @throws IOException
 	 */
 	public function generateSpecificConfFileForModule($module, $content, $priority = 50)
@@ -22,7 +22,7 @@ class ApacheService extends change_BaseService
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getGroup()
 	{
@@ -77,8 +77,8 @@ class ApacheService extends change_BaseService
 	// Private methods.
 	
 	/**
-	 * @param String $content
-	 * @return String
+	 * @param string $content
+	 * @return string
 	 */
 	private function applyReplacements($content)
 	{
@@ -131,8 +131,8 @@ class ApacheService extends change_BaseService
 	}
 	
 	/**
-	 * @param String $filePath
-	 * @param String $content
+	 * @param string $filePath
+	 * @param string $content
 	 */
 	private function writeFileAndSetPermissions($filePath, $content)
 	{
@@ -147,9 +147,9 @@ class ApacheService extends change_BaseService
 	}
 	
 	/**
-	 * @param String $module
-	 * @param Integer $priority between 0 and 99
-	 * @return String
+	 * @param string $module
+	 * @param integer $priority between 0 and 99
+	 * @return string
 	 */
 	private function getConfFileNameForModule($module, $priority)
 	{
@@ -160,8 +160,8 @@ class ApacheService extends change_BaseService
 	}
 	
 	/**
-	 * @param String $fileName
-	 * @return String
+	 * @param string $fileName
+	 * @return string
 	 */
 	private function getGeneratedFilePath($fileName)
 	{
@@ -169,7 +169,7 @@ class ApacheService extends change_BaseService
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	private function getApacheDirectory()
 	{
@@ -177,8 +177,8 @@ class ApacheService extends change_BaseService
 	}
 	
 	/**
-	 * @param String $package
-	 * @return String
+	 * @param string $package
+	 * @return string
 	 */
 	private function getApacheDirectoryByPackage($package)
 	{
@@ -186,7 +186,7 @@ class ApacheService extends change_BaseService
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	private function getHtaccessPath()
 	{
@@ -194,7 +194,7 @@ class ApacheService extends change_BaseService
 	}
 	
 	/**
-	 * @param String $module
+	 * @param string $module
 	 */
 	private function clearSpecificConfFilesForModule($module)
 	{
@@ -214,7 +214,7 @@ class ApacheService extends change_BaseService
 	}
 	
 	/**
-	 * @param String $dir
+	 * @param string $dir
 	 * @return Array<String, String>
 	 */
 	private function getContentsInDirectory($dir, $package)

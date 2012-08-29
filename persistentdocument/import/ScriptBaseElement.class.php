@@ -39,7 +39,7 @@ class import_ScriptBaseElement
 	}
 
 	/**
-	 * @param String $name
+	 * @param string $name
 	 * @return import_ScriptBaseElement
 	 */
 	protected function getAncestor($name)
@@ -56,7 +56,7 @@ class import_ScriptBaseElement
 	}
 
 	/**
-	 * @param String $className
+	 * @param string $className
 	 * @return import_ScriptBaseElement
 	 */
 	protected final function getAncestorByClassName($className)

@@ -358,16 +358,16 @@ class change_WrappedValidatorConstraint implements Zend_Validate_Interface
 	}	
 
 	
-    /**
-     * @param  mixed $value
-     * @return boolean
-     */	
+	/**
+	 * @param  mixed $value
+	 * @return boolean
+	 */	
  	public function isValid($value)
-    {
-    	$this->messages = array();
-    	
-      	$property   = new validation_Property('{field}', $value);
-		$errors     = new validation_Errors();
+	{
+		$this->messages = array();
+		
+	  	$property   = new validation_Property('{field}', $value);
+		$errors	 = new validation_Errors();
 		$this->wrappedValidator->validate($property, $errors);
 		
 		if ($errors->count() > 0)
@@ -375,12 +375,12 @@ class change_WrappedValidatorConstraint implements Zend_Validate_Interface
 			$this->messages = $errors->getArrayCopy();
 			return false;
 		}
-        return true;
-    }
-    
-    /**
-     * @return array
-     */
+		return true;
+	}
+	
+	/**
+	 * @return array
+	 */
 	public function getMessages()
 	{
 		return $this->messages;
@@ -391,40 +391,40 @@ class change_WrappedValidatorConstraint implements Zend_Validate_Interface
 
 class change_MinConstraint extends Zend_Validate_GreaterThan
 {
-    /**
-     * Returns true if and only if $value is greater or equals than min option
-     *
-     * @param  mixed $value
-     * @return boolean
-     */
-    public function isValid($value)
-    {
-        $this->_setValue($value);
-        if ($this->_min > $value) {
-            $this->_error(self::NOT_GREATER);
-            return false;
-        }
-        return true;
-    }	
+	/**
+	 * Returns true if and only if $value is greater or equals than min option
+	 *
+	 * @param  mixed $value
+	 * @return boolean
+	 */
+	public function isValid($value)
+	{
+		$this->_setValue($value);
+		if ($this->_min > $value) {
+			$this->_error(self::NOT_GREATER);
+			return false;
+		}
+		return true;
+	}	
 }
 
 class change_MaxConstraint extends Zend_Validate_LessThan
 {
-    /**
-     * Defined by Zend_Validate_Interface
-     *
-     * Returns true if and only if $value is less or equals than max option
-     *
-     * @param  mixed $value
-     * @return boolean
-     */
-    public function isValid($value)
-    {
-        $this->_setValue($value);
-        if ($this->_max <= $value) {
-            $this->_error(self::NOT_LESS);
-            return false;
-        }
-        return true;
-    }	
+	/**
+	 * Defined by Zend_Validate_Interface
+	 *
+	 * Returns true if and only if $value is less or equals than max option
+	 *
+	 * @param  mixed $value
+	 * @return boolean
+	 */
+	public function isValid($value)
+	{
+		$this->_setValue($value);
+		if ($this->_max <= $value) {
+			$this->_error(self::NOT_LESS);
+			return false;
+		}
+		return true;
+	}	
 }

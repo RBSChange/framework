@@ -77,9 +77,9 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	private $setterName = false;
 
 	/**
-	 * @param String $name
-	 * @param String $type
-	 * @param String $className required if type is BeanPropertyType::BEAN
+	 * @param string $name
+	 * @param string $type
+	 * @param string $className required if type is BeanPropertyType::BEAN
 	 */
 	function __construct($name, $type, $className = null)
 	{
@@ -116,14 +116,14 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getName()
 	{
 		return $this->name;
 	}
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getType()
 	{
@@ -133,7 +133,7 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	/**
 	 * If the property type is BeanPropertyType::DOCUMENT,
 	 * returns the linked document model
-	 * @return String
+	 * @return string
 	 */
 	public function getDocumentType()
 	{
@@ -150,7 +150,7 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getValidationRules()
 	{
@@ -185,7 +185,7 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	}
 	
 	/**
-	 * @param String $constraint
+	 * @param string $constraint
 	 * @return void
 	 */
 	function addConstraint($validatorName, $validatorParam)
@@ -216,7 +216,7 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getLabelKey()
 	{
@@ -224,7 +224,7 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	}
 
 	/**
-	 * @param String $helpKey
+	 * @param string $helpKey
 	 */
 	public function setLabelKey($labelKey)
 	{
@@ -232,7 +232,7 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getHelpKey()
 	{
@@ -240,7 +240,7 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	}
 
 	/**
-	 * @param String $helpKey
+	 * @param string $helpKey
 	 */
 	public function setHelpKey($helpKey)
 	{
@@ -248,7 +248,7 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	}
 
 	/**
-	 * @return Integer >=1 | -1, meaning "infinite"
+	 * @return integer >=1 | -1, meaning "infinite"
 	 */
 	public function getCardinality()
 	{
@@ -261,7 +261,7 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isRequired()
 	{
@@ -269,7 +269,7 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	}
 
 	/**
-	 * @param Boolean $isRequired
+	 * @param boolean $isRequired
 	 */
 	function setIsRequired($isRequired)
 	{
@@ -285,7 +285,7 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isHidden()
 	{
@@ -293,7 +293,7 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	}
 
 	/**
-	 * @param Boolean $isHidden
+	 * @param boolean $isHidden
 	 */
 	function setIsHidden($isHidden)
 	{
@@ -330,7 +330,7 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function hasList()
 	{
@@ -365,7 +365,7 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	}
 
 	/**
-	 * @param String $listId
+	 * @param string $listId
 	 */
 	function setListId($listId)
 	{
@@ -373,7 +373,7 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	}
 
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getMaxOccurs()
 	{
@@ -381,7 +381,7 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	}
 
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	public function getMinOccurs()
 	{
@@ -389,7 +389,7 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	}
 
 	/**
-	 * @param Integer $maxOccurs
+	 * @param integer $maxOccurs
 	 */
 	public function setMaxOccurs($maxOccurs)
 	{
@@ -397,7 +397,7 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	}
 
 	/**
-	 * @param Integer $minOccurs
+	 * @param integer $minOccurs
 	 */
 	public function setMinOccurs($minOccurs)
 	{
@@ -406,7 +406,7 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 
 	/**
 	 * @see BeanPropertyInfo::getSetterName()
-	 * @return String|null if property has public access
+	 * @return string|null if property has public access
 	 */
 	public function getSetterName()
 	{
@@ -422,7 +422,7 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	}
 	
 	/**
-	 * @param String $setterName
+	 * @param string $setterName
 	 */
 	function setSetterName($setterName)
 	{
@@ -430,7 +430,7 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	}
 	
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function isPublic()
 	{
@@ -438,7 +438,7 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 	}
 	
 	/**
-	 * @param Boolean $isPublic
+	 * @param boolean $isPublic
 	 */
 	public function setIsPublic($isPublic)
 	{
@@ -447,7 +447,7 @@ class BeanPropertyInfoImpl implements BeanPropertyInfo
 
 	/**
 	 * @see BeanPropertyInfo::getGetterName()
-	 * @return String|null if property has public access
+	 * @return string|null if property has public access
 	 */
 	public function getGetterName()
 	{

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.validation.validator.integer" lcid="en_GB">
-  <key id="message">The value of the ″{field}″ field must be an integer.</key>
+<?xml version="1.0" encoding="UTF-8"?>
+<i18n baseKey="m.framework.validation.validator.integer" lcid="en_GB">
+	<key id="message">The value of the ″{field}″ field must be an integer.</key>
 </i18n>

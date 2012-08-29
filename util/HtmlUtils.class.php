@@ -32,10 +32,10 @@ abstract class f_util_HtmlUtils
 	}
 	
 	/**
-	 * @param String $string
-	 * @param Boolean $translateUri
-	 * @param Boolean $convertNlToSpace
-	 * @return String
+	 * @param string $string
+	 * @param boolean $translateUri
+	 * @param boolean $convertNlToSpace
+	 * @return string
 	 */
 	public static function htmlToText($string, $translateUri = true, $convertNlToSpace = false)
 	{
@@ -77,8 +77,8 @@ abstract class f_util_HtmlUtils
 
 	/**
 	 * Validate <img> and <a> html balise
-	 * @param String $input;
-	 * @return String
+	 * @param string $input;
+	 * @return string
 	 */
 	public static function renderHtmlFragment($input)
 	{
@@ -97,7 +97,7 @@ abstract class f_util_HtmlUtils
 	}
 
 	/**
-	 * @param String $string
+	 * @param string $string
 	 * @return array
 	 */
 	public static function parseStyleAttributes($string)
@@ -123,7 +123,7 @@ abstract class f_util_HtmlUtils
 
 	/**
 	 * @param array $styleAttributes
-	 * @return String | null
+	 * @return string | null
 	 */
 	public static function buildStyleAttribute($styleAttributes)
 	{
@@ -143,9 +143,9 @@ abstract class f_util_HtmlUtils
 	}
 
 	/**
-	 * @param String $name
-	 * @param String $value
-	 * @return String
+	 * @param string $name
+	 * @param string $value
+	 * @return string
 	 */
 	public static function buildAttribute($name, $value)
 	{
@@ -154,7 +154,7 @@ abstract class f_util_HtmlUtils
 
 	/**
 	 * @param array<String, String> $attributes
-	 * @return String
+	 * @return string
 	 */
 	public static function buildAttributes($attributes)
 	{
@@ -167,7 +167,7 @@ abstract class f_util_HtmlUtils
 	}
 
 	/**
-	 * @param String $string
+	 * @param string $string
 	 * @return Array
 	 */
 	private static function parseAttributes ($string)
@@ -189,7 +189,7 @@ abstract class f_util_HtmlUtils
 	 * Parse <a> balise
 	 * @internal For internal usage of f_util_HtmlUtils only
 	 * @param Array $matches
-	 * @return String
+	 * @return string
 	 */
 	public static function parseLinkTag ($matches)
 	{
@@ -214,11 +214,11 @@ abstract class f_util_HtmlUtils
 			// FIX #583 - If we have a popup link, make the title RGAA compatible
 			if (isset($attributes['title']))
 			{
-				$attributes['title'] .= ' ' . LocaleService::getInstance()->transFO('f.util.htmlutils.popuptitleaddition', array('attr'));
+				$attributes['title'] .= ' ' . LocaleService::getInstance()->trans('f.util.htmlutils.popuptitleaddition', array('attr'));
 			}
 			else
 			{
-				$attributes['title'] = LocaleService::getInstance()->transFO('f.util.htmlutils.popuptitleaddition', array('attr'));
+				$attributes['title'] = LocaleService::getInstance()->trans('f.util.htmlutils.popuptitleaddition', array('attr'));
 			}
 		}
 
@@ -333,8 +333,8 @@ abstract class f_util_HtmlUtils
 	/**
 	 * remove script elements and replace change:id and replace html entities to decimal entities
 	 *
-	 * @param String $blockContent
-	 * @return String
+	 * @param string $blockContent
+	 * @return string
 	 */
 	public static function cleanHtmlForBackofficeEdition($blockContent)
 	{
@@ -360,8 +360,8 @@ abstract class f_util_HtmlUtils
 	}
 
 	/**
-	 * @param String $string
-	 * @return String
+	 * @param string $string
+	 * @return string
 	 */
 	static function htmlEntitiesToXMLEntities($string)
 	{
@@ -389,7 +389,7 @@ abstract class f_util_HtmlUtils
 	 * Parse <img> balise
 	 * @internal For internal usage of f_util_HtmlUtils only
 	 * @param Array $matches
-	 * @return String
+	 * @return string
 	 */
 	public static function parseImageTag($matches)
 	{
@@ -568,7 +568,7 @@ abstract class f_util_HtmlUtils
 	/**
 	 * @param media_persistentdocument_media $document
 	 * @param Array $attributes
-	 * @return String
+	 * @return string
 	 */
 	private function buildImageSrc($document, &$attributes)
 	{

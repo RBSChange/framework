@@ -70,7 +70,7 @@ class TreeService extends change_BaseService
 	}
 
 	/**
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 * @return f_persistentdocument_PersistentTreeNode or null
 	 */
 	private function getTreeNodeFromCache($documentId)
@@ -100,7 +100,7 @@ class TreeService extends change_BaseService
 	}
 	
 	/**
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 * @return f_persistentdocument_PersistentTreeNode
 	 */
 	public function getInstanceByDocumentId($documentId)
@@ -114,7 +114,7 @@ class TreeService extends change_BaseService
 	
 
 	/**
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 * @return f_persistentdocument_PersistentTreeNode
 	 */
 	public function getInstanceByDocumentIdInTree($documentId, $treeId)
@@ -126,7 +126,7 @@ class TreeService extends change_BaseService
 
 	/**
 	 * Obtient le noeud racine de l'arbre $treeId
-	 * @param String $treeId
+	 * @param string $treeId
 	 * @return f_persistentdocument_PersistentTreeNode
 	 */
 	public function getRootNode($treeId)
@@ -146,8 +146,8 @@ class TreeService extends change_BaseService
 	}
 	
 	/**
-	 * @param Integer $documentId
-	 * @param Integer $treeId
+	 * @param integer $documentId
+	 * @param integer $treeId
 	 * @return f_persistentdocument_PersistentTreeNode | null
 	 */
 	protected function getInstanceByDocumentIdAndTreeId($documentId, $treeId)
@@ -162,7 +162,7 @@ class TreeService extends change_BaseService
 
 	/**
 	 * Creer un nouvelle arbre
-	 * @param String $treeId
+	 * @param string $treeId
 	 * @return f_persistentdocument_PersistentTreeNode
 	 */
 	public function setRootNode($treeId)
@@ -174,7 +174,7 @@ class TreeService extends change_BaseService
 
 	/**
 	 * Efface un arbre
-	 * @param Integer $treeId
+	 * @param integer $treeId
 	 * @return f_persistentdocument_PersistentTreeNode
 	 */
 	public function clearRootNode($treeId)
@@ -189,7 +189,7 @@ class TreeService extends change_BaseService
 
 	/**
 	 * Supression du noeud
-	 * @param Integer $nodeId
+	 * @param integer $nodeId
 	 */
 	public function deleteNodeById($nodeId)
 	{
@@ -231,7 +231,7 @@ class TreeService extends change_BaseService
 
 	/**
 	 * Supression du noeud
-	 * @param Integer $nodeId
+	 * @param integer $nodeId
 	 */
 	public function deleteNodeRecursivelyById($nodeId)
 	{
@@ -275,8 +275,8 @@ class TreeService extends change_BaseService
 	/**
 	 * Ajoute un noeud a la fin de la liste des fils
 	 *
-	 * @param Integer $parentNodeId
-	 * @param Integer $documentId
+	 * @param integer $parentNodeId
+	 * @param integer $documentId
 	 * @return f_persistentdocument_PersistentTreeNode
 	 */
 	public function newLastChild($parentNodeId, $documentId)
@@ -288,7 +288,7 @@ class TreeService extends change_BaseService
 	 * Ajoute un noeud a la fin de la liste des fils
 	 *
 	 * @param f_persistentdocument_PersistentTreeNode $parentNode
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 * @return f_persistentdocument_PersistentTreeNode
 	 */
 	public function newLastChildForNode($parentNode, $documentId)
@@ -314,8 +314,8 @@ class TreeService extends change_BaseService
 	/**
 	 * Ajoute un noeud au debut de la liste des fils
 	 *
-	 * @param Integer $parentNodeId
-	 * @param Integer $documentId
+	 * @param integer $parentNodeId
+	 * @param integer $documentId
 	 * @return f_persistentdocument_PersistentTreeNode
 	 */
 	public function newFirstChild($parentNodeId, $documentId)
@@ -363,7 +363,7 @@ class TreeService extends change_BaseService
 	 * (du point de vu de la persistance)
 	 * @param f_persistentdocument_PersistentTreeNode $node1
 	 * @param f_persistentdocument_PersistentTreeNode $node2
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function equals($node1, $node2)
 	{
@@ -591,7 +591,7 @@ class TreeService extends change_BaseService
 
 	/**
 	 * @param PersistentTreeNode[] $treeNodes
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 * @return f_persistentdocument_PersistentTreeNode
 	 */
 	private function getNode($treeNodes, $documentId)
@@ -699,7 +699,7 @@ class TreeService extends change_BaseService
 	
 	/**
 	 * @param f_persistentdocument_PersistentTreeNode $treeNode
-	 * @param Integer $ancestorId
+	 * @param integer $ancestorId
 	 */
 	public function isAncestor($treeNode, $ancestorId)
 	{

@@ -33,8 +33,8 @@ final class indexer_Field
 	/**
 	 * Helper to convert a Y-M-D H:M:S date to a "solr" date
 	 * 
-	 * @param String $fulldate
-	 * @return String
+	 * @param string $fulldate
+	 * @return string
 	 */
 	static function dateToSolrDate($fulldate)
 	{
@@ -48,7 +48,7 @@ final class indexer_Field
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	static function getDateFieldName($baseName)
 	{
@@ -56,7 +56,7 @@ final class indexer_Field
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	static function getStringFieldName($baseName)
 	{
@@ -64,7 +64,7 @@ final class indexer_Field
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	static function getStringMultiFieldName($baseName)
 	{
@@ -72,7 +72,7 @@ final class indexer_Field
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	static function getVolatileStringFieldName($baseName)
 	{
@@ -80,7 +80,7 @@ final class indexer_Field
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	static function getVolatileStringMultiFieldName($baseName)
 	{
@@ -88,7 +88,7 @@ final class indexer_Field
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	static function getIntegerFieldName($baseName)
 	{
@@ -96,7 +96,7 @@ final class indexer_Field
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	static function getVolatileIntegerFieldName($baseName)
 	{
@@ -104,7 +104,7 @@ final class indexer_Field
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	static function getIntegerMultiFieldName($baseName)
 	{
@@ -112,7 +112,7 @@ final class indexer_Field
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	static function getVolatileIntegerMultiFieldName($baseName)
 	{
@@ -120,7 +120,7 @@ final class indexer_Field
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	static function getFloatFieldName($baseName)
 	{
@@ -128,7 +128,7 @@ final class indexer_Field
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	static function getVolatileFloatFieldName($baseName)
 	{
@@ -136,8 +136,8 @@ final class indexer_Field
 	}
 	
 	/**
-	 * @param String $fieldName
-	 * @return String
+	 * @param string $fieldName
+	 * @return string
 	 */
 	static function getSimpleFieldName($fieldName)
 	{

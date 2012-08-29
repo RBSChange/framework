@@ -135,7 +135,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 	
 	/**
-	 * @return Integer
+	 * @return integer
 	 */
 	function getId()
 	{
@@ -143,7 +143,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @param String $profile profile name. Use null to have default behaviour
+	 * @param string $profile profile name. Use null to have default behaviour
 	 */
 	public static function setDatabaseProfileName($profile)
 	{
@@ -160,7 +160,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @return String the database profile, 'default' by default
+	 * @return string the database profile, 'default' by default
 	 */
 	public static function getDatabaseProfileName()
 	{
@@ -204,7 +204,7 @@ abstract class f_persistentdocument_PersistentProvider
 
 	/**
 	 *
-	 * @param String $documentModelName
+	 * @param string $documentModelName
 	 * @return f_persistentdocument_criteria_Query
 	 */
 	public function createQuery($documentModelName = null, $includeChildren = true)
@@ -295,7 +295,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function checkConnection()
 	{
@@ -434,7 +434,7 @@ abstract class f_persistentdocument_PersistentProvider
 	protected abstract function errorInfo();
 
 	/**
-	 * @param String $script
+	 * @param string $script
 	 * @return PDOStatement
 	 */
 	public abstract function executeSQLSelect($script);
@@ -519,7 +519,7 @@ abstract class f_persistentdocument_PersistentProvider
 	/**
 	 * If the query has some projection, retrieve one of them into a dedicated array
 	 * @param f_persistentdocument_criteria_Query $query
-	 * @param String $columnName the name of the projection
+	 * @param string $columnName the name of the projection
 	 * @return mixed[]
 	 */
 	public function findColumn($query, $columnName)
@@ -561,7 +561,7 @@ abstract class f_persistentdocument_PersistentProvider
 
 	/**
 	 * @param f_persistentdocument_criteria_QueryIntersection $intersection
-	 * @return Integer[]
+	 * @return integer[]
 	 */
 	public function findIntersectionIds($intersection)
 	{
@@ -653,7 +653,7 @@ abstract class f_persistentdocument_PersistentProvider
 	
 	/**
 	 * @param f_persistentdocument_criteria_QueryUnion $union
-	 * @return Integer[]
+	 * @return integer[]
 	 */
 	public function findUnionIds($union)
 	{
@@ -699,7 +699,7 @@ abstract class f_persistentdocument_PersistentProvider
 	/**
 	 * @param f_persistentdocument_criteria_ExecutableQuery $query
 	 * @param array $params the parameters for the query, created and filled by buildQueryString
-	 * @return String the queryString as a pdo preparedStatement
+	 * @return string the queryString as a pdo preparedStatement
 	 */
 	protected abstract function buildQueryString($query, &$params);
 
@@ -915,7 +915,7 @@ abstract class f_persistentdocument_PersistentProvider
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $doc
-	 * @param String $lang
+	 * @param string $lang
 	 * @return f_persistentdocument_I18PersistentDocument
 	 */
 	public function getI18nDocument($doc, $lang, $isVo = false)
@@ -977,13 +977,13 @@ abstract class f_persistentdocument_PersistentProvider
 
 
 	/**
-	 * @param String $tableName
-	 * @return String
+	 * @param string $tableName
+	 * @return string
 	 */
 	protected abstract function getI18nDocumentQuery($tableName);
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getDocumentInstanceQuery();
 
@@ -991,10 +991,10 @@ abstract class f_persistentdocument_PersistentProvider
 	 * Return a instance of the document[@id = $id and @modelName = $modelName]
 	 *
 	 * @param integer $id
-	 * @param String $modelName
-	 * @param Integer $treeId
+	 * @param string $modelName
+	 * @param integer $treeId
 	 * @param Array $I18nInfoArray
-	 * @param Boolean $cacheServiceCalled
+	 * @param boolean $cacheServiceCalled
 	 * @return f_persistentdocument_PersistentDocument
 	 */
 	protected final function getDocumentInstanceWithModelName($id, $modelName, $treeId, $I18nInfoArray, $cacheServiceCalled = false)
@@ -1031,8 +1031,8 @@ abstract class f_persistentdocument_PersistentProvider
 	/**
 	 * Return the name of the document
 	 *
-	 * @param Integer $id
-	 * @return String the name of the document model or false
+	 * @param integer $id
+	 * @return string the name of the document model or false
 	 */
 	public function getDocumentModelName($id)
 	{
@@ -1057,12 +1057,12 @@ abstract class f_persistentdocument_PersistentProvider
 
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getDocumentModelNameQuery();
 
 	/**
-	 * @param String $documentModelName
+	 * @param string $documentModelName
 	 * @return f_persistentdocument_PersistentDocument
 	 */
 	public function getNewDocumentInstance($documentModelName)
@@ -1075,8 +1075,8 @@ abstract class f_persistentdocument_PersistentProvider
 	/**
 	 * Return the persistent document class name from the document model name
 	 *
-	 * @param String $modelName
-	 * @return String
+	 * @param string $modelName
+	 * @return string
 	 */
 	protected function getDocumentClassFromModel($modelName)
 	{
@@ -1092,8 +1092,8 @@ abstract class f_persistentdocument_PersistentProvider
 
 	/**
 	 * Return the I18n persistent document class name from the document model name
-	 * @param String $modelName
-	 * @return String
+	 * @param string $modelName
+	 * @return string
 	 */
 	protected function getI18nDocumentClassFromModel($modelName)
 	{
@@ -1180,27 +1180,27 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function mutateFrameworkQuery();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function mutateRelationId1Query();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function mutateRelationId2Query();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function mutateDocumentQuery($table);
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function mutateDocumentI18NQuery($tableI18N);
 
@@ -1249,7 +1249,7 @@ abstract class f_persistentdocument_PersistentProvider
 
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getLoadDocumentQuery($table);
 
@@ -1421,7 +1421,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 * @param f_persistentdocumentPersistentDocument $persistentDocument
 	 * @param boolean $clearCache
 	 */
@@ -1435,7 +1435,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getUpdateDocumentLangs();
 
@@ -1493,10 +1493,10 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @param String $table
+	 * @param string $table
 	 * @param array<String, String> $mapping
 	 * @param array<String, array<>> $lobParameters
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getUpdateI18nDocumentQuery($table, $mapping, $lobParameters = array());
 
@@ -1512,18 +1512,18 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 	
 	/**
-	 * @param String $tableName
-	 * @return String
+	 * @param string $tableName
+	 * @return string
 	 */
 	protected abstract function getDeleteI18nDocument($tableName);
 
 
 
 	/**
-	 * @param String $table
+	 * @param string $table
 	 * @param array<String, String> $mapping
 	 * @param array<String, array<>> $lobParameters
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getUpdateDocumentQuery($table, $mapping, $lobParameters = array());
 
@@ -1619,17 +1619,17 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getDeleteDocumentQuery1();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getDeleteDocumentQuery2($table);
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getDeleteDocumentQuery3();
 
@@ -1719,7 +1719,7 @@ abstract class f_persistentdocument_PersistentProvider
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $persistentDocument
-	 * @return Integer
+	 * @return integer
 	 */
 	protected function getNewDocumentId($persistentDocument)
 	{
@@ -1761,18 +1761,18 @@ abstract class f_persistentdocument_PersistentProvider
 
 	/**
 	 * Query like INSERT INTO f_document (document_model, lang_vo, label_fr, ...) VALUES (:document_model, :lang_vo, :label_fr, ...)
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getNewDocumentIdQuery1();
 
 	/**
 	 * Query like INSERT INTO f_document (document_id, document_model, lang_vo, label_fr, ...) VALUES (:document_id, :document_model, :lang_vo, :label_fr, ...)';
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getNewDocumentIdQuery2();
 
 	/**
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 * @param f_persistentdocument_PersistentDocument $persistentDocument
 	 */
 	protected function _insertDocument($documentId, $persistentDocument)
@@ -1850,7 +1850,7 @@ abstract class f_persistentdocument_PersistentProvider
 
 	/**
 	 * Query like INSERT INTO '.$table.' (' . implode(', ', $fieldsName) .') VALUES (' . implode(', ', $parameters) .')
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function get_insertDocumentQuery($table, $fieldsName, $parameters, $lobParameters = array());
 
@@ -1931,18 +1931,18 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getLoadRelationsQuery();
 
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getSaveRelationsQuery();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getloadAllRelations();
 	
@@ -2070,38 +2070,38 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getSaveRelationDeleteAllQuery();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getSaveRelationsPreviousQuery();
 	
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getSaveRelationInsertQuery();
 	
 	/**
-	 * @return String
+	 * @return string
 	 */	
 	protected abstract function getSaveRelationUpdateQuery();
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getSaveRelationDeleteQuery();
 
 	/**
-	 * @return String
+	 * @return string
 	 */	
 	protected abstract function getSaveRelationReorderQuery();
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public abstract function getType();
 
@@ -2652,7 +2652,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getRelationsQuery($documentId1, $documentId2, $relationId, $documentModel1, $documentModel2);
 
@@ -2728,12 +2728,12 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getTagsQuery();
 
 	/**
-	 * @return String 'SELECT tags.tag, tags.id FROM f_tags tags'
+	 * @return string 'SELECT tags.tag, tags.id FROM f_tags tags'
 	 */
 	protected abstract function getAllTagsTagsQuery();
 
@@ -2821,12 +2821,12 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getSaveSettingDeleteQuery();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getSaveUserSettingQuery();
 
@@ -2973,32 +2973,32 @@ abstract class f_persistentdocument_PersistentProvider
 
 	/**
 	 * @param array<String> $tags
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getHasTagsQuery($tags);
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getHasTagQuery();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getAddTagQuery();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getRemoveTagQuery();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getRemoveExclusiveTagQuery();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getDocumentIdsByTagQuery();
 
@@ -3030,7 +3030,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getFromFrameworkCacheQuery();
 
@@ -3067,7 +3067,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getMultipleFromFrameworkCacheQuery($keys);
 
@@ -3093,7 +3093,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function deleteFrameworkCacheKeysQuery($keys);
 
@@ -3166,21 +3166,21 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function setInFrameworkCacheDeleteQuery();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function setInFrameworkCacheQuery();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function setInFrameworkCacheInsertQuery();
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function setInFrameworkCacheUpdateQuery();
 
@@ -3202,12 +3202,12 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function clearFrameworkCacheDeleteQuery();
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function clearFrameworkCacheTruncateQuery();
 	
@@ -3602,7 +3602,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getUrlRewritingInfoQuery();
 	
@@ -3621,7 +3621,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function setUrlRewritingQuery();
 	
@@ -3652,7 +3652,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function clearUrlRewritingQuery();
 	
@@ -3695,7 +3695,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getPageForUrlQuery();
 
@@ -3764,8 +3764,8 @@ abstract class f_persistentdocument_PersistentProvider
 	/**
 	 * Remove all compiled acls for node $nodeId
 	 *
-	 * @param Integer $nodeId
-	 * @param String $packageName (ex: modules_website)
+	 * @param integer $nodeId
+	 * @param string $packageName (ex: modules_website)
 	 */
 	public function removeACLForNode($nodeId, $packageName = null)
 	{
@@ -3786,7 +3786,7 @@ abstract class f_persistentdocument_PersistentProvider
 	/**
 	 * Permissions defined on $nodeId predicate
 	 *
-	 * @param Integer $nodeId
+	 * @param integer $nodeId
 	 * @return boolean
 	 */
 	public function hasCompiledPermissions($nodeId)
@@ -3801,8 +3801,8 @@ abstract class f_persistentdocument_PersistentProvider
 	/**
 	 * Permissions defined on $nodeId for $package predicate
 	 *
-	 * @param Integer $nodeId
-	 * @param String $packageName
+	 * @param integer $nodeId
+	 * @param string $packageName
 	 * @return boolean
 	 */
 	public function hasCompiledPermissionsForPackage($nodeId, $packageName)
@@ -3818,8 +3818,8 @@ abstract class f_persistentdocument_PersistentProvider
 	 * Checks the existence of a permission on a node for an array of accessors.
 	 *
 	 * @param array<Integer> $accessors
-	 * @param String $fullPermName
-	 * @param Integer $nodeId
+	 * @param string $fullPermName
+	 * @param integer $nodeId
 	 * @return boolean
 	 */
 	public function checkCompiledPermission($accessors, $perm, $node)
@@ -3832,7 +3832,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @param String $permission
+	 * @param string $permission
 	 * @param integer $nodeId
 	 * @return array<Integer>
 	 */
@@ -3853,7 +3853,7 @@ abstract class f_persistentdocument_PersistentProvider
 
 	/**
 	 * @param array<Integer> $accessorIds
-	 * @param Integer $nodeId
+	 * @param integer $nodeId
 	 * @return array<String>
 	 */
 	public function getPermissionsForUserByNode($accessorIds, $nodeId)
@@ -3879,13 +3879,13 @@ abstract class f_persistentdocument_PersistentProvider
 	
 	/**
 	 * @param array<Integer> $accessors
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getPermissionsForUserByNodeQuery($accessors);
 	/**
 	 * Get the permission "Definition" points for tree $packageName (ex: modules_website).
 	 *
-	 * @param String $packageName
+	 * @param string $packageName
 	 * @return Array<Integer>
 	 */
 	public function getPermissionDefinitionPoints($packageName)
@@ -3902,43 +3902,43 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getCompileACLQuery();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getCheckACLQuery($accessors);
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getAccessorsByPermissionForNodeQuery();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getHasPermissionACLQuery();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getHasPermissionForPackageQuery();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getRemoveACLForNodeQuery();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getRemovePackageACLForNodeQuery();
 
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getACLDefinitionPointQuery();
 
@@ -3972,7 +3972,7 @@ abstract class f_persistentdocument_PersistentProvider
 	protected abstract function getWebsiteIdAndLangFromUrlQuery();
 
 	/**
-	 * @param String $blockName
+	 * @param string $blockName
 	 * @param array<String> $specs
 	 * @param website_persistentdocument_page $page
 	 */
@@ -4009,24 +4009,24 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getCacheIdsByPatternQuery();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getRegisterSimpleCacheQuery();
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	protected abstract function getUnregisterSimpleCacheQuery();
 
 	// private methods
 
 	/**
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 * @return boolean
 	 */
 	private function isInCache($documentId)
@@ -4035,7 +4035,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 * @return f_persistentdocument_PersistentDocument
 	 */
 	private function getFromCache($documentId)
@@ -4044,7 +4044,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 * @param f_persistentdocument_PersistentDocument $document
 	 * @return void
 	 */
@@ -4061,7 +4061,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @param Integer $documentId
+	 * @param integer $documentId
 	 * @return void
 	 */
 	protected function deleteFromCache($documentId)
@@ -4287,7 +4287,7 @@ abstract class f_persistentdocument_PersistentProvider
 	/**
 	 * Query like INSERT INTO f_user_action_entry (entry_date , user_id , document_id , module_name , action_name, username, info)
 	 * VALUES (:entry_date, :user_id, :document_id, :module_name, :action_name, :username, :info)
-	 * @return String
+	 * @return string
 	 */
 	protected function addUserActionEntryQuery()
 	{
@@ -4295,14 +4295,14 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @param String $date_entry
-	 * @param Integer $userId
-	 * @param String $moduleName
-	 * @param String $actionName
-	 * @param Integer $documentId
-	 * @param String $username
-	 * @param String $serializedInfo
-	 * @return Integer
+	 * @param string $date_entry
+	 * @param integer $userId
+	 * @param string $moduleName
+	 * @param string $actionName
+	 * @param integer $documentId
+	 * @param string $username
+	 * @param string $serializedInfo
+	 * @return integer
 	 */
 	public final function addUserActionEntry($date_entry, $userId, $moduleName, $actionName, $documentId, $username, $serializedInfo)
 	{
@@ -4351,11 +4351,11 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @param Integer $userId
-	 * @param String $moduleName
-	 * @param String $actionName
-	 * @param Integer $documentId
-	 * @return Integer
+	 * @param integer $userId
+	 * @param string $moduleName
+	 * @param string $actionName
+	 * @param integer $documentId
+	 * @return integer
 	 */
 	public final function getCountUserActionEntry($userId, $moduleName, $actionName, $documentId)
 	{
@@ -4375,14 +4375,14 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @param Integer $userId
-	 * @param String $moduleName
-	 * @param String $actionName
-	 * @param Integer $documentId
-	 * @param Integer $rowIndex
-	 * @param Integer $rowCount
-	 * @param String $sortOnField (date | user)
-	 * @param String $sortDirection (ASC | DESC)
+	 * @param integer $userId
+	 * @param string $moduleName
+	 * @param string $actionName
+	 * @param integer $documentId
+	 * @param integer $rowIndex
+	 * @param integer $rowCount
+	 * @param string $sortOnField (date | user)
+	 * @param string $sortDirection (ASC | DESC)
 	 * @return array(array(entry_id, entry_date, user_id, document_id, module_name, action_name, info, link_id));
 	 */
 	public final function getUserActionEntry($userId, $moduleName, $actionName, $documentId, $rowIndex, $rowCount, $sortOnField, $sortDirection)
@@ -4399,8 +4399,8 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @param String $fieldName (document | module | action | [user])
-	 * @return String Query like SELECT $sqlName as distinctvalue FROM f_user_action_entry GROUP BY $sqlName
+	 * @param string $fieldName (document | module | action | [user])
+	 * @return string Query like SELECT $sqlName as distinctvalue FROM f_user_action_entry GROUP BY $sqlName
 	 */
 	protected function getDistinctLogEntryQuery($fieldName)
 	{
@@ -4415,7 +4415,7 @@ abstract class f_persistentdocument_PersistentProvider
 	}
 
 	/**
-	 * @param String $fieldName (document | module | action | [user])
+	 * @param string $fieldName (document | module | action | [user])
 	 * @return array<array<distinctvalue => VALUE>>
 	 */
 	public final function getDistinctLogEntry($fieldName)

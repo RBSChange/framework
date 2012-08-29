@@ -22,7 +22,7 @@ abstract class change_Patch
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getModuleName()
 	{
@@ -30,7 +30,7 @@ abstract class change_Patch
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public function getNumber()
 	{
@@ -127,7 +127,7 @@ abstract class change_Patch
 	}
 	
 	/**
-	 * @param String $scriptName
+	 * @param string $scriptName
 	 */
 	protected function executeLocalXmlScript($scriptName)
 	{
@@ -136,8 +136,8 @@ abstract class change_Patch
 	}
 	
 	/**
-	 * @param String $scriptName
-	 * @param String $module
+	 * @param string $scriptName
+	 * @param string $module
 	 */
 	protected function executeModuleScript($scriptName, $module)
 	{
@@ -148,7 +148,7 @@ abstract class change_Patch
 	/**
 	 * Executes an SQL file.
 	 *
-	 * @param String $relativeFilePath
+	 * @param string $relativeFilePath
 	 *
 	 * @author intbonjf
 	 */
@@ -185,8 +185,8 @@ abstract class change_Patch
 	/**
 	 * Executes an SQL query.
 	 *
-	 * @param String $query
-	 * @return Integer the number of affected rows
+	 * @param string $query
+	 * @return integer the number of affected rows
 	 * @author intbonjf
 	 */
 	protected final function executeSQLQuery($query)
@@ -252,7 +252,7 @@ abstract class change_Patch
 	/**
 	 * @param string $commandName
 	 * @param array $arguments
-	 * @return String
+	 * @return string
 	 */
 	protected function execChangeCommand($commandName, $arguments = array())
 	{
@@ -260,7 +260,7 @@ abstract class change_Patch
 	}
 	
 	/**
-	 * @example set value to null for remove entry
+	 * For exemple set value to null for remove entry
 	 * @param string $path
 	 * @param string $value
 	 * @return string || false if return value != input value compile-config is required

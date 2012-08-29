@@ -3,16 +3,16 @@
  * This class uses phpredis (https://github.com/nicolasff/phpredis) for redis client.
  * To configure, add the following to your project.xml :
    <injection>
-     <entry name="f_DataCacheService">f_DataCacheRedisService</entry>
+	 <entry name="f_DataCacheService">f_DataCacheRedisService</entry>
    </injection>
    <datacache-redis>
-     <server>
-       <entry name="host">...</entry>
-       <entry name="port">...</entry>
-       <entry name="database">...</entry>
-       <!-- Optionnal entries -->
-       <entry name="password">...</entry>
-     </server>
+	 <server>
+	   <entry name="host">...</entry>
+	   <entry name="port">...</entry>
+	   <entry name="database">...</entry>
+	   <!-- Optionnal entries -->
+	   <entry name="password">...</entry>
+	 </server>
    </datacache-redis>
  */
 class f_DataCacheRedisService extends f_DataCacheService
@@ -96,7 +96,7 @@ class f_DataCacheRedisService extends f_DataCacheService
 	}
 	
 	/**
-	 * @param String $pattern
+	 * @param string $pattern
 	 */
 	public function getCacheIdsForPattern($pattern)
 	{

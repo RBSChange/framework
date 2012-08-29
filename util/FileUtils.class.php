@@ -57,11 +57,11 @@ abstract class f_util_FileUtils
 	
 	/**
 	 * "ln -s $linkTarget $linkPath"
-	 * @param String $linkTarget
-	 * @param String $linkPath
-	 * @param Integer $options value in {self::OVERRIDE}
+	 * @param string $linkTarget
+	 * @param string $linkPath
+	 * @param integer $options value in {self::OVERRIDE}
 	 * @throws Exception if the target is not readable or the symlink creation failed
-	 * @return Boolean true if link has to be created or updated
+	 * @return boolean true if link has to be created or updated
 	 */
 	static function symlink($linkTarget, $linkPath, $options = 0)
 	{
@@ -120,8 +120,8 @@ abstract class f_util_FileUtils
 	/**
 	 * Clean string to be acceptable for a filename
 	 *
-	 * @param String $string
-	 * @return String
+	 * @param string $string
+	 * @return string
 	 */
 	public static function normalizeFilename($string)
 	{
@@ -133,7 +133,7 @@ abstract class f_util_FileUtils
 	 * Clear the content of $path file.
 	 * If $path does not exist, creates it
 	 *
-	 * @param String $path
+	 * @param string $path
 	 */
 	public static function clearFile($path)
 	{
@@ -143,8 +143,8 @@ abstract class f_util_FileUtils
 
 	/**
 	 * Unlink the file specified by $filePath.
-	 * @param String $filePath
-	 * @return Boolean
+	 * @param string $filePath
+	 * @return boolean
 	 */
 	public static function unlink($filePath)
 	{
@@ -162,9 +162,9 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @param String $pattern
-	 * @param String $fromPath
-	 * @return String[] the founded files as a "relative to $fromPath path" array
+	 * @param string $pattern
+	 * @param string $fromPath
+	 * @return string[] the founded files as a "relative to $fromPath path" array
 	 * For example: f_util_FileUtils::find("*.php", util_File_Utils::buildProjectPath("modules", "myModule"));
 	 */
 	static public function find($pattern, $fromPath)
@@ -220,7 +220,7 @@ abstract class f_util_FileUtils
 
 	/**
 	 * For example: f_util_FileUtils::buildRelativePath('home', 'toto') returns 'home/toto'
-	 * @return String the path builded using concatenated arguments
+	 * @return string the path builded using concatenated arguments
 	 */
 	public static function buildRelativePath()
 	{
@@ -231,7 +231,7 @@ abstract class f_util_FileUtils
 	/**
 	 * For example: f_util_FileUtils::buildPath('home', 'toto') returns 'home/toto'
 	 * For example: f_util_FileUtils::buildPath('/home/titi/tutu', 'toto') returns '/home/titi/tutu/toto'
-	 * @return String the path builded using concatenated arguments
+	 * @return string the path builded using concatenated arguments
 	 */
 	public static function buildPath()
 	{
@@ -242,7 +242,7 @@ abstract class f_util_FileUtils
 	/**
 	 * For example: f_util_FileUtils::buildAbsolutePath('home', 'toto') returns '/home/toto'
 	 * For example: f_util_FileUtils::buildAbsolutePath('/home', 'toto') returns '/home/toto'
-	 * @return String the path builded using concatenated arguments
+	 * @return string the path builded using concatenated arguments
 	 */
 	public static function buildAbsolutePath()
 	{
@@ -252,7 +252,7 @@ abstract class f_util_FileUtils
 
 	/**
 	 * @param array<String> $args
-	 * @return String
+	 * @return string
 	 */
 	private static function buildAbsolutePathFromArray($args)
 	{
@@ -267,7 +267,7 @@ abstract class f_util_FileUtils
 	
 	/**
 	 * For example: f_util_FileUtils::buildProjectPath('libs', 'icons')
-	 * @return String
+	 * @return string
 	 */
 	public static function buildProjectPath()
 	{
@@ -278,7 +278,7 @@ abstract class f_util_FileUtils
 
 	/**
 	 * For example: f_util_FileUtils::buildModulesPath('mymodule', 'config')
-	 * @return String
+	 * @return string
 	 */
 	public static function buildModulesPath()
 	{
@@ -289,7 +289,7 @@ abstract class f_util_FileUtils
 	
 	/**
 	 * For example: f_util_FileUtils::buildOverridePath('modules', 'mymodule', 'config')
-	 * @return String
+	 * @return string
 	 */
 	public static function buildOverridePath()
 	{
@@ -300,7 +300,7 @@ abstract class f_util_FileUtils
 
 	/**
  	 * For example: f_util_FileUtils::buildDocumentRootPath('index.php')
-	 * @return String
+	 * @return string
 	 */
 	public static function buildDocumentRootPath()
 	{
@@ -310,7 +310,7 @@ abstract class f_util_FileUtils
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public static function buildChangeCachePath()
 	{
@@ -320,7 +320,7 @@ abstract class f_util_FileUtils
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public static function buildWebCachePath()
 	{
@@ -330,7 +330,7 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	public static function buildChangeBuildPath()
 	{
@@ -341,7 +341,7 @@ abstract class f_util_FileUtils
 
 	/**
 	 * For example: FileUtils::buildLogPath('application.log')
-	 * @return String
+	 * @return string
 	 */
 	public static function buildLogPath()
 	{
@@ -352,7 +352,7 @@ abstract class f_util_FileUtils
 
 	/**
 	 * For example: FileUtils::buildFrameworkPath('config', 'listeners.xml')
-	 * @return String
+	 * @return string
 	 */
 	public static function buildFrameworkPath()
 	{
@@ -383,8 +383,8 @@ abstract class f_util_FileUtils
 
 	/**
 	 * Get the path of the files contained in a directory
-	 * @param String $dirPath
-	 * @return String[]
+	 * @param string $dirPath
+	 * @return string[]
 	 */
 	static public function getDirFiles($dirPath)
 	{
@@ -525,7 +525,7 @@ abstract class f_util_FileUtils
 	 * Be carefull ; this function doesn't delete folders.
 	 *
 	 * @param  $filePath  Path of the file to delete or array of files to delete
-	 * @return boolean    TRUE if delete succeed or file doesn't exists, otherwise FALSE
+	 * @return boolean	TRUE if delete succeed or file doesn't exists, otherwise FALSE
 	 */
 	static public function deleteTmpFile($filePath = null)
 	{
@@ -597,7 +597,7 @@ abstract class f_util_FileUtils
 	}
 	
 	/**
-	 * @param String $path
+	 * @param string $path
 	 * @throws IOException on error
 	 */
 	static function touch($path, $time = null)
@@ -621,10 +621,10 @@ abstract class f_util_FileUtils
 	/**
 	 * write data to file designed by $path
 	 *
-	 * @param String $path
+	 * @param string $path
 	 * @param mixed $content
-	 * @param Integer $options value in {self::OVERRIDE}
-	 * @return Boolean if file was really written (could be false with no override option)
+	 * @param integer $options value in {self::OVERRIDE}
+	 * @return boolean if file was really written (could be false with no override option)
 	 * @throws IOException on error
 	 */
 	public static function write($path, $content, $options = 0)
@@ -653,10 +653,10 @@ abstract class f_util_FileUtils
 	/**
 	 * write data to file designed by $path
 	 *
-	 * @param String $path
+	 * @param string $path
 	 * @param mixed $content
-	 * @param Integer $options value in {self::OVERRIDE}
-	 * @return Boolean if file was really written (could be false with no override option)
+	 * @param integer $options value in {self::OVERRIDE}
+	 * @return boolean if file was really written (could be false with no override option)
 	 * @throws IOException on error
 	 */
 	private static function fileWrite($path, $content, $options)
@@ -677,10 +677,10 @@ abstract class f_util_FileUtils
 	/**
 	 * write data to file designed by $path threw FTP protocol
 	 *
-	 * @param String $path matching the following format : "ftp://username:password@server:port/path".
+	 * @param string $path matching the following format : "ftp://username:password@server:port/path".
 	 * @param mixed $content
-	 * @param Integer $options value in {self::OVERRIDE}
-	 * @return Boolean if file was really written (could be false with no override option)
+	 * @param integer $options value in {self::OVERRIDE}
+	 * @return boolean if file was really written (could be false with no override option)
 	 * @throws IOException on error
 	 */
 	private static function ftpWrite($path, $content, $options)
@@ -704,7 +704,7 @@ abstract class f_util_FileUtils
 	/**
 	 * write data to file designed by $path and create the dirname of $path if not exists
 	 *
-	 * @param String $path
+	 * @param string $path
 	 * @param mixed $content
 	 * @throws IOException
 	 */
@@ -716,10 +716,10 @@ abstract class f_util_FileUtils
 
 	/**
 	 * Copy files or directories
-	 * @param String $from
-	 * @param String $dest
-	 * @param Integer $options value in {self::OVERRIDE}
-	 * @param String[] $exclude patterns of file to exclude (mean something when $from is a directory)
+	 * @param string $from
+	 * @param string $dest
+	 * @param integer $options value in {self::OVERRIDE}
+	 * @param string[] $exclude patterns of file to exclude (mean something when $from is a directory)
 	 */
 	public static function cp($from, $dest, $options = 0, $exclude = null)
 	{
@@ -785,8 +785,8 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @param String $path
-	 * @return String the content of file[@path] = $path
+	 * @param string $path
+	 * @return string the content of file[@path] = $path
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
@@ -804,8 +804,8 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @param String $path
-	 * @return String the content of file[@path] = $path
+	 * @param string $path
+	 * @return string the content of file[@path] = $path
 	 * @throws FileNotFoundException
 	 * @throws IOException if file could not be read
 	 */
@@ -824,8 +824,8 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @param String $path
-	 * @return String[] the content of file[@path] = $path
+	 * @param string $path
+	 * @return string[] the content of file[@path] = $path
 	 * @throws FileNotFoundException
 	 * @throws IOException if file could not be read
 	 */
@@ -844,8 +844,8 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @param String $path
-	 * @return String the content of file[@path] = $path
+	 * @param string $path
+	 * @return string the content of file[@path] = $path
 	 * @throws IOException
 	 */
 	private static function ftpRead($path)
@@ -894,7 +894,7 @@ abstract class f_util_FileUtils
 	/**
 	 * append data to file designed by $path
 	 *
-	 * @param String $path
+	 * @param string $path
 	 * @param mixed $content
 	 * @throws IOException
 	 */
@@ -940,10 +940,10 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @param String $file
-	 * @param String|Integer $mode Cf. http://php.net/manual/en/function.chmod.php
-	 * @param Boolean $recursive
-	 * @param String|Integer $filesMode if recursive, you can specify a different mode than $mode for files
+	 * @param string $file
+	 * @param string|Integer $mode Cf. http://php.net/manual/en/function.chmod.php
+	 * @param boolean $recursive
+	 * @param string|Integer $filesMode if recursive, you can specify a different mode than $mode for files
 	 * For example: chmod(..., "2775") or chmod (..., 02775)
 	 */
 	public static function chmod($file, $mode, $recursive = true, $filesMode = null)
@@ -1006,10 +1006,10 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * @param String $file
-	 * @param String $owner nullable
-	 * @param String $group
-	 * @param Boolean $recursive
+	 * @param string $file
+	 * @param string $owner nullable
+	 * @param string $group
+	 * @param boolean $recursive
 	 */
 	public static function chown($file, $owner, $group, $recursive = true)
 	{
@@ -1072,35 +1072,5 @@ abstract class f_util_FileUtils
 				}
 			}
 		}
-	}
-	
-	/**
-	 * @deprecated use f_util_FileUtils::buildProjectPath
-	 * @return String
-	 */
-	public static function buildWebeditPath()
-	{
-		$args = func_get_args();
-		array_unshift($args, PROJECT_HOME);
-		return self::buildAbsolutePathFromArray($args);
-	}
-	
-	/**
-	 * @deprecated use f_util_FileUtils::buildChangeCachePath
-	 */
-	public static function buildCachePath()
-	{
-		$args = func_get_args();
-		array_unshift($args, PROJECT_HOME, 'cache' , 'project');
-		return self::buildAbsolutePathFromArray($args);
-	}
-	
-	/**
-	 * @deprecated
-	 * @return String
-	 */
-	static function buildRepositoryPath()
-	{
-		throw new Exception("Deprecated method with no replacement");
 	}
 }

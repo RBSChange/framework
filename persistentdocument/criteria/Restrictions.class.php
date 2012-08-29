@@ -60,7 +60,7 @@ class Restrictions
 
 	/**
 	 * Apply an "equal" constraint to the named property
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 * @param mixed $value
 	 * @param boolean $ignoreCase deprecated, use ieq($propertyName, $value) instead of eq($propertyName, $value, true)
 	 * For example: eq("author", "me")
@@ -80,9 +80,9 @@ class Restrictions
 	}
 
 	/**
-      * Apply a "greater than or equal" constraint to the named property
-      * For example: ge("creationdate", $today)
-      */
+	  * Apply a "greater than or equal" constraint to the named property
+	  * For example: ge("creationdate", $today)
+	  */
 	static function ge($propertyName, $value)
 	{
 		return new f_persistentdocument_criteria_SimpleExpression($propertyName, $value, '>=');
@@ -136,8 +136,8 @@ class Restrictions
 
 	/**
 	 * A case-insensitive "like", similar to Postgres ilike operator
-	 * @param String $propertyName
-	 * @param String $value
+	 * @param string $propertyName
+	 * @param string $value
 	 * @param MatchMode $matchMode
 	 * For example: ilike("email", "@rBbS.fR", MatchMode::END)
 	 * @see MatchMode
@@ -148,8 +148,8 @@ class Restrictions
 	}
 
 	/**
-	 * @param String $propertyName
-	 * @param String $value
+	 * @param string $propertyName
+	 * @param string $value
 	 */
 	static function beginsWith($propertyName, $value)
 	{
@@ -157,8 +157,8 @@ class Restrictions
 	}
 	
 	/**
-	 * @param String $propertyName
-	 * @param String $value
+	 * @param string $propertyName
+	 * @param string $value
 	 */
 	static function ibeginsWith($propertyName, $value)
 	{
@@ -166,8 +166,8 @@ class Restrictions
 	}
 	
 	/**
-	 * @param String $propertyName
-	 * @param String $value
+	 * @param string $propertyName
+	 * @param string $value
 	 */
 	static function endsWith($propertyName, $value)
 	{
@@ -175,8 +175,8 @@ class Restrictions
 	}
 	
 	/**
-	 * @param String $propertyName
-	 * @param String $value
+	 * @param string $propertyName
+	 * @param string $value
 	 */
 	static function iendsWith($propertyName, $value)
 	{
@@ -184,16 +184,16 @@ class Restrictions
 	}
 	
 	/**
-     * Apply an "in" constraint to the named property
-     */
+	 * Apply an "in" constraint to the named property
+	 */
 	static function in($propertyName, $values)
 	{
 		return new f_persistentdocument_criteria_InExpression($propertyName, $values, false);
 	}
 	
 	/**
-     * Apply an "notin" constraint to the named property
-     */
+	 * Apply an "notin" constraint to the named property
+	 */
 	static function notin($propertyName, $values)
 	{
 		return new f_persistentdocument_criteria_InExpression($propertyName, $values, true);
@@ -222,7 +222,7 @@ class Restrictions
 	/**
 	 * Apply an "is not null" constraint to the named property
 	 *
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 */
 	static function isNotNull($propertyName)
 	{
@@ -232,7 +232,7 @@ class Restrictions
 	/**
 	 * Apply an "is null" constraint to the named property
 	 *
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 */
 	static function isNull($propertyName)
 	{
@@ -242,7 +242,7 @@ class Restrictions
 	/**
 	 * Apply a "less than or equal" constraint to the named property
 	 *
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 * @param mixed $value
 	 */
 	static function le($propertyName, $value)
@@ -253,8 +253,8 @@ class Restrictions
 	/**
 	 * Apply a "less than or equal" constraint to two properties
 	 *
-	 * @param String $propertyName
-	 * @param String $otherPropertyName
+	 * @param string $propertyName
+	 * @param string $otherPropertyName
 	 */
 	static function leProperty($propertyName, $otherPropertyName)
 	{
@@ -262,22 +262,22 @@ class Restrictions
 	}
 
 	/**
-     *  Apply a "like" constraint to the named property
-     *
-     * @param String $propertyName
-     * @param mixed $value
-     */
+	 *  Apply a "like" constraint to the named property
+	 *
+	 * @param string $propertyName
+	 * @param mixed $value
+	 */
 	static function like($propertyName, $value, $matchMode = null, $ignoreCase = false)
 	{
 		return new f_persistentdocument_criteria_LikeExpression($propertyName, $value, $matchMode, $ignoreCase);
 	}
 
 	/**
-     *  Apply a "not like" constraint to the named property
-     *
-     * @param String $propertyName
-     * @param mixed $value
-     */
+	 *  Apply a "not like" constraint to the named property
+	 *
+	 * @param string $propertyName
+	 * @param mixed $value
+	 */
 	static function notLike($propertyName, $value, $matchMode = null, $ignoreCase = false)
 	{
 		return new f_persistentdocument_criteria_LikeExpression($propertyName, $value, $matchMode, $ignoreCase, true);
@@ -286,7 +286,7 @@ class Restrictions
 	/**
 	 * Apply a "less than" constraint to the named property
 	 *
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 * @param mixed $value
 	 */
 	static function lt($propertyName, $value)
@@ -297,8 +297,8 @@ class Restrictions
 	/**
 	 *  Apply a "less than" constraint to two properties
 	 *
-	 * @param String $propertyName
-	 * @param String $otherPropertyName
+	 * @param string $propertyName
+	 * @param string $otherPropertyName
 	 */
 	static function ltProperty($propertyName, $otherPropertyName)
 	{
@@ -308,7 +308,7 @@ class Restrictions
 	/**
 	 * Apply a "not equal" constraint to the named property
 	 *
-	 * @param String $propertyName
+	 * @param string $propertyName
 	 */
 	static function ne($propertyName, $value)
 	{
@@ -318,8 +318,8 @@ class Restrictions
 	/**
 	 * Apply a "not equal" constraint to two properties
 	 *
-	 * @param String $propertyName
-	 * @param String $otherPropertyName
+	 * @param string $propertyName
+	 * @param string $otherPropertyName
 	 */
 	static function neProperty($propertyName, $otherPropertyName)
 	{
@@ -351,7 +351,7 @@ class Restrictions
 
 	/**
 	 * Apply a "parentOf" constraint (in a tree).
-	 * @param String $documentId
+	 * @param string $documentId
 	 */
 	static function parentOf($documentId)
 	{
@@ -360,7 +360,7 @@ class Restrictions
 
 	/**
 	 * Apply a "childOf" constraint (in a tree).
-	 * @param String $documentId
+	 * @param string $documentId
 	 */
 	static function childOf($documentId)
 	{
@@ -369,7 +369,7 @@ class Restrictions
 
 	/**
 	 * Apply a "siblingOf" constraint (in a tree).
-	 * @param String $documentId
+	 * @param string $documentId
 	 */
 	static function siblingOf($documentId)
 	{
@@ -378,8 +378,8 @@ class Restrictions
 
 	/**
 	 * Apply a "ancestorOf" constraint (in a tree).
-	 * @param String $documentId
-	 * @param Integer level
+	 * @param string $documentId
+	 * @param integer level
 	 */
 	static function ancestorOf($documentId, $level = -1)
 	{
@@ -387,7 +387,7 @@ class Restrictions
 	}
 	/**
 	 * Apply a "previousSiblingOf" constraint (in a tree).
-	 * @param String $documentId
+	 * @param string $documentId
 	 */
 	static function previousSiblingOf($documentId)
 	{
@@ -395,7 +395,7 @@ class Restrictions
 	}
 	/**
 	 * Apply a "nextSiblingOf" constraint (in a tree).
-	 * @param String $documentId
+	 * @param string $documentId
 	 */
 	static function nextSiblingOf($documentId)
 	{
@@ -403,8 +403,8 @@ class Restrictions
 	}
 	/**
 	 * Apply a "descendentOf" constraint (in a tree).
-	 * @param String $documentId
-	 * @param Integer $level
+	 * @param string $documentId
+	 * @param integer $level
 	 */
 	static function descendentOf($documentId, $level = -1)
 	{
@@ -413,7 +413,7 @@ class Restrictions
 
 	/**
 	 * Apply a "referenceOf" constraint.
-	 * @param String $documentId
+	 * @param string $documentId
 	 */
 	static function referenceOf($documentId)
 	{
@@ -422,7 +422,7 @@ class Restrictions
 
 	/**
 	 * Apply a "referenceBy" constraint.
-	 * @param String $referenceDocumentId
+	 * @param string $referenceDocumentId
 	 */
 	static function referencedBy($referenceDocumentId)
 	{
@@ -431,7 +431,7 @@ class Restrictions
 
 	/**
 	 * Apply an "hasTag" constraint
-	 * @param String $tagName
+	 * @param string $tagName
 	 */
 	static function hasTag($tagName)
 	{

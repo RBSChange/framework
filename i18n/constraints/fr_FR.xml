@@ -1,13 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.constraints" lcid="fr_FR">
+<?xml version="1.0" encoding="UTF-8"?>
+<i18n baseKey="m.framework.constraints" lcid="fr_FR">
 	<key id="isinvalidfield">Champ "{field}" invalide : </key>
-	
 	<key id="isempty">Cette valeur est obligatoire et ne peut être vide.</key>
 	<key id="notbetweendocumentarray">le champ "{field}" n'est pas valide : count='{count}' min-occurs='{minOccurs}', max-occurs='{maxOccurs}'</key>
-	
 	<key id="emailaddressinvalid">le champ "{field}" doit contenir une adresse e-mail valide.</key>
 	<key id="emailaddressinvalidformat">le champ "{field}" doit contenir une adresse e-mail valide.</key>
-
 	<key id="emailaddressinvalidhostname">le champ "{field}" doit contenir une adresse e-mail valide
 		('%hostname%' n'est pas un nom d'hôte valide pour l'adresse email '%value%').</key>
 	<key id="emailaddressinvalidmxrecord">le champ "{field}" doit contenir une adresse e-mail valide
@@ -16,15 +13,12 @@
 		('%hostname%' n'est pas dans un segment réseau routable. L'adresse email '%value%' ne devrait pas être résolue depuis un réseau public).</key>
 	<key id="emailaddressdotatom">le champ "{field}" doit contenir une adresse e-mail valide
 		('%localPart%' ne correspond pas au format dot-atom).</key>
-	<key id="emailaddressdotatom">le champ "{field}" doit contenir une adresse e-mail valide
-		('%localPart%' ne correspond pas au format dot-atom).</key>
 	<key id="emailaddressquotedstring">le champ "{field}" doit contenir une adresse e-mail valide
 		('%localPart%' ne correspond pas au format quoted-string).</key>
 	<key id="emailaddressinvalidlocalpart">le champ "{field}" doit contenir une adresse e-mail valide
 		('%localPart%' n'est pas une partie locale valide pour l'adresse email '%value%').</key>
 	<key id="emailaddresslengthexceeded">le champ "{field}" doit contenir une adresse e-mail valide
 		('%value%' excède la taille autorisée).</key>
-		
 	<key id="stringlengthtoolong">le champ "{field}" doit avoir une taille maximale de %max% caractères.</key>
 	<key id="stringlengthinvalid">le champ "{field}" doit etre de type chaîne</key>
 	<key id="stringlengthtooshort">le champ "{field}" doit avoir une taille minimal de %min% caractères.</key>
@@ -34,7 +28,6 @@
 	<key id="notlessthan">le champ "{field}" doit avoir une valeur maximale de %max%.</key>
 	<key id="notbetween">le champ "{field}" doit avoir une valeur comprise entre %min% et %max%.</key>
 	<key id="notbetweenstrict">le champ "{field}" doit avoir une valeur scrtictement comprise entre %min% et %max%.</key>
-	
 	<key id="hostnamecannotdecodepunycode">'%value%' semble être un DNS valide mais le code n'a pu être décodé</key>
 	<key id="hostnameinvalid">Type invalide. Chaîne attendue</key>
 	<key id="hostnamedashcharacter">'%value%' semble être un nom d'hôte DNS mais il contient un tiret à une position invalide</key>

@@ -2,12 +2,12 @@
 interface f_web_Link
 {
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getUrl();
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getPath();	
 }

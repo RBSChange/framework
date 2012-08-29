@@ -41,7 +41,7 @@ class change_Controller
 	protected function __construct()
 	{
 		// initialize the controller
-	    $this->initialize();
+		$this->initialize();
 	}
 		
 	public function dispatch()
@@ -50,15 +50,15 @@ class change_Controller
 		$this->setRequestContextMode();
 		
  		// get the application context
-	    $context = $this->getContext();
-	    // determine our module and action
-	    $moduleName = $context->getRequest()->getParameter('module');
-    	if ($moduleName == null)
+		$context = $this->getContext();
+		// determine our module and action
+		$moduleName = $context->getRequest()->getParameter('module');
+		if ($moduleName == null)
 		{
 			$moduleName = 'website';
 		}
 		
-	    $actionName = $context->getRequest()->getParameter('action');
+		$actionName = $context->getRequest()->getParameter('action');
 		if ($actionName == null)
 		{
 			// no action has been specified
@@ -69,12 +69,12 @@ class change_Controller
 			}
 			else
 			{
-			    $moduleName =  'website';
-			    $actionName = 'Error404';
+				$moduleName =  'website';
+				$actionName = 'Error404';
 			}
-	    }
-	    // make the first request
-	    $this->forward($moduleName, $actionName);
+		}
+		// make the first request
+		$this->forward($moduleName, $actionName);
 	}
 	
 	/**
@@ -93,7 +93,7 @@ class change_Controller
 	
 	protected function setRequestContextMode()
 	{
-	    RequestContext::getInstance()->setMode(RequestContext::FRONTOFFICE_MODE);
+		RequestContext::getInstance()->setMode(RequestContext::FRONTOFFICE_MODE);
 	}
 	
 	/**
@@ -391,17 +391,17 @@ class change_Controller
 	{
 		if (headers_sent())
 		{
-            return;
-        }
-        
-        header('Last-Modified: '. gmdate('D, d M Y H:i:s') . ' GMT');
-        header('Expires: '. 'Mon, 26 Jul 1997 05:00:00 GMT');
-        header('Cache-Control: '. 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
-        header('Pragma: '. 'no-cache');
-        if (defined('NODE_NAME'))
-        {
-        	header('X-Change-WebNode: '. NODE_NAME);
-        }
+			return;
+		}
+		
+		header('Last-Modified: '. gmdate('D, d M Y H:i:s') . ' GMT');
+		header('Expires: '. 'Mon, 26 Jul 1997 05:00:00 GMT');
+		header('Cache-Control: '. 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
+		header('Pragma: '. 'no-cache');
+		if (defined('NODE_NAME'))
+		{
+			header('X-Change-WebNode: '. NODE_NAME);
+		}
 	}
 
 	public static function newInstance($class)
@@ -441,23 +441,23 @@ class change_Controller
 		$this->storage->shutdown();	
 		$this->request->shutdown();	
 	}
-    	
+		
 	/**
 	 * @param array $urlParams
 	 */
 	protected function generateRedirectUrl($urlParams)
 	{
-	    return LinkHelper::getParametrizedLink($urlParams)->getUrl();	    
+		return LinkHelper::getParametrizedLink($urlParams)->getUrl();		
 	}
 }
 
 class change_XulController extends change_Controller 
 {
-    
+	
 	protected function setRequestContextMode()
 	{
-	    RequestContext::getInstance()->setMode(RequestContext::BACKOFFICE_MODE);
-	    $this->getContext()->getUser()->setUserNamespace(change_User::BACKEND_NAMESPACE);
+		RequestContext::getInstance()->setMode(RequestContext::BACKOFFICE_MODE);
+		$this->getContext()->getUser()->setUserNamespace(change_User::BACKEND_NAMESPACE);
 	}
 	
 	/**
@@ -465,6 +465,6 @@ class change_XulController extends change_Controller
 	 */
 	protected function generateRedirectUrl($urlParams)
 	{
-	    return LinkHelper::getUIParametrizedLink($urlParams)->getUrl();	    
+		return LinkHelper::getUIParametrizedLink($urlParams)->getUrl();		
 	}
 }

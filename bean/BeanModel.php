@@ -22,12 +22,12 @@ interface f_mvc_BeanModel
 	/**
 	 * Used as getter/setter prefix in the context of BeanAggregateModel
 	 * @see BeanAggregateModel 
-	 * @return String
+	 * @return string
 	 */
 	function getBeanName();
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getBeanConstraints();
 }

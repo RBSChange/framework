@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.validation.validator" lcid="en_GB">
-  <key id="invalidvalue">″{value}″ is not a valid value for the ″{field}″ field.</key>
-  <key id="persisentdocumentarray">the ″{field}″ field is not valid: count=″{count}″ min-occurs=″{minOccurs}″, max-occurs=″{maxOccurs}″</key>
+<?xml version="1.0" encoding="UTF-8"?>
+<i18n baseKey="m.framework.validation.validator" lcid="en_GB">
+	<key id="invalidvalue">″{value}″ is not a valid value for the ″{field}″ field.</key>
+	<key id="persisentdocumentarray">the ″{field}″ field is not valid: count=″{count}″ min-occurs=″{minOccurs}″, max-occurs=″{maxOccurs}″</key>
 </i18n>

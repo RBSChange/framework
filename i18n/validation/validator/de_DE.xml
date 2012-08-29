@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<i18n baseKey="f.validation.validator" lcid="de_DE">
-  <key id="persisentdocumentarray">das Feld ″{field}″ ist nicht gültig: count=″{count}″ min-occurs=″{minOccurs}″, max-occurs=″{maxOccurs}″</key>
+<?xml version="1.0" encoding="UTF-8"?>
+<i18n baseKey="m.framework.validation.validator" lcid="de_DE">
+	<key id="persisentdocumentarray">das Feld ″{field}″ ist nicht gültig: count=″{count}″ min-occurs=″{minOccurs}″, max-occurs=″{maxOccurs}″</key>
 </i18n>

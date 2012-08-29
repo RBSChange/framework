@@ -31,8 +31,8 @@ class import_ScriptReader extends change_BaseService
 	}
 
 	/**
-	 * @param String $moduleName ex : website
-	 * @param String $scriptName ex : defaultsite.xml
+	 * @param string $moduleName ex : website
+	 * @param string $scriptName ex : defaultsite.xml
 	 * @param array $attributes
 	 */
 	public function executeModuleScript($moduleName, $scriptName, $attributes = array())
@@ -46,8 +46,8 @@ class import_ScriptReader extends change_BaseService
 	}
 	
 	/**
-	 * @param String $themeName ex : developer
-	 * @param String $scriptName ex : init.xml
+	 * @param string $themeName ex : developer
+	 * @param string $scriptName ex : init.xml
 	 * @param array $attributes
 	 */
 	public function executeThemeScript($themeName, $scriptName, $attributes = array())
@@ -60,7 +60,7 @@ class import_ScriptReader extends change_BaseService
 		$this->execute($path, $attributes);		
 	}
 	/**
-	 * @param String $fileName
+	 * @param string $fileName
 	 * @param attay $attributes
 	 */
 	public function execute($fileName, $attributes = array())
@@ -92,7 +92,7 @@ class import_ScriptReader extends change_BaseService
 	}
 
 	/**
-	 * @param String $fileName
+	 * @param string $fileName
 	 */
 	public function executeInternal($fileName)
 	{
@@ -235,8 +235,8 @@ class import_ScriptReader extends change_BaseService
 	}
 
 	/**
-	 * @param Integer $id
-	 * @return Boolean
+	 * @param integer $id
+	 * @return boolean
 	 */
 	public final function hasElementById($id)
 	{

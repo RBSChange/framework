@@ -21,7 +21,7 @@ class change_User
 	private $attributes = null;
 	
 	/**
-     * @var change_Context
+	 * @var change_Context
 	 */
 	private $context = null;
 
@@ -40,7 +40,7 @@ class change_User
 	
 	/**
 	 *
-	 * @param String $class
+	 * @param string $class
 	 * @return change_User 
 	 */
 	public static function newInstance($class)
@@ -74,8 +74,8 @@ class change_User
 	}
 	
 	/**
-	 * @param String $userNamespace
-	 * @return String Old namespace
+	 * @param string $userNamespace
+	 * @return string Old namespace
 	 */
 	public function setUserNamespace($userNamespace)
 	{
@@ -91,7 +91,7 @@ class change_User
 	
 	/**
 	 *
-	 * @return String 
+	 * @return string 
 	 */
 	public function getUserNamespace()
 	{
@@ -148,7 +148,7 @@ class change_User
 	/**
 	 * Get the superuser attribute for the user. 
 	 *
-	 * @return Boolean true if super user false otherwise.
+	 * @return boolean true if super user false otherwise.
 	 */
 	public function isRoot()
 	{
@@ -314,7 +314,7 @@ class change_User
 	}
 	
 	/**
-	 * @param Boolean $authenticated
+	 * @param boolean $authenticated
 	 */
 	public function setAuthenticated($authenticated)
 	{

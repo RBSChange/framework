@@ -40,7 +40,7 @@ class indexer_FacetResult extends ArrayObject
 	}
 
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getFieldName()
 	{
@@ -54,7 +54,7 @@ class indexer_FacetResult extends ArrayObject
 	}
 	
 	/**
-	 * @return String
+	 * @return string
 	 */
 	function getSimpleFieldName()
 	{
@@ -119,7 +119,7 @@ class indexer_FacetResult extends ArrayObject
 	}
 	
 	/**
-	 * @param String $value
+	 * @param string $value
 	 * @return indexer_FacetCount
 	 */
 	function getByValue($value)

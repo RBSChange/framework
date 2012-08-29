@@ -219,7 +219,7 @@ class change_AutoloadBuilder
 
 	/**
 	 * @param array $files
-	 * @param Boolean $override
+	 * @param boolean $override
 	 */
 	private function constructClassList($files, $override = false)
 	{
@@ -238,9 +238,9 @@ class change_AutoloadBuilder
 	}
 		
 	/**
-	 * @param String $class full class name
-	 * @param String $filePath the file defining the class
-	 * @param Boolean $override
+	 * @param string $class full class name
+	 * @param string $filePath the file defining the class
+	 * @param boolean $override
 	 */
 	private function makeAutoloadLink($class, $filePath, $override)
 	{

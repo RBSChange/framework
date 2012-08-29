@@ -9,7 +9,7 @@ class PHPTAL_Php_Attribute_CHANGE_Include extends ChangeTalAttribute
 	/**
 	 * @see ChangeTalAttribute::evaluateAll()
 	 *
-	 * @return Boolean
+	 * @return boolean
 	 */
 	protected function evaluateAll()
 	{

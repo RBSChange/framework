@@ -6,15 +6,15 @@ abstract class f_util_CSVUtils
 	 *
 	 * $fields is an associative array:
 	 * $fields = array (
-	 *    "field1" => "Label of field 1",
-	 *    "field2" => "Label of field 2"
-	 *    );
+	 *	"field1" => "Label of field 1",
+	 *	"field2" => "Label of field 2"
+	 *	);
 	 *
 	 * $data is an array of associative arrays:
 	 * $data = array (
-	 *    array ("field1" => "value1", "field2" => "value2" ...), // line 1
-	 *    array ("field1" => "value1", "field2" => "value2" ...), // line 2
-	 *    );
+	 *	array ("field1" => "value1", "field2" => "value2" ...), // line 1
+	 *	array ("field1" => "value1", "field2" => "value2" ...), // line 2
+	 *	);
 	 *
 	 * @param array<string,string> $fields
 	 * @param array $data
@@ -86,8 +86,8 @@ abstract class f_util_CSVUtils
 
 class f_util_CSVUtils_export_options
 {
-	public $separator     = "\t";
-	public $quote         = true;
-	public $crlf          = "\r\n";
+	public $separator	 = "\t";
+	public $quote		 = true;
+	public $crlf		  = "\r\n";
 	public $outputHeaders = true;
 }

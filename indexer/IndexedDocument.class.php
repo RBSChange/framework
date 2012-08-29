@@ -140,9 +140,9 @@ class indexer_IndexedDocument
 	/**
 	 * Set the field name $name to value $int and treat it as a multivalued integer
 	 *
-	 * @param String $name
+	 * @param string $name
 	 * @param mixed $int
-	 * @param Boolean $multivalued
+	 * @param boolean $multivalued
 	 */
 	public function setIntegerField($name, $int, $multivalued = false)
 	{
@@ -169,9 +169,9 @@ class indexer_IndexedDocument
 	/**
 	 * Set the field name $name to value $int and treat it as a multivalued integer (non stored)
 	 *
-	 * @param String $name
-	 * @param Integer|Integer[] $int
-	 * @param Boolean $multivalued
+	 * @param string $name
+	 * @param integer|Integer[] $int
+	 * @param boolean $multivalued
 	 */
 	public function setVolatileIntegerField($name, $int, $multivalued = false)
 	{
@@ -198,7 +198,7 @@ class indexer_IndexedDocument
 	/**
 	 * Set the field name $name to value $float and treat it as a decimal
 	 *
-	 * @param String $name
+	 * @param string $name
 	 * @param Float $float
 	 */
 	public function setFloatField($name, $float)
@@ -216,7 +216,7 @@ class indexer_IndexedDocument
 	/**
 	 * Set the field name $name to value $float and treat it as a decimal (non stored)
 	 *
-	 * @param String $name
+	 * @param string $name
 	 * @param Float $float
 	 */
 	public function setVolatileFloatField($name, $float)
@@ -235,7 +235,7 @@ class indexer_IndexedDocument
 	/**
 	 * Label setter
 	 *
-	 * @param String $value
+	 * @param string $value
 	 */
 	public function setLabel($value)
 	{
@@ -248,7 +248,7 @@ class indexer_IndexedDocument
 	/**
 	 * text setter
 	 *
-	 * @param String $value
+	 * @param string $value
 	 */
 	public function setText($value)
 	{
@@ -297,7 +297,7 @@ class indexer_IndexedDocument
 	/**
 	 * change Id setter
 	 *
-	 * @param String $value
+	 * @param string $value
 	 */
 	public function setId($value)
 	{
@@ -311,7 +311,7 @@ class indexer_IndexedDocument
 	/**
 	 * lang setter
 	 *
-	 * @param String $value
+	 * @param string $value
 	 */
 	public function setLang($value)
 	{
@@ -325,7 +325,7 @@ class indexer_IndexedDocument
 	/**
 	 * document_model setter
 	 *
-	 * @param String $value
+	 * @param string $value
 	 */
 	public function setDocumentModel($value)
 	{
@@ -335,7 +335,7 @@ class indexer_IndexedDocument
 	/**
 	 * id getter
 	 *
-	 * @return String
+	 * @return string
 	 */
 	public final function getId()
 	{
@@ -345,7 +345,7 @@ class indexer_IndexedDocument
 	/**
 	 * lang getter
 	 *
-	 * @return String
+	 * @return string
 	 */
 	public final function getLang()
 	{
@@ -355,7 +355,7 @@ class indexer_IndexedDocument
 	/**
 	 * document_model getter
 	 *
-	 * @return String
+	 * @return string
 	 */
 	public final function getDocumentModel()
 	{
@@ -365,7 +365,7 @@ class indexer_IndexedDocument
 	/**
 	 * label getter
 	 *
-	 * @return String
+	 * @return string
 	 */
 	public final function getLabel()
 	{
@@ -375,7 +375,7 @@ class indexer_IndexedDocument
 	/**
 	 * text getter
 	 *
-	 * @return String
+	 * @return string
 	 */
 	public final function getText()
 	{
@@ -385,7 +385,7 @@ class indexer_IndexedDocument
 	/**
 	 * Unique key getter (concatenation of document id, "/" and lang).
 	 *
-	 * @return String
+	 * @return string
 	 */
 	public final function getUniqueKey()
 	{
@@ -464,7 +464,7 @@ class indexer_IndexedDocument
 	/**
 	 * Predicate on the existence of document accessors
 	 *
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function hasDocumentAccessors()
 	{
@@ -488,7 +488,7 @@ class indexer_IndexedDocument
 	/**
 	 * add a document ancestor 
 	 *
-	 * @param Integer $id
+	 * @param integer $id
 	 */
 	public function addDocumentAncestor($id)
 	{
@@ -503,7 +503,7 @@ class indexer_IndexedDocument
 	/**
 	 * Predicate on the existence of document ancestors
 	 *
-	 * @return Boolean
+	 * @return boolean
 	 */
 	public function hasDocumentAncestors()
 	{
@@ -523,7 +523,7 @@ class indexer_IndexedDocument
 	
 	
 	/**
-	 * @param String $name
+	 * @param string $name
 	 * @param array $arguments
 	 */
 	final function __call($name, $arguments)

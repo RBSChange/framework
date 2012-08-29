@@ -419,7 +419,7 @@ class indexer_IndexService extends change_BaseService
 	 * (search on label and full text with a boost on the label). 
 	 * 
 	 * @param indexer_Query $query
-	 * @param String[] $suggestionTerms
+	 * @param string[] $suggestionTerms
 	 * @return indexer_SearchResults
 	 */
 	public function search(indexer_Query $query, $suggestionTerms = null)
@@ -443,9 +443,9 @@ class indexer_IndexService extends change_BaseService
 	 * Get a *single* suggestion for the word $word from the spellchecker for $lang. 
 	 * If $lang is null, the RequestContext's lang is used.
 	 *
-	 * @param String $word
-	 * @param String $lang
-	 * @return String
+	 * @param string $word
+	 * @param string $lang
+	 * @return string
 	 */
 	public function getSuggestionForWord($word, $lang = null)
 	{
@@ -460,9 +460,9 @@ class indexer_IndexService extends change_BaseService
 	/**
 	 * Get an array of at most $count suggestions for the word $word from the spellchecker for $lang. 
 	 *
-	 * @param String $word
-	 * @param String $lang
-	 * @param String $count
+	 * @param string $word
+	 * @param string $lang
+	 * @param string $count
 	 * @return Array<String>
 	 */
 	public function getSuggestionArrayForWord($word, $lang = null, $count = null)
@@ -743,7 +743,7 @@ class indexer_IndexService extends change_BaseService
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
-	 * @return Integer[]
+	 * @return integer[]
 	 */
 	private function getFrontendAccessorIds($document)
 	{
@@ -845,7 +845,7 @@ class indexer_IndexService extends change_BaseService
 	 * Returns the array of document models that should be reindexed when the role $roleName was 
 	 * attributed or removed to some user/group. Default implementation returns an empty array if the role is a 
 	 * backoffice role and all frontoffice documents if it is a frontoffice role.
-	 * @param String $roleName
+	 * @param string $roleName
 	 * @return Array
 	 */
 	public function getIndexableDocumentModelsForModifiedRole($roleName)
