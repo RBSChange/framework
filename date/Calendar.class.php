@@ -67,7 +67,7 @@ abstract class date_Calendar
 		{
 			throw new ClassNotFoundException('Unknown Calendar implementation: '.$impl);
 		}
-		return f_util_ClassUtils::callMethodArgs($calendarClassName, 'getInstance', array($dateString));
+		return new $calendarClassName($dateString);
 	}
 	
 	/**

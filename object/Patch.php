@@ -11,7 +11,6 @@ abstract class change_Patch
 	 */
 	private $parts;	
 	
-	
 	/**
 	 * @param c_ChangescriptCommand $command
 	 */
@@ -68,17 +67,21 @@ abstract class change_Patch
 		return PatchService::getInstance()->getInstallationDate($this);
 	}
 	
-	
+	/**
+	 * @return array|null
+	 */
 	public function getPreCommandList()
 	{
 		return null;
 	}
 
+	/**
+	 * @return array|null
+	 */
 	public function getPostCommandList()
 	{
 		return null;
 	}	
-	
 	
 	public final function executePatch()
 	{
@@ -187,7 +190,6 @@ abstract class change_Patch
 	 *
 	 * @param string $query
 	 * @return integer the number of affected rows
-	 * @author intbonjf
 	 */
 	protected final function executeSQLQuery($query)
 	{
@@ -197,7 +199,13 @@ abstract class change_Patch
 			return $this->getPersistentProvider()->executeSQLScript($query);
 		}
 	}
-	
+
+	/**
+	 * Executes an SQL select.
+	 *  
+	 * @param string $query
+	 * @return array
+	 */
 	protected final function executeSQLSelect($query)
 	{
 		$query = trim($query);
@@ -209,8 +217,6 @@ abstract class change_Patch
 
 	/**
 	 * @return f_persistentdocument_PersistentProvider
-	 *
-	 * @author intbonjf
 	 */
 	protected final function getPersistentProvider()
 	{
@@ -219,8 +225,6 @@ abstract class change_Patch
 
 	/**
 	 * Begins a new database transaction.
-	 *
-	 * @author intbonjf
 	 */
 	protected final function beginTransaction()
 	{
@@ -229,8 +233,6 @@ abstract class change_Patch
 
 	/**
 	 * Commits a previously begun database transaction.
-	 *
-	 * @author intbonjf
 	 */
 	protected final function commit()
 	{
@@ -241,8 +243,6 @@ abstract class change_Patch
 	 * Rolls back a previously begun database transaction.
 	 *
 	 * @param Exception $e
-	 *
-	 * @author intbonjf
 	 */
 	protected final function rollBack($e)
 	{
@@ -267,6 +267,6 @@ abstract class change_Patch
 	 */
 	protected final function addProjectConfigurationEntry($path, $value)
 	{
-		return config_ProjectParser::addProjectConfigurationEntry($path, $value);
+		return change_ConfigurationService::getInstance()->addProjectConfigurationEntry($path, $value);
 	}
 }

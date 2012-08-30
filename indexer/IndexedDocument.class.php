@@ -25,6 +25,40 @@ class indexer_IndexedDocument
 	}
 	
 	/**
+	 * @param string $fullName
+	 * @return boolean
+	 */
+	public function hasField($fullName)
+	{
+		return (isset($this->fields[$fullName]));
+	}
+	
+	/**
+	 * @param string $fullName
+	 * @param mixed $value
+	 * @param integer $type
+	 */
+	public function setField($fullName, $value, $type = indexer_Field::INDEXED)
+	{
+		if (!is_int($type)) {
+			$type = indexer_Field::INDEXED;
+		}
+	
+		if ($value === null || (is_array($value) && count($value) === 0))
+		{
+			if (isset($this->fields[$fullName]))
+			{
+				unset($this->fields[$fullName]);
+				return;
+			}
+		}
+		else
+		{
+			$this->fields[$fullName] = array('value' => $value, 'type' => $type);
+		}
+	}
+	
+	/**
 	 * Set the Field named $name to $value and treat it as a simple string 
 	 *
 	 * @param string $name

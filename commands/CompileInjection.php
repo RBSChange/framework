@@ -4,12 +4,12 @@ class commands_CompileInjection extends c_ChangescriptCommand
 	/**
 	 * @return string
 	 */
-	function getUsage()
+	public function getUsage()
 	{
 		return "";
 	}
 	
-	function getAlias()
+	public function getAlias()
 	{
 		return "cinj";
 	}
@@ -17,7 +17,7 @@ class commands_CompileInjection extends c_ChangescriptCommand
 	/**
 	 * @return string
 	 */
-	function getDescription()
+	public function getDescription()
 	{
 		return "compile injection of classes and documents";
 	}
@@ -39,7 +39,7 @@ class commands_CompileInjection extends c_ChangescriptCommand
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
 	 * @see c_ChangescriptCommand::parseArgs($args)
 	 */
-	function _execute($params, $options)
+	public function _execute($params, $options)
 	{
 		$this->message("== Compile Injection ==");
 		$this->loadFramework();

@@ -43,10 +43,9 @@ abstract class object_InitDataSetup
 	}
 
 	/**
-	 * @var Array<String>
+	 * @var string[]
 	 */
 	private $messages = array();
-
 
 	/**
 	 * Registers a message to log.
@@ -152,7 +151,7 @@ abstract class object_InitDataSetup
 	 */
 	protected function addProjectConfigurationEntry($path, $value)
 	{
-		return config_ProjectParser::addProjectConfigurationEntry($path, $value);
+		return change_ConfigurationService::getInstance()->addProjectConfigurationEntry($path, $value);
 	}
 	
 	/**

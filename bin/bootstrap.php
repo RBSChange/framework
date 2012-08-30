@@ -1,5 +1,4 @@
 <?php
-
 function c_error($msg, $exitCode = 1)
 {
 	echo "[ERROR] $msg\n";

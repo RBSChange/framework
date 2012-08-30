@@ -1,25 +1,14 @@
 <?php
-
-class change_InjectionService
+/**
+ * @package framework.service
+ * @method change_InjectionService getInstance()
+ */
+class change_InjectionService extends change_Singleton
 {
 	/**
-	 * @var change_InjectionService 
+	 * @var array
 	 */
-	private static $instance;
-	
 	private $infos;
-	
-	/**
-	 * @return change_InjectionService
-	 */
-	public function getInstance()
-	{
-		if (self::$instance === null)
-		{
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
 	
 	/**
 	 * Get the array containing all the injection related informations 
@@ -161,7 +150,6 @@ class change_InjectionService
 	}
 	
 	/**
-	 *
 	 * @param type $className
 	 * @return type 
 	 */
@@ -175,11 +163,12 @@ class change_InjectionService
 		return array('name' => $className, 'path' => realpath(change_AutoloadBuilder::getInstance()->buildLinkPathByClass($className)));
 	}
 	
-		
+	/**
+	 * @param array $infos
+	 */
 	protected function setInfos($infos)
 	{
 		$this->infos = $infos;
 		f_util_FileUtils::writeAndCreateContainer(f_util_FileUtils::buildProjectPath('build', 'injection', 'info.ser'), serialize($this->infos), f_util_FileUtils::OVERRIDE);
 	}
-	
 }

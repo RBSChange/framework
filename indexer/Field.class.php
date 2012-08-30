@@ -29,6 +29,7 @@ final class indexer_Field
 	const INTEGER_VOLATILE = '_vol_int';
 	const INTEGER_MULTI_VOLATILE = '_vol_mul_int';
 	const FLOAT_VOLATILE = '_vol_float';
+	const FLOAT_MULTI_VOLATILE = '_vol_mul_float';
 	
 	/**
 	 * Helper to convert a Y-M-D H:M:S date to a "solr" date

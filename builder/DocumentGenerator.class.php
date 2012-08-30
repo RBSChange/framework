@@ -243,13 +243,13 @@ class builder_DocumentGenerator
 		$generator = new builder_Generator($directory);
 
 		// Assign all necessary variable
-		$generator->assign_by_ref('name', $this->name);
-		$generator->assign_by_ref('module', $this->module);
-		$generator->assign_by_ref('moduleUCFirst', ucfirst($this->module));
-		$generator->assign_by_ref('date', $this->date );
-		$generator->assign_by_ref('author', $this->author );
-		$generator->assign_by_ref('nameUCFirst', ucfirst($this->name));
-		$generator->assign_by_ref('model', $this->modelObject);
+		$generator->assign('name', $this->name);
+		$generator->assign('module', $this->module);
+		$generator->assign('moduleUCFirst', ucfirst($this->module));
+		$generator->assign('date', $this->date );
+		$generator->assign('author', $this->author );
+		$generator->assign('nameUCFirst', ucfirst($this->name));
+		$generator->assign('model', $this->modelObject);
 
 		// Execute template and return result
 		$result = $generator->fetch($templateName .'.tpl');

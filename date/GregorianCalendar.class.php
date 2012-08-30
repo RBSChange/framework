@@ -77,24 +77,6 @@ class date_GregorianCalendar extends date_Calendar
 	////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @param string $dateString
-	 * @return date_GregorianCalendar
-	 */
-	public static function getInstance($dateString = null)
-	{
-		return new date_GregorianCalendar($dateString);
-	}
-	
-	/**
-	 * @param integer $timestamp
-	 * @return date_GregorianCalendar
-	 */
-	public static function getInstanceFromTimestamp($timestamp)
-	{
-		return new date_GregorianCalendar(null, $timestamp);
-	}
-
-	/**
 	 * Sets the time of the current date_Calendar to midnight.
 	 *
 	 * @return date_Calendar $this

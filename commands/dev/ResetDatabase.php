@@ -77,6 +77,7 @@ class commands_ResetDatabase extends c_ChangescriptCommand
 		$this->executeCommand("generate-database");
 		$this->executeCommand("clear-datacache");
 		$this->executeCommand("compile-all");
+		$this->executeCommand("indexer", array('clear'));
 		$this->executeCommand("import-init-data");
 		
 		$this->executeCommand("theme.install");

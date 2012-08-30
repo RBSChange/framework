@@ -31,18 +31,13 @@ class commands_CompileConfig extends c_ChangescriptCommand
 	{
 		$this->message("== Compile config ==");
 		$this->getBootStrap()->cleanDependenciesCache();
-		$cd = $this->getComputedDeps();
 		
-		$projectParser = new config_ProjectParser();
+		$cs = change_ConfigurationService::getInstance();
+		$oldAndCurrent = $cs->compile($this->getComputedDeps());
 		
-		$oldAndCurrent = $projectParser->execute($cd);
-		
-		if (class_exists('Framework', false))
-		{
-			// Framework is loaded and configuration may have changed
-			Framework::reloadConfiguration();
-		}
-		
+		// Framework is loaded and configuration may have changed
+		$cs->loadConfiguration();
+				
 		//OAuth identification files
 		if (!is_dir(PROJECT_HOME . '/build/config/oauth/script'))
 		{

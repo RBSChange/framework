@@ -1,10 +1,14 @@
 <?php
 /**
- * <{$commandTitle}>
- * <{$name}>
- * @package <{$module}>
+<{if $module == 'framework'}>
+ * @package framework.command
  */
-class <{$className}> extends c_ChangescriptCommand
+class commands_<{$name}> extends c_ChangescriptCommand
+<{else}>
+ * @package modules.<{$module}>
+ */
+class commands_<{$module}>_<{$name}> extends c_ChangescriptCommand
+<{/if}>
 {
 	/**
 	 * @return String
@@ -32,7 +36,7 @@ class <{$className}> extends c_ChangescriptCommand
 	 */
 //	public function getDescription()
 //	{
-//		return "<{$commandTitle}>";
+//		return "<describe your command here>";
 //	}
 	
 	/**
@@ -54,7 +58,7 @@ class <{$className}> extends c_ChangescriptCommand
 //	{
 //		$components = array();
 //		
-//		// Generate options in $components.		
+//		// Generate options in $components.
 //		
 //		return $components;
 //	}

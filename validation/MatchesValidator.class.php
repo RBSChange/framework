@@ -35,13 +35,18 @@ class validation_MatchesValidator extends validation_ValidatorImpl implements va
 			$this->reject($field->getName(), $errors);
 		}
 	}
-	
-	protected function getMessage()
+
+	/**
+	 * Returns the error message.
+	 * @param array $args
+	 * @return string
+	 */
+	protected function getMessage($args = null)
 	{
 		if ($this->localizedErrorMessage !== null)
 		{
 			return LocaleService::getInstance()->trans($this->localizedErrorMessage);
 		}
-		return parent::getMessage();
+		return parent::getMessage($args);
 	}
 }

@@ -56,17 +56,19 @@ class indexer_Facet
 	
 	/**
 	 * @param string $rangeTxt
+	 * @param float $precision For example: 1 or 0.01
 	 * @return indexer_Facet
 	 */
-	function addStringRange($rangeTxt)
+	function addStringRange($rangeTxt, $precision = null)
 	{
+		$precision = $precision !== null ? $precision : $this->getPrecision();
 		$mic = $rangeTxt[0];
 		$mac = $rangeTxt[strlen($rangeTxt) - 1];
 		if (($mic === '[' || $mic === ']') and ($mac === '[' || $mac === ']') && strpos($rangeTxt, ','))
 		{
 			list($min, $max) = explode(',', str_replace(array(']', '[', ' '), '', $rangeTxt));
-			if ($max !== '*' && $mac === '[') {$max = intval($max) - $this->getPrecision();}
-			if ($min !== '*' && $mic === ']') {$min = intval($min) + $this->getPrecision();}
+			if ($max !== '*' && $mac === '[') {$max = floatval($max) - $precision;}
+			if ($min !== '*' && $mic === ']') {$min = floatval($min) + $precision;}
 			$this->addRange($min, $max);
 		}
 		return $this;	
@@ -135,6 +137,14 @@ class indexer_VolatileFloatFacet extends indexer_Facet
 	function __construct($field)
 	{
 		parent::__construct($field.indexer_Field::FLOAT_VOLATILE);
+	}
+}
+
+class indexer_VolatileMultiFloatFacet extends indexer_Facet
+{
+	function __construct($field)
+	{
+		parent::__construct($field.indexer_Field::FLOAT_MULTI_VOLATILE);
 	}
 }
 

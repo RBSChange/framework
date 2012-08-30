@@ -4,12 +4,12 @@ class commands_InitProject extends c_ChangescriptCommand
 	/**
 	 * @return string
 	 */
-	function getUsage()
+	public function getUsage()
 	{
 		return "";
 	}
 
-	function getAlias()
+	public function getAlias()
 	{
 		return "ip";
 	}
@@ -17,14 +17,9 @@ class commands_InitProject extends c_ChangescriptCommand
 	/**
 	 * @return string
 	 */
-	function getDescription()
+	public function getDescription()
 	{
 		return "init the project layout";
-	}
-	
-	function generateDefaultConfig()
-	{
-		
 	}
 
 	/**
@@ -32,7 +27,7 @@ class commands_InitProject extends c_ChangescriptCommand
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
 	 * @see c_ChangescriptCommand::parseArgs($args)
 	 */
-	function _execute($params, $options)
+	public function _execute($params, $options)
 	{
 		$this->message("== Initializing project ==");
 
@@ -87,6 +82,7 @@ class commands_InitProject extends c_ChangescriptCommand
 		
 		$this->executeCommand("compile-config");
 		
+		$this->executeCommand("compile-autoload");
 		$this->loadFramework();
 
 		// init-file-policy
@@ -123,7 +119,6 @@ class commands_InitProject extends c_ChangescriptCommand
 		}
 		return $projectName.".".$this->getAuthor()."."."localhost";
 	}
-	
 	
 	private function getSolrDef()
 	{

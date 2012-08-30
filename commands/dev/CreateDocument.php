@@ -47,26 +47,28 @@ class commands_CreateDocument extends c_ChangescriptCommand
 	 */
 	protected function validateArgs($params, $options)
 	{
-		if (count($params) == 2)
+		if (count($params) != 2)
 		{
-			$package = $this->getPackageByName($params[0]);
-			if ($package->isModule() && $package->isInProject())
-			{
-				if (preg_match('/^[a-z][a-z0-9]{1,49}+$/', $params[1]))
-				{
-					return true;
-				}
-				else
-				{
-					$this->errorMessage('Invalid document name: ' . $params[1]);
-				}
-			}
-			else
-			{
-				$this->errorMessage('Invalid module name: ' . $params[0]);
-			}
+			return false;
 		}
-		return false;
+		$moduleName = strtolower($params[0]);
+		if (!file_exists(f_util_FileUtils::buildProjectPath('modules', $moduleName)))
+		{
+			$this->errorMessage('Module "' . $moduleName . '" not found.');
+			return false;
+		}
+		$documentName = strtolower($params[1]);
+		if (file_exists(f_util_FileUtils::buildProjectPath('modules', $moduleName, 'persistentdocument', $documentName . '.xml')))
+		{
+			$this->errorMessage('Document "' . $moduleName . '/' .$documentName. '" already exist.');
+			return false;
+		}
+		if (!preg_match('/^[a-z0-9]+$/', $documentName))
+		{
+			$this->errorMessage('Name "' . $documentName . '" is not valid for a document');
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -74,20 +76,14 @@ class commands_CreateDocument extends c_ChangescriptCommand
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
 	 * @see c_ChangescriptCommand::parseArgs($args)
 	 */
-	function _execute($params, $options)
+	public function _execute($params, $options)
 	{
 		$this->message("== Create document ==");
-		$package = $this->getPackageByName($params[0]);
-		$moduleName = $package->getName();
-		$documentName = $params[1];
+		$moduleName = strtolower($params[0]);
+		$documentName = strtolower($params[1]);
 		
 		$this->loadFramework();
 		$to = f_util_FileUtils::buildModulesPath($moduleName, "persistentdocument", "$documentName.xml");
-		if (file_exists($to))
-		{
-			return $this->quitError("Document $moduleName/$documentName already exists (check $to)");
-		}
-		
 		$from = f_util_FileUtils::buildFrameworkPath("builder", "templates", "documents", "base-document.xml");
 		f_util_FileUtils::cp($from, $to);
 			

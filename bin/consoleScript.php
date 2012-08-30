@@ -4,7 +4,14 @@ $scriptPath = getcwd() . DIRECTORY_SEPARATOR . $argv[1];
 if (file_exists($scriptPath) && is_readable($scriptPath) && strrpos($scriptPath, '.php') === strlen($scriptPath) - 4)
 {
 	$useFramework = $argv[2] == '0';
-	$arguments = array_splice($argv, 3);
+	if (isset($argv[3]) && is_readable($argv[3]))
+	{
+		$arguments = unserialize(file_get_contents($argv[3]));
+	}
+	else
+	{
+		$arguments = array();
+	}
 	try
 	{
 		if ($useFramework)

@@ -8,7 +8,7 @@ abstract class f_util_ArrayUtils
 	 * @param array $array
 	 * @return mixed the first element of the array or null
 	 */
-	public static function firstElement(&$array)
+	public static function firstElement($array)
 	{
 		if (self::isEmpty($array))
 		{
@@ -21,15 +21,13 @@ abstract class f_util_ArrayUtils
 	 * @param array $array
 	 * @return mixed the last element of the array or null
 	 */
-	public static function lastElement(&$array)
+	public static function lastElement($array)
 	{
 		if (self::isEmpty($array))
 		{
 			return null;
 		}
-		$lastElement = end($array);
-		reset($array);
-		return $lastElement;
+		return end($array);
 	}
 
 	/**

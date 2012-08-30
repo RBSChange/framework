@@ -4,12 +4,12 @@ class commands_InitWebapp extends c_ChangescriptCommand
 	/**
 	 * @return string
 	 */
-	function getUsage()
+	public function getUsage()
 	{
 		return "";
 	}
 
-	function getAlias()
+	public function getAlias()
 	{
 		return "iw";
 	}
@@ -17,7 +17,7 @@ class commands_InitWebapp extends c_ChangescriptCommand
 	/**
 	 * @return string
 	 */
-	function getDescription()
+	public function getDescription()
 	{
 		return "init webapp folder";
 	}
@@ -27,7 +27,7 @@ class commands_InitWebapp extends c_ChangescriptCommand
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
 	 * @see c_ChangescriptCommand::parseArgs($args)
 	 */
-	function _execute($params, $options)
+	public function _execute($params, $options)
 	{
 		$this->message("== Init webapp ==");
 
@@ -124,19 +124,22 @@ class commands_InitWebapp extends c_ChangescriptCommand
 	private function addRootLink($targetDir)
 	{
 		$targetDir .= DIRECTORY_SEPARATOR;
-		$exclude = array('apache', 'bin', 'log', 'build', 'config', 'framework', 'libs', 'modules', 'securemedia', 
-			'themes', 'override', 'profile', 'change.xml', 'change.properties', 'repository',
-			'installedpatch', 'pear', 'target', 'mockup', 'mailbox');
+		$defautLinks = "cache,changeicons,fckeditor,fckeditorbrowser,media,publicmedia,migration,install,".
+			"index.php,xchrome_controller.php,xul_controller.php,site-disabled.php,sessionKeepAlive.php,".
+			"listener.php,changecron.php,changescriptexec.php";
+		
+		$links = explode(',', Framework::getConfigurationValue('general/linkToDocumentRoot', $defautLinks));
+		$links = array_unique(array_map('trim', $links));		
 		
 		$dh = opendir($targetDir);
 		while (($file = readdir($dh)) !== false)
 		{
-			if (strpos($file, '.') === 0) {continue;}
-			if (in_array($file, $exclude)) {continue;}
+			if (!in_array($file, $links)) 
+			{
+				continue;
+			}
 			
 			$target = $targetDir.$file;
-			if (is_file($target) && substr($target, -4) !=  '.php') {continue;}
-			
 			$link = f_util_FileUtils::buildDocumentRootPath($file);
 			if (strpos($link, $target) !== 0)
 			{

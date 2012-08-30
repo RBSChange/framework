@@ -65,13 +65,12 @@ abstract class validation_ValidatorImpl implements validation_Validator
 		return $errors->count() === $errorsCount;
 	}
 
-
 	abstract protected function doValidate(validation_Property $field, validation_Errors $errors);
-
 
 	/**
 	 * Returns the error message.
 	 *
+	 * @param array $args 
 	 * @return string
 	 */
 	protected function getMessage($args = null)

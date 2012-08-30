@@ -10,6 +10,8 @@ class import_ScriptReader extends change_BaseService
 
 	private $regiteredElementsClass = array();
 
+	private $xmlFilePaths = array();
+	
 	private function initialize()
 	{
 		$this->elements = array();
@@ -96,29 +98,58 @@ class import_ScriptReader extends change_BaseService
 	 */
 	public function executeInternal($fileName)
 	{
-		error_reporting(E_ERROR | E_WARNING | E_PARSE);
-
+		array_push($this->xmlFilePaths, $fileName);
+		$this->errors = null;
 		set_error_handler(array($this, "errorReport"));
 		$reader = new XMLReader();
+		$pe = null;	
 		if (!$reader->open($fileName))
 		{
-			throw new Exception('Could not open ' . $fileName . ' for reading');
+			$this->errors = array('Could not open ' . $fileName . ' for reading');
 		}
-		$this->parse($reader);
-		$reader->close();
+		else
+		{
+			try
+			{
+				$this->parse($reader);
+			}
+			catch (Exception $e)
+			{
+				$pe = $e;
+				if ($this->errors === null)
+				{
+					$this->errors = array();
+				}
+				$this->errors[] = $e->getMessage();
+				$this->errors[] = $e->getTraceAsString();
+			}
+			$reader->close();
+		}
 		restore_error_handler();
+		array_pop($this->xmlFilePaths);
+		
 		if ($this->errors !== null)
 		{
-			$message = join("\n", $this->errors);
-			$this->errors = null;
+			$message = implode("\n", $this->errors);
 			Framework::error(__METHOD__ . "Error while processing $fileName:\n$message");
-			throw new Exception($message);
+			throw new Exception($message, 0, $pe);
 		}
 	}
 
+	/**
+	 * @return string
+	 */
+	public function getCurrentXmlFilePath()
+	{
+		return end($this->xmlFilePaths);
+	}
+	
+	/**
+	 * @var string[]
+	 */
 	private $errors;
 
-	function errorReport($errno, $errstr, $errfile, $errline)
+	public function errorReport($errno, $errstr, $errfile, $errline)
 	{
 		switch ($errno)
 		{
@@ -190,7 +221,7 @@ class import_ScriptReader extends change_BaseService
 				}
 				elseif ($reader->nodeType == XMLReader::TEXT || $reader->nodeType == XMLReader::CDATA)
 				{
-					if ($value = trim($reader->value))
+					if (($value = trim($reader->value)) != '')
 					{
 						$currentElement->addContent($value);
 					}
@@ -320,5 +351,4 @@ class import_ScriptReader extends change_BaseService
 	{
 		$element->endProcess();
 	}
-
 }

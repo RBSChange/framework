@@ -61,7 +61,7 @@ class change_Storage
 			$this->backuserSessionNameSpace = new Zend_Session_Namespace('BACKOFFICE');
 			$this->frontuserSessionNameSpace = new Zend_Session_Namespace('FRONTOFFICE');
 			$this->started = true;
-			Framework::sessionStarted(Zend_Session::getId());
+			change_LoggingService::getInstance()->registerSessionId(Zend_Session::getId());
 	
 			$currentKey =  $this->getSecureKey(); 
 			$md5 = $this->read('framework_SecureKey');
@@ -75,8 +75,8 @@ class change_Storage
 			{
 				$oldSessionId = Zend_Session::getId();
 				Zend_Session::destroy();
-				Zend_Session::start();		
-				Framework::sessionStarted(Zend_Session::getId());		
+				Zend_Session::start();
+				change_LoggingService::getInstance()->registerSessionId(Zend_Session::getId());		
 				$this->sessionIdChanged($oldSessionId);
 				
 			}
@@ -85,7 +85,7 @@ class change_Storage
 				$oldSessionId = Zend_Session::getId();
 				Zend_Session::regenerateId();
 				$this->write('framework_SecurePort', $_SERVER["SERVER_PORT"]);
-				Framework::sessionStarted(Zend_Session::getId());
+				change_LoggingService::getInstance()->registerSessionId(Zend_Session::getId());
 				$this->sessionIdChanged($oldSessionId);	
 			}
 		}
@@ -162,7 +162,7 @@ class change_Storage
 		$retval = null;
 		if ($this->started && isset($ns->$key))
 		{
-			$retval =  $ns->$key;	
+			$retval =  $ns->$key;
 		}
 		return $retval;
 	}

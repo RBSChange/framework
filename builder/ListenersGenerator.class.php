@@ -9,15 +9,12 @@ class builder_ListenersGenerator
 	 */
 	private $listenerArray = array();
 	
-	
 	public function generateListenerLoader()
 	{
 		$this->listenerArray = $this->parseConfigListener(f_util_FileUtils::buildFrameworkPath('config', 'listeners.xml'));
-		$fileResolver = Resolver::getInstance('file');
 		foreach (ModuleService::getInstance()->getPackageNames() as $moduleName)
 		{
-			$fileResolver->setPackageName($moduleName);
-			$path = $fileResolver->getPath('config/listeners.xml');
+			$path = change_FileResolver::getNewInstance()->getPath('modules', $moduleName, 'config', 'listeners.xml');
 			if (!is_null($path))
 			{
 				$this->listenerArray = $this->parseConfigListener($path, $this->listenerArray);
@@ -39,6 +36,9 @@ class builder_ListenersGenerator
 		$generator->assign('listeners', $this->listenerArray);
 	}
 	
+	/**
+	 * @return string
+	 */
 	protected function getTemplateName()
 	{
 		return 'listenerRegister.tpl';

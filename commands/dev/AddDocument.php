@@ -134,7 +134,7 @@ class commands_AddDocument extends c_ChangescriptCommand
 			if ($xmlDoc->documentElement->getAttribute('inject') === 'true')
 			{
 				$inject = true;
-				config_ProjectParser::addProjectConfigurationNamedEntry('injection/document',$extendModelName, $modelName);
+				change_ConfigurationService::getInstance()->addProjectConfigurationNamedEntry('injection/document',$extendModelName, $modelName);
 			}
 		}
 		

@@ -748,8 +748,8 @@ abstract class f_persistentdocument_PersistentProvider
 		{
 			$query->setMaxResults(2);
 		}
-		
 		$docs = $this->find($query);
+		
 		$nbDocs = count($docs);
 		if ($nbDocs > 0)
 		{

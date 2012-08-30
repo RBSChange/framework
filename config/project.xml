@@ -28,16 +28,22 @@
 	<config>
 		<!-- GENERAL -->
 		<general>
-			<entry name="selfRequestProxy">127.0.0.1:80</entry>
-			
+			<entry name="projectName">RBS CHANGE 4.0</entry>			
 			<entry name="server-fqdn">fully-qualified-domain-name</entry>
+			<entry name="server-ip">127.0.0.1</entry>
+			<entry name="selfRequestProxy">127.0.0.1:80</entry>
 			
 			<!-- What $_SERVER entry to use to detect https queries -->
 			<entry name="https-request-marker">HTTPS</entry>
 			<!-- What is the value of https-request-marker for https queries -->
 			<entry name="https-request-marker-value">on</entry>
-					
-			<entry name="projectName">RBS CHANGE 4.0</entry>	
+				
+			<!-- Phase can be : production, integration, development -->
+			<entry name="phase">production</entry>
+			
+			<!--
+			<entry name="linkToDocumentRoot">cache,changeicons,fckeditor,fckeditorbrowser,media,publicmedia,migration,install,changecron.php,changePHPUnit.php,index.php,site-disabled.php,xchrome_controller.php,changescriptexec.php,listener.php,sessionKeepAlive.php,xul_controller.php</entry>
+			-->
 		</general>
 		
 		<i18n>
@@ -139,6 +145,7 @@
 				<!--entry name="host">localhost</entry-->
 				<!--entry name="protocol">mysql</entry-->
 				<!--entry name="port">3306</entry-->
+				<!--entry name="embededTransaction">5</entry-->
 				<!--entry name="longTransaction">0.2</entry-->
 			</webapp>
 		</databases>

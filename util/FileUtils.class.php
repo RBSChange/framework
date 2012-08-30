@@ -340,17 +340,6 @@ abstract class f_util_FileUtils
 	}
 
 	/**
-	 * For example: FileUtils::buildLogPath('application.log')
-	 * @return string
-	 */
-	public static function buildLogPath()
-	{
-		$args = func_get_args();
-		array_unshift($args, PROJECT_HOME, "log", 'project');
-		return self::buildAbsolutePathFromArray($args);
-	}
-
-	/**
 	 * For example: FileUtils::buildFrameworkPath('config', 'listeners.xml')
 	 * @return string
 	 */
@@ -1072,5 +1061,17 @@ abstract class f_util_FileUtils
 				}
 			}
 		}
+	}
+	
+	// Deprecated
+	
+	/**
+	 * @deprecated
+	 */
+	public static function buildLogPath()
+	{
+		$args = func_get_args();
+		array_unshift($args, PROJECT_HOME, "log", 'project');
+		return self::buildAbsolutePathFromArray($args);
 	}
 }

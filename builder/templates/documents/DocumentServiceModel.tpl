@@ -374,10 +374,11 @@ class <{$className}> extends <{$extendClass}>
 	
 	/**
 	 * @param <{$moduleName}>_persistentdocument_<{$documentName}> $document
-	 * @param String[] $propertiesName
-	 * @param Array $datas
+	 * @param string[] $propertiesName
+	 * @param array $datas
+	 * @param integer $parentId
 	 */
-//	public function addFormProperties($document, $propertiesName, &$datas)
+//	public function addFormProperties($document, $propertiesName, &$datas, $parentId = null)
 //	{
 //	}
 
@@ -400,5 +401,21 @@ class <{$className}> extends <{$extendClass}>
 //	public function synchronizeI18nProperties($document, $from, $to)
 //	{
 //		return parent::synchronizeI18nProperties($document, $from, $to);
-//	}	
+//	}
+
+	/**
+	 * @param <{$module}>_persistentdocument_<{$name}> $document
+	 * @param string[] $subModelNames
+	 * @param integer $locateDocumentId null if use startindex
+	 * @param integer $pageSize
+	 * @param integer $startIndex
+	 * @param integer $totalCount
+	 * @param string $orderBy
+	 * @return f_persistentdocument_PersistentDocument[]
+	 */
+//	public function getVirtualChildrenAt($document, $subModelNames, $locateDocumentId, $pageSize, &$startIndex, &$totalCount, $orderBy)
+//	{
+//		$totalCount = 0
+//		return array();
+//	}
 }

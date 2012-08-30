@@ -35,8 +35,7 @@ class validation_InListValidator extends validation_ValidatorImpl implements val
 		parent::setParameter($value);
 	}
 	
-	
-	protected function getMessage()
+	protected function getMessage($args = null)
 	{
 		return LocaleService::getInstance()->trans($this->getMessageCode(), array(), array('param' => join(', ', $this->getParameter())));
 	}

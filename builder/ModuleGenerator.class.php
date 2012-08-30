@@ -159,7 +159,9 @@ class builder_ModuleGenerator
 	 */
 	public function generateOnce()
 	{
-	
+		$licensePath = f_util_FileUtils::buildFrameworkPath('builder', 'templates', 'modules', 'LICENSE.txt');
+		f_util_FileUtils::cp($licensePath, f_util_FileUtils::buildModulesPath($this->name, 'LICENSE.txt'));
+		
 		// Generate configuration files
 		f_util_FileUtils::write(f_util_FileUtils::buildModulesPath($this->name, 'install.xml'), $this->generateFile('install.xml'));
 		f_util_FileUtils::write(f_util_FileUtils::buildModulesPath($this->name, 'config', 'module.xml'), $this->generateFile('config_module.xml'));

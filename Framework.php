@@ -3,88 +3,11 @@ umask(0002);
 class Framework
 {
 	/**
-	 * The project config compiled
-	 */
-	private static $config = null;
-
-	/**
-	 * @var Zend_Log
-	 */
-	private static $log;
-
-	/**
-	 * @return string (DEBUG, INFO, NOTICE, WARN, ERR, ALERT, EMERG) 
-	 */
-	public static function getLogLevelName()
-	{
-		return LOGGING_LEVEL;
-	}
-	
-	/**
-	 * @return integer
-	 */
-	public static function getLogPriority()
-	{
-		return LOGGING_PRIORITY;
-	}
-	
-	/**
-	 * @return Zend_Log
-	 */
-	public static function getZendLog()
-	{
-		if (self::$log === null)
-		{
-			self::$log = new Zend_Log();
-			$filePath = f_util_FileUtils::buildLogPath('application.log');
-			if (!file_exists($filePath))
-			{
-				f_util_FileUtils::mkdir(dirname($filePath));
-			}
-			$writer = new Zend_Log_Writer_Stream($filePath);
-			$writer->setFormatter(new Zend_Log_Formatter_Simple('%timestamp% [%priorityName%] %sessionId%: %message% (in %file% at line %line%)' . PHP_EOL));
-			self::$log->addWriter($writer);
-			
-			$filter = new Zend_Log_Filter_Priority(LOGGING_PRIORITY);
-			self::$log->addFilter($filter);
-			self::$log->setEventItem('sessionId' , '');
-			self::$log->setEventItem('file' , '?');
-			self::$log->setEventItem('line' , '?');
-			self::$log->setTimestampFormat('Y-m-d H:i:s');
-			self::$log->registerErrorHandler();
-		}	
-		return self::$log;
-	}
-	
-	public static function registerLogErrorHandler()
-	{
-		self::getZendLog()->registerErrorHandler();
-	}
-	
-	/**
-	 * @param string $id
-	 */
-	public static function sessionStarted($id)
-	{
-		self::$log->setEventItem('sessionId' , '(' . $id . ')');
-	}
-	
-	/**
-	 * @param string $message
-	 * @param integer $priority elementof {Zend_Log::DEBUG, Zend_Log::INFO, Zend_Log::NOTICE, Zend_Log::WARN, 
-	 * 	Zend_Log::ERR, Zend_Log::EMERG}
-	 */
-	public static function log($message, $priority)
-	{
-		self::getZendLog()->log($message, $priority);
-	}
-
-	/**
 	 * @param string $message
 	 */
 	public static function debug($message)
 	{
-		self::getZendLog()->log($message, Zend_Log::DEBUG);
+		change_LoggingService::getInstance()->debug($message);
 	}
 
 	/**
@@ -92,7 +15,7 @@ class Framework
 	 */
 	public static function info($message)
 	{
-		self::getZendLog()->log($message, Zend_Log::INFO);
+		change_LoggingService::getInstance()->info($message);
 	}
 
 	/**
@@ -100,7 +23,7 @@ class Framework
 	 */
 	public static function warn($message)
 	{
-		self::getZendLog()->log($message, Zend_Log::WARN);
+		change_LoggingService::getInstance()->warn($message);
 	}
 
 	/**
@@ -108,7 +31,7 @@ class Framework
 	 */
 	public static function error($message)
 	{
-		self::getZendLog()->log($message, Zend_Log::ERR);
+		change_LoggingService::getInstance()->error($message);
 	}
 
 	/**
@@ -116,7 +39,7 @@ class Framework
 	 */
 	public static function exception($e)
 	{
-		self::getZendLog()->log(get_class($e).": ".$e->getMessage()."\n".$e->getTraceAsString(), Zend_Log::ALERT);
+		change_LoggingService::getInstance()->exception($e);
 	}
 
 	/**
@@ -124,7 +47,18 @@ class Framework
 	 */
 	public static function fatal($message)
 	{
-		self::getZendLog()->log($message, Zend_Log::EMERG);
+		change_LoggingService::getInstance()->fatal($message);
+	}
+	
+	/**
+	 * @param string $message
+	 */
+	public static function deprecated($message)
+	{
+		if (self::inDevelopmentMode())
+		{
+			trigger_error($message, E_USER_DEPRECATED);
+		}
 	}
 
 	/**
@@ -292,14 +226,7 @@ class Framework
 	 */
 	public static function getProfile()
 	{
-		if (file_exists(PROJECT_HOME.'/profile'))
-		{
-			return trim(file_get_contents(PROJECT_HOME.'/profile'));
-		}
-		else
-		{
-			return 'default';
-		}
+		return change_ConfigurationService::getInstance()->getCurrentProfile();
 	}
 
 	/**
@@ -345,7 +272,7 @@ class Framework
 	 */
 	public static function getUIDefaultHost()
 	{
-		$general = self::$config['general'];
+		$general = change_ConfigurationService::getInstance()->getConfiguration('general');
 		return isset($general['server-fqdn']) ? $general['server-fqdn'] : $_SERVER['HTTP_HOST'];
 	}
 	
@@ -367,135 +294,39 @@ class Framework
 	}
 
 	/**
-	 * Return an array with configuration of Framework
-	 */
-	public static function getAllConfiguration()
-	{
-		return self::$config;
-	}
-
-	/**
-	 * Return true if the $path configuration exist
+	 * Return true if the $path configuration exist.
+	 * 
 	 * @param string $path
 	 */
 	public static function hasConfiguration($path)
 	{
-		$current = self::$config;
-		foreach (explode('/', $path) as $part)
-		{
-			if (!isset($current[$part]))
-			{
-				return false;
-			}
-			$current = $current[$part];
-		}
-		return true;
+		return change_ConfigurationService::getInstance()->hasConfiguration($path);
 	}
 
 	/**
-	 * Return an array with part of configuration of Framework
-	 * or throw a Exception if the $path configuration does not exist
+	 * Return an array with part of project configuration.
+	 * 
 	 * @param string $path
 	 * @param boolean $strict
-	 * @throws Exception if the $path configuration does not exist
-	 * @return string | false if the path was not founded and strict value if false
+	 * @throws Exception if the $path configuration does not exist and $strict is set to true
+	 * @return string | false if the path was not found and strict value is false
 	 */
 	public static function getConfiguration($path, $strict = true)
 	{
-		$current = self::$config;
-		foreach (explode('/', $path) as $part)
-		{
-			if (!isset($current[$part]))
-			{
-				if ($strict)
-				{
-					throw new Exception('Part of configuration ' . $part . ' not found.');
-				}
-				return false;
-			}
-			$current = $current[$part];
-		}
-		return $current;
+		return change_ConfigurationService::getInstance()->getConfiguration($path, $strict);
 	}
 
 	/**
 	 * Return an array with part of configuration of Framework
-	 * or null if the $path configuration does not exist
+	 * or null if the $path configuration does not exist.
+	 * 
 	 * @param string $path
 	 * @param string $defaultValue
 	 * @return mixed | null
 	 */
 	public static function getConfigurationValue($path, $defaultValue = null)
 	{
-		$value = self::getConfiguration($path, false);
-		if ($value === false || (is_string($value) && empty($value)) || (is_array($value) && count($value) == 0))
-		{
-			return $defaultValue;
-		}
-		return $value;
-	}
-
-	/**
-	 * Only used by ModuleGenerator. TODO: remove it.
-	 * @param string $packageName 'modules_xxxx'
-	 * @param array $infos
-	 */
-	public static function addPackageConfiguration($packageName, $infos)
-	{
-		if (isset(self::$config) && isset(self::$config['packageversion']))
-		{
-			self::$config['packageversion'][$packageName] = $infos;
-		}
-		else
-		{
-			throw new Exception('Framework configuration not loaded');
-		}
-	}
-
-	/**
-	 * Load the framework configuration. Use the file php auto generated in cache/config
-	 * You can specify an environnement to load a particular config file
-	 * @param boolean $onlyConfig
-	 */
-	public static function loadConfiguration($onlyConfig = false)
-	{
-		// If configuration not yet loaded, load it
-		if (self::$config === null)
-		{
-			$cacheConfigDir = PROJECT_HOME . DIRECTORY_SEPARATOR . 'build' . DIRECTORY_SEPARATOR . 'config';	
-			
-			if (!$onlyConfig)
-			{
-				$cacheDefinesFile = $cacheConfigDir."/project.defines.php";
-				if (!is_file($cacheDefinesFile))
-				{
-					throw new Exception("Could not find $cacheDefinesFile. You must compile your configuration.");
-				}
-				require($cacheDefinesFile);
-			}
-			
-			$cacheFile = $cacheConfigDir."/project.php";
-			if (!is_file($cacheFile))
-			{
-				throw new Exception("Could not find $cacheFile. You must compile your configuration.");
-			}
-			require($cacheFile);
-		}
-	}
-
-	/**
-	 * @param string $env
-	 */
-	public static function reloadConfiguration()
-	{
-		if (self::$config !== null)
-		{
-			self::$config = null;
-			self::loadConfiguration(true);
-			// TODO: inverse dependences
-			ModuleService::clearInstance();
-			generator_PersistentModel::reloadModels();
-		}
+		return change_ConfigurationService::getInstance()->getConfigurationValue($path, $defaultValue);
 	}
 	
 	/**
@@ -503,7 +334,7 @@ class Framework
 	 */
 	public static function getHttpClientConfig()
 	{
-		return self::$config['http'];
+		return change_ConfigurationService::getInstance()->getConfiguration('http');
 	}
 	
 	public static function registerAutoload()
@@ -531,21 +362,71 @@ class Framework
 			if (is_readable($path)) {require_once $path;}	
 		}
 	}
+	
+	// Deprecated
+	
+	/**
+	 * @deprecated
+	 */
+	public static function log($message, $priority)
+	{
+		change_LoggingService::getInstance()->fatal("Invalid call of Framework::log('$message', $priority).");
+	}
+
+	/**
+	 * @deprecated use change_ConfigurationService::getAllConfiguration()
+	 */
+	public static function getAllConfiguration()
+	{
+		return change_ConfigurationService::getInstance()->getAllConfiguration();
+	}
+
+	/**
+	 * @deprecated
+	 */
+	public static function addPackageConfiguration($packageName, $infos)
+	{
+		$cs = change_ConfigurationService::getInstance();
+		$config = $cs->getAllConfiguration();
+		if ($config != null && isset($config['packageversion']))
+		{
+			$cs->addVolatileProjectConfigurationNamedEntry('packageversion/' . $packageName, $infos);
+		}
+		else
+		{
+			throw new Exception('Framework configuration not loaded');
+		}
+	}
+
+	/**
+	 * @deprecated use change_ConfigurationService::loadConfiguration()
+	 */
+	public static function loadConfiguration($onlyConfig = false)
+	{
+		change_ConfigurationService::getInstance()->loadConfiguration($onlyConfig);
+	}
+
+	/**
+	 * @deprecated use change_ConfigurationService::loadConfiguration()
+	 */
+	public static function reloadConfiguration()
+	{
+		change_ConfigurationService::getInstance()->loadConfiguration();
+	}
 }
 
 // Load configuration
-Framework::loadConfiguration();
+Framework::registerAutoload();
+change_ConfigurationService::getInstance()->loadConfiguration();
 
 if (Framework::inDevelopmentMode()) {error_reporting(E_ALL);}
 
 ini_set('include_path', ZEND_FRAMEWORK_PATH . (defined('INCLUDE_PATH') ? PATH_SEPARATOR . INCLUDE_PATH : ''));
 
-Framework::registerAutoload();
-
 ini_set('arg_separator.output',	  '&amp;');
 ini_set('magic_quotes_runtime',	  0);
 
-Framework::registerLogErrorHandler();
+change_LoggingService::getInstance()->registerErrorHandler();
 
 // Set the locale.
 $localResult = setlocale(LC_ALL, 'en_US.UTF-8');
