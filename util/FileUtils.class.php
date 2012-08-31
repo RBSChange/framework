@@ -1005,7 +1005,7 @@ abstract class f_util_FileUtils
 		if ($recursive && is_dir($file))
 		{
 			//echo "Recursive chmod ".$this->file." ".$this->mode." ".$mode."\n";
-			$dir = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($file), RecursiveIteratorIterator::SELF_FIRST);
+			$dir = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($file, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
 			foreach ($dir as $fileInfo)
 			{
 				// http://bugs.php.net/bug.php?id=40548, fixed starting from 5.2.2: warning if broken link
@@ -1053,17 +1053,10 @@ abstract class f_util_FileUtils
 		}
 		
 		$uid = posix_getuid();
-		if ($group !== null)
+		if ($group !== null && !is_numeric($group))
 		{
-			if (is_numeric($group))
-			{
-				$group = $group;
-			}
-			else
-			{
-				$groupInfo = posix_getgrnam($group);
-				$group = $groupInfo["gid"];
-			}
+			$groupInfo = posix_getgrnam($group);
+			$group = $groupInfo["gid"];
 		}
 
 		if ($owner !== null && chown($file, $owner) === false)
@@ -1081,7 +1074,7 @@ abstract class f_util_FileUtils
 
 		if ($recursive && is_dir($file))
 		{
-			$dir = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($file), RecursiveIteratorIterator::SELF_FIRST);
+			$dir = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($file, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
 			foreach ($dir as $fileInfo)
 			{
 				if ($fileInfo->getOwner() !== $uid)
