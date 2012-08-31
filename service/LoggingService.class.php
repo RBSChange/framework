@@ -51,8 +51,8 @@ class change_LoggingService extends change_BaseService
 		{
 			f_util_FileUtils::mkdir(dirname($filePath));
 		}
-			
-		$writer = new Zend_Log_Writer_Stream($filePath);
+		
+		$writer = new Zend_Log_Writer_Stream($filePath);		
 		$filter = new Zend_Log_Filter_Priority(LOGGING_PRIORITY);
 		if ($name == 'application')
 		{
@@ -159,6 +159,8 @@ class change_LoggingService extends change_BaseService
 		// Configuration du gestionnaire d'erreurs
 		set_error_handler(array($this, 'defaultErrorHandler'));
 		set_exception_handler(array($this, 'defaultExceptionHandler'));
+		// Make sure that the Zend classes used for logging are loaded
+		$this->getZendLogByName('phperror');
 	}
 	
 	/**
@@ -187,7 +189,7 @@ class change_LoggingService extends change_BaseService
 						$this->phperror('[E_USER_DEPRECATED] ' . $errstr);
 						$this->phperror(f_util_ProcessUtils::getBackTrace(false, 5));
 					}
-					else
+					else if ($errno & error_reporting())
 					{
 						$this->phperror($message);
 					}

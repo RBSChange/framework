@@ -419,7 +419,7 @@ class Framework
 Framework::registerAutoload();
 change_ConfigurationService::getInstance()->loadConfiguration();
 
-if (Framework::inDevelopmentMode()) {error_reporting(E_ALL);}
+if (Framework::inDevelopmentMode()) {error_reporting(E_ALL | E_STRICT);}
 
 ini_set('include_path', ZEND_FRAMEWORK_PATH . (defined('INCLUDE_PATH') ? PATH_SEPARATOR . INCLUDE_PATH : ''));
 

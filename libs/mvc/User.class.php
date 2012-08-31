@@ -183,7 +183,7 @@ class change_User
 	 */
 	public function removeAttribute($name, $ns = null)
 	{
-		Framework::error('Call to deprecated method ' . get_class($this) . '->removeAttribute');
+		Framework::deprecated('Call to deprecated method ' . get_class($this) . '->removeAttribute');
 		$retval = null;
 		if ($ns)
 		{
@@ -193,7 +193,7 @@ class change_User
 		}
 		else
 		{
-			$retval = change_Controller::getInstance()->getStorage()->readForUser($name, $zns);
+			$retval = change_Controller::getInstance()->getStorage()->readForUser($name);
 			change_Controller::getInstance()->getStorage()->removeForUser($name);
 		}
 		return $retval;
@@ -204,13 +204,13 @@ class change_User
 	 */
 	public function getAttribute($name, $ns = null)
 	{
-		Framework::error('Call to deprecated method ' . get_class($this) . '->getAttribute');
+		Framework::deprecated('Call to deprecated method ' . get_class($this) . '->getAttribute');
 		if ($ns)
 		{
 			$zns = new Zend_Session_Namespace($ns);
 			return change_Controller::getInstance()->getStorage()->readNS($name, $zns);
 		}
-		return change_Controller::getInstance()->getStorage()->readForUser($name, $zns);
+		return change_Controller::getInstance()->getStorage()->readForUser($name);
 	}
 	
 	/**
@@ -218,7 +218,7 @@ class change_User
 	 */
 	public function getAttributeNames($ns = null)
 	{
-		Framework::error('Call to deprecated method ' . get_class($this) . '->getAttributeNames');
+		Framework::deprecated('Call to deprecated method ' . get_class($this) . '->getAttributeNames');
 		if ($ns)
 		{
 			$zns = new Zend_Session_Namespace($ns);
@@ -235,7 +235,7 @@ class change_User
 	 */
 	public function setAttribute($name, $value, $ns = null)
 	{
-		Framework::error('Call to deprecated method ' . get_class($this) . '->setAttribute');
+		Framework::deprecated('Call to deprecated method ' . get_class($this) . '->setAttribute');
 		if ($ns)
 		{
 			$zns = new Zend_Session_Namespace($ns);
@@ -252,7 +252,7 @@ class change_User
 	 */
 	public function setAttributeByRef($name, &$value, $ns = null)
 	{
-		Framework::error('Call to deprecated method ' . get_class($this) . '->setAttributeByRef');
+		Framework::deprecated('Call to deprecated method ' . get_class($this) . '->setAttributeByRef');
 		if ($ns)
 		{
 			$zns = new Zend_Session_Namespace($ns);
@@ -269,7 +269,7 @@ class change_User
 	 */
 	public function setAttributes($attributes, $ns = null)
 	{
-		Framework::error('Call to deprecated method ' . get_class($this) . '->setAttributes');
+		Framework::deprecated('Call to deprecated method ' . get_class($this) . '->setAttributes');
 		if ($ns)
 		{
 			$zns = new Zend_Session_Namespace($ns);
@@ -289,7 +289,7 @@ class change_User
 	 */
 	public function setAttributesByRef (&$attributes, $ns = null)
 	{
-		Framework::error('Call to deprecated method ' . get_class($this) . '->setAttributesByRef');
+		Framework::deprecated('Call to deprecated method ' . get_class($this) . '->setAttributesByRef');
 		if ($ns)
 		{
 			$zns = new Zend_Session_Namespace($ns);
@@ -333,7 +333,7 @@ class change_User
 	 */
 	public function getAttributeNamespace($ns = null)
 	{
-		Framework::error('Call to deprecated method ' . get_class($this) . '->getAttributeNamespace');
+		Framework::deprecated('Call to deprecated method ' . get_class($this) . '->getAttributeNamespace');
 		if ($ns)
 		{
 			$zns = new Zend_Session_Namespace($ns);
