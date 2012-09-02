@@ -66,6 +66,12 @@ class MailMessage
 	 * @var array
 	 */
 	private $attachment = array();
+	
+	/**
+	 * Array of path for file attachment infos
+	 * @var array
+	 */
+	private $attachmentInfos = array();
 
 	private $source;
 	
@@ -195,9 +201,10 @@ class MailMessage
 	 * @param string $attachment
 	 * @return MailMessage
 	 */
-	public function addAttachment($attachment)
+	public function addAttachment($filePath, $mimeType = 'application/octet-stream', $name = '')
 	{
-		$this->attachment[] = $attachment;
+		$this->attachment[] = $filePath;
+		$this->attachmentInfos[] = array($mimeType, $name);
 		return $this;
 	}
 
@@ -208,6 +215,14 @@ class MailMessage
 	public function getAttachment()
 	{
 		return $this->attachment;
+	}
+	
+	/**
+	 * @return array
+	 */
+	public function getAttachmentInfos()
+	{
+		return $this->attachmentInfos;
 	}
 
 

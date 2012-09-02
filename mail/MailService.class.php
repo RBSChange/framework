@@ -115,10 +115,10 @@ class MailService extends BaseService
 		{
 			$mailer->setHeader('Disposition-Notification-To', $mailMessage->getNotificationTo());
 		}
-		
-		foreach ($mailMessage->getAttachment() as $attachement)
+		$attachmentInfos = $mailMessage->getAttachmentInfos();
+		foreach ($mailMessage->getAttachment() as $idx => $attachment)
 		{
-			$mailer->addAttachment($attachement);
+			$mailer->addAttachment($attachment, $attachmentInfos[$idx][0], $attachmentInfos[$idx][1]);
 		}
 		return $mailer;
 	}

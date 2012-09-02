@@ -127,9 +127,9 @@ abstract class Mailer
 	 * @param String attachment File path
 	 *
 	 */
-	public function addAttachment($attachment)
+	public function addAttachment($filePath, $mimeType = 'application/octet-stream', $name = '')
 	{
-		$this->getMimeObject()->addAttachment($attachment);
+		$this->getMimeObject()->addAttachment($filePath, $mimeType, $name);
 	}
 
 	/**
