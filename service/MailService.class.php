@@ -31,14 +31,14 @@ class change_MailService extends change_BaseService
 			if ($this->mta === null)
 			{
 				$config = Framework::getConfiguration('mail');
-				if (defined('FAKE_EMAIL') && !f_util_StringUtils::isEmpty(FAKE_EMAIL))
-				{
-					$config['type'] = "File";
-				}
 				switch (strtolower($config['type']))
 				{
 					case 'smtp':
 						$this->mta = new Zend_Mail_Transport_Smtp($config['host'], $config);
+						break;
+					case 'sendmail':
+						// TODO : check sendmail config
+						$this->mta = new Zend_Mail_Transport_Sendmail();
 						break;
 					default:
 						$mailPath = f_util_FileUtils::buildProjectPath('mailbox', 'outgoing');
