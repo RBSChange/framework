@@ -37,7 +37,7 @@ class f_DataCacheRedisService extends f_DataCacheService
 	{
 		if ($this->redis === null)
 		{
-			$conf = Framework::getConfiguration("datacache-redis/server");
+			$conf = Framework::getConfigurationValue("datacache-redis/server");
 			$redis = new Redis();
 			
 			try
