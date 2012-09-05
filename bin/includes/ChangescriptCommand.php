@@ -398,7 +398,8 @@ abstract class  c_ChangescriptCommand
 		{
 			$msg = "=> ".$msg;
 		}
-		$this->message("$msg\n");
+		$this->message($msg);
+		$this->message();
 		return null;
 	}
 
@@ -412,7 +413,8 @@ abstract class  c_ChangescriptCommand
 		{
 			$msg = "=> ".$msg;
 		}
-		$this->okMessage("$msg\n");
+		$this->okMessage($msg);
+		$this->message();
 		return null;
 	}
 
@@ -425,7 +427,8 @@ abstract class  c_ChangescriptCommand
 		{
 			$msg = "=> ".$msg;
 		}
-		$this->errorMessage("$msg\n");
+		$this->errorMessage($msg);
+		$this->message();
 		return false;
 	}
 
@@ -438,7 +441,8 @@ abstract class  c_ChangescriptCommand
 		{
 			$msg = "=> ".$msg;
 		}
-		$this->warnMessage("$msg\n");
+		$this->warnMessage($msg);
+		$this->message();
 		return null;
 	}
 }

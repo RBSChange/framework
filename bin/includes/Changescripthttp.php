@@ -1,19 +1,23 @@
 <?php
 class c_Changescripthttp extends c_Changescript
 {
-	
-
 	protected function echoMessage($message, $color = null)
 	{
+		if ($message == PHP_EOL)
+		{
+			echo "<br />";
+		}
+		else 
+		{
 		$class = ($color === null) ? "row_std" : "row_" . $color;
 		echo "<span class=\"$class\">";
 		echo nl2br(htmlspecialchars($message));
 		echo "</span>";
 	}
+	}
 	
 	/**
 	 * @see c_Changescript::usage()
-	 *
 	 */
 	protected function usage()
 	{
