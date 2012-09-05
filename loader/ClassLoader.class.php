@@ -58,28 +58,13 @@ class ClassLoader implements ResourceLoader
 	 */
 	function autoload($className)
 	{
-		try
+		$classFilePath = $this->resolver->getPathOrNull($className);
+		if ($classFilePath && is_readable($classFilePath))
 		{
-			require_once($this->resolver->getPath($className));
+			require_once($classFilePath);
 			return true;
 		}
-		catch (Exception $e)
-		{
-			// unspecified class
-			// do not print an error if the autoload came from class_exists
-			$trace = debug_backtrace();
-			if (count($trace) < 1 || ($trace[1]['function'] != 'class_exists' && $trace[1]['function'] != 'is_a'))
-			{
-				ob_start();
-				debug_print_backtrace();
-				$trace = ob_get_contents();
-				ob_end_clean();
-				$rc = fopen(CHANGE_LOG_DIR . DIRECTORY_SEPARATOR .'phperror.log', 'a+');
-				fwrite($rc, $trace);
-				fclose($rc);
-			}
-			return false;
-		}
+		return false;
 	}
 
 	/**

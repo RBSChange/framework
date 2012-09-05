@@ -24,7 +24,14 @@ abstract class f_action_BaseAction extends Action
 	 * @var f_persistentdocument_DocumentService
 	 */
 	protected $ds = null;
-
+	
+	
+	public function setFullName($moduleName, $actionName)
+	{
+		$this->m_moduleName = $moduleName;
+		$this->m_actionName = $actionName;
+	}
+	
 	/**
 	 * Initialize this action.
 	 *
@@ -36,17 +43,18 @@ abstract class f_action_BaseAction extends Action
 		$result = parent::initialize($context);
 
 		//Calculate Module name
-		$request = $context->getRequest();
-		$this->m_moduleName =  f_util_ArrayUtils::lastElement($request->getAttribute(K::EFFECTIVE_MODULE_NAME));
-
-		$classParts = explode('_', get_class($this));
-		//Caluclate Action name xxxxx_[name]Action
-		$className = end($classParts);
-		$this->m_actionName = substr($className, 0 , strlen($className) - 6);
-
-		if (Framework::isDebugEnabled())
+		if ($this->m_moduleName === null)
 		{
-			Framework::debug(get_class($this) . '->initialize('.$this->m_moduleName .', ' . $this->m_actionName.')');
+			$request = $context->getRequest();
+			$this->m_moduleName =  f_util_ArrayUtils::lastElement($request->getAttribute(K::EFFECTIVE_MODULE_NAME));
+		}
+
+		if ($this->m_actionName === null)
+		{
+			$classParts = explode('_', get_class($this));
+			$className = end($classParts);
+			//Remove 'Action' suffix 
+			$this->m_actionName = substr($className, 0 , strlen($className) - 6);
 		}
 		return $result;
 	}

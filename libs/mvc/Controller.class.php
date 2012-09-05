@@ -79,12 +79,7 @@ abstract class Controller
 	 * @param string $actionName
 	 */
 	public function forward($moduleName, $actionName)
-	{
-		
-		$actionName = str_replace('.', '/', $actionName);
-		$actionName = preg_replace('/[^a-z0-9\-_\/]+/i', '', $actionName);
-		$moduleName = preg_replace('/[^a-z0-9\-_]+/i', '', $moduleName);
-		
+	{	
 		if ($this->actionStack->getSize() >= $this->maxForwards)
 		{
 			throw new Exception('Too many forwards have been detected for this request');
@@ -100,14 +95,7 @@ abstract class Controller
 			
 			// switch to error 404 action
 			$moduleName = AG_ERROR_404_MODULE;
-			$actionName = AG_ERROR_404_ACTION;
-			
-			if (!$this->actionExists($moduleName, $actionName))
-			{
-				$error = 'Invalid configuration settings: ' . 'AG_ERROR_404_MODULE "%s", ' . 'AG_ERROR_404_ACTION "%s"';
-				$error = sprintf($error, $moduleName, $actionName);
-				throw new Exception($error);			
-			}		
+			$actionName = AG_ERROR_404_ACTION;		
 		}
 		
 		// create an instance of the action
@@ -416,12 +404,7 @@ class HttpController extends WebController
 		$urlParam['action'] = $actionName;
 		
 		$url = $this->generateRedirectUrl($urlParam);
-		
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("Controller->redirect ; resulting URL : $url", 'controller');
-		}
-		
+				
 		// shutdown the controller
 		$this->shutdown();
 		if (!headers_sent())
@@ -437,49 +420,99 @@ class HttpController extends WebController
 		}
 		exit();
 	}
-	    
-	public function actionExists($moduleName, $actionName)
+
+	/**
+	 * @param string $moduleName
+	 * @param string $actionName
+	 * @return string|null
+	 */
+	protected function getActionClassName($moduleName, $actionName)
 	{
-		return f_util_ClassUtils::classExists(strtolower($moduleName) . '_' . $actionName . "Action");
-	}
-	
-	public function getAction($moduleName, $actionName)
-	{
-		$className = $moduleName . '_' . $actionName . 'Action';
-		ClassLoader::getInstance()->load($className);	
-		return new $className();
+		$actionClassName = $moduleName . '_' . $actionName . 'Action';
+		if (($exist = class_exists($actionClassName)) == true)
+		{
+			$injection = Framework::getConfigurationValue('injection', array());
+			if (isset($injection[$actionClassName]))
+			{
+				$actionClassName =  $injection[$actionClassName];
+				$exist = class_exists($actionClassName);
+			}
+		}
+		
+		if (!$exist && $moduleName !== 'generic')
+		{
+			return $this->getActionClassName('generic', $actionName);
+		}
+		return $exist ? $actionClassName : null;
 	}
 
+	/**
+	 * @param string $moduleName
+	 * @param string $actionName
+	 * @return boolean
+	 */
+	public function actionExists($moduleName, $actionName)
+	{
+		return $this->getActionClassName($moduleName, $actionName) !== null;
+	}
+	
+	/**
+	 * @param string $moduleName
+	 * @param string $actionName
+	 * @return Action
+	 */
+	public function getAction($moduleName, $actionName)
+	{
+		$actionClassName = $this->getActionClassName($moduleName, $actionName);
+		if ($actionClassName === null)
+		{
+			throw new Exception('Action '. $moduleName .'/' . $actionName . ' not found');
+		}
+		/* @var $action f_action_BaseAction */
+		$action = new $actionClassName();
+		if (method_exists($action, 'setFullName'))
+		{
+			$action->setFullName($moduleName, $actionName);
+		}
+		return $action;
+	}
+	
+	/**
+	 * @param string $moduleName
+	 * @param string $actionName
+	 * @return string|null
+	 */
+	protected function getViewClassName($moduleName, $actionName)
+	{
+		$className = $moduleName . '_' . $actionName . 'View';
+		$injection = Framework::getConfigurationValue('injection', array()); 
+		$viewClassName = isset($injection[$className]) ? $injection[$className] : $className;
+		return class_exists($viewClassName) ? $viewClassName : null;
+	}
+
+	/**
+	 * @param string $moduleName
+	 * @param string $viewName
+	 * @return boolean
+	 */
 	public function viewExists($moduleName, $viewName)
 	{
-		return f_util_ClassUtils::classExists($moduleName . '_' . $viewName . 'View');
+		return $this->getViewClassName($moduleName, $viewName) !== null;
 	}
-	
+
+	/**
+	 * @param string $moduleName
+	 * @param string $viewName
+	 * @return View
+	 */
 	public function getView($moduleName, $viewName)
 	{
-		$className = $moduleName . '_' . $viewName . 'View';
-		ClassLoader::getInstance()->load($className);	
-		return new $className();
-	}
-	
-	public function forward($moduleName, $actionName)
-	{
-		$this->pushEffectiveModuleName($moduleName);
-		try
+		$viewClassName = $this->getViewClassName($moduleName, $viewName);
+		if ($viewClassName === null)
 		{
-			if (!$moduleName !== K::GENERIC_MODULE_NAME && !$this->actionExists($moduleName, $actionName))
-			{
-				$this->getRequest()->setParameter(K::WEBEDIT_MODULE_ACCESSOR, $moduleName);
-				$moduleName = K::GENERIC_MODULE_NAME;
-			}
-			parent::forward($moduleName, $actionName);
-			$this->popEffectiveModuleName();
+			throw new Exception('Action '. $moduleName .'/' . $viewName . ' not found');
 		}
-		catch (Exception $e)
-		{
-			Framework::exception($e);
-			$this->popEffectiveModuleName();
-		}			
+		return new $viewClassName();
 	}
 	
 	public function modelExists($moduleName, $modelName)
@@ -496,46 +529,64 @@ class HttpController extends WebController
 	}
 	
 	/**
-	 * @param String $moduleName
-	 */
-	private function pushEffectiveModuleName($moduleName)
-	{
-		$moduleStack = $this->getModuleStack();
-		$moduleStack[] = $moduleName;
-		$this->getRequest()->setAttribute(K::EFFECTIVE_MODULE_NAME, $moduleStack);
-	}
-	
-	/**
-	 * @return String[]
-	 */
-	private function getModuleStack()
-	{
-		$moduleStack = null;
-		if (!$this->getRequest()->hasAttribute(K::EFFECTIVE_MODULE_NAME))
-		{
-			$moduleStack = array();
-		}
-		else
-		{
-			$moduleStack = $this->getRequest()->getAttribute(K::EFFECTIVE_MODULE_NAME);
-		}
-		return $moduleStack;
-	}
-	
-	/**
-	 */
-	private function popEffectiveModuleName()
-	{
-		$moduleStack = $this->getModuleStack();
-		array_pop($moduleStack);
-		$this->getRequest()->setAttribute(K::EFFECTIVE_MODULE_NAME, $moduleStack);
-	}
-	
-	/**
 	 * @param array $urlParams
 	 */
 	protected function generateRedirectUrl($urlParams)
 	{
 		return $this->genURL('http://' . $_SERVER['HTTP_HOST'] . '/index.php', $urlParams);
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function forward($moduleName, $actionName)
+	{
+		$this->pushEffectiveModuleName($moduleName);
+		try
+		{
+			parent::forward($moduleName, $actionName);
+			$this->popEffectiveModuleName();
+		}
+		catch (Exception $e)
+		{
+			Framework::exception($e);
+			$this->popEffectiveModuleName();
+		}
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	private function pushEffectiveModuleName($moduleName)
+	{
+		$r = $this->getRequest();
+		$moduleStack = $r->getAttribute(K::EFFECTIVE_MODULE_NAME);
+		if (is_array($moduleStack))
+		{
+			$moduleStack[] = $moduleName;
+		}
+		else
+		{
+			$moduleStack = array($moduleName);
+		}
+		$r->setAttribute(K::EFFECTIVE_MODULE_NAME, $moduleStack);
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	private function popEffectiveModuleName()
+	{
+		$r = $this->getRequest();
+		$moduleStack = $r->getAttribute(K::EFFECTIVE_MODULE_NAME);
+		if (is_array($moduleStack))
+		{
+			array_pop($moduleStack);
+		}
+		else
+		{
+			$moduleStack = null;
+		}
+		$r->setAttribute(K::EFFECTIVE_MODULE_NAME, $moduleStack);
 	}
 }
