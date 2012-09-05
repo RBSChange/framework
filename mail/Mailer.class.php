@@ -2,9 +2,6 @@
 /**
  * @package framework.mail
  */
-/**
- * @deprecated
- */
 abstract class Mailer
 {
 

@@ -27,7 +27,6 @@ class Logger
 	const FATAL = 5000;
 }
 	
-
 class LoggingService extends BaseService
 {
 	/**

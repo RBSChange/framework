@@ -573,9 +573,6 @@ class paginator_Paginator extends ArrayObject
 /**
  * Small url class utility
  */
-/**
- * @deprecated
- */
 class paginator_Url
 {
 	/**

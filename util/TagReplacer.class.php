@@ -1,9 +1,6 @@
 <?php
-/**
- * @deprecated
- */
-class f_util_TagReplacer {
-
+class f_util_TagReplacer 
+{
 	protected $replacements  = array();
 	protected $search   = array();
 	protected $replace  = array();

@@ -2,9 +2,6 @@
 /**
  * @package framework.exception
  */
-/**
- * @deprecated
- */
 class BadArgumentException extends BaseException
 {
 	public function __construct ($argumentName, $expectedArgumentType)
@@ -18,36 +15,17 @@ class BadArgumentException extends BaseException
 /**
  * BadInitializationException is used when a class isn't correctly initialized
  */
-/**
- * @deprecated
- */
 class BadInitializationException extends Exception
-{
-}
-
-/**
- * ClassException is used in every class that must thorw exception
- */
-/**
- * @deprecated
- */
-class ClassException extends BaseException
 {
 }
 
 /**
  * ClassNotFoundException is used when a class are not found in project
  */
-/**
- * @deprecated
- */
 class ClassNotFoundException extends Exception
 {
 }
 
-/**
- * @deprecated
- */
 class FileNotFoundException extends BaseException
 {
 
@@ -59,45 +37,10 @@ class FileNotFoundException extends BaseException
 	}
 }
 
-/**
- * FrameworkException is used by Framework package classes to throw exception
- */
-/**
- * @deprecated
- */
-class FrameworkException extends BaseException
-{
-}
-
-/**
- * @deprecated
- */
-class IllegalArgumentException extends Exception
-{
-
-	public function __construct ($argumentNameOrMessage, $expectedArgumentType = null)
-	{
-		if (!is_null($expectedArgumentType))
-		{
-			parent::__construct("Illegal argument: ".$argumentNameOrMessage." must be a ".$expectedArgumentType);
-		}
-		else
-		{
-			parent::__construct($argumentNameOrMessage);
-		}
-	}
-}
-
-/**
- * @deprecated
- */
 class IllegalOperationException extends Exception
 {
 }
 
-/**
- * @deprecated
- */
 class IllegalTransitionException extends Exception
 {
 
@@ -107,23 +50,14 @@ class IllegalTransitionException extends Exception
 	}
 }
 
-/**
- * @deprecated
- */
 class IndexException extends Exception 
 {	
 }
 
-/**
- * @deprecated
- */
 class TagException extends Exception 
 {
 }
 
-/**
- * @deprecated
- */
 class InvalidContextualTagException extends TagException
 {
 	public function __construct($tagName)
@@ -132,9 +66,6 @@ class InvalidContextualTagException extends TagException
 	}
 }
 
-/**
- * @deprecated
- */
 class InvalidExclusiveTagException extends TagException
 {
 	public function __construct($tagName)
@@ -143,9 +74,6 @@ class InvalidExclusiveTagException extends TagException
 	}
 }
 
-/**
- * @deprecated
- */
 class InvalidFunctionalTagException extends TagException
 {
 	public function __construct($tagName)
@@ -153,10 +81,6 @@ class InvalidFunctionalTagException extends TagException
 		parent::__construct('Invalid functional tag: '.$tagName);
 	}
 }
-
-/**
- * @deprecated
- */
 class InvalidTagException extends TagException
 {
 	public function __construct($tagName)
@@ -165,42 +89,10 @@ class InvalidTagException extends TagException
 	}
 }
 
-/**
- * @deprecated
- */
 class IOException extends Exception
 {
 }
 
-/**
- * ListNotFoundException is used when a list is not found
- */
-/**
- * @deprecated
- */
-class ListNotFoundException extends Exception
-{
-}
-
-
-/**
- * NoUserForWorkitemException is used at workitem initialization if trere is not valid user.
- */
-/**
- * @deprecated
- */
-class NoUserForWorkitemException extends BaseException
-{
-	public function __construct ($argumentName)
-	{
-		$key = 'framework.exception.errors.No-valid-user-found-for-this-workitem';
-		parent::__construct($argumentName, $key);
-	}	
-}
-
-/**
- * @deprecated
- */
 class ServiceNotFoundException extends Exception 
 {
 	public function __construct($documentModelName)
@@ -209,9 +101,6 @@ class ServiceNotFoundException extends Exception
 	}
 }
 
-/**
- * @deprecated
- */
 class TemplateNotFoundException extends BaseException
 {
 	private static $key = 'framework.exception.errors.Template-not-found-exception';
@@ -223,9 +112,6 @@ class TemplateNotFoundException extends BaseException
 	}
 }
 
-/**
- * @deprecated
- */
 class TransactionCancelledException extends Exception
 {
 	/**
@@ -258,10 +144,6 @@ class TransactionCancelledException extends Exception
 	}
 }
 
-
-/**
- * @deprecated
- */
 class UnavailableModuleException extends Exception
 {
 
@@ -274,16 +156,10 @@ class UnavailableModuleException extends Exception
 /**
  * ValidationException is used by Validator
  */
-/**
- * @deprecated
- */
 class ValidationException extends Exception
 {
 }
 
-/**
- * @deprecated
- */
 class ValidatorConfigurationException extends Exception
 {
 }

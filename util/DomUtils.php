@@ -1,7 +1,4 @@
 <?php
-/**
- * @deprecated
- */
 abstract class f_util_DOMUtils
 {
 	/**
@@ -88,9 +85,6 @@ abstract class f_util_DOMUtils
 	}
 }
 
-/**
- * @deprecated
- */
 class f_util_DOMDocument extends DOMDocument
 {
 	/**

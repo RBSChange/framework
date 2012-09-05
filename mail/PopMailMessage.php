@@ -1,7 +1,4 @@
 <?php
-/**
- * @deprecated
- */
 class f_mail_MIMEObject
 {
 	

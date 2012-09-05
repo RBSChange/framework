@@ -3,9 +3,6 @@
  * Auto-generated doc comment
  * @package framework.mail
  */
-/**
- * @deprecated
- */
 class MailerNull extends Mailer
 {
 	public function __construct($params)

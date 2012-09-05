@@ -2,9 +2,6 @@
 /**
  * @package framework.mail
  */
-/**
- * @deprecated
- */
 class mail_MessageRecipients
 {
 	/**

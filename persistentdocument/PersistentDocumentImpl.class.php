@@ -2,9 +2,6 @@
 /**
  * @package framework.persistentdocument
  */
-/**
- * @deprecated
- */
 abstract class f_persistentdocument_PersistentDocumentImpl implements f_persistentdocument_PersistentDocument, f_mvc_Bean
 {
 	private $m_persistentState;

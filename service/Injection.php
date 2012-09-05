@@ -1,7 +1,5 @@
 <?php
-/**
- * @deprecated
- */
+
 class Injection
 {
 	/**

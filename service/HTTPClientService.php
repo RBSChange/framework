@@ -2,9 +2,6 @@
 /**
  * @package framework.service
  */
-/**
- * @deprecated
- */
 class HTTPClientService extends BaseService
 {
 	/**
@@ -33,9 +30,6 @@ class HTTPClientService extends BaseService
 	}
 }
 
-/**
- * @deprecated
- */
 class HTTPClient
 {
 	/**
