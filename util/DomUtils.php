@@ -38,17 +38,11 @@ abstract class f_util_DOMUtils
 	 */
 	static function fromXhtmlFragmentString($xhtml)
 	{
-		if (DIRECTORY_SEPARATOR !== '/')
-		{
-			$dtdPath = 'file:///' . str_replace(array(DIRECTORY_SEPARATOR, ' '), array('/', '%20'), realpath(PROJECT_HOME .'/framework/f_web/dtd/xhtml1-transitional.dtd'));
-		}
-		else
-		{
-			$dtdPath = 'file://' . str_replace(' ', '%20', realpath(PROJECT_HOME .'/framework/f_web/dtd/xhtml1-transitional.dtd'));
-		}
+		$dtd = str_replace(array(DIRECTORY_SEPARATOR, ' '), array('/', '%20'), f_util_FileUtils::buildFrameworkPath('f_web', 'dtd', 'xhtml1-transitional.dtd'));
+		if ($dtd[0] != '/') {$dtd = '/' . $dtd;}
 
 		$xml = '<?xml version="1.0" encoding="UTF-8"?>' .
-			 '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "'. $dtdPath .'">' .
+			 '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "file://'. $dtd .'">' .
 			 '<html xmlns="http://www.w3.org/1999/xhtml" xmlns:change="http://www.rbs.fr/change/1.0/schema" xmlns:tal="http://xml.zope.org/namespaces/tal"><body>' . 
 			 $xhtml .
 			 '</body></html>';
