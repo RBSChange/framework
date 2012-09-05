@@ -30,6 +30,16 @@ abstract class change_Action
 	protected $ds = null;
 
 	/**
+	 * @param string $moduleName
+	 * @param string $actionName
+	 */
+	public function setFullName($moduleName, $actionName)
+	{
+		$this->m_moduleName = $moduleName;
+		$this->m_actionName = $actionName;
+	}
+	
+	/**
 	 * @param change_Context $context.
 	 * @return bool true, if initialization completes successfully, otherwise false.
 	 */

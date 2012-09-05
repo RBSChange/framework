@@ -10,7 +10,7 @@ class change_Controller
 	/**
 	 * @var integer;
 	 */
-	private $maxForwards = 20; 
+	private $maxForwards = 100; 
 	
 	/**
 	 * @var change_Request
@@ -114,13 +114,29 @@ class change_Controller
 
 	
 	/**
+	 * @param string $moduleName
+	 * @param string $actionName
+	 * @return string|null
+	 */
+	protected function getActionClassName($moduleName, $actionName)
+	{
+		$actionClassName = $moduleName . '_' . $actionName . 'Action';
+		$exist = class_exists($actionClassName);	
+		if (!$exist && $moduleName !== 'generic')
+		{
+			return $this->getActionClassName('generic', $actionName);
+		}
+		return $exist ? $actionClassName : null;
+	}
+	
+	/**
 	 * 
 	 * @param string $moduleName
 	 * @param string $actionName
 	 */
 	public function actionExists($moduleName, $actionName)
 	{
-		return f_util_ClassUtils::classExists(strtolower($moduleName) . '_' . $actionName . 'Action');
+		return $this->getActionClassName($moduleName, $actionName) !== null;
 	}
 	
 	/**
@@ -130,10 +146,31 @@ class change_Controller
 	 */
 	protected function getAction($moduleName, $actionName)
 	{
-		$className = $moduleName . '_' . $actionName . 'Action';
-		return new $className();
+		$actionClassName = $this->getActionClassName($moduleName, $actionName);
+		if ($actionClassName === null)
+		{
+			throw new Exception('Action '. $moduleName .'/' . $actionName . ' not found');
+		}
+		/* @var $action change_Action */
+		$action = new $actionClassName();
+		if (method_exists($action, 'setFullName'))
+		{
+			$action->setFullName($moduleName, $actionName);
+		}
+		return $action;
 	}
 
+	/**
+	 * @param string $moduleName
+	 * @param string $actionName
+	 * @return string|null
+	 */
+	protected function getViewClassName($moduleName, $actionName)
+	{
+		$viewClassName = $moduleName . '_' . $actionName . 'View';
+		return class_exists($viewClassName) ? $viewClassName : null;
+	}
+	
 	/**
 	 * @param string $moduleName
 	 * @param string $viewName
@@ -141,7 +178,7 @@ class change_Controller
 	 */
 	public function viewExists($moduleName, $viewName)
 	{
-		return f_util_ClassUtils::classExists($moduleName . '_' . $viewName . 'View');
+		return $this->getViewClassName($moduleName, $viewName) !== null;
 	}
 	
 	/**
@@ -151,8 +188,12 @@ class change_Controller
 	 */
 	protected function getView($moduleName, $viewName)
 	{
-		$className = $moduleName . '_' . $viewName . 'View';
-		return new $className();
+		$viewClassName = $this->getViewClassName($moduleName, $viewName);
+		if ($viewClassName === null)
+		{
+			throw new Exception('View '. $moduleName .'/' . $viewName . ' not found');
+		}
+		return new $viewClassName();
 	}
 	
 	
@@ -170,34 +211,23 @@ class change_Controller
 	 */
 	public function forward($moduleName, $actionName)
 	{
-		$actionModuleName = $moduleName;
 		try
 		{
-			if ($this->actionExists($actionModuleName, $actionName))
-			{
-				$actionInstance = $this->getAction($actionModuleName, $actionName);
-			}
-			elseif ($actionModuleName !== 'generic' && $this->actionExists('generic', $actionName))
-			{
-				$this->getRequest()->setParameter('wemod', $moduleName);		
-				$actionModuleName = 'generic';		
-				$actionInstance =  $this->getAction('generic', $actionName);
-			}
-			else if ($moduleName !== 'website' && $actionName !== 'Error404')
-			{
-				return $this->forward('website', 'Error404');
-			}
-			else
-			{
-				throw new Exception('Action not found: ' . $moduleName. '/'. $actionName);
-			}
-
-			if ($this->actionStack->getSize() >= $this->maxForwards)
+			if ($this->actionStack->getSize() > $this->maxForwards)
 			{
 				throw new Exception('Too many forwards have been detected for this request');
 			}
 			
-			$this->actionStack->addEntry($moduleName, $actionName, $actionInstance);
+			if ($this->actionExists($moduleName, $actionName))
+			{
+				$actionInstance = $this->getAction($moduleName, $actionName);
+			}
+			else
+			{
+				return $this->forward('website', 'Error404');
+			}
+
+			$this->actionStack->addEntry($moduleName, $moduleName, $actionInstance);
 			
 				// initialize the action
 			if ($actionInstance->initialize($this->context))
