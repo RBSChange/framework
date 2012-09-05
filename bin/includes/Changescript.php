@@ -695,16 +695,13 @@ class c_Changescript
 	 * @param String $message
 	 * @param const $color one of the FG_XXX constants, optional
 	 */
-	public final function message($message, $color = null)
+	public final function message($message = null, $color = null)
 	{
-		if ($color !== null)
+		if ($message)
 		{
-			$this->echoMessage($message . self::END_COLORED_MESSAGE . "\n", $color);
+			$this->echoMessage($message, $color);
 		}
-		else
-		{
-			$this->echoMessage($message . "\n");
-		}
+		$this->echoMessage(PHP_EOL);
 	}
 	
 	/**
@@ -782,9 +779,7 @@ class c_Changescript
 	const PREFIX = "\x1b[";
 	const SUFFIX = "m";
 	const SEPARATOR = ';';
-	const END_COLOR = "\x1b[m";
-	const END_COLORED_MESSAGE = "\033[0m";
-	
+	const END_COLOR = "\x1b[m";	
 	
 	protected function echoMessage($message, $color = null)
 	{
