@@ -240,7 +240,7 @@ abstract class  c_ChangescriptCommand
 	 * @param String $message
 	 * @param const $color one of the FG_XXX constants, optional
 	 */
-	protected function message($message, $color = null)
+	protected function message($message = null, $color = null)
 	{
 		$this->getParent()->message($message, $color);
 	}
