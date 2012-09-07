@@ -91,7 +91,7 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 					return $this->quitOk("Installed version '".$installedVersion."' is newer than requested version ".$moduleVersion.".");
 				case -1:
 					return $this->quitError("Can not upgrade module version for now. You must use a migration script");
-			}		
+			}
 		}
 			
 		if (!$bootStrap->dependencyInLocalRepository($type, $moduleName, $moduleVersion))
@@ -125,6 +125,7 @@ class commands_InstallModule extends commands_AbstractChangedevCommand
 		$this->message("Check dependencies integrity");
 		
 		$this->getParent()->executeCommand('updateDependencies');
+		$this->getParent()->executeCommand('compile-config');
 		
 		$this->changecmd("compile-all");
 		$this->changecmd("generate-database");
