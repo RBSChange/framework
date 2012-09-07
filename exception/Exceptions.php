@@ -163,3 +163,55 @@ class ValidationException extends Exception
 class ValidatorConfigurationException extends Exception
 {
 }
+
+/**
+ * @deprecated
+ */
+class ClassException extends BaseException
+{
+}
+
+/**
+ * @deprecated
+ */
+class FrameworkException extends BaseException
+{
+}
+
+/**
+ * @deprecated use standard InvalidArgumentException
+ */
+class IllegalArgumentException extends Exception
+{
+
+	public function __construct ($argumentNameOrMessage, $expectedArgumentType = null)
+	{
+		if (!is_null($expectedArgumentType))
+		{
+			parent::__construct("Illegal argument: ".$argumentNameOrMessage." must be a ".$expectedArgumentType);
+		}
+		else
+		{
+			parent::__construct($argumentNameOrMessage);
+		}
+	}
+}
+
+/**
+ * @deprecated
+ */
+class ListNotFoundException extends Exception
+{
+}
+
+/**
+ * @deprecated
+ */
+class NoUserForWorkitemException extends BaseException
+{
+	public function __construct ($argumentName)
+	{
+		$key = 'framework.exception.errors.No-valid-user-found-for-this-workitem';
+		parent::__construct($argumentName, $key);
+	}
+}
