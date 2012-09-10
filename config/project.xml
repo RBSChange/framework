@@ -68,8 +68,9 @@
 		</documentcache>
 		
 		<http>
-			<entry name="adapter">Zend_Http_Client_Adapter_Curl</entry>
+			<entry name="adapter">\Zend\Http\Client\Adapter\Curl</entry>
 		</http>
+		
 		
 		<!-- 
 		<mongoDB>

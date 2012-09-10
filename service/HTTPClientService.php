@@ -11,7 +11,7 @@ class change_HttpClientService extends change_BaseService
 
 	/**
 	 * Return a Zend Framework compatible configuration for HTTP Clients - if you want
-	 * a client instance, please call getNewHttpClient directyly
+	 * a client instance, please call getNewHttpClient directly
  	 * 
 	 * @return array
 	 */
@@ -22,12 +22,14 @@ class change_HttpClientService extends change_BaseService
 			$this->config = Framework::getHttpClientConfig();
 			switch($this->config['adapter'])
 			{
-				case "Zend_Http_Client_Adapter_Curl":
+				case "\Zend\Http\Client\Adapter\Curl":
 					$this->config['curloptions'][CURLOPT_TIMEOUT] = isset($params['timeout'])  ? $params['timeout'] : 60;
 					$this->config['curloptions'][CURLOPT_CONNECTTIMEOUT] = 5;
+					//  avoid dreaded 100-Continue statuses cf. http://the-stickman.com/web-development/php-and-curl-disabling-100-continue-header/
+					$this->config['curloptions'][CURLOPT_HTTP_VERSION] = CURL_HTTP_VERSION_1_0;
 					break;
-				case "Zend_Http_Client_Adapter_Socket":
-				case "Zend_Http_Client_Adapter_Proxy":
+				case "\Zend\Http\Client\Adapter\Socket":
+				case "\Zend\Http\Client\Adapter\Proxy":
 					$this->config['timeout'] = isset($params['timeout'])  ? $params['timeout'] : 60;
 					break;
 			}
@@ -36,16 +38,10 @@ class change_HttpClientService extends change_BaseService
 	}
 	
 	/**
-	 * @return Zend_Http_Client
+	 * @return \Zend\Http\Client
 	 */
 	public function getNewHttpClient($params = array())
 	{
-		$clientInstance = new Zend_Http_Client(null, $this->getHttpClientConfig($params));
-		//  avoid dreaded 100-Continue statuses cf. http://the-stickman.com/web-development/php-and-curl-disabling-100-continue-header/
-		if ($clientInstance->getAdapter() instanceof Zend_Http_Client_Adapter_Curl)
-		{
-			$clientInstance->setHeaders('Expect:');
-		}
-		return $clientInstance;
+		return new \Zend\Http\Client(null, $this->getHttpClientConfig($params));;
 	}
 }
