@@ -337,9 +337,31 @@ class Framework
 		return change_ConfigurationService::getInstance()->getConfiguration('http');
 	}
 	
+	/**
+	 * Registers namespace using Zend - this should always be called **after** registerAutoload
+	 */
+	public static function registerNamespaces()
+	{
+		require_once PROJECT_HOME . DIRECTORY_SEPARATOR . 'libs/zf2/library/Zend/Loader/StandardAutoloader.php';
+		$namespaces = change_ConfigurationService::getInstance()->getConfigurationValue('namespaces');
+		foreach ($namespaces as $namespace => $path)
+		{
+			$normalizedPath = trim($path);
+			if ($normalizedPath[0] != DIRECTORY_SEPARATOR)
+			{
+				$normalizedPath = PROJECT_HOME . DIRECTORY_SEPARATOR . $normalizedPath;
+			}
+			$zendLoader  = new \Zend\Loader\StandardAutoloader();
+			$zendLoader->registerNamespace($namespace, $normalizedPath);
+			$zendLoader->register();
+		}
+	}
+	/**
+	 * Registers change's autoload
+	 */
 	public static function registerAutoload()
 	{
-		spl_autoload_register(array(__CLASS__, "autoload"));
+		spl_autoload_register(array(__CLASS__, "autoload"));		
 	}
 	
 	/**
@@ -418,6 +440,7 @@ class Framework
 // Load configuration
 Framework::registerAutoload();
 change_ConfigurationService::getInstance()->loadConfiguration();
+Framework::registerNamespaces();
 
 if (Framework::inDevelopmentMode()) {error_reporting(E_ALL | E_STRICT);}
 

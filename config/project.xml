@@ -176,7 +176,11 @@
 				<entry name="change_User">change_User</entry>	
 			</classes>	
 		</mvc>
-						
+		<!-- Zend-based namespace loading -->
+		<namespaces>
+			<entry name="Zend">libs/zf2/library/Zend/</entry>
+			<entry name="ZendOAuth">libs/ZendOAuth/library/ZendOAuth/</entry>
+		</namespaces>			
 		<tal>
 			<prefix>
 				<entry name="trans">f_TalesI18n</entry>
