@@ -9,26 +9,26 @@ class change_Storage
 	
 	/**
 	 *
-	 * @var Zend_Session_Namespace 
+	 * @var \Zend\Session\Container 
 	 */
-	private $changeSessionNameSpace;
+	private $changeSessionContainer;
 	
 	/**
 	 *
-	 * @var Zend_Session_Namespace 
+	 * @var \Zend\Session\Container  
 	 */
-	private $backuserSessionNameSpace;
+	private $backuserSessionContainer;
 	
 	/**
 	 *
-	 * @var Zend_Session_Namespace 
+	 * @var \Zend\Session\Container  
 	 */
-	private $frontuserSessionNameSpace;
+	private $frontuserSessionContainer;
 	
 	/**
 	 * @var array
 	 */
-	protected $parameters = array('session_name' => '__CHANGESESSIONID', 'auto_start' => true);
+	protected $parameters = array('session_name' => 'CHANGESESSIONID', 'auto_start' => true);
 	
 	private $started = null;
 	
@@ -52,16 +52,19 @@ class change_Storage
 	
 	protected function startSession()
 	{
+
 		if (isset($_SERVER["SERVER_ADDR"]))
 		{
-			session_name($this->parameters['session_name']);
-			Zend_Session::start();
+			$sessionManager = new \Zend\Session\SessionManager();
+			$sessionManager->setName($this->parameters['session_name']);
 			
-			$this->changeSessionNameSpace = new Zend_Session_Namespace('GLOBAL');
-			$this->backuserSessionNameSpace = new Zend_Session_Namespace('BACKOFFICE');
-			$this->frontuserSessionNameSpace = new Zend_Session_Namespace('FRONTOFFICE');
+			\Zend\Session\Container::setDefaultManager($sessionManager);
+
+			$this->changeSessionContainer = new \Zend\Session\Container('GLOBAL');
+			$this->backuserSessionContainer = new \Zend\Session\Container('BACKOFFICE');
+			$this->frontuserSessionContainer = new \Zend\Session\Container('FRONTOFFICE');
 			$this->started = true;
-			change_LoggingService::getInstance()->registerSessionId(Zend_Session::getId());
+			change_LoggingService::getInstance()->registerSessionId($sessionManager->getId());
 	
 			$currentKey =  $this->getSecureKey(); 
 			$md5 = $this->read('framework_SecureKey');
@@ -73,21 +76,20 @@ class change_Storage
 			} 
 			else if ($md5 !== $currentKey)
 			{
-				$oldSessionId = Zend_Session::getId();
-				Zend_Session::destroy();
-				Zend_Session::start();
-				change_LoggingService::getInstance()->registerSessionId(Zend_Session::getId());		
+				$oldSessionId = $sessionManager->getId();
+				$sessionManager->regenerateId(true);
+				change_LoggingService::getInstance()->registerSessionId($sessionManager->getId());		
 				$this->sessionIdChanged($oldSessionId);
 				
 			}
 			else if ($this->read('framework_SecurePort') !== $_SERVER["SERVER_PORT"])
 			{
-				$oldSessionId = Zend_Session::getId();
-				Zend_Session::regenerateId();
+				$oldSessionId = $sessionManager->getId();
+				$sessionManager->regenerateId(false);
 				$this->write('framework_SecurePort', $_SERVER["SERVER_PORT"]);
-				change_LoggingService::getInstance()->registerSessionId(Zend_Session::getId());
+				change_LoggingService::getInstance()->registerSessionId($sessionManager->getId());
 				$this->sessionIdChanged($oldSessionId);	
-			}
+			}				
 		}
 		else
 		{
@@ -95,12 +97,15 @@ class change_Storage
 		}
 	}
 	
+	/**
+	 * 
+	 */
 	protected function stopSession()
 	{
 		if ($this->started === true)
 		{
 			$this->started = null;
-			Zend_Session::stop();
+			\Zend\Session\Container::getDefaultManager()->writeClose();
 		}
 	}
 
@@ -153,16 +158,16 @@ class change_Storage
 	
 	/**
 	 * @param string $key
-	 * @param Zend_Session_Namespace $ns
+	 * @param \Zend\Session\Container $container
 	 * @return Mixed 
 	 */
-	public function &readNS($key, $ns)
+	public function &readForContainer($key, $container)
 	{
 		if ($this->started === null) {$this->startSession();}
 		$retval = null;
-		if ($this->started && isset($ns->$key))
+		if ($this->started && isset($container[$key]))
 		{
-			$retval =  $ns->$key;
+			$retval =  $container[$key];
 		}
 		return $retval;
 	}
@@ -173,7 +178,7 @@ class change_Storage
 	 */
 	public function &read($key)
 	{
-		return $this->readNS($key, $this->getChangeSessionNamespaceInstance());
+		return $this->readForContainer($key, $this->getChangeSessionContainer());
 	}
 	
 	/**
@@ -182,18 +187,23 @@ class change_Storage
 	 */
 	public function &readForUser($key)
 	{
-		return $this->readNS($key, $this->getUserSessionNamespaceInstance());
+		return $this->readForContainer($key, $this->getUserSessionContainer());
 	}
 	
-	public function removeNS($key, $ns)
+	/**
+	 * 
+	 * @param string $key
+	 * @param \Zend\Session\Container $container
+	 * @return mixed
+	 */
+	public function removeForContainer($key, $container)
 	{
 		if ($this->started === null) {$this->startSession();}
-		
 		$retval = null;
-		if ($this->started && isset($ns->$key))
+		if ($this->started && isset($container[$key]))
 		{
-			$retval = $ns->$key;
-			unset($ns->$key);
+			$retval = $container[$key];
+			unset($container[$key]);
 		}
 		return $retval;
 	}
@@ -204,7 +214,7 @@ class change_Storage
 	 */
 	public function remove($key)
 	{
-		return $this->removeNS($key, $this->getChangeSessionNamespaceInstance());
+		return $this->removeForContainer($key, $this->getChangeSessionContainer());
 	}
 	
 	/**
@@ -213,21 +223,21 @@ class change_Storage
 	 */
 	public function removeForUser($key)
 	{
-		return $this->removeNS($key, $this->getUserSessionNamespaceInstance());
+		return $this->removeForContainer($key, $this->getUserSessionContainer());
 	}
 
 
 	/**
 	 * @param string $key
 	 * @param Mixed $data
-	 * @param Zend_Session_Namespace $ns 
+	 * @param \Zend\Session\Container $container 
 	 */
-	public function writeNS($key, &$data, $ns)
+	public function writeForContainer($key, &$data, $container)
 	{
 		if ($this->started === null) {$this->startSession();}
 		if ($this->started)
 		{
-			$ns->$key = $data;
+			$container->$key = $data;
 		}
 	}
 	
@@ -237,7 +247,7 @@ class change_Storage
 	 */
 	public function write($key, &$data)
 	{
-		$this->writeNS($key, $data, $this->getChangeSessionNamespaceInstance());
+		$this->writeForContainer($key, $data, $this->getChangeSessionContainer());
 	}
 	
 	/**
@@ -246,19 +256,19 @@ class change_Storage
 	 */
 	public function writeForUser($key, &$data)
 	{
-		$this->writeNS($key, $data, $this->getUserSessionNamespaceInstance());
+		$this->writeForContainer($key, $data, $this->getUserSessionContainer());
 	}
 	
 	/**
-	 * @param Zend_Session_Namespace $ns
+	 * @param \Zend\Session\Container $container
 	 * @return Array 
 	 */
-	public function readAllNS($ns)
+	public function readAllForContainer($container)
 	{
 		if ($this->started === null) {$this->startSession();}
 		if ($this->started)
 		{
-			return $ns->getIterator()->getArrayCopy();
+			return $container->getIterator()->getArrayCopy();
 		}
 		return array();
 	}
@@ -268,7 +278,7 @@ class change_Storage
 	 */
 	public function readAll()
 	{
-		return $this->readAllNS($this->getChangeSessionNamespaceInstance());
+		return $this->readAllForContainer($this->getChangeSessionContainer());
 	}
 		
 	/**
@@ -276,19 +286,31 @@ class change_Storage
 	 */
 	public function readAllForUser()
 	{
-		return $this->readAllNS($this->getUserSessionNamespaceInstance());
+		return $this->readAllForContainer($this->getUserSessionContainer());
 	}
 	
 	public function clear()
 	{
-		$ns = $this->getChangeSessionNamespaceInstance();
-		if ($this->started) {$ns->unsetAll();}
+		$container = $this->getChangeSessionContainer();
+		if ($this->started) 
+		{
+			foreach ($container as $key => $value)
+			{
+				unset($container[$key]);
+			}
+		}
 	}
 	
 	public function clearForUser()
 	{
-		$ns = $this->getUserSessionNamespaceInstance();
-		if ($this->started) {$ns->unsetAll();}
+		$container = $this->getUserSessionContainer();
+		if ($this->started) 
+		{
+			foreach ($container as $key => $value)
+			{
+				unset($container[$key]);
+			}
+		}
 	}
 	
 	public function shutdown ()
@@ -297,45 +319,45 @@ class change_Storage
 	}
 	
 	/**
-	 * This method returns the Zend_Session_Namespace instance used to store related session data
+	 * This method returns the \Zend\Session\Container instance used to store related session data
 	 * 
-	 * @return Zend_Session_Namespace 
+	 * @return \Zend\Session\Container  
 	 */
-	public function getChangeSessionNamespaceInstance()
+	public function getChangeSessionContainer()
 	{
 		if ($this->started === null) {$this->startSession();}
-		return $this->changeSessionNameSpace;
+		return $this->changeSessionContainer;
 	}
 	
 	/**
-	 * This method returns the Zend_Session_Namespace instance used to store session data whose scope is authentified navigation only (ie: gets cleaned when authentified user disconnects)
+	 * This method returns the \Zend\Session\Container instance used to store session data whose scope is authentified navigation only (ie: gets cleaned when authentified user disconnects)
 	 * 
-	 * @return Zend_Session_Namespace 
+	 * @return \Zend\Session\Container 
 	 */
-	public function getUserSessionNamespaceInstance()
+	public function getUserSessionContainer()
 	{
 		if ($this->context->getUser()->getUserNamespace() === change_User::BACKEND_NAMESPACE)
 		{
-			return $this->getBackofficeSessionNamespaceInstance();
+			return $this->getBackofficeSessionContainer();
 		}
-		return $this->getFrontofficeSessionNamespaceInstance();
+		return $this->getFontofficeSessionContainer();
 	}
 	
 	/**
-	 * @return Zend_Session_Namespace 
+	 * @return \Zend\Session\Container 
 	 */
-	public function getBackofficeSessionNamespaceInstance()
+	public function getBackofficeSessionContainer()
 	{
 		if ($this->started === null) {$this->startSession();}
-		return $this->backuserSessionNameSpace;	
+		return $this->backuserSessionContainer;	
 	}
 	
 	/**
-	 * @return Zend_Session_Namespace 
+	 * @return \Zend\Session\Container 
 	 */
-	public function getFrontofficeSessionNamespaceInstance()
+	public function getFontofficeSessionContainer()
 	{
 		if ($this->started === null) {$this->startSession();}
-		return $this->frontuserSessionNameSpace;
+		return $this->frontuserSessionContainer;
 	}
 }
