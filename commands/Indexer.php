@@ -157,12 +157,11 @@ class commands_Indexer extends c_ChangescriptCommand
 		
 	private function processModels($modelsName)
 	{
-		$logs = LoggingService::getInstance();
 		$totalDocumentCount = 0;
 		$scriptPath = 'framework/indexer/chunkDocumentIndexer.php';
 		$chunkSize = 100;
 		$chunkInfo = "* Start indexing documents.";
-		$logs->namedLog($chunkInfo, 'indexer');
+		change_LoggingService::getInstance()->namedLog($chunkInfo, 'indexer');
 		$this->message($chunkInfo);
 		
 		foreach ($modelsName as $modelName) 
@@ -190,11 +189,11 @@ class commands_Indexer extends c_ChangescriptCommand
 					$progres = false;
 					$chunkInfo = "* $modelName processed Total: $documentIndex";
 				}
-				$logs->namedLog($chunkInfo, 'indexer');
+				change_LoggingService::getInstance()->namedLog($chunkInfo, 'indexer');
 				$this->message($chunkInfo);
 			} 	
 		}
-		$logs->namedLog('Total of indexed documents: ' . $totalDocumentCount, 'indexer');
+		change_LoggingService::getInstance()->namedLog('Total of indexed documents: ' . $totalDocumentCount, 'indexer');
 		$this->message("Total of indexed documents: " . $totalDocumentCount);
 	}
 	
