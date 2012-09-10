@@ -9,20 +9,21 @@ class change_MailService extends change_BaseService
 	const BCC = 'bcc';
 	
 	/**
-	 * @var Zend_Mail_Transport_Abstract 
+	 * @var \Zend\Mail\Transport\TransportInterface 
 	 */
 	private $mta;
 
 	/**
-	 * @return Zend_Mail 
+	 * @return \Zend\Mail\Message 
 	 */
 	public function getNewMessage()
 	{
-		return new Zend_Mail('UTF-8');
+		$message = new \Zend\Mail\Message();
+		return $message->setEncoding('UTF-8');
 	}
 	
 	/**
-	 * @param Zend_Mail $message 
+	 * @param \Zend\Mail\Message  $message 
 	 */
 	public function send($message, $moduleName = null)
 	{
@@ -34,27 +35,42 @@ class change_MailService extends change_BaseService
 				switch (strtolower($config['type']))
 				{
 					case 'smtp':
-						$this->mta = new Zend_Mail_Transport_Smtp($config['host'], $config);
+						$options   = new \Zend\Mail\Transport\SmtpOptions();
+						$options->setHost($config['host']);
+						$options->setPort($config['port']);
+						if (isset($config['username']) && f_util_StringUtils::isNotEmpty($config['username']))
+						{
+							$options->setConnectionClass('login');
+							$options->setConnectionConfig(array(
+								'username' => $config['username'],
+								'password' => $config['password'],
+							));
+						}
+						$this->mta = new \Zend\Mail\Transport\Smtp($options);
 						break;
 					case 'sendmail':
 						// TODO : check sendmail config
-						$this->mta = new Zend_Mail_Transport_Sendmail();
+						$this->mta =  new \Zend\Mail\Transport\Sendmail();
 						break;
 					default:
+						$options = new \Zend\Mail\Transport\FileOptions();
 						$mailPath = f_util_FileUtils::buildProjectPath('mailbox', 'outgoing');
 						f_util_FileUtils::mkdir($mailPath);
-						$this->mta = new Zend_Mail_Transport_File(array('path' => $mailPath));
+						$options->setPath($mailPath);
+						$this->mta = new \Zend\Mail\Transport\File($options);
 						break;
 				}
 			}
 			if (defined('FAKE_EMAIL'))
 			{
 				$cloneMessage = clone $message;
-				/* @var $cloneMessage Zend_Mail */
-				$cloneMessage->clearRecipients();
-				$cloneMessage->clearSubject();
-				$cloneMessage->setSubject("[FAKE] " . $message->getSubject() . ' [' . f_util_ArrayUtils::firstElement($message->getRecipients()) . ']');
-				$cloneMessage->addTo(FAKE_EMAIL);
+				/* @var $cloneMessage \Zend\Mail\Message */
+				$originalSubject = $message->getHeaders()->get('subject');
+				if ($originalSubject instanceof \Zend\Mail\Header\Subject)
+				{
+					$originalSubject->setSubject("[FAKE] " . $originalSubject->getFieldValue(). ' [' . $message->getTo()->current()->toString() . ']');
+				}
+				$cloneMessage->setTo(FAKE_EMAIL);
 				$this->mta->send($cloneMessage);
 			}
 			else
