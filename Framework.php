@@ -66,7 +66,7 @@ class Framework
 	 */
 	public static function isDebugEnabled()
 	{
-		return LOGGING_PRIORITY >= Zend_Log::DEBUG;
+		return LOGGING_PRIORITY >= \Zend\Log\Logger::DEBUG;
 	}
 
 	/**
@@ -74,7 +74,7 @@ class Framework
 	 */
 	public static function isInfoEnabled()
 	{
-		return LOGGING_PRIORITY >= Zend_Log::INFO;
+		return LOGGING_PRIORITY >= \Zend\Log\Logger::INFO;
 	}
 	
 	/**
@@ -82,7 +82,7 @@ class Framework
 	 */
 	public static function isWarnEnabled()
 	{
-		return LOGGING_PRIORITY >= Zend_Log::WARN;
+		return LOGGING_PRIORITY >= \Zend\Log\Logger::WARN;
 	}
 
 	/**
@@ -90,7 +90,7 @@ class Framework
 	 */
 	public static function isErrorEnabled()
 	{
-		return LOGGING_PRIORITY >= Zend_Log::ERR;
+		return LOGGING_PRIORITY >= \Zend\Log\Logger::ERR;
 	}
 
 	/**
@@ -98,11 +98,11 @@ class Framework
 	 */
 	public static function isFatalEnabled()
 	{
-		return LOGGING_PRIORITY >= Zend_Log::EMERG;
+		return LOGGING_PRIORITY >= \Zend\Log\Logger::EMERG;
 	}
 	
 	/**
-	 * @var Zend_Log
+	 * @var \Zend\Log\Logger
 	 */
 	private static $benchLog;
 	
@@ -144,7 +144,7 @@ class Framework
 	}
 
 	/**
-	 * @return Zend_Log
+	 * @return \Zend\Log\Logger
 	 */
 	private static function getZendBenchLog()
 	{
@@ -156,16 +156,14 @@ class Framework
 				return self::$benchLog;
 			}
 			
-			self::$benchLog = new Zend_Log();
+			self::$benchLog = new \Zend\Log\Logger();
 			$filePath = f_util_FileUtils::buildLogPath('bench.log');
 			if (!file_exists($filePath))
 			{
 				f_util_FileUtils::mkdir(dirname($filePath));
 			}
-			$writer = new Zend_Log_Writer_Stream($filePath);
-			$writer->setFormatter(new Zend_Log_Formatter_Simple("%id%\t%stepTime%\t%currentTime%\t%diffTime%\t%memory%\t%message%" . PHP_EOL));
+			$writer = new \Zend\Log\Writer\Stream($filePath);
 			self::$benchLog->addWriter($writer);
-			self::$benchLog->setEventItem('id' , rand() . "\t" . microtime(true));
 		}
 		return self::$benchLog;
 	}
@@ -181,11 +179,8 @@ class Framework
 		if ($benchLog !== false)
 		{
 			$newStep = microtime(true);
-			$benchLog->log($msg, Zend_Log::NOTICE, array('currentTime' => $newStep, 
-				'stepTime' => self::$benchSteps[self::$benchStepsIndex],
-				'diffTime' => $newStep - self::$benchSteps[self::$benchStepsIndex],
-				'memory' => memory_get_usage(),
-			));
+			$message = sprintf("%s\t%s\t%s\t%s\t%s\t%s", self::$benchSteps[self::$benchStepsIndex], $newStep, $newStep - self::$benchSteps[self::$benchStepsIndex], memory_get_usage(), $msg);
+			$benchLog->notice($message);	
 			self::$benchSteps[self::$benchStepsIndex] = $newStep;
 		}
 	}
@@ -337,9 +332,31 @@ class Framework
 		return change_ConfigurationService::getInstance()->getConfiguration('http');
 	}
 	
+	/**
+	 * Registers namespace using Zend - this should always be called **after** registerAutoload
+	 */
+	public static function registerNamespaces()
+	{
+		require_once PROJECT_HOME . DIRECTORY_SEPARATOR . 'libs/zf2/library/Zend/Loader/StandardAutoloader.php';
+		$namespaces = change_ConfigurationService::getInstance()->getConfigurationValue('namespaces');
+		foreach ($namespaces as $namespace => $path)
+		{
+			$normalizedPath = trim($path);
+			if ($normalizedPath[0] != DIRECTORY_SEPARATOR)
+			{
+				$normalizedPath = PROJECT_HOME . DIRECTORY_SEPARATOR . $normalizedPath;
+			}
+			$zendLoader  = new \Zend\Loader\StandardAutoloader();
+			$zendLoader->registerNamespace($namespace, $normalizedPath);
+			$zendLoader->register();
+		}
+	}
+	/**
+	 * Registers change's autoload
+	 */
 	public static function registerAutoload()
 	{
-		spl_autoload_register(array(__CLASS__, "autoload"));
+		spl_autoload_register(array(__CLASS__, "autoload"));		
 	}
 	
 	/**
@@ -418,6 +435,7 @@ class Framework
 // Load configuration
 Framework::registerAutoload();
 change_ConfigurationService::getInstance()->loadConfiguration();
+Framework::registerNamespaces();
 
 if (Framework::inDevelopmentMode()) {error_reporting(E_ALL | E_STRICT);}
 

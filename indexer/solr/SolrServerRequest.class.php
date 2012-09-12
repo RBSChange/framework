@@ -59,17 +59,18 @@ class indexer_SolrServerRequest
 		}
 		
 		$client = change_HttpClientService::getInstance()->getNewHttpClient($config);
-		$client->setUri(trim($this->url));
+		$request = $client->getRequest();
+		$request->setUri(trim($this->url));
 		if ($this->getMethod() == self::METHOD_POST)
 		{
-			$client->setMethod(Zend_Http_Client::POST);
-			$client->setRawData($this->data, $this->contentType);
-			$client->setHeaders('Content-Type: ' . $this->contentType);
+			$request->setMethod(\Zend\Http\Request::METHOD_POST);
+			$request->getHeaders()->addHeaderLine('Content-Type',  $this->contentType);
+			$request->setContent($this->data);
 		}
 
-		$request = $client->request();
-		$httpReturnCode = $request->getStatus();
-		return $request->getBody();
+		$response = $client->send();
+		$httpReturnCode = $response->getStatusCode();
+		return $response->getBody();
 	}
 
 	/**

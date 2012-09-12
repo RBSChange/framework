@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @method change_LoggingService getInstance()
  */
@@ -21,13 +22,13 @@ class change_LoggingService extends change_BaseService
 	}
 	
 	/**
-	 * @var Zend_Log[]
+	 * @var \Zend\Log\Logger[]
 	 */
 	protected $loggers = array();
 	
 	/**
 	 * @param string $name
-	 * @return Zend_Log
+	 * @return \Zend\Log\Logger
 	 */
 	protected function getZendLogByName($name = 'application')
 	{
@@ -40,11 +41,11 @@ class change_LoggingService extends change_BaseService
 	
 	/**
 	 * @param string $name
-	 * @return Zend_Log
+	 * @return \Zend\Log\Logger
 	 */
 	protected function createFileLog($name)
 	{
-		$logger = new Zend_Log();
+		$logger = new \Zend\Log\Logger();
 		$directory = ($name == 'application' || $name == 'phperror') ? 'project' : 'other';
 		$filePath = f_util_FileUtils::buildProjectPath('log', $directory, $name . '.log');
 		if (!file_exists($filePath))
@@ -52,22 +53,20 @@ class change_LoggingService extends change_BaseService
 			f_util_FileUtils::mkdir(dirname($filePath));
 		}
 		
-		$writer = new Zend_Log_Writer_Stream($filePath);		
-		$filter = new Zend_Log_Filter_Priority(LOGGING_PRIORITY);
-		if ($name == 'application')
+		
+		if ($name == 'phperror')
 		{
-			$writer->setFormatter(new Zend_Log_Formatter_Simple('%timestamp% [%priorityName%] %sessionId%: %message% (in %file% at line %line%)' . PHP_EOL));
-			$logger->setEventItem('sessionId' , '');
-			$logger->setEventItem('file' , '?');
-			$logger->setEventItem('line' , '?');
+			$writer = new \Zend\Log\Writer\Stream($filePath);
+			//$writer = new \Zend\Log\Writer\Syslog(array('application' => 'RBS Change'));
+			$formatter = new \Zend\Log\Formatter\ErrorHandler();
 		}
 		else
 		{
-			$writer->setFormatter(new Zend_Log_Formatter_Simple('%timestamp%: %message%' . PHP_EOL));
+			$writer = new \Zend\Log\Writer\Stream($filePath);
+			$filter = new \Zend\Log\Filter\Priority(LOGGING_PRIORITY);
+			$writer->addFilter($filter);
 		}
 		$logger->addWriter($writer);
-		$logger->addFilter($filter);
-		$logger->setTimestampFormat('Y-m-d H:i:s');
 		return $logger;
 	}
 	
@@ -76,7 +75,7 @@ class change_LoggingService extends change_BaseService
 	 */
 	public function registerSessionId($id)
 	{
-		$this->getZendLogByName('application')->setEventItem('sessionId' , '(' . $id . ')');
+		//$this->getZendLogByName('application')->setEventItem('sessionId' , '(' . $id . ')');
 	}
 	
 	/**
@@ -84,7 +83,7 @@ class change_LoggingService extends change_BaseService
 	 */
 	public function debug($message)
 	{
-		$this->getZendLogByName('application')->log($message, Zend_Log::DEBUG);
+		$this->getZendLogByName('application')->debug($message);
 	}
 	
 	/**
@@ -92,7 +91,7 @@ class change_LoggingService extends change_BaseService
 	 */
 	public function info($message)
 	{
-		$this->getZendLogByName('application')->log($message, Zend_Log::INFO);
+		$this->getZendLogByName('application')->info($message);
 	}
 	
 	/**
@@ -100,7 +99,7 @@ class change_LoggingService extends change_BaseService
 	 */
 	public function warn($message)
 	{
-		$this->getZendLogByName('application')->log($message, Zend_Log::WARN);
+		$this->getZendLogByName('application')->warn($message);
 	}
 	
 	/**
@@ -108,7 +107,7 @@ class change_LoggingService extends change_BaseService
 	 */
 	public function error($message)
 	{
-		$this->getZendLogByName('application')->log($message, Zend_Log::ERR);
+		$this->getZendLogByName('application')->err($message);
 	}
 	
 	/**
@@ -116,7 +115,7 @@ class change_LoggingService extends change_BaseService
 	 */
 	public function exception($e)
 	{
-		$this->getZendLogByName('application')->log(get_class($e).": ".$e->getMessage()."\n".$e->getTraceAsString(), Zend_Log::ALERT);
+		$this->getZendLogByName('application')->alert(get_class($e).": ".$e->getMessage()."\n".$e->getTraceAsString());
 	}
 	
 	/**
@@ -124,7 +123,7 @@ class change_LoggingService extends change_BaseService
 	 */
 	public function fatal($message)
 	{
-		$this->getZendLogByName('application')->log($message, Zend_Log::EMERG);
+		$this->getZendLogByName('application')->emerg($message);
 	}
 	
 	/**
@@ -216,7 +215,7 @@ class change_LoggingService extends change_BaseService
 	 */
 	protected function phperror($message)
 	{
-		$this->getZendLogByName('phperror')->log($message, $this->getLogPriority());
+		$this->getZendLogByName('phperror')->log($this->getLogPriority(), $message);
 	}
 	
 	/**
@@ -226,7 +225,6 @@ class change_LoggingService extends change_BaseService
 	public function namedLog($stringLine, $logName)
 	{
 		$logger = $this->getZendLogByName($logName);
-		$logFilePath = f_util_FileUtils::buildProjectPath('log', $logName, $logName.'.log');
-		$logger->log($stringLine, $this->getLogPriority());
+		$logger->log($this->getLogPriority(), $stringLine);
 	}
 }

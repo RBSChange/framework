@@ -193,7 +193,7 @@ class f_util_System
 	{
 		list($name, $secret) = explode('#', file_get_contents(PROJECT_HOME . '/build/config/oauth/script/token.txt'));	
 		
-		$token = new Zend_Oauth_Token_Access();
+		$token = new \ZendOAuth\Token\Access();
 		$token->setToken($name);
 		$token->setTokenSecret($secret);
 		
@@ -220,30 +220,26 @@ class f_util_System
 		$selfRequestProxy = Framework::getConfigurationValue('general/selfRequestProxy');
 		if (!empty($selfRequestProxy)) 
 		{
-			$config = array('adapter' => 'Zend_Http_Client_Adapter_Curl', 'curloptions' => array(CURLOPT_PROXY => $selfRequestProxy));
+			$config = array('adapter' => '\Zend\Http\Client\Adapter\Curl', 'curloptions' => array(CURLOPT_PROXY => $selfRequestProxy));
 		}
 		else
 		{
 			$config = null;
 		}
-		
 		$client = $token->getHttpClient(array( 'consumerKey' => $name, 'consumerSecret' => $secret), $uri, $config);
-		$client->setMethod(Zend_Http_Client::POST);
-		$client->setParameterPost('phpscript', $relativeScriptPath);
+		$client->setMethod(\Zend\Http\change_Request::METHOD_POST);
+		$postParameters = array('phpscript' => $relativeScriptPath);
 		if ($noFramework)
 		{
-			$client->setParameterPost('noframework', 'true');
+			$postParameters['noframework'] = 'true';
 		}
 		if (count($arguments) > 0)
 		{
-
-			foreach ($arguments as $i => $v)
-			{
-				$client->setParameterPost(f_web_HttpLink::flattenArray(array('argv' => $arguments)));
-			}
-			
+			$postParameters = array_merge($postParameters, f_web_HttpLink::flattenArray(array('argv' => $arguments)));
 		}
-		$response = $client->request();
+		$client->setEncType(\Zend\Http\Client::ENC_FORMDATA);
+		$client->getRequest()->getPost()->fromArray($postParameters);
+		$response = $client->send();
 		return $response->getBody();
 	}
 	

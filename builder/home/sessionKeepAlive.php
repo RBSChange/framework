@@ -36,7 +36,7 @@ else
 
 
 $ka = change_Controller::getInstance()->getStorage()->read('framework_sessionKeepAlive');
-echo Zend_Session::getId() . ' - ' . $ka;
+echo change_Controller::getInstance()->getStorage()->getChangeSessionContainer()->getManager()->getId() . ' - ' . $ka;
 
 if (($ka % 10) == 0)
 {

@@ -41,7 +41,7 @@ class change_Injection
 		{
 			require_once $infos[$this->originalClassInfo['name']]['path'];
 		}
-		$originalReflectionClass = new Zend_Reflection_Class($this->originalClassInfo['name']);
+		$originalReflectionClass = new \Zend\Code\Reflection\ClassReflection($this->originalClassInfo['name']);
 		if (!$originalReflectionClass->isUserDefined() || $originalReflectionClass->isFinal()) {return false;}
 		
 		foreach ($this->replacingClassInfos as $replacingClassInfo)
@@ -50,7 +50,7 @@ class change_Injection
 			{
 				require_once $infos[$replacingClassInfo['name']]['path'];
 			}
-			$reflectionClass = new Zend_Reflection_Class($replacingClassInfo['name']);
+			$reflectionClass = new \Zend\Code\Reflection\ClassReflection($replacingClassInfo['name']);
 			if ($reflectionClass->getParentClass()->getName() != $originalReflectionClass->getName())
 			{
 				return false;

@@ -172,8 +172,8 @@ class change_User
 		Framework::error('Call to deprecated method ' . get_class($this) . '->hasAttribute');
 		if ($ns)
 		{
-			$zns = new Zend_Session_Namespace($ns);
-			return change_Controller::getInstance()->getStorage()->readNS($name, $zns);
+			$container = new \Zend\Session\Container($ns);
+			return change_Controller::getInstance()->getStorage()->readForContainer($name, $container);
 		}
 		return change_Controller::getInstance()->getStorage()->readForUser($name);
 	}
@@ -187,9 +187,9 @@ class change_User
 		$retval = null;
 		if ($ns)
 		{
-			$zns = new Zend_Session_Namespace($ns);
-			$retval = change_Controller::getInstance()->getStorage()->readNS($name, $zns);
-			change_Controller::getInstance()->getStorage()->removeNS($name, $zns);
+			$container = new \Zend\Session\Container($ns);
+			$retval = change_Controller::getInstance()->getStorage()->readForContainer($name, $container);
+			change_Controller::getInstance()->getStorage()->removeForContainer($name, $container);
 		}
 		else
 		{
@@ -207,8 +207,8 @@ class change_User
 		Framework::deprecated('Call to deprecated method ' . get_class($this) . '->getAttribute');
 		if ($ns)
 		{
-			$zns = new Zend_Session_Namespace($ns);
-			return change_Controller::getInstance()->getStorage()->readNS($name, $zns);
+			$sessionContainer = new \Zend\Session\Container($ns);
+			return change_Controller::getInstance()->getStorage()->readForContainer($name, $sessionContainer);
 		}
 		return change_Controller::getInstance()->getStorage()->readForUser($name);
 	}
@@ -221,13 +221,13 @@ class change_User
 		Framework::deprecated('Call to deprecated method ' . get_class($this) . '->getAttributeNames');
 		if ($ns)
 		{
-			$zns = new Zend_Session_Namespace($ns);
+			$sessionContainer = new \Zend\Session\Container($ns);
 		}
 		else
 		{
-			$zns = change_Controller::getInstance()->getStorage()->getUserSessionNamespaceInstance();
+			$sessionContainer = change_Controller::getInstance()->getStorage()->getUserSessionNamespaceInstance();
 		}
-		return array_keys($zns->getIterator());
+		return array_keys($sessionContainer->getIterator());
 	}
 		
 	/**
@@ -238,13 +238,13 @@ class change_User
 		Framework::deprecated('Call to deprecated method ' . get_class($this) . '->setAttribute');
 		if ($ns)
 		{
-			$zns = new Zend_Session_Namespace($ns);
+			$sessionContainer = new \Zend\Session\Container($ns);
 		}
 		else
 		{
-			$zns = change_Controller::getInstance()->getStorage()->getUserSessionNamespaceInstance();
+			$sessionContainer = change_Controller::getInstance()->getStorage()->getUserSessionNamespaceInstance();
 		}
-		change_Controller::getInstance()->getStorage()->writeNS($name, $value, $zns);
+		change_Controller::getInstance()->getStorage()->writeForContainer($name, $value, $sessionContainer);
 	}
 
 	/**
@@ -255,13 +255,13 @@ class change_User
 		Framework::deprecated('Call to deprecated method ' . get_class($this) . '->setAttributeByRef');
 		if ($ns)
 		{
-			$zns = new Zend_Session_Namespace($ns);
+			$sessionContainer = new \Zend\Session\Container($ns);
 		}
 		else
 		{
-			$zns = change_Controller::getInstance()->getStorage()->getUserSessionNamespaceInstance();
+			$sessionContainer = change_Controller::getInstance()->getStorage()->getUserSessionNamespaceInstance();
 		}
-		change_Controller::getInstance()->getStorage()->writeNS($name, $value, $zns);
+		change_Controller::getInstance()->getStorage()->writeForContainer($name, $value, $sessionContainer);
 	}
 
 	/**
@@ -272,15 +272,15 @@ class change_User
 		Framework::deprecated('Call to deprecated method ' . get_class($this) . '->setAttributes');
 		if ($ns)
 		{
-			$zns = new Zend_Session_Namespace($ns);
+			$sessionContainer = new \Zend\Session\Container($ns);
 		}
 		else
 		{
-			$zns = change_Controller::getInstance()->getStorage()->getUserSessionNamespaceInstance();
+			$sessionContainer = change_Controller::getInstance()->getStorage()->getUserSessionNamespaceInstance();
 		}
 		foreach ($attributes as $name => $value)
 		{
-			change_Controller::getInstance()->getStorage()->writeNS($name, $value, $zns);
+			change_Controller::getInstance()->getStorage()->writeForContainer($name, $value, $sessionContainer);
 		}
 	}
 	
@@ -292,15 +292,15 @@ class change_User
 		Framework::deprecated('Call to deprecated method ' . get_class($this) . '->setAttributesByRef');
 		if ($ns)
 		{
-			$zns = new Zend_Session_Namespace($ns);
+			$sessionContainer = new \Zend\Session\Container($ns);
 		}
 		else
 		{
-			$zns = change_Controller::getInstance()->getStorage()->getUserSessionNamespaceInstance();
+			$sessionContainer = change_Controller::getInstance()->getStorage()->getUserSessionNamespaceInstance();
 		}
 		foreach ($attributes as $name => $value)
 		{
-			change_Controller::getInstance()->getStorage()->writeNS($name, $value, $zns);
+			change_Controller::getInstance()->getStorage()->writeForContainer($name, $value, $sessionContainer);
 		}
 	}
 		
@@ -336,13 +336,13 @@ class change_User
 		Framework::deprecated('Call to deprecated method ' . get_class($this) . '->getAttributeNamespace');
 		if ($ns)
 		{
-			$zns = new Zend_Session_Namespace($ns);
+			$container = new \Zend\Session\Container($ns);
 		}
 		else
 		{
-			$zns = change_Controller::getInstance()->getStorage()->getUserSessionNamespaceInstance();
+			$container = change_Controller::getInstance()->getStorage()->getUserSessionNamespaceInstance();
 		}
-		return $zns->getIterator()->getArrayCopy();
+		return $container->getArrayCopy();
 	}
 
 	/**
@@ -350,7 +350,8 @@ class change_User
 	 */
 	public function getAttributeNamespaces()
 	{
-		return Zend_Session::getIterator()->getIterator();
+		Framework::deprecated('Call to deprecated method ' . get_class($this) . '->getAttributeNamespaces');
+		return array();
 	}
 
 	/**
@@ -358,7 +359,8 @@ class change_User
 	 */
 	public function hasAttributeNamespace($ns)
 	{
-		return Zend_Session::namespaceIsset($ns);
+		Framework::deprecated('Call to deprecated method ' . get_class($this) . '->hasAttributeNamespace');
+		return false;
 	}
 	
 	/**
@@ -366,6 +368,6 @@ class change_User
 	 */
 	public function removeAttributeNamespace($ns)
 	{
-		return Zend_Session::namespaceUnset($ns);
+		Framework::deprecated('Call to deprecated method ' . get_class($this) . '->removeAttributeNamespace');
 	}
 }

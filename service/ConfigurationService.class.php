@@ -275,13 +275,13 @@ class change_ConfigurationService extends change_Singleton
 		{
 			$this->addConstant($configDefineArray, "OUTGOING_HTTP_PROXY_HOST", $computedDeps["OUTGOING_HTTP_PROXY_HOST"]);
 			$this->addConstant($configDefineArray, "OUTGOING_HTTP_PROXY_PORT", $computedDeps["OUTGOING_HTTP_PROXY_PORT"]);
-			if ($configArray['config']['http']['adapter'] == 'Zend_Http_Client_Adapter_Curl')
+			if ($configArray['config']['http']['adapter'] == '\Zend\Http\Client\Adapter\Curl')
 			{
 				$configArray['config']['http']['curloptions'][CURLOPT_PROXY] = $computedDeps["OUTGOING_HTTP_PROXY_HOST"].':'.$computedDeps["OUTGOING_HTTP_PROXY_PORT"];
 			}
-			else if ($configArray['config']['http']['adapter'] == 'Zend_Http_Client_Adapter_Proxy' || $configArray['config']['http']['adapter'] == 'Zend_Http_Client_Adapter_Socket')
+			else if ($configArray['config']['http']['adapter'] == '\Zend\Http\Client\Adapter\Proxy' || $configArray['config']['http']['adapter'] == '\Zend\Http\Client\Adapter\Socket')
 			{
-				$configArray['config']['http']['adapter'] = 'Zend_Http_Client_Adapter_Proxy';
+				$configArray['config']['http']['adapter'] = '\Zend\Http\Client\Adapter\Proxy';
 				$configArray['config']['http']['proxy_host'] = $computedDeps["OUTGOING_HTTP_PROXY_HOST"];
 				$configArray['config']['http']['proxy_port'] = $computedDeps["OUTGOING_HTTP_PROXY_PORT"];
 			}
