@@ -228,17 +228,10 @@ class c_ChangeBootStrap
 			$release = $this->getRelease();				
 			$profilePath = $this->projectHomePath . '/profile';
 			$profile = (is_readable($profilePath)) ? trim(file_get_contents($profilePath)) : 'default';
-		
-			$configPath = $this->projectHomePath . '/config/project.'. $profile .'.xml';
-			if (is_readable($configPath))
-			{
-				$projectXMLDoc = f_util_DOMUtils::fromPath($configPath);
-				$pIdNode = $projectXMLDoc->findUnique('defines/define[@name="PROJECT_ID"]');
-				$pId = $pIdNode ? $pIdNode->textContent : '-';
-				$fqdnNode = $projectXMLDoc->findUnique('config/general/entry[@name="server-fqdn"]');
-				$fqdn = $fqdnNode ? $fqdnNode->textContent : '-';
-			}
-			$this->instanceProjectKey = 'Change/' . $release . ';License/' . $license. ';Profile/' . $profile . ';PId/' . $pId. ';DevMode/' . $mode . ';FQDN/' . $fqdn;
+			
+			$pId = $this->getProperties()->getProperty("PROJECT_ID", '-');
+			$defaultHost = $this->getProperties()->getProperty("DEFAULT_HOST", '-');
+			$this->instanceProjectKey = 'Change/' . $release . ';License/' . $license. ';Profile/' . $profile . ';PId/' . $pId. ';DevMode/' . $mode . ';FQDN/' . $defaultHost;
 		}
 		return $this->instanceProjectKey;
 	}
@@ -278,20 +271,18 @@ class c_ChangeBootStrap
 	private function generateComputedChangeComponents()
 	{
 		$computedComponents = array('dependencies' => $this->getProjectDependencies());
-		$computedComponents["ZEND_FRAMEWORK_PATH"] = $this->getProperties()->getProperty('ZEND_FRAMEWORK_PATH');
-		$computedComponents["INCLUDE_PATH"] = $this->getProperties()->getProperty('INCLUDE_PATH');
 
-		$computedComponents["WWW_GROUP"] = $this->getProperties()->getProperty('WWW_GROUP');
 		$computedComponents["DEVELOPMENT_MODE"] = $this->getProperties()->getProperty('DEVELOPMENT_MODE', false) == true;
-		$computedComponents["PHP_CLI_PATH"] = $this->getProperties()->getProperty('PHP_CLI_PATH', '');
+		$computedComponents["PHP_CLI_PATH"] = $this->getProperties()->getProperty('PHP_CLI_PATH');
 		
 		$computedComponents["TMP_PATH"] = $this->getProperties()->getProperty('TMP_PATH');
 		
-		$computedComponents["CHANGE_COMMAND"] = $this->getProperties()->getProperty('CHANGE_COMMAND', 'framework/bin/change.php');
-		$computedComponents["PROJECT_HOME"] = $this->getProperties()->getProperty('PROJECT_HOME', $this->projectHomePath);
+		$computedComponents["CHANGE_COMMAND"] = $this->getProperties()->getProperty('CHANGE_COMMAND', $computedComponents["PHP_CLI_PATH"] . ' framework/bin/change.php');
 		$computedComponents["DOCUMENT_ROOT"] = $this->getProperties()->getProperty('DOCUMENT_ROOT', $this->projectHomePath);
 		$computedComponents["PROJECT_LICENSE"] = $this->getProperties()->getProperty('PROJECT_LICENSE', 'OS');
 		$computedComponents["FAKE_EMAIL"] = $this->getProperties()->getProperty('FAKE_EMAIL');
+		$computedComponents["DEFAULT_HOST"] = $this->getProperties()->getProperty('DEFAULT_HOST');
+		$computedComponents["PROJECT_ID"] = $this->getProperties()->getProperty('PROJECT_ID');
 		
 		$proxy = $this->getProxy();
 		if ($proxy)

@@ -257,20 +257,7 @@ class change_ConfigurationService extends change_Singleton
 		$this->loadXmlConfigFile(PROJECT_HOME . DIRECTORY_SEPARATOR . 'framework' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'project.xml', $configArray);
 		
 		// -- Global constants.
-		foreach (array('INCLUDE_PATH', 'ZEND_FRAMEWORK_PATH', 'WWW_GROUP', 'TMP_PATH',
-			'CHANGE_COMMAND', 'DOCUMENT_ROOT', 'PROJECT_LICENSE', 'FAKE_EMAIL',
-			'PHP_CLI_PATH', 'DEVELOPMENT_MODE') as $constName)
-		{
-			if (isset($computedDeps[$constName]))
-			{
-				$this->addConstant($configArray['defines'], $constName, $computedDeps[$constName]);
-			}
-			elseif ($constName === 'TMP_PATH' && !isset($configArray['defines']['TMP_PATH']))
-			{
-				$this->addConstant($configArray['defines'], $constName, $this->evaluateTmpPath());
-			}
-		}
-				
+						
 		if (isset($computedDeps["OUTGOING_HTTP_PROXY_HOST"]))
 		{
 			$this->addConstant($configDefineArray, "OUTGOING_HTTP_PROXY_HOST", $computedDeps["OUTGOING_HTTP_PROXY_HOST"]);
@@ -382,14 +369,20 @@ class change_ConfigurationService extends change_Singleton
 			$configDefineArray['TMP_PATH'] = $TMP_PATH;
 		}
 		
-		if (isset($computedDeps["DEVELOPMENT_MODE"]) && $computedDeps["DEVELOPMENT_MODE"])
+		foreach (array('TMP_PATH' => true, 'DEFAULT_HOST' => true, 'PROJECT_ID' => true,
+			'CHANGE_COMMAND' => false, 'DOCUMENT_ROOT' => false, 'PROJECT_LICENSE' => false, 'FAKE_EMAIL' => false,
+			'PHP_CLI_PATH'  => true, 'DEVELOPMENT_MODE' => false) as $constName => $required)
 		{
-			$configDefineArray['DEVELOPMENT_MODE'] = true;
+			if (isset($computedDeps[$constName]))
+			{
+				$configDefineArray[$constName] = $computedDeps[$constName];
+			}
+			else if ($required)
+			{
+				throw new Exception('Please define ' . $constName . ' in your change.properties  file');
+			}
 		}
-		else
-		{
-			$configDefineArray['DEVELOPMENT_MODE'] = false;
-		}
+		
 		
 		$configDefineArray['PHP_CLI_PATH'] = (isset($computedDeps["PHP_CLI_PATH"])) ? $computedDeps["PHP_CLI_PATH"] : '';
 		

@@ -268,7 +268,7 @@ class Framework
 	public static function getUIDefaultHost()
 	{
 		$general = change_ConfigurationService::getInstance()->getConfiguration('general');
-		return isset($general['server-fqdn']) ? $general['server-fqdn'] : $_SERVER['HTTP_HOST'];
+		return defined('DEFAULT_HOST') ? DEFAULT_HOST : $_SERVER['HTTP_HOST'];
 	}
 	
 	/**
@@ -335,17 +335,18 @@ class Framework
 	/**
 	 * Registers namespace using Zend - this should always be called **after** registerAutoload
 	 */
-	public static function registerNamespaces()
+	public static function registerConfiguredAutoloads()
 	{
+		$includePaths = change_ConfigurationService::getInstance()->getConfigurationValue('autoload/paths', array());
+		if (count($includePaths))
+		{
+			set_include_path(str_replace('{PROJECT_HOME}', PROJECT_HOME, implode(PATH_SEPARATOR, $includePaths)));
+		}
 		require_once PROJECT_HOME . DIRECTORY_SEPARATOR . 'libs/zf2/library/Zend/Loader/StandardAutoloader.php';
-		$namespaces = change_ConfigurationService::getInstance()->getConfigurationValue('namespaces');
+		$namespaces = change_ConfigurationService::getInstance()->getConfigurationValue('autoload/namespaces', array());
 		foreach ($namespaces as $namespace => $path)
 		{
-			$normalizedPath = trim($path);
-			if ($normalizedPath[0] != DIRECTORY_SEPARATOR)
-			{
-				$normalizedPath = PROJECT_HOME . DIRECTORY_SEPARATOR . $normalizedPath;
-			}
+			$normalizedPath = str_replace('{PROJECT_HOME}', PROJECT_HOME, trim($path));
 			$zendLoader  = new \Zend\Loader\StandardAutoloader();
 			$zendLoader->registerNamespace($namespace, $normalizedPath);
 			$zendLoader->register();
@@ -354,7 +355,7 @@ class Framework
 	/**
 	 * Registers change's autoload
 	 */
-	public static function registerAutoload()
+	public static function registerChangeAutoload()
 	{
 		spl_autoload_register(array(__CLASS__, "autoload"));		
 	}
@@ -373,10 +374,10 @@ class Framework
 		$path =  $basePath . DIRECTORY_SEPARATOR . str_replace('_', DIRECTORY_SEPARATOR, $className) . DIRECTORY_SEPARATOR . "to_include";
 		if (is_readable($path)) {require_once $path;}
 		
-		if (strpos($className, 'Zend_') === 0 && defined("ZEND_FRAMEWORK_PATH"))
+		if (strpos($className, 'Zend_') === 0)
 		{
-			$path = ZEND_FRAMEWORK_PATH . DIRECTORY_SEPARATOR . str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
-			if (is_readable($path)) {require_once $path;}	
+			$path = str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
+			require_once $path;
 		}
 	}
 	
@@ -433,13 +434,12 @@ class Framework
 }
 
 // Load configuration
-Framework::registerAutoload();
+Framework::registerChangeAutoload();
 change_ConfigurationService::getInstance()->loadConfiguration();
-Framework::registerNamespaces();
+Framework::registerConfiguredAutoloads();
 
 if (Framework::inDevelopmentMode()) {error_reporting(E_ALL | E_STRICT);}
 
-ini_set('include_path', ZEND_FRAMEWORK_PATH . (defined('INCLUDE_PATH') ? PATH_SEPARATOR . INCLUDE_PATH : ''));
 
 ini_set('arg_separator.output',	  '&amp;');
 ini_set('magic_quotes_runtime',	  0);

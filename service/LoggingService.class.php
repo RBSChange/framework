@@ -34,37 +34,71 @@ class change_LoggingService extends change_BaseService
 	{
 		if (!isset($this->loggers[$name]))
 		{			
-			$this->loggers[$name] = $this->createFileLog($name);
+			$this->loggers[$name] = $this->createLogger($name);
 		}
 		return $this->loggers[$name];
 	}
 	
 	/**
 	 * @param string $name
-	 * @return \Zend\Log\Logger
+	 * @return \Zend\Log\Logger\AbstractWriter
 	 */
-	protected function createFileLog($name)
+	protected function createStreamWriter($name)
 	{
-		$logger = new \Zend\Log\Logger();
 		$directory = ($name == 'application' || $name == 'phperror') ? 'project' : 'other';
 		$filePath = f_util_FileUtils::buildProjectPath('log', $directory, $name . '.log');
 		if (!file_exists($filePath))
 		{
 			f_util_FileUtils::mkdir(dirname($filePath));
 		}
-		
-		
+		return new \Zend\Log\Writer\Stream($filePath);
+	}
+	
+	/**
+	 * @param string $name
+	 * @return \Zend\Log\Logger\AbstractWriter
+	 */
+	protected function createSyslogWriter($name)
+	{
+		return new \Zend\Log\Writer\Syslog();
+	}
+	
+	/**
+	 * @param string $loggerName
+	 * @return string
+	 */
+	protected function getCreateWriterMethodName($loggerName)
+	{
+		$writerType = Framework::getConfigurationValue('logging/writers/' . $loggerName, null);
+		if ($writerType === null)
+		{
+			$writerType = Framework::getConfigurationValue('logging/writers/default', 'stream');
+		}
+		$methodName = 'create' . ucfirst(strtolower($writerType)) . 'Writer';
+		if (method_exists($this, $methodName))
+		{
+			return $methodName;
+		}
+		return 'createStreamWriter';
+	}
+	
+	/**
+	 * @param string $name
+	 * @return \Zend\Log\Logger
+	 */
+	protected function createLogger($name)
+	{
+		$logger = new \Zend\Log\Logger();
+		$writerMethodName = $this->getCreateWriterMethodName($name);
+		/* @var $writer \Zend\Log\Logger\AbstractWriter */
+		$writer = call_user_func(array($this, $writerMethodName), $name);
 		if ($name == 'phperror')
 		{
-			$writer = new \Zend\Log\Writer\Stream($filePath);
-			//$writer = new \Zend\Log\Writer\Syslog(array('application' => 'RBS Change'));
-			$formatter = new \Zend\Log\Formatter\ErrorHandler();
+			$writer->setFormatter(new \Zend\Log\Formatter\ErrorHandler());
 		}
 		else
 		{
-			$writer = new \Zend\Log\Writer\Stream($filePath);
-			$filter = new \Zend\Log\Filter\Priority(LOGGING_PRIORITY);
-			$writer->addFilter($filter);
+			$writer->addFilter(new \Zend\Log\Filter\Priority($this->getLogPriority()));
 		}
 		$logger->addWriter($writer);
 		return $logger;
@@ -155,11 +189,9 @@ class change_LoggingService extends change_BaseService
 			E_DEPRECATED  		 => 'E_DEPRECATED',
 			E_USER_DEPRECATED	 => 'E_USER_DEPRECATED'
 		);
-		// Configuration du gestionnaire d'erreurs
-		set_error_handler(array($this, 'defaultErrorHandler'));
-		set_exception_handler(array($this, 'defaultExceptionHandler'));
-		// Make sure that the Zend classes used for logging are loaded
-		$this->getZendLogByName('phperror');
+		\Zend\Log\Logger::registerErrorHandler($this->getZendLogByName('phperror'));
+		\Zend\Log\Logger::registerExceptionHandler($this->getZendLogByName('phperror'));
+
 	}
 	
 	/**
@@ -172,12 +204,13 @@ class change_LoggingService extends change_BaseService
 	 */
 	public function defaultErrorHandler($errno, $errstr, $errfile, $errline, $errcontext)
 	{
-		$message = '[' .$this->errortype[$errno] . '] ' . $errstr . ' in file (' . $errfile . ') line ' .$errline;
+		$message = '[' .$this->errortype[$errno] . '] ' . $errstr ;
+		$extra =  array('errno' => $errno, 'file' => $errfile, 'line' => $line);
 		switch ($errno)
 		{
 			case E_USER_ERROR:
 			case E_USER_WARNING:
-				$this->phperror($message);
+				$this->phperror($message, $extra);
 				die($message . PHP_EOL);
 				break;
 			default:
@@ -213,9 +246,9 @@ class change_LoggingService extends change_BaseService
 	/**
 	 * @param string $message
 	 */
-	protected function phperror($message)
+	protected function phperror($message, $extra = array())
 	{
-		$this->getZendLogByName('phperror')->log($this->getLogPriority(), $message);
+		$this->getZendLogByName('phperror')->log($this->getLogPriority(), $message, $extra);
 	}
 	
 	/**

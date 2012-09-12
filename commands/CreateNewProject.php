@@ -24,6 +24,12 @@ class commands_CreateNewProject extends c_ChangescriptCommand
 	 */
 	function _execute($params, $options)
 	{
+		if (!file_exists(f_util_FileUtils::buildProjectPath('config/project.xml'))
+			|| !file_exists(f_util_FileUtils::buildProjectPath('change.properties')))
+		{
+			$this->quitError('You have no project configuration. Please create your config/project.xml and change.properties files');
+		}
+		
 		$this->message("== Create new project ==");
 		
 		$this->executeCommand("init");

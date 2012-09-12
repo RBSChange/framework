@@ -2,6 +2,14 @@
 class commands_ApplyProjectPolicy extends c_ChangescriptCommand
 {
 	/**
+	 * @return boolean
+	 */
+	public function isHidden()
+	{
+		return true;
+	}
+
+	/**
 	 * @return string
 	 */
 	function getUsage()
@@ -32,7 +40,6 @@ class commands_ApplyProjectPolicy extends c_ChangescriptCommand
 		$this->message("== Apply project policy ==");
 		
 		$user = $this->getAuthor();
-		$apacheGroup = $this->getApacheGroup();
 		
 		$readWriteDirs = array("cache", "build", "log", "mailbox", "modules", "themes"); 
 		foreach ($readWriteDirs as $dir)
@@ -40,7 +47,6 @@ class commands_ApplyProjectPolicy extends c_ChangescriptCommand
 			$this->message("Apply '$dir' dir policy");
 			try 
 			{
-				f_util_FileUtils::chown($dir, $user, $apacheGroup, true);
 				// Strange behaviour when SGID on files: unable to write "directly", so use
 				// different mode for files
 				f_util_FileUtils::chmod($dir, "2775", true, "775");

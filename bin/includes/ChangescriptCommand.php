@@ -528,12 +528,13 @@ abstract class c_ChangescriptCommand
 	}
 
 	/**
+	 * @deprecated
 	 * @return string
 	 */
 	protected function getApacheGroup()
 	{
-		$cdeps = $this->getComputedDeps();
-		return $cdeps["WWW_GROUP"];
+		Framework::deprecated("no more implemented");
+		return '';
 	}
 
 	/**

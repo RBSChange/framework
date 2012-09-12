@@ -45,7 +45,12 @@
 			<entry name="linkToDocumentRoot">cache,changeicons,fckeditor,fckeditorbrowser,media,publicmedia,migration,install,changecron.php,changePHPUnit.php,index.php,site-disabled.php,xchrome_controller.php,changescriptexec.php,listener.php,sessionKeepAlive.php,xul_controller.php</entry>
 			-->
 		</general>
-		
+		<logging>
+			<entry name="level">WARN</entry>
+			<writers>
+				<entry name="default">stream</entry>
+			</writers>
+		</logging>
 		<i18n>
 			<entry name="en">en_GB</entry>
 		</i18n>
@@ -177,11 +182,16 @@
 				<entry name="change_User">change_User</entry>	
 			</classes>	
 		</mvc>
-		<!-- Zend-based namespace loading -->
-		<namespaces>
-			<entry name="Zend">libs/zf2/library/Zend/</entry>
-			<entry name="ZendOAuth">libs/ZendOAuth/library/ZendOAuth/</entry>
-		</namespaces>			
+		<autoload>
+			<!-- Zend-based namespace loading -->
+			<namespaces>
+				<entry name="Zend">{PROJECT_HOME}/libs/zf2/library/Zend/</entry>
+				<entry name="ZendOAuth">{PROJECT_HOME}/libs/ZendOAuth/library/ZendOAuth/</entry>
+			</namespaces>
+			<paths>
+				<entry name="zf1">{PROJECT_HOME}/libs/zfminimal/library/</entry>
+			</paths>
+		</autoload>
 		<tal>
 			<prefix>
 				<entry name="trans">f_TalesI18n</entry>

@@ -29,46 +29,16 @@ class commands_InitProject extends c_ChangescriptCommand
 	 */
 	public function _execute($params, $options)
 	{
+		if (!file_exists(f_util_FileUtils::buildProjectPath('config/project.xml'))
+			|| !file_exists(f_util_FileUtils::buildProjectPath('change.properties')))
+		{
+			$this->quitError('You have no project configuration. Please create your config/project.xml and change.properties files');
+		}
+		
 		$this->message("== Initializing project ==");
 
 		$this->executeCommand("update-dependencies");
-				
-		// config directory: generate default config files
-		$builderResourcePath = f_util_FileUtils::buildFrameworkPath("builder");
-		f_util_FileUtils::mkdir("config");
-		// base config
-		$fileName = 'config/project.xml';
-		if (!file_exists(f_util_FileUtils::buildProjectPath($fileName)))
-		{
-			$this->message("Create $fileName");
-			$baseProject = f_util_FileUtils::read("$builderResourcePath/config/project.xml");
-			$baseSubstitutions = array("project" => $this->getProjectName(), "author" => $this->getAuthor(),);
-			f_util_FileUtils::write($fileName, $this->substitueVars($baseProject, $baseSubstitutions), f_util_FileUtils::OVERRIDE);
-		}
-		else
-		{
-			$this->warnMessage($fileName.' already exists.');
-		}
-
-		// current user config
-		$fileName = 'config/project.'.$this->getProfile().'.xml';
-		if (!file_exists(f_util_FileUtils::buildProjectPath($fileName)))
-		{
-			$this->message("Create $fileName");
-			$profilProject = f_util_FileUtils::read("$builderResourcePath/config/project_profil.xml");
-			$profilSubstitutions = array("project" => $this->getProjectName(), "author" => $this->getAuthor(), 
-				"serverHost" => $this->getServerHost(),
-				"database" => str_replace(".", "_", "C4_".$this->getAuthor()."_".$this->getProjectName()),
-				"database_host" => $this->getDatabaseHost(),
-				"serverFqdn" => $this->getServerFqdn(),
-				"solrDef" => $this->getSolrDef());
-			f_util_FileUtils::write($fileName, $this->substitueVars($profilProject, $profilSubstitutions), f_util_FileUtils::OVERRIDE);
-		}
-		else
-		{
-			$this->warnMessage($fileName.' already exists.');
-		}
-
+	
 		// build directory
 		f_util_FileUtils::mkdir("build/project");
 
@@ -84,9 +54,6 @@ class commands_InitProject extends c_ChangescriptCommand
 		
 		$this->executeCommand("compile-autoload");
 		$this->loadFramework();
-
-		// init-file-policy
-		$this->executeCommand("apply-project-policy");
 
 		$this->quitOk("Project initialized");
 	}
