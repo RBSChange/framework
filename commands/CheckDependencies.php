@@ -54,12 +54,6 @@ class commands_CheckDependencies extends c_ChangescriptCommand
 			$this->okMessage('Archive Release path: ' . $ap);
 		}
 		$this->okMessage('Temporary path: ' . $bootstrap->getTmpPath());
-		$this->okMessage("External depencendies:");
-		if ($cpDeps['INCLUDE_PATH'])
-		{
-			$this->okMessage(" - Include Path: " . $cpDeps['INCLUDE_PATH']);
-		}
-		$this->okMessage(" - Zend Include Path: " . $cpDeps['ZEND_FRAMEWORK_PATH']);
 		
 		$changeXmlPath = $bootstrap->getDescriptorPath();
 		$this->okMessage('Project depencendies: ' .$changeXmlPath);

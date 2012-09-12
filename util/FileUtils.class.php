@@ -993,8 +993,11 @@ abstract class f_util_FileUtils
 			}
 		}
 	}
+	
+	// Deprecated
 
 	/**
+	 * @deprecated
 	 * @param string $file
 	 * @param string $owner nullable
 	 * @param string $group
@@ -1002,68 +1005,9 @@ abstract class f_util_FileUtils
 	 */
 	public static function chown($file, $owner, $group, $recursive = true)
 	{
-		if (!function_exists('posix_getuid'))
-		{
-			//Unable to execute this function
-			return;
-		}
-		
-		$uid = posix_getuid();
-		if ($group !== null)
-		{
-			if (!is_numeric($group))
-			{
-				$groupInfo = posix_getgrnam($group);
-				$group = $groupInfo["gid"];
-			}
-		}
-
-		if ($owner !== null && chown($file, $owner) === false)
-		{
-			f_util_ProcessUtils::printBackTrace();
-			throw new Exception("Could not chown $owner ".$file);
-		}
-		if ($group !== null)
-		{
-			if (chgrp($file, $group) === false)
-			{
-				throw new Exception("Could not chgrp $group ".$file);
-			}
-		}
-
-		if ($recursive && is_dir($file))
-		{
-			$dir = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($file, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
-			foreach ($dir as $fileInfo)
-			{
-				if ($fileInfo->getOwner() !== $uid)
-				{
-					if (!$fileInfo->isWritable() && !$fileInfo->isLink())
-					{
-						throw new Exception($fileInfo->getPathname()." is not writeable");
-					}
-				}
-				else
-				{
-					$pathName = $fileInfo->getPathname();
-					if ($owner !== null && chown($pathName, $owner) === false)
-					{
-						throw new Exception("Could not chown ".$pathName);
-					}
-					if ($group !== null && $fileInfo->getGroup() !== $group)
-					{
-						$oldPerms = $fileInfo->getPerms();
-						if (chgrp($pathName, $group) === false)
-						{
-							throw new Exception("Could not chgrp ".$pathName);
-						}
-					}
-				}
-			}
-		}
+		Framework::deprecated("no more implemented");
+		return '';
 	}
-	
-	// Deprecated
 	
 	/**
 	 * @deprecated

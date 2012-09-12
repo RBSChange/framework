@@ -26,7 +26,8 @@ class ApacheService extends change_BaseService
 	 */
 	public function getGroup()
 	{
-		return WWW_GROUP;	
+		Framework::deprecated("no more implemented");
+		return '';	
 	}
 	
 	/**
