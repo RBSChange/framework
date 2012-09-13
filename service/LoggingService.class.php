@@ -170,7 +170,7 @@ class change_LoggingService extends change_BaseService
 	 */
 	public function registerErrorHandler()
 	{
-		ini_set('display_errors', 1);
+		ini_set('display_errors', 0);
 	
 		$this->errortype = array (
 			E_ERROR			  => 'E_ERROR',
@@ -205,7 +205,7 @@ class change_LoggingService extends change_BaseService
 	public function defaultErrorHandler($errno, $errstr, $errfile, $errline, $errcontext)
 	{
 		$message = '[' .$this->errortype[$errno] . '] ' . $errstr ;
-		$extra =  array('errno' => $errno, 'file' => $errfile, 'line' => $line);
+		$extra =  array('errno' => $errno, 'file' => $errfile, 'line' => $errline);
 		switch ($errno)
 		{
 			case E_USER_ERROR:

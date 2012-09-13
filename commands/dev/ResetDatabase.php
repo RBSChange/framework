@@ -58,9 +58,6 @@ class commands_ResetDatabase extends c_ChangescriptCommand
 		//disable site bo and cron
 		$this->executeCommand("disable-site");
 		
-		//If document cache not stored in f_cache
-		$this->executeCommand("clear-documentscache");
-
 		$this->log("Delete media...");
 		
 		$path = f_util_FileUtils::buildProjectPath('media','formatted');

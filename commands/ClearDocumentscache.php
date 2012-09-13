@@ -21,6 +21,14 @@ class commands_ClearDocumentscache extends c_ChangescriptCommand
 	{
 		return "clear documents cache";
 	}
+	
+	/**
+	 * @return boolean
+	 */
+	function isHidden()
+	{
+		return true;
+	}
 
 	/**
 	 * @param string[] $params
@@ -29,9 +37,6 @@ class commands_ClearDocumentscache extends c_ChangescriptCommand
 	 */
 	function _execute($params, $options)
 	{
-		$this->message("== Clear documents cache ==");
-		$this->loadFramework();
-		f_persistentdocument_CacheService::getInstance()->clear();
-		$this->quitOk("Documents cache cleared");
+		$this->quitOk("== Documents cache deactivated ==");
 	}
 }

@@ -29,7 +29,6 @@
 		<!-- GENERAL -->
 		<general>
 			<entry name="projectName">RBS CHANGE 4.0</entry>			
-			<entry name="server-fqdn">fully-qualified-domain-name</entry>
 			<entry name="server-ip">127.0.0.1</entry>
 			<entry name="selfRequestProxy">127.0.0.1:80</entry>
 			
@@ -112,7 +111,7 @@
 		<injection>
 			<class>
 				<entry name="f_DataCacheService">f_DataCacheFileService</entry>
-				<entry name="f_persistentdocument_CacheService">f_persistentdocument_NoopCacheService</entry>
+				<entry name="f_persistentdocument_PersistentProvider">f_persistentdocument_PersistentProviderMySql</entry>
 			</class>
 		</injection>
 		
@@ -141,25 +140,16 @@
 
 		<!-- DATABASES -->
 		<databases>
-			<connections>
-				<entry name="default">webapp</entry>
-			</connections>
-			<webapp>
+			<default>
 				<!--entry name="user">root</entry-->
 				<!--entry name="password"></entry-->
 				<!--entry name="database">rbschange</entry-->
 				<!--entry name="host">localhost</entry-->
 				<!--entry name="protocol">mysql</entry-->
 				<!--entry name="port">3306</entry-->
-				<!--entry name="embededTransaction">5</entry-->
 				<!--entry name="longTransaction">0.2</entry-->
-			</webapp>
+			</default>
 		</databases>
-
-		<!-- PERSISTENT PROVIDER -->
-		<persistent_provider>
-			<entry name="mysql">f_persistentdocument_PersistentProviderMySql</entry>
-		</persistent_provider>
 
 		<!-- PDF SERVICE -->
 		<pdf>

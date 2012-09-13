@@ -169,9 +169,6 @@ class commands_GenerateDatabase extends c_ChangescriptCommand
 		$this->message('Compile document relation name ...');
 		RelationService::getInstance()->compile();
 		
-		$this->message("Cleaning Framework cache (f_cache) ...");
-		f_persistentdocument_PersistentProvider::getInstance()->clearFrameworkCache();
-		
 		$this->quitOk("Database generated");
 	}
 }

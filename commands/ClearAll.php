@@ -30,7 +30,6 @@ class commands_ClearAll extends c_ChangescriptCommand
 		$this->executeCommand("clear-webapp-cache");
 		$this->executeCommand("clear-datacache");
 		$this->executeCommand("clear-template-cache");
-		$this->executeCommand("clear-documentscache");
 		$this->quitOk("All was cleared");
 	}
 }

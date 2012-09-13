@@ -78,10 +78,6 @@ class commands_CompileDbSchema extends c_ChangescriptCommand
 		}
 		$this->okMessage("Tree tables generated");
 
-		$this->message("=== Cleaning Framework cache (f_cache) ... ===");
-		$persistentProvider->clearFrameworkCache();
-		$this->okMessage("f_cache cleaned");
-		
 		$this->quitOk("DB Schema compiled");
 	}
 }

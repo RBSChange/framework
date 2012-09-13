@@ -63,7 +63,7 @@ class change_ConfigurationService extends change_Singleton
 	public function getConfigurationValue($path, $defaultValue = null)
 	{
 		$value = $this->getConfiguration($path, false);
-		if ($value === false || (is_string($value) && f_util_StringUtils::isEmpty($value)) || (is_array($value) && f_util_ArrayUtils::isEmpty($value)))
+		if ($value === false || (is_string($value) && (trim($value) == '') || (is_array($value) && (count($value) == 0))))
 		{
 			return $defaultValue;
 		}

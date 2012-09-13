@@ -669,34 +669,30 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	protected function setLabelInternal($label)
 	{
 		$label = $label === null ? null : strval($label);
+		
 		if ($this->isLocalized())
 		{
-			$update = $this->getI18nObject()->setLabel($label);
-			if ($update)
+			$labels = $this->getI18nInfo()->getLabels();
+			$lang = $this->getContextLang();
+			$oldLabel = isset($labels[$lang]) ? $labels[$lang] : null;
+			if ($oldLabel !== $label)
 			{
 				$this->is_i18InfoModified = true;
-				if ($this->getI18nInfo()->getVo() == $this->getContextLang())
-				{
-					$this->getI18nInfo()->setVoLabel($label);
-				}
-				else
-				{
-					$this->getI18nInfo()->setLabel($this->getContextLang(), $label);
-				}
+				$this->getI18nInfo()->setLabel($lang, $label);
+				$this->getI18nObject($lang)->setLabel($label);
 				return true;
 			}
 		}
 		else
 		{
 			$oldLablel = $this->getI18nInfo()->getVoLabel();
-			if ($oldLablel != $label)
+			if ($oldLablel !== $label)
 			{
 				$this->is_i18InfoModified = true;
 				$this->getI18nInfo()->setVoLabel($label);
 				return true;
 			}
 		}
-
 		return false;
 	}
 
@@ -715,7 +711,9 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 	{
 		if ($this->isLocalized())
 		{
-			return $this->getI18nObject()->getLabel();
+			$labels = $this->getI18nInfo()->getLabels();
+			$lang = $this->getContextLang();
+			return isset($labels[$lang]) ? $labels[$lang] : null;
 		}
 		else
 		{
