@@ -1401,7 +1401,7 @@ class generator_PersistentModel
 	public function generatePhpModel()
 	{
 		$generator = new builder_Generator('models');
-		$generator->assign_by_ref('model', $this);
+		$generator->assign('model', $this);
 		$result = $generator->fetch('DocumentModel.tpl');
 		return $result;
 	}
@@ -1412,7 +1412,7 @@ class generator_PersistentModel
 	public function generatePhpBaseClass()
 	{
 		$generator = new builder_Generator('models');
-		$generator->assign_by_ref('model', $this);
+		$generator->assign('model', $this);
 		$result = $generator->fetch('DocumentClassBase.tpl');
 		return $result;
 	}
@@ -1423,7 +1423,7 @@ class generator_PersistentModel
 	public function generatePhpI18nClass()
 	{
 		$generator = new builder_Generator('models');
-		$generator->assign_by_ref('model', $this);
+		$generator->assign('model', $this);
 		$result = $generator->fetch('DocumentI18nClass.tpl');
 		return $result;
 	}

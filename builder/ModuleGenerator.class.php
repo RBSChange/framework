@@ -301,11 +301,11 @@ class builder_ModuleGenerator
 	protected function _getTpl($folder, $tpl, $nom, $icon = null)
 	{
 		$generator = new builder_Generator($folder);
-		$generator->assign_by_ref('author', $this->author);
-		$generator->assign_by_ref('name', $nom);
-		$generator->assign_by_ref('module', $this->name);
-		$generator->assign_by_ref('icon', $icon);
-		$generator->assign_by_ref('date', $this->date);
+		$generator->assign('author', $this->author);
+		$generator->assign('name', $nom);
+		$generator->assign('module', $this->name);
+		$generator->assign('icon', $icon);
+		$generator->assign('date', $this->date);
 		$result = $generator->fetch($tpl);
 		return $result;
 	}

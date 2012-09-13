@@ -30,7 +30,7 @@ class bean_BeanAggregateGenerator
 		$instance = new bean_BeanAggregateGenerator($beanClasses);
 		$instance->className = $beanClassName;
 		$generator = new builder_Generator('bean');
-		$generator->assign_by_ref('aggregate', $instance);
+		$generator->assign('aggregate', $instance);
 		$result = $generator->fetch('BeanAggregate.tpl');
 		f_util_FileUtils::writeAndCreateContainer($path, $result);
 	}
