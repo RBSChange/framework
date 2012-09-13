@@ -560,6 +560,7 @@ abstract class c_ChangescriptCommand
 				}
 			}	
 			require_once PROJECT_HOME.'/framework/Framework.php';
+			Framework::initialize();
 		}
 	}
 

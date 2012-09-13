@@ -552,7 +552,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 			$stmt->closeCursor();
 			return $this->buildI18nDocument($doc, $lang, ($result != false) ? $result : null);
 		}
-		return null;
+		return $this->buildI18nDocument($doc, $lang, null);
 	}	
 	
 	/**

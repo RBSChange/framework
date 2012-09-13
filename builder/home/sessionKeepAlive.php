@@ -4,6 +4,7 @@ define('PROJECT_HOME', PROJECT_HOME);
 
 // Starts the framework
 require_once PROJECT_HOME . "/framework/Framework.php";
+Framework::initialize();
 
 $controller = change_Controller::newInstance('change_Controller');
 $controller->setNoCache();

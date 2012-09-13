@@ -1,11 +1,7 @@
 <?php
-class change_Context
+class change_Context extends change_Singleton
 {
-	/**
-	 * @var change_Context
-	 */
-	protected static $instance = null;
-	
+
 	/**
 	 * @var change_ActionStack
 	 */
@@ -69,30 +65,29 @@ class change_Context
 	 * @param change_Controller $controller
 	 * @return change_Context
 	 */
-	public static function getInstance($controller)
+	public static function getInstance($controller = null)
 	{
-		if (self::$instance === null) 
+		$instance = self::getInstanceByClassName(get_called_class());
+		if ($controller !== null) 
 		{
-			self::$instance = new self();
-			self::$instance->controller 			= $controller;
-			self::$instance->actionStack			= new change_ActionStack();
+			$instance->controller = $controller;
+			$instance->actionStack = new change_ActionStack();
 
-			$classes = Framework::getConfiguration('mvc/classes');
-			self::$instance->request = new $classes['change_Request'];
-			self::$instance->storage = new $classes['change_Storage'];
-			self::$instance->user = new $classes['change_User'];
+			$instance->request = new change_Request();
+			$instance->storage = new change_Storage();
+			$instance->user = new change_User();
 			
-			self::$instance->request->initialize(self::$instance, null);
-			self::$instance->storage->initialize(self::$instance, null);
-			self::$instance->user->initialize(self::$instance, null);
+			$instance->request->initialize($instance, null);
+			$instance->storage->initialize($instance, null);
+			$instance->user->initialize($instance, null);
 		}
-		return self::$instance;
+		return $instance;
 	}
 
 	/**
 	 * @return change_Controller
 	 */
-	public function getController ()
+	public function getController()
 	{
 		return $this->controller;
 	}
@@ -100,7 +95,7 @@ class change_Context
 	/**
 	 * @return change_Request
 	 */
-	public function getRequest ()
+	public function getRequest()
 	{
 		return $this->request;
 	}
@@ -108,7 +103,7 @@ class change_Context
 	/**
 	 * @return change_Storage
 	 */
-	public function getStorage ()
+	public function getStorage()
 	{
 		return $this->storage;
 	}
@@ -116,7 +111,7 @@ class change_Context
 	/**
 	 * @return change_User
 	 */
-	public function getUser ()
+	public function getUser()
 	{
 		return $this->user;
 	}

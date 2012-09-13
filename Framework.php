@@ -381,6 +381,34 @@ class Framework
 		}
 	}
 	
+	public static function initialize()
+	{
+		// Load configuration
+		self::registerChangeAutoload();
+		
+		change_ConfigurationService::getInstance()->loadConfiguration();
+		self::registerConfiguredAutoloads();
+	
+		if (self::inDevelopmentMode()) {error_reporting(E_ALL | E_STRICT);}
+	
+	
+		ini_set('arg_separator.output',	  '&amp;');
+		ini_set('magic_quotes_runtime',	  0);
+	
+		change_LoggingService::getInstance()->registerErrorHandler();
+	
+		// Set the locale.
+		$localResult = setlocale(LC_ALL, 'en_US.UTF-8');
+	
+		// Set GMT TimeZone
+		date_default_timezone_set('GMT');
+	
+		if (self::inDevelopmentMode())
+		{
+			change_InjectionService::getInstance()->update();
+		}
+	}
+	
 	// Deprecated
 	
 	/**
@@ -431,28 +459,4 @@ class Framework
 	{
 		change_ConfigurationService::getInstance()->loadConfiguration();
 	}
-}
-
-// Load configuration
-Framework::registerChangeAutoload();
-change_ConfigurationService::getInstance()->loadConfiguration();
-Framework::registerConfiguredAutoloads();
-
-if (Framework::inDevelopmentMode()) {error_reporting(E_ALL | E_STRICT);}
-
-
-ini_set('arg_separator.output',	  '&amp;');
-ini_set('magic_quotes_runtime',	  0);
-
-change_LoggingService::getInstance()->registerErrorHandler();
-
-// Set the locale.
-$localResult = setlocale(LC_ALL, 'en_US.UTF-8');
-
-// Set GMT TimeZone
-date_default_timezone_set('GMT');
-
-if (Framework::inDevelopmentMode())
-{
-	change_InjectionService::getInstance()->update();
 }

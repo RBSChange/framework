@@ -1,5 +1,5 @@
 <?php
-class change_Controller
+class change_Controller extends change_Singleton
 {
 
 	/**
@@ -31,12 +31,7 @@ class change_Controller
 	 * @var change_Context
 	 */
 	protected $context = null;
-	
-	/**
-	 * @var change_Controller
-	 */
-	private static $instance = null;
-	
+
 	
 	protected function __construct()
 	{
@@ -338,20 +333,7 @@ class change_Controller
 	{
 		return $this->user;
 	}
-	
-	/**
-	 *
-	 * @return change_Controller 
-	 */
-	public static function getInstance()
-	{	
-		if (null !== self::$instance)
-		{
-			return self::$instance;
-		}
-		return self::newInstance('change_Controller');
-	}
-	
+		
 	protected function initialize()
 	{
 		$this->loadContext();
@@ -433,36 +415,54 @@ class change_Controller
 			header('X-Change-WebNode: '. NODE_NAME);
 		}
 	}
-
-	public static function newInstance($class)
+	
+	/**
+	 * @var string
+	 */
+	private static $className;
+	
+	/**
+	 * @return change_Controller
+	 */
+	public static function getInstance()
 	{
-		try
+		if (self::$className !== null)
 		{
-			if (null === self::$instance)
+			return self::getInstanceByClassName(self::$className);
+		}
+		return self::getInstanceByClassName(get_called_class());
+	}
+	
+	/**
+	 * @param string $className
+	 * @throws Exception
+	 * @return change_Controller
+	 */
+	public static function newInstance($className)
+	{
+		
+		$controller = null;
+		
+		if ($className != get_called_class())
+		{
+			if (class_exists($className))
 			{
-				$controllerClassName = Framework::getConfiguration('mvc/classes/'.$class);
-				$controller = new $controllerClassName();
-				if (!($controller instanceof change_Controller))
-				{
-					$error = 'Class "%s" is not of the type Controller';
-					$error = sprintf($error, $controllerClassName);	
-					throw new Exception($error);
-				}
-				
-				self::$instance = $controller;	
-				return self::$instance;
-			}
-			else
-			{
-				$error = 'A Controller implementation instance has already been created';
-				throw new Exception($error);			
+				self::$className = $className;
+				$controller = self::getInstanceByClassName(self::$className);
 			}
 		}
-		catch (Exception $e)
+		else
 		{
-			echo $e->getMessage() . "\n";
-			echo $e->getTraceAsString() . "\n";
+			self::$className = null;
+			$controller = self::getInstanceByClassName(get_called_class());
 		}
+		if (!($controller instanceof change_Controller))
+		{
+			$error = 'Unable to create (' . $className . ')  Controller instance';
+			throw new Exception($error);	
+		}
+
+		return $controller;
 	}
 	
 	public function shutdown()
@@ -478,23 +478,5 @@ class change_Controller
 	protected function generateRedirectUrl($urlParams)
 	{
 		return LinkHelper::getParametrizedLink($urlParams)->getUrl();		
-	}
-}
-
-class change_XulController extends change_Controller 
-{
-	
-	protected function setRequestContextMode()
-	{
-		RequestContext::getInstance()->setMode(RequestContext::BACKOFFICE_MODE);
-		$this->getContext()->getUser()->setUserNamespace(change_User::BACKEND_NAMESPACE);
-	}
-	
-	/**
-	 * @param array $urlParams
-	 */
-	protected function generateRedirectUrl($urlParams)
-	{
-		return LinkHelper::getUIParametrizedLink($urlParams)->getUrl();		
 	}
 }

@@ -5,6 +5,8 @@ define('PROJECT_HOME', dirname(realpath(__FILE__)));
 set_time_limit(0);
 
 require_once PROJECT_HOME . "/framework/Framework.php";
+Framework::initialize();
+
 RequestContext::getInstance()->setMode(RequestContext::BACKOFFICE_MODE);
 
 $headers = array();

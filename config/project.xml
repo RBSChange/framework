@@ -163,15 +163,6 @@
 			<!--  <entry name="node1">http://localhost</entry> -->
 		</nodes>
 		
-		<mvc>
-			<classes>
-				<entry name="change_Controller">change_Controller</entry>
-				<entry name="change_XulController">change_XulController</entry>
-				<entry name="change_Storage">change_Storage</entry>	
-				<entry name="change_Request">change_Request</entry>	
-				<entry name="change_User">change_User</entry>	
-			</classes>	
-		</mvc>
 		<autoload>
 			<!-- Zend-based namespace loading -->
 			<namespaces>
@@ -182,6 +173,7 @@
 				<entry name="zf1">{PROJECT_HOME}/libs/zfminimal/library/</entry>
 			</paths>
 		</autoload>
+		
 		<tal>
 			<prefix>
 				<entry name="trans">f_TalesI18n</entry>
