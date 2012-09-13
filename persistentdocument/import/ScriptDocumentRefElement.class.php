@@ -17,6 +17,11 @@ class import_ScriptDocumentRefElement extends import_ScriptDocumentElement
 	 */
 	protected function initPersistentDocument()
 	{
-		throw new Exception('No document found for documentRef with type '.$this->attributes['type']);
+		$attrs = array();
+		foreach ($this->attributes as $key => $value)
+		{
+			$attrs[] = $key . ' = "' . $value . '"';
+		}
+		throw new Exception('No document found for documentRef with attributes '.implode(', ', $attrs));
 	}
 }
