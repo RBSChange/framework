@@ -13,7 +13,6 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 
 	public function __sleep()
 	{
-		$this->__cleanDocumentPropertiesForSleep();
 		return $this->__getSerializedPropertyNames();
 	}
 
@@ -26,30 +25,6 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		return self::$__serializedPropertyNames;
 	}
 
-	protected function __cleanDocumentPropertiesForSleep()
-	{
-		parent::__cleanDocumentPropertiesForSleep();
-<{foreach from=$model->getPrivateClassMember() item=property}>
-<{if $property->isDocument()}>
-		if ($this->m_<{$property->getName()}> !== null && !is_numeric($this->m_<{$property->getName()}>))
-		{
-			$valCount = $this->m_<{$property->getName()}>->count(); 
-			if ($valCount > 0)
-			{
-<{if $property->isArray()}>
-				$this->m_<{$property->getName()}> = $valCount;
-<{else}>			
-				$this->m_<{$property->getName()}> = $this->m_<{$property->getName()}>[0]->getId();
-<{/if}>
-			}
-			else
-			{
-				$this->m_<{$property->getName()}> = null;
-			}
-		}
-<{/if}>
-<{/foreach}>
-	}
 <{if (!$model->inject()) }>  
    
 	/**
@@ -150,19 +125,10 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 <{/foreach}>
 <{/if}>
 <{foreach from=$model->getPrivateClassMember() item=property}>
-<{if $property->isDocument()}>
-        if ($loadAll)
-        {
-        	$this->checkLoaded<{$property->getPhpName()}>();
-        	$propertyBag['<{$property->getName()}>'] = $this->m_<{$property->getName()}>;
-        }
-        elseif ($this->m_<{$property->getName()}> !== null && !is_numeric($this->m_<{$property->getName()}>))
-        {
-        	$propertyBag['<{$property->getName()}>'] = $this->m_<{$property->getName()}>;
-        }
-<{else}>
-		$propertyBag['<{$property->getName()}>'] = $this->m_<{$property->getName()}>;
+<{if $property->isArray()}>
+        if ($loadAll) {$this->checkLoaded<{$property->getPhpName()}>();}
 <{/if}>
+		$propertyBag['<{$property->getName()}>'] = $this->m_<{$property->getName()}>;
 <{/foreach}>
 		return $propertyBag;
 	}
@@ -483,38 +449,19 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 <{/foreach}>
 <{foreach from=$model->getDocumentClassMember() item=property}>
 <{if !$property->isArray()}>
-
-	private function checkLoaded<{$property->getName()}>()
-	{
-		$this->checkLoaded();
-		if ((null === $this->m_<{$property->getName()}>) || is_numeric($this->m_<{$property->getName()}>))
-		{
-			$id = intval($this->m_<{$property->getName()}>);
-			$this->m_<{$property->getName()}> = new f_persistentdocument_PersistentDocumentArray($this, '<{$property->getName()}>', 'CHILD', 'TREE', <{$model->escapeBoolean($property->getPreserveOldValue())}>);
-			$this->m_<{$property->getName()}>->loadDocumentId($id);
-		}
-	}
-
 	/**
 	 * @param <{$property->getCommentaryType()}> $newValue
 	 */
 	public function set<{$property->getPhpName()}>($newValue)
 	{
-		$this->checkLoaded<{$property->getPhpName()}>();
-		$oldValue = (count($this->m_<{$property->getName()}>) == 1) ? $this->m_<{$property->getName()}>[0] : null;
-		if (!DocumentHelper::equals($oldValue, $newValue))
+		$this->checkLoaded();
+		$newId = ($newValue instanceof f_persistentdocument_PersistentDocument) ? $this->getProvider()->getCachedDocumentId($newValue) : null;
+		if ($this->m_<{$property->getName()}> != $newId)
 		{
-			if ($newValue == null)
-			{
-				if (count($this->m_<{$property->getName()}>) == 1) $this->m_<{$property->getName()}>->offsetUnset(0);
-			}
-			else
-			{
-				$this->m_<{$property->getName()}>[0] = $newValue;
-			}
-<{if $property->getPreserveOldValue()}>
-			$this->setOldValue('<{$property->getName()}>', $this->m_<{$property->getName()}>->getOldValues());
-<{/if}>
+		<{if $property->getPreserveOldValue()}>
+			$this->setOldValue('<{$property->getName()}>', $this->m_<{$property->getName()}>);
+		<{/if}>
+			$this->m_<{$property->getName()}> = $newId;
 			$this->propertyUpdated('<{$property->getName()}>');
 		}
 	}
@@ -525,15 +472,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	public function get<{$property->getPhpName()}>Id()
 	{
 		$this->checkLoaded();
-		if ((null === $this->m_<{$property->getName()}>) || is_numeric($this->m_<{$property->getName()}>))
-		{
-			return $this->m_<{$property->getName()}>;
-		}
-		else
-		{
-			$ids = $this->m_<{$property->getName()}>->getIds();
-			return count($ids) ? $ids[0] : null;
-		}
+		return $this->m_<{$property->getName()}>;
 	}
 	
 	/**
@@ -541,8 +480,8 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	 */
 	public function get<{$property->getPhpName()}>()
 	{
-		$this->checkLoaded<{$property->getPhpName()}>();
-		return (count($this->m_<{$property->getName()}>) == 1) ? $this->m_<{$property->getName()}>[0] : null;
+		$this->checkLoaded();
+		return ($this->m_<{$property->getName()}>) ? $this->getProvider()->getCachedDocumentById($this->m_<{$property->getName()}>) : null;
 	}
 
 <{if $property->getPreserveOldValue()}>
@@ -552,25 +491,22 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	 */
 	public function get<{$property->getPhpName()}>OldValueId()
 	{
-		$result = $this->getOldValue('<{$property->getName()}>');
-		if (is_array($result) && isset($result[0]))
-		{
-			return $result[0];
-		}
-		return null;
+		return $this->getOldValue('<{$property->getName()}>');
 	}
 <{/if}>
 <{else}>
-
 	private function checkLoaded<{$property->getPhpName()}>()
 	{
 		$this->checkLoaded();
-		if (!$this->m_<{$property->getName()}> instanceof f_persistentdocument_PersistentDocumentArray)
+		if (!is_array($this->m_<{$property->getName()}>))
 		{
-			$this->m_<{$property->getName()}> = new f_persistentdocument_PersistentDocumentArray($this, '<{$property->getName()}>', 'CHILD', 'TREE', <{$model->escapeBoolean($property->getPreserveOldValue())}>);
 			if ($this->getDocumentPersistentState() != self::PERSISTENTSTATE_NEW)
 			{
-				$this->getProvider()->loadRelations($this->m_<{$property->getName()}>);
+				$this->m_<{$property->getName()}> = $this->getProvider()->loadRelations($this, '<{$property->getName()}>');
+			}
+			else
+			{
+				$this->m_<{$property->getName()}> = array();
 			}
 		}
 	}
@@ -581,18 +517,27 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	 */
 	public function set<{$property->getPhpName()}>($index, $newValue)
 	{
-		if ($newValue === null) throw new Exception(__METHOD__.": document can not be null");
-		$this->checkLoaded<{$property->getPhpName()}>();
-		if (!DocumentHelper::equals($this->m_<{$property->getName()}>[$index], $newValue))
+		if ($newValue instanceof f_persistentdocument_PersistentDocument)
 		{
-			if ($this->m_<{$property->getName()}>->indexOf($newValue) == - 1)
+			$newId = $this->getProvider()->getCachedDocumentId($newValue); 
+			$index = intval($index);
+			$this->checkLoaded<{$property->getPhpName()}>();
+			if (!in_array($newId, $this->m_<{$property->getName()}>))
 			{
-				$this->m_<{$property->getName()}>[$index] = $newValue;
 <{if $property->getPreserveOldValue()}>
-				$this->setOldValue('<{$property->getName()}>', $this->m_<{$property->getName()}>->getOldValues());
+				$this->setOldValue('<{$property->getName()}>', $this->m_<{$property->getName()}>);
 <{/if}>
+				if ($index < 0 || $index > count($this->m_<{$property->getName()}>)) 
+				{
+					$index = count($this->m_<{$property->getName()}>);
+				}
+				$this->m_<{$property->getName()}>[$index] = $newId;
 				$this->propertyUpdated('<{$property->getName()}>');
 			}
+		}
+		else
+		{
+			throw new Exception(__METHOD__.": document can not be null");
 		}
 	}
 
@@ -601,16 +546,26 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	 */
 	public function set<{$property->getPhpName()}>Array($newValueArray)
 	{
-		if (!is_array($newValueArray)) throw new Exception("Invalid type of document array");
-		$this->checkLoaded<{$property->getPhpName()}>();
-		if ($this->m_<{$property->getName()}>->getArrayCopy() != $newValueArray)
+		if (is_array($newValueArray))
 		{
-			$this->m_<{$property->getName()}>->exchangeArray($newValueArray);
+			$this->checkLoaded<{$property->getPhpName()}>();
+			$newValueIds = array(); $pp = $this->getProvider();
+			array_walk($newValueArray, function ($newValue, $index) use (&$newValueIds, $pp) {
+				$newValueIds[] = $pp->getCachedDocumentId($newValue);
+			});
+			if ($this->m_<{$property->getName()}> != $newValueIds)
+			{
 <{if $property->getPreserveOldValue()}>
-			$this->setOldValue('<{$property->getName()}>', $this->m_<{$property->getName()}>->getOldValues());
+				$this->setOldValue('<{$property->getName()}>', $this->m_<{$property->getName()}>);
 <{/if}>
-			$this->propertyUpdated('<{$property->getName()}>');
-		}			
+				$this->m_<{$property->getName()}> = $newValueIds;
+				$this->propertyUpdated('<{$property->getName()}>');
+			}
+		}
+		else
+		{
+			throw new Exception("Invalid type of document array");
+		}
 	}
 
 	/**
@@ -618,15 +573,22 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	 */
 	public function add<{$property->getPhpName()}>($newValue)
 	{
-		if ($newValue === null) throw new Exception(__METHOD__.": document can not be null");
-		$this->checkLoaded<{$property->getPhpName()}>();
-		if ($this->m_<{$property->getName()}>->indexOf($newValue) == - 1)
-		{
-			$this->m_<{$property->getName()}>[] = $newValue;
+		if ($newValue instanceof f_persistentdocument_PersistentDocument)
+		{ 
+			$newId = $this->getProvider()->getCachedDocumentId($newValue);
+			$this->checkLoaded<{$property->getPhpName()}>();
+			if (!in_array($newId, $this->m_<{$property->getName()}>))
+			{	
 <{if $property->getPreserveOldValue()}>
-			$this->setOldValue('<{$property->getName()}>', $this->m_<{$property->getName()}>->getOldValues());
+				$this->setOldValue('<{$property->getName()}>', $this->m_<{$property->getName()}>);
 <{/if}>
-			$this->propertyUpdated('<{$property->getName()}>');
+				$this->m_<{$property->getName()}>[] = $newId;
+				$this->propertyUpdated('<{$property->getName()}>');
+			}
+		}
+		else
+		{
+			throw new Exception(__METHOD__.": document can not be null");
 		}
 	}
 
@@ -638,31 +600,16 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		$this->checkLoaded<{$property->getPhpName()}>();
 		if ($value instanceof f_persistentdocument_PersistentDocument)
 		{
-			$index = $this->m_<{$property->getName()}>->indexOf($value);
-			if ($index != -1)
+			$valueId = $value->getId();
+			$index = array_search($valueId, $this->m_<{$property->getName()}>);
+			if ($index !== false)
 			{
+<{if $property->getPreserveOldValue()}>
+				$this->setOldValue('<{$property->getName()}>', $this->m_<{$property->getName()}>);
+<{/if}>
 				unset($this->m_<{$property->getName()}>[$index]);
-<{if $property->getPreserveOldValue()}>
-				$this->setOldValue('<{$property->getName()}>', $this->m_<{$property->getName()}>->getOldValues());
-<{/if}>
 				$this->propertyUpdated('<{$property->getName()}>');
 			}
-		}
-		elseif (is_numeric($value))
-		{
-			Framework::error('Deprecated call of ' . __METHOD__ . ' use ' . __METHOD__ . 'ByIndex');
-			if (isset($this->m_<{$property->getName()}>[$value]))
-			{
-				unset($this->m_<{$property->getName()}>[$value]);
-<{if $property->getPreserveOldValue()}>
-				$this->setOldValue('<{$property->getName()}>', $this->m_<{$property->getName()}>->getOldValues());
-<{/if}>
-				$this->propertyUpdated('<{$property->getName()}>');
-			}
-		}
-		else
-		{
-			throw new IllegalArgumentException('$value is not valid <{$property->getCommentaryType()}> instance');
 		}
 	}
 
@@ -674,10 +621,10 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 		$this->checkLoaded<{$property->getPhpName()}>();
 		if (isset($this->m_<{$property->getName()}>[$index]))
 		{
-			unset($this->m_<{$property->getName()}>[$index]);
 <{if $property->getPreserveOldValue()}>
-			$this->setOldValue('<{$property->getName()}>', $this->m_<{$property->getName()}>->getOldValues());
+			$this->setOldValue('<{$property->getName()}>', $this->m_<{$property->getName()}>);
 <{/if}>
+			unset($this->m_<{$property->getName()}>[$index]);
 			$this->propertyUpdated('<{$property->getName()}>');
 		}
 	}
@@ -685,12 +632,12 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	public function removeAll<{$property->getPhpName()}>()
 	{
 		$this->checkLoaded<{$property->getPhpName()}>();
-		if ($this->m_<{$property->getName()}>->count() != 0)
+		if (count($this->m_<{$property->getName()}>))
 		{
-			$this->m_<{$property->getName()}>->removeAll();
 <{if $property->getPreserveOldValue()}>
-			$this->setOldValue('<{$property->getName()}>', $this->m_<{$property->getName()}>->getOldValues());
+			$this->setOldValue('<{$property->getName()}>', $this->m_<{$property->getName()}>);
 <{/if}>
+			$this->m_<{$property->getName()}> = array();
 			$this->propertyUpdated('<{$property->getName()}>');
 		}
 	}
@@ -702,7 +649,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	public function get<{$property->getPhpName()}>($index)
 	{
 		$this->checkLoaded<{$property->getPhpName()}>();
-		return $this->m_<{$property->getName()}>[$index];
+		return isset($this->m_<{$property->getName()}>[$index]) ?  $this->getProvider()->getCachedDocumentById($this->m_<{$property->getName()}>[$index]) : null;
 	}
 	
 	/**
@@ -711,7 +658,7 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	public function get<{$property->getPhpName()}>Ids()
 	{
 		$this->checkLoaded<{$property->getPhpName()}>();
-		return $this->m_<{$property->getName()}>->getIds();
+		return $this->m_<{$property->getName()}>;
 	}
 
 	/**
@@ -720,7 +667,11 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	public function get<{$property->getPhpName()}>Array()
 	{
 		$this->checkLoaded<{$property->getPhpName()}>();
-		return $this->m_<{$property->getName()}>->getArrayCopy();
+		$documents = array(); $pp = $this->getProvider();
+		array_walk($this->m_<{$property->getName()}>, function ($documentId, $index) use (&$documents, $pp) {
+			$documents[] = $pp->getCachedDocumentById($documentId);
+		});
+		return $documents;
 	}
 
 	/**
@@ -728,15 +679,13 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	 */
 	public function getPublished<{$property->getPhpName()}>Array()
 	{
-		$publishedDocumentArray = array();
-		foreach ($this->get<{$property->getPhpName()}>Array() as $document)
-		{
-			if ($document->isPublished())
-			{
-				$publishedDocumentArray[] = $document;
-			}
-		}
-		return $publishedDocumentArray;
+		$this->checkLoaded<{$property->getPhpName()}>();
+		$documents = array(); $pp = $this->getProvider();
+		array_walk($this->m_<{$property->getName()}>, function ($documentId, $index) use (&$documents, $pp) {
+			$document = $pp->getCachedDocumentById($documentId);
+			if ($document->isPublished()) {$documents[] = $document;}
+		});
+		return $documents;
 	}
 
 <{if $property->getPreserveOldValue()}>
@@ -761,9 +710,9 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	public function get<{$property->getPhpName()}>Count()
 	{
 		$this->checkLoaded();
-		if ($this->m_<{$property->getName()}> instanceof f_persistentdocument_PersistentDocumentArray)
+		if (is_array($this->m_<{$property->getName()}>))
 		{
-			return $this->m_<{$property->getName()}>->count();
+			return count($this->m_<{$property->getName()}>);
 		}
 		else
 		{
@@ -785,9 +734,14 @@ class <{$model->getDocumentClassName()}>base extends <{$model->getBaseClassName(
 	 */
 	public function getIndexof<{$property->getPhpName()}>($value)
 	{
-		if ($value === null) throw new Exception(__METHOD__.": document can not be null");
-		$this->checkLoaded<{$property->getPhpName()}>();
-		return $this->m_<{$property->getName()}>->indexOf($value);
+		if ($value instanceof f_persistentdocument_PersistentDocument) 
+		{
+			$this->checkLoaded<{$property->getPhpName()}>();
+			$valueId = $this->getProvider()->getCachedDocumentId($value);
+			$index = array_search($valueId, $this->m_<{$property->getName()}>);
+			return $index !== false ? $index : -1;
+		}
+		throw new Exception(__METHOD__.": document can not be null");
 	}
 <{/if}>
 <{/foreach}>

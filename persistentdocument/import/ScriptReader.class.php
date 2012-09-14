@@ -165,7 +165,7 @@ class import_ScriptReader extends change_BaseService
 				$this->errors[] = $errstr;
 				break;
 		}
-		return Framework::getZendLog()->errorHandler($errno, $errstr, $errfile, $errline, null);
+		return  change_LoggingService::getInstance()->defaultErrorHandler($errno, $errstr, $errfile, $errline, null);
 	}
 
 	/**

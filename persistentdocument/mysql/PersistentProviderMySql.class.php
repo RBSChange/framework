@@ -607,23 +607,20 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 	}
 	
 	/**
-	 * @param f_persistentdocument_PersistentDocumentArray $documentArray
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param string $propertyName
 	 */
-	public function loadRelations($documentArray)
+	public function loadRelations($document, $propertyName)
 	{
-		$masterDocId = $documentArray->getParentDocument()->getId();
-		$relType = $documentArray->getRelationType();
-		$relName = $documentArray->getRelationName();
-		$relId = $documentArray->getRelationId();
+		$masterDocId = $document->getId();
+		$relId =  RelationService::getInstance()->getRelationId($propertyName);
 	
-		$stmt = $this->prepareStatement('SELECT `relation_id2` AS document_id FROM `f_relation` WHERE `relation_id1` = :relation_id1 AND `relation_id` = :relation_id ORDER BY `relation_order`');
+		$stmt = $this->prepareStatement('SELECT `relation_id2` AS `id` FROM `f_relation` WHERE `relation_id1` = :relation_id1 AND `relation_id` = :relation_id ORDER BY `relation_order`');
 		$stmt->bindValue(':relation_id1', $masterDocId, PersistentProviderConst::PARAM_INT);
 		$stmt->bindValue(':relation_id', $relId, PersistentProviderConst::PARAM_INT);
-	
 		$this->executeStatement($stmt);
-	
-		$results = $stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC);
-		$documentArray->loadDocumentIds($results);
+		$result = $stmt->fetchAll(PersistentProviderConst::FETCH_NUM);
+		return array_map(function($row) {return intval($row[0]);}, $result);
 	}
 	
 	
@@ -725,9 +722,9 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 			$fieldsName[$propertyName] = '`' . $propertyInfo->getDbMapping(). '`';
 			$parameters[$propertyName] = ':p'. $propertyInfo->getDbMapping();
 	
-			if ($properties[$propertyName] instanceof f_persistentdocument_PersistentDocumentArray)
+			if (is_array($properties[$propertyName]) && $propertyInfo->isDocument())
 			{
-				$this->cascadeSaveDocumentArray($properties[$propertyName]);
+				$properties[$propertyName] = $this->cascadeSaveDocumentArray($persistentDocument, $propertyName, $properties[$propertyName]);
 			}
 		}
 	
@@ -858,19 +855,17 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 				$dbparemetername = ':p' .$propertyInfo->getDbMapping();
 				$mapping[$propertyName] = $dbname . " = " . $dbparemetername;
 			}
-			elseif ($propertyValue !== null && $propertyValue->isModified())
+			else
 			{
+				if (is_array($propertyValue))
+				{
+					$properties[$propertyName] = $this->cascadeSaveDocumentArray($persistentDocument, $propertyName, $propertyValue);
+				}
 				$mapping[$propertyName] = '`'.$propertyInfo->getDbMapping().'` = :p' .$propertyInfo->getDbMapping();
-			}
-	
-			if ($propertyValue instanceof f_persistentdocument_PersistentDocumentArray)
-			{
-				$this->cascadeSaveDocumentArray($propertyValue);
 			}
 		}
 	
 		$dataRelations = array();
-	
 		if (f_util_ArrayUtils::isNotEmpty($mapping))
 		{
 			$sql = 'UPDATE `'.$persistentDocument->getPersistentModel()->getTableName().
@@ -879,10 +874,6 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 			$this->buildRelationDataAndBindValues($dataRelations, $propertiesInfo, $properties, $stmt, $mapping);
 			$stmt->bindValue(':document_id', $documentId, PersistentProviderConst::PARAM_INT);
 			$this->executeStatement($stmt);
-		}
-		else
-		{
-			$this->buildRelationData($dataRelations, $propertiesInfo, $properties);
 		}
 	
 		$this->saveRelations($persistentDocument, $dataRelations);
@@ -893,66 +884,65 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 	
 	/**
 	 * @param f_persistentdocument_PersistentDocument $persistentDocument
-	 * @param f_persistentdocument_PersistentDocumentArray[] $dataRelations
+	 * @param mixed[] $dataRelations
 	 */
 	private function saveRelations($persistentDocument, $dataRelations)
 	{
-		foreach ($dataRelations as $relation)
+		if (count($dataRelations))
 		{
-			if (!is_null($relation))
+			foreach ($dataRelations as $propertyName => $relationValues)
 			{
-				$this->saveRelation($relation);
+				$this->saveRelation($persistentDocument, $propertyName, $relationValues);
 			}
 		}
 	}
 	
 	/**
-	 * @param f_persistentdocument_PersistentDocumentArray $documentArray
+	 * 
+	 * @param f_persistentdocument_PersistentDocument $parentDocument
+	 * @param string $propertyName
+	 * @param mixed $relationValues
 	 */
-	private function saveRelation($documentArray)
+	private function saveRelation($parentDocument, $propertyName, $relationValues)
 	{
-		if (!$documentArray->isModified())
-		{
-			return;
-		}
-	
-		$parentDocument = $documentArray->getParentDocument();
 		$masterDocId = $parentDocument->getId();
 		$masterDocType = $parentDocument->getDocumentModelName();
-		$relName = $documentArray->getRelationName();
-		$relId = $documentArray->getRelationId();
+		$relId = RelationService::getInstance()->getRelationId($propertyName);
 		
 		//Recuperation des nouvelles relations
-		$docs = $documentArray->getInternalArray();
-		if (count($docs) === 0)
+
+		if ($relationValues === null || (is_array($relationValues) && count($relationValues) === 0))
 		{
-			if (!$documentArray->getParentDocument()->isNew())
+			if (!$parentDocument->isNew())
 			{
 				$stmt = $this->prepareStatement('DELETE FROM `f_relation` WHERE `relation_id1` = :relation_id1 AND `relation_id` = :relation_id');
 				$stmt->bindValue(':relation_id1', $masterDocId, PersistentProviderConst::PARAM_INT);
 				$stmt->bindValue(':relation_id', $relId, PersistentProviderConst::PARAM_INT);
 				$this->executeStatement($stmt);
 			}
-			$documentArray->setIsPersisted();
 			return;
 		}
-	
+		elseif (!is_array($relationValues))
+		{
+			$relationValues = array($relationValues);
+		}		
+		
 		//Recuperations des anciens document_id / order
-		$oldIds = array();
+		$oldIds = array();		
 		$stmt = $this->prepareStatement('SELECT `relation_id2` AS doc_id, `relation_order` AS doc_order FROM `f_relation` WHERE `relation_id1` = :relation_id1 AND `relation_id` = :relation_id');
 		$stmt->bindValue(':relation_id1', $masterDocId, PersistentProviderConst::PARAM_INT);
 		$stmt->bindValue(':relation_id', $relId, PersistentProviderConst::PARAM_INT);
 		$this->executeStatement($stmt);
-		foreach ($stmt->fetchAll(PersistentProviderConst::FETCH_ASSOC) as $row)
+		foreach ($stmt->fetchAll(PersistentProviderConst::FETCH_NUM) as $row)
 		{
-			$oldIds[$row['doc_id']] = $row['doc_order'];
+			$oldIds[$row[0]] = $row[1];
 		}
+		
 		$oldCount = count($oldIds);
 		$updateOrder = false;
 		$order = 0;
-		foreach ($docs as $docInfo)
+		foreach ($relationValues as $subDocId)
 		{
-			$subDocId = is_numeric($docInfo) ? $docInfo : $docInfo->getId();
 			if (isset($oldIds[$subDocId]))
 			{
 				if ($oldIds[$subDocId] != $order)
@@ -979,13 +969,13 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 					$relOrder = -$order - 1;
 					$updateOrder = true;
 				}
-				$subDocType = $docInfo->getDocumentModelName();
+				$subDocType = $this->getCachedDocumentById($subDocId)->getDocumentModelName();
 				$stmt = $this->prepareStatement('INSERT INTO `f_relation` (relation_id1, relation_id2, relation_order, relation_name, document_model_id1, document_model_id2, relation_id) VALUES (:relation_id1, :relation_id2, :relation_order, :relation_name, :document_model_id1, :document_model_id2, :relation_id)');
 				$stmt->bindValue(':relation_id1', $masterDocId, PersistentProviderConst::PARAM_INT);
 				$stmt->bindValue(':relation_id2', $subDocId, PersistentProviderConst::PARAM_INT);
 				$stmt->bindValue(':relation_order', $relOrder, PersistentProviderConst::PARAM_INT);
 	
-				$stmt->bindValue(':relation_name', $relName, PersistentProviderConst::PARAM_STR);
+				$stmt->bindValue(':relation_name', $propertyName, PersistentProviderConst::PARAM_STR);
 				$stmt->bindValue(':document_model_id1', $masterDocType, PersistentProviderConst::PARAM_STR);
 				$stmt->bindValue(':document_model_id2', $subDocType, PersistentProviderConst::PARAM_STR);
 				$stmt->bindValue(':relation_id', $relId, PersistentProviderConst::PARAM_INT);
@@ -1014,8 +1004,6 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 			$stmt->bindValue(':relation_id', $relId, PersistentProviderConst::PARAM_INT);
 			$this->executeStatement($stmt);
 		}
-	
-		$documentArray->setIsPersisted();
 	}
 	
 	/**
@@ -1044,26 +1032,36 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 			}
 			else
 			{
-				$dataRelations[] = $propertyValue;
 				if ($propertyInfo->isArray())
 				{
 					if (!is_array($mapping) || array_key_exists($propertyName, $mapping))
 					{
-						$stmt->bindPropertyValue($propertyInfo, $propertyValue->count());
+						$stmt->bindPropertyValue($propertyInfo, is_array($propertyValue) ? count($propertyValue) : intval($propertyValue));
 					}
-				}
-				elseif ($propertyValue->count() != 0)
-				{
-					if (!is_array($mapping) || array_key_exists($propertyName, $mapping))
+					
+					if (is_array($propertyValue))
 					{
-						$stmt->bindPropertyValue($propertyInfo, $propertyValue[0]->getId());
+						$dataRelations[$propertyName] = $propertyValue;
+					}
+					elseif (is_array($mapping) && array_key_exists($propertyName, $mapping))
+					{
+						$dataRelations[$propertyName] = null;
 					}
 				}
 				else
 				{
 					if (!is_array($mapping) || array_key_exists($propertyName, $mapping))
 					{
-						$stmt->bindPropertyValue($propertyInfo, null);
+						$stmt->bindPropertyValue($propertyInfo, intval($propertyValue) > 0 ? intval($propertyValue) : null);
+					}
+					
+					if (intval($propertyValue) > 0)
+					{
+						$dataRelations[$propertyName] = intval($propertyValue);
+					}
+					elseif (is_array($mapping) && array_key_exists($propertyName, $mapping))
+					{
+						$dataRelations[$propertyName] = null;
 					}
 				}
 			}
@@ -1071,47 +1069,30 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 	}
 	
 	/**
-	 * @param array $dataRelations
-	 * @param array $propertiesInfo
-	 * @param array $properties
+	 * @param f_persistentdocument_PersistentDocument $persistentDocument
+	 * @param string $propertyName
+	 * @param integer[] $documentIds
+	 * @return integer[] 
 	 */
-	private function buildRelationData(&$dataRelations, $propertiesInfo, $properties)
+	private function cascadeSaveDocumentArray($persistentDocument, $propertyName, $documentIds)
 	{
-		foreach ($properties as $propertyName => $propertyValue)
-		{
-			if ('id' == $propertyName || 'model' == $propertyName)
+		$self = $this;
+		$ids =  array_map(function ($documentId) use ($self) {
+			$subDoc = $self->getCachedDocumentById($documentId);
+			if ($subDoc->isNew() || $subDoc->isModified()) 
 			{
-				continue;
+				$subDoc->save();
 			}
-			$propertyInfo = $propertiesInfo[$propertyName];
-			if ($propertyInfo->isDocument())
-			{
-				$dataRelations[] = $propertyValue;
-			}
-		}
-	}
-	
-	/**
-	 * @param f_persistentdocument_PersistentDocumentArray $documentArray
-	 */
-	private function cascadeSaveDocumentArray($documentArray)
-	{
-		if ($documentArray->isModified())
-		{
-			foreach ($documentArray as $subDoc)
-			{
-				/* @var $subDoc f_persistentdocument_PersistentDocument */
-				if ($subDoc->isNew() || $subDoc->isModified())
-				{
-					$subDoc->save();
-				}
-			}
-		}
+			return $subDoc->getId();
+		}, $documentIds);
+		
+		$persistentDocument->setDocumentProperties(array($propertyName => $ids));
+		return $ids;
 	}
 		
 	/**
 	 * @param integer $documentId
-	 * @param f_persistentdocumentPersistentDocument $persistentDocument
+	 * @param f_persistentdocument_PersistentDocument $persistentDocument
 	 * @param boolean $clearCache
 	 */
 	protected function postUpdate($documentId, $persistentDocument, $clearCache = true)

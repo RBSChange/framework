@@ -573,15 +573,15 @@ abstract class f_persistentdocument_PersistentDocument implements f_mvc_Bean
 		{
 			$selfValues = $selfProperties[$propertyName];
 			$newValues = $newProperties[$propertyName];
-			if ($selfValues instanceof f_persistentdocument_PersistentDocumentArray)
+			if (is_array($selfValues))
 			{
 				if ($mergeArrayProperties)
 				{
-					$selfValues->mergeWith($newValues);
+					$selfValues = array_unique(array_merge($selfValues, $newValues));
 				}
 				else
 				{
-					$selfValues->replaceWith($newValues);
+					$selfValues = $newValues;
 				}
 			}
 			else

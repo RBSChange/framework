@@ -811,9 +811,9 @@ class generator_PersistentProperty
 		$phpScript[] = '	{';
 		if ($this->isDocument())
 		{
-			$phpScript[] = '		$this->checkLoaded' . $uName .'();';
 			if ($this->isArray())
 			{
+				$phpScript[] = '		$this->checkLoaded' . $uName .'();';
 				if (is_array($constraintArray))
 				{
 					throw new Exception("Invalid constraints for document property " . $this->model->getName() . '/' . $name);

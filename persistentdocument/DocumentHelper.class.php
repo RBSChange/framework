@@ -33,7 +33,7 @@ class DocumentHelper
 	public static function documentArrayEquals($a, $b)
 	{
 		if ($a === $b) {return true;}
-		if ($a instanceof f_persistentdocument_PersistentDocumentArray)
+		if ($a instanceof ArrayObject)
 		{
 			$a = $a->getArrayCopy();
 		}
@@ -42,7 +42,7 @@ class DocumentHelper
 			return false;
 		}
 		
-		if ($b instanceof f_persistentdocument_PersistentDocumentArray)
+		if ($b instanceof ArrayObject)
 		{
 			$b = $b->getArrayCopy();
 		}		
@@ -106,7 +106,7 @@ class DocumentHelper
 	 */
 	public static function getIdArrayFromDocumentArray($documents)
 	{
-		if ($documents instanceof f_persistentdocument_PersistentDocumentArray)
+		if ($documents instanceof ArrayObject)
 		{
 			$documents = $documents->getArrayCopy();
 		}

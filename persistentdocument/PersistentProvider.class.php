@@ -354,6 +354,39 @@ abstract class f_persistentdocument_PersistentProvider extends change_Singleton
 	 */
 	public abstract function getDocumentInstance($documentId, $modelName = null, $lang = null);
 	
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @return integer
+	 */
+	public function getCachedDocumentId($document)
+	{
+		$id = $document->getId();
+		if ($id < 0) 
+		{
+			$this->putInCache($id, $document);
+		}
+		return $id;
+	}
+	
+	/**
+	 * @param integer $documentId
+	 * @return f_persistentdocument_PersistentDocument
+	 * @throws Exception
+	 */
+	public function getCachedDocumentById($documentId)
+	{
+		if ($documentId < 0)
+		{
+			if ($this->isInCache($documentId))
+			{
+				return $this->getFromCache($documentId);
+			}
+			throw new Exception('document ' . $documentId . ' is not in memory');
+		}
+		return $this->getDocumentInstance($documentId);
+	}
+	
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
 	 * @param string $modelName
@@ -392,9 +425,11 @@ abstract class f_persistentdocument_PersistentProvider extends change_Singleton
 	public abstract function getRelationId($propertyName);
 	
 	/**
-	 * @param f_persistentdocument_PersistentDocumentArray $documentArray
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param string $propertyName
 	 */
-	public abstract function loadRelations($documentArray);
+	public abstract function loadRelations($document, $propertyName);
+	
 
 	/**
 	 * @param f_persistentdocument_PersistentDocument $persistentDocument
@@ -823,8 +858,7 @@ abstract class f_persistentdocument_PersistentProvider extends change_Singleton
 	 */
 	public function getChildRelationByMasterDocumentId($masterDocumentId, $relationName = null, $slaveDocumentModel = null)
 	{
-		return $this->getRelations(f_persistentdocument_PersistentDocumentArray::RELATION_CHILD,
-			$masterDocumentId, null, $relationName, null, $slaveDocumentModel);
+		return $this->getRelations("CHILD", $masterDocumentId, null, $relationName, null, $slaveDocumentModel);
 	}
 	
 	/**
@@ -835,8 +869,7 @@ abstract class f_persistentdocument_PersistentProvider extends change_Singleton
 	 */
 	public function getChildRelationBySlaveDocumentId($slaveDocumentId, $relationName = null, $masterDocumentModel = null)
 	{
-		return $this->getRelations(f_persistentdocument_PersistentDocumentArray::RELATION_CHILD,
-			null, $slaveDocumentId, $relationName, $masterDocumentModel, null);
+		return $this->getRelations("CHILD", null, $slaveDocumentId, $relationName, $masterDocumentModel, null);
 	}
 	
 	/**
