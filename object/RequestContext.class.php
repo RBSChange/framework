@@ -5,7 +5,7 @@
 class RequestContext
 {
 	/**
-	 * @var change_RequestContext
+	 * @var RequestContext
 	 */
 	private static $m_instance;
 
@@ -104,7 +104,7 @@ class RequestContext
 	/**
 	 * @param string $supportedLanguages
 	 * @param string $ui_supportedLanguages
-	 * @return change_RequestContext
+	 * @return RequestContext
 	 */
 	public static function getInstance($supportedLanguages = null, $ui_supportedLanguages = null)
 	{
