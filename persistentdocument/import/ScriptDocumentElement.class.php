@@ -171,6 +171,10 @@ class import_ScriptDocumentElement extends import_ScriptObjectElement
 	{
 		// This must be the first line as it manipulates attributes (especially byXxx attributes).
 		$document = $this->getPersistentDocument();
+		if (!$document)
+		{
+			throw new Exception('Invalid document in (' . $this->script->getCurrentXmlFilePath() . ') ' . get_class($this));
+		}
 		$properties = $this->computeAttributes($this->getDocumentProperties());
 		$this->affectDocumentProperties($document, $properties);
 	}
