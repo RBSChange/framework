@@ -227,7 +227,7 @@ class f_util_System
 			$config = null;
 		}
 		$client = $token->getHttpClient(array( 'consumerKey' => $name, 'consumerSecret' => $secret), $uri, $config);
-		$client->setMethod(\Zend\Http\change_Request::METHOD_POST);
+		$client->setMethod(\Zend\Http\Request::METHOD_POST);
 		$postParameters = array('phpscript' => $relativeScriptPath);
 		if ($noFramework)
 		{
