@@ -1,6 +1,5 @@
 <?php
 define('PROJECT_HOME', dirname(realpath(__FILE__)));
-define('PROJECT_HOME', PROJECT_HOME);
 
 // Starts the framework
 require_once PROJECT_HOME . "/framework/Framework.php";
