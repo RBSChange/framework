@@ -69,7 +69,7 @@ $currentUrl = strpos($_SERVER['REQUEST_URI'], $protocol . $_SERVER['HTTP_HOST'])
 $util = new \ZendOAuth\Http\Utility();
 
 $mergedParams = f_web_HttpLink::flattenArray(array_merge($_POST, $headers));
-if ($headers['oauth_signature'] !== \ZendOAuth\Http\Utility::urlEncode($util->sign($mergedParams, $headers['oauth_signature_method'], $consumerSecret, $tokenSecret, \Zend\Http\change_Request::METHOD_POST, $currentUrl)))
+if ($headers['oauth_signature'] !== \ZendOAuth\Http\Utility::urlEncode($util->sign($mergedParams, $headers['oauth_signature_method'], $consumerSecret, $tokenSecret, \Zend\Http\Request::METHOD_POST, $currentUrl)))
 {
 	header("HTTP/1.1 401 Unauthorized");
 	die("Invalid signature");
