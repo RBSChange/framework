@@ -43,11 +43,14 @@ abstract class change_Action
 	 * @param change_Context $context.
 	 * @return bool true, if initialization completes successfully, otherwise false.
 	 */
-	public function initialize ($context)
+	public function initialize($context)
 	{
 		$this->context = $context;
-		$this->m_moduleName =  $context->getModuleName();
-		$this->m_actionName =  $context->getActionName();	
+		if ($this->m_moduleName === null)
+		{
+			$this->m_moduleName =  $context->getModuleName();
+			$this->m_actionName =  $context->getActionName();	
+		}
 		return true;
 	}
 	
@@ -224,25 +227,18 @@ abstract class change_Action
 	{
 		return $this->m_actionName;
 	}
-	
-	private $logged = false;
-	
+
 	/**
 	 * @param f_persistentdocument_PersistentDocument $document
 	 */
 	protected function logAction($document, $info = array())
 	{
-		$this->logged = true;
 		$moduleName = $this->getModuleName();
 		$actionName = strtolower($this->getActionName());
 		if ($document instanceof f_persistentdocument_PersistentDocument)
 		{
 			$actionName .= '.' . strtolower($document->getPersistentModel()->getDocumentName());
 		}
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug(__METHOD__."($moduleName, $actionName)");
-		}		
 		UserActionLoggerService::getInstance()->addCurrentUserDocumentEntry($actionName, $document, $info, $moduleName);
 	}
 	

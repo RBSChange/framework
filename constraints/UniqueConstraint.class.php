@@ -1,15 +1,8 @@
 <?php
-class change_UniqueConstraint extends Zend_Validate_Abstract
+class change_UniqueConstraint extends \Zend\Validator\AbstractValidator
 {
 	const NOTUNIQUE = 'notUnique';
 	
-	/**
-	 * @var array
-	 */
-	protected $_messageVariables = array(
-		'propertyName' => '_propertyName'
-	);
-
 	/**
 	 * @var string
 	 */
@@ -30,8 +23,9 @@ class change_UniqueConstraint extends Zend_Validate_Abstract
 	 */   
 	public function __construct($params = array())
 	{
-		$this->_messageTemplates = array(self::NOTUNIQUE => change_Constraints::getI18nConstraintValue(self::NOTUNIQUE));
-	
+		$messageTemplates = array(self::NOTUNIQUE => change_Constraints::getI18nConstraintValue(self::NOTUNIQUE));
+		$messageVariables = array('propertyName' => '_propertyName');
+		parent::__construct(array('messageTemplates' => $messageTemplates, 'messageVariables' => $messageVariables));
 		if (isset($params['modelName']))
 		{
 			$this->_modelName = $params['modelName'];
@@ -64,7 +58,7 @@ class change_UniqueConstraint extends Zend_Validate_Abstract
 			throw new Exception('Invalid property '. $this->_propertyName . ' for document '. $this->_modelName);
 		}
 		
-		$this->_setValue($value);
+		$this->setValue($value);
 		
 		$ds = $model->getDocumentService();
 		$query = $ds->createQuery()->setProjection(Projections::property('id', 'id'))->setMaxResults(1);
@@ -99,7 +93,7 @@ class change_UniqueConstraint extends Zend_Validate_Abstract
 		if ($row !== null && intval($row['id']) != $this->_documentId)
 		{
 			Framework::fatal(__METHOD__ . ' ' . $this->_modelName . ' '. $this->_propertyName . ' '. $this->_documentId . ' -> ' . $value);
-			$this->_error(self::NOTUNIQUE);
+			$this->error(self::NOTUNIQUE);
 			return false;
 		}
 		return true;

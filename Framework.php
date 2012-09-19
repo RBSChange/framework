@@ -373,12 +373,6 @@ class Framework
 		}
 		$path =  $basePath . DIRECTORY_SEPARATOR . str_replace('_', DIRECTORY_SEPARATOR, $className) . DIRECTORY_SEPARATOR . "to_include";
 		if (is_readable($path)) {require_once $path;}
-		
-		if (strpos($className, 'Zend_') === 0)
-		{
-			$path = str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
-			require_once $path;
-		}
 	}
 	
 	public static function initialize()

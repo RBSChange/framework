@@ -1021,10 +1021,6 @@ class LocaleService extends change_BaseService
 		return array($key, $formatters, $replacements);
 	}
 	
-	/**
-	 * @var string
-	 */
-	protected $logFilePath;
 	
 	/**
 	 * @param string $key
@@ -1032,23 +1028,14 @@ class LocaleService extends change_BaseService
 	 */
 	protected function logKeyNotFound($key, $lang)
 	{
-		if ($this->logFilePath === null)
+		if (Framework::inDevelopmentMode())
 		{
-			if (Framework::inDevelopmentMode())
-			{
-				$this->logFilePath = f_util_FileUtils::buildProjectPath('log', 'i18n', 'keynotfound.log');
-				f_util_FileUtils::mkdir(dirname($this->logFilePath));
-			}
-			else
-			{
-				$this->logFilePath = false;
-			}
+			$stringLine = $lang . '/' . $key;
+			change_LoggingService::getInstance()->namedLog($stringLine, 'keynotfound');
 		}
-		
-		if ($this->logFilePath !== false)
+		else
 		{
-			$mode =  RequestContext::getInstance()->getMode() === RequestContext::FRONTOFFICE_MODE ? 'fo' : 'bo';
-			error_log(gmdate('Y-m-d H:i:s'). "\t" . $mode ."\t" .  $lang. "\t" . $key . PHP_EOL, 3, $this->logFilePath);
+			$this->logFilePath = false;
 		}
 	}
 	

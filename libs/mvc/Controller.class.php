@@ -222,7 +222,7 @@ class change_Controller extends change_Singleton
 				return $this->forward('website', 'Error404');
 			}
 
-			$this->actionStack->addEntry($moduleName, $moduleName, $actionInstance);
+			$this->actionStack->addEntry($moduleName, $actionName, $actionInstance);
 			
 				// initialize the action
 			if ($actionInstance->initialize($this->context))

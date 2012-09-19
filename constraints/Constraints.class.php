@@ -4,7 +4,7 @@ abstract class change_Constraints
 	/**
 	 * @param string $name
 	 * @param array $params
-	 * @return Zend_Validate_Interface
+	 * @return \Zend\Validator\ValidatorInterface
 	 */
 	public static function getByName($name, $params = array())
 	{
@@ -24,7 +24,7 @@ abstract class change_Constraints
 	}
 	
 	/**
-	 * @param Zend_Validate_Interface $constraint
+	 * @param \Zend\Validator\ValidatorInterface $constraint
 	 * @param string $fieldLabel
 	 * @param array $params
 	 * @return array
@@ -114,44 +114,45 @@ abstract class change_Constraints
 	
 	/**
 	 * @param array $params <type => integer>
+	 * @return \Zend\Validator\ValidatorInterface
 	 */
 	public static function required($params = array())
 	{
-		$c = new Zend_Validate_NotEmpty($params);
-		$c->setMessage(self::getI18nConstraintValue(Zend_Validate_NotEmpty::IS_EMPTY));
+		$c = new \Zend\Validator\NotEmpty($params);
+		$c->setMessage(self::getI18nConstraintValue(\Zend\Validator\NotEmpty::IS_EMPTY));
 		return $c;		
 	}
 	
 	/**
 	 * @param array $params
-	 * @return Zend_Validate_Interface
+	 * @return \Zend\Validator\ValidatorInterface
 	 */
 	public static function email($params = array())
 	{	
 		$params['hostname'] = self::hostname($params);	
-		$c = new Zend_Validate_EmailAddress($params);
+		$c = new \Zend\Validator\EmailAddress($params);
 		if (!isset($params['messages']))
 		{ 
-			foreach (array(Zend_Validate_EmailAddress::INVALID, 
-				Zend_Validate_EmailAddress::INVALID_FORMAT, 
-				Zend_Validate_EmailAddress::INVALID_HOSTNAME, 
-				Zend_Validate_EmailAddress::INVALID_MX_RECORD, 
-				Zend_Validate_EmailAddress::INVALID_SEGMENT, 
-				Zend_Validate_EmailAddress::DOT_ATOM, 
-				Zend_Validate_EmailAddress::QUOTED_STRING, 
-				Zend_Validate_EmailAddress::INVALID_LOCAL_PART, 
-				Zend_Validate_EmailAddress::LENGTH_EXCEEDED) as $key) 
+			foreach (array(\Zend\Validator\EmailAddress::INVALID, 
+				\Zend\Validator\EmailAddress::INVALID_FORMAT, 
+				\Zend\Validator\EmailAddress::INVALID_HOSTNAME, 
+				\Zend\Validator\EmailAddress::INVALID_MX_RECORD, 
+				\Zend\Validator\EmailAddress::INVALID_SEGMENT, 
+				\Zend\Validator\EmailAddress::DOT_ATOM, 
+				\Zend\Validator\EmailAddress::QUOTED_STRING, 
+				\Zend\Validator\EmailAddress::INVALID_LOCAL_PART, 
+				\Zend\Validator\EmailAddress::LENGTH_EXCEEDED) as $key) 
 			{
 				$c->setMessage(self::getI18nConstraintValue($key), $key);
 			}
 		}
-		$c->setDisableTranslator(true);
+		$c->setDefaultTranslator();
 		return $c;
 	}
 	
 	/**
 	 * @param array $params <max => maxLength || parameter => maxLength>
-	 * @return Zend_Validate_Interface
+	 * @return \Zend\Validator\ValidatorInterface
 	 */
 	public static function maxSize($params = array())
 	{		
@@ -160,18 +161,18 @@ abstract class change_Constraints
 			$params['max'] = intval($params['parameter']);
 		}
 		$messages = array(
-		Zend_Validate_StringLength::INVALID => self::getI18nConstraintValue(Zend_Validate_StringLength::INVALID),
-		Zend_Validate_StringLength::TOO_LONG => self::getI18nConstraintValue(Zend_Validate_StringLength::TOO_LONG));
+		\Zend\Validator\StringLength::INVALID => self::getI18nConstraintValue(\Zend\Validator\StringLength::INVALID),
+		\Zend\Validator\StringLength::TOO_LONG => self::getI18nConstraintValue(\Zend\Validator\StringLength::TOO_LONG));
 		
-		$c = new Zend_Validate_StringLength($params);
+		$c = new \Zend\Validator\StringLength($params);
 		$c->setMessages($messages);
-		$c->setDisableTranslator(true);
+		$c->setDefaultTranslator();
 		return $c;
 	}	
 	
 	/**
 	 * @param array $params <min => minLength || parameter => minLength>
-	 * @return Zend_Validate_Interface
+	 * @return \Zend\Validator\ValidatorInterface
 	 */
 	public static function minSize($params = array())
 	{		
@@ -180,18 +181,18 @@ abstract class change_Constraints
 			$params['min'] = intval($params['parameter']);
 		}
 		$messages = array(
-		Zend_Validate_StringLength::INVALID => self::getI18nConstraintValue(Zend_Validate_StringLength::INVALID),
-		Zend_Validate_StringLength::TOO_SHORT => self::getI18nConstraintValue(Zend_Validate_StringLength::TOO_SHORT));
+		\Zend\Validator\StringLength::INVALID => self::getI18nConstraintValue(\Zend\Validator\StringLength::INVALID),
+		\Zend\Validator\StringLength::TOO_SHORT => self::getI18nConstraintValue(\Zend\Validator\StringLength::TOO_SHORT));
 		
-		$c = new Zend_Validate_StringLength($params);
+		$c = new \Zend\Validator\StringLength($params);
 		$c->setMessages($messages);
-		$c->setDisableTranslator(true);
+		$c->setDefaultTranslator();
 		return $c;
 	}
 
 	/**
 	 * @param array $params <modelName => modelName, propertyName => propertyName, [documentId => documentId]>
-	 * @return Zend_Validate_Interface
+	 * @return \Zend\Validator\ValidatorInterface
 	 */
 	public static function unique($params = array())
 	{
@@ -201,7 +202,7 @@ abstract class change_Constraints
 	
 	/**
 	 * @param array $params <pattern => pattern, [message => message] || parameter => pattern#message>
-	 * @return Zend_Validate_Interface
+	 * @return \Zend\Validator\ValidatorInterface
 	 */	
 	public static function matches($params = array())
 	{
@@ -216,7 +217,7 @@ abstract class change_Constraints
 			$params['pattern'] = '#' . $pattern . '#';
 		}
 
-		$c = new Zend_Validate_Regex($params);
+		$c = new \Zend\Validator\Regex($params);
 		if (isset($params['message']) && is_string($params['message']))
 		{
 			$c->setMessage($params['message']);
@@ -224,7 +225,7 @@ abstract class change_Constraints
 		else
 		{
 			$messages = array(
-				Zend_Validate_Regex::NOT_MATCH => self::getI18nConstraintValue(Zend_Validate_Regex::NOT_MATCH));		
+				\Zend\Validator\Regex::NOT_MATCH => self::getI18nConstraintValue(\Zend\Validator\Regex::NOT_MATCH));		
 			$c->setMessages($messages);
 		}
 		return $c;
@@ -232,7 +233,7 @@ abstract class change_Constraints
 	
 	/**
 	 * @param array $params <min => min || parameter => min>
-	 * @return Zend_Validate_Interface
+	 * @return \Zend\Validator\ValidatorInterface
 	 */	
 	public static function min($params = array())
 	{
@@ -249,7 +250,7 @@ abstract class change_Constraints
 
 	/**
 	 * @param array $params <max => max || parameter => max>
-	 * @return Zend_Validate_Interface
+	 * @return \Zend\Validator\ValidatorInterface
 	 */	
 	public static function max($params = array())
 	{
@@ -266,7 +267,7 @@ abstract class change_Constraints
 
 	/**
 	 * @param array $params <min => min, max => max, [inclusive => inclusive] || parameter => min..max>
-	 * @return Zend_Validate_Interface
+	 * @return \Zend\Validator\ValidatorInterface
 	 */	
 	public static function range($params = array())
 	{
@@ -278,38 +279,38 @@ abstract class change_Constraints
 			$params['inclusive'] = true;
 		}
 		
-		$c = new Zend_Validate_Between($params);
-		$c->setDisableTranslator(true);
+		$c = new \Zend\Validator\Between($params);
+		$c->setDefaultTranslator();
 		$messages = array(
-			Zend_Validate_Between::NOT_BETWEEN => self::getI18nConstraintValue(Zend_Validate_Between::NOT_BETWEEN),
-			Zend_Validate_Between::NOT_BETWEEN_STRICT => self::getI18nConstraintValue(Zend_Validate_Between::NOT_BETWEEN_STRICT));		
+			\Zend\Validator\Between::NOT_BETWEEN => self::getI18nConstraintValue(\Zend\Validator\Between::NOT_BETWEEN),
+			\Zend\Validator\Between::NOT_BETWEEN_STRICT => self::getI18nConstraintValue(\Zend\Validator\Between::NOT_BETWEEN_STRICT));		
 		$c->setMessages($messages);	
 		return $c;
 	}
 	
 	/**
 	 * 
-	 * @param array $params<allow => Zend_Validate_Hostname::ALLOW_*>
+	 * @param array $params<allow => \Zend\Validator\Hostname::ALLOW_*>
 	 */
 	public static function hostname($params = array())
 	{
-		$c = new Zend_Validate_Hostname($params);
-		foreach (array(Zend_Validate_Hostname::INVALID, 
-				Zend_Validate_Hostname::CANNOT_DECODE_PUNYCODE, 
-				Zend_Validate_Hostname::INVALID_DASH, 
-				Zend_Validate_Hostname::INVALID_HOSTNAME, 
-				Zend_Validate_Hostname::INVALID_HOSTNAME_SCHEMA, 
-				Zend_Validate_Hostname::INVALID_LOCAL_NAME, 
-				Zend_Validate_Hostname::INVALID_URI, 
-				Zend_Validate_Hostname::IP_ADDRESS_NOT_ALLOWED, 
-				Zend_Validate_Hostname::LOCAL_NAME_NOT_ALLOWED,
-				Zend_Validate_Hostname::UNDECIPHERABLE_TLD,
-				Zend_Validate_Hostname::UNKNOWN_TLD,
+		$c = new \Zend\Validator\Hostname($params);
+		foreach (array(\Zend\Validator\Hostname::INVALID, 
+				\Zend\Validator\Hostname::CANNOT_DECODE_PUNYCODE, 
+				\Zend\Validator\Hostname::INVALID_DASH, 
+				\Zend\Validator\Hostname::INVALID_HOSTNAME, 
+				\Zend\Validator\Hostname::INVALID_HOSTNAME_SCHEMA, 
+				\Zend\Validator\Hostname::INVALID_LOCAL_NAME, 
+				\Zend\Validator\Hostname::INVALID_URI, 
+				\Zend\Validator\Hostname::IP_ADDRESS_NOT_ALLOWED, 
+				\Zend\Validator\Hostname::LOCAL_NAME_NOT_ALLOWED,
+				\Zend\Validator\Hostname::UNDECIPHERABLE_TLD,
+				\Zend\Validator\Hostname::UNKNOWN_TLD,
 				) as $key) 
 			{
 				$c->setMessage(self::getI18nConstraintValue($key), $key);
 			}		
-		$c->setDisableTranslator(true);
+		$c->setDefaultTranslator();
 		return $c;
 		
 
@@ -317,17 +318,17 @@ abstract class change_Constraints
 	
 	/**
 	 * @param array $params
-	 * @return Zend_Validate_Interface
+	 * @return \Zend\Validator\ValidatorInterface
 	 */
 	public static function integer($params = array())
 	{
-		$c = new Zend_Validate_Digits($params);
-		$c->setMessage(self::getI18nConstraintValue(Zend_Validate_Digits::NOT_DIGITS), Zend_Validate_Digits::NOT_DIGITS);
+		$c = new \Zend\Validator\Digits($params);
+		$c->setMessage(self::getI18nConstraintValue(\Zend\Validator\Digits::NOT_DIGITS), \Zend\Validator\Digits::NOT_DIGITS);
 		return $c;		
 	}	
 }
 
-class change_WrappedValidatorConstraint implements Zend_Validate_Interface
+class change_WrappedValidatorConstraint implements \Zend\Validator\ValidatorInterface
 {
 	/**
 	 * @var validation_ValidatorImpl
@@ -389,7 +390,7 @@ class change_WrappedValidatorConstraint implements Zend_Validate_Interface
 
 
 
-class change_MinConstraint extends Zend_Validate_GreaterThan
+class change_MinConstraint extends \Zend\Validator\GreaterThan
 {
 	/**
 	 * Returns true if and only if $value is greater or equals than min option
@@ -399,19 +400,19 @@ class change_MinConstraint extends Zend_Validate_GreaterThan
 	 */
 	public function isValid($value)
 	{
-		$this->_setValue($value);
-		if ($this->_min > $value) {
-			$this->_error(self::NOT_GREATER);
+		$this->setValue($value);
+		if ($this->min > $value) {
+			$this->error(\Zend\Validator\GreaterThan::NOT_GREATER);
 			return false;
 		}
 		return true;
 	}	
 }
 
-class change_MaxConstraint extends Zend_Validate_LessThan
+class change_MaxConstraint extends \Zend\Validator\LessThan
 {
 	/**
-	 * Defined by Zend_Validate_Interface
+	 * Defined by \Zend\Validator\ValidatorInterface
 	 *
 	 * Returns true if and only if $value is less or equals than max option
 	 *
@@ -420,9 +421,9 @@ class change_MaxConstraint extends Zend_Validate_LessThan
 	 */
 	public function isValid($value)
 	{
-		$this->_setValue($value);
-		if ($this->_max <= $value) {
-			$this->_error(self::NOT_LESS);
+		$this->setValue($value);
+		if ($this->max <= $value) {
+			$this->error(\Zend\Validator\LessThan::NOT_LESS);
 			return false;
 		}
 		return true;
