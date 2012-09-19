@@ -252,7 +252,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 	 */
 	public function getLabel()
 	{
-		return LocaleService::getInstance()->trans($this->getLabelKey());
+		return LocaleService::getInstance()->trans($this->getLabelKey(), array('ucf'));
 	}
 
 	/**
