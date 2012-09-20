@@ -26,7 +26,7 @@ class f_tasks_BackgroundIndexingTask extends task_SimpleSystemTask
 	
 	private function backgroundIndex($maxId, $chunkSize = 100, &$errors)
 	{
-		$logs = LoggingService::getInstance();
+		$logs = change_LoggingService::getInstance();
 		$scriptPath = 'framework/indexer/backgroundDocumentIndexer.php';
 		$logs->namedLog(__METHOD__ . "\t" . $maxId, 'indexer');
 		$output = f_util_System::execScript($scriptPath, array($maxId, $chunkSize));
