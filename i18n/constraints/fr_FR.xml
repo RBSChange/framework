@@ -4,6 +4,7 @@
 	<key id="isempty">Cette valeur est obligatoire et ne peut être vide.</key>
 	<key id="notbetweendocumentarray">le champ "{field}" n'est pas valide : count='{count}' min-occurs='{minOccurs}', max-occurs='{maxOccurs}'</key>
 	<key id="emailaddressinvalid">le champ "{field}" doit contenir une adresse e-mail valide.</key>
+	<key id="emailsaddressinvalid">le champ "{field}" contient des adresses (%value%) e-mail invalide.</key>
 	<key id="emailaddressinvalidformat">le champ "{field}" doit contenir une adresse e-mail valide.</key>
 	<key id="emailaddressinvalidhostname">le champ "{field}" doit contenir une adresse e-mail valide
 		('%hostname%' n'est pas un nom d'hôte valide pour l'adresse email '%value%').</key>
@@ -40,4 +41,6 @@
 	<key id="hostnameundecipherabletld">'%value%' semble être un nom d'hôte DNS mais l'extension TLD ne peut être extraite</key>
 	<key id="hostnameunknowntld">'%value%' semble être un nom d'hôte DNS mais son extension TLD semble inconnue</key>
 	<key id="notdigits">'%value%' ne doit contenir que des chiffres</key>
+	<key id="domaininvalid">'%value%' n'est pas un nom de domaine valide.</key>
+	<key id="urlinvalid">'%value%' n'est pas une URL valide.</key>
 </i18n>

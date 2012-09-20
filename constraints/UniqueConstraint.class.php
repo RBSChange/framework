@@ -23,9 +23,10 @@ class change_UniqueConstraint extends \Zend\Validator\AbstractValidator
 	 */   
 	public function __construct($params = array())
 	{
-		$messageTemplates = array(self::NOTUNIQUE => change_Constraints::getI18nConstraintValue(self::NOTUNIQUE));
-		$messageVariables = array('propertyName' => '_propertyName');
-		parent::__construct(array('messageTemplates' => $messageTemplates, 'messageVariables' => $messageVariables));
+		$this->messageTemplates = array(self::NOTUNIQUE => self::NOTUNIQUE);
+		$this->messageVariables = array('propertyName' => '_propertyName');
+		$params += change_Constraints::getDefaultOptions();
+		parent::__construct($params);
 		if (isset($params['modelName']))
 		{
 			$this->_modelName = $params['modelName'];
@@ -92,7 +93,6 @@ class change_UniqueConstraint extends \Zend\Validator\AbstractValidator
 		$row = $query->findUnique();
 		if ($row !== null && intval($row['id']) != $this->_documentId)
 		{
-			Framework::fatal(__METHOD__ . ' ' . $this->_modelName . ' '. $this->_propertyName . ' '. $this->_documentId . ' -> ' . $value);
 			$this->error(self::NOTUNIQUE);
 			return false;
 		}
