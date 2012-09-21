@@ -306,7 +306,7 @@ class change_Storage
 		$container = $this->getUserSessionContainer();
 		if ($this->started) 
 		{
-			foreach (array_keys($container) as $key)
+			foreach (array_keys($container->getArrayCopy()) as $key)
 			{
 				unset($container[$key]);
 			}
