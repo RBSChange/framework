@@ -166,14 +166,9 @@
 		<autoload>
 			<!-- Zend-based namespace loading -->
 			<namespaces>
-				<entry name="Zend">{PROJECT_HOME}/libs/zf2/library/Zend/</entry>
-				<entry name="ZendOAuth">{PROJECT_HOME}/libs/ZendOAuth/library/ZendOAuth/</entry>
+				<entry name="Zend">{PROJECT_HOME}/Libraries/ZendFramework/library/Zend/</entry>
+				<entry name="ZendOAuth">{PROJECT_HOME}/Libraries/ZendOAuth/library/ZendOAuth/</entry>
 			</namespaces>
-			<!-- 
-			<paths>
-				<entry name="zf1">{PROJECT_HOME}/libs/zfminimal/library/</entry>
-			</paths>
-			 -->
 		</autoload>
 		
 		<tal>

@@ -342,7 +342,7 @@ class Framework
 		{
 			set_include_path(str_replace('{PROJECT_HOME}', PROJECT_HOME, implode(PATH_SEPARATOR, $includePaths)));
 		}
-		require_once PROJECT_HOME . DIRECTORY_SEPARATOR . 'libs/zf2/library/Zend/Loader/StandardAutoloader.php';
+		require_once PROJECT_HOME . '/Libraries/ZendFramework/library/Zend/Loader/StandardAutoloader.php';
 		$namespaces = change_ConfigurationService::getInstance()->getConfigurationValue('autoload/namespaces', array());
 		foreach ($namespaces as $namespace => $path)
 		{
