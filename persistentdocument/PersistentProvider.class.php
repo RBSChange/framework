@@ -32,6 +32,11 @@ abstract class f_persistentdocument_PersistentProvider extends change_Singleton
 	protected $m_i18nDocumentInstances = array();
 	
 	/**
+	 * @var array
+	 */
+	protected $m_tmpRelation = array();
+	
+	/**
 	 * Temporay identifier for new persistent document
 	 * @var Integer
 	 */
@@ -365,26 +370,36 @@ abstract class f_persistentdocument_PersistentProvider extends change_Singleton
 		if ($id < 0) 
 		{
 			$this->putInCache($id, $document);
+			$this->m_tmpRelation[$id] = $id;
 		}
 		return $id;
 	}
 	
 	/**
-	 * @param integer $documentId
+	 * @param integer $cachedId
 	 * @return f_persistentdocument_PersistentDocument
 	 * @throws Exception
 	 */
-	public function getCachedDocumentById($documentId)
+	public function getCachedDocumentById($cachedId)
 	{
-		if ($documentId < 0)
+		if ($cachedId < 0)
 		{
-			if ($this->isInCache($documentId))
+			$id = isset($this->m_tmpRelation[$cachedId]) ? $this->m_tmpRelation[$cachedId] : $cachedId;
+			if ($this->isInCache($id))
 			{
-				return $this->getFromCache($documentId);
+				return $this->getFromCache($id);
 			}
-			throw new Exception('document ' . $documentId . ' is not in memory');
+			throw new Exception('document ' . $cachedId . '/'. $id . ' is not in memory');
 		}
-		return $this->getDocumentInstance($documentId);
+		return $this->getDocumentInstance($cachedId);
+	}
+	
+	protected function setCachedRelation($cachedId, $documentId)
+	{
+		if (isset($this->m_tmpRelation[$cachedId]))
+		{
+			$this->m_tmpRelation[$cachedId] = $documentId;
+		}
 	}
 	
 	/**
