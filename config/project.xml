@@ -164,11 +164,14 @@
 		</nodes>
 		
 		<autoload>
-			<!-- Zend-based namespace loading -->
-			<namespaces>
-				<entry name="Zend">{PROJECT_HOME}/Libraries/ZendFramework/library/Zend/</entry>
-				<entry name="ZendOAuth">{PROJECT_HOME}/Libraries/ZendOAuth/library/ZendOAuth/</entry>
-			</namespaces>
+			<!-- Zend-based namespace loading
+				<namespaces>
+				</namespaces>
+			 -->
+			 <!-- Include Path based autoload
+			 <paths>
+			 </paths>
+			 -->
 		</autoload>
 		
 		<tal>

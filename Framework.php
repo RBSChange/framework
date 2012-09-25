@@ -352,6 +352,7 @@ class Framework
 			$zendLoader->register();
 		}
 	}
+	
 	/**
 	 * Registers change's autoload
 	 */
@@ -377,6 +378,9 @@ class Framework
 	
 	public static function initialize()
 	{
+		require_once PROJECT_HOME . '/Change/Application.php';
+		\Change\Application::getInstance()->registerAutoload();
+		
 		// Load configuration
 		self::registerChangeAutoload();
 		
