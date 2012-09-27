@@ -1,14 +1,25 @@
 <?php
 /**
- * @method change_XulController getInstance()
+ * @deprecated use \Change\Mvc\Controller
  */
 class change_XulController extends change_Controller
 {
-
-	protected function setRequestContextMode()
+	/**
+	 * @return boolean
+	 */
+	public function allowAutoLogin()
 	{
-		RequestContext::getInstance()->setMode(RequestContext::BACKOFFICE_MODE);
-		$this->getContext()->getUser()->setUserNamespace(change_User::BACKEND_NAMESPACE);
+		return false;
+	}
+
+	/**
+	 * @return void
+	 */
+	public function dispatch()
+	{
+		$this->getContext()->setMode(\Change\Mvc\Context::BACKEND);
+		$this->getUser()->setUserNamespace(change_User::BACKEND_NAMESPACE);
+		parent::dispatch();
 	}
 
 	/**

@@ -1,43 +1,9 @@
 <?php
-class change_User
+/**
+ * @deprecated use \Change\Mvc\User
+ */
+class change_User extends \Change\Mvc\User
 {
-	const BACKEND_NAMESPACE = 'backend';
-	const FRONTEND_NAMESPACE = 'frontend';
-	
-	const AUTH_NAMESPACE = 'User/authenticated';
-
-	// extends ParameterHolder
-	const ATTRIBUTE_NAMESPACE = 'User/attributes';
-
-	/**
-	 * @var straing
-	 */
-	private $userNamespace = self::FRONTEND_NAMESPACE;
-	
-	
-	/**
-	 * @var array
-	 */
-	private $attributes = null;
-	
-	/**
-	 * @var change_Context
-	 */
-	private $context = null;
-
-	/**
-	 * @var array
-	 */
-	private $authenticated;
-	
-	/**
-	 * @return change_Context
-	 */
-	public function getContext()
-	{
-		return $this->context;
-	}
-	
 	/**
 	 *
 	 * @param string $class
@@ -54,107 +20,15 @@ class change_User
 		return $object;
 	}
 	
-	public function initialize($context, $parameters = null)
-	{	
-		$this->context = $context;
-	}
-	
-	public function shutdown()
-	{	
-		
-	}
-	
 	/**
-	 *@deprecated
+	 * @deprecated
 	 */
 	protected function checkLoadedNamespace($ns = null)
 	{
 		// No implementation
 		return false;
 	}
-	
-	/**
-	 * @param string $userNamespace
-	 * @return string Old namespace
-	 */
-	public function setUserNamespace($userNamespace)
-	{
-		if ($userNamespace !== self::BACKEND_NAMESPACE)
-		{
-			$userNamespace = self::FRONTEND_NAMESPACE;
-		}
-		
-		$oldNamespace = $this->userNamespace;
-		$this->userNamespace = $userNamespace;
-		return $oldNamespace;
-	}
-	
-	/**
-	 *
-	 * @return string 
-	 */
-	public function getUserNamespace()
-	{
-		return $this->userNamespace;
-	}
 
-	/**
-	 * @return string
-	 */
-	public function getLogin()
-	{
-		return change_Controller::getInstance()->getStorage()->readForUser('framework_login'); 
-	}
-	
-	/**
-	 * @param string $login
-	 */
-	public function setLogin($login)
-	{
-		change_Controller::getInstance()->getStorage()->writeForUser('framework_login', $login); 
-	}
-	
-	/**
-	 * @return integer
-	 */
-	public function getId()
-	{
-		return change_Controller::getInstance()->getStorage()->readForUser('framework_userid');
-	}
-	
-	/**
-	 * @param integer $id
-	 */
-	public function setId($id)
-	{
-		change_Controller::getInstance()->getStorage()->writeForUser('framework_userid', $id);
-	}
-	
-	/**
-	 * Initializes the FrameworkSecurityUser using a modules_users/user.
-	 * @param users_persistentdocument_user $user
-	 */
-	public function setUser($user)
-	{
-		if ($user instanceof users_persistentdocument_user) 
-		{
-			$isRoot = $user->getIsroot();
-			change_Controller::getInstance()->getStorage()->writeForUser('framework_isRoot', $isRoot);
-			$this->setLogin($user->getLogin());
-			$this->setId($user->getId());
-		}
-	}
-	
-	/**
-	 * Get the superuser attribute for the user. 
-	 *
-	 * @return boolean true if super user false otherwise.
-	 */
-	public function isRoot()
-	{
-		return change_Controller::getInstance()->getStorage()->readForUser('framework_isRoot') === true;
-	}
-	
 	/**
 	 * @deprecated
 	 */
@@ -225,7 +99,7 @@ class change_User
 		}
 		else
 		{
-			$sessionContainer = change_Controller::getInstance()->getStorage()->getUserSessionNamespaceInstance();
+			$sessionContainer = change_Controller::getInstance()->getStorage()->getUserSessionContainer();
 		}
 		return array_keys($sessionContainer->getIterator());
 	}
@@ -242,7 +116,7 @@ class change_User
 		}
 		else
 		{
-			$sessionContainer = change_Controller::getInstance()->getStorage()->getUserSessionNamespaceInstance();
+			$sessionContainer = change_Controller::getInstance()->getStorage()->getUserSessionContainer();
 		}
 		change_Controller::getInstance()->getStorage()->writeForContainer($name, $value, $sessionContainer);
 	}
@@ -259,7 +133,7 @@ class change_User
 		}
 		else
 		{
-			$sessionContainer = change_Controller::getInstance()->getStorage()->getUserSessionNamespaceInstance();
+			$sessionContainer = change_Controller::getInstance()->getStorage()->getUserSessionContainer();
 		}
 		change_Controller::getInstance()->getStorage()->writeForContainer($name, $value, $sessionContainer);
 	}
@@ -276,7 +150,7 @@ class change_User
 		}
 		else
 		{
-			$sessionContainer = change_Controller::getInstance()->getStorage()->getUserSessionNamespaceInstance();
+			$sessionContainer = change_Controller::getInstance()->getStorage()->getUserSessionContainer();
 		}
 		foreach ($attributes as $name => $value)
 		{
@@ -296,38 +170,14 @@ class change_User
 		}
 		else
 		{
-			$sessionContainer = change_Controller::getInstance()->getStorage()->getUserSessionNamespaceInstance();
+			$sessionContainer = change_Controller::getInstance()->getStorage()->getUserSessionContainer();
 		}
 		foreach ($attributes as $name => $value)
 		{
 			change_Controller::getInstance()->getStorage()->writeForContainer($name, $value, $sessionContainer);
 		}
 	}
-		
-	/**
-	 * @return Booolean
-	 */
-	public function isAuthenticated()
-	{
-		$data = change_Controller::getInstance()->getStorage()->readForUser('framework_isAuthenticated');
-		return $data == true;
-	}
-	
-	/**
-	 * @param boolean $authenticated
-	 */
-	public function setAuthenticated($authenticated)
-	{
-		if ($authenticated === true)
-		{
-			change_Controller::getInstance()->getStorage()->writeForUser('framework_isAuthenticated', $authenticated);
-		}
-		else
-		{
-			change_Controller::getInstance()->getStorage()->removeForUser('framework_isAuthenticated');
-		}
-	}
-	
+
 	/**
 	 * @deprecated
 	 */
@@ -340,7 +190,7 @@ class change_User
 		}
 		else
 		{
-			$container = change_Controller::getInstance()->getStorage()->getUserSessionNamespaceInstance();
+			$container = change_Controller::getInstance()->getStorage()->getUserSessionContainer();
 		}
 		return $container->getArrayCopy();
 	}

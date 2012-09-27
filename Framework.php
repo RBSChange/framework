@@ -379,7 +379,7 @@ class Framework
 	public static function initialize()
 	{
 		require_once PROJECT_HOME . '/Change/Application.php';
-		\Change\Application::getInstance()->registerAutoload();
+		\Change\Application::getInstance()->registerNamespaceAutoload();
 		
 		// Load configuration
 		self::registerChangeAutoload();

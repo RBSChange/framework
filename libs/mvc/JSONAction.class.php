@@ -1,4 +1,7 @@
 <?php
+/**
+ * @deprecated use \Change\Mvc\AbstractAction
+ */
 abstract class change_JSONAction extends change_Action
 {
 	
@@ -25,8 +28,8 @@ abstract class change_JSONAction extends change_Action
 			header('Content-Type: application/json; charset=utf-8');
 		}
 		$message = array('status' => 'OK', 
-						'module' => $this->getModuleName(null),
-						'action' => $this->getActionName(null),
+						'module' => $this->getModuleName(),
+						'action' => $this->getActionName(),
 						'contents' => $content);
 		echo JsonService::getInstance()->encode($message);
 		return change_View::NONE;			
@@ -44,8 +47,8 @@ abstract class change_JSONAction extends change_Action
 			header('Content-Type: application/json; charset=utf-8');
 		}
 		$message = array('status' => 'ERROR', 
-						'module' => $this->getModuleName(null),
-						'action' => $this->getActionName(null),
+						'module' => $this->getModuleName(),
+						'action' => $this->getActionName(),
 						'contents' => array('popupAlert' => $popupAlert,
 											'errorMessage' => $message));
 		echo JsonService::getInstance()->encode($message);
@@ -64,8 +67,8 @@ abstract class change_JSONAction extends change_Action
 			header('Content-Type: application/json; charset=utf-8');
 		}
 		$message = array('status' => 'ERROR', 
-						'module' => $this->getModuleName(null),
-						'action' => $this->getActionName(null),
+						'module' => $this->getModuleName(),
+						'action' => $this->getActionName(),
 						'contents' => array('popupAlert' => $popupAlert,
 											'errorMessage' => $e->getMessage(), 
 											'errorStackTrace' => $e->getTraceAsString()));
@@ -85,7 +88,7 @@ abstract class change_JSONAction extends change_Action
 	 * @see f_action_BaseAction::getActionName()
 	 * @return string
 	 */
-	protected function getActionName()
+	public function getActionName()
 	{
 		return str_replace('JSON', '', parent::getActionName());
 	}

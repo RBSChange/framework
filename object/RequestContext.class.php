@@ -49,29 +49,6 @@ class RequestContext
 	private $m_ui_supportedLanguages = array();
 
 	/**
-	 * @var boolean
-	 */
-	private $m_inHTTPS;
-	
-	/**
-	 * @var string
-	 */
-	private $m_pathURI;
-	
-	/**
-	 * The possible request modes : backoffice or frontoffice
-	 */
-	const BACKOFFICE_MODE = 0;
-	const FRONTOFFICE_MODE = 1;
-
-	/**
-	 * Enter description here...
-	 *
-	 * @var Integer FRONTOFFICE_MODE or BACKOFFICE_MODE
-	 */
-	private $mode;
-	
-	/**
 	 * @var array
 	 */
 	private $profile;
@@ -92,12 +69,6 @@ class RequestContext
 		$this->m_enabled = (count($this->m_supportedLanguages) > 1);
 		$this->m_lang = $this->getDefaultLang();
 		$this->m_ui_supportedLanguages = $ui_supportedLanguages;
-
-		// This "marker" can be overriden especially when behind proxies
-		$httpsMarker = Framework::getConfigurationValue('general/https-request-marker', 'HTTPS');
-		$httpsMarkerValue = Framework::getConfigurationValue('general/https-request-marker-value', 'on');
-		$this->m_inHTTPS = (isset($_SERVER[$httpsMarker]) && ($_SERVER[$httpsMarker] === $httpsMarkerValue));
-		$this->m_pathURI = (isset($_SERVER['REQUEST_URI'])) ? $_SERVER['REQUEST_URI'] : null;
 		$this->resetProfile();
 	}
 	
@@ -203,50 +174,7 @@ class RequestContext
 		return $this->hasI18nSynchro() ? $this->m_i18n_synchro : array();
 	}
 	
-	/**
-	 * @return boolean
-	 */
-	public function inHTTPS()
-	{
-		return $this->m_inHTTPS;
-	}
-	
-	/**
-	 * @return string (http | https)
-	 */
-	public function getProtocol()
-	{
-		if ($this->m_inHTTPS)
-		{
-			return 'https';
-		}
-		return 'http';
-	}
-	
-	
-	public function getPathURI()
-	{
-		return $this->m_pathURI;
-	}
-	
-	/**
-	 * The current request mode
-	 * @return const FRONTOFFICE_MODE or BACKOFFICE_MODE
-	 */
-	public function getMode()
-	{
-		return $this->mode;
-	}
-
-	/**
-	 * Set the current request mode
-	 * @param const $mode FRONTOFFICE_MODE or BACKOFFICE_MODE
-	 */
-	public function setMode($mode)
-	{
-		$this->mode = $mode;
-	}
-	
+		
 	/**
 	 * @var Boolean
 	 */
@@ -925,17 +853,68 @@ class RequestContext
 	}
 	
 	/**
-	 * @return string
+	 * @deprecated
 	 */
 	public function getClientIp()
 	{
-		$ip = isset($_SERVER['HTTP_X_FORWARDED_FOR']) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : null;
-		$remoteAddr = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : null;
-		if (!f_util_StringUtils::isEmpty($ip) && !f_util_StringUtils::isEmpty($remoteAddr))
-		{
-			$ip .= ', '; 
-		}
-		$ip .= $remoteAddr;
-		return $ip;
+		$controller = change_Controller::getInstance();
+		$controller->getClientIp();
+	}
+	
+	
+	/**
+	 * @deprecated use \Change\Mvc\Context::BACKEND
+	 */
+	const BACKOFFICE_MODE = 0;
+	
+	/**
+	 * @deprecated use \Change\Mvc\Context::FRONTEND
+	 */	
+	const FRONTOFFICE_MODE = 1;
+	
+	
+	/**
+	 * @deprecated
+	 */
+	public function getMode()
+	{
+		$controller = change_Controller::getInstance();
+		$controller->getContext()->getMode();
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function setMode($mode)
+	{
+		$controller = change_Controller::getInstance();
+		$controller->getContext()->setMode($mode);
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function inHTTPS()
+	{
+		return $this->getProtocol() === 'https';
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function getProtocol()
+	{
+		$controller = change_Controller::getInstance();
+		return $controller->getUri()->getScheme();
+	}
+	
+	/**
+	 *  @deprecated
+	 */
+	public function getPathURI()
+	{
+		$controller = change_Controller::getInstance();
+		$uri = $controller->getUri();
+		return $uri->getPath() . ($uri->getQuery() ? '?' . $uri->getQuery() : ''); 
 	}
 }
