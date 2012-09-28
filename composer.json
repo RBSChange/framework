@@ -2,7 +2,50 @@
 	"name": "rbschange/framework",
 	"description": "RBS Change CMS Framework",
 	"type": "rbschange-core",
+	"license":"AGPL-3.0",
 	"require": {
-		"composer/installers": "*"
-	}
+		"composer/installers": "dev-rbschange",
+		"rbschange/brand": "self.version",
+		"rbschange/catalog": "self.version",
+		"rbschange/comment": "self.version",
+		"rbschange/compatibility": "self.version",
+		"rbschange/contactcard": "self.version",
+		"rbschange/customer": "self.version",
+		"rbschange/dashboard": "self.version",
+		"rbschange/filter": "self.version",
+		"rbschange/form": "self.version",
+		"rbschange/generic": "self.version",
+		"rbschange/i18n": "self.version",
+		"rbschange/list": "self.version",
+		"rbschange/markergas": "self.version",
+		"rbschange/media": "self.version",
+		"rbschange/mysqlindexer": "self.version",
+		"rbschange/notification": "self.version",
+		"rbschange/order": "self.version",
+		"rbschange/payment": "self.version",
+		"rbschange/preferences": "self.version",
+		"rbschange/richtext": "self.version",
+		"rbschange/rss": "self.version",
+		"rbschange/seo": "self.version",
+		"rbschange/shipping": "self.version",
+		"rbschange/skin": "self.version",
+		"rbschange/solrsearch": "self.version",
+		"rbschange/task": "self.version",
+		"rbschange/theme": "self.version",
+		"rbschange/uixul": "self.version",
+		"rbschange/useractionlogger": "self.version",
+		"rbschange/users": "self.version",
+		"rbschange/videos": "self.version",
+		"rbschange/website": "self.version",
+		"rbschange/workflow": "self.version",
+		"rbschange/zone": "self.version",
+		"rbschange/defaultheme": "self.version"
+	},
+	"repositories": 
+	[
+		{
+			"type": "vcs",
+			"url": "http://github.com/franckstauffer/installers"
+		}
+	]
 }
