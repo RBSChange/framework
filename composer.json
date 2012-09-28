@@ -4,7 +4,7 @@
 	"type": "rbschange-core",
 	"license":"AGPL-3.0",
 	"require": {
-		"composer/installers": "dev-rbschange",
+		"composer/installers": "dev-rbschange"
 	},
 	"repositories": 
 	[
