@@ -635,7 +635,8 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 
 		foreach ($this->getInverseProperties() as $name => $infos)
 		{
-			if ($infos->isTreeNode() && $infos->isDocument() && $infos->acceptType($type))
+			/* @var $infos PropertyInfo */
+			if ($infos->getTreeNode() && $infos->isDocument() && $infos->acceptType($type))
 			{
 				// The most specific is suposed to be the last one.
 				// Cf generator_PersistentModel::generatePhpModel().

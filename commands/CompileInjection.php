@@ -43,8 +43,7 @@ class commands_CompileInjection extends c_ChangescriptCommand
 	{
 		$this->message("== Compile Injection ==");
 		$this->loadFramework();
-		change_InjectionService::getInstance()->restore();
-		change_InjectionService::getInstance()->compile();
+		\Change\Injection\Service::getInstance()->compile();
 		$this->quitOk("Injection compiled");
 	}
 }

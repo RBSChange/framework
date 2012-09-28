@@ -342,7 +342,7 @@ class Framework
 		{
 			set_include_path(str_replace('{PROJECT_HOME}', PROJECT_HOME, implode(PATH_SEPARATOR, $includePaths)));
 		}
-		require_once PROJECT_HOME . '/Libraries/ZendFramework/library/Zend/Loader/StandardAutoloader.php';
+		require_once PROJECT_HOME . '/Libraries/zendframework/zendframework/library/Zend/Loader/StandardAutoloader.php';
 		$namespaces = change_ConfigurationService::getInstance()->getConfigurationValue('autoload/namespaces', array());
 		foreach ($namespaces as $namespace => $path)
 		{
@@ -386,12 +386,13 @@ class Framework
 		
 		change_ConfigurationService::getInstance()->loadConfiguration();
 		self::registerConfiguredAutoloads();
+		
+		\Change\Application::getInstance()->registerInjectionAutoload();
 	
 		if (self::inDevelopmentMode()) {error_reporting(E_ALL | E_STRICT);}
 	
-	
-		ini_set('arg_separator.output',	  '&amp;');
-		ini_set('magic_quotes_runtime',	  0);
+		ini_set('arg_separator.output', '&');
+		ini_set('magic_quotes_runtime', 0);
 	
 		change_LoggingService::getInstance()->registerErrorHandler();
 	
@@ -403,7 +404,7 @@ class Framework
 	
 		if (self::inDevelopmentMode())
 		{
-			change_InjectionService::getInstance()->update();
+			\Change\Injection\Service::getInstance()->update();
 		}
 	}
 	
