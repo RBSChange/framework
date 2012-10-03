@@ -2,37 +2,20 @@
 class commands_CompileInjection extends c_ChangescriptCommand
 {
 	/**
+	 * @return boolean
+	 */
+	public function isHidden()
+	{
+		return true;
+	}
+	
+	/**
 	 * @return string
 	 */
 	public function getUsage()
 	{
-		return "";
+		return '@deprecated use compile-config';
 	}
-	
-	public function getAlias()
-	{
-		return "cinj";
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getDescription()
-	{
-		return "compile injection of classes and documents";
-	}
-	
-	/**
-	 * @see c_ChangescriptCommand::getEvents()
-	 */
-	public function getEvents()
-	{
-		return array(
-			array('target' => 'compile-autoload'),
-			array('target' => 'compile-config'),
-			array('target' => 'compile-documents'),
-		);
-	}	
 
 	/**
 	 * @param string[] $params
@@ -41,9 +24,6 @@ class commands_CompileInjection extends c_ChangescriptCommand
 	 */
 	public function _execute($params, $options)
 	{
-		$this->message("== Compile Injection ==");
-		$this->loadFramework();
-		\Change\Injection\Service::getInstance()->compile();
-		$this->quitOk("Injection compiled");
+		$this->quitWarn("== Use compile-config ==");
 	}
 }

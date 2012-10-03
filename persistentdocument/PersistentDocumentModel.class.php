@@ -123,7 +123,7 @@ abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_Bea
 
 		if (!isset(self::$m_documentModels[$documentModelName]))
 		{
-			$modulesConf = Framework::getConfiguration("injection");
+			$modulesConf = Framework::getConfiguration("injection", false);
 			$documentsInjectionConf = isset($modulesConf['document']) ? $modulesConf['document'] : null;
 			
 			if ($documentsInjectionConf !== null && (($key = array_search($moduleName."/".$documentName, $documentsInjectionConf)) !== false))

@@ -7,7 +7,7 @@ class Framework
 	 */
 	public static function debug($message)
 	{
-		change_LoggingService::getInstance()->debug($message);
+		\Change\Application\LoggingManager::getInstance()->debug($message);
 	}
 
 	/**
@@ -15,7 +15,7 @@ class Framework
 	 */
 	public static function info($message)
 	{
-		change_LoggingService::getInstance()->info($message);
+		\Change\Application\LoggingManager::getInstance()->info($message);
 	}
 
 	/**
@@ -23,7 +23,7 @@ class Framework
 	 */
 	public static function warn($message)
 	{
-		change_LoggingService::getInstance()->warn($message);
+		\Change\Application\LoggingManager::getInstance()->warn($message);
 	}
 
 	/**
@@ -31,7 +31,7 @@ class Framework
 	 */
 	public static function error($message)
 	{
-		change_LoggingService::getInstance()->error($message);
+		\Change\Application\LoggingManager::getInstance()->error($message);
 	}
 
 	/**
@@ -39,7 +39,7 @@ class Framework
 	 */
 	public static function exception($e)
 	{
-		change_LoggingService::getInstance()->exception($e);
+		\Change\Application\LoggingManager::getInstance()->exception($e);
 	}
 
 	/**
@@ -47,7 +47,7 @@ class Framework
 	 */
 	public static function fatal($message)
 	{
-		change_LoggingService::getInstance()->fatal($message);
+		\Change\Application\LoggingManager::getInstance()->fatal($message);
 	}
 	
 	/**
@@ -62,7 +62,7 @@ class Framework
 	}
 
 	/**
-	 * @return boolean DEBUG if debug log is enabled
+	 * @deprecated use \Change\Application::inDevelopmentMode()
 	 */
 	public static function isDebugEnabled()
 	{
@@ -70,7 +70,7 @@ class Framework
 	}
 
 	/**
-	 * @return boolean true if INFO log is enabled
+	 * @deprecated use \Change\Application::inDevelopmentMode()
 	 */
 	public static function isInfoEnabled()
 	{
@@ -78,7 +78,7 @@ class Framework
 	}
 	
 	/**
-	 * @return boolean true if WARN log is enabled
+	 * @deprecated use \Change\Application::inDevelopmentMode()
 	 */
 	public static function isWarnEnabled()
 	{
@@ -86,7 +86,7 @@ class Framework
 	}
 
 	/**
-	 * @return boolean true if ERR log is enabled
+	 * @deprecated use \Change\Application::inDevelopmentMode()
 	 */
 	public static function isErrorEnabled()
 	{
@@ -94,7 +94,7 @@ class Framework
 	}
 
 	/**
-	 * @return boolean true if EMERG log is enabled
+	 * @deprecated use \Change\Application::inDevelopmentMode()
 	 */
 	public static function isFatalEnabled()
 	{
@@ -208,20 +208,19 @@ class Framework
 	}
 
 	/**
-	 * @see project config and DEVELOPMENT_MODE constant
-	 * @return boolean
+	 * @deprecated use \Change\Application::inDevelopmentMode()
 	 */
 	public static function inDevelopmentMode()
 	{
-		return DEVELOPMENT_MODE;
+		return \Change\Application::getInstance()->inDevelopmentMode();
 	}
 	
 	/**
-	 * @return string
+	 * @deprecated use \Change\Application::getProfile()
 	 */
 	public static function getProfile()
 	{
-		return change_ConfigurationService::getInstance()->getCurrentProfile();
+		return \Change\Application::getInstance()->getProfile();
 	}
 
 	/**
@@ -289,22 +288,15 @@ class Framework
 	}
 
 	/**
-	 * Return true if the $path configuration exist.
-	 * 
-	 * @param string $path
+	 * @deprecated use \Change\Application\Configuration::hasEntry()
 	 */
 	public static function hasConfiguration($path)
 	{
-		return change_ConfigurationService::getInstance()->hasConfiguration($path);
+		return \Change\Application::getInstance()->getConfiguration()->hasEntry($path);
 	}
 
 	/**
-	 * Return an array with part of project configuration.
-	 * 
-	 * @param string $path
-	 * @param boolean $strict
-	 * @throws Exception if the $path configuration does not exist and $strict is set to true
-	 * @return string | false if the path was not found and strict value is false
+	 * @deprecated use \Change\Application\Configuration::getEntry()
 	 */
 	public static function getConfiguration($path, $strict = true)
 	{
@@ -312,16 +304,11 @@ class Framework
 	}
 
 	/**
-	 * Return an array with part of configuration of Framework
-	 * or null if the $path configuration does not exist.
-	 * 
-	 * @param string $path
-	 * @param string $defaultValue
-	 * @return mixed | null
+	 * @deprecated use \Change\Application\Configuration::getEntry()
 	 */
 	public static function getConfigurationValue($path, $defaultValue = null)
 	{
-		return change_ConfigurationService::getInstance()->getConfigurationValue($path, $defaultValue);
+		return \Change\Application::getInstance()->getConfiguration()->getEntry($path, $defaultValue);
 	}
 	
 	/**
@@ -337,13 +324,14 @@ class Framework
 	 */
 	public static function registerConfiguredAutoloads()
 	{
-		$includePaths = change_ConfigurationService::getInstance()->getConfigurationValue('autoload/paths', array());
+		$application = \Change\Application::getInstance();
+		$includePaths = $application->getConfiguration()->getEntry('autoload/paths', array());
 		if (count($includePaths))
 		{
 			set_include_path(str_replace('{PROJECT_HOME}', PROJECT_HOME, implode(PATH_SEPARATOR, $includePaths)));
 		}
 		require_once PROJECT_HOME . '/Libraries/zendframework/zendframework/library/Zend/Loader/StandardAutoloader.php';
-		$namespaces = change_ConfigurationService::getInstance()->getConfigurationValue('autoload/namespaces', array());
+		$namespaces = $application->getConfiguration()->getEntry('autoload/namespaces', array());
 		foreach ($namespaces as $namespace => $path)
 		{
 			$normalizedPath = str_replace('{PROJECT_HOME}', PROJECT_HOME, trim($path));
@@ -379,22 +367,23 @@ class Framework
 	public static function initialize()
 	{
 		require_once PROJECT_HOME . '/Change/Application.php';
-		\Change\Application::getInstance()->registerNamespaceAutoload();
+		$application = \Change\Application::getInstance();
+		$application->registerNamespaceAutoload();
+		$application->loadConfiguration();
 		
 		// Load configuration
 		self::registerChangeAutoload();
-		
-		change_ConfigurationService::getInstance()->loadConfiguration();
+				
 		self::registerConfiguredAutoloads();
 		
-		\Change\Application::getInstance()->registerInjectionAutoload();
+		$application->registerInjectionAutoload();
 	
 		if (self::inDevelopmentMode()) {error_reporting(E_ALL | E_STRICT);}
 	
 		ini_set('arg_separator.output', '&');
 		ini_set('magic_quotes_runtime', 0);
 	
-		change_LoggingService::getInstance()->registerErrorHandler();
+		\Change\Application\LoggingManager::getInstance()->registerErrorHandler();
 	
 		// Set the locale.
 		$localResult = setlocale(LC_ALL, 'en_US.UTF-8');
@@ -415,47 +404,6 @@ class Framework
 	 */
 	public static function log($message, $priority)
 	{
-		change_LoggingService::getInstance()->fatal("Invalid call of Framework::log('$message', $priority).");
-	}
-
-	/**
-	 * @deprecated use change_ConfigurationService::getAllConfiguration()
-	 */
-	public static function getAllConfiguration()
-	{
-		return change_ConfigurationService::getInstance()->getAllConfiguration();
-	}
-
-	/**
-	 * @deprecated
-	 */
-	public static function addPackageConfiguration($packageName, $infos)
-	{
-		$cs = change_ConfigurationService::getInstance();
-		$config = $cs->getAllConfiguration();
-		if ($config != null && isset($config['packageversion']))
-		{
-			$cs->addVolatileProjectConfigurationNamedEntry('packageversion/' . $packageName, $infos);
-		}
-		else
-		{
-			throw new Exception('Framework configuration not loaded');
-		}
-	}
-
-	/**
-	 * @deprecated use change_ConfigurationService::loadConfiguration()
-	 */
-	public static function loadConfiguration($onlyConfig = false)
-	{
-		change_ConfigurationService::getInstance()->loadConfiguration($onlyConfig);
-	}
-
-	/**
-	 * @deprecated use change_ConfigurationService::loadConfiguration()
-	 */
-	public static function reloadConfiguration()
-	{
-		change_ConfigurationService::getInstance()->loadConfiguration();
+		\Change\Application\LoggingManager::getInstance()->fatal("Invalid call of Framework::log('$message', $priority).");
 	}
 }

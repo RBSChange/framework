@@ -32,87 +32,19 @@ class commands_CompileConfig extends c_ChangescriptCommand
 		$this->message("== Compile config ==");
 		$this->getBootStrap()->cleanDependenciesCache();
 		
-		$cs = change_ConfigurationService::getInstance();
-		$oldAndCurrent = $cs->compile($this->getComputedDeps());
+		require_once PROJECT_HOME . '/Change/Application.php';
+		\Change\Application::getInstance()->registerNamespaceAutoload();
 		
-		// Framework is loaded and configuration may have changed
-		$cs->loadConfiguration();
-				
-		//OAuth identification files
-		if (!is_dir(PROJECT_HOME . '/build/config/oauth/script'))
-		{
-			mkdir(PROJECT_HOME . '/build/config/oauth/script', 0777, true);
-		}
-		
-		if (Framework::hasConfiguration('oauth/consumer'))
-		{
-			$consumer = Framework::getConfiguration('oauth/consumer');
-			file_put_contents(PROJECT_HOME . '/build/config/oauth/script/consumer.txt', $consumer);
-		}
-		else if (!file_exists(PROJECT_HOME . '/build/config/oauth/script/consumer.txt'))
-		{
-			$profile = trim(file_get_contents(PROJECT_HOME . '/profile'));
-			$consumer = $profile .'#' . $profile;
-			file_put_contents(PROJECT_HOME . '/build/config/oauth/script/consumer.txt', $consumer);
-		}
-		
-		if (Framework::hasConfiguration('oauth/token'))
-		{
-			$token = Framework::getConfiguration('oauth/token');
-			file_put_contents(PROJECT_HOME . '/build/config/oauth/script/token.txt', $token);
-		}
-		else if (!file_exists(PROJECT_HOME . '/build/config/oauth/script/token.txt'))
-		{	
-			$ts = time();
-			$token = md5($ts . mt_rand()) .'#' . md5($ts . mt_rand());
-			file_put_contents(PROJECT_HOME . '/build/config/oauth/script/token.txt', $token);
-		}
-		
-		if ($oldAndCurrent !== null)
-		{
-			$old = $oldAndCurrent["old"];
-			$current = $oldAndCurrent["current"];
-			
-			if ($old["defines"]["LOGGING_LEVEL"] != $current["defines"]["LOGGING_LEVEL"])
-			{
-				$this->message("LOGGING_LEVEL is now ".$current["defines"]["LOGGING_LEVEL"]);
-				if (!isset($options['ignoreListener']))
-				{
-					$this->addListeners('after', "website.compile-js-dependencies");
-				}
-			}
-			if ($old["defines"]["SUPPORTED_LANGUAGES"] != $current["defines"]["SUPPORTED_LANGUAGES"])
-			{
-				$this->message("SUPPORTED_LANGUAGES changed");
-				if (!isset($options['ignoreListener']))
-				{
-					$this->addListeners('after', "generate-database");
-					$this->addListeners('after', "uixul.compile-editors-config"); 	
-				}
-			}
-			if ($old["defines"]["CHANGE_USE_CORRECTION"] != $current["defines"]["CHANGE_USE_CORRECTION"]
-			 || $old["defines"]["CHANGE_USE_WORKFLOW"] != $current["defines"]["CHANGE_USE_WORKFLOW"])
-			{
-				$this->message("CHANGE_USE_CORRECTION or CHANGE_USE_WORKFLOW changed");
-				if (!isset($options['ignoreListener']))
-				{
-					$this->addListeners('after', "compile-documents");	
-				}
-			}
-			
-			if ($old["defines"]["DEVELOPMENT_MODE"] != $current["defines"]["DEVELOPMENT_MODE"])
-			{
-				$this->message("DEVELOPMENT_MODE is now ".$current["defines"]["DEVELOPMENT_MODE"]);
-				
-				if (!isset($options['ignoreListener']))
-				{
-					$this->addListeners('after', "clear-webapp-cache");
-				}	
-			}
-		}
-		
-		$this->loadFramework();
-		
+		$generator = new \Change\Application\Configuration\Generator();
+		$generator->compile($this->getComputedDeps());
+
+		// TODO: 
+		// - website.compile-js-dependencies on LOGGING_LEVEL changed
+		// - uixul.compile-editors-config on SUPPORTED_LANGUAGES changed
+		// - compile-documents on CHANGE_USE_CORRECTION | CHANGE_USE_WORKFLOW changed
+		// - clear-webapp-cache on DEVELOPMENT_MODE changed
+		// - website.compile-htaccess
+
 		$this->quitOk("Config compiled");
 	}
 }

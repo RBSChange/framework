@@ -148,8 +148,8 @@ class builder_ModuleGenerator
 	
 	private function addConfiguration()
 	{
+		// TODO update configuration.
 		$info = array('VISIBLE' => $this->visibility, 'CATEGORY' => $this->category, 'ICON' => $this->icon);
-		Framework::addPackageConfiguration('modules_' . $this->name, $info);
 		ModuleService::clearInstance();
 	}
 

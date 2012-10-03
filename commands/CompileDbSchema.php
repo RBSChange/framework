@@ -33,7 +33,7 @@ class commands_CompileDbSchema extends c_ChangescriptCommand
 		
 		$this->loadFramework();
 		
-		$persistentProvider = f_persistentdocument_PersistentProvider::getInstance();
+		$persistentProvider = \Change\Db\Provider::getInstance();
 		$sm = $persistentProvider->getSchemaManager();
 		
 		$this->message('=== Update table f_document with supported languages ===');
