@@ -2,65 +2,9 @@
 /**
  * @method LocaleService getInstance()
  */
-class LocaleService extends change_BaseService
+class LocaleService extends \Change\I18n\I18nManager
 {
-	private $LCID_BY_LANG = null;
 	
-	private $ignoreTransform;
-	
-	protected $transformers;
-	
-	protected function __construct()
-	{
-		$this->ignoreTransform = array('TEXT' => 'raw', 'HTML' => 'html');
-		$this->transformers = array(
-			'lab' => 'transformLab', 'uc' => 'transformUc', 'ucf' => 'transformUcf', 'lc' => 'transformLc', 
-			'js' => 'transformJs', 'html' => 'transformHtml', 'text' => 'transformText', 
-			'attr' => 'transformAttr', 'space' => 'transformSpace', 'etc' => 'transformEtc', 'ucw' => 'transformUcw');
-	}
-	
-	/**
-	 * @param string $langCode
-	 * @return string
-	 */
-	public function getLCID($langCode)
-	{
-		if ($this->LCID_BY_LANG === null)
-		{
-			$this->LCID_BY_LANG = Framework::getConfiguration('i18n');
-		}
-		if (! isset($this->LCID_BY_LANG[$langCode]))
-		{
-			if (strlen($langCode) === 2)
-			{
-				$this->LCID_BY_LANG[$langCode] = strtolower($langCode) . '_' . strtoupper($langCode);
-			}
-			else
-			{
-				$this->LCID_BY_LANG[$langCode] = strtolower($langCode);
-			}
-		}
-		return $this->LCID_BY_LANG[$langCode];
-	}
-	
-	/**
-	 * @param string $lcid
-	 * @return string
-	 */
-	public function getCode($lcid)
-	{
-		if ($this->LCID_BY_LANG === null)
-		{
-			$this->LCID_BY_LANG = Framework::getConfiguration('i18n');
-		}
-		$code = array_search($lcid, $this->LCID_BY_LANG);
-		if ($code === false)
-		{
-			return substr($lcid, 0, 2);
-		}
-		return $code;
-	}
-		
 	public function importOverride($name = null)
 	{
 		if ($name === null || $name === 'framework')
@@ -180,17 +124,7 @@ class LocaleService extends change_BaseService
 			}
 		}
 	}
-	
-	private function getBaseKey($key)
-	{
-		return substr($key, 0, strrpos($key, '.'));
-	}
-	
-	private function getKeyId($key)
-	{
-		return end(explode('.', $key));
-	}
-	
+
 	private function getI18nFilePath($baseKey, $lcid, $override = false)
 	{
 		$parts = explode('.', $baseKey);
@@ -315,20 +249,20 @@ class LocaleService extends change_BaseService
 	 */
 	public function regenerateLocales()
 	{
+		$dbp = $this->getDbProvider();
 		try
 		{
-			$this->getTransactionManager()->beginTransaction();
-			
-			$this->getPersistentProvider()->clearTranslationCache();
+			$dbp->beginTransaction();		
+			$dbp->clearTranslationCache();
 			$this->processModules();
 			$this->processFramework();
 			$this->processThemes();
 				
-			$this->getTransactionManager()->commit();
+			$dbp->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->getTransactionManager()->rollBack($e);
+			$dbp->rollBack($e);
 			throw $e;
 		}
 	}
@@ -342,15 +276,15 @@ class LocaleService extends change_BaseService
 	{
 		try
 		{
-			$this->getTransactionManager()->beginTransaction();
-			$this->getPersistentProvider()->clearTranslationCache('m.' . $moduleName);		
+			$this->getDbProvider()->beginTransaction();
+			$this->getDbProvider()->clearTranslationCache('m.' . $moduleName);		
 			// Processing module : $moduleName
 			$this->processModule($moduleName);
-			$this->getTransactionManager()->commit();
+			$this->getDbProvider()->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->getTransactionManager()->rollBack($e);
+			$this->getDbProvider()->rollBack($e);
 			throw $e;
 		}
 	}
@@ -364,14 +298,14 @@ class LocaleService extends change_BaseService
 	{
 		try
 		{
-			$this->getTransactionManager()->beginTransaction();
-			$this->getPersistentProvider()->clearTranslationCache('t.' . $themeName);
+			$this->getDbProvider()->beginTransaction();
+			$this->getDbProvider()->clearTranslationCache('t.' . $themeName);
 			$this->processTheme($themeName);
-			$this->getTransactionManager()->commit();
+			$this->getDbProvider()->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->getTransactionManager()->rollBack($e);
+			$this->getDbProvider()->rollBack($e);
 			throw $e;
 		}
 	}
@@ -383,14 +317,14 @@ class LocaleService extends change_BaseService
 	{
 		try
 		{
-			$this->getTransactionManager()->beginTransaction();
-			$this->getPersistentProvider()->clearTranslationCache('f');
+			$this->getDbProvider()->beginTransaction();
+			$this->getDbProvider()->clearTranslationCache('f');
 			$this->processFramework();
-			$this->getTransactionManager()->commit();
+			$this->getDbProvider()->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->getTransactionManager()->rollBack($e);
+			$this->getDbProvider()->rollBack($e);
 			throw $e;
 		}
 	}
@@ -464,7 +398,6 @@ class LocaleService extends change_BaseService
 	
 	/**
 	 * Generate the framework localization
-	 *
 	 * @param string $dir
 	 * @param string $basedir
 	 */
@@ -473,7 +406,7 @@ class LocaleService extends change_BaseService
 		
 		try
 		{
-			$this->getTransactionManager()->beginTransaction();
+			$this->getDbProvider()->beginTransaction();
 			
 			$availablePaths = array(f_util_FileUtils::buildFrameworkPath('i18n'), 
 					f_util_FileUtils::buildOverridePath('framework', 'i18n'));
@@ -485,14 +418,13 @@ class LocaleService extends change_BaseService
 				}
 			}
 			
-			$this->getTransactionManager()->commit();
+			$this->getDbProvider()->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->getTransactionManager()->rollBack($e);
+			$this->getDbProvider()->rollBack($e);
 			throw $e;
 		}
-	
 	}
 	
 	/**
@@ -539,34 +471,6 @@ class LocaleService extends change_BaseService
 			foreach ($dirs as $baseKey => $dir)
 			{
 				$this->processDir($baseKey, $dir);
-			}
-		}
-	}
-	
-	protected function applyEntitiesI18nSynchro(&$entities)
-	{
-		$syncConf = RequestContext::getInstance()->getI18nSynchro();
-		if (count($syncConf) === 0) {return;}
-		foreach ($syncConf as $to => $froms)
-		{
-			$toLCID = $this->getLCID($to);
-			foreach ($froms as $from)
-			{
-				$fromLCID = $this->getLCID($from);
-				if (isset($entities[$fromLCID]))
-				{
-					if (!isset($entities[$toLCID]))
-					{
-						$entities[$toLCID] = array();
-					}
-					foreach ($entities[$fromLCID] as $id => $data)
-					{
-						if (!isset($entities[$toLCID][$id]))
-						{
-							$entities[$toLCID][$id] = $data;
-						}
-					}
-				}
 			}
 		}
 	}
@@ -618,46 +522,13 @@ class LocaleService extends change_BaseService
 	}
 	
 	/**
-	 * @return array [baseKey => nbLocales]
-	 */
-	public function getPackageNames()
-	{
-		return $this->getPersistentProvider()->getPackageNames();
-	}
-
-	/**
-	 * @return array [baseKey => nbLocales]
-	 */
-	public function getUserEditedPackageNames()
-	{
-		return $this->getPersistentProvider()->getUserEditedPackageNames();
-	}
-	
-	/**
-	 * 
-	 * @param string $keyPath
-	 * @return array[id => [lcid => ['content' => string, 'useredited' => integer, 'format' => string]]]
-	 */
-	public function getPackageContent($keyPath)
-	{
-		$result = $this->getPersistentProvider()->getPackageData($keyPath);
-		$contents = array();
-		foreach ($result as $row)
-		{
-			$contents[$row['id']][$row['lang']] = array('content' => $row['content'], 
-					'useredited' => $row['useredited'] == "1", 'format' => $row['format']);
-		}
-		return $contents;
-	}
-
-	/**
 	 * @param string $keyPath
 	 * @return array[id => [lcid => ['content' => string, 'useredited' => integer, 'format' => string]]]
 	 */
 	public function getPackageContentFromFile($keyPath)
 	{
 		$entities = array();
-		foreach (RequestContext::getInstance()->getSupportedLanguages() as $lang) 
+		foreach ($this->getSupportedLanguages() as $lang) 
 		{
 			$lcid = $this->getLCID($lang);
 			$filePath = $this->getI18nFilePath($keyPath, $lcid);
@@ -684,564 +555,5 @@ class LocaleService extends change_BaseService
 			}
 		}
 		return $results;
-	}
-	
-	/**
-	 * @param string $keyPath
-	 * @param array $entities
-	 */
-	private function processDatabase($keyPath, $entities)
-	{
-		$keyPath = strtolower($keyPath);
-		
-		$provider = $this->getPersistentProvider();
-		$lcids = array();
-		foreach (RequestContext::getInstance()->getSupportedLanguages() as $lang)
-		{
-			$lcids[$this->getLCID($lang)] = $lang;
-		}
-		foreach ($entities as $lcid => $infos)
-		{
-			if (! isset($lcids[$lcid]))
-			{
-				continue;
-			}
-			foreach ($infos as $id => $entityInfos)
-			{
-				list($content, $format) = $entityInfos;
-				$provider->addTranslate($lcid, strtolower($id), $keyPath, $content, 0, $format, false);
-			}
-		}
-	}
-	
-	/**
-	 * 
-	 * @param string $lcid exemple fr_FR
-	 * @param string $id
-	 * @param string $keyPath
-	 * @param string $content
-	 * @param string $format TEXT | HTML
-	 */
-	public function updateUserEditedKey($lcid, $id, $keyPath, $content, $format)
-	{
-		$this->updateKey($lcid, $id, $keyPath, $content, $format, true);
-	}
-	
-	public function deleteUserEditedKey($lcid, $id, $keyPath)
-	{
-		$provider = $this->getPersistentProvider();
-		$provider->deleteI18nKey($keyPath, $id, $lcid);
-	}
-	
-	/**
-	 * @param string $lcid exemple fr_FR
-	 * @param string $id
-	 * @param string $keyPath
-	 * @param string $content
-	 * @param string $format TEXT | HTML
-	 * @param boolean $userEdited
-	 */
-	public function updateKey($lcid, $id, $keyPath, $content, $format, $userEdited = false)
-	{
-		$provider = $this->getPersistentProvider();
-		$provider->addTranslate($lcid, $id, $keyPath, $content, $userEdited ? 1 : 0, $format, true);
-	}
-	
-	/**
-	 * @param string $cleanKey
-	 * @return array(keyPath, id) || array(false, false);
-	 */
-	public function explodeKey($cleanKey)
-	{
-		$parts = explode('.', strtolower($cleanKey));
-		if (count($parts) < 3) {return array(false, false);}
-		
-		$id = end($parts);
-		$keyPathParts = array_slice($parts, 0, - 1);
-		switch ($keyPathParts[0])
-		{
-			case 'f' :
-			case 'm' :
-			case 't' :
-				break;
-			case 'framework' :
-				$keyPathParts[0] = 'f';
-				break;
-			case 'modules' :
-				$keyPathParts[0] = 'm';
-				break;
-			case 'themes' :
-				$keyPathParts[0] = 't';
-				break;
-			default :
-				return array(false, false);
-		}
-		return array(implode('.', $keyPathParts), $id);
-	}
-	
-	/**
-	 * @param string $string
-	 * @return boolean
-	 */
-	public function isKey($string)
-	{
-		list($path,) = $this->explodeKey($string);
-		return $path !== false;
-	}
-	
-	/**
-	 * @param string $lang
-	 * @param string $cleanKey
-	 * @return string | null
-	 */
-	public function getFullKeyContent($lang, $cleanKey)
-	{
-		list ($keyPath, $id) = $this->explodeKey($cleanKey);
-		if ($keyPath !== false)
-		{
-			$lcid = $this->getLCID($lang);
-			list($content, ) = f_persistentdocument_PersistentProvider::getInstance()->translate($lcid, $id, $keyPath);
-			
-			if ($content === null)
-			{
-				$this->logKeyNotFound($keyPath.'.'.$id, $lcid);
-			}
-			return $content;
-		}
-		
-		Framework::warn("Invalid Key $cleanKey");
-		return null;
-	}
-	
-	/**
-	 * For example: transData('f.boolean.true')
-	 * @param string $cleanKey
-	 * @param array $formatters value in array lab, lc, uc, ucf, js, html, attr
-	 * @param array $replacements
-	 * @return string | $cleanKey
-	 */
-	public function transData($cleanKey, $formatters = array(), $replacements = array())
-	{
-		return $this->formatKey(RequestContext::getInstance()->getLang(), $cleanKey, $formatters, $replacements);
-	}
-	
-	/**
-	 * For example: trans('f.boolean.true')
-	 * @param string $cleanKey
-	 * @param array $formatters value in array lab, lc, uc, ucf, js, html, attr
-	 * @param array $replacements
-	 * @return string | $cleanKey
-	 */
-	public function trans($cleanKey, $formatters = array(), $replacements = array())
-	{
-		return $this->formatKey(RequestContext::getInstance()->getUILang(), $cleanKey, $formatters, $replacements);
-	}
-			
-	/**
-	 * @param string $text
-	 * @return string
-	 */
-	public function translateText($text)
-	{
-		if (f_util_StringUtils::isEmpty($text)) {return $text;}
-		if (preg_match_all('/\$\{(trans|transui):([^}]*)\}/', $text, $matches, PREG_SET_ORDER))
-		{
-			$search = array();
-			$replace = array();
-			$rc = RequestContext::getInstance();
-			foreach ($matches as $infos) 
-			{
-				$search[] = $infos[0];
-				$lang = ($infos[1] === 'transui') ? $rc->getUILang() : $rc->getLang();
-				list($key, $formatters, $replacements) = $this->parseTransString($infos[2]);
-				$replace[] = $this->formatKey($lang, $key, $formatters, $replacements);
-			}
-			$text = str_replace($search, $replace, $text);
-		}
-		return $text;
-	}
-	
-	
-	/**
-	 * For example: formatKey('fr', 'f.boolean.true')
-	 * @param string $lang
-	 * @param string $cleanKey
-	 * @param array $formatters value in array lab, lc, uc, ucf, js, attr, raw, text, html
-	 * @param array $replacements
-	 */
-	public function formatKey($lang, $cleanKey, $formatters = array(), $replacements = array())
-	{
-		list ($keyPath, $id) = $this->explodeKey($cleanKey);
-		if ($keyPath !== false)
-		{
-			$lcid = $this->getLCID($lang);
-			list($content, $format) = f_persistentdocument_PersistentProvider::getInstance()->translate($lcid, $id, $keyPath);
-			if ($content === null)
-			{
-				$this->logKeyNotFound($keyPath.'.'.$id, $lcid);
-				return $cleanKey;
-			}
-		}
-		else
-		{
-			$content = $cleanKey;
-			$format = 'TEXT';
-		}
-		
-		if (count($replacements))
-		{
-			$search = array();
-			$replace = array();
-			foreach ($replacements as $key => $value)
-			{
-				$search[] = '{' . $key . '}';
-				$replace[] = $value;
-			}
-			$content = str_replace($search, $replace, $content);
-		}
-		
-		if (count($formatters))
-		{
-			foreach ($formatters as $formatter)
-			{
-				if ($formatter === 'raw' || $formatter === $this->ignoreTransform[$format]) 
-				{
-					continue;
-				}	
-				if (isset($this->transformers[$formatter]))
-				{
-					$content = $this->{$this->transformers[$formatter]}($content, $lang);
-				}
-				else 
-				{
-					Framework::warn(__METHOD__ . ' Invalid formatter '. $formatter);
-				}
-			}
-		}
-		return $content;
-	}
-		
-	public function transformLab($text, $lang)
-	{
-		return $text . ($lang == 'fr' ? ' :' : ':');
-	}
-	
-	public function transformUc($text, $lang)
-	{
-		return f_util_StringUtils::toUpper($text);
-	}
-	
-	public function transformUcf($text, $lang)
-	{
-		return f_util_StringUtils::ucfirst($text);
-	}
-	
-	public function transformUcw($text, $lang)
-	{
-		return mb_convert_case($text, MB_CASE_TITLE, "UTF-8"); 
-	}
-	
-	public function transformLc($text, $lang)
-	{
-		return f_util_StringUtils::toLower($text);
-	}
-	
-	public function transformJs($text, $lang)
-	{
-		return str_replace(array("\\", "\t", "\n", "\"", "'"), 
-				array("\\\\", "\\t", "\\n", "\\\"", "\\'"), $text);
-	}
-	
-	public function transformHtml($text, $lang)
-	{
-		return nl2br(htmlspecialchars($text, ENT_COMPAT, 'UTF-8'));
-	}
-	
-	public function transformText($text, $lang)
-	{
-		return f_util_HtmlUtils::htmlToText($text);
-	}
-	
-	public function transformAttr($text, $lang)
-	{
-		return f_util_HtmlUtils::textToAttribute($text);
-	}
-	
-	public function transformSpace($text, $lang)
-	{
-		return ' ' . $text . ' ';
-	}
-	
-	public function transformEtc($text, $lang)
-	{
-		return $text . '...';
-	}
-	
-	/**
-	 * @param string $transString
-	 * @return array[$key, $formatters, $replacements]
-	 */
-	public function parseTransString($transString)
-	{
-		$formatters = array();
-		$replacements = array();
-		$key = null;
-		$parts = explode(',' , $transString);
-		$key = strtolower(trim($parts[0]));		
-		$count = count($parts);
-		for ($i = 1; $i < $count; $i++)
-		{
-			$data = trim($parts[$i]);
-			if (strlen($data) == 0) {continue;}
-			if (strpos($data, '='))
-			{
-				$subParts = explode('=' , $data);
-				if (count($subParts) == 2)
-				{
-					list($name, $value) = $subParts;
-					$name = trim($name);
-					$value = trim($value);
-					$l = strlen($value);
-					if ($l === 0)
-					{
-						$replacements[$name] = '';
-					}
-					else
-					{
-						$replacements[$name] = $value;
-					}
-				}
-			}
-			else
-			{
-				$data = strtolower($data);
-				$formatters[] = $data;
-			}
-		}
-		return array($key, $formatters, $replacements);
-	}
-	
-	
-	/**
-	 * @param string $key
-	 * @param string $lang
-	 */
-	protected function logKeyNotFound($key, $lang)
-	{
-		if (Framework::inDevelopmentMode())
-		{
-			$stringLine = $lang . '/' . $key;
-			change_LoggingService::getInstance()->namedLog($stringLine, 'keynotfound');
-		}
-		else
-		{
-			$this->logFilePath = false;
-		}
-	}
-	
-	const SYNCHRO_MODIFIED = 'MODIFIED';
-	const SYNCHRO_VALID = 'VALID';
-	const SYNCHRO_SYNCHRONIZED = 'SYNCHRONIZED';
-	
-	/**
-	 * @param integer $documentId
-	 */
-	public function resetSynchroForDocumentId($documentId)
-	{
-		if (RequestContext::getInstance()->hasI18nSynchro())
-		{
-			$d = DocumentHelper::getDocumentInstanceIfExists($documentId);
-			if ($d && $d->getPersistentModel()->isLocalized())
-			{
-				$this->getPersistentProvider()->setI18nSynchroStatus($d->getId(), $d->getLang(), self::SYNCHRO_MODIFIED, null);
-			}
-		}
-	}
-	
-	
-	/**
-	 * @param integer $documentId
-	 */
-	public function initSynchroForDocumentId($documentId)
-	{
-		if (RequestContext::getInstance()->hasI18nSynchro())
-		{
-			$d = DocumentHelper::getDocumentInstanceIfExists($documentId);
-			if ($d && $d->getPersistentModel()->isLocalized())
-			{
-				foreach ($d->getI18nInfo()->getLangs() as $lang)
-				{
-					$this->getPersistentProvider()->setI18nSynchroStatus($d->getId(), $lang, self::SYNCHRO_MODIFIED, null);
-				}
-			}
-		}
-	}
-	
-	/**
-	 * @return integer[]
-	 */
-	public function getDocumentIdsToSynchronize()
-	{
-		if (RequestContext::getInstance()->hasI18nSynchro())
-		{
-			return $this->getPersistentProvider()->getI18nSynchroIds();
-		}
-		return array();
-	}
-	
-	/**
-	 * @param f_persistentdocument_PersistentDocument $document
-	 * @return array
-	 * 		- isLocalized : boolean
-	 * 		- action : 'none'|'generate'|'synchronize'
-	 * 		- config : array
-	 * 			- 'fr'|'??' : string[]
-	 * 			- ...
-	 *		- states : array
-	 * 			- 'fr'|'??' : array
-	 * 				- status : 'MODIFIED'|'VALID'|'SYNCHRONIZED'
-	 * 				- from : fr'|'en'|'??'|null
-	 * 			- ...
-	 */
-	public function getI18nSynchroForDocument($document)
-	{
-		$result = array('isLocalized' => false, 'action' => 'none', 'config' => array());
-		$pm = $document->getPersistentModel();
-		if ($pm->isLocalized())
-		{
-			$result['isLocalized'] = true;
-			$rc = RequestContext::getInstance();
-			if ($rc->hasI18nSynchro())
-			{
-				$result['config'] = $rc->getI18nSynchro();
-				$data = $this->getPersistentProvider()->getI18nSynchroStatus($document->getId());
-				$result['states'] = $data;
-				foreach ($document->getI18nInfo()->getLangs() as $lang)
-				{
-					if (!isset($data[$lang]))
-					{
-						$result['action'] = 'generate';
-						break;
-					}
-					elseif ($data[$lang]['status'] === self::SYNCHRO_MODIFIED)
-					{
-						$result['action'] = 'synchronize';
-					}
-				}
-			}
-		}
-		return $result;
-	}
-	
-	/**
-	 * @param integer $documentId
-	 * @return boolean
-	 */
-	public function synchronizeDocumentId($documentId)
-	{
-		$rc = RequestContext::getInstance();
-		if (!$rc->hasI18nSynchro())
-		{
-			//No synchro configured
-			return false;
-		}
-		$d = DocumentHelper::getDocumentInstanceIfExists($documentId);
-		if ($d === null)
-		{
-			//Invalid document
-			return false;
-		}
-	
-		$pm = $d->getPersistentModel();
-		if (!$pm->isLocalized())
-		{
-			//Not applicable on this document
-			return false;
-		}
-	
-		$tm = $this->getTransactionManager();
-		try
-		{
-			$tm->beginTransaction();
-			$ds = $d->getDocumentService();
-				
-			$synchroConfig = $ds->getI18nSynchroConfig($d, $rc->getI18nSynchro());
-			if (count($synchroConfig))
-			{
-				$dcs = f_DataCacheService::getInstance();
-				$datas = $tm->getPersistentProvider()->getI18nSynchroStatus($d->getId());
-				if (count($datas) === 0)
-				{
-					foreach ($d->getI18nInfo()->getLangs() as $lang)
-					{
-						$datas[$lang] = array('status' => self::SYNCHRO_MODIFIED, 'from' => null);
-					}
-				}
-				else
-				{
-					$datas[$d->getLang()] = array('status' => self::SYNCHRO_MODIFIED, 'from' => null);
-				}
-	
-				foreach ($synchroConfig as $lang => $fromLangs)
-				{
-					if (!isset($datas[$lang]) || $datas[$lang]['status'] === self::SYNCHRO_SYNCHRONIZED)
-					{
-						foreach ($fromLangs as $fromLang)
-						{
-							if (isset($datas[$fromLang]) && $datas[$fromLang]['status'] !== self::SYNCHRO_SYNCHRONIZED)
-							{
-								list($from, $to) = $tm->getPersistentProvider()->prepareI18nSynchro($pm, $documentId, $lang, $fromLang);
-								try
-								{
-									$rc->beginI18nWork($fromLang);
-										
-									if ($ds->synchronizeI18nProperties($d, $from, $to))
-									{
-										$tm->getPersistentProvider()->setI18nSynchro($pm, $to);
-										$tm->getPersistentProvider()->setI18nSynchroStatus($documentId, $lang, self::SYNCHRO_SYNCHRONIZED, $fromLang);
-										$dcs->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($d->getDocumentModelName()));
-										$dcs->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($documentId));
-									}
-									elseif (isset($datas[$lang]))
-									{
-										$this->getPersistentProvider()->setI18nSynchroStatus($documentId, $lang, self::SYNCHRO_VALID, null);
-									}
-	
-									$rc->endI18nWork();
-								}
-								catch (Exception $e)
-								{
-									$rc->endI18nWork($e);
-								}
-								break;
-							}
-						}
-					}
-				}
-	
-				foreach ($datas as $lang => $synchroInfos)
-				{
-					if ($synchroInfos['status'] === self::SYNCHRO_MODIFIED)
-					{
-						$this->getPersistentProvider()->setI18nSynchroStatus($documentId, $lang, self::SYNCHRO_VALID, null);
-					}
-					elseif ($synchroInfos['status'] === self::SYNCHRO_SYNCHRONIZED && !isset($synchroConfig[$lang]))
-					{
-						$this->getPersistentProvider()->setI18nSynchroStatus($documentId, $lang, self::SYNCHRO_VALID, null);
-					}
-				}
-			}
-			else
-			{
-				$tm->getPersistentProvider()->deleteI18nSynchroStatus($documentId);
-			}
-			$tm->commit();
-		}
-		catch (Exception $e)
-		{
-			$tm->rollback($e);
-			return false;
-		}
-		return true;
 	}
 }

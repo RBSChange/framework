@@ -1,22 +1,22 @@
 <?php
 /**
- * @package framework.service
+ * @deprecated
  */
 abstract class change_BaseService extends change_Singleton
 {
 	/**
-	 * @return f_persistentdocument_PersistentProvider
+	 * @deprecated
 	 */
 	protected function getPersistentProvider()
 	{
-		return f_persistentdocument_PersistentProvider::getInstance();
+		return \Change\Db\Provider::getInstance();
 	}
 	
 	/**
-	 * @return f_persistentdocument_TransactionManager
+	 * @deprecated
 	 */
 	protected function getTransactionManager()
 	{
-		return f_persistentdocument_TransactionManager::getInstance();
+		return \Change\Db\Provider::getInstance();
 	}
 }

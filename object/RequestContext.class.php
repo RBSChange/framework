@@ -9,107 +9,33 @@ class RequestContext
 	 */
 	private static $m_instance;
 
-	/**
-	 * @var array
-	 */
-	private $m_workLang = array();
-
-	/**
-	 * @var string (lowercase) Ex: fr
-	 */
-	private $m_lang;
 	
-	/**
-	 * @var boolean
-	 */
-	private $m_isLangDefined = false;
-
-	/**
-	 * Language used for the Backoffice UI (could be different from the above one).
-	 *
-	 * @var string (lowercase) Ex: fr
-	 */
-	private $m_ui_lang;
-
-	/**
-	 * @var boolean
-	 */
-	private $m_enabled = false;
-
-	/**
-	 * @var array
-	 */
-	private $m_supportedLanguages = array();
-
-	/**
-	 * Languages supported by the Backoffice UI (could be different from the above ones).
-	 *
-	 * @var array
-	 */
-	private $m_ui_supportedLanguages = array();
-
 	/**
 	 * @var array
 	 */
 	private $profile;
 	
+
 	/**
-	 * @var array
+	 * @deprecated
 	 */
-	private $m_i18n_synchro = null;
-	
-	/**
-	 * Constructor of RequestContext
-	 * @param array $supportedLanguages
-	 * @param array $ui_supportedLanguages
-	 */
-	protected function __construct($supportedLanguages, $ui_supportedLanguages)
+	private $m_isLangDefined = false;
+
+
+	protected function __construct()
 	{
-		$this->m_supportedLanguages = $supportedLanguages;
-		$this->m_enabled = (count($this->m_supportedLanguages) > 1);
-		$this->m_lang = $this->getDefaultLang();
-		$this->m_ui_supportedLanguages = $ui_supportedLanguages;
 		$this->resetProfile();
 	}
 	
 	/**
-	 * @param string $supportedLanguages
-	 * @param string $ui_supportedLanguages
 	 * @return RequestContext
 	 */
-	public static function getInstance($supportedLanguages = null, $ui_supportedLanguages = null)
+	public static function getInstance()
 	{
 		if (self::$m_instance === null)
 		{
-			if ($supportedLanguages !== null)
-			{
-				$languages = explode(' ', strtolower($supportedLanguages));
-			}
-			else if (defined('SUPPORTED_LANGUAGES'))
-			{
-				$languages = explode(' ', strtolower(SUPPORTED_LANGUAGES));
-			}
-			else
-			{
-				$languages = array('fr');
-			}
-
-			if ($ui_supportedLanguages !== null)
-			{
-				$ui_languages = explode(' ', strtolower($ui_supportedLanguages));
-			}
-			else if (defined('UI_SUPPORTED_LANGUAGES'))
-			{
-				$ui_languages = explode(' ', strtolower(UI_SUPPORTED_LANGUAGES));
-			}
-			else
-			{
-				$ui_languages = array('fr');
-			}
-
-			self::$m_instance = new RequestContext($languages, $ui_languages);
+			self::$m_instance = new RequestContext();
 		}
-
 		return self::$m_instance;
 	}
 
@@ -117,64 +43,7 @@ class RequestContext
 	{
 		self::$m_instance = null;
 	}
-		
-	protected function loadI18nSynchroConfiguration()
-	{
-		$this->m_i18n_synchro = false;
-		$data = Framework::getConfigurationValue('i18nsynchro', null);
-	
-		if (is_array($data) && count($data))
-		{
-			$langs = $this->getSupportedLanguages();
-			$result = array();
-			foreach ($data as $lang => $froms)
-			{
-				if (in_array($lang, $langs))
-				{
-					$fromLangs = array();
-					foreach (array_map('trim', explode(',', $froms)) as $fromLang)
-					{
-						if (in_array($fromLang, $langs))
-						{
-							$fromLangs[] = $fromLang;
-						}
-					}
-	
-					if (count($fromLangs))
-					{
-						$result[$lang] = $fromLangs;
-					}
-				}
-			}
-	
-			if (count($result))
-			{
-				$this->m_i18n_synchro = $result;
-			}
-		}
-	}
-	
-	/**
-	 * @return boolean
-	 */
-	public function hasI18nSynchro()
-	{
-		if ($this->m_i18n_synchro === null)
-		{
-			$this->loadI18nSynchroConfiguration();
-		}
-		return $this->m_i18n_synchro !== false;
-	}
-	
-	/**
-	 * @return array string : string[]
-	 */
-	public function getI18nSynchro()
-	{
-		return $this->hasI18nSynchro() ? $this->m_i18n_synchro : array();
-	}
-	
-		
+			
 	/**
 	 * @var Boolean
 	 */
@@ -223,190 +92,7 @@ class RequestContext
 		}
 		throw new Exception("Could not parse ".$this->ajaxFromURL);
 	}
-
-	/**
-	 * @return boolean
-	 */
-	public function isMultiLangEnabled()
-	{
-		return $this->m_enabled;
-	}
-	
-	/**
-	 * @return boolean
-	 */
-	public function isLangDefined()
-	{
-		return $this->m_isLangDefined;
-	}
-	
-	/**
-	 * @return string current language to lower case Ex: fr
-	 */
-	public function getLang()
-	{
-		if (count($this->m_workLang) > 0)
-		{
-			$lang = end($this->m_workLang);
-		}
-		else
-		{
-			$lang = $this->m_lang;
-		}
-		return $lang;
-	}
-	
-	/**
-	 * @exception BadInitializationException if the current UI language is not defined
-	 * @return string current UI language to lower case Ex: fr
-	 */
-	public function getUILang()
-	{
-		if ($this->m_ui_lang === null)
-		{
-			$uilang = change_Controller::getInstance()->getStorage()->readForUser('uilang');
-			$this->m_ui_lang = $uilang ? $uilang : $this->getUserAgentLanguage();
-		}
-		return $this->m_ui_lang;
-	}
-
-	/**
-	 * @exception BadInitializationException if the lang is already defined to other language
-	 * @exception IllegalArgumentException if the lang is not supported
-	 * @param string $lang
-	 */
-	public function setLang($lang)
-	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug(__METHOD__ . '(' . $lang . ')');
-		}
 		
-		if (count($this->m_workLang) > 0)
-		{
-			throw new BadInitializationException("The current language is already defined to :" . $this->m_lang);
-		}
-		
-		if (in_array($lang, $this->getSupportedLanguages()))
-		{
-			$this->m_lang = $lang;
-			$this->m_isLangDefined = true;
-		}
-	}
-
-	/**
-	 * @exception IllegalArgumentException if the UI lang is not supported
-	 * @param string $lang
-	 */
-	public function setUILang($lang)
-	{
-		if (in_array($lang, $this->getUISupportedLanguages()))
-		{
-			$this->m_ui_lang = $lang;
-		}
-		else
-		{
-			throw new IllegalArgumentException($lang);
-		}
-	}
-	
-	
-	public function setUILangFromParameter($lang)
-	{
-		
-		if ($lang && is_string($lang) && in_array($lang, $this->getUISupportedLanguages()))
-		{
-			$this->m_ui_lang = $lang;
-		}
-	}	
-	
-
-	/**
-	 * @return array
-	 */
-	public function getSupportedLanguages()
-	{
-		return $this->m_supportedLanguages;
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getUISupportedLanguages()
-	{
-		return $this->m_ui_supportedLanguages;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getDefaultLang()
-	{
-		return $this->m_supportedLanguages[0];
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getUIDefaultLang()
-	{
-		return $this->m_ui_supportedLanguages[0];
-	}
-
-	/**
-	 * Retrieve available UA language.
-	 *
-	 * @return string
-	 */
-	public function getUserAgentLanguage()
-	{
-		$lang = null;
-
-		if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']))
-		{
-			$lang = preg_split('/[,;]+/', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
-			$lang = strtolower(substr(trim($lang[0]), 0, 2));
-		}
-
-		if ($lang === null || !in_array($lang, $this->getUISupportedLanguages()))
-		{
-			$lang = $this->getUIDefaultLang();
-		}
-
-		return $lang;
-	}
-
-	public function beginI18nWork($lang)
-	{
-		if ($lang === null || !in_array($lang, $this->m_supportedLanguages))
-		{
-			throw new IllegalArgumentException($lang);
-		}
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("RequestContext->beginI18nWork($lang) - " .count($this->m_workLang));
-		}
-		array_push($this->m_workLang, $lang);
-	}
-
-	/**
-	 * @param Exception $exception
-	 * @throws $exception if provided
-	 */
-	public function endI18nWork($exception = null)
-	{
-		if (Framework::isDebugEnabled())
-		{
-			Framework::debug("RequestContext->endI18nWork() - " .count($this->m_workLang));
-		}
-
-		array_pop($this->m_workLang);
-		if ($exception !== null)
-		{
-			throw $exception;
-		}
-	}
-	
 	public function resetProfile()
 	{
 		$this->profile = array('date' => array(), 'datetime' => array(), 'timezone' => null);
@@ -916,5 +602,142 @@ class RequestContext
 		$controller = change_Controller::getInstance();
 		$uri = $controller->getUri();
 		return $uri->getPath() . ($uri->getQuery() ? '?' . $uri->getQuery() : ''); 
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function hasI18nSynchro()
+	{
+		return \Change\I18n\I18nManager::getInstance()->hasI18nSynchro();
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function getI18nSynchro()
+	{
+		return \Change\I18n\I18nManager::getInstance()->getI18nSynchro();
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function isMultiLangEnabled()
+	{
+		return \Change\I18n\I18nManager::getInstance()->isMultiLangEnabled();
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function isLangDefined()
+	{
+		return $this->m_isLangDefined;
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function getLang()
+	{
+		return \Change\I18n\I18nManager::getInstance()->getLang();
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function getUILang()
+	{
+		return \Change\I18n\I18nManager::getInstance()->getUILang();
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function setLang($lang)
+	{
+		$this->m_isLangDefined = \Change\I18n\I18nManager::getInstance()->setLang($lang);
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function setUILang($lang)
+	{
+		return \Change\I18n\I18nManager::getInstance()->setUILang($lang);
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function setUILangFromParameter($lang)
+	{
+		if ($lang && is_string($lang) && in_array($lang, $this->getUISupportedLanguages()))
+		{
+			$this->setUILang($lang);
+		}
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function getUserAgentLanguage()
+	{
+		$controller = change_Controller::getInstance();
+		$lang = $controller->getUserAgentLanguage();
+		if ($lang === null || !in_array($lang, $this->getUISupportedLanguages()))
+		{
+			$lang = $this->getUIDefaultLang();
+		}
+		return $lang;
+	}
+		
+	/**
+	 * @deprecated
+	 */
+	public function getSupportedLanguages()
+	{
+		return \Change\I18n\I18nManager::getInstance()->getSupportedLanguages();
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function getUISupportedLanguages()
+	{
+		return \Change\I18n\I18nManager::getInstance()->getUISupportedLanguages();
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function getDefaultLang()
+	{
+		return \Change\I18n\I18nManager::getInstance()->getDefaultLang();
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function getUIDefaultLang()
+	{
+		return \Change\I18n\I18nManager::getInstance()->getUIDefaultLang();
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function beginI18nWork($lang)
+	{
+		\Change\I18n\I18nManager::getInstance()->pushLang($lang);
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function endI18nWork($exception = null)
+	{
+		\Change\I18n\I18nManager::getInstance()->popLang($exception);
 	}
 }

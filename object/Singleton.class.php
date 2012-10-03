@@ -1,14 +1,16 @@
 <?php
+/**
+ * @deprecated use \Change\AbstractSingleton 
+ */
 abstract class change_Singleton
 {
 	/**
-	 * @var array
+	 * @deprecated
 	 */
 	private static $instances = array();
 
 	/**
-	 * @param string $className
-	 * @return change_Singleton
+	 * @deprecated
 	 */
 	protected final static function getInstanceByClassName($className)
 	{
@@ -20,8 +22,7 @@ abstract class change_Singleton
 	}
 	
 	/**
-	 * @param string $className
-	 * @return void
+	 * @deprecated
 	 */
 	protected final static function clearInstanceByClassName($className)
 	{
@@ -32,7 +33,7 @@ abstract class change_Singleton
 	}
 
 	/**
-	 * @return change_Singleton
+	 * @deprecated
 	 */
 	public static function getInstance()
 	{
@@ -40,7 +41,7 @@ abstract class change_Singleton
 	}
 
 	/**
-	 * Protected constructor use getInstance()
+	 * @deprecated
 	 */
 	protected function __construct()
 	{
