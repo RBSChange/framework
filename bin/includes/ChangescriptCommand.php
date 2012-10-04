@@ -177,7 +177,7 @@ abstract class c_ChangescriptCommand
 		{
 			foreach ($this->listeners[$name] as $commandInfo)
 			{
-				$this->executeCommand($commandInfo['command'], $commandInfo['args']);
+			//	$this->executeCommand($commandInfo['command'], $commandInfo['args']);
 			}
 		}
 	}
