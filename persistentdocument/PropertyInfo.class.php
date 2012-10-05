@@ -4,6 +4,26 @@
  */
 class PropertyInfo extends \Change\Documents\Property
 {
+	
+	protected $dbTable;
+	
+	/**
+	 * @deprecated with no replacement
+	 */
+	public function getDbTable()
+	{
+		return $this->dbTable;
+	}
+	
+	/**
+	 * @deprecated with no replacement
+	 */
+	public function setDbTable($dbTable)
+	{
+		$this->dbTable = $dbTable;
+		return $this;
+	}
+	
 	/**
 	 * @deprecated with no replacement
 	 */
