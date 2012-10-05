@@ -1,4 +1,6 @@
 <?php
+use \Change\Db\Provider;
+
 /**
  * @method LocaleService getInstance()
  */
@@ -249,7 +251,7 @@ class LocaleService extends \Change\I18n\I18nManager
 	 */
 	public function regenerateLocales()
 	{
-		$dbp = $this->getDbProvider();
+		$dbp = Provider::getInstance();
 		try
 		{
 			$dbp->beginTransaction();		
@@ -276,15 +278,15 @@ class LocaleService extends \Change\I18n\I18nManager
 	{
 		try
 		{
-			$this->getDbProvider()->beginTransaction();
-			$this->getDbProvider()->clearTranslationCache('m.' . $moduleName);		
+			Provider::getInstance()->beginTransaction();
+			Provider::getInstance()->clearTranslationCache('m.' . $moduleName);		
 			// Processing module : $moduleName
 			$this->processModule($moduleName);
-			$this->getDbProvider()->commit();
+			Provider::getInstance()->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->getDbProvider()->rollBack($e);
+			Provider::getInstance()->rollBack($e);
 			throw $e;
 		}
 	}
@@ -298,14 +300,14 @@ class LocaleService extends \Change\I18n\I18nManager
 	{
 		try
 		{
-			$this->getDbProvider()->beginTransaction();
-			$this->getDbProvider()->clearTranslationCache('t.' . $themeName);
+			Provider::getInstance()->beginTransaction();
+			Provider::getInstance()->clearTranslationCache('t.' . $themeName);
 			$this->processTheme($themeName);
-			$this->getDbProvider()->commit();
+			Provider::getInstance()->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->getDbProvider()->rollBack($e);
+			Provider::getInstance()->rollBack($e);
 			throw $e;
 		}
 	}
@@ -317,14 +319,14 @@ class LocaleService extends \Change\I18n\I18nManager
 	{
 		try
 		{
-			$this->getDbProvider()->beginTransaction();
-			$this->getDbProvider()->clearTranslationCache('f');
+			Provider::getInstance()->beginTransaction();
+			Provider::getInstance()->clearTranslationCache('f');
 			$this->processFramework();
-			$this->getDbProvider()->commit();
+			Provider::getInstance()->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->getDbProvider()->rollBack($e);
+			Provider::getInstance()->rollBack($e);
 			throw $e;
 		}
 	}
@@ -406,7 +408,7 @@ class LocaleService extends \Change\I18n\I18nManager
 		
 		try
 		{
-			$this->getDbProvider()->beginTransaction();
+			Provider::getInstance()->beginTransaction();
 			
 			$availablePaths = array(f_util_FileUtils::buildFrameworkPath('i18n'), 
 					f_util_FileUtils::buildOverridePath('framework', 'i18n'));
@@ -418,11 +420,11 @@ class LocaleService extends \Change\I18n\I18nManager
 				}
 			}
 			
-			$this->getDbProvider()->commit();
+			Provider::getInstance()->commit();
 		}
 		catch (Exception $e)
 		{
-			$this->getDbProvider()->rollBack($e);
+			Provider::getInstance()->rollBack($e);
 			throw $e;
 		}
 	}

@@ -2,7 +2,7 @@
 /**
  * @deprecated use \Change\Application\Configuration
  */
-class change_ConfigurationService extends \Change\AbstractService
+class change_ConfigurationService extends change_BaseService
 {
 	/**
 	 * @deprecated use \Change\Application\Configuration::getEntry()

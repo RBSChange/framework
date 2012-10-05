@@ -62,43 +62,43 @@ class Framework
 	}
 
 	/**
-	 * @deprecated use \Change\Application::inDevelopmentMode()
+	 * @deprecated use \Change\Application\LoggingManager::getPriority()
 	 */
 	public static function isDebugEnabled()
 	{
-		return LOGGING_PRIORITY >= \Zend\Log\Logger::DEBUG;
+		return \Change\Application\LoggingManager::getInstance()->getPriority() >= \Zend\Log\Logger::DEBUG;
 	}
 
 	/**
-	 * @deprecated use \Change\Application::inDevelopmentMode()
+	 * @deprecated use \Change\Application\LoggingManager::getPriority()
 	 */
 	public static function isInfoEnabled()
 	{
-		return LOGGING_PRIORITY >= \Zend\Log\Logger::INFO;
+		return \Change\Application\LoggingManager::getInstance()->getPriority() >= \Zend\Log\Logger::INFO;
 	}
 	
 	/**
-	 * @deprecated use \Change\Application::inDevelopmentMode()
+	 * @deprecated use \Change\Application\LoggingManager::getPriority()
 	 */
 	public static function isWarnEnabled()
 	{
-		return LOGGING_PRIORITY >= \Zend\Log\Logger::WARN;
+		return \Change\Application\LoggingManager::getInstance()->getPriority() >= \Zend\Log\Logger::WARN;
 	}
 
 	/**
-	 * @deprecated use \Change\Application::inDevelopmentMode()
+	 * @deprecated use \Change\Application\LoggingManager::getPriority()
 	 */
 	public static function isErrorEnabled()
 	{
-		return LOGGING_PRIORITY >= \Zend\Log\Logger::ERR;
+		return \Change\Application\LoggingManager::getInstance()->getPriority() >= \Zend\Log\Logger::ERR;
 	}
 
 	/**
-	 * @deprecated use \Change\Application::inDevelopmentMode()
+	 * @deprecated use \Change\Application\LoggingManager::getPriority()
 	 */
 	public static function isFatalEnabled()
 	{
-		return LOGGING_PRIORITY >= \Zend\Log\Logger::EMERG;
+		return \Change\Application\LoggingManager::getInstance()->getPriority() >= \Zend\Log\Logger::EMERG;
 	}
 	
 	/**
@@ -369,11 +369,15 @@ class Framework
 		require_once PROJECT_HOME . '/Change/Application.php';
 		$application = \Change\Application::getInstance();
 		$application->registerNamespaceAutoload();
-		$application->loadConfiguration();
 		
 		// Load configuration
-		self::registerChangeAutoload();
-				
+		$application->loadConfiguration();
+		if (!defined('FRAMEWORK_VERSION'))
+		{
+			define('FRAMEWORK_VERSION', CHANGE_VERSION);
+		}
+		
+		self::registerChangeAutoload();				
 		self::registerConfiguredAutoloads();
 		
 		$application->registerInjectionAutoload();
