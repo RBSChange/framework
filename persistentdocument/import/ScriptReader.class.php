@@ -100,7 +100,8 @@ class import_ScriptReader extends change_BaseService
 	{
 		array_push($this->xmlFilePaths, $fileName);
 		$this->errors = null;
-		set_error_handler(array($this, "errorReport"));
+		
+		// TODO: handle XML errors.
 		$reader = new XMLReader();
 		$pe = null;	
 		if (!$reader->open($fileName))
@@ -125,11 +126,13 @@ class import_ScriptReader extends change_BaseService
 			}
 			$reader->close();
 		}
-		restore_error_handler();
 		array_pop($this->xmlFilePaths);
 		
 		if ($this->errors !== null)
 		{
+			var_export($this->errors);
+			die();
+			
 			$message = implode("\n", $this->errors);
 			Framework::error(__METHOD__ . "Error while processing $fileName:\n$message");
 			throw new Exception($message, 0, $pe);
@@ -148,25 +151,6 @@ class import_ScriptReader extends change_BaseService
 	 * @var string[]
 	 */
 	private $errors;
-
-	public function errorReport($errno, $errstr, $errfile, $errline)
-	{
-		switch ($errno)
-		{
-			case E_USER_ERROR:
-			case E_USER_WARNING:
-			case E_STRICT:
-				break;
-			default:
-				if ($this->errors === null)
-				{
-					$this->errors = array();
-				}
-				$this->errors[] = $errstr;
-				break;
-		}
-		return  change_LoggingService::getInstance()->defaultErrorHandler($errno, $errstr, $errfile, $errline, null);
-	}
 
 	/**
 	 * @param XMLReader $reader

@@ -38,17 +38,20 @@ else
 $ka = change_Controller::getInstance()->getStorage()->read('framework_sessionKeepAlive');
 echo change_Controller::getInstance()->getStorage()->getChangeSessionContainer()->getManager()->getId() . ' - ' . $ka;
 
-if (($ka % 10) == 0)
+if (constant('CHANGECRON_EXECUTION') == 'http')
 {
-	if (defined('NODE_NAME') && ModuleService::getInstance()->moduleExists('clustersafe'))
+	if (($ka % 10) == 0)
 	{
-		$node = clustersafe_WebnodeService::getInstance()->getCurrentNode();
-		$baseURL = $node->getBaseUrl();
+		if (defined('NODE_NAME') && ModuleService::getInstance()->moduleExists('clustersafe'))
+		{
+			$node = clustersafe_WebnodeService::getInstance()->getCurrentNode();
+			$baseURL = $node->getBaseUrl();
+		}
+		else
+		{
+			$baseURL = Framework::getBaseUrl();
+		}
+		$pingURl = $baseURL .'/changecron.php';
+		task_PlannedTaskRunner::pingChangeCronURL($pingURl);
 	}
-	else
-	{
-		$baseURL = Framework::getBaseUrl();
-	}
-	$pingURl = $baseURL .'/changecron.php';
-	task_PlannedTaskRunner::pingChangeCronURL($pingURl);
 }

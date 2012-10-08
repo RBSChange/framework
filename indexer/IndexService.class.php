@@ -117,11 +117,6 @@ class indexer_IndexService extends change_BaseService
 		{
 			if (count($this->documentIdsToIndex))
 			{
-				if (Framework::isInfoEnabled())
-				{
-					Framework::info(__METHOD__ . ' Count To Index: ' . count($this->documentIdsToIndex));
-				}
-				
 				$pp = $this->getPersistentProvider();
 				$lastUpdate = date_Calendar::getInstance()->toString();
 				foreach ($this->documentIdsToIndex as $id => $status) 
