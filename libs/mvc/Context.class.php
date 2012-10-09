@@ -16,7 +16,7 @@ class change_Context extends \Change\Mvc\Context
 			$this->controller = $controller;
 
 			$this->request = new change_Request();
-			$this->storage = new change_Storage();
+			$this->storage = new change_Storage(\Change\Application::getInstance()->getApplicationServices()->getLogging());
 			$this->user = new change_User();
 			
 			$this->request->initialize($this, null);

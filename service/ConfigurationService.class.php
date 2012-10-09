@@ -1,11 +1,11 @@
 <?php
 /**
- * @deprecated use \Change\Application\Configuration
+ * @deprecated use \Change\Configuration\Configuration
  */
 class change_ConfigurationService extends change_BaseService
 {
 	/**
-	 * @deprecated use \Change\Application\Configuration::getEntry()
+	 * @deprecated use \Change\Configuration\Configuration::getEntry()
 	 */
 	public function getConfiguration($path, $strict = true)
 	{
@@ -24,7 +24,7 @@ class change_ConfigurationService extends change_BaseService
 	}
 	
 	/**
-	 * @deprecated use \Change\Application\Configuration::getEntry()
+	 * @deprecated use \Change\Configuration\Configuration::getEntry()
 	 */
 	public function getConfigurationValue($path, $defaultValue = null)
 	{
@@ -32,7 +32,7 @@ class change_ConfigurationService extends change_BaseService
 	}
 	
 	/**
-	 * @deprecated use \Change\Application\Configuration::getConfigArray()
+	 * @deprecated use \Change\Configuration\Configuration::getConfigArray()
 	 */
 	public function getAllConfiguration()
 	{
@@ -40,7 +40,7 @@ class change_ConfigurationService extends change_BaseService
 	}
 
 	/**
-	 * @deprecated use \Change\Application\Configuration::hasEntry()
+	 * @deprecated use \Change\Configuration\Configuration::hasEntry()
 	 */
 	public function hasConfiguration($path)
 	{
@@ -48,7 +48,7 @@ class change_ConfigurationService extends change_BaseService
 	}
 	
 	/**
-	 * @deprecated use \Change\Application\Configuration::addVolatileEntry()
+	 * @deprecated use \Change\Configuration\Configuration::addVolatileEntry()
 	 */
 	public function addVolatileProjectConfigurationNamedEntry($path, $value)
 	{
@@ -56,7 +56,7 @@ class change_ConfigurationService extends change_BaseService
 	}
 	
 	/**
-	 * @deprecated use \Change\Application\Configuration::addPersistentEntry()
+	 * @deprecated use \Change\Configuration\Configuration::addPersistentEntry()
 	 */
 	public function addProjectConfigurationEntry($path, $value)
 	{
@@ -77,7 +77,7 @@ class change_ConfigurationService extends change_BaseService
 	}
 	
 	/**
-	 * @deprecated use \Change\Application\Configuration::addPersistentEntry()
+	 * @deprecated use \Change\Configuration\Configuration::addPersistentEntry()
 	 */
 	public function addProjectConfigurationNamedEntry($path, $entryName, $value)
 	{

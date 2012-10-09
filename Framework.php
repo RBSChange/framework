@@ -7,7 +7,7 @@ class Framework
 	 */
 	public static function debug($message)
 	{
-		\Change\Application\LoggingManager::getInstance()->debug($message);
+		\Change\Application::getInstance()->getApplicationServices()->getLogging()->debug($message);
 	}
 
 	/**
@@ -15,7 +15,7 @@ class Framework
 	 */
 	public static function info($message)
 	{
-		\Change\Application\LoggingManager::getInstance()->info($message);
+		\Change\Application::getInstance()->getApplicationServices()->getLogging()->info($message);
 	}
 
 	/**
@@ -23,7 +23,7 @@ class Framework
 	 */
 	public static function warn($message)
 	{
-		\Change\Application\LoggingManager::getInstance()->warn($message);
+		\Change\Application::getInstance()->getApplicationServices()->getLogging()->warn($message);
 	}
 
 	/**
@@ -31,7 +31,7 @@ class Framework
 	 */
 	public static function error($message)
 	{
-		\Change\Application\LoggingManager::getInstance()->error($message);
+		\Change\Application::getInstance()->getApplicationServices()->getLogging()->error($message);
 	}
 
 	/**
@@ -39,7 +39,7 @@ class Framework
 	 */
 	public static function exception($e)
 	{
-		\Change\Application\LoggingManager::getInstance()->exception($e);
+		\Change\Application::getInstance()->getApplicationServices()->getLogging()->exception($e);
 	}
 
 	/**
@@ -47,7 +47,7 @@ class Framework
 	 */
 	public static function fatal($message)
 	{
-		\Change\Application\LoggingManager::getInstance()->fatal($message);
+		\Change\Application::getInstance()->getApplicationServices()->getLogging()->fatal($message);
 	}
 	
 	/**
@@ -62,43 +62,43 @@ class Framework
 	}
 
 	/**
-	 * @deprecated use \Change\Application\LoggingManager::getPriority()
+	 * @deprecated use \Change\Logging\Logging::getPriority()
 	 */
 	public static function isDebugEnabled()
 	{
-		return \Change\Application\LoggingManager::getInstance()->getPriority() >= \Zend\Log\Logger::DEBUG;
+		return \Change\Application::getInstance()->getApplicationServices()->getLogging()->getPriority() >= \Zend\Log\Logger::DEBUG;
 	}
 
 	/**
-	 * @deprecated use \Change\Application\LoggingManager::getPriority()
+	 * @deprecated use \Change\Logging\Logging::getPriority()
 	 */
 	public static function isInfoEnabled()
 	{
-		return \Change\Application\LoggingManager::getInstance()->getPriority() >= \Zend\Log\Logger::INFO;
+		return \Change\Application::getInstance()->getApplicationServices()->getLogging()->getPriority() >= \Zend\Log\Logger::INFO;
 	}
 	
 	/**
-	 * @deprecated use \Change\Application\LoggingManager::getPriority()
+	 * @deprecated use \Change\Logging\Logging::getPriority()
 	 */
 	public static function isWarnEnabled()
 	{
-		return \Change\Application\LoggingManager::getInstance()->getPriority() >= \Zend\Log\Logger::WARN;
+		return \Change\Application::getInstance()->getApplicationServices()->getLogging()->getPriority() >= \Zend\Log\Logger::WARN;
 	}
 
 	/**
-	 * @deprecated use \Change\Application\LoggingManager::getPriority()
+	 * @deprecated use \Change\Logging\Logging::getPriority()
 	 */
 	public static function isErrorEnabled()
 	{
-		return \Change\Application\LoggingManager::getInstance()->getPriority() >= \Zend\Log\Logger::ERR;
+		return \Change\Application::getInstance()->getApplicationServices()->getLogging()->getPriority() >= \Zend\Log\Logger::ERR;
 	}
 
 	/**
-	 * @deprecated use \Change\Application\LoggingManager::getPriority()
+	 * @deprecated use \Change\Logging\Logging::getPriority()
 	 */
 	public static function isFatalEnabled()
 	{
-		return \Change\Application\LoggingManager::getInstance()->getPriority() >= \Zend\Log\Logger::EMERG;
+		return \Change\Application::getInstance()->getApplicationServices()->getLogging()->getPriority() >= \Zend\Log\Logger::EMERG;
 	}
 	
 	/**
@@ -288,7 +288,7 @@ class Framework
 	}
 
 	/**
-	 * @deprecated use \Change\Application\Configuration::hasEntry()
+	 * @deprecated use \Change\Configuration\Configuration::hasEntry()
 	 */
 	public static function hasConfiguration($path)
 	{
@@ -296,7 +296,7 @@ class Framework
 	}
 
 	/**
-	 * @deprecated use \Change\Application\Configuration::getEntry()
+	 * @deprecated use \Change\Configuration\Configuration::getEntry()
 	 */
 	public static function getConfiguration($path, $strict = true)
 	{
@@ -304,7 +304,7 @@ class Framework
 	}
 
 	/**
-	 * @deprecated use \Change\Application\Configuration::getEntry()
+	 * @deprecated use \Change\Configuration\Configuration::getEntry()
 	 */
 	public static function getConfigurationValue($path, $defaultValue = null)
 	{
@@ -366,39 +366,8 @@ class Framework
 	
 	public static function initialize()
 	{
-		require_once PROJECT_HOME . '/Change/Application.php';
-		$application = \Change\Application::getInstance();
-		$application->registerNamespaceAutoload();
+
 		
-		// Load configuration
-		$application->loadConfiguration();
-		if (!defined('FRAMEWORK_VERSION'))
-		{
-			define('FRAMEWORK_VERSION', CHANGE_VERSION);
-		}
-		
-		self::registerChangeAutoload();				
-		self::registerConfiguredAutoloads();
-		
-		$application->registerInjectionAutoload();
-	
-		if (self::inDevelopmentMode()) {error_reporting(E_ALL | E_STRICT);}
-	
-		ini_set('arg_separator.output', '&');
-		ini_set('magic_quotes_runtime', 0);
-	
-		\Change\Application\LoggingManager::getInstance()->registerErrorHandler();
-	
-		// Set the locale.
-		$localResult = setlocale(LC_ALL, 'en_US.UTF-8');
-	
-		// Set GMT TimeZone
-		date_default_timezone_set('GMT');
-	
-		if (self::inDevelopmentMode())
-		{
-			\Change\Injection\Service::getInstance()->update();
-		}
 	}
 	
 	// Deprecated
@@ -408,6 +377,6 @@ class Framework
 	 */
 	public static function log($message, $priority)
 	{
-		\Change\Application\LoggingManager::getInstance()->fatal("Invalid call of Framework::log('$message', $priority).");
+		\Change\Application::getInstance()->getApplicationServices()->getLogging()->fatal("Invalid call of Framework::log('$message', $priority).");
 	}
 }

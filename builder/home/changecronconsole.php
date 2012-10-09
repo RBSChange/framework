@@ -10,8 +10,9 @@ if (file_exists(PROJECT_HOME."/site_is_disabled"))
 }
 
 chdir(PROJECT_HOME);
-require_once PROJECT_HOME . "/framework/Framework.php";
-Framework::initialize();
+// Starts the application
+require_once PROJECT_HOME . '/Change/Application.php';
+\Change\Application::getInstance()->start();
 
 if (isset($_SERVER['REMOTE_ADDR']))
 {

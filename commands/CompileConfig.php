@@ -35,7 +35,7 @@ class commands_CompileConfig extends c_ChangescriptCommand
 		require_once PROJECT_HOME . '/Change/Application.php';
 		\Change\Application::getInstance()->registerNamespaceAutoload();
 		
-		$generator = new \Change\Application\Configuration\Generator();
+		$generator = new \Change\Configuration\Generator();
 		$generator->compile($this->getComputedDeps());
 
 		// TODO: 

@@ -10,7 +10,7 @@ class f_persistentdocument_TransactionManager
 	 */
 	public static function getInstance()
 	{
-		return \Change\Db\Provider::getInstance();
+		return \Change\Application::getInstance()->getApplicationServices()->getDbProvider();
 	}
 
 	/**
@@ -18,7 +18,7 @@ class f_persistentdocument_TransactionManager
 	 */
 	public function getPersistentProvider()
 	{
-		return \Change\Db\Provider::getInstance();
+		return \Change\Application::getInstance()->getApplicationServices()->getDbProvider();
 	}
 
 	/**

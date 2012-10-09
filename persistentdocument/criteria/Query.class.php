@@ -919,8 +919,12 @@ class f_persistentdocument_criteria_QueryImpl implements f_persistentdocument_cr
 	 * @see f_persistentdocument_PersistentProvider#find
 	 * @return f_persistentdocument_PersistentDocument[]
 	 */
-	function find()
+	function find($providerInstance = null)
 	{
+		if ($providerInstance === null)
+		{
+			
+		}
 		if ($this->fetchColumnName !== null)
 		{
 			return $this->getProvider()->findColumn($this, $this->fetchColumnName);

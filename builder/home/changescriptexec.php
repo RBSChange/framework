@@ -4,8 +4,9 @@ define('PROJECT_HOME', dirname(realpath(__FILE__)));
 
 set_time_limit(0);
 
-require_once PROJECT_HOME . "/framework/Framework.php";
-Framework::initialize();
+// Starts the application
+require_once PROJECT_HOME . '/Change/Application.php';
+\Change\Application::getInstance()->start();
 
 RequestContext::getInstance()->setMode(RequestContext::BACKOFFICE_MODE);
 

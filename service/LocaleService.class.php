@@ -1,8 +1,7 @@
 <?php
-use \Change\Db\Provider;
+use \Change\Db\DbProvider;
 
 /**
- * @method LocaleService getInstance()
  */
 class LocaleService extends \Change\I18n\I18nManager
 {
@@ -251,7 +250,7 @@ class LocaleService extends \Change\I18n\I18nManager
 	 */
 	public function regenerateLocales()
 	{
-		$dbp = Provider::getInstance();
+		$dbp = DbProvider::getInstance();
 		try
 		{
 			$dbp->beginTransaction();		

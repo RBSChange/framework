@@ -2,13 +2,13 @@
 /**
  * @deprecated
  */
-abstract class f_persistentdocument_PersistentProvider extends \Change\Db\Provider
+abstract class f_persistentdocument_PersistentProvider extends \Change\Db\DbProvider
 {
 	//DEPRECATED
 	
 	public static function getInstance()
 	{
-		return \Change\Db\Provider::getInstance();
+		return \Change\Application::getInstance()->getApplicationServices()->getDbProvider();
 	}
 	
 	/**
@@ -23,8 +23,9 @@ abstract class f_persistentdocument_PersistentProvider extends \Change\Db\Provid
 	 */
 	public static function refresh()
 	{
-		$instance = self::getInstance();
-		$instance->closeConnection();
+		throw new Exception("Unimplemented");
+		//$instance = self::getInstance();
+		//$instance->closeConnection();
 	}
 	
 	/**
@@ -32,6 +33,7 @@ abstract class f_persistentdocument_PersistentProvider extends \Change\Db\Provid
 	 */
 	public static function clearInstance()
 	{
-		self::clearInstanceByClassName('\Change\Db\Provider');
+		throw new Exception("Unimplemented");
+		//self::clearInstanceByClassName('\Change\Db\Provider');
 	}
 }

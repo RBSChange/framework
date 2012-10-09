@@ -9,7 +9,7 @@ abstract class change_BaseService extends change_Singleton
 	 */
 	protected function getPersistentProvider()
 	{
-		return \Change\Db\Provider::getInstance();
+		return \Change\Application::getInstance()->getApplicationServices()->getDbProvider();
 	}
 	
 	/**
@@ -17,6 +17,6 @@ abstract class change_BaseService extends change_Singleton
 	 */
 	protected function getTransactionManager()
 	{
-		return \Change\Db\Provider::getInstance();
+		return \Change\Application::getInstance()->getApplicationServices()->getDbProvider();
 	}
 }
