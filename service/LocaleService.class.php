@@ -2,9 +2,45 @@
 use \Change\Db\DbProvider;
 
 /**
+ * @deprecated
  */
-class LocaleService extends \Change\I18n\I18nManager
+class LocaleService
 {
+	protected static $instance;
+	
+	/**
+	 * @var \Change\I18n\I18nManager
+	 */
+	protected $wrappedI18nManager;
+
+	/**
+	 * @var \Change\Db\DbProvider
+	 */
+	protected $dbProvider;
+	
+	/**
+	 * @deprecated use \Change\I18n\I18nManager
+	 */
+	public static function getInstance()
+	{
+		if (self::$instance === null)
+		{
+			self::$instance = new static();
+			self::$instance->wrappedI18nManager = \Change\Application::getInstance()->getApplicationServices()->getI18nManager();
+		}
+		return self::$instance;
+	}
+	
+	protected function __construct()
+	{
+		// TODO correct initialization.
+		$this->dbProvider = \Change\Application::getInstance()->getApplicationServices()->getDbProvider();
+	}
+	
+	public function __call($name, $arguments)
+	{
+		return call_user_func_array(array($this->wrappedI18nManager, $name), $arguments);
+	}
 	
 	public function importOverride($name = null)
 	{
@@ -250,7 +286,7 @@ class LocaleService extends \Change\I18n\I18nManager
 	 */
 	public function regenerateLocales()
 	{
-		$dbp = DbProvider::getInstance();
+		$dbp = $this->dbProvider;
 		try
 		{
 			$dbp->beginTransaction();		
@@ -277,15 +313,15 @@ class LocaleService extends \Change\I18n\I18nManager
 	{
 		try
 		{
-			Provider::getInstance()->beginTransaction();
-			Provider::getInstance()->clearTranslationCache('m.' . $moduleName);		
+			$this->dbProvider->beginTransaction();
+			$this->dbProvider->clearTranslationCache('m.' . $moduleName);		
 			// Processing module : $moduleName
 			$this->processModule($moduleName);
-			Provider::getInstance()->commit();
+			$this->dbProvider->commit();
 		}
 		catch (Exception $e)
 		{
-			Provider::getInstance()->rollBack($e);
+			$this->dbProvider->rollBack($e);
 			throw $e;
 		}
 	}
@@ -299,14 +335,14 @@ class LocaleService extends \Change\I18n\I18nManager
 	{
 		try
 		{
-			Provider::getInstance()->beginTransaction();
-			Provider::getInstance()->clearTranslationCache('t.' . $themeName);
+			$this->dbProvider->beginTransaction();
+			$this->dbProvider->clearTranslationCache('t.' . $themeName);
 			$this->processTheme($themeName);
-			Provider::getInstance()->commit();
+			$this->dbProvider->commit();
 		}
 		catch (Exception $e)
 		{
-			Provider::getInstance()->rollBack($e);
+			$this->dbProvider->rollBack($e);
 			throw $e;
 		}
 	}
@@ -318,14 +354,14 @@ class LocaleService extends \Change\I18n\I18nManager
 	{
 		try
 		{
-			Provider::getInstance()->beginTransaction();
-			Provider::getInstance()->clearTranslationCache('f');
+			$this->dbProvider->beginTransaction();
+			$this->dbProvider->clearTranslationCache('f');
 			$this->processFramework();
-			Provider::getInstance()->commit();
+			$this->dbProvider->commit();
 		}
 		catch (Exception $e)
 		{
-			Provider::getInstance()->rollBack($e);
+			$this->dbProvider->rollBack($e);
 			throw $e;
 		}
 	}
@@ -407,7 +443,7 @@ class LocaleService extends \Change\I18n\I18nManager
 		
 		try
 		{
-			Provider::getInstance()->beginTransaction();
+			$this->dbProvider->beginTransaction();
 			
 			$availablePaths = array(f_util_FileUtils::buildFrameworkPath('i18n'), 
 					f_util_FileUtils::buildOverridePath('framework', 'i18n'));
@@ -419,11 +455,11 @@ class LocaleService extends \Change\I18n\I18nManager
 				}
 			}
 			
-			Provider::getInstance()->commit();
+			$this->dbProvider->commit();
 		}
 		catch (Exception $e)
 		{
-			Provider::getInstance()->rollBack($e);
+			$this->dbProvider->rollBack($e);
 			throw $e;
 		}
 	}
@@ -556,5 +592,60 @@ class LocaleService extends \Change\I18n\I18nManager
 			}
 		}
 		return $results;
+	}
+	
+	protected function applyEntitiesI18nSynchro(&$entities)
+	{
+		$syncConf = $this->getI18nSynchro();
+		if (count($syncConf) === 0) {return;}
+		foreach ($syncConf as $to => $froms)
+		{
+			$toLCID = $this->getLCID($to);
+			foreach ($froms as $from)
+			{
+				$fromLCID = $this->getLCID($from);
+				if (isset($entities[$fromLCID]))
+				{
+					if (!isset($entities[$toLCID]))
+					{
+						$entities[$toLCID] = array();
+					}
+					foreach ($entities[$fromLCID] as $id => $data)
+					{
+						if (!isset($entities[$toLCID][$id]))
+						{
+							$entities[$toLCID][$id] = $data;
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * @param string $keyPath
+	 * @param array $entities
+	 */
+	protected function processDatabase($keyPath, $entities)
+	{
+		$keyPath = strtolower($keyPath);
+		$lcids = array();
+		foreach ($this->getSupportedLanguages() as $lang)
+		{
+			$lcids[$this->getLCID($lang)] = $lang;
+		}
+		
+		foreach ($entities as $lcid => $infos)
+		{
+			if (! isset($lcids[$lcid]))
+			{
+				continue;
+			}
+			foreach ($infos as $id => $entityInfos)
+			{
+				list($content, $format) = $entityInfos;
+				$this->dbProvider->addTranslate($lcid, strtolower($id), $keyPath, $content, 0, $format, false);
+			}
+		}
 	}
 }

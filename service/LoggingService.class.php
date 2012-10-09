@@ -13,9 +13,9 @@ class change_LoggingService
 	protected $wrappedLogging;
 	
 	/**
-	 * @deprecated use \Change\Logging\Logging::getLevel()
+	 * @deprecated use \Change\Logging\Logging
 	 */
-	public function getLogLevelName()
+	public static function getInstance()
 	{
 		if (self::$instance === null)
 		{
@@ -27,7 +27,7 @@ class change_LoggingService
 	
 	public function __call($name, $arguments)
 	{
-		return call_user_method($name, $this->wrappedLogging, $arguments);
+		return call_user_func_array(array($this->wrappedLogging, $name), $arguments);
 	}
 	
 	/**

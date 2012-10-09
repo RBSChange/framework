@@ -558,9 +558,9 @@ abstract class c_ChangescriptCommand
 				{
 					spl_autoload_unregister($fct);
 				}
-			}	
-			require_once PROJECT_HOME.'/framework/Framework.php';
-			Framework::initialize();
+			}
+			require_once PROJECT_HOME . '/Change/Application.php';
+			\Change\Application::getInstance()->start();
 		}
 	}
 
