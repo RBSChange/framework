@@ -1536,7 +1536,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	 */
 	public function synchronizeI18nProperties($document, $from, $to)
 	{
-		return in_array($from->getPublicationstatus(), array('ACTIVE', 'PUBLICATED', 'DEACTIVATED'));
+		return in_array($from->getPublicationstatus(), array('ACTIVE', 'PUBLISHED', 'DEACTIVATED'));
 	}	
 	
 	/**
@@ -1761,7 +1761,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 		if ($document->isContextLangAvailable())
 		{	
 			$currentStatus = $document->getPublicationstatus();
-			return $currentStatus === 'PUBLICATED' || $currentStatus === 'ACTIVE';
+			return $currentStatus === 'PUBLISHED' || $currentStatus === 'ACTIVE';
 		}
 		return false;
 	}
@@ -1778,7 +1778,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 		$currentStatus = $document->getPublicationstatus();
 		if (!$this->isPublishTransitionPossible($document))
 		{
-			throw new IllegalTransitionException($currentStatus, 'PUBLICATED/ACTIVE');
+			throw new IllegalTransitionException($currentStatus, 'PUBLISHED/ACTIVE');
 		}
 
 		$eventName = null;
@@ -1792,7 +1792,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 			{
 				if ($currentStatus == 'ACTIVE')
 				{
-					$document->setPublicationstatus('PUBLICATED');
+					$document->setPublicationstatus('PUBLISHED');
 					$this->removeActivePublicationStatusInfo($document);
 					$pp->updateDocument($document);					
 					$this->setToIndexIfNeeded($document, 'UpdateStatus');
@@ -1800,7 +1800,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 					$published = true;
 				}
 			}
-			else if ($currentStatus == 'PUBLICATED')
+			else if ($currentStatus == 'PUBLISHED')
 			{
 				$document->setPublicationstatus('ACTIVE');
 				$pp->updateDocument($document);
@@ -1831,12 +1831,12 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	private function unpublishDocument($document, $extraEventParams = null)
 	{
 		$pp = $this->getPersistentProvider();
-		if ($document->getPublicationstatus() == 'PUBLICATED')
+		if ($document->getPublicationstatus() == 'PUBLISHED')
 		{
 			$document->setPublicationstatus('ACTIVE');
 			$pp->updateDocument($document);
 			$this->setToIndexIfNeeded($document, 'UpdateStatus');
-			$this->dispatchPublicationStatusChanged($document, 'PUBLICATED', 'persistentDocumentUnpublished', $extraEventParams);
+			$this->dispatchPublicationStatusChanged($document, 'PUBLISHED', 'persistentDocumentUnpublished', $extraEventParams);
 		}
 	}
 
@@ -2028,7 +2028,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 			return;
 		}
 
-		if ($currentStatus != 'PUBLICATED' && $currentStatus != 'ACTIVE')
+		if ($currentStatus != 'PUBLISHED' && $currentStatus != 'ACTIVE')
 		{
 			throw new IllegalTransitionException($currentStatus, 'DEACTIVATED');
 		}
@@ -2076,7 +2076,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 			return;
 		}
 
-		if ($currentStatus != 'PUBLICATED' && $currentStatus != 'ACTIVE' && $currentStatus != 'DEACTIVATED')
+		if ($currentStatus != 'PUBLISHED' && $currentStatus != 'ACTIVE' && $currentStatus != 'DEACTIVATED')
 		{
 			throw new IllegalTransitionException($currentStatus, 'FILED');
 		}
@@ -2132,7 +2132,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 			return;
 		}
 
-		if ($currentStatus != 'DRAFT' && $currentStatus != 'ACTIVE' && $currentStatus != 'PUBLICATED'
+		if ($currentStatus != 'DRAFT' && $currentStatus != 'ACTIVE' && $currentStatus != 'PUBLISHED'
 		&& $currentStatus != 'FILED' && $currentStatus != 'DEACTIVATED')
 		{
 			throw new IllegalTransitionException($currentStatus, 'TRASH');

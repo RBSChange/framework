@@ -44,10 +44,6 @@
 	</properties>
 
 	<!--
-		<statuses default="[DRAFT] | CORRECTION | ACTIVE | PUBLICATED | DEACTIVATED | FILED | DEPRECATED | TRASH | WORKFLOW" />
-	-->
-
-	<!--
 		Exemple d'activation d'un workflow pour le modèle
 		- Un seul workflow par modèle
 		- L'activation d'un workflow implique 'use-correction="true"'
@@ -57,13 +53,6 @@
 		</workflow>
 	-->
 
-	<!--
-		Exemples de relation arborescente
-		<children>
-			<child name="subDocuments" type="modules_generic/document" />
-		</children>
-	-->
-	
 	<serializedproperties>
 		<!--
 			* Tag: <property />
@@ -74,7 +63,6 @@
 			min-occurs="[0]..n"
 			max-occurs="[1]..n | -1"
 			from-list="xxxxxxxx"
-			localized="true | [false]"
 			default-value="xxxx"
 		-->
 	</serializedproperties>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <i18n baseKey="m.framework.persistentdocument.status" lcid="fr_FR">
-	<key id="publicated">publié</key>
+	<key id="published">publié</key>
 	<key id="active">actif</key>
 	<key id="deactivated">désactivé</key>
 	<key id="draft">brouillon</key>

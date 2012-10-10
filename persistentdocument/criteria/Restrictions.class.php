@@ -451,11 +451,11 @@ class Restrictions
 	//
 
 	/**
-	 * Shorcut for <code>eq("publicationstatus", "PUBLICATED")</code>
+	 * Shorcut for <code>eq("publicationstatus", "PUBLISHED")</code>
 	 * @return SimpleExpression
 	 */
 	static function published()
 	{
-		return self::eq("publicationstatus", "PUBLICATED");
+		return self::eq("publicationstatus", "PUBLISHED");
 	}
 }

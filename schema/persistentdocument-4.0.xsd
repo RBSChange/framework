@@ -52,7 +52,7 @@
 			<xs:enumeration value="DRAFT" />
 			<xs:enumeration value="CORRECTION" />
 			<xs:enumeration value="ACTIVE" />
-			<xs:enumeration value="PUBLICATED" />
+			<xs:enumeration value="PUBLISHED" />
 			<xs:enumeration value="DEACTIVATED" />
 			<xs:enumeration value="FILED" />
 			<xs:enumeration value="DEPRECATED" />
@@ -144,18 +144,7 @@
 									<xs:attribute name="from-list" type="xs:string" />				
 									<xs:attribute name="db-mapping" type="xs:string" />
 									<xs:attribute name="db-size" type="xs:string" />
-									<xs:attribute name="tree-node" default="false">
-										<xs:simpleType>
-											<xs:restriction base="xs:NMTOKEN">
-												<xs:enumeration value="true" />
-												<xs:enumeration value="false" />
-												<xs:enumeration value="both" />
-												<xs:enumeration value="direct" />
-												<xs:enumeration value="inverse" />
-												<xs:enumeration value="none" />
-											</xs:restriction>
-										</xs:simpleType>
-									</xs:attribute>
+									<xs:attribute name="tree-node" type="xs:boolean" default="false" />
 									<xs:attribute name="preserve-old-value" type="xs:boolean" default="false" />
 									<xs:attribute name="localized" type="xs:boolean" default="false" />
 									<xs:attribute name="inverse" type="xs:boolean" default="false" />
@@ -180,18 +169,11 @@
 									<xs:attribute name="min-occurs" type="xs:int" default="0" />
 									<xs:attribute name="max-occurs" type="xs:int" default="1" />
 									<xs:attribute name="from-list" type="xs:string" />
-									<xs:attribute name="localized" type="xs:boolean" default="false" />
 									<xs:attribute name="default-value" type="xs:string" />
 									<xs:attribute name="indexed" type="indexTarget" default="none" />
 								</xs:complexType>
 							</xs:element>
 						</xs:sequence>
-					</xs:complexType>
-				</xs:element>
-				<xs:element name="statuses" minOccurs="0"
-					maxOccurs="1">
-					<xs:complexType>
-						<xs:attribute name="default" type="documentStatus" />
 					</xs:complexType>
 				</xs:element>
 				<xs:element name="workflow" minOccurs="0"
@@ -208,29 +190,15 @@
 							type="xs:string" />
 					</xs:complexType>
 				</xs:element>
-				<xs:element name="children" minOccurs="0"
-					maxOccurs="1">
-					<xs:complexType>
-						<xs:sequence>
-							<xs:element name="child" minOccurs="0" maxOccurs="unbounded">
-								<xs:complexType>
-									<xs:attribute name="name" use="required" type="xs:string" />
-									<xs:attribute name="type" use="required" type="documentModel" />
-								</xs:complexType>
-							</xs:element>
-						</xs:sequence>
-					</xs:complexType>
-				</xs:element>	
 			</xs:all>
 			<xs:attribute name="model-version" type="xs:string" use="required" />
 			<xs:attribute name="icon" type="xs:string" />
 			<xs:attribute name="edit-module" type="xs:string" />
 			<xs:attribute name="use-correction" type="xs:boolean" default="false" />
-			<xs:attribute name="table-name" type="xs:string" />
+			<xs:attribute name="db-mapping" type="xs:string" />
 			<xs:attribute name="extend" type="xs:string" />
 			<xs:attribute name="inject" type="xs:boolean" default="false" />
 			<xs:attribute name="has-url" type="xs:boolean" default="true" />
-			<xs:attribute name="localized" type="xs:boolean" default="false" />
 			<xs:attribute name="use-rewrite-url" type="xs:boolean" default="true" />
 			<xs:attribute name="indexable" type="xs:boolean" default="false" />
 			<xs:attribute name="backoffice-indexable" type="xs:boolean" default="true" />
