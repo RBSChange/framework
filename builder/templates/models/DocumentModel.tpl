@@ -7,7 +7,7 @@ class <{$model->getDocumentClassName()}>model extends <{$model->getBaseModelClas
 	/**
 	 * Constructor of <{$model->getDocumentClassName()}>model
 	 */
-	protected function __construct()
+	public function __construct()
 	{
 		parent::__construct();	
 <{if (!$model->inject()) }>

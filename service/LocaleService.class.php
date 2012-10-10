@@ -6,6 +6,22 @@ use \Change\Db\DbProvider;
  */
 class LocaleService
 {
+	/**
+	 * @deprecated
+	 */
+	const SYNCHRO_MODIFIED = 'MODIFIED';
+	
+	/**
+	 * @deprecated
+	 */
+	const SYNCHRO_VALID = 'VALID';
+	
+	/**
+	 * @deprecated
+	 */
+	const SYNCHRO_SYNCHRONIZED = 'SYNCHRONIZED';
+	
+	
 	protected static $instance;
 	
 	/**

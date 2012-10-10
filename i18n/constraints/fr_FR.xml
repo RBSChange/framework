@@ -3,6 +3,8 @@
 	<key id="isinvalidfield">Champ "{field}" invalide : </key>
 	<key id="isempty">Cette valeur est obligatoire et ne peut être vide.</key>
 	<key id="notbetweendocumentarray">le champ "{field}" n'est pas valide : count='{count}' min-occurs='{minOccurs}', max-occurs='{maxOccurs}'</key>
+	<key id="maxoccurs">le champ "{field}" doit contenir au plus {maxOccurs} elements</key>
+	<key id="minoccurs">le champ "{field}" doit contenir au moins {maxOccurs} elements</key>
 	<key id="emailaddressinvalid">le champ "{field}" doit contenir une adresse e-mail valide.</key>
 	<key id="emailsaddressinvalid">le champ "{field}" contient des adresses (%value%) e-mail invalide.</key>
 	<key id="emailaddressinvalidformat">le champ "{field}" doit contenir une adresse e-mail valide.</key>

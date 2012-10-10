@@ -4,16 +4,7 @@
  * @package generic
  */
 class generic_persistentdocument_documentmodel extends f_persistentdocument_PersistentDocumentModel
-{
-
-	/**
-	 * Constructor of generic_persistentdocument_documentmodel
-	 */
-	protected function __construct()
-	{
-		parent::__construct();
-	}
-	
+{	
 	protected function loadProperties()
 	{
 		parent::loadProperties();

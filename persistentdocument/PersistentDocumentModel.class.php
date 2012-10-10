@@ -1,5 +1,4 @@
 <?php
-use Change\Documents\DocumentHelper;
 
 /**
  * @package framework.persistentdocument
