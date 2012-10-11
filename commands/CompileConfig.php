@@ -33,10 +33,10 @@ class commands_CompileConfig extends c_ChangescriptCommand
 		$this->getBootStrap()->cleanDependenciesCache();
 		
 		require_once PROJECT_HOME . '/Change/Application.php';
-		\Change\Application::getInstance()->registerNamespaceAutoload();
+		\Change\Application::getInstance()->start();
 		
-		$generator = new \Change\Configuration\Generator();
-		$generator->compile($this->getComputedDeps());
+		$generator = new \Change\Configuration\Generator(\Change\Application::getInstance());
+		$generator->compile();
 
 		// TODO: 
 		// - website.compile-js-dependencies on LOGGING_LEVEL changed
