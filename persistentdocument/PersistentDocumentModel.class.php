@@ -1,8 +1,6 @@
 <?php
-
 /**
- * @package framework.persistentdocument
- * f_persistentdocument_PersistentDocumentModel
+ * @deprecated
  */
 abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Documents\AbstractModel implements f_mvc_BeanModel 
 {
@@ -12,9 +10,38 @@ abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Docu
 	const PRIMARY_KEY_ID = "id";
 	
 	/**
-	 * @var \Change\Documents\Property[]
+	 * @deprecated
 	 */
 	protected  $m_childrenProperties;
+	
+	/**
+	 * @return NULL
+	 */
+	public function getVendorName()
+	{
+		return null;
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	protected  $m_preservedPropertiesNames = array();
+	
+	/**
+	 * @deprecated
+	 */
+	public function getPreservedPropertiesNames()
+	{
+		return $this->m_preservedPropertiesNames;
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function isPreservedProperty($name)
+	{
+		return isset($this->m_preservedPropertiesNames[$name]);
+	}
 	
 	/**
 	 * @deprecated
