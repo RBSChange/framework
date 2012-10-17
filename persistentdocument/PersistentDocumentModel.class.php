@@ -48,7 +48,7 @@ abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Docu
 	 */
 	public static function buildDocumentModelName($moduleName, $documentName)
 	{
-		return \Change\Documents\ModelManager::getInstance()->composeModelName($moduleName, $documentName);
+		return 'modules_' . $moduleName . '/' .$documentName;
 	}
 
 	/**
@@ -71,18 +71,54 @@ abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Docu
 		}
 		throw new Exception("Invalid model name $modelName");
 	}
+	
+	/**
+	 * @var deprecated
+	 */
+	protected static $documentModels = array();
 
 	/**
 	 * @deprecated
 	 */
 	public static function getInstanceFromDocumentModelName($modelName)
 	{
-		$model = \Change\Documents\ModelManager::getInstance()->getModelByName($modelName);
+		if (!array_key_exists($modelName, self::$documentModels))
+		{
+			$className = self::getModelClassName($modelName);
+			if ($className)
+			{
+				self::$documentModels[$modelName] = new $className();
+			}
+			else
+			{
+				self::$documentModels[$modelName] = null;
+			}
+		}
+		$model =  self::$documentModels[$modelName];
 		if ($model === null)
 		{
 			throw new BaseException("type_must_be_a_module");
 		}
 		return  $model;
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	protected static function getModelClassName($modelName)
+	{
+		list ($package, $documentName) = explode('/', $modelName);
+		list ($packageType, $moduleName) = explode('_', $package);
+		if ($packageType != 'modules' || empty($moduleName) || empty($documentName))
+		{
+			return null;
+		}
+		$className = $moduleName .'_persistentdocument_'.$documentName.'model';
+		if (class_exists($className))
+		{
+			return $className;
+		}
+		return null;
 	}
 	
 	/**
@@ -94,26 +130,22 @@ abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Docu
 	}
 
 	/**
+	 * @param string $moduleName
+	 * @param string $documentName
+	 * @return string
+	 */
+	public static function composeModelName($moduleName, $documentName)
+	{
+		return 'modules_' . $moduleName . '/' .$documentName;
+	}
+	
+	/**
 	 * @deprecated
 	 */
 	public static function getInstance($moduleName, $documentName)
 	{
-		$mm = \Change\Documents\ModelManager::getInstance();
-		$documentModelName = $mm->composeModelName($moduleName, $documentName);
-		
-		$model = $mm->getModelByName($documentModelName);
-		if ($model === null)
-		{
-			if ($moduleName != 'generic' && $documentName == 'folder')
-			{
-				$model = $mm->getModelByName($mm->composeModelName('generic', $documentName));
-			}
-			else
-			{
-				throw new Exception('Unknown document model ' . $documentModelName);
-			}
-		}
-		return $model;
+		$modelName = self::composeModelName($moduleName, $documentName);
+		return self::getInstanceFromDocumentModelName($modelName);
 	}
 
 	/**
@@ -121,7 +153,8 @@ abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Docu
 	 */
 	static function getNewModelInstance($moduleName, $documentName)
 	{
-		return self::getInstance($moduleName, $documentName);
+		$modelName = self::composeModelName($moduleName, $documentName);
+		return self::getInstanceFromDocumentModelName($modelName);
 	}
 
 	/**
@@ -129,7 +162,7 @@ abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Docu
 	 */
 	public static function exists($documentModelName)
 	{
-		$model = \Change\Documents\ModelManager::getInstance()->getModelByName($documentModelName);
+		$model = self::getModelClassName($documentModelName);
 		return $model != null;
 	}
 
@@ -138,7 +171,15 @@ abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Docu
 	 */
 	public static function getDocumentModels()
 	{
-		return \Change\Documents\ModelManager::getInstance()->getModels();
+		self::$documentModels = array();
+		foreach (self::getDocumentModelNamesByModules() as $modelNames)
+		{
+			foreach ($modelNames as $modelName)
+			{
+				self::getInstanceFromDocumentModelName($modelName);
+			}
+		}
+		return self::$documentModels;
 	}
 	
 	/**
@@ -146,7 +187,7 @@ abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Docu
 	 */
 	public static function getDocumentModelNamesByModules()
 	{
-		return \Change\Documents\ModelManager::getInstance()->getModelNamesByModules();
+		return unserialize(file_get_contents(f_util_FileUtils::buildChangeBuildPath('documentmodels.php')));
 	}
 	
 	/**
@@ -154,7 +195,18 @@ abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Docu
 	 */
 	public static function getModelChildrenNames($modelName = null)
 	{
-		return \Change\Documents\ModelManager::getInstance()->getChildrenModelNames();
+		$modelChildren = unserialize(file_get_contents(f_util_FileUtils::buildChangeBuildPath('documentmodelschildren.php')));
+		if ($modelName === null)
+		{
+			return $modelChildren;
+		}
+		
+		if (isset($modelChildren[$modelName]))
+		{
+			return $modelChildren[$modelName];
+		}	
+		
+		return array();
 	}
 
 	/**********************************************************/
@@ -174,7 +226,7 @@ abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Docu
 	 */
 	public final function getStatuses()
 	{
-		return \Change\Documents\ModelManager::getInstance()->getPublicationStatuses();
+		return array('DRAFT','CORRECTION','ACTIVE','PUBLISHED','DEACTIVATED','FILED','DEPRECATED','TRASH','WORKFLOW');
 	}
 
 	/**
@@ -191,7 +243,8 @@ abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Docu
 	 */
 	public static function getSystemProperties()
 	{
-		return \Change\Documents\DocumentHelper::getSystemPropertyNames();
+		return array('id', 'model', 'author', 'authorid', 'creationdate','modificationdate','publicationstatus',
+				'lang','metastring','modelversion','documentversion', 'si18n');
 	}
 	
 	
