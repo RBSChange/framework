@@ -141,6 +141,7 @@ class import_ScriptBaseElement
 			$objects = array();
 			foreach (explode(',', $this->attributes[$key]) as $value)
 			{ 
+				$value = trim($value);
 				if ($value === '==')
 				{
 					$objects = array('==');
@@ -202,6 +203,7 @@ class import_ScriptBaseElement
 							$value = array();
 							foreach ($values as $oneValue)
 							{
+								$oneValue = trim($oneValue);
 								if ($oneValue === '==')
 								{
 									$value = array('==');
