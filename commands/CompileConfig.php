@@ -32,11 +32,11 @@ class commands_CompileConfig extends c_ChangescriptCommand
 		$this->message("== Compile config ==");
 		$this->getBootStrap()->cleanDependenciesCache();
 		
-		require_once PROJECT_HOME . '/Change/Application.php';
+		/*require_once PROJECT_HOME . '/Change/Application.php';
 		\Change\Application::getInstance()->start();
 		
 		$generator = new \Change\Configuration\Generator(\Change\Application::getInstance());
-		$generator->compile();
+		$generator->compile();*/
 
 		// TODO: 
 		// - website.compile-js-dependencies on LOGGING_LEVEL changed
