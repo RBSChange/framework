@@ -4,13 +4,42 @@
  */
 class f_persistentdocument_TransactionManager
 {
-
+	/**
+	 * @var f_persistentdocument_TransactionManager
+	 */
+	private static $instance;
+	
+	/**
+	 * @var \Change\Db\DbProvider
+	 */
+	private $wrapped;
+	
+	/**
+	 * @deprecated
+	 */
+	protected function __construct()
+	{
+		$this->wrapped = f_persistentdocument_PersistentProvider::getInstance();
+	}
+	
 	/**
 	 * @deprecated
 	 */
 	public static function getInstance()
 	{
-		return \Change\Application::getInstance()->getApplicationServices()->getDbProvider();
+		if (self::$instance === null)
+		{
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+	
+	/**
+	 * @deprecated wrapped method
+	 */
+	public function __call($name, $args)
+	{
+		return call_user_func_array(array($this->wrapped, $name), $args);
 	}
 
 	/**
@@ -18,7 +47,7 @@ class f_persistentdocument_TransactionManager
 	 */
 	public function getPersistentProvider()
 	{
-		return \Change\Application::getInstance()->getApplicationServices()->getDbProvider();
+		return $this->wrapped;
 	}
 
 	/**
@@ -26,7 +55,7 @@ class f_persistentdocument_TransactionManager
 	 */
 	public function isDirty()
 	{
-		return self::getInstance()->isTransactionDirty();
+		return $this->wrapped->isTransactionDirty();
 	}
 
 	/**

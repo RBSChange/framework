@@ -12,6 +12,15 @@ abstract class f_persistentdocument_PersistentDocument extends \Change\Documents
 	/**
 	 * @deprecated
 	 */
+	public function getProvider()
+	{
+		return f_persistentdocument_PersistentProvider::getInstance();
+	}
+	
+	
+	/**
+	 * @deprecated
+	 */
 	public function getBeanId()
 	{
 		return $this->getId();
