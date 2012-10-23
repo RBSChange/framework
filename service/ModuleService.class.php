@@ -54,15 +54,7 @@ class ModuleService extends change_BaseService
 	
 	public function loadCacheFile()
 	{
-		$fileName = \Change\Stdlib\Path::compilationPath('Config', 'modulesinfos.ser');
-		if (file_exists($fileName))
-		{
-			$this->packages = unserialize(\Change\Stdlib\File::read($fileName));
-		}
-		else
-		{
-			$this->packages = array();
-		}
+		$this->packages = Framework::getConfiguration('packageversion');
 	}
 
 	private function initializeIfNeeded()
@@ -127,9 +119,9 @@ class ModuleService extends change_BaseService
 	public final function moduleExists($moduleName)
 	{
 		$this->initializeIfNeeded();
-		if (substr($moduleName, 0, 8) === 'modules_')
+		if (substr($moduleName, 0, 8) !== 'modules_')
 		{
-			$moduleName = substr($moduleName, 8);
+			$moduleName = 'modules_' . $moduleName;
 		}
 		
 		return array_key_exists($moduleName, $this->packages);
@@ -194,12 +186,7 @@ class ModuleService extends change_BaseService
 	public final function getPackageNames()
 	{
 		$this->initializeIfNeeded();
-		$packageNames = array();
-		foreach (array_keys($this->packages) as $moduleName)
-		{
-			$packageNames[] = 'modules_' . $moduleName;
-		}
-		return $packageNames;
+		return array_keys($this->packages);
 	}
 	
 	/**
@@ -212,8 +199,9 @@ class ModuleService extends change_BaseService
 		{
 			$this->initializeIfNeeded();
 			$modules = array();
-			foreach ($this->packages as $shortName => $infos)
+			foreach ($this->packages as $fullModuleName => $infos)
 			{
+				$shortName = substr($fullModuleName, 8);
 				$modules[$shortName] = new c_Module($shortName, $infos);
 			}
 			$this->modules = $modules;
@@ -246,13 +234,13 @@ class ModuleService extends change_BaseService
 	public final function getModuleVersion($moduleName)
 	{
 		$this->initializeIfNeeded();
-		if (substr($moduleName, 0, 8) === 'modules_')
+		if (substr($moduleName, 0, 8) !== 'modules_')
 		{
-			$moduleName = substr($moduleName, 8);
+			$moduleName = 'modules_' . $moduleName;
 		}
-		if (isset($this->packages[$moduleName]) && isset($this->packages[$moduleName]['version']))
+		if (isset($this->packages[$moduleName]) && isset($this->packages[$moduleName]["VERSION"]))
 		{
-			return $this->packages[$moduleName]['version'];
+			return $this->packages[$moduleName]["VERSION"];
 		}
 		return null;
 	}
@@ -676,7 +664,7 @@ class c_Module
 	 */
 	function isVisible()
 	{
-		return isset($this->infos['visible']) ? $this->infos['visible'] : false;
+		return isset($this->infos['VISIBLE']) ? $this->infos['VISIBLE'] : false;
 	}
 		
 	/**
@@ -703,7 +691,7 @@ class c_Module
 	 */
 	function getVersion()
 	{
-		return isset($this->infos['version']) ? $this->infos['version'] : null;
+		return isset($this->infos['VERSION']) ? $this->infos['VERSION'] : null;
 	}
 	
 	/**
@@ -711,7 +699,7 @@ class c_Module
 	 */
 	function getIconName()
 	{
-		return isset($this->infos['icon']) ? $this->infos['icon'] : 'package';
+		return isset($this->infos['ICON']) ? $this->infos['ICON'] : 'package';
 	}
 	
 	/**
@@ -719,7 +707,7 @@ class c_Module
 	 */
 	function getCategory()
 	{
-		return isset($this->infos['category']) ? $this->infos['category'] : 'modules';
+		return isset($this->infos['CATEGORY']) ? $this->infos['CATEGORY'] : 'modules';
 	}
 	
 	/**
@@ -745,6 +733,6 @@ class c_Module
 	 */
 	function isTopicBased()
 	{
-		return isset($this->infos['usetopic']) ? $this->infos['usetopic'] : false;
+		return isset($this->infos['USETOPIC']) ? $this->infos['USETOPIC'] : false;
 	}
 }
