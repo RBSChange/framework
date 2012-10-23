@@ -1,8 +1,6 @@
 <?php
-use \Change\Db\DbProvider;
-
 /**
- * @deprecated
+ * @deprecated use \Change\I18n\I18nManager
  */
 class LocaleService
 {
@@ -20,8 +18,10 @@ class LocaleService
 	 * @deprecated
 	 */
 	const SYNCHRO_SYNCHRONIZED = 'SYNCHRONIZED';
-	
-	
+
+	/**
+	 * @var LocaleService
+	 */
 	protected static $instance;
 	
 	/**
@@ -43,20 +43,91 @@ class LocaleService
 		{
 			self::$instance = new static();
 			self::$instance->wrappedI18nManager = \Change\Application::getInstance()->getApplicationServices()->getI18nManager();
+			self::$instance->dbProvider = \Change\Application::getInstance()->getApplicationServices()->getDbProvider();
 		}
 		return self::$instance;
-	}
-	
-	protected function __construct()
-	{
-		// TODO correct initialization.
-		$this->dbProvider = \Change\Application::getInstance()->getApplicationServices()->getDbProvider();
 	}
 	
 	public function __call($name, $arguments)
 	{
 		return call_user_func_array(array($this->wrappedI18nManager, $name), $arguments);
 	}
+	
+	/**
+	 * @deprecated use \Change\I18n\PreparedKey
+	 */
+	public function explodeKey($cleanKey)
+	{
+		$parts = explode('.', strtolower($cleanKey));
+		if (count($parts) < 3)
+		{
+			return array(false, false);
+		}
+	
+		$id = end($parts);
+		$keyPathParts = array_slice($parts, 0, -1);
+		switch ($keyPathParts[0])
+		{
+			case 'f' :
+			case 'm' :
+			case 't' :
+				break;
+			case 'framework' :
+				$keyPathParts[0] = 'f';
+				break;
+			case 'modules' :
+				$keyPathParts[0] = 'm';
+				break;
+			case 'themes' :
+				$keyPathParts[0] = 't';
+				break;
+			default :
+				return array(false, false);
+		}
+		return array(implode('.', $keyPathParts), $id);
+	}
+	
+	/**
+	 * @deprecated use \Change\I18n\PreparedKey::isValid()
+	 */
+	public function isKey($string)
+	{
+		list ($path, ) = $this->explodeKey($string);
+		return $path !== false;
+	}
+	
+	/**
+	 * @deprecated use \Change\I18n\I18nManager::formatKey()
+	 */
+	public function getFullKeyContent($lang, $cleanKey)
+	{
+		list ($keyPath, $id) = $this->explodeKey($cleanKey);
+		if ($keyPath !== false)
+		{
+			$lcid = $this->getLCID($lang);
+			list ($content, ) = $this->dbProvider->translate($lcid, $id, $keyPath);
+	
+			if ($content === null)
+			{
+				$this->logKeyNotFound($keyPath . '.' . $id, $lcid);
+			}
+			return $content;
+		}
+		Framework::warn('Invalid Key ' . $cleanKey);
+		return null;
+	}
+	
+	/**
+	 * @depreacated use \Change\I18n\I18nManager::prepareKeyFromTransString()
+	 */
+	public function parseTransString($transString)
+	{
+		$key = $this->prepareKeyFromTransString($transString);
+		return array($key->getKey(), $key->getFormatters(), $key->getReplacements());
+	}
+	
+	// Keys compilation.
+	// TODO: move.
 	
 	public function importOverride($name = null)
 	{
@@ -517,7 +588,10 @@ class LocaleService
 			
 			if (count($entities))
 			{
-				$this->applyEntitiesI18nSynchro($entities);
+				if ($this->hasI18nKeysSynchro())
+				{
+					$this->applyI18nKeysSynchro($entities);
+				}
 				$this->processDatabase($baseKey, $entities);
 			}
 			
@@ -610,9 +684,9 @@ class LocaleService
 		return $results;
 	}
 	
-	protected function applyEntitiesI18nSynchro(&$entities)
+	protected function applyI18nKeysSynchro(&$entities)
 	{
-		$syncConf = $this->getI18nSynchro();
+		$syncConf = $this->getI18nKeysSynchro();
 		if (count($syncConf) === 0) {return;}
 		foreach ($syncConf as $to => $froms)
 		{

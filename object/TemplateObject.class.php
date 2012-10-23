@@ -110,9 +110,9 @@ class TemplateObject
 			
 			RequestContext::getInstance()->endI18nWork();
 		}
-		catch(Exception $e)
+		catch (Exception $e)
 		{
-			Framework::error(__METHOD__ . ' EXCEPTION while executing template ('. $this->fileName . ') :' . $e->getMessage());
+			Framework::error(__METHOD__ . ' EXCEPTION while executing template ('. $this->fileName . '): ' . $e->getMessage());
 			RequestContext::getInstance()->endI18nWork($e);
 		}
 		

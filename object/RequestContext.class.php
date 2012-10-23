@@ -1,6 +1,6 @@
 <?php
 /**
- * @package framework.object
+ * @deprecated
  */
 class RequestContext
 {
@@ -9,22 +9,25 @@ class RequestContext
 	 */
 	private static $m_instance;
 
-	
 	/**
 	 * @var array
 	 */
 	private $profile;
 	
-
 	/**
 	 * @deprecated
 	 */
 	private $m_isLangDefined = false;
 
+	/**
+	 * @var \Change\I18n\I18nManager
+	 */
+	protected $wrappedI18nManager;
 
 	protected function __construct()
 	{
 		$this->resetProfile();
+		$this->wrappedI18nManager = \Change\Application::getInstance()->getApplicationServices()->getI18nManager();
 	}
 	
 	/**
@@ -605,19 +608,19 @@ class RequestContext
 	}
 	
 	/**
-	 * @deprecated
+	 * @deprecated use \Change\I18n\I18nManager::hasI18nDocumentsSynchro() or \Change\I18n\I18nManager::hasI18nKeysSynchro()
 	 */
 	public function hasI18nSynchro()
 	{
-		return \Change\I18n\I18nManager::getInstance()->hasI18nSynchro();
+		return $this->wrappedI18nManager->hasI18nDocumentsSynchro();
 	}
 	
 	/**
-	 * @deprecated
+	 * @deprecated use \Change\I18n\I18nManager::getI18nDocumentsSynchro() or \Change\I18n\I18nManager::getI18nKeysSynchro()
 	 */
 	public function getI18nSynchro()
 	{
-		return \Change\I18n\I18nManager::getInstance()->getI18nSynchro();
+		return $this->wrappedI18nManager->getI18nDocumentsSynchro();
 	}
 	
 	/**
@@ -625,7 +628,7 @@ class RequestContext
 	 */
 	public function isMultiLangEnabled()
 	{
-		return \Change\I18n\I18nManager::getInstance()->isMultiLangEnabled();
+		return $this->wrappedI18nManager->isMultiLangEnabled();
 	}
 	
 	/**
@@ -637,11 +640,27 @@ class RequestContext
 	}
 	
 	/**
-	 * @deprecated
+	 * @deprecated use \Change\I18n\I18nManager::getLang()
 	 */
 	public function getLang()
 	{
-		return \Change\I18n\I18nManager::getInstance()->getLang();
+		return $this->wrappedI18nManager->getLang();
+	}
+	
+	/**
+	 * @deprecated use \Change\I18n\I18nManager::getSupportedLanguages()
+	 */
+	public function getUISupportedLanguages()
+	{
+		return $this->wrappedI18nManager->getSupportedLanguages();
+	}
+	
+	/**
+	 * @deprecated \Change\I18n\I18nManager::getDefaultLang()
+	 */
+	public function getUIDefaultLang()
+	{
+		return $this->wrappedI18nManager->getDefaultLang();
 	}
 	
 	/**
@@ -649,7 +668,7 @@ class RequestContext
 	 */
 	public function getUILang()
 	{
-		return \Change\I18n\I18nManager::getInstance()->getUILang();
+		return $this->wrappedI18nManager->getUILang();
 	}
 	
 	/**
@@ -657,15 +676,26 @@ class RequestContext
 	 */
 	public function setLang($lang)
 	{
-		$this->m_isLangDefined = \Change\I18n\I18nManager::getInstance()->setLang($lang);
-	}
+		if ($this->wrappedI18nManager->getLangStackSize() > 0)
+		{
+			throw new \RuntimeException('The current language is already defined to: ' . $this->getLang());
+		}
+		
+		if (in_array($lang, $this->wrappedI18nManager->getSupportedLanguages()))
+		{
+			$this->wrappedI18nManager->pushLang($lang);
+			$this->m_isLangDefined = true;
+			return true;
+		}
+		return false;
+	}	
 	
 	/**
 	 * @deprecated
 	 */
 	public function setUILang($lang)
 	{
-		return \Change\I18n\I18nManager::getInstance()->setUILang($lang);
+		$this->wrappedI18nManager->setUILang($lang);
 	}
 	
 	/**
@@ -698,15 +728,7 @@ class RequestContext
 	 */
 	public function getSupportedLanguages()
 	{
-		return \Change\I18n\I18nManager::getInstance()->getSupportedLanguages();
-	}
-	
-	/**
-	 * @deprecated
-	 */
-	public function getUISupportedLanguages()
-	{
-		return \Change\I18n\I18nManager::getInstance()->getUISupportedLanguages();
+		return $this->wrappedI18nManager->getSupportedLanguages();
 	}
 	
 	/**
@@ -714,15 +736,7 @@ class RequestContext
 	 */
 	public function getDefaultLang()
 	{
-		return \Change\I18n\I18nManager::getInstance()->getDefaultLang();
-	}
-	
-	/**
-	 * @deprecated
-	 */
-	public function getUIDefaultLang()
-	{
-		return \Change\I18n\I18nManager::getInstance()->getUIDefaultLang();
+		return $this->wrappedI18nManager->getDefaultLang();
 	}
 	
 	/**
@@ -730,7 +744,7 @@ class RequestContext
 	 */
 	public function beginI18nWork($lang)
 	{
-		\Change\I18n\I18nManager::getInstance()->pushLang($lang);
+		$this->wrappedI18nManager->pushLang($lang);
 	}
 	
 	/**
@@ -738,6 +752,6 @@ class RequestContext
 	 */
 	public function endI18nWork($exception = null)
 	{
-		\Change\I18n\I18nManager::getInstance()->popLang($exception);
+		$this->wrappedI18nManager->popLang($exception);
 	}
 }
