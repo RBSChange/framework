@@ -292,7 +292,7 @@ class Framework
 	 */
 	public static function hasConfiguration($path)
 	{
-		return \Change\Application::getInstance()->getConfiguration()->hasEntry($path);
+		return change_ConfigurationService::getInstance()->hasConfiguration($path);
 	}
 
 	/**
@@ -308,7 +308,7 @@ class Framework
 	 */
 	public static function getConfigurationValue($path, $defaultValue = null)
 	{
-		return \Change\Application::getInstance()->getConfiguration()->getEntry($path, $defaultValue);
+		return change_ConfigurationService::getInstance()->getConfigurationValue($path, $defaultValue);
 	}
 	
 	/**
