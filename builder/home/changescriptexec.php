@@ -59,7 +59,7 @@ $request->setToken($token);
 f_web_oauth_Util::setParametersFromArray($request, $_POST);
 f_web_oauth_Util::setParametersFromArray($request, $headers);
 
-if ($headers['oauth_signature'] !== f_web_oauth_Util::encode($request->getSignature()))
+if ($headers['oauth_signature'] !== $request->getSignature())
 {
 	header("HTTP/1.1 401 Unauthorized");
 	die("Invalid signature");

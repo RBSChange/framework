@@ -1,11 +1,28 @@
 <?php
 class f_web_oauth_Util
 {
+	/**
+	 * @param string $input
+	 * @return string
+	 */
 	static function encode($input)
 	{
 		return str_replace('%7E', '~', rawurlencode($input));
 	}
 	
+	/**
+	 * @param string $input
+	 * @return string
+	 */
+	static function decode($input)
+	{
+		return rawurldecode($input);
+	}
+	
+	/**
+	 * @param string $signName
+	 * @return string
+	 */
 	static function getSignatureClassNameFromSignatureName($signName)
 	{
 		$signatureClassName = 'f_web_oauth_Signature';
@@ -16,6 +33,9 @@ class f_web_oauth_Util
 		return $signatureClassName;
 	}
 	
+	/**
+	 * @return array
+	 */
 	static function parseOauthAutorizationHeader()
 	{
 		if (!isset($_SERVER['HTTP_AUTHORIZATION']))
@@ -31,15 +51,15 @@ class f_web_oauth_Util
 		foreach (explode(',', trim(substr($rawHeader, 5))) as $part)
 		{
 			$firstEqual = strpos($part, '=');
-			$name = substr($part, 0, $firstEqual);
+			$name = self::decode(substr($part, 0, $firstEqual));
 			if (strpos($name, 'oauth_') === 0)
 			{
 				$value = substr($part, $firstEqual+1);
 				if (strlen($value) > 1 && $value[0] == '"' && $value[strlen($value)-1] == '"')
-				{	
+				{
 					$value = substr($value, 1, strlen($value)-2);
 				}
-				$headers[$name] = $value;
+				$headers[$name] = self::decode($value);
 			}
 		}
 		return $headers;
@@ -47,7 +67,7 @@ class f_web_oauth_Util
 	
 	/**
 	 * @param f_web_oauth_Request $request
-	 * @param Array $parameters
+	 * @param array $parameters
 	 */
 	static function setParametersFromArray($request, $parameters)
 	{
