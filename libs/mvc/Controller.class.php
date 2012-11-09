@@ -14,7 +14,7 @@ class change_Controller extends \Change\Mvc\Controller
 	
 	/**
 	 * @deprecated
-	 */	
+	 */
 	protected $contentType;
 	
 	/**
@@ -159,13 +159,7 @@ class change_Controller extends \Change\Mvc\Controller
 	 */
 	public static function getInstance()
 	{
-		$instance = \Change\Application::getInstance()->getController();
-		if ($instance === null)
-		{
-			$instance = new static();
-			\Change\Application::getInstance()->setController($instance);
-		}
-		return $instance;
+		return \Change\Application::getInstance()->getApplicationServices()->getController();
 	}
 	
 	/**
@@ -175,20 +169,21 @@ class change_Controller extends \Change\Mvc\Controller
 	 */
 	public static function newInstance($className)
 	{
+		$application = \Change\Application::getInstance();
 		$instance = null;
 		if ($className != get_called_class())
 		{
 			if (class_exists($className))
 			{
-				$instance = new $className();
-				\Change\Application::getInstance()->setController($instance);
+				$instance = new $className($application);
+				$application->getApplicationServices()->instanceManager()->addSharedInstance($instance, 'Change\Mvc\Controller');
 			}
 		}
 		
 		if ($instance === null)
 		{
-			$instance = new static();
-			\Change\Application::getInstance()->setController($instance);
+			$instance = new static($application);
+			$application->getApplicationServices()->instanceManager()->addSharedInstance($instance, 'Change\Mvc\Controller');
 		}
 		return $instance;
 	}

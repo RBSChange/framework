@@ -113,7 +113,6 @@ class LocaleService
 			}
 			return $content;
 		}
-		Framework::warn('Invalid Key ' . $cleanKey);
 		return null;
 	}
 	
@@ -126,6 +125,20 @@ class LocaleService
 		return array($key->getKey(), $key->getFormatters(), $key->getReplacements());
 	}
 	
+	/**
+	 * For example: formatKey('fr', 'f.boolean.true')
+	 * @api
+	 * @param string $lang
+	 * @param string
+	 * @param array $formatters value in array lab, lc, uc, ucf, js, attr, raw, text, html
+	 * @param array $replacements
+	 */
+	public function formatKey($lang, $cleanKey, $formatters = array(), $replacements = array())
+	{
+		$preparedKey = new change_PreparedKey($cleanKey, $formatters, $replacements);
+		return $this->wrappedI18nManager->formatKey($lang, $preparedKey);
+	}
+	
 	// Keys compilation.
 	// TODO: move.
 	
@@ -133,6 +146,11 @@ class LocaleService
 	{
 		if ($name === null || $name === 'framework')
 		{
+			$i18nPath = f_util_FileUtils::buildOverridePath('Change', 'I18n', 'Assets');
+			if (is_dir($i18nPath))
+			{
+				$this->importOverrideDir($i18nPath, 'c');
+			}
 			$i18nPath = f_util_FileUtils::buildOverridePath('framework', 'i18n');
 			if (is_dir($i18nPath))
 			{
@@ -202,7 +220,7 @@ class LocaleService
 	{
 		foreach (scandir($dir) as $file)
 		{
-			if ($file[0] == ".")
+			if ($file[0] == '.')
 			{
 				continue;
 			}
@@ -255,6 +273,9 @@ class LocaleService
 		$parts[] = $lcid . '.xml';
 		switch ($parts[0])
 		{
+			case 'c' :
+				$parts[0] = '/Change/I18n/Assets';
+				break;
 			case 'f' :
 			case 'framework' :
 				$parts[0] = '/framework/i18n';
@@ -376,7 +397,7 @@ class LocaleService
 		$dbp = $this->dbProvider;
 		try
 		{
-			$dbp->beginTransaction();		
+			$dbp->beginTransaction();
 			$dbp->clearTranslationCache();
 			$this->processModules();
 			$this->processFramework();
@@ -401,7 +422,7 @@ class LocaleService
 		try
 		{
 			$this->dbProvider->beginTransaction();
-			$this->dbProvider->clearTranslationCache('m.' . $moduleName);		
+			$this->dbProvider->clearTranslationCache('m.' . $moduleName);
 			// Processing module : $moduleName
 			$this->processModule($moduleName);
 			$this->dbProvider->commit();
@@ -442,6 +463,7 @@ class LocaleService
 		try
 		{
 			$this->dbProvider->beginTransaction();
+			$this->dbProvider->clearTranslationCache('c');
 			$this->dbProvider->clearTranslationCache('f');
 			$this->processFramework();
 			$this->dbProvider->commit();
@@ -458,7 +480,7 @@ class LocaleService
 	 */
 	private function processModules()
 	{
-		$paths = glob(PROJECT_HOME . "/modules/*/i18n", GLOB_ONLYDIR);
+		$paths = glob(PROJECT_HOME . '/modules/*/i18n', GLOB_ONLYDIR);
 		if (! is_array($paths))
 		{
 			return;
@@ -472,7 +494,7 @@ class LocaleService
 	
 	private function processThemes()
 	{
-		$paths = glob(PROJECT_HOME . "/themes/*/i18n", GLOB_ONLYDIR);
+		$paths = glob(PROJECT_HOME . '/themes/*/i18n', GLOB_ONLYDIR);
 		foreach ($paths as $path)
 		{
 			$themeName = basename(dirname($path));
@@ -527,18 +549,27 @@ class LocaleService
 	 */
 	private function processFramework()
 	{
-		
 		try
 		{
 			$this->dbProvider->beginTransaction();
 			
+			$availablePaths = array(\Change\Application::getInstance()->getWorkspace()->projectPath('Change', 'I18n', 'Assets'), 
+					f_util_FileUtils::buildOverridePath('Change', 'I18n', 'Assets'));
+			foreach ($availablePaths as $path)
+			{
+				if (is_dir($path))
+				{
+					Framework::fatal(__METHOD__ . ' ' . $path);
+					$this->processDir('c', $path);
+				}
+			}
 			$availablePaths = array(f_util_FileUtils::buildFrameworkPath('i18n'), 
 					f_util_FileUtils::buildOverridePath('framework', 'i18n'));
 			foreach ($availablePaths as $path)
 			{
 				if (is_dir($path))
 				{
-					$this->processDir("f", $path);
+					$this->processDir('f', $path);
 				}
 			}
 			
@@ -570,7 +601,7 @@ class LocaleService
 			$entities = array();
 			foreach (scandir($dir) as $file)
 			{
-				if ($file[0] == ".")
+				if ($file[0] == '.')
 				{
 					continue;
 				}
@@ -582,7 +613,6 @@ class LocaleService
 				elseif (f_util_StringUtils::endsWith($file, '.xml'))
 				{
 					$this->processFile($absFile, $entities);
-
 				}
 			}
 			
@@ -737,5 +767,245 @@ class LocaleService
 				$this->dbProvider->addTranslate($lcid, strtolower($id), $keyPath, $content, 0, $format, false);
 			}
 		}
+	}
+	
+	// I18n document synchro.
+	
+	/**
+	 * @param integer $documentId
+	 */
+	public function resetSynchroForDocumentId($documentId)
+	{
+		if ($this->hasI18nDocumentsSynchro())
+		{
+			$d = \DocumentHelper::getDocumentInstanceIfExists($documentId); //TODO Old class Usage
+			if ($d && $d->getPersistentModel()->isLocalized())
+			{
+				$this->dbProvider->setI18nSynchroStatus($d->getId(), $d->getLang(), self::SYNCHRO_MODIFIED, null);
+			}
+		}
+	}
+	
+	/**
+	 * @param integer $documentId
+	 */
+	public function initSynchroForDocumentId($documentId)
+	{
+		if ($this->hasI18nDocumentsSynchro())
+		{
+			$d = \DocumentHelper::getDocumentInstanceIfExists($documentId); //TODO Old class Usage
+			if ($d && $d->getPersistentModel()->isLocalized())
+			{
+				foreach ($d->getI18nInfo()->getLangs() as $lang)
+				{
+					$this->dbProvider->setI18nSynchroStatus($d->getId(), $lang, self::SYNCHRO_MODIFIED, null);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * @return integer[]
+	 */
+	public function getDocumentIdsToSynchronize()
+	{
+		if ($this->hasI18nDocumentsSynchro())
+		{
+			return $this->dbProvider->getI18nSynchroIds();
+		}
+		return array();
+	}
+	
+	/**
+	 * @param \Change\Documents\AbstractDocument $document
+	 * @return array
+	 *		- isLocalized : boolean
+	 *		- action : 'none'|'generate'|'synchronize'
+	 *		- config : array
+	 *			- 'fr'|'??' : string[]
+	 *			- ...
+	 *		- states : array
+	 *			- 'fr'|'??' : array
+	 *				- status : 'MODIFIED'|'VALID'|'SYNCHRONIZED'
+	 *				- from : fr'|'en'|'??'|null
+	 *			- ...
+	 */
+	public function getI18nSynchroForDocument($document)
+	{
+		$result = array('isLocalized' => false, 'action' => 'none', 'config' => array());
+		$pm = $document->getPersistentModel();
+		if ($pm->isLocalized())
+		{
+			$result['isLocalized'] = true;
+			if ($this->hasI18nDocumentsSynchro())
+			{
+				$result['config'] = $this->getI18nDocumentsSynchro();
+				$data = $this->dbProvider->getI18nSynchroStatus($document->getId());
+				$result['states'] = $data;
+				foreach ($document->getI18nInfo()->getLangs() as $lang)
+				{
+					if (!isset($data[$lang]))
+					{
+						$result['action'] = 'generate';
+						break;
+					}
+					elseif ($data[$lang]['status'] === self::SYNCHRO_MODIFIED)
+					{
+						$result['action'] = 'synchronize';
+					}
+				}
+			}
+		}
+		return $result;
+	}
+	
+	/**
+	 * @param integer $documentId
+	 * @return boolean
+	 */
+	public function synchronizeDocumentId($documentId)
+	{
+		if (!$this->hasI18nDocumentsSynchro())
+		{
+			// No synchro configured.
+			return false;
+		}
+		$d = \DocumentHelper::getDocumentInstanceIfExists($documentId); //TODO Old class Usage
+		if ($d === null)
+		{
+			// Invalid document.
+			return false;
+		}
+	
+		$pm = $d->getPersistentModel();
+		if (!$pm->isLocalized())
+		{
+			// Not applicable on this document.
+			return false;
+		}
+	
+		try
+		{
+			$this->dbProvider->beginTransaction();
+			$ds = $d->getDocumentService();
+	
+			$synchroConfig = $ds->getI18nSynchroConfig($d, $this->getI18nDocumentsSynchro());
+			if (count($synchroConfig))
+			{
+				//TODO Old class Usage
+				$dcs = \f_DataCacheService::getInstance();
+				$datas = $this->dbProvider->getI18nSynchroStatus($d->getId());
+				if (count($datas) === 0)
+				{
+					foreach ($d->getI18nInfo()->getLangs() as $lang)
+					{
+						$datas[$lang] = array('status' => self::SYNCHRO_MODIFIED, 'from' => null);
+					}
+				}
+				else
+				{
+					$datas[$d->getLang()] = array('status' => self::SYNCHRO_MODIFIED, 'from' => null);
+				}
+	
+				foreach ($synchroConfig as $lang => $fromLangs)
+				{
+					if (!isset($datas[$lang]) || $datas[$lang]['status'] === self::SYNCHRO_SYNCHRONIZED)
+					{
+						foreach ($fromLangs as $fromLang)
+						{
+							if (isset($datas[$fromLang]) && $datas[$fromLang]['status'] !== self::SYNCHRO_SYNCHRONIZED)
+							{
+								list($from, $to) = $this->dbProvider->prepareI18nSynchro($pm, $documentId, $lang, $fromLang);
+								try
+								{
+									$this->pushLang($fromLang);
+	
+									if ($ds->synchronizeI18nProperties($d, $from, $to))
+									{
+										$this->dbProvider->setI18nSynchro($pm, $to);
+										$this->dbProvider->setI18nSynchroStatus($documentId, $lang, self::SYNCHRO_SYNCHRONIZED, $fromLang);
+										//TODO Old class Usage
+										$dcs->clearCacheByPattern(\f_DataCachePatternHelper::getModelPattern($d->getDocumentModelName()));
+										$dcs->clearCacheByDocId(\f_DataCachePatternHelper::getIdPattern($documentId));
+									}
+									elseif (isset($datas[$lang]))
+									{
+										$this->dbProvider->setI18nSynchroStatus($documentId, $lang, self::SYNCHRO_VALID, null);
+									}
+	
+									$this->popLang();
+								}
+								catch (\Exception $e)
+								{
+									$this->popLang($e);
+								}
+								break;
+							}
+						}
+					}
+				}
+	
+				foreach ($datas as $lang => $synchroInfos)
+				{
+					if ($synchroInfos['status'] === self::SYNCHRO_MODIFIED)
+					{
+						$this->dbProvider->setI18nSynchroStatus($documentId, $lang, self::SYNCHRO_VALID, null);
+					}
+					elseif ($synchroInfos['status'] === self::SYNCHRO_SYNCHRONIZED && !isset($synchroConfig[$lang]))
+					{
+						$this->dbProvider->setI18nSynchroStatus($documentId, $lang, self::SYNCHRO_VALID, null);
+					}
+				}
+			}
+			else
+			{
+				$this->dbProvider->deleteI18nSynchroStatus($documentId);
+			}
+			$this->dbProvider->commit();
+		}
+		catch (\Exception $e)
+		{
+			$this->dbProvider->rollback($e);
+			return false;
+		}
+		return true;
+	}
+}
+
+class change_PreparedKey extends \Change\I18n\PreparedKey
+{
+	/**
+	 * @return boolean
+	 */
+	public function isValid()
+	{
+		if ($this->path === null)
+		{
+			$key = \Change\Stdlib\String::toLower($this->key);
+			if (preg_match('/^(m|modules|t|themes|f|framework)\.[a-z0-9]+(\.[a-z0-9-]+)+$/', $key))
+			{
+				$parts = explode('.', $key);
+				switch ($parts[0])
+				{
+					case 'framework' :
+						$parts[0] = 'f';
+						break;
+					case 'modules' :
+						$parts[0] = 'm';
+						break;
+					case 'themes' :
+						$parts[0] = 't';
+						break;
+				}
+				$this->path = implode('.', array_slice($parts, 0, -1));
+				$this->id = end($parts);
+			}
+			else
+			{
+				$this->path = false;
+				$this->id = false;
+			}
+		}
+		return $this->path !== false;
 	}
 }

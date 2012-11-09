@@ -24,10 +24,16 @@ class RequestContext
 	 */
 	protected $wrappedI18nManager;
 
+	/**
+	 * @var \Change\Document\DocumentManager
+	 */
+	protected $wrappedDocumentManager;
+
 	protected function __construct()
 	{
 		$this->resetProfile();
 		$this->wrappedI18nManager = \Change\Application::getInstance()->getApplicationServices()->getI18nManager();
+		$this->wrappedDocumentManager = \Change\Application::getInstance()->getDocumentServices()->getDocumentManager();
 	}
 	
 	/**
@@ -644,7 +650,7 @@ class RequestContext
 	 */
 	public function getLang()
 	{
-		return $this->wrappedI18nManager->getLang();
+		return $this->wrappedDocumentManager->getLang();
 	}
 	
 	/**
@@ -668,7 +674,7 @@ class RequestContext
 	 */
 	public function getUILang()
 	{
-		return $this->wrappedI18nManager->getUILang();
+		return $this->wrappedI18nManager->getLang();
 	}
 	
 	/**
@@ -676,14 +682,14 @@ class RequestContext
 	 */
 	public function setLang($lang)
 	{
-		if ($this->wrappedI18nManager->getLangStackSize() > 0)
+		if ($this->wrappedDocumentManager->getLangStackSize() > 0)
 		{
 			throw new \RuntimeException('The current language is already defined to: ' . $this->getLang());
 		}
 		
 		if (in_array($lang, $this->wrappedI18nManager->getSupportedLanguages()))
 		{
-			$this->wrappedI18nManager->pushLang($lang);
+			$this->wrappedDocumentManager->pushLang($lang);
 			$this->m_isLangDefined = true;
 			return true;
 		}
@@ -695,7 +701,7 @@ class RequestContext
 	 */
 	public function setUILang($lang)
 	{
-		$this->wrappedI18nManager->setUILang($lang);
+		$this->wrappedI18nManager->setLang($lang);
 	}
 	
 	/**
@@ -744,7 +750,7 @@ class RequestContext
 	 */
 	public function beginI18nWork($lang)
 	{
-		$this->wrappedI18nManager->pushLang($lang);
+		$this->wrappedDocumentManager->pushLang($lang);
 	}
 	
 	/**
@@ -752,6 +758,6 @@ class RequestContext
 	 */
 	public function endI18nWork($exception = null)
 	{
-		$this->wrappedI18nManager->popLang($exception);
+		$this->wrappedDocumentManager->popLang($exception);
 	}
 }
