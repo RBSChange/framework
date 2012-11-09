@@ -23,7 +23,7 @@ abstract class f_util_HtmlUtils
 	 */
 	public static function textToHtml($string)
 	{
-		if (!empty($string))
+		if (!f_util_StringUtils::isEmpty($string))
 		{
 			$string = htmlspecialchars($string, ENT_COMPAT, "utf-8");
 			return nl2br($string);
