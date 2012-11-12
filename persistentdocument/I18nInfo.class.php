@@ -1,4 +1,7 @@
 <?php
+/**
+ * @deprecated use \Change\Documents\I18nInfo
+ */
 class I18nInfo
 {
 	/**

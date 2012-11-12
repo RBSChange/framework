@@ -1,58 +1,55 @@
 <?php
 /**
- * @deprecated
+ * @deprecated use \Change\Documents\AbstractModel
  */
-abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Documents\AbstractModel implements f_mvc_BeanModel 
+abstract class f_persistentdocument_PersistentDocumentModel implements f_mvc_BeanModel 
 {
+	private static $publicationStatusArray = array('DRAFT','CORRECTION','ACTIVE','PUBLISHED','DEACTIVATED','FILED','DEPRECATED','TRASH','WORKFLOW');
 	/**
-	 * @deprecated
+	 * @var array<BeanPropertyInfo>
 	 */
-	const PRIMARY_KEY_ID = "id";
+	private $beanPropertiesInfo;
 	
+	private static $m_documentModels;
+
 	/**
-	 * @deprecated
+	 * @var array<PropertyInfo>
 	 */
+	protected  $m_properties;
+	protected  $m_invertProperties;
+	protected  $m_serialisedproperties;
 	protected  $m_childrenProperties;
 	
-	/**
-	 * @return NULL
-	 */
-	public function getVendorName()
-	{
-		return null;
-	}
+	protected  $m_propertiesNames;
+	protected  $m_preservedPropertiesNames;
 	
 	/**
-	 * @deprecated
+	 * @var String[]
 	 */
-	protected  $m_preservedPropertiesNames = array();
+	protected  $m_childrenNames;
 	
 	/**
-	 * @deprecated
+	 * @var String
 	 */
-	public function getPreservedPropertiesNames()
-	{
-		return $this->m_preservedPropertiesNames;
-	}
+	protected  $m_parentName;
+
+	const PRIMARY_KEY_ID = "id";
 	
+	const BASE_MODEL = 'modules_generic/document';
+
 	/**
-	 * @deprecated
-	 */
-	public function isPreservedProperty($name)
-	{
-		return isset($this->m_preservedPropertiesNames[$name]);
-	}
-	
-	/**
-	 * @deprecated
+	 * @param string $moduleName
+	 * @param string $documentName
+	 * @return string
 	 */
 	public static function buildDocumentModelName($moduleName, $documentName)
 	{
-		return 'modules_' . $moduleName . '/' .$documentName;
+		return "modules_$moduleName/$documentName";
 	}
 
 	/**
-	 * @deprecated
+	 * @param string $modelName
+	 * @return string
 	 */
 	public static function convertModelNameToBackoffice($modelName)
 	{
@@ -60,7 +57,8 @@ abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Docu
 	}
 	
 	/**
-	 * @deprecated
+	 * @param string $modelName modules_<module>/<document>
+	 * @return array<String, String> keys module & document
 	 */
 	public static function getModelInfo($modelName)
 	{
@@ -71,58 +69,27 @@ abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Docu
 		}
 		throw new Exception("Invalid model name $modelName");
 	}
-	
-	/**
-	 * @var deprecated
-	 */
-	protected static $documentModels = array();
 
 	/**
-	 * @deprecated
+	 * Get instance from complet document model name
+	 * @param string $documentModelName Ex : modules_<generic>/<folder>
+	 * @return f_persistentdocument_PersistentDocumentModel
 	 */
-	public static function getInstanceFromDocumentModelName($modelName)
+	public static function getInstanceFromDocumentModelName($documentModelName)
 	{
-		if (!array_key_exists($modelName, self::$documentModels))
-		{
-			$className = self::getModelClassName($modelName);
-			if ($className)
-			{
-				self::$documentModels[$modelName] = new $className();
-			}
-			else
-			{
-				self::$documentModels[$modelName] = null;
-			}
-		}
-		$model =  self::$documentModels[$modelName];
-		if ($model === null)
+		list ($package, $docName) = explode('/', $documentModelName);
+		list ($packageType, $packageName) = explode('_', $package);
+		if ($packageType != 'modules')
 		{
 			throw new BaseException("type_must_be_a_module");
 		}
-		return $model;
+
+		return  self::getInstance($packageName, $docName);
 	}
 	
 	/**
-	 * @deprecated
-	 */
-	protected static function getModelClassName($modelName)
-	{
-		list ($package, $documentName) = explode('/', $modelName);
-		list ($packageType, $moduleName) = explode('_', $package);
-		if ($packageType != 'modules' || empty($moduleName) || empty($documentName))
-		{
-			return null;
-		}
-		$className = $moduleName .'_persistentdocument_'.$documentName.'model';
-		if (class_exists($className))
-		{
-			return $className;
-		}
-		return null;
-	}
-	
-	/**
-	 * @deprecated
+	 * @param string $documentModelName For example: "modules_mymodule/mydocument"
+	 * @return string the corresponding document class name For example: mymodule_persistentdocument_mydocument
 	 */
 	public static function documentModelNameToDocumentClassName($documentModelName)
 	{
@@ -132,81 +99,267 @@ abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Docu
 	/**
 	 * @param string $moduleName
 	 * @param string $documentName
-	 * @return string
-	 */
-	public static function composeModelName($moduleName, $documentName)
-	{
-		return 'modules_' . $moduleName . '/' .$documentName;
-	}
-	
-	/**
-	 * @deprecated
+	 * @return f_persistentdocument_PersistentDocumentModel
 	 */
 	public static function getInstance($moduleName, $documentName)
 	{
-		$modelName = self::composeModelName($moduleName, $documentName);
-		return self::getInstanceFromDocumentModelName($modelName);
+		// TODO: this is too ugly "old fashioned"...
+		if (empty($moduleName))
+		{
+			throw new BaseException("module-name-cannot-be-empty");
+		}
+		if (empty($documentName))
+		{
+			throw new BaseException("module-type-cannot-be-empty");
+		}
+
+		$documentModelName = self::buildDocumentModelName($moduleName, $documentName);
+
+		if (self::$m_documentModels == null)
+		{
+			self::$m_documentModels = array();
+		}
+
+		if (!isset(self::$m_documentModels[$documentModelName]))
+		{
+			$modulesConf = Framework::getConfiguration("injection", false);
+			$documentsInjectionConf = isset($modulesConf['document']) ? $modulesConf['document'] : null;
+			
+			if ($documentsInjectionConf !== null && (($key = array_search($moduleName."/".$documentName, $documentsInjectionConf)) !== false))
+			{
+				// We requested a model that injects => instantiate "original" model (just the name of the class is "original". Properties are from the model that injects) 
+				list($injectedModuleName, $injectedDocumentName) = explode("/", $key);
+				$model = self::getNewModelInstance($injectedModuleName, $injectedDocumentName);
+			}
+			else
+			{
+				$model = self::getNewModelInstance($moduleName, $documentName);	
+			}			
+			
+			self::$m_documentModels[$documentModelName] = $model;
+		}
+		return self::$m_documentModels[$documentModelName];
 	}
 
 	/**
-	 * @deprecated
+	 * @param string $moduleName
+	 * @param string $documentName
+	 * @return f_persistentdocument_PersistentDocumentModel
 	 */
 	static function getNewModelInstance($moduleName, $documentName)
 	{
-		$modelName = self::composeModelName($moduleName, $documentName);
-		return self::getInstanceFromDocumentModelName($modelName);
+		$className = self::getClassNameFromDocument($moduleName, $documentName);
+		if (!f_util_ClassUtils::classExists($className))
+		{
+			if ($moduleName != 'generic' && $documentName == 'folder')
+			{
+				Framework::info('Using generic folder');
+				$className = 'generic_persistentdocument_foldermodel';
+			}
+			else
+			{
+				throw new Exception("Unknown document model $className.");
+			}
+		}
+		return new $className;
 	}
 
 	/**
-	 * @deprecated
+	 * @param string $documentModelName
+	 * @return boolean
 	 */
 	public static function exists($documentModelName)
 	{
-		$model = self::getModelClassName($documentModelName);
-		return $model != null;
+		list ($package, $docName) = explode('/', $documentModelName);
+		list ($packageType, $packageName) = explode('_', $package);
+		if ($packageType != 'modules')
+		{
+			throw new BaseException("type_must_be_a_module");
+		}
+		return f_util_ClassUtils::classExists(self::getClassNameFromDocument($packageName, $docName));
 	}
 
+	private static function getClassNameFromDocument($moduleName, $documentName)
+	{
+		return $moduleName .'_persistentdocument_'.$documentName.'model';
+	}
+	
 	/**
-	 * @deprecated
+	 * @return array<f_persistentdocument_PersistentDocumentModel>
 	 */
 	public static function getDocumentModels()
 	{
-		self::$documentModels = array();
+		$documentModels = array();
 		foreach (self::getDocumentModelNamesByModules() as $modelNames)
 		{
 			foreach ($modelNames as $modelName)
 			{
-				self::getInstanceFromDocumentModelName($modelName);
+				$documentModels[$modelName] = self::getInstanceFromDocumentModelName($modelName);
 			}
 		}
-		return self::$documentModels;
+		return $documentModels;
 	}
-	
 	/**
-	 * @deprecated
+	 * returns an array of the type : array('moduleA' => array('modules_moduleA/doc1', ...), ...);
+	 *
+	 * @return array
 	 */
 	public static function getDocumentModelNamesByModules()
 	{
 		return unserialize(file_get_contents(f_util_FileUtils::buildChangeBuildPath('documentmodels.php')));
 	}
 	
+	private static $modelChildren;
 	/**
-	 * @deprecated
+	 * If no child is available for model, key does not exists in returned array
+	 * @return array array('modules_moduleA/doc1' => array('modules_moduleA/doc2', ...), ...)
 	 */
 	public static function getModelChildrenNames($modelName = null)
 	{
-		$modelChildren = unserialize(file_get_contents(f_util_FileUtils::buildChangeBuildPath('documentmodelschildren.php')));
+		if (self::$modelChildren === null)
+		{
+			self::$modelChildren = unserialize(file_get_contents(f_util_FileUtils::buildChangeBuildPath('documentmodelschildren.php')));	
+		}
 		if ($modelName === null)
 		{
-			return $modelChildren;
+			return self::$modelChildren;	
 		}
-		
-		if (isset($modelChildren[$modelName]))
+		if (isset(self::$modelChildren[$modelName]))
 		{
-			return $modelChildren[$modelName];
-		}	
-		
+			return self::$modelChildren[$modelName];
+		}
 		return array();
+	}
+
+	protected function __construct()
+	{
+	}
+	
+	/**
+	 * @return string
+	 */
+	abstract public function getFilePath();
+
+	/**
+	 * @return string
+	 */
+	abstract public function getIcon();
+
+	/**
+	 * @return string
+	 */
+	public function getLabel()
+	{
+		return LocaleService::getInstance()->trans($this->getLabelKey(), array('ucf'));
+	}
+
+	/**
+	 * @return string
+	 */
+	abstract function getLabelKey();
+
+	/**
+	 * @return string For example: modules_generic/folder
+	 */
+	abstract public function getName();
+
+	/**
+	 * @return string|NULL For example: modules_generic/folder or null
+	 */
+	abstract public function getBaseName();
+
+	/**
+	 * @return string For example: generic
+	 */
+	abstract public function getModuleName();
+
+	/**
+	 * @return string For example: folder
+	 */
+	abstract public function getDocumentName();
+
+	/**
+	 * @return string
+	 */
+	abstract public function getTableName();
+
+	/**
+	 * @return boolean
+	 */
+	abstract public function isLocalized();
+	
+	/**
+	 * @return string[]|NULL
+	 */
+	public function getChildrenNames()
+	{
+		return $this->m_childrenNames;
+	}
+	
+	/**
+	 * @return boolean
+	 */
+	function hasChildren()
+	{
+		return $this->m_childrenNames !== null;
+	}
+	
+	/**
+	 * @return string
+	 */
+	function getParentName()
+	{
+		return $this->m_parentName;
+	}
+	
+	/**
+	 * @return string
+	 */
+	function getDocumentClassName()
+	{
+		return $this->getModuleName()."_persistentdocument_".$this->getDocumentName();
+	}
+	
+	/**
+	 * @return boolean
+	 */
+	function hasParent()
+	{
+		return $this->m_parentName !== null;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	abstract public function isIndexable();
+	
+	/**
+	 * @return boolean
+	 */
+	public function isBackofficeIndexable()
+	{
+		return false;
+	}
+	
+	/**
+	 * @return string[]
+	 */
+	abstract public function getAncestorModelNames();
+	
+	/**
+	 * @param string $modelName
+	 * @return boolean
+	 */
+	public final function isModelCompatible($modelName)
+	{
+		switch ($modelName)
+		{
+			case self::BASE_MODEL:
+			case $this->getName():
+				return true;			
+			default: 
+				return in_array($modelName, $this->getAncestorModelNames());
+		}
 	}
 
 	/**********************************************************/
@@ -214,7 +367,7 @@ abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Docu
 	/**********************************************************/
 
 	/**
-	 * @deprecated
+	 * @return string Convert model name from 'modules_generic/folder' to 'modules_generic_folder'
 	 */
 	public final function getBackofficeName()
 	{
@@ -222,11 +375,11 @@ abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Docu
 	}
 
 	/**
-	 * @deprecated
+	 * @return string[] 'DRAFT','CORRECTION','ACTIVE','PUBLISHED','DEACTIVATED','FILED','DEPRECATED','TRASH','WORKFLOW'
 	 */
 	public final function getStatuses()
 	{
-		return array('DRAFT','CORRECTION','ACTIVE','PUBLISHED','DEACTIVATED','FILED','DEPRECATED','TRASH','WORKFLOW');
+		return self::$publicationStatusArray;
 	}
 
 	/**
@@ -235,88 +388,280 @@ abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Docu
 	 */
 	public final function hasSatutsCode($status)
 	{
-		return in_array($status, $this->getStatuses());
+		return in_array($status, self::$publicationStatusArray);
+	}
+
+	/**
+	 * @return string
+	 */
+	abstract public function getDefaultNewInstanceStatus();
+
+
+	/**********************************************************/
+	/* Properties Informations								*/
+	/**********************************************************/
+	
+	protected function loadProperties()
+	{
+		$this->m_properties = array();
 	}
 	
 	/**
-	 * @deprecated
+	 * @return array<String, PropertyInfo> ie. <propName, propertyInfo> 
+	 */
+	public final function getPropertiesInfos()
+	{
+		if ($this->m_properties === null){$this->loadProperties();}
+		return $this->m_properties;
+	}
+	
+	
+	/**
+	 * @return array<String, PropertyInfo> ie. <propName, propertyInfo>
+	 */
+	public final function getLocalizedPropertiesInfos()
+	{
+		if ($this->m_properties === null){$this->loadProperties();}
+		$result = array();
+		foreach ($this->m_properties as $name => $propertInfo)
+		{
+			/* @var $propertInfo PropertyInfo */
+			if ($propertInfo->getLocalized()) {$result[$name] = $propertInfo;}
+		}
+		return $result;
+	}
+	
+	/**
+	 * @var array
+	 */
+	private static $systemProperties;
+	
+	/**
+	 * @return string[]
 	 */
 	public static function getSystemProperties()
 	{
-		return array('id', 'model', 'author', 'authorid', 'creationdate','modificationdate','publicationstatus',
-				'lang','metastring','modelversion','documentversion', 'si18n');
+		if (self::$systemProperties === null)
+		{
+			self::$systemProperties = array('id', 'model', 'author', 'authorid',
+				'creationdate','modificationdate','publicationstatus',
+				'lang','metastring','modelversion','documentversion');
+		}
+		return self::$systemProperties;
 	}
 	
+	public final function getVisiblePropertiesInfos()
+	{
+		return array_diff_key($this->getEditablePropertiesInfos(), array_flip(self::getSystemProperties()));
+	}
+
+	/**
+	 * @param string $propertyName
+	 * @return PropertyInfo
+	 */
+	public final function getProperty($propertyName)
+	{
+		if ($this->m_properties === null){$this->loadProperties();}
+		if (isset($this->m_properties[$propertyName]))
+		{
+			return $this->m_properties[$propertyName];
+		}
+		return null;
+	}
+	
+	protected function loadSerialisedProperties()
+	{
+		$this->m_serialisedproperties = array();
+	}
 	
 	/**
-	 * @deprecated
+	 * @return array<String, PropertyInfo> ie. <propName, propertyInfo> 
 	 */
-	public function getBaseName()
+	public final function getSerializedPropertiesInfos()
 	{
-		return $this->getParentName();
+		if ($this->m_serialisedproperties === null) {$this->loadSerialisedProperties();}
+		return $this->m_serialisedproperties;
+	}
+	
+	/**
+	 * @param string $propertyName
+	 * @return PropertyInfo
+	 */	
+	public final function getSerializedProperty($propertyName)
+	{
+		if ($this->m_serialisedproperties === null) {$this->loadSerialisedProperties();}
+		if (isset($this->m_serialisedproperties[$propertyName]))
+		{
+			return $this->m_serialisedproperties[$propertyName];
+		}
+		return null;
 	}	
 	
 	/**
-	 * @deprecated
-	 */
-	public function getTableName()
+	 * @return array<String, PropertyInfo> ie. <propName, propertyInfo> 
+	 */	
+	public final function getEditablePropertiesInfos()
 	{
-		return str_replace(array('modules_', '/'), array('m_', '_doc_'), strtolower($this->getRootModelName()));
+		if ($this->m_properties === null){$this->loadProperties();}
+		if ($this->m_serialisedproperties === null) {$this->loadSerialisedProperties();}
+		return array_merge($this->m_properties, $this->m_serialisedproperties);
+	}	
+		
+
+	/**
+	 * @param string $propertyName
+	 * @return PropertyInfo
+	 */	
+	public final function getEditableProperty($propertyName)
+	{
+		if ($this->m_properties === null){$this->loadProperties();}
+		if (isset($this->m_properties[$propertyName]))
+		{
+			return $this->m_properties[$propertyName];
+		} 
+		
+	
+		if ($this->m_serialisedproperties === null) {$this->loadSerialisedProperties();}
+		if (isset($this->m_serialisedproperties[$propertyName]))
+		{
+			return $this->m_serialisedproperties[$propertyName];
+		}
+		
+		return null;
+	}	
+
+	/**
+	 * @return PropertyInfo[]
+	 */
+	public final function getIndexedPropertiesInfos()
+	{
+		$result = array();
+		foreach ($this->getEditablePropertiesInfos() as $propertyName => $property) 
+		{
+			/* @var $property PropertyInfo */
+			if ($property->isIndexed())
+			{
+				$result[$propertyName] = $property;
+			}
+		}
+		return $result;
+	}
+
+	/**
+	 * @param string $propertyName
+	 * @return boolean
+	 */
+	public function isTreeNodeProperty($propertyName)
+	{
+		$property = $this->getProperty($propertyName);
+		return is_null($property) ? false : $property->isTreeNode();
+	}
+
+	/**
+	 * @param string $propertyName
+	 * @return boolean
+	 */
+	public function isDocumentProperty($propertyName)
+	{
+		$property = $this->getProperty($propertyName);
+		return is_null($property) ? false : $property->isDocument();
+	}
+
+	/**
+	 * @param string $propertyName
+	 * @return boolean
+	 */
+	public function isArrayProperty($propertyName)
+	{
+		$property = $this->getProperty($propertyName);
+		return is_null($property) ? false : $property->isArray();
+	}
+
+	/**
+	 * @param string $propertyName
+	 * @return boolean
+	 */
+	public function isUniqueProperty($propertyName)
+	{
+		$property = $this->getProperty($propertyName);
+		return is_null($property) ? false : $property->isUnique();
+	}
+
+	/**
+	 * @param string $propertyName
+	 * @return boolean
+	 */
+	public function isProperty($propertyName)
+	{
+		$property = $this->getProperty($propertyName);
+		return is_null($property) ? false : true;
+	}
+
+	/**
+	 * @return array<string>
+	 */
+	public function getPropertiesNames()
+	{
+		if ($this->m_propertiesNames === null)
+		{
+			$this->m_propertiesNames = array();
+			foreach ($this->getPropertiesInfos() as $name => $infos)
+			{
+				if ($name != 'id' && $name != 'model')
+				{
+					$this->m_propertiesNames[] = $name;
+				}
+			}
+		}
+		return $this->m_propertiesNames;
+	}
+
+	/**
+	 * @param string $type
+	 * @return array<string>
+	 */
+	public function findTreePropertiesNamesByType($type)
+	{
+		$componentNames = array();
+		foreach ($this->getPropertiesInfos() as $name => $infos)
+		{
+			if ($infos->isTreeNode() && $infos->isDocument() && $infos->acceptType($type))
+			{
+				$componentNames[] = $name;
+			}
+		}
+
+		foreach ($this->getInverseProperties() as $name => $infos)
+		{
+			/* @var $infos PropertyInfo */
+			if ($infos->getTreeNode() && $infos->isDocument() && $infos->acceptType($type))
+			{
+				// The most specific is suposed to be the last one.
+				// Cf generator_PersistentModel::generatePhpModel().
+				$componentNames[$infos->getDbTable() . '.' . $infos->getDbMapping()] = $name;
+			}
+		}
+		return array_values($componentNames);
 	}
 	
-	/**
-	 * @deprecated
-	 */
-	public function getDocumentClassName()
-	{
-		return $this->getModuleName()."_persistentdocument_".$this->getDocumentName();
-	}
-	
-	/**
-	 * @return f_persistentdocument_DocumentService
-	 */
-	public function getDocumentService()
-	{
-		$className = $this->getModuleName(). "_"  . ucfirst($this->getDocumentName()) . 'Service';
-		return call_user_func(array($className, 'getInstance'));
-	}
-	
-	/**
-	 * @deprecated
-	 */
-	public function getDefaultNewInstanceStatus()
-	{
-		return $this->getDefaultStatus();
-	}
-	
-	/**
-	 * @deprecated
-	 */
-	public function getFilePath()
-	{
-		return __FILE__;
-	}
-	
-	/**
-	 * @deprecated
-	 */
 	protected function loadChildrenProperties()
 	{
 		$this->m_childrenProperties = array();
 	}
 	
 	/**
-	 * @deprecated
+	 * @return array<ChildPropertyInfo>
 	 */
 	public final function getChildrenPropertiesInfos()
 	{
 		if ($this->m_childrenProperties === null) {$this->loadChildrenProperties();}
 		return $this->m_childrenProperties;
 	}
-	
-	
+
+
 	/**
-	 * @deprecated
+	 * @param string $propertyName
+	 * @return ChildPropertyInfo
 	 */
 	public final function getChildProperty($propertyName)
 	{
@@ -327,9 +672,10 @@ abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Docu
 		}
 		return null;
 	}
-	
+
 	/**
-	 * @deprecated
+	 * @param string $modelName
+	 * @return boolean
 	 */
 	public final function isChildValidType($modelName)
 	{
@@ -343,22 +689,90 @@ abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Docu
 		}
 		return false;
 	}
-	
+
+	public final function hasCascadeDelete()
+	{
+		foreach ($this->getPropertiesInfos() as $name => $info)
+		{
+			if ($info->isCascadeDelete())
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	protected function loadInvertProperties()
+	{
+		$this->m_invertProperties = array();
+	}
+
 	/**
-	 * @deprecated
+	 * @return array<PropertyInfo>
 	 */
-	private $beanPropertiesInfo;	
+	public final function getInverseProperties()
+	{
+		if ($this->m_invertProperties === null) {$this->loadInvertProperties();}
+		return $this->m_invertProperties;
+	}
 	
 	/**
-	 * @deprecated
+	 * @param string $name
+	 * @return boolean
+	 */
+	public final function hasInverseProperty($name)
+	{
+		if ($this->m_invertProperties === null) {$this->loadInvertProperties();}
+		return isset($this->m_invertProperties[$name]);
+	}
+
+	/**
+	 * @param string $name
+	 * @return PropertyInfo
+	 */
+	public final function getInverseProperty($name)
+	{
+		if ($this->m_invertProperties === null) {$this->loadInvertProperties();}
+		if (isset($this->m_invertProperties[$name]))
+		{
+			return $this->m_invertProperties[$name];
+		}
+		return null;
+	}
+
+	/**
+	 * @return array<String>
+	 */
+	public final function getPreservedPropertiesNames()
+	{
+		return $this->m_preservedPropertiesNames;
+	}
+
+	/**
+	 * @param string $name
+	 * @return boolean
+	 */
+	public final function isPreservedProperty($name)
+	{
+		return isset($this->m_preservedPropertiesNames[$name]);
+	}
+
+
+
+	/**
+	 * @see f_mvc_BeanModel::getBeanName()
+	 *
+	 * @return string
 	 */
 	function getBeanName()
 	{
 		return $this->getDocumentName();
 	}
-	
+
 	/**
-	 * @deprecated
+	 * @see f_mvc_BeanModel::getBeanPropertiesInfos()
+	 *
+	 * @return array<String,
 	 */
 	function getBeanPropertiesInfos()
 	{
@@ -370,7 +784,10 @@ abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Docu
 	}
 	
 	/**
-	 * @deprecated
+	 * @see f_mvc_BeanModel::getBeanPropertyInfo()
+	 *
+	 * @param string $propertyName
+	 * @return BeanPropertyInfo
 	 */
 	function getBeanPropertyInfo($propertyName)
 	{
@@ -385,13 +802,10 @@ abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Docu
 		throw new Exception("property $propertyName does not exists!");
 	}
 	
-	/**
-	 * @deprecated
-	 */	
 	private function loadBeanProperties()
 	{
 		$this->beanPropertiesInfo = array();
-		foreach ($this->getEditablePropertiesInfos() as $propertyName => $propertyInfo)
+		foreach ($this->getEditablePropertiesInfos() as $propertyName => $propertyInfo) 
 		{
 			if ($propertyName == "model")
 			{
@@ -400,9 +814,11 @@ abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Docu
 			$this->beanPropertiesInfo[$propertyName] = new f_persistentdocument_PersistentDocumentBeanPropertyInfo($this->getModuleName(), $this->getDocumentName(), $propertyInfo);
 		}
 	}
-	
 	/**
-	 * @deprecated
+	 * @see f_mvc_BeanModel::hasBeanProperty()
+	 *
+	 * @param string $propertyName
+	 * @return boolean
 	 */
 	function hasBeanProperty($propertyName)
 	{
@@ -414,14 +830,65 @@ abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Docu
 	}
 	
 	/**
-	 * @deprecated
+	 * (non-PHPdoc)
+	 * @see f_mvc/bean/f_mvc_BeanModel#getBeanConstraints()
 	 */
 	public function getBeanConstraints()
 	{
 		// empty. TODO: fill it during documents compilation process
 	}
+	
+	/**
+	 * @param string $propertyName
+	 * @return boolean
+	 */
+	function hasProperty($propertyName)
+	{
+		return $this->isProperty($propertyName);
+	}
 
 	/**
+	 * Return if the document has 2 special properties (correctionid, correctionofid)
+	 * @return boolean
+	 */
+	abstract public function useCorrection();
+
+	/**
+	 * @return boolean
+	 */
+	abstract public function hasWorkflow();
+
+	/**
+	 * @return string
+	 */
+	abstract public function getWorkflowStartTask();
+
+	/**
+	 * @return array<String, String>
+	 */
+	abstract public function getWorkflowParameters();
+
+	/**
+	 * @return boolean
+	 */
+	abstract public function usePublicationDates();
+	
+	/**
+	 * @return f_persistentdocument_DocumentService
+	 */
+	abstract public function getDocumentService();
+	
+	/**
+	 * @return string
+	 */
+	public function __toString()
+	{
+		return $this->getName();
+	}
+
+	/**
+	 * @param string $name
+	 * @param array $arguments
 	 * @deprecated
 	 */
 	public function __call($name, $arguments)

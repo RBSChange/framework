@@ -1,7 +1,6 @@
 <?php
 /**
- * Auto-generated doc comment
- * @package framework.persistentdocument
+ * @deprecated use \Change\Documents\AbstractI18nDocument
  */
 interface f_persistentdocument_I18nPersistentDocument
 {

@@ -18,6 +18,29 @@ class f_persistentdocument_PersistentProvider
 	 * @var change_SchemaManager
 	 */
 	private $schemaManager;
+	
+	/**
+	 * Document instances by id
+	 * @var array<integer, f_persistentdocument_PersistentDocument>
+	 */
+	protected $m_documentInstances = array();
+	
+	/**
+	 * I18nDocument instances by id
+	 * @var array<integer, f_persistentdocument_I18nPersistentDocument>
+	*/
+	protected $m_i18nDocumentInstances = array();
+	
+	/**
+	 * @var array
+	*/
+	protected $m_tmpRelation = array();
+	
+	/**
+	 * Temporay identifier for new persistent document
+	 * @var Integer
+	*/
+	protected $m_newInstancesCounter = 0;
 
 	/**
 	 * @deprecated
@@ -27,7 +50,6 @@ class f_persistentdocument_PersistentProvider
 		$this->wrapped = \Change\Application::getInstance()->getApplicationServices()->getDbProvider();
 	}
 	
-	
 	public static function getInstance()
 	{
 		if (self::$instance === null)
@@ -36,6 +58,1279 @@ class f_persistentdocument_PersistentProvider
 		}
 		return self::$instance;
 	}
+		
+	/**
+	 * @param integer $documentId
+	 * @return boolean
+	 */
+	public function isInCache($documentId)
+	{
+		return isset($this->m_documentInstances[intval($documentId)]);
+	}
+	
+	/**
+	 * @param integer $documentId
+	 * @return f_persistentdocument_PersistentDocument
+	 */
+	public function getFromCache($documentId)
+	{
+		return $this->m_documentInstances[intval($documentId)];
+	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $doc
+	 * @param string $lang
+	 * @return f_persistentdocument_I18nPersistentDocument|NULL
+	 */
+	protected function getI18nDocumentFromCache($doc, $lang)
+	{
+		$docId = intval($doc->getId());
+		if (isset($this->m_i18nDocumentInstances[$docId]))
+		{
+			if (isset($this->m_i18nDocumentInstances[$docId][$lang]))
+			{
+				return $this->m_i18nDocumentInstances[$docId][$lang];
+			}
+		}
+		else
+		{
+			$this->m_i18nDocumentInstances[$docId] = array();
+		}
+		return null;
+	}
+	
+	/**
+	 * @return void
+	 */
+	public function reset()
+	{
+		$this->clearDocumentCache();
+	}
+	
+	/**
+	 * @param boolean $useDocumentCache
+	 */
+	public function setDocumentCache($useDocumentCache)
+	{
+		if (!$useDocumentCache)
+		{
+			$this->clearDocumentCache();
+		}
+		return $this;
+	}
+	
+	/**
+	 * @param integer $documentId
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @return void
+	 */
+	protected function putInCache($documentId, $document)
+	{
+		$documentId = intval($documentId);
+		$this->m_documentInstances[$documentId] = $document;
+		if ($document->getPersistentModel()->isLocalized() && $document->getRawI18nVoObject() !== null)
+		{
+			$this->m_i18nDocumentInstances[$documentId][$document->getLang()] = $document->getRawI18nVoObject();
+		}
+	}
+	
+	/**
+	 * @param integer $documentId
+	 * @return void
+	 */
+	protected function deleteFromCache($documentId)
+	{
+		unset($this->m_documentInstances[$documentId]);
+	}
+	
+	/**
+	 * @return void
+	 */
+	protected function clearDocumentCache()
+	{
+		$this->m_documentInstances = array();
+		$this->m_i18nDocumentInstances = array();
+	}
+	/**
+	 * @see f_persistentdocument_PersistentProvider::getDocumentInstanceIfExist()
+	 */
+	public function getDocumentInstanceIfExist($documentId)
+	{
+		if (!is_numeric($documentId) || $documentId <= 0)
+		{
+			return null;
+		}
+	
+		$documentId = intval($documentId);
+		if ($this->isInCache($documentId))
+		{
+			return $this->getFromCache($documentId);
+		}
+		return $this->getDocumentInstanceInternal($documentId);
+	}
+	
+	public function getDocumentInstance($documentId, $modelName = null, $lang = null)
+	{
+		if (!is_numeric($documentId) || $documentId <= 0)
+		{
+			throw new Exception('Invalid document id: ' . $documentId);
+		}
+	
+		$documentId = intval($documentId);
+		if ($this->isInCache($documentId))
+		{
+			$document = $this->getFromCache($documentId);
+		}
+		else
+		{
+			$document = $this->getDocumentInstanceInternal($documentId);
+			if ($document === null)
+			{
+				throw new Exception('Document "' . $documentId .'" not found');
+			}
+		}
+		return $this->checkModelCompatibility($document, $modelName);
+	}
+	
+	
+	/**
+	 * @param integer $documentId
+	 * @return f_persistentdocument_PersistentDocument|NULL
+	 */
+	protected function getDocumentInstanceInternal($documentId)
+	{
+		$sql = 'SELECT `document_model`, `treeid`, `' . implode('`, `', $this->getI18nFieldNames()) . '` FROM `f_document` WHERE `document_id` = :document_id';
+		$stmt = $this->prepareStatement($sql);
+		$stmt->bindValue(':document_id', $documentId, PDO::PARAM_INT);
+		$this->executeStatement($stmt);
+		$result = $stmt->fetch(PDO::FETCH_ASSOC);
+		$stmt->closeCursor();
+		if (!$result)
+		{
+			return null;
+		}
+		return $this->getDocumentInstanceWithModelName($documentId, $result['document_model'], $result['treeid'], $result);
+	}	
+	
+	public function getDocumentModelName($id)
+	{
+		if (!is_numeric($id) || $id <= 0)
+		{
+			return false;
+		}
+		$documentId = intval($id);
+		if ($this->isInCache($documentId))
+		{
+			return $this->getFromCache($documentId)->getDocumentModelName();
+		}
+	
+		$sql = 'SELECT `document_model` FROM `f_document` WHERE `document_id` = :document_id';
+		$stmt = $this->prepareStatement($sql);
+		$stmt->bindValue(':document_id', $documentId, PDO::PARAM_INT);
+		$this->executeStatement($stmt);
+		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		if (count($results) > 0)
+		{
+			return $results[0]['document_model'];
+		}
+		return false;
+	}	
+	
+
+	/**
+	 * Return the persistent document class name from the document model name
+	 * @param string $modelName
+	 * @return string
+	 */
+	protected function getDocumentClassFromModel($modelName)
+	{
+		return f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($modelName)->getDocumentClassName();
+	}
+		
+	/**
+	 * Return a instance of the document[@id = $id and @modelName = $modelName]
+	 *
+	 * @param integer $id
+	 * @param string $modelName
+	 * @param integer $treeId
+	 * @param array $I18nInfoArray
+	 * @return f_persistentdocument_PersistentDocument
+	 */
+	protected function getDocumentInstanceWithModelName($id, $modelName, $treeId, $I18nInfoArray)
+	{
+		if (!$this->isInCache($id))
+		{
+			$className = $this->getDocumentClassFromModel($modelName);
+			$i18nInfo = (count($I18nInfoArray) === 0) ? null : I18nInfo::getInstanceFromArray($I18nInfoArray);
+			$doc = new $className($id, $i18nInfo, $treeId);
+			$this->putInCache($id, $doc);
+			return $doc;
+		}
+		return $this->getFromCache($id);
+	}
+	
+	/**
+	 * Return the I18n persistent document class name from the document model name
+	 * @param string $modelName
+	 * @return string
+	 */
+	protected function getI18nDocumentClassFromModel($modelName)
+	{
+		return $this->getDocumentClassFromModel($modelName).'I18n';
+	}
+	
+	/**
+	 * @param string $documentModelName
+	 * @return f_persistentdocument_PersistentDocument
+	 */
+	public function getNewDocumentInstance($documentModelName)
+	{
+		$this->m_newInstancesCounter--;
+		$className = $this->getDocumentClassFromModel($documentModelName);
+		return new $className($this->m_newInstancesCounter);
+	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @return integer
+	 */
+	public function getCachedDocumentId($document)
+	{
+		$id = $document->getId();
+		if ($id < 0)
+		{
+			$this->putInCache($id, $document);
+			$this->m_tmpRelation[$id] = $id;
+		}
+		return $id;
+	}
+	
+	/**
+	 * @param integer $cachedId
+	 * @return f_persistentdocument_PersistentDocument
+	 * @throws Exception
+	 */
+	public function getCachedDocumentById($cachedId)
+	{
+		if ($cachedId < 0)
+		{
+			$id = isset($this->m_tmpRelation[$cachedId]) ? $this->m_tmpRelation[$cachedId] : $cachedId;
+			if ($this->isInCache($id))
+			{
+				return $this->getFromCache($id);
+			}
+			throw new Exception('document ' . $cachedId . '/'. $id . ' is not in memory');
+		}
+		return $this->getDocumentInstance($cachedId);
+	}
+	
+	protected function setCachedRelation($cachedId, $documentId)
+	{
+		if (isset($this->m_tmpRelation[$cachedId]))
+		{
+			$this->m_tmpRelation[$cachedId] = $documentId;
+		}
+	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param string $modelName
+	 * @throws Exception
+	 * @return f_persistentdocument_PersistentDocument
+	 */
+	protected function checkModelCompatibility($document, $modelName)
+	{
+		if ($modelName !== null && !$document->getPersistentModel()->isModelCompatible($modelName))
+		{
+			throw new Exception('document ' . $document->getId() . ' is a ' . $document->getDocumentModelName() . ' but not a ' . $modelName);
+		}
+		return $document;
+	}	
+	
+	/**
+	 * When we want to get a document, the data is not loaded. When we want to access to it,
+	 * this function is called for giving all data to the object.
+	 *
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @throws Exception
+	 */
+	public function loadDocument($document)
+	{
+		$sh = $this->getSqlMapping();
+		$documentId = $document->getId();
+		$model = $document->getPersistentModel();
+		$table = $sh->getDbNameByModel($model);
+		$fields = array();
+		$i18nTable = null;
+		foreach ($model->getPropertiesInfos() as $propertyName => $propertyInfos)
+		{
+			/* @var $propertyInfos PropertyInfo */
+			if ($propertyInfos->getLocalized())
+			{
+				$fields[] = $sh->escapeName($sh->getDbNameByProperty($propertyInfos), 'i', $propertyName);
+				if ($i18nTable === null) {$i18nTable = $sh->getDbNameByModel($model, true);}
+			}
+			else
+			{
+				$fields[] = $sh->escapeName($sh->getDbNameByProperty($propertyInfos), 'd', $propertyName);
+			}
+		}
+		$sql = 'SELECT ' .implode(', ', $fields). ' FROM '. $sh->escapeName($table, null, 'd');
+		if ($i18nTable)
+		{
+			$sql .= ' INNER JOIN '. $sh->escapeName($i18nTable, null, 'i'). ' USING(`document_id`)';
+		}
+		$sql .=  ' WHERE `d`.`document_id` = :document_id';
+		if ($i18nTable)
+		{
+			$sql .=  ' AND `d`.`document_lang` = `i`.`lang_i18n`';
+		}
+		$stmt = $this->prepareStatement($sql);
+		$stmt->bindValue(':document_id', $documentId, PDO::PARAM_INT);
+		$this->executeStatement($stmt);
+	
+		$result = $stmt->fetch(PDO::FETCH_ASSOC);
+		$stmt->closeCursor();
+	
+		if ($result)
+		{
+			$this->initDocumentFromDb($document, $result);
+		}
+		else
+		{
+			throw new Exception(get_class($this).'->loadDocument : could not load document[@id = '.$document->getId().']');
+		}
+	}
+	
+	/**
+	 * Initialize un document avec une ligne de resultat de la base de donnée
+	 * @param f_persistentdocument_PersistentDocument $persistentDocument
+	 * @param array $dbresult contient statement->fetch(PDO::FETCH_ASSOC)
+	 */
+	protected function initDocumentFromDb($persistentDocument, $dbresult)
+	{
+		$documentModel = $persistentDocument->getPersistentModel();
+		$dbresult['id'] = intval($persistentDocument->getId());
+	
+		if ($documentModel->isLocalized())
+		{
+			//Utilisé pour initialiser l'entrée du cache
+			$lang = $dbresult['lang'];
+			if ($this->getI18nDocumentFromCache($persistentDocument, $lang) === null)
+			{
+				$i18nDoc = $this->buildI18nDocument($persistentDocument, $lang, $dbresult);
+				$persistentDocument->setI18nVoObject($i18nDoc);
+			}
+		}
+		$persistentDocument->setDocumentProperties($dbresult);
+		$persistentDocument->setDocumentPersistentState(f_persistentdocument_PersistentDocument::PERSISTENTSTATE_LOADED);
+	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $doc
+	 * @param string $lang
+	 * @return f_persistentdocument_I18PersistentDocument
+	 */
+	public function getI18nDocument($doc, $lang, $isVo = false)
+	{
+		$i18ndoc = $this->getI18nDocumentFromCache($doc, $lang);
+		if ($i18ndoc !== null)
+		{
+			return $i18ndoc;
+		}
+		$documentId = $doc->getId();
+		$sh = $this->getSqlMapping();
+		$properties = null;
+		if ($documentId > 0)
+		{
+			$model = $doc->getPersistentModel();
+			$fields = array();
+			$table = $sh->getDbNameByModel($model, true);
+			foreach ($model->getPropertiesInfos() as $propertyName => $propertyInfos)
+			{
+				/* @var $propertyInfos PropertyInfo */
+				if ($propertyInfos->getLocalized())
+				{
+					$fields[] = $sh->escapeName($sh->getDbNameByProperty($propertyInfos), 'i', $propertyName);
+				}
+			}
+				
+			$sql = 'SELECT ' .implode(', ', $fields). ' FROM '.$sh->escapeName($table, null, 'i') . ' WHERE `i`.`document_id` = :document_id  AND `i`.`lang_i18n` = :lang';
+			$stmt = $this->prepareStatement($sql);
+			$stmt->bindValue(':document_id', $doc->getId(), PDO::PARAM_INT);
+			$stmt->bindValue(':lang', $lang, PDO::PARAM_STR);
+				
+			$this->executeStatement($stmt);
+			$result = $stmt->fetch(PDO::FETCH_ASSOC);
+			$stmt->closeCursor();
+			return $this->buildI18nDocument($doc, $lang, ($result != false) ? $result : null);
+		}
+		return $this->buildI18nDocument($doc, $lang, null);
+	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $doc
+	 * @param string $lang
+	 * @param array $result or null
+	 * @return f_persistentdocument_I18nPersistentDocument
+	 */
+	protected function buildI18nDocument($doc, $lang, $result = null)
+	{
+		$documentId = intval($doc->getId());
+		$model = $doc->getPersistentModel();
+	
+		$className = $this->getI18nDocumentClassFromModel($model->getName());
+		$i18nDoc = new $className($documentId, $lang, $result === null);
+	
+		/* @var $i18nDoc f_persistentdocument_I18nPersistentDocument */
+		if ($result !== null)
+		{
+			$i18nDoc->setDocumentProperties($result);
+		}
+		else
+		{
+			$i18nDoc->setDefaultValues();
+		}
+		$this->m_i18nDocumentInstances[$documentId][$lang] = $i18nDoc;
+		return $i18nDoc;
+	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $persistentDocument
+	 */
+	public function insertDocument($persistentDocument)
+	{
+		$documentId = $this->getNewDocumentId($persistentDocument);
+		$this->insertDocumentInternal($documentId, $persistentDocument);
+		$this->putInCache($documentId, $persistentDocument);
+	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $persistentDocument
+	 * @return integer
+	 */
+	protected function getNewDocumentId($persistentDocument)
+	{
+		$documentId = $persistentDocument->getId();
+		$documentModel = $persistentDocument->getDocumentModelName();
+		$documentLangs =  $persistentDocument->getI18nInfo()->toPersistentProviderArray();
+		$i18nFieldNames = $this->getI18nFieldNames();
+		if ($documentId <= 0)
+		{
+			$sql = 'INSERT INTO f_document (document_model, '. implode(', ', $i18nFieldNames) .') VALUES (:document_model, :'. implode(', :', $i18nFieldNames) .')';
+			$stmt = $this->prepareStatement($sql);
+			$stmt->bindValue(':document_model', $documentModel, PDO::PARAM_STR);
+			foreach ($this->getI18nFieldNames() as $i18nFieldName)
+			{
+				$value  = isset($documentLangs[$i18nFieldName]) ? $documentLangs[$i18nFieldName] : NULL;
+				$stmt->bindValue(':'.$i18nFieldName, $value, PDO::PARAM_STR);
+			}
+	
+			$this->executeStatement($stmt);
+			$documentId = $this->getLastInsertId($persistentDocument->getPersistentModel()->getTableName());
+		}
+		else
+		{
+			$sql = 'INSERT INTO f_document (document_id, document_model, '. implode(', ', $i18nFieldNames) .') VALUES (:document_id, :document_model, :'. implode(', :', $i18nFieldNames) .')';
+			$stmt = $this->prepareStatement($sql);
+			$stmt->bindValue(':document_id', $documentId, PDO::PARAM_INT);
+			$stmt->bindValue(':document_model', $documentModel, PDO::PARAM_STR);
+	
+			foreach ($i18nFieldNames as $i18nFieldName)
+			{
+				$value  = isset($documentLangs[$i18nFieldName]) ? $documentLangs[$i18nFieldName] : NULL;
+				$stmt->bindValue(':'.$i18nFieldName, $value, PDO::PARAM_STR);
+			}
+			$this->executeStatement($stmt);
+		}
+		return $documentId;
+	}
+	
+	/**
+	 * @param integer $documentId
+	 * @param f_persistentdocument_PersistentDocument $persistentDocument
+	 */
+	protected function insertDocumentInternal($documentId, $persistentDocument)
+	{
+		$documentModel = $persistentDocument->getPersistentModel();
+		$sh = $this->getSqlMapping();
+		$table = $sh->getDbNameByModel($documentModel);
+	
+		$propertiesInfo = $documentModel->getPropertiesInfos();
+		$properties = $persistentDocument->getDocumentProperties();
+	
+		$tmpId = $properties['id'];
+		$properties['id'] = $documentId;
+		$this->setCachedRelation($tmpId, $documentId);
+	
+		$properties['model'] = $persistentDocument->getDocumentModelName();
+	
+		if ($documentModel->isLocalized())
+		{
+			$this->m_i18nDocumentInstances[$documentId] = array();
+			if (array_key_exists($tmpId, $this->m_i18nDocumentInstances))
+			{
+				foreach ($this->m_i18nDocumentInstances[$tmpId] as $i18nDocument)
+				{
+					$i18nDocument->setId($documentId);
+					$this->m_i18nDocumentInstances[$documentId][$i18nDocument->getLang()] = $i18nDocument;
+					if ($i18nDocument->isModified())
+					{
+						$this->insertI18nDocumentInternal($i18nDocument, $documentModel);
+					}
+				}
+				unset($this->m_i18nDocumentInstances[$tmpId]);
+			}
+		}
+	
+		$fieldsName = array('`document_id`', '`document_model`');
+		$parameters = array(':document_id', ':document_model');
+	
+		foreach ($propertiesInfo as $propertyName => $propertyInfo)
+		{
+			/* @var $propertyInfo PropertyInfo */
+			if ('id' == $propertyName || 'model' == $propertyName)
+			{
+				continue;
+			}
+			$dbName = $sh->getDbNameByProperty($propertyInfo, false);
+			$fieldsName[$propertyName] = $sh->escapeName($dbName);
+			$parameters[$propertyName] = $sh->escapeParameterName($propertyName);
+	
+			if (is_array($properties[$propertyName]) && $propertyInfo->isDocument())
+			{
+				$properties[$propertyName] = $this->cascadeSaveDocumentArray($persistentDocument, $propertyName, $properties[$propertyName]);
+			}
+		}
+	
+		$sql = 'INSERT INTO `'.$table.'` (' . implode(', ', $fieldsName) .') VALUES (' . implode(', ', $parameters) .')';
+		$stmt = $this->prepareStatement($sql);
+	
+		$dataRelations = array();
+	
+		$stmt->bindValue(':document_id', $properties['id'], PDO::PARAM_INT);
+		$stmt->bindValue(':document_model', $properties['model'], PDO::PARAM_STR);
+		$this->buildRelationDataAndBindValues($dataRelations, $propertiesInfo, $properties, $stmt);
+	
+		$this->executeStatement($stmt);
+	
+		$persistentDocument->updateId($documentId);
+		$this->saveRelations($persistentDocument, $dataRelations);
+	
+		$persistentDocument->setDocumentPersistentState(f_persistentdocument_PersistentDocument::PERSISTENTSTATE_LOADED);
+	}
+	
+	/**
+	 * @param f_persistentdocument_I18nPersistentDocument $i18nDocument
+	 * @param f_persistentdocument_PersistentDocumentModel $documentModel
+	 */
+	protected function insertI18nDocumentInternal($i18nDocument, $documentModel)
+	{
+		$sh = $this->getSqlMapping();
+		$table = $sh->getDbNameByModel($documentModel, true);
+	
+		$fieldsName = array('`document_id`', '`lang_i18n`');
+		$parameters = array(':id', ':lang');
+		$properties = $i18nDocument->getDocumentProperties();
+		foreach ($properties as $propertyName => $propertyValue)
+		{
+			$property = $documentModel->getProperty($propertyName);
+			$dbName = $sh->getDbNameByProperty($property, true);
+			$fieldsName[$propertyName] = $sh->escapeName($dbName);
+			$parameters[$propertyName] = $sh->escapeParameterName($propertyName);
+		}
+	
+		$sql = 'INSERT INTO `'.$table.'` (' . implode(', ', $fieldsName) .') VALUES (' . implode(', ', $parameters) .')';
+		$stmt = $this->prepareStatement($sql);
+		$stmt->bindValue(':id', $i18nDocument->getId(), PDO::PARAM_INT);
+		$stmt->bindValue(':lang', $i18nDocument->getLang(), PDO::PARAM_STR);
+		foreach ($properties as $propertyName => $propertyValue)
+		{
+			$stmt->bindPropertyValue($documentModel->getProperty($propertyName) , $propertyValue);
+		}
+		$this->executeStatement($stmt);
+		$this->setI18nSynchroStatus($i18nDocument->getId(), $i18nDocument->getLang(), 'MODIFIED');
+		$i18nDocument->setIsPersisted();
+	}
+	
+	/**
+	 * Update a document.
+	 * @param f_persistentdocument_PersistentDocument $persistentDocument
+	 */
+	public function updateDocument($persistentDocument)
+	{
+		$documentId = $persistentDocument->getId();
+		$documentModel = $persistentDocument->getPersistentModel();
+		$sh = $this->getSqlMapping();
+		if ($documentModel->isLocalized())
+		{
+			// Foreach i18documents that were loaded, do an update
+			if (isset($this->m_i18nDocumentInstances[$documentId]))
+			{
+				foreach ($this->m_i18nDocumentInstances[$documentId] as $i18nDocument)
+				{
+					if ($i18nDocument->isNew())
+					{
+						//echo "NEW I18N";
+						$this->insertI18nDocumentInternal($i18nDocument, $documentModel);
+					}
+					elseif ($i18nDocument->isModified())
+					{
+						//echo "I18N has been modified";
+						$this->updateI18nDocumentInternal($i18nDocument, $documentModel);
+					}
+					else
+					{
+						//echo "Not new and not modified";
+					}
+				}
+			}
+		}
+	
+		if ($persistentDocument->isI18InfoModified())
+		{
+			//echo "I18INfo modified";
+			// Update i18n information, only if modified
+			$documentLangs = $persistentDocument->getI18nInfo()->toPersistentProviderArray();
+				
+			$sqlFields = array();
+			foreach ($this->getI18nFieldNames() as $i18nFieldName)
+			{
+				$sqlFields[] = $i18nFieldName . ' = :' .$i18nFieldName;
+			}
+				
+			$sql = 'UPDATE f_document SET ' . implode(', ', $sqlFields) . ' WHERE (document_id = :document_id)';
+			$stmt = $this->prepareStatement($sql);
+			foreach ($this->getI18nFieldNames() as $i18nFieldName)
+			{
+				$value = isset($documentLangs[$i18nFieldName]) ? $documentLangs[$i18nFieldName] : NULL;
+				$stmt->bindValue(':'.$i18nFieldName, $value, PDO::PARAM_STR);
+			}
+	
+			$stmt->bindValue(':document_id', $documentId, PDO::PARAM_INT);
+			$this->executeStatement($stmt);
+		}
+	
+		$propertiesInfo = $documentModel->getPropertiesInfos();
+		$properties = $persistentDocument->getDocumentProperties(false);
+		$mapping = array();
+		$lobParameters = array();
+	
+		foreach ($properties as $propertyName => $propertyValue)
+		{
+			if ($propertyName == 'id' || $propertyName == 'model' || !$persistentDocument->isPropertyModified($propertyName))
+			{
+				continue;
+			}
+	
+			$propertyInfo = $propertiesInfo[$propertyName];
+			$mapping[$propertyName] = $sh->escapeName($sh->getDbNameByProperty($propertyInfo, false)) . " = " .  $sh->escapeParameterName($propertyName);
+			if ($propertyInfo->isDocument() && is_array($propertyValue))
+			{
+				$properties[$propertyName] = $this->cascadeSaveDocumentArray($persistentDocument, $propertyName, $propertyValue);
+			}
+		}
+	
+		$dataRelations = array();
+	
+		if (count($mapping))
+		{
+			$sql = 'UPDATE '. $sh->escapeName($sh->getDbNameByModel($documentModel)) . ' SET ' . implode(', ', $mapping) . ' WHERE (`document_id` = :document_id)';
+			$stmt = $this->prepareStatement($sql);
+			$this->buildRelationDataAndBindValues($dataRelations, $propertiesInfo, $properties, $stmt, $mapping);
+			$stmt->bindValue(':document_id', $documentId, PDO::PARAM_INT);
+			$this->executeStatement($stmt);
+		}
+	
+		$this->saveRelations($persistentDocument, $dataRelations);
+		$persistentDocument->setDocumentPersistentState(f_persistentdocument_PersistentDocument::PERSISTENTSTATE_LOADED);
+		$this->putInCache($documentId, $persistentDocument);
+	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $persistentDocument
+	 * @param mixed[] $dataRelations
+	 */
+	private function saveRelations($persistentDocument, $dataRelations)
+	{
+		if (count($dataRelations))
+		{
+			foreach ($dataRelations as $propertyName => $relationValues)
+			{
+				$this->saveRelation($persistentDocument, $propertyName, $relationValues);
+			}
+		}
+	}	
+	
+
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param string $propertyName
+	 */
+	public function loadRelations($document, $propertyName)
+	{
+		$masterDocId = $document->getId();
+		$relId = RelationService::getInstance()->getRelationId($propertyName);
+	
+		$stmt = $this->prepareStatement('SELECT `relation_id2` AS `id` FROM `f_relation` WHERE `relation_id1` = :relation_id1 AND `relation_id` = :relation_id ORDER BY `relation_order`');
+		$stmt->bindValue(':relation_id1', $masterDocId, PDO::PARAM_INT);
+		$stmt->bindValue(':relation_id', $relId, PDO::PARAM_INT);
+		$this->executeStatement($stmt);
+		$result = $stmt->fetchAll(PDO::FETCH_NUM);
+		return array_map(function($row) {return intval($row[0]);}, $result);
+	}
+	
+	/**
+	 * @param string $url
+	 * @return f_persistentdocument_I18PersistentDocument[]|null
+	 */
+	public function getI18nWebsitesFromUrl($url)
+	{
+		$stmt = $this->prepareStatement('SELECT document_id, lang_i18n FROM m_website_doc_website_i18n WHERE url_i18n = :url');
+		$stmt->bindValue(':url', $url, PDO::PARAM_STR);
+	
+		$this->executeStatement($stmt);
+		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		if (count($results) > 0)
+		{
+			$ret = array();
+			foreach ($results as $result)
+			{
+				$ret[] = $this->getI18nDocument($this->getDocumentInstance($result['document_id']), $result['lang_i18n']);
+			}
+		}
+		else
+		{
+			$ret = null;
+		}
+		return $ret;
+	}	
+	
+	/**
+	 *
+	 * @param f_persistentdocument_PersistentDocument $parentDocument
+	 * @param string $propertyName
+	 * @param mixed $relationValues
+	 */
+	private function saveRelation($parentDocument, $propertyName, $relationValues)
+	{
+		$masterDocId = $parentDocument->getId();
+		$masterDocType = $parentDocument->getDocumentModelName();
+		$relId = RelationService::getInstance()->getRelationId($propertyName);
+	
+		//Recuperation des nouvelles relations
+	
+		if ($relationValues === null || (is_array($relationValues) && count($relationValues) === 0))
+		{
+			if (!$parentDocument->isNew())
+			{
+				$stmt = $this->prepareStatement('DELETE FROM `f_relation` WHERE `relation_id1` = :relation_id1 AND `relation_id` = :relation_id');
+				$stmt->bindValue(':relation_id1', $masterDocId, PDO::PARAM_INT);
+				$stmt->bindValue(':relation_id', $relId, PDO::PARAM_INT);
+				$this->executeStatement($stmt);
+			}
+			return;
+		}
+		elseif (!is_array($relationValues))
+		{
+			$relationValues = array($relationValues);
+		}
+	
+		//Recuperations des anciens document_id / order
+		$oldIds = array();
+		$stmt = $this->prepareStatement('SELECT `relation_id2` AS doc_id, `relation_order` AS doc_order FROM `f_relation` WHERE `relation_id1` = :relation_id1 AND `relation_id` = :relation_id');
+		$stmt->bindValue(':relation_id1', $masterDocId, PDO::PARAM_INT);
+		$stmt->bindValue(':relation_id', $relId, PDO::PARAM_INT);
+		$this->executeStatement($stmt);
+		foreach ($stmt->fetchAll(PDO::FETCH_NUM) as $row)
+		{
+			$oldIds[$row[0]] = $row[1];
+		}
+	
+		$oldCount = count($oldIds);
+		$updateOrder = false;
+		$order = 0;
+		foreach ($relationValues as $subDocId)
+		{
+			if (isset($oldIds[$subDocId]))
+			{
+				if ($oldIds[$subDocId] != $order)
+				{
+					$relOrder = -$order - 1;
+					$updateOrder = true;
+					$stmt = $this->prepareStatement('UPDATE `f_relation` SET relation_order = :new_order WHERE `relation_id1` = :relation_id1 AND `relation_id` = :relation_id AND relation_order = :relation_order');
+					$stmt->bindValue(':new_order', $relOrder, PDO::PARAM_INT);
+					$stmt->bindValue(':relation_id1', $masterDocId, PDO::PARAM_INT);
+					$stmt->bindValue(':relation_id', $relId, PDO::PARAM_INT);
+					$stmt->bindValue(':relation_order', $oldIds[$subDocId], PDO::PARAM_INT);
+					$this->executeStatement($stmt);
+				}
+				unset($oldIds[$subDocId]);
+			}
+			else
+			{
+				if ($order >= $oldCount)
+				{
+					$relOrder = $order;
+				}
+				else
+				{
+					$relOrder = -$order - 1;
+					$updateOrder = true;
+				}
+				$subDocType = $this->getCachedDocumentById($subDocId)->getDocumentModelName();
+				$stmt = $this->prepareStatement('INSERT INTO `f_relation` (relation_id1, relation_id2, relation_order, relation_name, document_model_id1, document_model_id2, relation_id) VALUES (:relation_id1, :relation_id2, :relation_order, :relation_name, :document_model_id1, :document_model_id2, :relation_id)');
+				$stmt->bindValue(':relation_id1', $masterDocId, PDO::PARAM_INT);
+				$stmt->bindValue(':relation_id2', $subDocId, PDO::PARAM_INT);
+				$stmt->bindValue(':relation_order', $relOrder, PDO::PARAM_INT);
+	
+				$stmt->bindValue(':relation_name', $propertyName, PDO::PARAM_STR);
+				$stmt->bindValue(':document_model_id1', $masterDocType, PDO::PARAM_STR);
+				$stmt->bindValue(':document_model_id2', $subDocType, PDO::PARAM_STR);
+				$stmt->bindValue(':relation_id', $relId, PDO::PARAM_INT);
+				$this->executeStatement($stmt);
+			}
+			$order++;
+		}
+	
+		if (count($oldIds) > 0)
+		{
+			//Delete old relation;
+			foreach ($oldIds as $subDocId => $order)
+			{
+				$stmt = $this->prepareStatement('DELETE FROM `f_relation` WHERE `relation_id1` = :relation_id1 AND `relation_id` = :relation_id AND relation_order = :relation_order');
+				$stmt->bindValue(':relation_id1', $masterDocId, PDO::PARAM_INT);
+				$stmt->bindValue(':relation_id', $relId, PDO::PARAM_INT);
+				$stmt->bindValue(':relation_order', $order, PDO::PARAM_INT);
+				$this->executeStatement($stmt);
+			}
+		}
+	
+		if ($updateOrder)
+		{
+			$stmt = $this->prepareStatement('UPDATE `f_relation` SET relation_order = -relation_order - 1 WHERE `relation_id1` = :relation_id1 AND `relation_id` = :relation_id AND relation_order < 0');
+			$stmt->bindValue(':relation_id1', $masterDocId, PDO::PARAM_INT);
+			$stmt->bindValue(':relation_id', $relId, PDO::PARAM_INT);
+			$this->executeStatement($stmt);
+		}
+	}
+	
+	/**
+	 * @param array $dataRelations
+	 * @param array $propertiesInfo
+	 * @param array $properties
+	 * @param StatmentMysql $stmt
+	 * @param array mapping
+	 */
+	private function buildRelationDataAndBindValues(&$dataRelations, $propertiesInfo, $properties, $stmt, $mapping = null)
+	{
+		foreach ($properties as $propertyName => $propertyValue)
+		{
+			/* @var $propertyInfo PropertyInfo */
+			$propertyInfo = $propertiesInfo[$propertyName];
+			if ('id' == $propertyName || 'model' == $propertyName)
+			{
+				continue;
+			}
+			if (!$propertyInfo->isDocument())
+			{
+				if (!is_array($mapping) || array_key_exists($propertyName, $mapping))
+				{
+					$stmt->bindPropertyValue($propertyInfo, $propertyValue);
+				}
+			}
+			else
+			{
+				if ($propertyInfo->isArray())
+				{
+					if (!is_array($mapping) || array_key_exists($propertyName, $mapping))
+					{
+						$stmt->bindPropertyValue($propertyInfo, is_array($propertyValue) ? count($propertyValue) : intval($propertyValue));
+					}
+						
+					if (is_array($propertyValue))
+					{
+						$dataRelations[$propertyName] = $propertyValue;
+					}
+					elseif (is_array($mapping) && array_key_exists($propertyName, $mapping))
+					{
+						$dataRelations[$propertyName] = null;
+					}
+				}
+				else
+				{
+					if (!is_array($mapping) || array_key_exists($propertyName, $mapping))
+					{
+						$stmt->bindPropertyValue($propertyInfo, intval($propertyValue) > 0 ? intval($propertyValue) : null);
+					}
+						
+					if (intval($propertyValue) > 0)
+					{
+						$dataRelations[$propertyName] = intval($propertyValue);
+					}
+					elseif (is_array($mapping) && array_key_exists($propertyName, $mapping))
+					{
+						$dataRelations[$propertyName] = null;
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $persistentDocument
+	 * @param string $propertyName
+	 * @param integer[] $documentIds
+	 * @return integer[]
+	 */
+	private function cascadeSaveDocumentArray($persistentDocument, $propertyName, $documentIds)
+	{
+		$self = $this;
+		$ids =  array_map(function ($documentId) use ($self) {
+			$subDoc = $self->getCachedDocumentById($documentId);
+			if ($subDoc->isNew() || $subDoc->isModified())
+			{
+				$subDoc->save();
+			}
+			return $subDoc->getId();
+		}, $documentIds);
+	
+			$persistentDocument->setDocumentProperties(array($propertyName => $ids));
+			return $ids;
+	}
+	
+	
+	/**
+	 * @param f_persistentdocument_I18nPersistentDocument $i18nDocument
+	 * @param f_persistentdocument_PersistentDocumentModel $documentModel
+	 */
+	protected function updateI18nDocumentInternal($i18nDocument, $documentModel)
+	{
+		$sh = $this->getSqlMapping();
+		$i18nSuffix = $this->getI18nSuffix();
+		$table = $sh->getDbNameByModel($documentModel, true);
+		$properties = $i18nDocument->getDocumentProperties();
+	
+		$mapping = array();
+	
+		foreach ($properties as $propertyName => $propertyValue)
+		{
+			if (!$i18nDocument->isPropertyModified($propertyName))
+			{
+				continue;
+			}
+	
+			$propertyInfo = $documentModel->getProperty($propertyName);
+	
+			if ($propertyInfo->isDocument())
+			{
+				// this should not be possible
+				continue;
+			}
+			$mapping[$propertyName] = $sh->escapeName($sh->getDbNameByProperty($propertyInfo, true)) . ' = ' . $sh->escapeParameterName($propertyName);
+		}
+		$sql = 'UPDATE `'.$table.'` SET ' . implode(', ', $mapping) . ' WHERE `document_id` = :id AND `lang_i18n` = :lang';
+		$stmt = $this->prepareStatement($sql);
+		$stmt->bindValue(':id', $i18nDocument->getId(), PDO::PARAM_INT);
+		$stmt->bindValue(':lang', $i18nDocument->getLang(), PDO::PARAM_STR);
+		foreach ($mapping as $propertyName => $tmp)
+		{
+			$stmt->bindPropertyValue($documentModel->getProperty($propertyName), $properties[$propertyName]);
+		}
+		$this->executeStatement($stmt);
+		$this->setI18nSynchroStatus($i18nDocument->getId(), $i18nDocument->getLang(), 'MODIFIED');
+		$i18nDocument->setIsPersisted();
+	
+		$this->m_i18nDocumentInstances[$i18nDocument->getId()][$i18nDocument->getLang()] = $i18nDocument;
+	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $persistentDocument
+	 */
+	public function deleteDocument($persistentDocument)
+	{
+		$documentId = $persistentDocument->getId();
+		$lang = $persistentDocument->getLang();
+	
+		$documentModel = $persistentDocument->getPersistentModel();
+	
+		$deleteDocumentInstance = true;
+		if ($documentModel->isLocalized())
+		{
+	
+			$i18nm = RequestContext::getInstance();
+			$contextLang = $i18nm->getLang();
+			if (!$persistentDocument->isLangAvailable($contextLang))
+			{
+				//Le document n'existe pas dans la langue du context on ne fait rien
+				return;
+			}
+	
+			if ($i18nm->hasI18nSynchro())
+			{
+				//Suppression de toute les versions de lang synchronisé
+				foreach ($this->getI18nSynchroStatus($documentId) as $stl => $stInfo)
+				{
+					if (isset($stInfo['from']) && $stInfo['from'] === $contextLang)
+					{
+						$i18nSyncDoc = $this->getI18nDocument($persistentDocument, $stl);
+						$this->deleteI18nDocument($i18nSyncDoc, $documentModel);
+						unset($this->m_i18nDocumentInstances[$documentId][$stl]);
+						$persistentDocument->getI18nInfo()->removeLabel($stl);
+					}
+				}
+			}
+	
+			$langCount = $persistentDocument->removeContextLang();
+			$deleteDocumentInstance = ($langCount == 0);
+	
+			//On supprime physiquement la traduction
+	
+			$i18nDocument = $this->getI18nDocument($persistentDocument, $contextLang);
+			$this->deleteI18nDocument($i18nDocument, $documentModel);
+		}
+	
+		if (!$deleteDocumentInstance)
+		{
+			//Election d'une nouvelle VO
+			$this->setI18nSynchroStatus($documentId, $persistentDocument->getLang(), 'MODIFIED');
+			$this->updateDocument($persistentDocument);
+		}
+		else
+		{
+			if ($documentModel->hasCascadeDelete())
+			{
+				$persistentDocument->preCascadeDelete();
+			}
+	
+			$table = $documentModel->getTableName();
+			$sql = 'DELETE FROM `f_document` WHERE (`document_id` = :document_id)';
+			$stmt = $this->prepareStatement($sql);
+			$stmt->bindValue(':document_id', $documentId, PDO::PARAM_INT);
+			$this->executeStatement($stmt);
+	
+			$deletedrow = $stmt->rowCount();
+			if ($deletedrow != 0)
+			{
+				$sql =  'DELETE FROM `'.$table.'` WHERE (`document_id` = :document_id)';
+				$stmt = $this->prepareStatement($sql);
+				$stmt->bindValue(':document_id', $documentId, PDO::PARAM_INT);
+				$this->executeStatement($stmt);
+	
+				$stmt = $this->prepareStatement('DELETE FROM `f_relation` WHERE `relation_id1` = :relation_id1');
+				$stmt->bindValue(':relation_id1', $documentId, PDO::PARAM_INT);
+				$this->executeStatement($stmt);
+			}
+			$this->clearUrlRewriting($documentId);
+	
+			$persistentDocument->setDocumentPersistentState(f_persistentdocument_PersistentDocument::PERSISTENTSTATE_DELETED);
+	
+			if ($documentModel->hasCascadeDelete())
+			{
+				$persistentDocument->postCascadeDelete();
+			}
+	
+			$this->deleteFromCache($documentId);
+		}
+	}
+	
+	protected function deleteI18nDocument($i18nDocument, $documentModel)
+	{
+		$table = $documentModel->getTableName() . $this->getI18nSuffix();
+		$stmt = $this->prepareStatement('DELETE FROM `'. $table . '` WHERE `document_id` = :id AND `lang_i18n` = :lang');
+		$stmt->bindValue(':id', $i18nDocument->getId(), PDO::PARAM_INT);
+		$stmt->bindValue(':lang', $i18nDocument->getLang(), PDO::PARAM_STR);
+		$this->executeStatement($stmt);
+		$this->deleteI18nSynchroStatus($i18nDocument->getId(), $i18nDocument->getLang());
+		unset($this->m_i18nDocumentInstances[$i18nDocument->getId()][$i18nDocument->getLang()]);
+	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocument $document
+	 * @param f_persistentdocument_PersistentDocument $destDocument
+	 * @return f_persistentdocument_PersistentDocument the result of mutation (destDocument)
+	 */
+	public function mutate($document, $destDocument)
+	{
+		try
+		{
+			$this->beginTransaction();
+			$id = $document->getId();
+			$sourceModel = $document->getPersistentModel();
+			$sourceModelName = $sourceModel->getName();
+			$destModel = $destDocument->getPersistentModel();
+			$destModelName = $destModel->getName();
+	
+			if ($sourceModel->getTableName() != $destModel->getTableName())
+			{
+				throw new IllegalOperationException('Unable to mutate document ' . $document->toString() . ' to ' . $destDocument->__toString());
+			}
+	
+			// Update model name in f_framework table
+			$stmt = $this->prepareStatement('UPDATE `f_document` SET `document_model` = :destmodelname WHERE `document_id` = :id AND `document_model` = :sourcemodelname');
+			$stmt->bindValue(':destmodelname', $destModelName, PDO::PARAM_STR);
+			$stmt->bindValue(':id', $id, PDO::PARAM_INT);
+			$stmt->bindValue(':sourcemodelname', $sourceModelName, PDO::PARAM_STR);
+			$this->executeStatement($stmt);
+	
+			// Update model name in f_relation table
+			$stmt = $this->prepareStatement('UPDATE `f_relation` SET `document_model_id1` = :destmodelname WHERE `relation_id1` = :id AND `document_model_id1` = :sourcemodelname');
+			$stmt->bindValue(':destmodelname', $destModelName, PDO::PARAM_STR);
+			$stmt->bindValue(':id', $id, PDO::PARAM_INT);
+			$stmt->bindValue(':sourcemodelname', $sourceModelName, PDO::PARAM_STR);
+			$this->executeStatement($stmt);
+	
+			$stmt = $this->prepareStatement('UPDATE `f_relation` SET `document_model_id2` = :destmodelname WHERE `relation_id2` = :id AND `document_model_id1` = :sourcemodelname');
+			$stmt->bindValue(':destmodelname', $destModelName, PDO::PARAM_STR);
+			$stmt->bindValue(':id', $id, PDO::PARAM_INT);
+			$stmt->bindValue(':sourcemodelname', $sourceModelName, PDO::PARAM_STR);
+			$this->executeStatement($stmt);
+	
+			// Update model name in document table
+			$tableName = $sourceModel->getTableName();
+			$stmt = $this->prepareStatement('UPDATE `'.$tableName.'` SET `document_model` = :destmodelname WHERE `document_id` = :id AND `document_model` = :sourcemodelname');
+			$stmt->bindValue(':destmodelname', $destModelName, PDO::PARAM_STR);
+			$stmt->bindValue(':id', $id, PDO::PARAM_INT);
+			$stmt->bindValue(':sourcemodelname', $sourceModelName, PDO::PARAM_STR);
+			$this->executeStatement($stmt);
+	
+			// Delete i18n cache information
+			if ($sourceModel->isLocalized())
+			{
+				$tmpId = $destDocument->getId();
+				if (isset($this->m_i18nDocumentInstances[$tmpId]))
+				{
+					$array = $this->m_i18nDocumentInstances[$tmpId];
+					unset($this->m_i18nDocumentInstances[$tmpId]);
+					foreach ($array as $lang => $i18nObject)
+					{
+						$i18nObject->copyMutateSource($id, $this->m_i18nDocumentInstances[$id][$lang]);
+						$this->m_i18nDocumentInstances[$id][$lang] = $i18nObject;
+					}
+				}
+			}
+	
+			$this->deleteFromCache($id);
+			$destDocument->copyMutateSource($document);
+			$this->putInCache($id, $destDocument);
+			$this->commit();
+			return $destDocument;
+		}
+		catch (Exception $e)
+		{
+			$this->rollBack($e);
+			// unrecoverable ...
+			throw $e;
+		}
+	}	
+	
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocumentModel $pm
+	 * @param integer $id
+	 * @param string $lang
+	 * @param string $fromLang
+	 */
+	public function prepareI18nSynchro($pm, $documentId, $lang, $fromLang)
+	{
+		$sh = $this->getSqlMapping();
+		$tableName = $sh->getDbNameByModel($pm, true);
+		$className = $this->getI18nDocumentClassFromModel($pm->getName());
+		$fields = array();
+		foreach ($pm->getPropertiesInfos() as $key => $propertyInfo)
+		{
+			if ($propertyInfo->getLocalized())
+			{
+				$fields[] =  $sh->escapeName($sh->getDbNameByProperty($propertyInfo, true), null, $key);
+			}
+		}
+	
+		$sql =  "SELECT ". implode(', ', $fields)." FROM ".$tableName." WHERE document_id = :document_id and lang_i18n = :lang";
+		$stmt = $this->prepareStatement($sql);
+		$stmt->bindValue(':document_id', $documentId, PDO::PARAM_INT);
+		$stmt->bindValue(':lang', $fromLang, PDO::PARAM_STR);
+		$this->executeStatement($stmt);
+		$fromResult = $stmt->fetch(PDO::FETCH_ASSOC);
+		$stmt->closeCursor();
+	
+		$from = new $className($documentId, $fromLang, false);
+		$from->setDocumentProperties($fromResult);
+	
+		$sql =  "SELECT `document_publicationstatus_i18n` AS `publicationstatus` FROM ".$tableName." WHERE document_id = :document_id and lang_i18n = :lang";
+		$stmt = $this->prepareStatement($sql);
+		$stmt->bindValue(':document_id', $documentId, PDO::PARAM_INT);
+		$stmt->bindValue(':lang', $lang, PDO::PARAM_STR);
+		$this->executeStatement($stmt);
+		$toResult = $stmt->fetch(PDO::FETCH_ASSOC);
+		$stmt->closeCursor();
+		$isNew = true;
+		if ($toResult)
+		{
+			$fromResult['publicationstatus'] = $toResult['publicationstatus'];
+			$isNew = false;
+		}
+		$to = new $className($documentId, $lang, $isNew);
+		$to->setDocumentProperties($fromResult);
+	
+		return array($from, $to);
+	}
+	
+	/**
+	 * @param f_persistentdocument_PersistentDocumentModel $pm
+	 * @param f_persistentdocument_I18nPersistentDocument $to
+	 */
+	public function setI18nSynchro($pm, $to)
+	{
+		$sh = $this->getSqlMapping();
+		$tableName = $sh->getDbNameByModel($pm, true);
+		$sql = "select * from ".$tableName." where document_id = :document_id and lang_i18n = :lang";
+		$id = $to->getId();
+		$lang = $to->getLang();
+	
+		$sqlInsert = array('`document_id`', '`lang_i18n`');
+		$sqlValues =  array(':document_id' => $id, ':lang_i18n' => $lang);
+		$sqlUpdate = array();
+	
+		foreach ($to->getDocumentProperties() as $propertyName => $value)
+		{
+			$property = $pm->getProperty($propertyName);
+			$fieldName = $sh->getDbNameByProperty($property, true);
+	
+			$fn = $sh->escapeName($fieldName);
+			$pn = $sh->escapeParameterName($propertyName);
+				
+			if ($propertyName === 'publicationstatus')
+			{
+				$sqlInsert[] = $fn;
+				$sqlValues[$pn] = $value;
+			}
+			elseif ($propertyName !== 'correctionid')
+			{
+				$sqlInsert[] = $fn;
+				$sqlValues[$pn] = $value;
+				$sqlUpdate[] = $fn .' = VALUES(' . $fn . ')';
+			}
+		}
+		$sql = 'INSERT INTO `'.$tableName.'` (' . implode(', ', $sqlInsert) .
+		') VALUES (' . implode(', ', array_keys($sqlValues)) .
+		') ON DUPLICATE KEY UPDATE' . implode(', ', $sqlUpdate);
+	
+		$stmt = $this->prepareStatement($sql);
+		foreach ($sqlValues as $bn => $value)
+		{
+			$stmt->bindValue($bn, $value, $value === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+		}
+		$this->executeStatement($stmt);
+		$this->m_i18nDocumentInstances[$id] = array();
+	
+		$sql = 'UPDATE `f_document` SET `label_' . $lang . '` = :label  WHERE (document_id = :document_id)';
+		$stmt = $this->prepareStatement($sql);
+		$stmt->bindValue(':label', $sqlValues[$sh->escapeParameterName('label')], PDO::PARAM_STR);
+		$stmt->bindValue(':document_id', $id, PDO::PARAM_INT);
+		$this->executeStatement($stmt);
+		$this->deleteFromCache($id);
+	}
+	
 	
 	/**
 	 * @deprecated wrapped method
@@ -68,7 +1363,6 @@ class f_persistentdocument_PersistentProvider
 	public static function clearInstance()
 	{
 		throw new Exception("Unimplemented");
-		//self::clearInstanceByClassName('\Change\Db\Provider');
 	}
 	
 	/**
@@ -82,6 +1376,10 @@ class f_persistentdocument_PersistentProvider
 		}
 		return $this->schemaManager;
 	}
+	
+	
+	
+	
 	
 	/**
 	 * @param string $documentModelName
@@ -130,7 +1428,7 @@ class f_persistentdocument_PersistentProvider
 					$docs[] = $this->getDocumentInstanceWithModelName(intval($row['document_id']), $row['document_model'], $row['treeid'], $row);
 				}
 			}
-			elseif ($fetchMode === QueryConstants::FETCH_MODE_DIRECT) //TODO Old class Usage
+			elseif ($fetchMode === QueryConstants::FETCH_MODE_DIRECT)
 			{
 				$isLocalized = $query->getDocumentModel()->isLocalized();
 				foreach ($rows as $row)
@@ -348,7 +1646,7 @@ class f_persistentdocument_PersistentProvider
 	 * Transform result
 	 *
 	 * @param array<array<String, mixed>> $rows
-	 * @param f_persistentdocument_criteria_ExecutableQuery $query TODO Old class Usage
+	 * @param f_persistentdocument_criteria_ExecutableQuery $query
 	 * @return array<mixed>
 	 */
 	protected function fetchProjection($rows, $query)
@@ -1311,7 +2609,6 @@ class f_persistentdocument_QueryBuilderMysql
 			return;
 		}
 
-		//TODO ehau : experimental
 		$property = $criterion->popPropertyName();
 		if ($property !== null)
 		{
