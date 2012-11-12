@@ -97,7 +97,7 @@ abstract class f_persistentdocument_PersistentDocumentModel extends \Change\Docu
 		$model =  self::$documentModels[$modelName];
 		if ($model === null)
 		{
-			throw new BaseException('Model not found: ' . $modelName);
+			throw new BaseException("type_must_be_a_module");
 		}
 		return $model;
 	}
