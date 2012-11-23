@@ -1339,7 +1339,8 @@ class f_persistentdocument_DocumentService extends change_BaseService
 	}
 
 	/**
-	 * Generate the path string of ancestor document (excluding the rootfolder).
+	 * Generate the path string of ancestor documents (excluding the rootfolder).
+	 * This method should be used only in backoffice context (it uses getTreeNodeLabel to get document labels).
 	 * @param f_persistentdocument_PersistentDocument $document
 	 * @param string $separator ' > ' by default
 	 * @return string
@@ -1355,7 +1356,7 @@ class f_persistentdocument_DocumentService extends change_BaseService
 		$labels = array();
 		foreach ($ids as $id)
 		{
-			$labels[] = $this->getDocumentInstance($id)->getLabel();
+			$labels[] = $this->getDocumentInstance($id)->getTreeNodeLabel();
 		}
 
 		return implode($separator, $labels);
