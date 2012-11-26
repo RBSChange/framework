@@ -479,7 +479,8 @@ class generator_PersistentProperty
 			$constraints[] = "blank:false";
 		}
 
-		if ($this->type == f_persistentdocument_PersistentDocument::PROPERTYTYPE_STRING)
+		// db-size can't be overridden.
+		if (!$this->parentProperty && $this->type == f_persistentdocument_PersistentDocument::PROPERTYTYPE_STRING)
 		{
 			if (is_null($this->dbSize)) {$this->dbSize = 255;}
 			$constraints[] = "maxSize:".$this->dbSize;
