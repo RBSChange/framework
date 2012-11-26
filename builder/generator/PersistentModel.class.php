@@ -1147,16 +1147,12 @@ class generator_PersistentModel
 
 	private function checkOverrideProperties()
 	{
-		//echo "CheckOverrideProperties ".$this->name."\n";
 		$parentModel = $this->getParentModelOrInjected();
 		if (is_null($parentModel))
 		{
-			//echo "END ***\n";
 			return;
 		}
 		
-		//echo $parentModel->getName()."\n";
-
 		$parentModel->checkOverrideProperties();
 
 		$this->tableName = $parentModel->tableName;
@@ -1207,6 +1203,21 @@ class generator_PersistentModel
 					$property->setParentProperty($parentProperty);
 				}
 			}
+		}
+		
+		// Look for properties in ancestor models.
+		$parentModel = $parentModel->getParentModelOrInjected();
+		while ($parentModel)
+		{
+			foreach ($this->properties as $property)
+			{
+				$parentProperty = $parentModel->getPropertyByName($property->getName());
+				if (!is_null($parentProperty) && !$property->isOverride())
+				{
+					$property->setParentProperty($parentProperty);
+				}
+			}
+			$parentModel = $parentModel->getParentModelOrInjected();
 		}
 	}
 
