@@ -467,11 +467,12 @@ class generator_PersistentProperty
 	public function getParentProperty()
 	{
 		return $this->parentProperty;
-	}	
+	}
 
 	public function applyDefaultConstraints()
-	{		
-		if ($this->type == f_persistentdocument_PersistentDocument::PROPERTYTYPE_STRING)
+	{
+		// db-size can't be overridden.
+		if (!$this->parentProperty && $this->type == f_persistentdocument_PersistentDocument::PROPERTYTYPE_STRING)
 		{
 			if (intval($this->dbSize) <= 0 || intval($this->dbSize) > 255) 
 			{
