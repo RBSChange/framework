@@ -14,6 +14,23 @@ class change_SchemaManager extends \Change\Db\Mysql\SchemaManager
 		parent::__construct($dbProvider);
 	}
 	
+	/**
+	 * @param string $lang
+	 * @return boolean
+	 */
+	public function addLang($lang)
+	{
+		$infos = $this->getTableDefinition('f_document');
+		$fName = 'label_'.$lang;
+		if ($infos->getField($fName) === null)
+		{
+			$sql = "ALTER TABLE `f_document` ADD `label_$lang` VARCHAR(255) NULL";
+			$this->execute($sql);
+			return true;
+		}
+		return false;
+	}
+	
 	
 	/**
 	 * @param string $moduleName
@@ -21,7 +38,7 @@ class change_SchemaManager extends \Change\Db\Mysql\SchemaManager
 	 * @param boolean $apply
 	 * @return string the SQL statements that where executed
 	 */
-	function dropModelTables($moduleName, $documentName, $apply = true)
+	public function dropModelTables($moduleName, $documentName, $apply = true)
 	{
 		//TODO Old class Usage
 		$documentModel = \f_persistentdocument_PersistentDocumentModel::getInstance($moduleName, $documentName);

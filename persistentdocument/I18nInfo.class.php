@@ -1,6 +1,6 @@
 <?php
 /**
- * @deprecated use \Change\Documents\I18nInfo
+ * @deprecated
  */
 class I18nInfo
 {

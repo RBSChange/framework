@@ -1,6 +1,6 @@
 <?php
 /**
- * @deprecated use \Change\Documents\Property
+ * @deprecated
  */
 class PropertyInfo
 {
@@ -510,7 +510,7 @@ class PropertyInfo
 	
 	/**
 	 * @param array $constraintArray
-	 * @return \Change\Documents\Property
+	 * @return PropertyInfo
 	 */
 	public function setConstraintArray($constraintArray)
 	{

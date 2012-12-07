@@ -30,7 +30,7 @@ class LocaleService
 	protected $wrappedI18nManager;
 
 	/**
-	 * @var \Change\Db\DbProvider
+	 * @var f_persistentdocument_PersistentProvider
 	 */
 	protected $dbProvider;
 	
@@ -43,7 +43,7 @@ class LocaleService
 		{
 			self::$instance = new static();
 			self::$instance->wrappedI18nManager = \Change\Application::getInstance()->getApplicationServices()->getI18nManager();
-			self::$instance->dbProvider = \Change\Application::getInstance()->getApplicationServices()->getDbProvider();
+			self::$instance->dbProvider = f_persistentdocument_PersistentProvider::getInstance();
 		}
 		return self::$instance;
 	}
@@ -817,7 +817,7 @@ class LocaleService
 	}
 	
 	/**
-	 * @param \Change\Documents\AbstractDocument $document
+	 * @param f_persistentdocument_PersistentDocument $document
 	 * @return array
 	 *		- isLocalized : boolean
 	 *		- action : 'none'|'generate'|'synchronize'
@@ -970,6 +970,75 @@ class LocaleService
 		}
 		return true;
 	}
+	
+	/**
+	 * @return array [baseKey => nbLocales]
+	 */
+	public function getPackageNames()
+	{
+		return $this->dbProvider->getPackageNames();
+	}
+	
+	/**
+	 * @return array [baseKey => nbLocales]
+	 */
+	public function getUserEditedPackageNames()
+	{
+		return $this->dbProvider->getUserEditedPackageNames();
+	}
+	
+	/**
+	 *
+	 * @param string $keyPath
+	 * @return array[id => [lcid => ['content' => string, 'useredited' => integer, 'format' => string]]]
+	 */
+	public function getPackageContent($keyPath)
+	{
+		$result = $this->dbProvider->getPackageData($keyPath);
+		$contents = array();
+		foreach ($result as $row)
+		{
+			$contents[$row['id']][$row['lang']] = array('content' => $row['content'],
+				'useredited' => $row['useredited'] == '1', 'format' => $row['format']);
+		}
+		return $contents;
+	}
+	
+	/**
+	 * @param string $lcid exemple fr_FR
+	 * @param string $id
+	 * @param string $keyPath
+	 * @param string $content
+	 * @param string $format TEXT | HTML
+	 */
+	public function updateUserEditedKey($lcid, $id, $keyPath, $content, $format)
+	{
+		$this->updateKey($lcid, $id, $keyPath, $content, $format, true);
+	}
+	
+	/**
+	 * @param string $lcid
+	 * @param string $id
+	 * @param string $keyPath
+	 */
+	public function deleteUserEditedKey($lcid, $id, $keyPath)
+	{
+		$this->dbProvider->deleteI18nKey($keyPath, $id, $lcid);
+	}
+	
+	/**
+	 * @param string $lcid exemple fr_FR
+	 * @param string $id
+	 * @param string $keyPath
+	 * @param string $content
+	 * @param string $format TEXT | HTML
+	 * @param boolean $userEdited
+	 */
+	public function updateKey($lcid, $id, $keyPath, $content, $format, $userEdited = false)
+	{
+		$this->dbProvider->addTranslate($lcid, $id, $keyPath, $content, $userEdited ? 1 : 0, $format, true);
+	}
+	
 }
 
 class change_PreparedKey extends \Change\I18n\PreparedKey
