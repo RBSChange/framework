@@ -25,7 +25,7 @@ class RequestContext
 	protected $wrappedI18nManager;
 
 	/**
-	 * @var \Change\Document\DocumentManager
+	 * @var \Change\Documents\DocumentManager
 	 */
 	protected $wrappedDocumentManager;
 

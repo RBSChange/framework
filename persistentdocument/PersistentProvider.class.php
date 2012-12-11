@@ -85,6 +85,12 @@ class f_persistentdocument_PersistentProvider
 	{
 		return $this->getSqlMapping()->getI18nFieldNames();
 	}
+	
+	
+	public function getI18nSuffix()
+	{
+		return '_i18n';
+	}
 		
 	/**
 	 * @param integer $documentId
@@ -572,6 +578,11 @@ class f_persistentdocument_PersistentProvider
 			$this->executeStatement($stmt);
 		}
 		return $documentId;
+	}
+	
+	protected function getLastInsertId($tableName)
+	{
+		return $this->wrapped->getDriver()->lastInsertId($tableName);
 	}
 	
 	/**
@@ -1252,10 +1263,6 @@ class f_persistentdocument_PersistentProvider
 		}
 	}	
 	
-	
-
-	
-	
 	/**
 	 * @deprecated wrapped method
 	 */
@@ -1628,6 +1635,27 @@ class f_persistentdocument_PersistentProvider
 	//
 	// Tree Methods à usage du treeService
 	//
+	public function createTreeTable($treeId)
+	{
+		$stmt = $this->wrapped->prepareStatement('DROP TABLE IF EXISTS `f_tree_'. $treeId .'`');
+		$this->wrapped->executeStatement($stmt);
+	
+		$sql = 'CREATE TABLE IF NOT EXISTS `f_tree_'. $treeId .'` ('
+		. ' `document_id` int(11) NOT NULL default \'0\','
+		. ' `parent_id` int(11) NOT NULL default \'0\','
+		. ' `node_order` int(11) NOT NULL default \'0\','
+		. ' `node_level` int(11) NOT NULL default \'0\','
+		. ' `node_path` varchar(255) collate latin1_general_ci NOT NULL default \'/\','
+        . ' `children_count` int(11) NOT NULL default \'0\','
+        . ' PRIMARY KEY (`document_id`),'
+        . ' UNIQUE KEY `tree_node` (`parent_id`, `node_order`),'
+        . ' UNIQUE KEY `descendant` (`node_level`,`node_order`,`node_path`)'
+        . ' ) ENGINE=InnoDB CHARACTER SET latin1 COLLATE latin1_general_ci';
+		
+		$stmt = $this->wrapped->prepareStatement($sql);
+		$this->wrapped->executeStatement($stmt);
+	}
+	
 	
 	/**
 	* @param integer $documentId
@@ -1775,6 +1803,15 @@ class f_persistentdocument_PersistentProvider
 		$stmt->closeCursor();
 		return $result;
 	}	
+	
+	/**
+	 * @param f_persistentdocument_PersistentTreeNode $rootNode
+	 */
+	public function createTree($rootNode)
+	{
+		$this->createTreeTable($rootNode->getId());
+		$this->insertNode($rootNode);
+	}
 	
 	/**
 	 * Suppression de tout l'arbre
@@ -3538,6 +3575,11 @@ class f_persistentdocument_QueryBuilderMysql
 		return $this->params;
 	}
 
+	public function getI18nSuffix()
+	{
+		return '_i18n';
+	}
+	
 	/**
 	 * @return string
 	 */
@@ -3887,11 +3929,6 @@ class f_persistentdocument_QueryBuilderMysql
 		}
 
 		return $qName;
-	}
-
-	protected function getI18nSuffix()
-	{
-		return '_i18n';
 	}
 
 	/**

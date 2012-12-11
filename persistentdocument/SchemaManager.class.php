@@ -10,7 +10,6 @@ class change_SchemaManager extends \Change\Db\Mysql\SchemaManager
 	 */
 	public function __construct(\Change\Db\Mysql\DbProvider $dbProvider)
 	{
-		Framework::fatal(__METHOD__);
 		parent::__construct($dbProvider);
 	}
 	
@@ -29,6 +28,11 @@ class change_SchemaManager extends \Change\Db\Mysql\SchemaManager
 			return true;
 		}
 		return false;
+	}
+	
+	public function getI18nSuffix()
+	{
+		return '_i18n';
 	}
 	
 	

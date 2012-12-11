@@ -553,16 +553,18 @@ class LocaleService
 		{
 			$this->dbProvider->beginTransaction();
 			
+			//TODO create new compile locale command
 			$availablePaths = array(\Change\Application::getInstance()->getWorkspace()->projectPath('Change', 'I18n', 'Assets'), 
 					f_util_FileUtils::buildOverridePath('Change', 'I18n', 'Assets'));
 			foreach ($availablePaths as $path)
 			{
 				if (is_dir($path))
 				{
-					Framework::fatal(__METHOD__ . ' ' . $path);
 					$this->processDir('c', $path);
 				}
 			}
+			
+			
 			$availablePaths = array(f_util_FileUtils::buildFrameworkPath('i18n'), 
 					f_util_FileUtils::buildOverridePath('framework', 'i18n'));
 			foreach ($availablePaths as $path)
@@ -778,7 +780,7 @@ class LocaleService
 	{
 		if ($this->hasI18nDocumentsSynchro())
 		{
-			$d = \DocumentHelper::getDocumentInstanceIfExists($documentId); //TODO Old class Usage
+			$d = \DocumentHelper::getDocumentInstanceIfExists($documentId);
 			if ($d && $d->getPersistentModel()->isLocalized())
 			{
 				$this->dbProvider->setI18nSynchroStatus($d->getId(), $d->getLang(), self::SYNCHRO_MODIFIED, null);
@@ -793,7 +795,7 @@ class LocaleService
 	{
 		if ($this->hasI18nDocumentsSynchro())
 		{
-			$d = \DocumentHelper::getDocumentInstanceIfExists($documentId); //TODO Old class Usage
+			$d = \DocumentHelper::getDocumentInstanceIfExists($documentId);
 			if ($d && $d->getPersistentModel()->isLocalized())
 			{
 				foreach ($d->getI18nInfo()->getLangs() as $lang)
@@ -870,7 +872,7 @@ class LocaleService
 			// No synchro configured.
 			return false;
 		}
-		$d = \DocumentHelper::getDocumentInstanceIfExists($documentId); //TODO Old class Usage
+		$d = DocumentHelper::getDocumentInstanceIfExists($documentId);
 		if ($d === null)
 		{
 			// Invalid document.
@@ -883,6 +885,8 @@ class LocaleService
 			// Not applicable on this document.
 			return false;
 		}
+		
+		$rc = RequestContext::getInstance();
 	
 		try
 		{
@@ -892,8 +896,7 @@ class LocaleService
 			$synchroConfig = $ds->getI18nSynchroConfig($d, $this->getI18nDocumentsSynchro());
 			if (count($synchroConfig))
 			{
-				//TODO Old class Usage
-				$dcs = \f_DataCacheService::getInstance();
+				$dcs = f_DataCacheService::getInstance();
 				$datas = $this->dbProvider->getI18nSynchroStatus($d->getId());
 				if (count($datas) === 0)
 				{
@@ -918,26 +921,26 @@ class LocaleService
 								list($from, $to) = $this->dbProvider->prepareI18nSynchro($pm, $documentId, $lang, $fromLang);
 								try
 								{
-									$this->pushLang($fromLang);
+									$rc->beginI18nWork($fromLang);
+									
 	
 									if ($ds->synchronizeI18nProperties($d, $from, $to))
 									{
 										$this->dbProvider->setI18nSynchro($pm, $to);
 										$this->dbProvider->setI18nSynchroStatus($documentId, $lang, self::SYNCHRO_SYNCHRONIZED, $fromLang);
-										//TODO Old class Usage
-										$dcs->clearCacheByPattern(\f_DataCachePatternHelper::getModelPattern($d->getDocumentModelName()));
-										$dcs->clearCacheByDocId(\f_DataCachePatternHelper::getIdPattern($documentId));
+										$dcs->clearCacheByPattern(f_DataCachePatternHelper::getModelPattern($d->getDocumentModelName()));
+										$dcs->clearCacheByDocId(f_DataCachePatternHelper::getIdPattern($documentId));
 									}
 									elseif (isset($datas[$lang]))
 									{
 										$this->dbProvider->setI18nSynchroStatus($documentId, $lang, self::SYNCHRO_VALID, null);
 									}
-	
-									$this->popLang();
+								
+									$rc->endI18nWork();
 								}
-								catch (\Exception $e)
+								catch (Exception $e)
 								{
-									$this->popLang($e);
+									$rc->endI18nWork($e);
 								}
 								break;
 							}
@@ -963,7 +966,7 @@ class LocaleService
 			}
 			$this->dbProvider->commit();
 		}
-		catch (\Exception $e)
+		catch (Exception $e)
 		{
 			$this->dbProvider->rollback($e);
 			return false;
