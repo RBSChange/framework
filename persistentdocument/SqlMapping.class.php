@@ -15,7 +15,7 @@ class change_SqlMapping extends \Change\Db\Mysql\SqlMapping
 		if ($this->i18nfieldNames === null)
 		{
 			$array = array('lang_vo');
-			foreach (\Change\Application::getInstance()->getApplicationServices()->getI18nManager()->getSupportedLanguages() as $lang)
+			foreach (RequestContext::getInstance()->getSupportedLanguages() as $lang)
 			{
 				$array[] = 'label_'.$lang;
 			}

@@ -28,12 +28,38 @@ class RequestContext
 	 * @var \Change\Documents\DocumentManager
 	 */
 	protected $wrappedDocumentManager;
+	
+	/**
+	 * @var string
+	 */
+	private $supportedLanguages;
+	
 
 	protected function __construct()
 	{
 		$this->resetProfile();
 		$this->wrappedI18nManager = \Change\Application::getInstance()->getApplicationServices()->getI18nManager();
 		$this->wrappedDocumentManager = \Change\Application::getInstance()->getDocumentServices()->getDocumentManager();
+	}
+		
+	/**
+	 * @deprecated
+	 */
+	public function getSupportedLanguages()
+	{
+		if ($this->supportedLanguages === null)
+		{
+			$this->supportedLanguages = array();
+			foreach ($this->wrappedI18nManager->getSupportedLCIDs() as $LCID)
+			{
+				$lang = $this->wrappedI18nManager->getLangByLCID($LCID);
+				if (!in_array($lang, $this->supportedLanguages))
+				{
+					$this->supportedLanguages[] = $lang;
+				}
+			}
+		}
+		return $this->supportedLanguages;
 	}
 	
 	/**
@@ -622,11 +648,11 @@ class RequestContext
 	}
 	
 	/**
-	 * @deprecated use \Change\I18n\I18nManager::getI18nDocumentsSynchro() or \Change\I18n\I18nManager::getI18nKeysSynchro()
+	 * @deprecated
 	 */
 	public function getI18nSynchro()
 	{
-		return $this->wrappedI18nManager->getI18nDocumentsSynchro();
+		return LocaleService::getInstance()->getI18nDocumentsSynchro();
 	}
 	
 	/**
@@ -646,27 +672,19 @@ class RequestContext
 	}
 	
 	/**
-	 * @deprecated use \Change\I18n\I18nManager::getLang()
+	 * @deprecated
 	 */
 	public function getLang()
 	{
-		return $this->wrappedDocumentManager->getLang();
+		return $this->wrappedI18nManager->getLangByLCID($this->wrappedDocumentManager->getLCID());
 	}
 	
 	/**
-	 * @deprecated use \Change\I18n\I18nManager::getSupportedLanguages()
-	 */
-	public function getUISupportedLanguages()
-	{
-		return $this->wrappedI18nManager->getSupportedLanguages();
-	}
-	
-	/**
-	 * @deprecated \Change\I18n\I18nManager::getDefaultLang()
+	 * @deprecated
 	 */
 	public function getUIDefaultLang()
 	{
-		return $this->wrappedI18nManager->getDefaultLang();
+		return $this->wrappedI18nManager->getLangByLCID($this->wrappedI18nManager->getDefaultLCID());
 	}
 	
 	/**
@@ -674,7 +692,7 @@ class RequestContext
 	 */
 	public function getUILang()
 	{
-		return $this->wrappedI18nManager->getLang();
+		return $this->wrappedI18nManager->getLangByLCID($this->wrappedI18nManager->getLCID());
 	}
 	
 	/**
@@ -682,14 +700,15 @@ class RequestContext
 	 */
 	public function setLang($lang)
 	{
-		if ($this->wrappedDocumentManager->getLangStackSize() > 0)
+		if ($this->wrappedDocumentManager->getLCIDStackSize() > 0)
 		{
 			throw new \RuntimeException('The current language is already defined to: ' . $this->getLang());
 		}
 		
-		if (in_array($lang, $this->wrappedI18nManager->getSupportedLanguages()))
+		$LCID = $this->wrappedI18nManager->getLCIDByLang($lang);
+		if (in_array($LCID, $this->wrappedI18nManager->getSupportedLCIDs()))
 		{
-			$this->wrappedDocumentManager->pushLang($lang);
+			$this->wrappedDocumentManager->pushLCID($LCID);
 			$this->m_isLangDefined = true;
 			return true;
 		}
@@ -701,7 +720,8 @@ class RequestContext
 	 */
 	public function setUILang($lang)
 	{
-		$this->wrappedI18nManager->setLang($lang);
+		$LCID = $this->wrappedI18nManager->getLCIDByLang($lang);
+		$this->wrappedI18nManager->setLCID($LCID);
 	}
 	
 	/**
@@ -728,13 +748,13 @@ class RequestContext
 		}
 		return $lang;
 	}
-		
+	
 	/**
 	 * @deprecated
 	 */
-	public function getSupportedLanguages()
+	public function getUISupportedLanguages()
 	{
-		return $this->wrappedI18nManager->getSupportedLanguages();
+		return $this->getSupportedLanguages();
 	}
 	
 	/**
@@ -742,7 +762,7 @@ class RequestContext
 	 */
 	public function getDefaultLang()
 	{
-		return $this->wrappedI18nManager->getDefaultLang();
+		return $this->getUIDefaultLang();
 	}
 	
 	/**
@@ -750,7 +770,8 @@ class RequestContext
 	 */
 	public function beginI18nWork($lang)
 	{
-		$this->wrappedDocumentManager->pushLang($lang);
+		$LCID = $this->wrappedI18nManager->getLCIDByLang($lang);
+		$this->wrappedDocumentManager->pushLCID($LCID);
 	}
 	
 	/**
@@ -758,6 +779,6 @@ class RequestContext
 	 */
 	public function endI18nWork($exception = null)
 	{
-		$this->wrappedDocumentManager->popLang($exception);
+		$this->wrappedDocumentManager->popLCID($exception);
 	}
 }

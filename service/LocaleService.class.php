@@ -34,6 +34,9 @@ class LocaleService
 	 */
 	protected $dbProvider;
 	
+	
+	private $i18nDocumentsSynchro;
+	
 	/**
 	 * @deprecated use \Change\I18n\I18nManager
 	 */
@@ -50,7 +53,51 @@ class LocaleService
 	
 	public function __call($name, $arguments)
 	{
+		
 		return call_user_func_array(array($this->wrappedI18nManager, $name), $arguments);
+	}
+	
+	public function getLCID($langCode)
+	{
+		return $this->wrappedI18nManager->getLCIDByLang($langCode);
+	}
+	
+	public function getCode($lcid)
+	{
+		return $this->wrappedI18nManager->getLangByLCID($lcid);
+	}
+	
+	public function getI18nDocumentsSynchro()
+	{
+		if ($this->i18nDocumentsSynchro === null)
+		{
+			$this->i18nDocumentsSynchro = array();
+			$wM = $this->wrappedI18nManager;
+			foreach ($wM->getI18nDocumentsSynchro() as $toLCID => $fromLCIDS)
+			{
+				$froms = array();
+				foreach ($fromLCIDS as $fromLCID)
+				{
+					$froms[$wM->getLangByLCID($fromLCID)] = true;
+				}
+				$this->i18nDocumentsSynchro[$wM->getLangByLCID($toLCID)] = array_keys($froms);
+			}
+		}
+		return $this->i18nDocumentsSynchro;
+	}
+	
+	/**
+	 * For example: formatText('fr', 'My text.')
+	 * @api
+	 * @param string $lang
+	 * @param string $text
+	 * @param string $format 'TEXT' or 'HTML'
+	 * @param array $formatters value in array lab, lc, uc, ucf, js, attr, raw, text, html
+	 * @param array $replacements
+	 */
+	public function formatText($lang, $text, $format = 'TEXT', $formatters = array(), $replacements = array())
+	{
+		return $this->wrappedI18nManager->formatText($this->getLCID($lang), $text, $format, $formatters, $replacements);
 	}
 	
 	/**
@@ -136,7 +183,8 @@ class LocaleService
 	public function formatKey($lang, $cleanKey, $formatters = array(), $replacements = array())
 	{
 		$preparedKey = new change_PreparedKey($cleanKey, $formatters, $replacements);
-		return $this->wrappedI18nManager->formatKey($lang, $preparedKey);
+		$lcid = $this->wrappedI18nManager->getLCIDByLang($lang);
+		return $this->wrappedI18nManager->formatKey($lcid, $preparedKey);
 	}
 	
 	// Keys compilation.
@@ -687,9 +735,8 @@ class LocaleService
 	public function getPackageContentFromFile($keyPath)
 	{
 		$entities = array();
-		foreach ($this->getSupportedLanguages() as $lang) 
+		foreach ($this->wrappedI18nManager->getSupportedLCIDs() as $lcid) 
 		{
-			$lcid = $this->getLCID($lang);
 			$filePath = $this->getI18nFilePath($keyPath, $lcid);
 			if (file_exists($filePath))
 			{
@@ -718,14 +765,12 @@ class LocaleService
 	
 	protected function applyI18nKeysSynchro(&$entities)
 	{
-		$syncConf = $this->getI18nKeysSynchro();
+		$syncConf = $this->wrappedI18nManager->getI18nKeysSynchro();
 		if (count($syncConf) === 0) {return;}
-		foreach ($syncConf as $to => $froms)
+		foreach ($syncConf as $toLCID => $froms)
 		{
-			$toLCID = $this->getLCID($to);
-			foreach ($froms as $from)
+			foreach ($froms as $fromLCID)
 			{
-				$fromLCID = $this->getLCID($from);
 				if (isset($entities[$fromLCID]))
 				{
 					if (!isset($entities[$toLCID]))
@@ -752,9 +797,9 @@ class LocaleService
 	{
 		$keyPath = strtolower($keyPath);
 		$lcids = array();
-		foreach ($this->getSupportedLanguages() as $lang)
+		foreach ($this->wrappedI18nManager->getSupportedLCIDs() as $LCID)
 		{
-			$lcids[$this->getLCID($lang)] = $lang;
+			$lcids[$LCID] = $LCID;
 		}
 		
 		foreach ($entities as $lcid => $infos)

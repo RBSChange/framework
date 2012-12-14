@@ -16,6 +16,15 @@ abstract class change_Action extends \Change\Mvc\AbstractAction
 	protected $ds = null;
 	
 	/**
+	 * Returns the current lang.
+	 * @return string
+	 */
+	public final function getLang()
+	{
+		return $this->getApplicationServices()->getI18nManager()->getLangByLCID($this->getLCID());
+	}
+	
+	/**
 	 * @deprecated
 	 */
 	protected final function getDocumentService()

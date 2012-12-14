@@ -4,6 +4,15 @@
  */
 abstract class change_View extends \Change\Mvc\AbstractView
 {
+	
+	/**
+	 * @deprecated
+	 */
+	public final function getLang()
+	{
+		return $this->getApplicationServices()->getI18nManager()->getLangByLCID($this->getLCID());
+	}
+	
 	/**
 	 * @deprecated
 	 */
