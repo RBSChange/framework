@@ -63,7 +63,7 @@ abstract class f_util_HtmlUtils
 	 */
 	public static function textToAttribute($string)
 	{
-		if (!empty($string))
+		if (f_util_StringUtils::isNotEmpty($string))
 		{
 			return htmlspecialchars(str_replace(array("\t", "\n"), array("&#09;", "&#10;"), $string), ENT_COMPAT, 'UTF-8');
 		}
