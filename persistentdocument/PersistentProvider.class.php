@@ -86,10 +86,12 @@ class f_persistentdocument_PersistentProvider
 		return $this->getSqlMapping()->getI18nFieldNames();
 	}
 	
-	
+	/**
+	 * @return string
+	 */
 	public function getI18nSuffix()
 	{
-		return '_i18n';
+		return $this->getSqlMapping()->getI18nSuffix();
 	}
 		
 	/**
@@ -185,6 +187,49 @@ class f_persistentdocument_PersistentProvider
 		$this->m_documentInstances = array();
 		$this->m_i18nDocumentInstances = array();
 	}
+	
+	/**
+	 * @var MysqlStatment
+	 */
+	protected $currentStatment = null;
+	
+	/**
+	 * @param MysqlStatment $statment|null
+	 */
+	protected function setCurrentStatment($statment)
+	{
+		if ($this->currentStatment instanceof MysqlStatment)
+		{
+			$this->currentStatment->close();
+			$this->currentStatment = null;
+		}
+		$this->currentStatment = $statment;
+	}
+	
+	/**
+	 * @param string $sql
+	 * @param StatmentParameter[] $parameters
+	 * @return MysqlStatment
+	 */
+	public function prepareStatement($sql, $parameters = null)
+	{
+		$this->setCurrentStatment(null);
+		$stmt = new MysqlStatment($this, $sql, $parameters);
+		$this->setCurrentStatment($stmt);
+		return $stmt;
+	}
+	
+	/**
+	 * @param MysqlStatment $stmt
+	 */
+	public function executeStatement($stmt)
+	{
+		if (!$stmt->execute())
+		{
+			$this->showError($stmt);
+		}
+	}
+	
 	/**
 	 * @see f_persistentdocument_PersistentProvider::getDocumentInstanceIfExist()
 	 */
@@ -1637,8 +1682,8 @@ class f_persistentdocument_PersistentProvider
 	//
 	public function createTreeTable($treeId)
 	{
-		$stmt = $this->wrapped->prepareStatement('DROP TABLE IF EXISTS `f_tree_'. $treeId .'`');
-		$this->wrapped->executeStatement($stmt);
+		$stmt = $this->prepareStatement('DROP TABLE IF EXISTS `f_tree_'. $treeId .'`');
+		$this->executeStatement($stmt);
 	
 		$sql = 'CREATE TABLE IF NOT EXISTS `f_tree_'. $treeId .'` ('
 		. ' `document_id` int(11) NOT NULL default \'0\','
@@ -1652,8 +1697,8 @@ class f_persistentdocument_PersistentProvider
         . ' UNIQUE KEY `descendant` (`node_level`,`node_order`,`node_path`)'
         . ' ) ENGINE=InnoDB CHARACTER SET latin1 COLLATE latin1_general_ci';
 		
-		$stmt = $this->wrapped->prepareStatement($sql);
-		$this->wrapped->executeStatement($stmt);
+		$stmt = $this->prepareStatement($sql);
+		$this->executeStatement($stmt);
 	}
 	
 	
@@ -1664,9 +1709,9 @@ class f_persistentdocument_PersistentProvider
 	*/
 	public function getNodeInfo($documentId, $treeId)
 	{
-		$stmt = $this->wrapped->prepareStatement('SELECT document_id, parent_id, node_order, node_level, node_path, children_count FROM f_tree_'.$treeId . ' WHERE document_id = :document_id');
+		$stmt = $this->prepareStatement('SELECT document_id, parent_id, node_order, node_level, node_path, children_count FROM f_tree_'.$treeId . ' WHERE document_id = :document_id');
 		$stmt->bindValue(':document_id', $documentId, PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 	
 		$result = $stmt->fetch(PDO::FETCH_ASSOC);
 		$stmt->closeCursor();
@@ -1697,12 +1742,12 @@ class f_persistentdocument_PersistentProvider
 		
 		$sql = 'SELECT document_id, parent_id, node_order, node_level, node_path, children_count FROM f_tree_' . $treeId . ' WHERE document_id in (' . implode(', ', $params) . ')';
 		
-		$stmt = $this->wrapped->prepareStatement($sql);
+		$stmt = $this->prepareStatement($sql);
 		for ($i = 0; $i < $documentCount; $i++)
 		{
 			$stmt->bindValue($params[$i], $documentsId[$i], PDO::PARAM_INT);
 		}
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		while (($row = $stmt->fetch(PDO::FETCH_ASSOC)) != false)
 		{
 			$row['tree_id'] = $treeId;
@@ -1720,9 +1765,9 @@ class f_persistentdocument_PersistentProvider
 	{
 		$result = array();
 		$treeId = $node->getTreeId();
-		$stmt = $this->wrapped->prepareStatement('SELECT t.document_id, parent_id, node_order, node_level, node_path, children_count, d.document_model' . ' FROM f_tree_' . $treeId . ' AS t INNER JOIN f_document AS d ON t.document_id = d.document_id' . ' WHERE parent_id = :parent_id ORDER BY node_order');
+		$stmt = $this->prepareStatement('SELECT t.document_id, parent_id, node_order, node_level, node_path, children_count, d.document_model' . ' FROM f_tree_' . $treeId . ' AS t INNER JOIN f_document AS d ON t.document_id = d.document_id' . ' WHERE parent_id = :parent_id ORDER BY node_order');
 		$stmt->bindValue(':parent_id', $node->getId(), PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		
 		while (($row = $stmt->fetch(PDO::FETCH_ASSOC)) != false)
 		{
@@ -1744,14 +1789,14 @@ class f_persistentdocument_PersistentProvider
 		$result = array();
 		$treeId = $node->getTreeId();
 		$maxlvl = $node->getLevel() + ($deep < 1 ? 1000 :  $deep);
-		$stmt = $this->wrapped->prepareStatement('SELECT t.document_id, parent_id, node_order, node_level, node_path, children_count, d.document_model'
+		$stmt = $this->prepareStatement('SELECT t.document_id, parent_id, node_order, node_level, node_path, children_count, d.document_model'
 			. ' FROM f_tree_'.$treeId. ' AS t INNER JOIN f_document AS d ON t.document_id = d.document_id'
 			. '	WHERE node_level > :min_level AND node_level <= :max_level AND node_path like :node_path ORDER BY node_level, node_order');
 	
 		$stmt->bindValue(':min_level', $node->getLevel(), PDO::PARAM_INT);
 		$stmt->bindValue(':max_level', $maxlvl, PDO::PARAM_INT);
 		$stmt->bindValue(':node_path', $node->getPath() . $node->getId() . '/%', PDO::PARAM_STR);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 	
 		while (($row = $stmt->fetch(PDO::FETCH_ASSOC)) != false)
 		{
@@ -1771,9 +1816,9 @@ class f_persistentdocument_PersistentProvider
 		$result = array();
 		if (!$node->hasChildren()) {return $result;}
 			
-		$stmt = $this->wrapped->prepareStatement('SELECT document_id FROM f_tree_'.$node->getTreeId().' WHERE parent_id = :parent_id ORDER BY node_order');
+		$stmt = $this->prepareStatement('SELECT document_id FROM f_tree_'.$node->getTreeId().' WHERE parent_id = :parent_id ORDER BY node_order');
 		$stmt->bindValue(':parent_id', $node->getId(), PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		while (($row = $stmt->fetch(PDO::FETCH_ASSOC)) != false)
 		{
 			$result[] = $row['document_id'];
@@ -1792,10 +1837,10 @@ class f_persistentdocument_PersistentProvider
 		$result = array();
 		if (!$node->hasChildren()) {return $result;}
 			
-		$stmt = $this->wrapped->prepareStatement('SELECT document_id FROM f_tree_'.$node->getTreeId(). ' WHERE node_level > :node_level AND node_path like :node_path');
+		$stmt = $this->prepareStatement('SELECT document_id FROM f_tree_'.$node->getTreeId(). ' WHERE node_level > :node_level AND node_path like :node_path');
 		$stmt->bindValue(':node_level', $node->getLevel(), PDO::PARAM_INT);
 		$stmt->bindValue(':node_path', $node->getPath() . $node->getId() . '/%', PDO::PARAM_STR);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		while (($row = $stmt->fetch(PDO::FETCH_ASSOC)) != false)
 		{
 			$result[] = $row['document_id'];
@@ -1824,13 +1869,13 @@ class f_persistentdocument_PersistentProvider
 		if (count($ids) === 0) return $ids;
 		$treeId = $rootNode->getId();
 	
-		$stmt = $this->wrapped->prepareStatement('UPDATE f_document SET treeid = NULL WHERE treeid = :treeid AND document_id <> :document_id');
+		$stmt = $this->prepareStatement('UPDATE f_document SET treeid = NULL WHERE treeid = :treeid AND document_id <> :document_id');
 		$stmt->bindValue(':treeid', $treeId , PDO::PARAM_INT);
 		$stmt->bindValue(':document_id', $treeId, PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 	
-		$stmt = $this->wrapped->prepareStatement('DELETE FROM f_tree_'.$treeId);
-		$this->wrapped->executeStatement($stmt);
+		$stmt = $this->prepareStatement('DELETE FROM f_tree_'.$treeId);
+		$this->executeStatement($stmt);
 	
 		//Update node information
 		$rootNode->setEmpty();
@@ -1844,7 +1889,7 @@ class f_persistentdocument_PersistentProvider
 	 */
 	protected function insertNode($node)
 	{
-		$stmt = $this->wrapped->prepareStatement('INSERT INTO f_tree_'.$node->getTreeId()
+		$stmt = $this->prepareStatement('INSERT INTO f_tree_'.$node->getTreeId()
 			. ' (`document_id`, `parent_id`, `node_order`, `node_level`, `node_path`, `children_count`) VALUES (:document_id, :parent_id, :node_order, :node_level, :node_path, :children_count)');
 		$stmt->bindValue(':document_id', $node->getId(), PDO::PARAM_INT);
 		$stmt->bindValue(':parent_id', $node->getParentId(), PDO::PARAM_INT);
@@ -1852,12 +1897,12 @@ class f_persistentdocument_PersistentProvider
 		$stmt->bindValue(':node_level', $node->getLevel(), PDO::PARAM_INT);
 		$stmt->bindValue(':node_path', $node->getPath(), PDO::PARAM_STR);
 		$stmt->bindValue(':children_count', $node->getChildCount(), PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 	
-		$stmt = $this->wrapped->prepareStatement('UPDATE f_document SET treeid = :treeid WHERE document_id = :document_id');
+		$stmt = $this->prepareStatement('UPDATE f_document SET treeid = :treeid WHERE document_id = :document_id');
 		$stmt->bindValue(':treeid', $node->getTreeId(), PDO::PARAM_INT);
 		$stmt->bindValue(':document_id', $node->getId(), PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 	
 		if ($this->isInCache($node->getId()))
 		{
@@ -1879,18 +1924,18 @@ class f_persistentdocument_PersistentProvider
 	
 		$sql = 'UPDATE f_tree_'.$treeId . ' SET node_order = - node_order - 1 WHERE document_id in (' . implode(', ', $params) . ')';
 	
-		$stmt = $this->wrapped->prepareStatement($sql);
+		$stmt = $this->prepareStatement($sql);
 		foreach ($nodes as $i => $node)
 		{
 			$stmt->bindValue($params[$i], $node->getId() , PDO::PARAM_INT);
 		}
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		foreach ($nodes as $node)
 		{
-			$stmt = $this->wrapped->prepareStatement('UPDATE f_tree_'.$treeId. ' SET node_order = :node_order WHERE document_id = :document_id');
+			$stmt = $this->prepareStatement('UPDATE f_tree_'.$treeId. ' SET node_order = :node_order WHERE document_id = :document_id');
 			$stmt->bindValue(':node_order', $node->getIndex() , PDO::PARAM_INT);
 			$stmt->bindValue(':document_id', $node->getId() , PDO::PARAM_INT);
-			$this->wrapped->executeStatement($stmt);
+			$this->executeStatement($stmt);
 		}
 	}	
 	
@@ -1919,30 +1964,30 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function deleteEmptyNode($treeNode)
 	{
-		$stmt = $this->wrapped->prepareStatement('UPDATE f_document SET treeid = :treeid WHERE document_id = :document_id');
+		$stmt = $this->prepareStatement('UPDATE f_document SET treeid = :treeid WHERE document_id = :document_id');
 		$stmt->bindValue(':treeid', null, PDO::PARAM_NULL);
 		$stmt->bindValue(':document_id', $treeNode->getId(), PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 			
 		$sql = 'DELETE FROM f_tree_'.$treeNode->getTreeId() . ' WHERE document_id = :document_id';
-		$stmt = $this->wrapped->prepareStatement($sql);
+		$stmt = $this->prepareStatement($sql);
 		$stmt->bindValue(':document_id', $treeNode->getId(), PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 	
 		if ($treeNode->getParentId())
 		{
 			//Mise à jour du nombre de fils
-			$stmt = $this->wrapped->prepareStatement($this->updateChildenCountQuery($treeNode->getTreeId()));
+			$stmt = $this->prepareStatement($this->updateChildenCountQuery($treeNode->getTreeId()));
 			$stmt->bindValue(':offest', -1, PDO::PARAM_INT);
 			$stmt->bindValue(':document_id',$treeNode->getParentId(), PDO::PARAM_INT);
-			$this->wrapped->executeStatement($stmt);
+			$this->executeStatement($stmt);
 	
 			//Mise à jour de l'ordre des fils
-			$stmt = $this->wrapped->prepareStatement($this->updateChildrenOrderQuery($treeNode->getTreeId(), -1));
+			$stmt = $this->prepareStatement($this->updateChildrenOrderQuery($treeNode->getTreeId(), -1));
 			$stmt->bindValue(':offest', -1, PDO::PARAM_INT);
 			$stmt->bindValue(':parent_id',$treeNode->getParentId(), PDO::PARAM_INT);
 			$stmt->bindValue(':node_order',$treeNode->getIndex(), PDO::PARAM_INT);
-			$this->wrapped->executeStatement($stmt);
+			$this->executeStatement($stmt);
 		}
 	}	
 	
@@ -1960,16 +2005,16 @@ class f_persistentdocument_PersistentProvider
 			$path = $treeNode->getPath() . $treeNode->getId() . '/%';
 			$sql = 'UPDATE f_document SET treeid = NULL WHERE document_id IN (SELECT document_id FROM f_tree_'.$treeNode->getTreeId()
 			. ' WHERE node_level > :node_level AND node_path like :node_path)';
-			$stmt = $this->wrapped->prepareStatement($sql);
+			$stmt = $this->prepareStatement($sql);
 			$stmt->bindValue(':node_level', $treeNode->getLevel(), PDO::PARAM_INT);
 			$stmt->bindValue(':node_path', $path, PDO::PARAM_STR);
-			$this->wrapped->executeStatement($stmt);
+			$this->executeStatement($stmt);
 	
 			$sql = 'DELETE FROM f_tree_'.$treeNode->getTreeId() . ' WHERE node_level > :node_level AND node_path like :node_path';
-			$stmt = $this->wrapped->prepareStatement($sql);
+			$stmt = $this->prepareStatement($sql);
 			$stmt->bindValue(':node_level', $treeNode->getLevel(), PDO::PARAM_INT);
 			$stmt->bindValue(':node_path', $path, PDO::PARAM_STR);
-			$this->wrapped->executeStatement($stmt);
+			$this->executeStatement($stmt);
 		}
 	
 		$ids[] = $treeNode->getId();
@@ -1984,10 +2029,10 @@ class f_persistentdocument_PersistentProvider
 	public function appendChildNode($parentNode, $childNode)
 	{
 		//Mise à jour du nombre de fils
-		$stmt = $this->wrapped->prepareStatement($this->updateChildenCountQuery($childNode->getTreeId()));
+		$stmt = $this->prepareStatement($this->updateChildenCountQuery($childNode->getTreeId()));
 		$stmt->bindValue(':offest', 1, PDO::PARAM_INT);
 		$stmt->bindValue(':document_id', $parentNode->getId(), PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 	
 		//Insertion du noeud
 		$this->insertNode($childNode);
@@ -2003,17 +2048,17 @@ class f_persistentdocument_PersistentProvider
 	public function insertChildNodeAtOrder($parentNode, $childNode)
 	{
 		//Mise à jour du nombre de fils
-		$stmt = $this->wrapped->prepareStatement($this->updateChildenCountQuery($childNode->getTreeId()));
+		$stmt = $this->prepareStatement($this->updateChildenCountQuery($childNode->getTreeId()));
 		$stmt->bindValue(':offest', 1, PDO::PARAM_INT);
 		$stmt->bindValue(':document_id',$parentNode->getId(), PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 	
 		//Mise à jour de l'ordre des fils
-		$stmt = $this->wrapped->prepareStatement($this->updateChildrenOrderQuery($childNode->getTreeId(), 1));
+		$stmt = $this->prepareStatement($this->updateChildrenOrderQuery($childNode->getTreeId(), 1));
 		$stmt->bindValue(':offest', 1, PDO::PARAM_INT);
 		$stmt->bindValue(':parent_id', $parentNode->getId(), PDO::PARAM_INT);
 		$stmt->bindValue(':node_order', $childNode->getIndex(), PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 	
 		//Insertion du noeud
 		$this->insertNode($childNode);
@@ -2046,7 +2091,7 @@ class f_persistentdocument_PersistentProvider
 		$lvlOffset = $destNode->getLevel() - $parentNode->getLevel();
 		$orderdest = $destNode->getChildCount();
 	
-		$stmt = $this->wrapped->prepareStatement('UPDATE f_tree_'.$movedNode->getTreeId()
+		$stmt = $this->prepareStatement('UPDATE f_tree_'.$movedNode->getTreeId()
 			. ' SET parent_id = :parent_id, node_order = :node_order, node_level = node_level + :offestlvl, node_path = :node_path'
 			. ' WHERE document_id = :document_id');
 		$stmt->bindValue(':parent_id', $destNode->getId(), PDO::PARAM_INT);
@@ -2054,33 +2099,33 @@ class f_persistentdocument_PersistentProvider
 		$stmt->bindValue(':offestlvl', $lvlOffset, PDO::PARAM_INT);
 		$stmt->bindValue(':node_path', $destPath, PDO::PARAM_STR);
 		$stmt->bindValue(':document_id', $movedNode->getId(), PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 	
 		//Mise à jour du nombre de fils destination
-		$stmt = $this->wrapped->prepareStatement($this->updateChildenCountQuery($destNode->getTreeId()));
+		$stmt = $this->prepareStatement($this->updateChildenCountQuery($destNode->getTreeId()));
 		$stmt->bindValue(':offest', 1, PDO::PARAM_INT);
 		$stmt->bindValue(':document_id',$destNode->getId(), PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 	
 	
 		//Mise à jour du nombre de fils depart
-		$stmt = $this->wrapped->prepareStatement($this->updateChildenCountQuery($parentNode->getTreeId()));
+		$stmt = $this->prepareStatement($this->updateChildenCountQuery($parentNode->getTreeId()));
 		$stmt->bindValue(':offest', -1, PDO::PARAM_INT);
 		$stmt->bindValue(':document_id',$parentNode->getId(), PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 	
 		//Mise à jour de l'ordre des fils de fils depart
-		$stmt = $this->wrapped->prepareStatement($this->updateChildrenOrderQuery($parentNode->getTreeId(), -1));
+		$stmt = $this->prepareStatement($this->updateChildrenOrderQuery($parentNode->getTreeId(), -1));
 		$stmt->bindValue(':offest', -1, PDO::PARAM_INT);
 		$stmt->bindValue(':parent_id', $parentNode->getId(), PDO::PARAM_INT);
 		$stmt->bindValue(':node_order', $movedNode->getIndex(), PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 	
 		if ($movedNode->hasChildren())
 		{
 			$originalPath .= $movedNode->getId() .'/';
 			$destPath .= $movedNode->getId() .'/';
-			$stmt = $this->wrapped->prepareStatement('UPDATE f_tree_'.$movedNode->getTreeId()
+			$stmt = $this->prepareStatement('UPDATE f_tree_'.$movedNode->getTreeId()
 				. ' SET node_level = node_level + :offestlvl, node_path = REPLACE(node_path, :from_path, :to_path)'
 				. ' WHERE node_level > :node_level AND node_path like :node_path');
 			$stmt->bindValue(':offestlvl', $lvlOffset, PDO::PARAM_INT);
@@ -2088,7 +2133,7 @@ class f_persistentdocument_PersistentProvider
 			$stmt->bindValue(':to_path', $destPath, PDO::PARAM_STR);
 			$stmt->bindValue(':node_level', $movedNode->getLevel(), PDO::PARAM_INT);
 			$stmt->bindValue(':node_path', $originalPath.'%', PDO::PARAM_INT);
-			$this->wrapped->executeStatement($stmt);
+			$this->executeStatement($stmt);
 		}
 	
 		$parentNode->removeChild($movedNode);
@@ -2104,7 +2149,7 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function getRelationId($propertyName)
 	{
-		$stmt = $this->wrapped->prepareStatement('SELECT `relation_id` FROM `f_relationname` WHERE `property_name` = :property_name');
+		$stmt = $this->prepareStatement('SELECT `relation_id` FROM `f_relationname` WHERE `property_name` = :property_name');
 		$stmt->bindValue(':property_name', $propertyName, PDO::PARAM_STR);
 		$this->executeStatement($stmt);
 		$result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -2115,7 +2160,7 @@ class f_persistentdocument_PersistentProvider
 		}
 		else
 		{
-			$stmt = $this->wrapped->prepareStatement('INSERT INTO `f_relationname` (`property_name`) VALUES (:property_name)');
+			$stmt = $this->prepareStatement('INSERT INTO `f_relationname` (`property_name`) VALUES (:property_name)');
 			$stmt->bindValue(':property_name', $propertyName, PDO::PARAM_STR);
 			$this->executeStatement($stmt);
 			return intval($this->wrapped->getDriver()->lastInsertId());
@@ -2142,7 +2187,7 @@ class f_persistentdocument_PersistentProvider
 		if (!is_null($documentModel2)) { $where[] = 'document_model_id2 = :document_model_id2'; }
 		if (!is_null($relationId)) { $where[] = 'relation_id = :relation_id'; }
 	
-		$stmt = $this->wrapped->prepareStatement('SELECT * FROM f_relation WHERE ' . join(' AND ', $where) . ' ORDER BY relation_order ASC');
+		$stmt = $this->prepareStatement('SELECT * FROM f_relation WHERE ' . join(' AND ', $where) . ' ORDER BY relation_order ASC');
 	
 		if (!is_null($documentId1)) { $stmt->bindValue(':relation_id1', $documentId1, PDO::PARAM_INT); }
 		if (!is_null($documentModel1)) { $stmt->bindValue(':document_model_id1', $documentModel1, PDO::PARAM_STR); }
@@ -2150,7 +2195,7 @@ class f_persistentdocument_PersistentProvider
 		if (!is_null($documentModel2)) { $stmt->bindValue(':document_model_id2', $documentModel2, PDO::PARAM_STR); }
 		if (!is_null($relationId)) { $stmt->bindValue(':relation_id', $relationId, PDO::PARAM_INT); }
 	
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 	
 		$references = array();
 		foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $result)
@@ -2211,10 +2256,10 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function getSettingPackage($value, $settingName)
 	{
-		$stmt = $this->wrapped->prepareStatement('SELECT package FROM f_settings WHERE value = :value AND name = :name AND userid = 0');
+		$stmt = $this->prepareStatement('SELECT package FROM f_settings WHERE value = :value AND name = :name AND userid = 0');
 		$stmt->bindValue(':value', $value, PDO::PARAM_INT);
 		$stmt->bindValue(':name', $settingName, PDO::PARAM_STR);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		return count($results) === 1 ? $results[0]['package'] : null;
 	}
@@ -2227,11 +2272,11 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function getUserSettingValue($packageName, $settingName, $userId)
 	{
-		$stmt = $this->wrapped->prepareStatement('SELECT value FROM f_settings WHERE package = :package AND name = :name AND userid = :userid');
+		$stmt = $this->prepareStatement('SELECT value FROM f_settings WHERE package = :package AND name = :name AND userid = :userid');
 		$stmt->bindValue(':package', $packageName, PDO::PARAM_STR);
 		$stmt->bindValue(':name', $settingName, PDO::PARAM_STR);
 		$stmt->bindValue(':userid', $userId, PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		return count($results) === 1 ? $results[0]['value'] : null;
 	}
@@ -2254,20 +2299,20 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function setUserSettingValue($packageName, $settingName, $userId, $value)
 	{
-		$stmt = $this->wrapped->prepareStatement('DELETE FROM `f_settings` WHERE `package` = :package AND `name` = :name AND `userid` = :userid');
+		$stmt = $this->prepareStatement('DELETE FROM `f_settings` WHERE `package` = :package AND `name` = :name AND `userid` = :userid');
 		$stmt->bindValue(':package', $packageName, PDO::PARAM_STR);
 		$stmt->bindValue(':name', $settingName, PDO::PARAM_STR);
 		$stmt->bindValue(':userid', $userId, PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 	
 		if ($value !== null)
 		{
-			$stmt = $this->wrapped->prepareStatement('INSERT INTO `f_settings` (`package`, `name`, `userid`, `value`) VALUES (:package, :name, :userid, :value)');
+			$stmt = $this->prepareStatement('INSERT INTO `f_settings` (`package`, `name`, `userid`, `value`) VALUES (:package, :name, :userid, :value)');
 			$stmt->bindValue(':package', $packageName, PDO::PARAM_STR);
 			$stmt->bindValue(':name', $settingName, PDO::PARAM_STR);
 			$stmt->bindValue(':userid', $userId, PDO::PARAM_INT);
 			$stmt->bindValue(':value', $value, PDO::PARAM_STR);
-			$this->wrapped->executeStatement($stmt);
+			$this->executeStatement($stmt);
 		}
 	}
 	
@@ -2293,9 +2338,9 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function getTags($documentId)
 	{
-		$stmt = $this->wrapped->prepareStatement('SELECT tag FROM f_tags WHERE id = :id');
+		$stmt = $this->prepareStatement('SELECT tag FROM f_tags WHERE id = :id');
 		$stmt->bindValue(':id', $documentId, PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 	
 		$tags = array();
 		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -2314,8 +2359,8 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function getAllTags()
 	{
-		$stmt = $this->wrapped->prepareStatement('SELECT tags.tag, tags.id FROM f_tags tags');
-		$this->wrapped->executeStatement($stmt);
+		$stmt = $this->prepareStatement('SELECT tags.tag, tags.id FROM f_tags tags');
+		$this->executeStatement($stmt);
 		$allTags = array();
 		foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row)
 		{
@@ -2331,9 +2376,9 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function getDocumentIdsByTag($tag)
 	{
-		$stmt = $this->wrapped->prepareStatement('SELECT id FROM f_tags WHERE tag = :tag');
+		$stmt = $this->prepareStatement('SELECT id FROM f_tags WHERE tag = :tag');
 		$stmt->bindValue(':tag', $tag, PDO::PARAM_STR);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 	
 		$ids = array();
 		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -2359,9 +2404,9 @@ class f_persistentdocument_PersistentProvider
 	{
 		$sql = 'SELECT count(*) nbtags FROM f_tags WHERE id = :id AND tag IN (\'' . implode("', '", $tags) . '\')';
 	
-		$stmt = $this->wrapped->prepareStatement($sql);
+		$stmt = $this->prepareStatement($sql);
 		$stmt->bindValue(':id', $documentId, PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 	
 		$nb = 0;
 		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -2384,11 +2429,11 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function hasTag($documentId, $tag)
 	{
-		$stmt = $this->wrapped->prepareStatement('SELECT id FROM f_tags WHERE id = :id AND tag = :tag');
+		$stmt = $this->prepareStatement('SELECT id FROM f_tags WHERE id = :id AND tag = :tag');
 		$stmt->bindValue(':id', $documentId, PDO::PARAM_INT);
 		$stmt->bindValue(':tag', $tag, PDO::PARAM_STR);
 	
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		if (count($results) > 0)
 		{
@@ -2405,11 +2450,11 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function removeTag($documentId, $tag)
 	{
-		$stmt = $this->wrapped->prepareStatement('DELETE FROM f_tags WHERE id = :id AND tag = :tag');
+		$stmt = $this->prepareStatement('DELETE FROM f_tags WHERE id = :id AND tag = :tag');
 		$stmt->bindValue(':id', $documentId, PDO::PARAM_INT);
 		$stmt->bindValue(':tag', $tag, PDO::PARAM_STR);
 	
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		return true;
 	}
 	
@@ -2421,10 +2466,10 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function addTag($documentId, $tag)
 	{
-		$stmt = $this->wrapped->prepareStatement('INSERT INTO f_tags (id, tag) VALUES (:id, :tag)');
+		$stmt = $this->prepareStatement('INSERT INTO f_tags (id, tag) VALUES (:id, :tag)');
 		$stmt->bindValue(':id', $documentId, PDO::PARAM_INT);
 		$stmt->bindValue(':tag', $tag, PDO::PARAM_STR);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 	}
 		
 	/**
@@ -2442,8 +2487,8 @@ class f_persistentdocument_PersistentProvider
 		{
 			$sql = "DELETE FROM `f_locale` WHERE `useredited` != 1 AND `key_path` LIKE '" . $package . ".%'";
 		}
-		$stmt = $this->wrapped->prepareStatement($sql);
-		$this->wrapped->executeStatement($stmt);
+		$stmt = $this->prepareStatement($sql);
+		$this->executeStatement($stmt);
 	}
 	
 	/**
@@ -2457,11 +2502,11 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function addTranslate($lcid, $id, $keyPath, $content, $useredited, $format = 'TEXT', $forceUpdate = false)
 	{
-		$stmt = $this->wrapped->prepareStatement('SELECT `useredited` FROM `f_locale` WHERE `lang` = :lang AND `id` = :id  AND `key_path` = :key_path');
+		$stmt = $this->prepareStatement('SELECT `useredited` FROM `f_locale` WHERE `lang` = :lang AND `id` = :id  AND `key_path` = :key_path');
 		$stmt->bindValue(':lang', $lcid, PDO::PARAM_STR);
 		$stmt->bindValue(':id', $id, PDO::PARAM_STR);
 		$stmt->bindValue(':key_path', $keyPath, PDO::PARAM_STR);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		if (count($results))
 		{
@@ -2479,14 +2524,14 @@ class f_persistentdocument_PersistentProvider
 		}
 		else
 		{
-			$stmt = $this->wrapped->prepareStatement('INSERT INTO `f_locale` (`lang`, `id`, `key_path`, `content`, `useredited`, `format`) VALUES (:lang, :id, :key_path, :content, :useredited, :format)');
+			$stmt = $this->prepareStatement('INSERT INTO `f_locale` (`lang`, `id`, `key_path`, `content`, `useredited`, `format`) VALUES (:lang, :id, :key_path, :content, :useredited, :format)');
 			$stmt->bindValue(':lang', $lcid, PDO::PARAM_STR);
 			$stmt->bindValue(':id', $id, PDO::PARAM_STR);
 			$stmt->bindValue(':key_path', $keyPath, PDO::PARAM_STR);
 			$stmt->bindValue(':content', $content, PDO::PARAM_LOB);
 			$stmt->bindValue(':useredited', $useredited, PDO::PARAM_INT);
 			$stmt->bindValue(':format', $format, PDO::PARAM_STR);
-			$this->wrapped->executeStatement($stmt);
+			$this->executeStatement($stmt);
 		}
 	}
 	
@@ -2495,8 +2540,8 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function getPackageNames()
 	{
-		$stmt = $this->wrapped->prepareStatement('SELECT COUNT(*) AS `nbkeys`, `key_path` FROM `f_locale` GROUP BY `key_path` ORDER BY `key_path`');
-		$this->wrapped->executeStatement($stmt);
+		$stmt = $this->prepareStatement('SELECT COUNT(*) AS `nbkeys`, `key_path` FROM `f_locale` GROUP BY `key_path` ORDER BY `key_path`');
+		$this->executeStatement($stmt);
 		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		$paths = array();
 		foreach ($results as $result)
@@ -2511,8 +2556,8 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function getUserEditedPackageNames()
 	{
-		$stmt = $this->wrapped->prepareStatement('SELECT COUNT(*) AS `nbkeys`, `key_path` FROM `f_locale` WHERE `useredited` = 1 GROUP BY `key_path` ORDER BY `key_path`');
-		$this->wrapped->executeStatement($stmt);
+		$stmt = $this->prepareStatement('SELECT COUNT(*) AS `nbkeys`, `key_path` FROM `f_locale` WHERE `useredited` = 1 GROUP BY `key_path` ORDER BY `key_path`');
+		$this->executeStatement($stmt);
 		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		$paths = array();
 		foreach ($results as $result)
@@ -2528,9 +2573,9 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function getPackageData($keyPath)
 	{
-		$stmt = $this->wrapped->prepareStatement('SELECT `id`,`lang`,`content`,`useredited`,`format` FROM `f_locale` WHERE `key_path` = :key_path');
+		$stmt = $this->prepareStatement('SELECT `id`,`lang`,`content`,`useredited`,`format` FROM `f_locale` WHERE `key_path` = :key_path');
 		$stmt->bindValue(':key_path', $keyPath, PDO::PARAM_STR);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		return $results;
 	}
@@ -2551,7 +2596,7 @@ class f_persistentdocument_PersistentProvider
 				$sql .= ' AND `lang` = :lang';
 			}
 		}
-		$stmt = $this->wrapped->prepareStatement($sql);
+		$stmt = $this->prepareStatement($sql);
 		$stmt->bindValue(':key_path', $keyPath, PDO::PARAM_STR);
 		if ($id !== null)
 		{
@@ -2561,7 +2606,7 @@ class f_persistentdocument_PersistentProvider
 				$stmt->bindValue(':lang', $lcid, PDO::PARAM_STR);
 			}
 		}
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		return $stmt->rowCount();
 	}
 	
@@ -2579,12 +2624,12 @@ class f_persistentdocument_PersistentProvider
 			VALUES (:document_id, :document_lang, :synchro_status, :synchro_from)
 			ON DUPLICATE KEY UPDATE `synchro_status` = VALUES(`synchro_status`), `synchro_from` = VALUES(`synchro_from`)";
 	
-		$stmt = $this->wrapped->prepareStatement($sql);
+		$stmt = $this->prepareStatement($sql);
 		$stmt->bindValue(':document_id', $id, PDO::PARAM_INT);
 		$stmt->bindValue(':document_lang', $lang, PDO::PARAM_STR);
 		$stmt->bindValue(':synchro_status', $synchroStatus, PDO::PARAM_STR);
 		$stmt->bindValue(':synchro_from', $fromLang, ($fromLang === null ? PDO::PARAM_NULL : PDO::PARAM_STR));
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		return $stmt->rowCount();
 	}
 	
@@ -2598,9 +2643,9 @@ class f_persistentdocument_PersistentProvider
 	public function getI18nSynchroStatus($id)
 	{
 		$sql = "SELECT `document_lang`, `synchro_status`, `synchro_from` FROM `f_i18n` WHERE `document_id` = :document_id";
-		$stmt = $this->wrapped->prepareStatement($sql);
+		$stmt = $this->prepareStatement($sql);
 		$stmt->bindValue(':document_id', $id, PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		$result = array();
 		$row = $stmt->fetch(PDO::FETCH_ASSOC);
 		while ($row)
@@ -2618,8 +2663,8 @@ class f_persistentdocument_PersistentProvider
 	public function getI18nSynchroIds()
 	{
 		$sql = "SELECT DISTINCT `document_id` FROM `f_i18n` WHERE `synchro_status` = 'MODIFIED' LIMIT 0, 100";
-		$stmt = $this->wrapped->prepareStatement($sql);
-		$this->wrapped->executeStatement($stmt);
+		$stmt = $this->prepareStatement($sql);
+		$this->executeStatement($stmt);
 		return $stmt->fetchAll(PDO::FETCH_COLUMN);
 	}
 	
@@ -2644,10 +2689,10 @@ class f_persistentdocument_PersistentProvider
 		}
 	
 		$sql =  "SELECT ". implode(', ', $fields)." FROM ".$tableName." WHERE document_id = :document_id and lang_i18n = :lang";
-		$stmt = $this->wrapped->prepareStatement($sql);
+		$stmt = $this->prepareStatement($sql);
 		$stmt->bindValue(':document_id', $documentId, PDO::PARAM_INT);
 		$stmt->bindValue(':lang', $fromLang, PDO::PARAM_STR);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		$fromResult = $stmt->fetch(PDO::FETCH_ASSOC);
 		$stmt->closeCursor();
 	
@@ -2655,10 +2700,10 @@ class f_persistentdocument_PersistentProvider
 		$from->setDocumentProperties($fromResult);
 	
 		$sql =  "SELECT `document_publicationstatus_i18n` AS `publicationstatus` FROM ".$tableName." WHERE document_id = :document_id and lang_i18n = :lang";
-		$stmt = $this->wrapped->prepareStatement($sql);
+		$stmt = $this->prepareStatement($sql);
 		$stmt->bindValue(':document_id', $documentId, PDO::PARAM_INT);
 		$stmt->bindValue(':lang', $lang, PDO::PARAM_STR);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		$toResult = $stmt->fetch(PDO::FETCH_ASSOC);
 		$stmt->closeCursor();
 		$isNew = true;
@@ -2709,19 +2754,19 @@ class f_persistentdocument_PersistentProvider
 		') VALUES (' . implode(', ', array_keys($sqlValues)) .
 		') ON DUPLICATE KEY UPDATE' . implode(', ', $sqlUpdate);
 	
-		$stmt = $this->wrapped->prepareStatement($sql);
+		$stmt = $this->prepareStatement($sql);
 		foreach ($sqlValues as $bn => $value)
 		{
 			$stmt->bindValue($bn, $value, $value === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
 		}
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		$this->m_i18nDocumentInstances[$id] = array();
 	
 		$sql = 'UPDATE `f_document` SET `label_' . $lang . '` = :label  WHERE (document_id = :document_id)';
-		$stmt = $this->wrapped->prepareStatement($sql);
+		$stmt = $this->prepareStatement($sql);
 		$stmt->bindValue(':label', $sqlValues[':document_label_i18n'], PDO::PARAM_STR);
 		$stmt->bindValue(':document_id', $id, PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		$this->deleteFromCache($id);
 	}	
 	
@@ -2737,13 +2782,13 @@ class f_persistentdocument_PersistentProvider
 			$sql .= " AND `document_lang` = :document_lang";
 		}
 	
-		$stmt = $this->wrapped->prepareStatement($sql);
+		$stmt = $this->prepareStatement($sql);
 		$stmt->bindValue(':document_id', $id, PDO::PARAM_INT);
 		if ($lang !== null)
 		{
 			$stmt->bindValue(':document_lang', $lang, PDO::PARAM_STR);
 		}
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		return $stmt->rowCount();
 	}	
 	
@@ -2754,9 +2799,9 @@ class f_persistentdocument_PersistentProvider
 	public function getUrlRewritingDocumentWebsiteInfo($documentId)
 	{
 		$sql = "SELECT count(rule_id) AS nb_rules, website_id, website_lang FROM f_url_rules WHERE document_id = :document_id GROUP BY website_id, website_lang";
-		$stmt = $this->wrapped->prepareStatement($sql);
+		$stmt = $this->prepareStatement($sql);
 		$stmt->bindValue(':document_id', $documentId, PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
 	
@@ -2770,12 +2815,12 @@ class f_persistentdocument_PersistentProvider
 	{
 		$sql = "SELECT rule_id, origine, modulename, actionname, document_id, website_lang, website_id, from_url, to_url, redirect_type
 			FROM f_url_rules WHERE document_id = :document_id AND website_lang = :website_lang AND website_id = :website_id";
-		$stmt = $this->wrapped->prepareStatement($sql);
+		$stmt = $this->prepareStatement($sql);
 	
 		$stmt->bindValue(':document_id', $documentId, PDO::PARAM_INT);
 		$stmt->bindValue(':website_lang', $lang, PDO::PARAM_STR);
 		$stmt->bindValue(':website_id', $websiteId, PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
 	
@@ -2787,11 +2832,11 @@ class f_persistentdocument_PersistentProvider
 	public function deleteUrlRewritingDocument($documentId, $lang, $websiteId)
 	{
 		$sql = "DELETE FROM f_url_rules WHERE document_id = :document_id AND website_lang = :website_lang AND website_id = :website_id";
-		$stmt = $this->wrapped->prepareStatement($sql);
+		$stmt = $this->prepareStatement($sql);
 		$stmt->bindValue(':document_id', $documentId, PDO::PARAM_INT);
 		$stmt->bindValue(':website_lang', $lang, PDO::PARAM_STR);
 		$stmt->bindValue(':website_id', $websiteId, PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		return $stmt->rowCount();
 	}
 	
@@ -2803,10 +2848,10 @@ class f_persistentdocument_PersistentProvider
 	public function getUrlRewritingActionWebsiteInfo($moduleName, $actionName)
 	{
 		$sql = "SELECT count(rule_id) AS nb_rules, website_id, website_lang FROM f_url_rules WHERE modulename = :modulename AND actionname = :actionname GROUP BY website_id, website_lang";
-		$stmt = $this->wrapped->prepareStatement($sql);
+		$stmt = $this->prepareStatement($sql);
 		$stmt->bindValue(':modulename', $moduleName, PDO::PARAM_STR);
 		$stmt->bindValue(':actionname', $actionName, PDO::PARAM_STR);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
 	
@@ -2821,13 +2866,13 @@ class f_persistentdocument_PersistentProvider
 	{
 		$sql = "SELECT rule_id, origine, modulename, actionname, document_id, website_lang, website_id, from_url, to_url, redirect_type
 			FROM f_url_rules WHERE modulename = :modulename AND actionname = :actionname AND website_lang = :website_lang AND website_id = :website_id";
-		$stmt = $this->wrapped->prepareStatement($sql);
+		$stmt = $this->prepareStatement($sql);
 	
 		$stmt->bindValue(':modulename', $moduleName, PDO::PARAM_STR);
 		$stmt->bindValue(':actionname', $actionName, PDO::PARAM_STR);
 		$stmt->bindValue(':website_lang', $lang, PDO::PARAM_STR);
 		$stmt->bindValue(':website_id', $websiteId, PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
 	
@@ -2840,12 +2885,12 @@ class f_persistentdocument_PersistentProvider
 	public function deleteUrlRewritingAction($moduleName, $actionName, $lang, $websiteId)
 	{
 		$sql = "DELETE FROM f_url_rules WHERE modulename = :modulename AND actionname = :actionname AND website_lang = :website_lang AND website_id = :website_id";
-		$stmt = $this->wrapped->prepareStatement($sql);
+		$stmt = $this->prepareStatement($sql);
 		$stmt->bindValue(':modulename', $moduleName, PDO::PARAM_STR);
 		$stmt->bindValue(':actionname', $actionName, PDO::PARAM_STR);
 		$stmt->bindValue(':website_lang', $lang, PDO::PARAM_STR);
 		$stmt->bindValue(':website_id', $websiteId, PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		return $stmt->rowCount();
 	}
 	
@@ -2857,12 +2902,12 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function getUrlRewriting($documentId, $lang, $websiteId = 0, $actionName = 'ViewDetail')
 	{
-		$stmt = $this->wrapped->prepareStatement('SELECT from_url FROM f_url_rules WHERE document_id = :id AND website_lang = :lang AND website_id = :website_id AND actionname = :actionname AND redirect_type = 200');
+		$stmt = $this->prepareStatement('SELECT from_url FROM f_url_rules WHERE document_id = :id AND website_lang = :lang AND website_id = :website_id AND actionname = :actionname AND redirect_type = 200');
 		$stmt->bindValue(':id', $documentId, PDO::PARAM_INT);
 		$stmt->bindValue(':lang', $lang, PDO::PARAM_STR);
 		$stmt->bindValue(':website_id', $websiteId, PDO::PARAM_INT);
 		$stmt->bindValue(':actionname', $actionName, PDO::PARAM_STR);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		if (count($results) > 0)
 		{
@@ -2878,10 +2923,10 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function getUrlRewritingInfo($documentId, $lang)
 	{
-		$stmt = $this->wrapped->prepareStatement('SELECT rule_id, origine, modulename, actionname, document_id, website_lang, website_id, from_url, to_url, redirect_type FROM f_url_rules WHERE document_id = :id AND website_lang = :lang');
+		$stmt = $this->prepareStatement('SELECT rule_id, origine, modulename, actionname, document_id, website_lang, website_id, from_url, to_url, redirect_type FROM f_url_rules WHERE document_id = :id AND website_lang = :lang');
 		$stmt->bindValue(':id', $documentId, PDO::PARAM_INT);
 		$stmt->bindValue(':lang', $lang, PDO::PARAM_STR);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
 	
@@ -2898,7 +2943,7 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function setUrlRewriting($documentId, $lang, $websiteId, $fromURL, $toURL, $redirectType, $moduleName, $actionName, $origine = 0)
 	{
-		$stmt = $this->wrapped->prepareStatement('INSERT INTO f_url_rules (document_id, website_lang, website_id, from_url, to_url, redirect_type, modulename, actionname, origine) VALUES (:document_id, :website_lang, :website_id, :from_url, :to_url, :redirect_type, :modulename, :actionname, :origine)');
+		$stmt = $this->prepareStatement('INSERT INTO f_url_rules (document_id, website_lang, website_id, from_url, to_url, redirect_type, modulename, actionname, origine) VALUES (:document_id, :website_lang, :website_id, :from_url, :to_url, :redirect_type, :modulename, :actionname, :origine)');
 		$stmt->bindValue(':document_id', $documentId, PDO::PARAM_INT);
 		$stmt->bindValue(':website_lang', $lang, PDO::PARAM_STR);
 		$stmt->bindValue(':website_id', $websiteId, PDO::PARAM_INT);
@@ -2908,7 +2953,7 @@ class f_persistentdocument_PersistentProvider
 		$stmt->bindValue(':modulename', $moduleName, PDO::PARAM_STR);
 		$stmt->bindValue(':actionname', $actionName, PDO::PARAM_STR);
 		$stmt->bindValue(':origine', $origine, PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 	}
 	
 	/**
@@ -2917,9 +2962,9 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function clearUrlRewriting($documentId)
 	{
-		$stmt = $this->wrapped->prepareStatement('DELETE FROM f_url_rules WHERE document_id = :document_id');
+		$stmt = $this->prepareStatement('DELETE FROM f_url_rules WHERE document_id = :document_id');
 		$stmt->bindValue(':document_id', $documentId, PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		return $stmt->rowCount();
 	}
 	
@@ -2931,11 +2976,11 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function getUrlRewritingInfoByUrl($url, $websiteId, $lang)
 	{
-		$stmt = $this->wrapped->prepareStatement('SELECT `rule_id`, `origine`, `modulename`, `actionname`, `document_id`, `website_lang`, `website_id`, `to_url`, `redirect_type` FROM `f_url_rules` WHERE from_url = :url AND website_id = :website_id AND `website_lang` = :website_lang');
+		$stmt = $this->prepareStatement('SELECT `rule_id`, `origine`, `modulename`, `actionname`, `document_id`, `website_lang`, `website_id`, `to_url`, `redirect_type` FROM `f_url_rules` WHERE from_url = :url AND website_id = :website_id AND `website_lang` = :website_lang');
 		$stmt->bindValue(':url', $url, PDO::PARAM_STR);
 		$stmt->bindValue(':website_id', $websiteId, PDO::PARAM_INT);
 		$stmt->bindValue(':website_lang', $lang, PDO::PARAM_STR);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		if (count($results) > 0)
 		{
@@ -2951,10 +2996,10 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function getPageForUrl($url, $websiteId = 0)
 	{
-		$stmt = $this->wrapped->prepareStatement('SELECT rule_id, document_id, website_lang, website_id, to_url, redirect_type FROM f_url_rules WHERE from_url = :url AND (website_id = 0 OR website_id = :website_id)');
+		$stmt = $this->prepareStatement('SELECT rule_id, document_id, website_lang, website_id, to_url, redirect_type FROM f_url_rules WHERE from_url = :url AND (website_id = 0 OR website_id = :website_id)');
 		$stmt->bindValue(':url', $url, PDO::PARAM_STR);
 		$stmt->bindValue(':website_id', $websiteId, PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		if (count($results) > 0)
 		{
@@ -2987,11 +3032,11 @@ class f_persistentdocument_PersistentProvider
 			{
 				if (!$this->checkCompiledPermission(array($accessorId), $permission, $nodeId))
 				{
-					$stmt = $this->wrapped->prepareStatement('INSERT INTO `f_permission_compiled` VALUES (:accessorId, :permission, :nodeId)');
+					$stmt = $this->prepareStatement('INSERT INTO `f_permission_compiled` VALUES (:accessorId, :permission, :nodeId)');
 					$stmt->bindValue(':accessorId', $accessorId, PDO::PARAM_INT);
 					$stmt->bindValue(':permission', $permission, PDO::PARAM_STR);
 					$stmt->bindValue(':nodeId', $nodeId, PDO::PARAM_INT);
-					$this->wrapped->executeStatement($stmt);
+					$this->executeStatement($stmt);
 				}
 			}
 		}
@@ -3012,16 +3057,16 @@ class f_persistentdocument_PersistentProvider
 	{
 		if (is_null($packageName))
 		{
-			$stmt = $this->wrapped->prepareStatement('DELETE FROM `f_permission_compiled` WHERE `node_id` = :nodeId');
+			$stmt = $this->prepareStatement('DELETE FROM `f_permission_compiled` WHERE `node_id` = :nodeId');
 			$stmt->bindValue(':nodeId', $nodeId, PDO::PARAM_INT);
 		}
 		else
 		{
-			$stmt = $this->wrapped->prepareStatement('DELETE FROM `f_permission_compiled` WHERE `node_id` = :nodeId AND permission LIKE :permission');
+			$stmt = $this->prepareStatement('DELETE FROM `f_permission_compiled` WHERE `node_id` = :nodeId AND permission LIKE :permission');
 			$stmt->bindValue(':nodeId', $nodeId, PDO::PARAM_INT);
 			$stmt->bindValue(':permission', $packageName . '%', PDO::PARAM_STR);
 		}
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 	}
 	
 	/**
@@ -3032,9 +3077,9 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function hasCompiledPermissions($nodeId)
 	{
-		$stmt = $this->wrapped->prepareStatement('SELECT COUNT(*) FROM `f_permission_compiled` WHERE `node_id` = :nodeId');
+		$stmt = $this->prepareStatement('SELECT COUNT(*) FROM `f_permission_compiled` WHERE `node_id` = :nodeId');
 		$stmt->bindValue(':nodeId', $nodeId, PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		$result = $stmt->fetchColumn() > 0;
 		$stmt->close();
 		return $result;
@@ -3049,10 +3094,10 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function hasCompiledPermissionsForPackage($nodeId, $packageName)
 	{
-		$stmt = $this->wrapped->prepareStatement('SELECT COUNT(*) FROM `f_permission_compiled` WHERE `node_id` = :nodeId AND `permission` LIKE :permission');
+		$stmt = $this->prepareStatement('SELECT COUNT(*) FROM `f_permission_compiled` WHERE `node_id` = :nodeId AND `permission` LIKE :permission');
 		$stmt->bindValue(':nodeId', $nodeId, PDO::PARAM_INT);
 		$stmt->bindValue(':permission', $packageName .'%', PDO::PARAM_STR);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		$result = $stmt->fetchColumn() > 0;
 		$stmt->close();
 		return $result;
@@ -3068,10 +3113,10 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function checkCompiledPermission($accessors, $fullPermName, $nodeId)
 	{
-		$stmt = $this->wrapped->prepareStatement('SELECT count(*) FROM `f_permission_compiled` WHERE `accessor_id` IN (' . implode(', ', $accessors). ') AND `permission` = :permission AND `node_id` = :nodeId');
+		$stmt = $this->prepareStatement('SELECT count(*) FROM `f_permission_compiled` WHERE `accessor_id` IN (' . implode(', ', $accessors). ') AND `permission` = :permission AND `node_id` = :nodeId');
 		$stmt->bindValue(':permission', $fullPermName, PDO::PARAM_STR);
 		$stmt->bindValue(':nodeId', $nodeId, PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		$result = $stmt->fetchColumn() > 0;
 		$stmt->close();
 		return $result;
@@ -3084,10 +3129,10 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function getAccessorsByPermissionForNode($permission, $nodeId)
 	{
-		$stmt = $this->wrapped->prepareStatement('SELECT DISTINCT accessor_id FROM `f_permission_compiled` WHERE `permission` = :permission AND `node_id` = :nodeId');
+		$stmt = $this->prepareStatement('SELECT DISTINCT accessor_id FROM `f_permission_compiled` WHERE `permission` = :permission AND `node_id` = :nodeId');
 		$stmt->bindValue(':permission', $permission, PDO::PARAM_STR);
 		$stmt->bindValue(':nodeId', $nodeId, PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		$result = array();
 		foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row)
 		{
@@ -3103,9 +3148,9 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function getPermissionsForUserByNode($accessorIds, $nodeId)
 	{
-		$stmt = $this->wrapped->prepareStatement('SELECT DISTINCT `permission` FROM `f_permission_compiled` WHERE `node_id` = :nodeId and `accessor_id` in (' . implode(', ', $accessorIds). ')');
+		$stmt = $this->prepareStatement('SELECT DISTINCT `permission` FROM `f_permission_compiled` WHERE `node_id` = :nodeId and `accessor_id` in (' . implode(', ', $accessorIds). ')');
 		$stmt->bindValue(':nodeId', $nodeId, PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		$result = array();
 		while(($row = $stmt->fetch(PDO::FETCH_ASSOC)) != false)
 		{
@@ -3116,8 +3161,8 @@ class f_persistentdocument_PersistentProvider
 	
 	public function clearAllPermissions()
 	{
-		$stmt = $this->wrapped->prepareStatement('TRUNCATE TABLE f_permission_compiled');
-		$this->wrapped->executeStatement($stmt);
+		$stmt = $this->prepareStatement('TRUNCATE TABLE f_permission_compiled');
+		$this->executeStatement($stmt);
 	}
 	
 	/**
@@ -3128,9 +3173,9 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function getPermissionDefinitionPoints($packageName)
 	{
-		$stmt = $this->wrapped->prepareStatement('SELECT DISTINCT node_id FROM f_permission_compiled WHERE permission LIKE :permission');
+		$stmt = $this->prepareStatement('SELECT DISTINCT node_id FROM f_permission_compiled WHERE permission LIKE :permission');
 		$stmt->bindValue(':permission', $packageName . '%', PDO::PARAM_STR);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		$result = array();
 		while(($row = $stmt->fetch(PDO::FETCH_ASSOC)) != false)
 		{
@@ -3146,19 +3191,19 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function registerSimpleCache($cacheId, $specs)
 	{
-		$deleteStmt = $this->wrapped->prepareStatement('DELETE FROM f_simplecache_registration WHERE cache_id = :cacheId');
+		$deleteStmt = $this->prepareStatement('DELETE FROM f_simplecache_registration WHERE cache_id = :cacheId');
 		$deleteStmt->bindValue(':cacheId', $cacheId, PDO::PARAM_STR);
-		$this->wrapped->executeStatement($deleteStmt);
+		$this->executeStatement($deleteStmt);
 	
 		if (f_util_ArrayUtils::isNotEmpty($specs))
 		{
 			$registerQuery = 'INSERT INTO f_simplecache_registration VALUES (:pattern, :cacheId)';
 			foreach (array_unique($specs) as $spec)
 			{
-				$stmt = $this->wrapped->prepareStatement($registerQuery);
+				$stmt = $this->prepareStatement($registerQuery);
 				$stmt->bindValue(':pattern', $spec, PDO::PARAM_STR);
 				$stmt->bindValue(':cacheId', $cacheId, PDO::PARAM_STR);
-				$this->wrapped->executeStatement($stmt);
+				$this->executeStatement($stmt);
 			}
 		}
 	}
@@ -3168,9 +3213,9 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function getCacheIdsByPattern($pattern)
 	{
-		$stmt = $this->wrapped->prepareStatement('SELECT DISTINCT(cache_id) FROM f_simplecache_registration WHERE pattern = :pattern');
+		$stmt = $this->prepareStatement('SELECT DISTINCT(cache_id) FROM f_simplecache_registration WHERE pattern = :pattern');
 		$stmt->bindValue(':pattern', $pattern, PDO::PARAM_STR);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		$blockNames = array();
 		foreach ($stmt->fetchAll(PDO::FETCH_NUM) as $row)
 		{
@@ -3191,7 +3236,7 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function addUserActionEntry($date_entry, $userId, $moduleName, $actionName, $documentId, $username, $serializedInfo)
 	{
-		$stmt = $this->wrapped->prepareStatement('INSERT INTO f_user_action_entry (entry_date, user_id, document_id, module_name, action_name, username, info) VALUES (:entry_date, :user_id, :document_id, :module_name, :action_name, :username, :info)');
+		$stmt = $this->prepareStatement('INSERT INTO f_user_action_entry (entry_date, user_id, document_id, module_name, action_name, username, info) VALUES (:entry_date, :user_id, :document_id, :module_name, :action_name, :username, :info)');
 		$stmt->bindValue(':entry_date', $date_entry, PDO::PARAM_STR);
 		$stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
 		$stmt->bindValue(':document_id', $documentId, PDO::PARAM_INT);
@@ -3199,7 +3244,7 @@ class f_persistentdocument_PersistentProvider
 		$stmt->bindValue(':action_name', $actionName, PDO::PARAM_STR);
 		$stmt->bindValue(':username', $username, PDO::PARAM_STR);
 		$stmt->bindValue(':info', $serializedInfo, PDO::PARAM_LOB);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		return intval($this->wrapped->getDriver()->lastInsertId('f_user_action_entry'));
 	}
 	
@@ -3244,12 +3289,12 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function getCountUserActionEntry($userId, $moduleName, $actionName, $documentId)
 	{
-		$stmt = $this->wrapped->prepareStatement($this->getUserActionEntryQuery($userId, $moduleName, $actionName, $documentId, null, null, null, null));
+		$stmt = $this->prepareStatement($this->getUserActionEntryQuery($userId, $moduleName, $actionName, $documentId, null, null, null, null));
 		if ($userId !== null) {$stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);}
 		if ($moduleName !== null) {$stmt->bindValue(':module_name', $moduleName, PDO::PARAM_STR);}
 		if ($actionName !== null) {$stmt->bindValue(':action_name', $actionName, PDO::PARAM_STR);}
 		if ($documentId !== null) {$stmt->bindValue(':document_id', $documentId, PDO::PARAM_INT);}
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		$result = $stmt->fetch(PDO::FETCH_ASSOC);
 		$stmt->closeCursor();
 		if ($result)
@@ -3272,12 +3317,12 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function getUserActionEntry($userId, $moduleName, $actionName, $documentId, $rowIndex, $rowCount, $sortOnField, $sortDirection)
 	{
-		$stmt = $this->wrapped->prepareStatement($this->getUserActionEntryQuery($userId, $moduleName, $actionName, $documentId, $rowIndex, $rowCount, $sortOnField, $sortDirection));
+		$stmt = $this->prepareStatement($this->getUserActionEntryQuery($userId, $moduleName, $actionName, $documentId, $rowIndex, $rowCount, $sortOnField, $sortDirection));
 		if ($userId !== null) {$stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);}
 		if ($moduleName !== null) {$stmt->bindValue(':module_name', $moduleName, PDO::PARAM_STR);}
 		if ($actionName !== null) {$stmt->bindValue(':action_name', $actionName, PDO::PARAM_STR);}
 		if ($documentId !== null) {$stmt->bindValue(':document_id', $documentId, PDO::PARAM_INT);}
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		$stmt->closeCursor();
 		return $result;
@@ -3298,8 +3343,8 @@ class f_persistentdocument_PersistentProvider
 		}
 		$sql = 'SELECT '.$sqlName.' as distinctvalue FROM f_user_action_entry GROUP BY '.$sqlName;
 	
-		$stmt = $this->wrapped->prepareStatement($sql);
-		$this->wrapped->executeStatement($stmt);
+		$stmt = $this->prepareStatement($sql);
+		$this->executeStatement($stmt);
 		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		$stmt->closeCursor();
 		return $result;
@@ -3320,14 +3365,14 @@ class f_persistentdocument_PersistentProvider
 			$sql = 'DELETE FROM f_user_action_entry WHERE entry_date < :entry_date';
 		}
 	
-		$stmt = $this->wrapped->prepareStatement($sql);
+		$stmt = $this->prepareStatement($sql);
 		$stmt->bindValue(':entry_date', $date, PDO::PARAM_STR);
 	
 		if ($moduleName !== null)
 		{
 			$stmt->bindValue(':module_name', $moduleName, PDO::PARAM_STR);
 		}
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		return $stmt->rowCount();
 	}
 	
@@ -3339,9 +3384,9 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function getIndexingDocumentStatus($documentId)
 	{
-		$stmt = $this->wrapped->prepareStatement("SELECT `indexing_status`, `lastupdate` FROM `f_indexing` WHERE `document_id` = :document_id");
+		$stmt = $this->prepareStatement("SELECT `indexing_status`, `lastupdate` FROM `f_indexing` WHERE `document_id` = :document_id");
 		$stmt->bindValue(':document_id', $documentId, PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		$result = $stmt->fetch(PDO::FETCH_ASSOC);
 		$stmt->closeCursor();
 		if ($result)
@@ -3358,9 +3403,9 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function setIndexingDocumentStatus($documentId, $newStatus, $lastUpdate = null)
 	{
-		$stmt = $this->wrapped->prepareStatement("SELECT `indexing_status` FROM `f_indexing` WHERE `document_id` = :document_id FOR UPDATE");
+		$stmt = $this->prepareStatement("SELECT `indexing_status` FROM `f_indexing` WHERE `document_id` = :document_id FOR UPDATE");
 		$stmt->bindValue(':document_id', $documentId, PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		$result = $stmt->fetch(PDO::FETCH_NUM);
 		$stmt->closeCursor();
 		if (is_array($result) && $result[0] === $newStatus)
@@ -3370,18 +3415,18 @@ class f_persistentdocument_PersistentProvider
 	
 		if (is_array($result))
 		{
-			$updatestmt = $this->wrapped->prepareStatement("UPDATE `f_indexing` SET `indexing_status` = :indexing_status, `lastupdate` = :lastupdate WHERE `document_id` = :document_id");
+			$updatestmt = $this->prepareStatement("UPDATE `f_indexing` SET `indexing_status` = :indexing_status, `lastupdate` = :lastupdate WHERE `document_id` = :document_id");
 		}
 		else
 		{
-			$updatestmt = $this->wrapped->prepareStatement("INSERT INTO `f_indexing` (`indexing_status`, `lastupdate`, `document_id`) VALUES (:indexing_status, :lastupdate, :document_id)");
+			$updatestmt = $this->prepareStatement("INSERT INTO `f_indexing` (`indexing_status`, `lastupdate`, `document_id`) VALUES (:indexing_status, :lastupdate, :document_id)");
 		}
 	
 		if ($lastUpdate === null) {$lastUpdate = date_Calendar::getInstance()->toString();}
 		$updatestmt->bindValue(':indexing_status', $newStatus, PDO::PARAM_STR);
 		$updatestmt->bindValue(':lastupdate', $lastUpdate, PDO::PARAM_STR);
 		$updatestmt->bindValue(':document_id', $documentId, PDO::PARAM_INT);
-		$this->wrapped->executeStatement($updatestmt);
+		$this->executeStatement($updatestmt);
 		return array($newStatus, $lastUpdate);
 	}
 	
@@ -3391,9 +3436,9 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function deleteIndexingDocumentStatus($documentId)
 	{
-		$stmt = $this->wrapped->prepareStatement("DELETE FROM `f_indexing` WHERE `document_id` = :document_id");
+		$stmt = $this->prepareStatement("DELETE FROM `f_indexing` WHERE `document_id` = :document_id");
 		$stmt->bindValue(':document_id', $documentId, PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		return $stmt->rowCount() == 1;
 	}
 	
@@ -3402,8 +3447,8 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function clearIndexingDocumentStatus()
 	{
-		$stmt = $this->wrapped->prepareStatement("DELETE FROM `f_indexing`");
-		$this->wrapped->executeStatement($stmt);
+		$stmt = $this->prepareStatement("DELETE FROM `f_indexing`");
+		$this->executeStatement($stmt);
 		return $stmt->rowCount();
 	}
 	
@@ -3412,8 +3457,8 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function getIndexingStats()
 	{
-		$stmt = $this->wrapped->prepareStatement("SELECT `indexing_status`, count(`document_id`) as nb_document,  max(`document_id`) as max_id FROM `f_indexing` GROUP BY `indexing_status`");
-		$this->wrapped->executeStatement($stmt);
+		$stmt = $this->prepareStatement("SELECT `indexing_status`, count(`document_id`) as nb_document,  max(`document_id`) as max_id FROM `f_indexing` GROUP BY `indexing_status`");
+		$this->executeStatement($stmt);
 		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		$stmt->closeCursor();
 		return $result;
@@ -3424,8 +3469,8 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function getIndexingPendingEntries()
 	{
-		$stmt = $this->wrapped->prepareStatement("SELECT max(`document_id`) as max_id FROM `f_indexing` WHERE `indexing_status` <> 'INDEXED'");
-		$this->wrapped->executeStatement($stmt);
+		$stmt = $this->prepareStatement("SELECT max(`document_id`) as max_id FROM `f_indexing` WHERE `indexing_status` <> 'INDEXED'");
+		$this->executeStatement($stmt);
 		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		$stmt->closeCursor();
 		return $result;
@@ -3438,9 +3483,9 @@ class f_persistentdocument_PersistentProvider
 	 */
 	public function getIndexingDocuments($maxDocumentId, $chunkSize = 100)
 	{
-		$stmt = $this->wrapped->prepareStatement("SELECT `document_id` FROM `f_indexing` WHERE `document_id` <= :document_id AND `indexing_status` <> 'INDEXED' ORDER BY `document_id` DESC LIMIT 0, " .intval($chunkSize));
+		$stmt = $this->prepareStatement("SELECT `document_id` FROM `f_indexing` WHERE `document_id` <= :document_id AND `indexing_status` <> 'INDEXED' ORDER BY `document_id` DESC LIMIT 0, " .intval($chunkSize));
 		$stmt->bindValue(':document_id', $maxDocumentId, PDO::PARAM_INT);
-		$this->wrapped->executeStatement($stmt);
+		$this->executeStatement($stmt);
 		$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		$stmt->closeCursor();
 		$result = array();
@@ -4708,7 +4753,4 @@ class f_persistentdocument_QueryBuilderMysql
 			$this->addOrder($order);
 		}
 	}
-	
-	
-	
 }

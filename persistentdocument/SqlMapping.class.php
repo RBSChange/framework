@@ -2,11 +2,36 @@
 /**
  * @deprecated
  */
-class change_SqlMapping extends \Change\Db\Mysql\SqlMapping
+class change_SqlMapping extends \Change\Db\SqlMapping
 {
 	
 	private $i18nfieldNames;
 	
+	/**
+	 * @deprecated
+	 */
+	public function getI18nSuffix()
+	{
+		return '_i18n';
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function escapeParameterName($name)
+	{
+		return ':p' . $name;
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	public function escapeName($name, $nameSpace = null, $alias = null)
+	{
+		$sql = ($nameSpace ? '`' . $nameSpace . '`.`' : '`') . $name . '`';
+		return ($alias) ?  $sql . ' AS `' . $alias . '`' : $sql;
+	}
+		
 	/**
 	 * @deprecated
 	 */
