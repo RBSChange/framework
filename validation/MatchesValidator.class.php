@@ -1,18 +1,13 @@
 <?php
 /**
- * @package framework.validation
+ * @deprecated use validation_RegexpValidator
  */
 class validation_MatchesValidator extends validation_ValidatorImpl implements validation_Validator
 {
 	private $localizedErrorMessage;
 	
 	/**
-	 * Validate $data and append error message in $errors.
-	 *
-	 * @param validation_Property $Field
-	 * @param validation_Errors $errors
-	 * 
-	 * @return void
+	 * @deprecated
 	 */
 	protected function doValidate(validation_Property $field, validation_Errors $errors)
 	{
@@ -37,8 +32,7 @@ class validation_MatchesValidator extends validation_ValidatorImpl implements va
 	}
 	
 	/**
-	 * Returns the error message.
-	 * @return string
+	 * @deprecated
 	 */
 	protected function getMessage($args = null)
 	{
