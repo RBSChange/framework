@@ -150,20 +150,24 @@ class indexer_TermQuery extends indexer_QueryBase implements indexer_Query
 	 */
 	public function toSolrString()
 	{
-		return urlencode($this->toStringPrefix().$this->escapeValue($this->value).$this->toStringSuffix());
+		return urlencode($this->toStringPrefix().'"'.$this->escapeValue($this->value).'"'.$this->toStringSuffix());
 	}
 	
+	/**
+	 * @param String $value
+	 * @return String
+	 */
 	protected function escapeValue($value)
 	{
 		return str_replace(
 			array('\\', '+', '-', '(', ')', '{', '}', '^', '"', '~', '?', ':', '[', ']'),
-            array('\\\\', '\\+', '\\-', '\\(', '\\)', '\\{', '\\}', '\\^', '\\"', '\\~', '\\?', '\\:', '\\[', '\\]'),
+			array('\\\\', '\\+', '\\-', '\\(', '\\)', '\\{', '\\}', '\\^', '\\"', '\\~', '\\?', '\\:', '\\[', '\\]'),
 			$value);
 	}
 
 	/**
 	 * @return String
-	 */	
+	 */
 	public function getValue()
 	{
 		return $this->value;
