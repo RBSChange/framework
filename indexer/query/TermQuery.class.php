@@ -150,9 +150,13 @@ class indexer_TermQuery extends indexer_QueryBase implements indexer_Query
 	 */
 	public function toSolrString()
 	{
-		return urlencode($this->toStringPrefix().$this->escapeValue($this->value).$this->toStringSuffix());
+		return urlencode($this->toStringPrefix().'"'.$this->escapeValue($this->value).'"'.$this->toStringSuffix());
 	}
 	
+	/**
+	 * @param string $value
+	 * @return string
+	 */
 	protected function escapeValue($value)
 	{
 		return str_replace(
