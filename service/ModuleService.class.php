@@ -267,11 +267,10 @@ class ModuleService extends change_BaseService
 	public final function getPackageVersionInfos()
 	{
 		$packageVersion = array();
-		$packageVersionArray = $this->getPackageVersionList();
 		$ls = LocaleService::getInstance();
-		foreach ($packageVersionArray as $packageName => $version)
+		foreach ($this->getPackageVersionList() as $packageName => $infos)
 		{
-			$packageVersion[$ls->trans('m.' . substr($packageName, 8) . '.bo.general.module-name', array('ucf'))] = $version;
+			$packageVersion[$ls->trans('m.' . substr($packageName, 8) . '.bo.general.module-name', array('ucf'))] = $infos['VERSION'];
 		}
 		krsort($packageVersion);
 		$packageVersion['Framework'] = FRAMEWORK_VERSION;
