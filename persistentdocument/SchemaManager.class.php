@@ -35,6 +35,39 @@ class change_SchemaManager extends \Change\Db\Mysql\SchemaManager
 		return '_i18n';
 	}
 	
+	/**
+	 * @param integer $treeId
+	 * @return string the SQL statements that where executed
+	 */
+	public function createTreeTable($treeId)
+	{
+		$dropSQL = $this->dropTreeTable($treeId);
+		$sql = 'CREATE TABLE IF NOT EXISTS `f_tree_'. $treeId .'` (
+			`document_id` int(11) NOT NULL default \'0\',
+			`parent_id` int(11) NOT NULL default \'0\',
+			`node_order` int(11) NOT NULL default \'0\',
+			`node_level` int(11) NOT NULL default \'0\',
+			`node_path` varchar(255) collate latin1_general_ci NOT NULL default \'/\',
+			`children_count` int(11) NOT NULL default \'0\',
+			PRIMARY KEY (`document_id`),
+			UNIQUE KEY `tree_node` (`parent_id`, `node_order`),
+			UNIQUE KEY `descendant` (`node_level`,`node_order`,`node_path`)
+			) ENGINE=InnoDB CHARACTER SET latin1 COLLATE latin1_general_ci';
+	
+		$this->execute($sql);
+		return $dropSQL . $sql . ';' . PHP_EOL;
+	}
+	
+	/**
+	 * @param integer $treeId
+	 * @return string the SQL statements that where executed
+	 */
+	public function dropTreeTable($treeId)
+	{
+		$sql = 'DROP TABLE IF EXISTS `f_tree_'. $treeId .'`';
+		$this->execute($sql);
+		return $sql . ';' . PHP_EOL;
+	}
 	
 	/**
 	 * @param string $moduleName
@@ -44,8 +77,7 @@ class change_SchemaManager extends \Change\Db\Mysql\SchemaManager
 	 */
 	public function dropModelTables($moduleName, $documentName, $apply = true)
 	{
-		//TODO Old class Usage
-		$documentModel = \f_persistentdocument_PersistentDocumentModel::getInstance($moduleName, $documentName);
+		$documentModel = f_persistentdocument_PersistentDocumentModel::getInstance($moduleName, $documentName);
 		$tableName = $documentModel->getTableName();
 		$sqls = array();
 		$sqls[] = 'DROP TABLE IF EXISTS `' . $tableName . '`';
@@ -65,14 +97,13 @@ class change_SchemaManager extends \Change\Db\Mysql\SchemaManager
 	/**
 	 * @param string $moduleName
 	 * @param string $documentName
-	 * @param \generator_PersistentProperty $property TODO Old class Usage
+	 * @param generator_PersistentProperty $property
 	 * @param boolean $apply
 	 * @return string the SQL statements that where executed
 	 */
 	function addProperty($moduleName, $documentName, $property, $apply = true)
 	{
-		//TODO Old class Usage
-		$documentModel = \f_persistentdocument_PersistentDocumentModel::getInstance($moduleName, $documentName);
+		$documentModel = f_persistentdocument_PersistentDocumentModel::getInstance($moduleName, $documentName);
 		$sqls = array();
 	
 		$tableName = $documentModel->getTableName();
@@ -111,14 +142,13 @@ class change_SchemaManager extends \Change\Db\Mysql\SchemaManager
 	/**
 	 * @param string $moduleName
 	 * @param string $documentName
-	 * @param \generator_PersistentProperty $oldProperty TODO Old class Usage
+	 * @param generator_PersistentProperty $oldProperty
 	 * @param boolean $apply
 	 * @return string the SQL statements that where executed
 	 */
 	function delProperty($moduleName, $documentName, $oldProperty, $apply = true)
 	{
-		//TODO Old class Usage
-		$documentModel = \f_persistentdocument_PersistentDocumentModel::getInstance($moduleName, $documentName);
+		$documentModel = f_persistentdocument_PersistentDocumentModel::getInstance($moduleName, $documentName);
 		$sqls = array();
 		$sqls[] = "ALTER TABLE `" . $documentModel->getTableName() . "` DROP COLUMN `" . $oldProperty->getDbName() . "`";
 		if ($oldProperty->isLocalized())
@@ -151,15 +181,14 @@ class change_SchemaManager extends \Change\Db\Mysql\SchemaManager
 	/**
 	 * @param string $moduleName
 	 * @param string $documentName
-	 * @param \generator_PersistentProperty $oldProperty TODO Old class Usage
-	 * @param \generator_PersistentProperty $newProperty TODO Old class Usage
+	 * @param generator_PersistentProperty $oldProperty
+	 * @param generator_PersistentProperty $newProperty
 	 * @param boolean $apply
 	 * @return string the SQL statements that where executed
 	 */
 	function renameProperty($moduleName, $documentName, $oldProperty, $newProperty, $apply = true)
 	{
-		//TODO Old class Usage
-		$documentModel = \f_persistentdocument_PersistentDocumentModel::getInstance($moduleName, $documentName);
+		$documentModel = f_persistentdocument_PersistentDocumentModel::getInstance($moduleName, $documentName);
 		$sqls = array();
 		$oldDbMapping = $oldProperty->getDbName();
 		$oldPropertyName = $oldProperty->getName();
@@ -214,7 +243,7 @@ class change_SchemaManager extends \Change\Db\Mysql\SchemaManager
 	}
 	
 	/**
-	 * @param \generator_PersistentProperty $buildProperty TODO Old class Usage
+	 * @param generator_PersistentProperty $buildProperty
 	 * @return string
 	 */
 	public function generateSQLField($buildProperty, $localizedField = false)
