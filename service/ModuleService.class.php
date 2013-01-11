@@ -273,8 +273,6 @@ class ModuleService extends BaseService
 		return $this->packages;
 	}
 
-
-	
 	/**
 	 * Return an associative array of the versions for the packages.
 	 * The key is the package label (localized).
@@ -284,11 +282,10 @@ class ModuleService extends BaseService
 	public final function getPackageVersionInfos()
 	{
 		$packageVersion = array();
-		$packageVersionArray = $this->getPackageVersionList();
 		$ls = LocaleService::getInstance();
-		foreach ($packageVersionArray as $packageName => $version)
+		foreach ($this->getPackageVersionList() as $packageName => $infos)
 		{
-			$packageVersion[$ls->transFO('m.' . substr($packageName, 8) . '.bo.general.module-name', array('ucf'))] = $version;
+			$packageVersion[$ls->transFO('m.' . substr($packageName, 8) . '.bo.general.module-name', array('ucf'))] = $infos['VERSION'];
 		}
 		krsort($packageVersion);
 		$packageVersion['Framework'] = FRAMEWORK_VERSION;
