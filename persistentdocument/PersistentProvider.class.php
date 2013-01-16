@@ -182,7 +182,7 @@ class f_persistentdocument_PersistentProvider
 	/**
 	 * @return void
 	 */
-	protected function clearDocumentCache()
+	public function clearDocumentCache()
 	{
 		$this->m_documentInstances = array();
 		$this->m_i18nDocumentInstances = array();
