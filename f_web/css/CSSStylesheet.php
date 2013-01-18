@@ -182,8 +182,8 @@ class f_web_CSSStylesheet
 				$declarationText .= $cssText[$i];
 			}
 			// handle @import
-		    else if ($cssText[$i] === '@' && $inSelector && substr($cssText, $i, 7) === '@import' && !$inComment)
-		    {
+			else if ($cssText[$i] === '@' && $inSelector && substr($cssText, $i, 7) === '@import' && !$inComment)
+			{
 				$idx = strpos($cssText, ";", $i);
 				if (!$idx)
 				{
@@ -200,24 +200,31 @@ class f_web_CSSStylesheet
 					throw new Exception('Invalid directive @import syntax');
 				}
 				$i = $idx;
-		    }
-		    // handle @-rules
-		    // Rules like @xxx ...; //@charset, @namespace, @phonetic-alphabet
-		    // -> These @-rules are not very used, so we choose to ignore them here: using these rules will cause an error!
-		    else if ($cssText[$i] === '@' && $inSelector && !$inComment && (substr($cssText, $i, 8) === '@charset' || substr($cssText, $i, 10) === '@namespace' || substr($cssText, $i, 18) === '@phonetic-alphabet'))
-		    {
-		    	throw new Exception('@charset, @namespace and @phonetic-alphabet are not handeled.');
-		    }
-		    // Rules like @xxx { ... }; //@page, @font-face
+			}
+			// handle @-rules
+			// Rules like @xxx ...; //@charset, @namespace, @phonetic-alphabet
+			// -> These @-rules are not often used and have specific position constraints in the stylesheet, so we choose to ignore them here.
+			else if ($cssText[$i] === '@' && $inSelector && !$inComment && (substr($cssText, $i, 8) === '@charset' || substr($cssText, $i, 10) === '@namespace' || substr($cssText, $i, 18) === '@phonetic-alphabet'))
+			{
+				$idx = strpos($cssText, ";", $i);
+				if (!$idx)
+				{
+					throw new Exception('Invalid directive @charset, @namespace and @phonetic-alphabet syntax');
+				}
+				$directive = substr($cssText, $i, $idx - $i);
+				Framework::warn(__METHOD__ . ' @charset, @namespace and @phonetic-alphabet are not handeled. The following rule was removed: ' . $directive . ';');
+				$i = $idx;
+			}
+			// Rules like @xxx { ... }; //@page, @font-face
 			// -> These @-rules work like selectors, so nothing specific to do.
-		    // Rules like @xxx { yyy { ... } ... }; //@media, @document, @support, @keyframes
-		    // -> These @-rules wil containt selectors or maybe nested @-rules, handle them specifically.
+			// Rules like @xxx { yyy { ... } ... }; //@media, @document, @support, @keyframes
+			// -> These @-rules wil containt selectors or maybe nested @-rules, handle them specifically.
 			else if ($cssText[$i] === '@' && $inSelector && !$inComment && substr($cssText, $i, 5) !== '@page' && substr($cssText, $i, 10) !== '@font-face')
 			{
 				$inAtSelector = true;
 				$atLevel++;
 				$atSelectors[$atLevel] = '@';
-		    }
+			}
 			else if ($cssText[$i] === '/' && $cssText[$i + 1] === '*' && !$inComment)
 			{
 				$inComment = true;
@@ -271,7 +278,7 @@ class f_web_CSSStylesheet
 
 					$inDeclarationBlock = false;
 					$selectorText = "";
-				}								
+				}
 				else if ($atLevel > 0)
 				{
 					unset($atSelectors[$atLevel]);
@@ -291,8 +298,8 @@ class f_web_CSSStylesheet
 			}
 			else if ($cssText[$i] === '{' && !$inComment)
 			{
-			    if ($inAtSelector)
-			    {
+				if ($inAtSelector)
+				{
 					$inAtSelector = false;
 			    }
 				else
