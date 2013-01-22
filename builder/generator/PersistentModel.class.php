@@ -1719,7 +1719,7 @@ class generator_PersistentModel
 		$alreadyValidated = $this->getValidatesPropertyNamesToExclude();
 		foreach ($this->getPropertiesComplete() as $property)
 		{
-			if ($property->hasDefinedConstraints() || $property->isRequired() || $property->getMaxOccurs() > 1)
+			if ($property->hasValidationMethod())
 			{
 				if (!in_array($property->getName(), $alreadyValidated))
 				{
@@ -1729,13 +1729,13 @@ class generator_PersistentModel
 		}
 		foreach ($this->getSerializedProperties() as $property)
 		{
-			if ($property->hasDefinedConstraints() || $property->isRequired() || $property->getMaxOccurs() > 1)
+			if ($property->hasValidationMethod())
 			{
 				if (!in_array($property->getName(), $alreadyValidated))
 				{
 					$result[] = $property;
 				}
-			}				
+			}
 		}
 		return $result;
 	}

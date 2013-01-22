@@ -795,17 +795,28 @@ class generator_PersistentProperty
 		return ucfirst($this->name);
 	}
 
+	/**
+	 * @return boolean
+	 */
+	public function hasValidationMethod()
+	{
+		if (in_array($this->name, array('id', 'model', 'lang')))
+		{
+			return false;
+		}
+		return (is_array($this->getConstraintArray()) || $this->isRequired() || $this->getMaxOccurs() > 1 || $this->getMinOccurs() > 1);
+	}
+	
 	public function phpPropertyValidationMethod()
 	{
 		$phpScript = array();
 		$name = $this->name;
-		if (in_array($name, array('id', 'model', 'lang'))) {return;}
-		$constraintArray = $this->getConstraintArray();
-		$required = $this->isRequired();
-		if (!is_array($constraintArray) && !$required && $this->getMaxOccurs() <= 1)
+		if (!$this->hasValidationMethod())
 		{
 			return;
 		}
+		$constraintArray = $this->getConstraintArray();
+		$required = $this->isRequired();
 		
 		$uName = ucfirst($name);	
 		$phpScript[] = '	protected function is' . $uName .'Valid()';
