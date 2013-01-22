@@ -761,12 +761,28 @@ class generator_PersistentProperty
 		return ucfirst($this->name);
 	}
 
+	/**
+	 * @return boolean
+	 */
+	public function hasValidationMethod()
+	{
+		if (in_array($this->name, array('id', 'model', 'lang')))
+		{
+			return false;
+		}
+		if ($this->constraints === null)
+		{
+			return ($this->isArray() && ($this->getMinOccurs() > 0 || $this->getMaxOccurs() > 1));
+		}
+		return true;
+	}
+	
 	public function phpPropertyValidationMethod()
 	{
 		$phpScript = array();
 		$name = $this->name;
 		$uName = ucfirst($name);
-		if (is_null($this->constraints) || in_array($name, array('id', 'model', 'lang')))
+		if (!$this->hasValidationMethod())
 		{
 			return;
 		}
@@ -780,11 +796,9 @@ class generator_PersistentProperty
 		$phpScript[] = '	{';
 		if ($this->isDocument())
 		{
-
-			$phpScript[] = '		$uniqueValidatorResult = true;';
-
 			if ( ! $this->isArray() )
 			{
+				$phpScript[] = '		$uniqueValidatorResult = true;';
 				$str = $this->constraints;
 
 				$constraintsParser = new validation_ContraintsParser();
@@ -838,7 +852,7 @@ class generator_PersistentProperty
 			else
 			{
 				$phpScript[] = '		$this->checkLoaded' . $uName .'();';
-				$phpScript[] = '		return $this->m_' . $name .'->isValid('. $this->getMinOccurs() .', '. $this->getMaxOccurs() .', \''.$this->type.'\') && $uniqueValidatorResult;';
+				$phpScript[] = '		return $this->m_' . $name .'->isValid('. $this->getMinOccurs() .', '. $this->getMaxOccurs() .', \''.$this->type.'\');';
 			}
 		}
 		else if (!is_null($this->constraints))

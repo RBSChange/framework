@@ -2020,7 +2020,7 @@ class generator_PersistentModel
 		}
 		foreach ($properties as $property)
 		{
-			if (is_null($property->getConstraints()))
+			if (!$property->hasValidationMethod())
 			{
 				continue;
 			}
