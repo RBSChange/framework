@@ -267,7 +267,7 @@
 			<backoffice>
 				<browser name="firefox">
 					<version name="0">3.6.24</version>
-					<version name="1">14.0.1</version>
+					<version name="1">16.0.2</version>
 				</browser>
 			</backoffice>
 		</browsers>
