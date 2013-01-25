@@ -10,7 +10,7 @@ class change_SchemaManager extends \Change\Db\Mysql\SchemaManager
 	 */
 	public function __construct(\Change\Db\Mysql\DbProvider $dbProvider)
 	{
-		parent::__construct($dbProvider);
+		parent::__construct($dbProvider, \Change\Application::getInstance()->getApplicationServices()->getLogging());
 	}
 	
 	/**
