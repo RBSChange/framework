@@ -10,7 +10,7 @@ class f_persistentdocument_TransactionManager
 	private static $instance;
 	
 	/**
-	 * @var \Change\Db\DbProvider
+	 * @var f_persistentdocument_PersistentProvider
 	 */
 	private $wrapped;
 	
@@ -140,16 +140,9 @@ class f_persistentdocument_TransactionManager
 		if (!$this->transactionDirty)
 		{
 			$this->transactionDirty = true;
-			if (!$this->inTransaction)
-			{
-				$this->logging->warn("Provider->rollBack() called while not in transaction");
-			}
-			else
-			{
-				$this->wrapped->clearDocumentCache();
-				indexer_IndexService::getInstance()->rollBackIndex();
-				$this->wrapped->rollBack();
-			}
+			$this->wrapped->clearDocumentCache();
+			indexer_IndexService::getInstance()->rollBackIndex();
+			$this->wrapped->rollBack();
 		}
 	
 		if ($this->transactionCount == 0)
