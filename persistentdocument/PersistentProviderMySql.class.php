@@ -245,6 +245,7 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		$adminInfos['password'] = $props->getProperty("dbAdminPassword"); 
 		$adminInfos['host'] = $props->getProperty("dbAdminHost");
 		$adminInfos['port'] = $props->getProperty("dbAdminPort");
+		$adminInfos['useutf8charset'] = $props->getProperty("dbAdminUseutf8charset");
 		
 		if (!isset($adminInfos['user']) || !isset($adminInfos['password']))
 		{
@@ -342,7 +343,15 @@ class f_persistentdocument_PersistentProviderMySql extends f_persistentdocument_
 		}
 
 		$this->sql_fieldescape = '`';
-		$pdo = new PDO($dsn, $username, $password);
+		
+		$options = array();
+		
+		if (isset($connectionInfos['utf8charset']) && $connectionInfos['utf8charset'] == 'true')
+		{
+			$options[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'";
+		}
+		
+		$pdo = new PDO($dsn, $username, $password, $options);
 		$this->emulatePrepares = isset($connectionInfos['emulate_prepares']) ? f_util_Convert::toBoolean($connectionInfos['emulate_prepares']) : false;
 		if ($this->emulatePrepares == true)
 		{

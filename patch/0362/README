@@ -1,0 +1,3 @@
+Version: 3.6.5
+
+This patch disable the UTF8 mysql connection.
