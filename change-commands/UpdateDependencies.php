@@ -21,13 +21,12 @@ class commands_UpdateDependencies extends commands_AbstractChangeCommand
 	{
 		return "Update project dependencies";
 	}
-
+	
 	function getOptions()
 	{
 		return array('forcedownload');
 	}
 	
-
 	/**
 	 * @param String[] $params
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
@@ -38,22 +37,23 @@ class commands_UpdateDependencies extends commands_AbstractChangeCommand
 		$this->message("== Update project dependencies ==");
 		$bootstrap = $this->getParent()->getBootStrap();
 		$forceDownload = isset($options['forcedownload']);
-		do 
+		
+		do
 		{
 			$dependencies = $bootstrap->loadDependencies();
-			$downloads = $this->getDepsToDownload($dependencies, $forceDownload);	
-			foreach ($downloads as $depsInfos) 
+			$downloads = $this->getDepsToDownload($dependencies, $forceDownload);
+			foreach ($downloads as $depsInfos)
 			{
-				list($debType, $componentName, $version) = $depsInfos;
-				$fullName = $bootstrap->convertToCategory($debType) . '/' . $componentName .'-' . $version;
+				list ($debType, $componentName, $version) = $depsInfos;
+				$fullName = $bootstrap->convertToCategory($debType) . '/' . $componentName . '-' . $version;
 				
 				$this->message('Download ' . $fullName . ' ...');
 				try
 				{
 					$url = null;
 					$path = $bootstrap->downloadDependency($debType, $componentName, $version, $url);
-				} 
-				catch (Exception $e) 
+				}
+				catch (Exception $e)
 				{
 					if ($forceDownload && $dependencies[$debType][$componentName]['localy'])
 					{
@@ -64,25 +64,31 @@ class commands_UpdateDependencies extends commands_AbstractChangeCommand
 						return $this->quitError('Unable to Download : ' . $fullName . ' in local repository. ' . $e->getMessage());
 					}
 				}
+				
+				if ($depsInfos[0] == "framework")
+				{
+					$bootstrap->resetInstanceProjectKey();
+				}
+			
 			}
 			$forceDownload = false;
-		} 
+		}
 		while (count($downloads) > 0);
 		
-		$moduleType = $bootstrap->convertToCategory(c_ChangeBootStrap::$DEP_MODULE);		
+		$moduleType = $bootstrap->convertToCategory(c_ChangeBootStrap::$DEP_MODULE);
 		$dependencies = $bootstrap->loadDependencies();
 		$linkeds = $this->getDepsToLink($dependencies);
-		foreach ($linkeds as $depsInfos) 
+		foreach ($linkeds as $depsInfos)
 		{
-			list($debType, $componentName, $version) = $depsInfos;		
-			$fullName = $bootstrap->convertToCategory($debType) . '/' . $componentName .'-' . $version;
+			list ($debType, $componentName, $version) = $depsInfos;
+			$fullName = $bootstrap->convertToCategory($debType) . '/' . $componentName . '-' . $version;
 			$this->message('linking ' . $fullName . ' ...');
 			if (!$bootstrap->linkToProject($debType, $componentName, $version))
 			{
 				return $this->quitError('Unable to link : ' . $fullName . ' in project.');
 			}
 		}
-	
+		
 		$bootstrap->cleanDependenciesCache();
 		
 		$this->getParent()->loadCommands();
@@ -93,32 +99,32 @@ class commands_UpdateDependencies extends commands_AbstractChangeCommand
 	private function getDepsToDownload($dependencies, $forceDownload)
 	{
 		$result = array();
-		foreach ($dependencies as $debType => $debs) 
+		foreach ($dependencies as $debType => $debs)
 		{
 			foreach ($debs as $debName => $infos)
 			{
 				if ($forceDownload || !$infos['localy'])
 				{
-					$result[] = array($debType, $debName, $infos['version']) ;
+					$result[] = array($debType, $debName, $infos['version']);
 				}
-			} 
-		}	
-		return $result;	
+			}
+		}
+		return $result;
 	}
 	
 	private function getDepsToLink($dependencies)
 	{
 		$result = array();
-		foreach ($dependencies as $debType => $debs) 
+		foreach ($dependencies as $debType => $debs)
 		{
 			foreach ($debs as $debName => $infos)
 			{
 				if (!$infos['linked'])
 				{
-					$result[] = array($debType, $debName, $infos['version']) ;
+					$result[] = array($debType, $debName, $infos['version']);
 				}
-			} 
-		}	
-		return $result;	
-	}	
+			}
+		}
+		return $result;
+	}
 }

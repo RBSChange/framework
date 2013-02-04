@@ -86,7 +86,7 @@ class c_ChangeBootStrap
 	
 	/**
 	 * @var string
-	 */	
+	 */
 	private $instanceProjectKey = null;
 	
 	/**
@@ -275,32 +275,32 @@ class c_ChangeBootStrap
 	 */
 	public function appendToAutoload($componentPath)
 	{
-	
+		
 		$autoloadPath = $this->getAutoloadPath();
 		$autoloadedFlag = $autoloadPath . "/" . md5($componentPath) . ".autoloaded";
-	
+		
 		$analyzer = cboot_ClassDirAnalyzer::getInstance();
 		if (!$this->autoloadRegistered)
 		{
 			spl_autoload_register(array($analyzer, "autoload"));
 			$this->autoloadRegistered = true;
 		}
-	
+		
 		if (isset($this->autoloaded[$componentPath]) || (!$this->refreshAutoload && file_exists($autoloadedFlag)))
 		{
 			$this->autoloaded[$componentPath] = true;
 			return;
 		}
-	
+		
 		if (file_exists($autoloadedFlag))
 		{
 			unlink($autoloadedFlag);
 		}
-	
+		
 		$analyzer->appendRealDir($componentPath);
 		$this->autoloaded[$componentPath] = true;
 		touch($autoloadedFlag);
-	}	
+	}
 	
 	/**
 	 * @param string $path
@@ -324,8 +324,7 @@ class c_ChangeBootStrap
 		{
 			$this->autoloadPath = $autoloadPath;
 		}
-	}	
-	
+	}
 	
 	/**
 	 * Return the path of project change.xml
@@ -366,7 +365,7 @@ class c_ChangeBootStrap
 			$this->remoteRepositories = array_unique(explode(",", $this->getProperties()->getProperty("REMOTE_REPOSITORIES", "http://update.rbschange.fr")));
 		}
 		return $this->remoteRepositories;
-	}	
+	}
 	
 	/**
 	 * @return string
@@ -393,7 +392,7 @@ class c_ChangeBootStrap
 				$node = $changeXMLDoc->findUnique("cc:version");
 				$version = $node ? $node->textContent : '-';
 			}
-				
+			
 			$profilePath = $this->wd . '/profile';
 			if (is_readable($profilePath))
 			{
@@ -414,6 +413,14 @@ class c_ChangeBootStrap
 	}
 	
 	/**
+	 * Reset the instance project key. This method must be used when your upgrade the framework
+	 */
+	public function resetInstanceProjectKey()
+	{
+		$this->instanceProjectKey = null;
+	}
+	
+	/**
 	 * @return string
 	 */
 	public function getCurrentReleaseName()
@@ -421,8 +428,7 @@ class c_ChangeBootStrap
 		$parts = explode(';', $this->getInstanceProjectKey());
 		$p2 = explode('/', $parts[0]);
 		return $p2[1];
-	}	
-	
+	}
 	
 	/**
 	 *
@@ -437,9 +443,15 @@ class c_ChangeBootStrap
 			foreach (array_unique(explode(",", $this->getProperties()->getProperty("LOCAL_REPOSITORY", $this->wd . "/repository"))) as $localRepoPath)
 			{
 				$localRepoPath = trim($localRepoPath);
-				if ($localRepoPath == '') {continue;}
+				if ($localRepoPath == '')
+				{
+					continue;
+				}
 				
-				if (!is_dir($localRepoPath)) {continue;}
+				if (!is_dir($localRepoPath))
+				{
+					continue;
+				}
 				
 				$writable = true;
 				$writableTmpPath = $localRepoPath . DIRECTORY_SEPARATOR . 'tmp';
@@ -463,7 +475,7 @@ class c_ChangeBootStrap
 			}
 		}
 		return $this->localRepositories;
-	}	
+	}
 	
 	/**
 	 * @param integer $depType
@@ -477,33 +489,32 @@ class c_ChangeBootStrap
 			case "change-lib" :
 			case "framework" :
 				return 'framework';
-					
+			
 			case self::$DEP_MODULE :
 			case "modules" :
 			case "module" :
 				return 'modules';
-					
+			
 			case self::$DEP_LIB :
 			case "libs" :
 			case "lib" :
 				return 'libs';
-					
+			
 			case self::$DEP_PEAR :
 			case "lib-pear" :
 			case "pearlibs" :
 			case "pearlib" :
 			case "pear" :
 				return 'pearlibs';
-					
+			
 			case self::$DEP_THEME :
 			case "themes" :
 			case "theme" :
 				return 'themes';
-	
+		
 		}
 		return "";
-	}	
-	
+	}
 	
 	/**
 	 * @param string $releaseName
@@ -522,22 +533,23 @@ class c_ChangeBootStrap
 				foreach ($releaseDom->documentElement->childNodes as $node)
 				{
 					/* @var $node DOMElement */
-					if ($node->nodeType !== XML_ELEMENT_NODE) {
+					if ($node->nodeType !== XML_ELEMENT_NODE)
+					{
 						continue;
 					}
 					switch ($node->localName)
 					{
-						case 'change-lib':
-							$e = array('type' => $this->convertToCategory(self::$DEP_FRAMEWORK),
-							'name' => 'framework', 'version' => $node->getAttribute('version'));
+						case 'change-lib' :
+							$e = array('type' => $this->convertToCategory(self::$DEP_FRAMEWORK), 'name' => 'framework', 
+								'version' => $node->getAttribute('version'));
 							$result[$e['type']][$e['name']] = $e;
 							break;
-						case 'module':
-						case 'lib':
-						case 'pearlib':
-						case 'theme':
-							$e = array('type' => $this->convertToCategory($node->localName),
-							'name' => $node->getAttribute('name'), 'version' => $node->getAttribute('version'));
+						case 'module' :
+						case 'lib' :
+						case 'pearlib' :
+						case 'theme' :
+							$e = array('type' => $this->convertToCategory($node->localName), 'name' => $node->getAttribute('name'), 
+								'version' => $node->getAttribute('version'));
 							$result[$e['type']][$e['name']] = $e;
 					}
 				}
@@ -546,8 +558,8 @@ class c_ChangeBootStrap
 			}
 		}
 		return $result;
-	}	
-		
+	}
+	
 	/**
 	 * @param string|integer $depType
 	 * @param string $name
@@ -558,7 +570,6 @@ class c_ChangeBootStrap
 		return $this->buildProjectPath($this->convertToValidType($depType), $name);
 	}
 	
-
 	public function loadDependencies()
 	{
 		$localRepo = $this->getWriteRepository();
@@ -693,7 +704,7 @@ class c_ChangeBootStrap
 	{
 		return $this->getRemoteFile($url, $filePath, $postDataArray);
 	}
-
+	
 	/**
 	 * @param string $depType
 	 * @param string $name
@@ -713,7 +724,7 @@ class c_ChangeBootStrap
 			$relaseInfos = $this->getReleaseDefinition($this->getCurrentReleaseName());
 			if (!isset($relaseInfos[$type]) || !isset($relaseInfos[$type][$name]))
 			{
-				throw new Exception('Unable to find version of: ' . $type .  '/' . $name);
+				throw new Exception('Unable to find version of: ' . $type . '/' . $name);
 			}
 			$version = $relaseInfos[$type][$name]['version'];
 		}
@@ -745,17 +756,17 @@ class c_ChangeBootStrap
 		{
 			throw new Exception(implode(', ', $this->remoteError));
 		}
-			
+		
 		$this->deleteDependency($depType, $name, $version);
 		
 		$localPath = $this->buildLocalRepositoryPath($depType, $name, $version);
-		echo 'Unzip ', $tmpFile, ' in (', $localPath , ')',  PHP_EOL;
+		echo 'Unzip ', $tmpFile, ' in (', $localPath, ')', PHP_EOL;
 		if (!$this->unZip($tmpFile, dirname($localPath)))
 		{
-			echo 'Unable to unZip archive ', $tmpFile,  PHP_EOL;
-		}	
+			echo 'Unable to unZip archive ', $tmpFile, PHP_EOL;
+		}
 		unlink($tmpFile);
-				
+		
 		clearstatcache();
 		if (!is_dir($localPath))
 		{
@@ -822,17 +833,17 @@ class c_ChangeBootStrap
 			if ($backup)
 			{
 				$count = 0;
-				while (is_dir($localPath . '-bak'.$count))
+				while (is_dir($localPath . '-bak' . $count))
 				{
 					$count++;
 				}
 				while ($count > 0)
 				{
-					rename($localPath . '-bak'.($count -1 ) , $localPath . '-bak'.$count);
+					rename($localPath . '-bak' . ($count - 1), $localPath . '-bak' . $count);
 					$count--;
 				}
 				
-				echo 'Backup ', $localPath, ' => ', $localPath , '-bak0', PHP_EOL;
+				echo 'Backup ', $localPath, ' => ', $localPath, '-bak0', PHP_EOL;
 				rename($localPath, $localPath . '-bak0');
 			}
 			else
@@ -841,7 +852,7 @@ class c_ChangeBootStrap
 			}
 		}
 	}
-			
+	
 	/**
 	 * @param String $dir        	
 	 * @return multitype:NULL
@@ -967,7 +978,7 @@ class c_ChangeBootStrap
 					$modulesNode->appendChild($depNode);
 				}
 				break;
-				
+			
 			case self::$DEP_LIB :
 				$libsNode = $changeXMLDoc->findUnique("c:dependencies/c:libs");
 				if ($libsNode === null)
@@ -1016,6 +1027,7 @@ class c_ChangeBootStrap
 	
 	// PEAR INSTALLATION
 	
+
 	/**
 	 *
 	 * @var array
@@ -1085,9 +1097,9 @@ class c_ChangeBootStrap
 		return $this->pearInfos;
 	}
 	
-
 	// PRIVATE
 	
+
 	/**
 	 * @param integer $depType
 	 * @param string $name
@@ -1097,17 +1109,18 @@ class c_ChangeBootStrap
 	private function restoreDependency($depType, $name, $version, $backupNumber = 0)
 	{
 		$localPath = $this->buildLocalRepositoryPath($depType, $name, $version);
-		$backupPath = $localPath . '-bak'.$backupNumber;
+		$backupPath = $localPath . '-bak' . $backupNumber;
 		if (is_dir($backupPath))
 		{
-			if (is_dir($localPath)) {
+			if (is_dir($localPath))
+			{
 				f_util_FileUtils::rmdir($localPath);
 			}
-			echo "Restore ", $localPath , ' <= ', $backupPath, PHP_EOL;
-			rename($backupPath , $localPath);
+			echo "Restore ", $localPath, ' <= ', $backupPath, PHP_EOL;
+			rename($backupPath, $localPath);
 		}
 	}
-
+	
 	/**
 	 *
 	 * @param string $url
@@ -1123,7 +1136,8 @@ class c_ChangeBootStrap
 			$wr = $this->getWriteRepository();
 			if ($wr === null)
 			{
-				$this->remoteError = array(-10, 'Invalid LOCAL_REPOSITORY configuration', $this->getProperties()->getProperty("LOCAL_REPOSITORY", $this->wd . "/repository"));
+				$this->remoteError = array(-10, 'Invalid LOCAL_REPOSITORY configuration', 
+					$this->getProperties()->getProperty("LOCAL_REPOSITORY", $this->wd . "/repository"));
 				echo implode(', ', $this->remoteError), PHP_EOL;
 				return $this->remoteError;
 			}
@@ -1136,7 +1150,7 @@ class c_ChangeBootStrap
 			}
 			$destFile = tempnam($tmpDir, 'tmp');
 		}
-	
+		
 		$fp = fopen($destFile, "wb");
 		if ($fp === false)
 		{
@@ -1144,7 +1158,7 @@ class c_ChangeBootStrap
 			echo implode(', ', $this->remoteError), PHP_EOL;
 			return $this->remoteError;
 		}
-	
+		
 		$ch = curl_init($url);
 		if ($ch == false)
 		{
@@ -1152,15 +1166,15 @@ class c_ChangeBootStrap
 			echo implode(', ', $this->remoteError), PHP_EOL;
 			return $this->remoteError;
 		}
-	
+		
 		curl_setopt($ch, CURLOPT_USERAGENT, $this->getInstanceProjectKey());
 		curl_setopt($ch, CURLOPT_AUTOREFERER, true);
 		curl_setopt($ch, CURLOPT_COOKIEFILE, '');
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-
+		
 		if (is_array($postDataArray) && count($postDataArray))
 		{
-			curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postDataArray, null , '&'));
+			curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postDataArray, null, '&'));
 			curl_setopt($ch, CURLOPT_POST, true);
 		}
 		
@@ -1169,7 +1183,7 @@ class c_ChangeBootStrap
 		{
 			curl_setopt($ch, CURLOPT_PROXY, $proxy);
 		}
-	
+		
 		curl_setopt($ch, CURLOPT_FILE, $fp);
 		curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
 		if (curl_exec($ch) === false)
@@ -1181,7 +1195,7 @@ class c_ChangeBootStrap
 			echo implode(', ', $this->remoteError), PHP_EOL;
 			return $this->remoteError;
 		}
-	
+		
 		fclose($fp);
 		$info = curl_getinfo($ch);
 		curl_close($ch);
@@ -1192,10 +1206,10 @@ class c_ChangeBootStrap
 			echo implode(', ', $this->remoteError), PHP_EOL;
 			return $this->remoteError;
 		}
-	
+		
 		return $this->remoteError;
 	}
-		
+	
 	private function loadImplicitDependencies(&$dependencies)
 	{
 		$localRepo = $this->getWriteRepository();
@@ -1212,7 +1226,7 @@ class c_ChangeBootStrap
 						c_warning($filePath . ' not found');
 						continue;
 					}
-						
+					
 					$changeXMLDoc = f_util_DOMUtils::fromPath($filePath);
 					$decDeps = $this->loadDependenciesFromXML($changeXMLDoc);
 					foreach ($decDeps as $depTypeKey => $deps)
@@ -1234,7 +1248,6 @@ class c_ChangeBootStrap
 			}
 		}
 	}
-	
 	
 	/**
 	 *
@@ -1273,7 +1286,7 @@ class c_ChangeBootStrap
 				$depType = $matches[1];
 				$depName = $matches[2];
 			}
-				
+			
 			$depTypeKey = null;
 			$repoRelativePath = null;
 			$link = null;
@@ -1312,24 +1325,24 @@ class c_ChangeBootStrap
 					$link = $this->wd . '/themes/' . $depName;
 					break;
 			}
-				
+			
 			if ($depTypeKey === null)
 			{
 				continue;
 			}
-				
+			
 			if (!isset($declaredDeps[$depTypeKey]))
 			{
 				$declaredDeps[$depTypeKey] = array();
 			}
-				
+			
 			$infos = array('localy' => FALSE, 'linked' => false, 'version' => '', 'repoRelativePath' => null);
-				
+			
 			foreach ($changeXMLDoc->find("cc:versions/cc:version", $dep) as $versionElem)
 			{
 				$infos['version'] = $versionElem->textContent;
 			}
-				
+			
 			$repoRelativePath .= $infos['version'];
 			$infos['repoRelativePath'] = $repoRelativePath;
 			$infos['path'] = $localRepo . $repoRelativePath;
@@ -1357,7 +1370,7 @@ class c_ChangeBootStrap
 	 */
 	private function buildProjectPath($depType, $name)
 	{
-	
+		
 		$path = $this->wd . DIRECTORY_SEPARATOR;
 		switch ($depType)
 		{
@@ -1426,7 +1439,7 @@ class c_ChangeBootStrap
 		$computedComponents["WWW_GROUP"] = $this->getProperties()->getProperty("WWW_GROUP");
 		$computedComponents["DEVELOPMENT_MODE"] = $this->getProperties()->getProperty("DEVELOPMENT_MODE") == true;
 		$computedComponents["PHP_CLI_PATH"] = $this->getProperties()->getProperty("PHP_CLI_PATH") . "";
-	
+		
 		$proxy = $this->getProxy();
 		if ($proxy !== null)
 		{
@@ -1438,7 +1451,7 @@ class c_ChangeBootStrap
 			$computedComponents["OUTGOING_HTTP_PROXY_HOST"] = $proxyInfo[0];
 			$computedComponents["OUTGOING_HTTP_PROXY_PORT"] = $proxyInfo[1];
 		}
-	
+		
 		$computedComponents['change-lib'] = $components['framework'];
 		$computedComponents['lib-pear'] = isset($components['pearlibs']) ? $components['pearlibs'] : array();
 		$computedComponents['extension'] = array();
@@ -1451,10 +1464,9 @@ class c_ChangeBootStrap
 				$computedComponents[$depType][$depname]['path'] = $localRepo . $infos["repoRelativePath"];
 			}
 		}
-	
+		
 		return $computedComponents;
 	}
-	
 	
 	/**
 	 * @return string
@@ -1495,24 +1507,24 @@ class c_ChangeBootStrap
 			case "modules" :
 			case "module" :
 				return self::$DEP_MODULE;
-					
+			
 			case "change-lib" :
 			case "framework" :
 				return self::$DEP_FRAMEWORK;
-					
+			
 			case "libs" :
 			case "lib" :
 				return self::$DEP_LIB;
-					
+			
 			case "lib-pear" :
 			case "pearlibs" :
 			case "pear" :
 				return self::$DEP_PEAR;
-					
+			
 			case "themes" :
 			case "theme" :
 				return self::$DEP_THEME;
-					
+			
 			case self::$DEP_MODULE :
 			case self::$DEP_FRAMEWORK :
 			case self::$DEP_LIB :
