@@ -13,7 +13,7 @@ class commands_ResetDatabase extends commands_AbstractChangeCommand
 	{
 		return "rdb";
 	}
-
+	
 	/**
 	 * @return String
 	 */
@@ -21,7 +21,7 @@ class commands_ResetDatabase extends commands_AbstractChangeCommand
 	{
 		return "reset database";
 	}
-
+	
 	/**
 	 * @param String[] $params
 	 * @param array<String, String> $options where the option array key is the option name, the potential option value or true
@@ -38,7 +38,7 @@ class commands_ResetDatabase extends commands_AbstractChangeCommand
 		}
 		
 		$dbInfos = f_persistentdocument_PersistentProvider::getInstance()->getConnectionInfos();
-		if (!$this->yesNo("*All* tables contained ".$dbInfos["database"]."@".$dbInfos["host"]." in will be deleted. Are you sure you want to reset the database ?"))
+		if (!$this->yesNo("*All* tables contained " . $dbInfos["database"] . "@" . $dbInfos["host"] . " in will be deleted. Are you sure you want to reset the database ?"))
 		{
 			return $this->quitOk("Task cancelled. No changes were performed in database.");
 		}
@@ -57,7 +57,16 @@ class commands_ResetDatabase extends commands_AbstractChangeCommand
 		$parent->executeCommand("clearSimplecache");
 		$parent->executeCommand("clearDatacache");
 		$parent->executeCommand("compileAll");
-		$parent->executeCommand("indexer", array('clear'));
+		
+		if (defined('SOLR_INDEXER_URL'))
+		{
+			$solrURL = SOLR_INDEXER_URL;
+			if (!f_util_StringUtils::contains($solrURL, 'mysqlindexer'))
+			{
+				$parent->executeCommand("indexer", array('clear'));
+			}
+		}
+		
 		$parent->executeCommand("importInitData");
 		$parent->executeCommand("initPatchDb");
 		
