@@ -54,7 +54,15 @@ abstract class commands_AbstractChangeCommand extends c_ChangescriptCommand
 					spl_autoload_unregister($fct);
 				}
 			}
-			require_once(WEBEDIT_HOME. '/framework/Framework.php');
+			
+			if (file_exists(WEBEDIT_HOME . '/modules/bridgev4/lib/initApplication.php'))
+			{
+				require_once WEBEDIT_HOME . '/modules/bridgev4/lib/initApplication.php';
+			}
+			else
+			{
+				require_once(WEBEDIT_HOME. '/framework/Framework.php');
+			}
 		}
 	}
 
