@@ -1115,7 +1115,7 @@ class indexer_IndexService extends BaseService
 		{
 			return null;
 		}
-
+		
 		$indexedDocument = $document->getIndexedDocument();
 		if ($indexedDocument instanceof indexer_IndexedDocument)
 		{
@@ -1126,6 +1126,13 @@ class indexer_IndexService extends BaseService
 			}
 			
 			$indexedDocument->setWebsiteIds($websiteIds);
+			$primaryFieldName = 'primary' . indexer_Field::INTEGER;
+			$fields = $indexedDocument->getFields();
+			if (!isset($fields[$primaryFieldName]))
+			{
+				$indexedDocument->setIntegerField('primary', 1);
+			}
+				
 			if (!$indexedDocument->hasDocumentAccessors())
 			{
 				$userIds = array();
