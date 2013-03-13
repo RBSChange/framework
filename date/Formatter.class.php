@@ -141,7 +141,7 @@ class date_Formatter
 
 					// 12-hour format of an hour without leading zeros
 					case 'g' :
-						$result .= strval($date->getHour() % 12);
+						$result .= strval((($date->getHour() + 23) % 12) + 1);
 						break;
 
 					// 24-hour format of an hour without leading zeros
@@ -151,7 +151,7 @@ class date_Formatter
 
 					// 12-hour format of an hour with leading zeros
 					case 'h' :
-						$result .= str_pad(strval($date->getHour() % 12), 2, '0', STR_PAD_LEFT);
+						$result .= str_pad(strval((($date->getHour() + 23) % 12) + 1), 2, '0', STR_PAD_LEFT);
 						break;
 
 					// 24-hour format of an hour with leading zeros
