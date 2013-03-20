@@ -6,7 +6,6 @@ class bean_DateTimeConverter implements BeanValueConverter
 	 */
 	private $dateFormat;
 	
-
 	/**
 	 * @return String
 	 */
@@ -14,7 +13,7 @@ class bean_DateTimeConverter implements BeanValueConverter
 	{
 		if ($this->dateFormat === null)
 		{
-			return date_DateFormat::getDateFormatForLang(RequestContext::getInstance()->getLang());
+			return date_Formatter::getDefaultDateFormat(RequestContext::getInstance()->getLang());
 		}
 		return $this->dateFormat;
 	}
@@ -34,14 +33,13 @@ class bean_DateTimeConverter implements BeanValueConverter
 	 * @return Mixed
 	 */
 	public function convertFromBeanToRequestValue($value)
-	{		
+	{
 		if (!f_util_StringUtils::isEmpty($value))
 		{
-			$lang = RequestContext::getInstance()->getLang();
 			$convertedValue = date_Calendar::getInstance($value);
 			$convertedValue = date_Converter::convertDateToLocal($convertedValue);
 			$convertedValue = $convertedValue->toString();
-			return date_DateFormat::format($convertedValue, date_DateFormat::getDateFormatForLang($lang));
+			return date_DateFormat::format($convertedValue, $this->getDateFormat());
 		}
 		return "";
 	}
@@ -112,27 +110,27 @@ class bean_DateTimeConverter implements BeanValueConverter
 					if (strval($dv) != $dateParts[$i] || $dv < 1 || $dv > 12)
 					{
 						return false;
-					}					
+					}
 					break;
 				case 'd' :
 					if (strval($dv) != $dateParts[$i] || $dv < 1 || $dv > 31)
 					{
 						return false;
-					}					
+					}
 					break;
 				case 'h' :
 				case 'H' :
 					if (strval($dv) != $dateParts[$i] || $dv < 0 || $dv > 23)
 					{
 						return false;
-					}						
+					}
 					break;
 				case 'i' :
 				case 's' :
 					if (strval($dv) != $dateParts[$i] || $dv < 0 || $dv > 59)
 					{
 						return false;
-					}					
+					}
 					break;
 			}
 		}
