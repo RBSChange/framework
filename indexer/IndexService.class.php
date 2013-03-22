@@ -1132,7 +1132,7 @@ class indexer_IndexService extends BaseService
 			{
 				$indexedDocument->setIntegerField('primary', 1);
 			}
-				
+			
 			if (!$indexedDocument->hasDocumentAccessors())
 			{
 				$userIds = array();
@@ -1145,7 +1145,17 @@ class indexer_IndexService extends BaseService
 					}
 					$userIds = array_unique($userIds);
 				}
-				// If there is no explicit accessor, anybody can access. 
+				else
+				{
+					foreach (website_WebsiteService::getInstance()->getAll() as $website)
+					{
+						website_WebsiteModuleService::getInstance()->setCurrentWebsite($website);
+						$userIds = array_merge($this->getFrontendAccessorIds($document), $userIds);
+					}
+					$userIds = array_unique($userIds);
+				}
+				
+				// If there is no explicit accessor, anybody can access.
 				if (count($userIds) == 0)
 				{
 					$userIds[] = 0;
