@@ -150,11 +150,12 @@ abstract class object_InitDataSetup
 	 * @example set value to null for remove entry
 	 * @param string $path
 	 * @param string $value
+	 * @param string $profile
 	 * @return string || false if return value != input value compile-config is required
 	 */
-	protected final function addProjectConfigurationEntry($path, $value)
+	protected final function addProjectConfigurationEntry($path, $value, $profile = null)
 	{
-		return change_ConfigurationService::getInstance()->addProjectConfigurationEntry($path, $value);
+		return change_ConfigurationService::getInstance()->addProjectConfigurationEntry($path, $value, $profile);
 	}
 	
 	/**

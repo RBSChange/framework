@@ -124,13 +124,13 @@ class change_ConfigurationService
 	{
 		// If specific environnement add a dot to complet in path file
 		$this->config = array();
-
-		$configFileDir = WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'build' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR;	
+		
+		$configFileDir = WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'build' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR;
 		$configFile = $configFileDir . $profile . '.php';
 		if (!is_file($configFile))
 		{
 			throw new Exception("Could not find $configFile. You must compile your configuration.");
-		}			
+		}
 		include $configFile;
 		
 		$this->defines = array();
@@ -138,9 +138,9 @@ class change_ConfigurationService
 		$defineFile = $configFileDir . $profile . '.define.php';
 		include $defineFile;
 		$this->applyDefine();
-
+	
 	}
-		
+	
 	public function setConfigArray($config)
 	{
 		$this->config = $config;
@@ -236,7 +236,7 @@ class change_ConfigurationService
 		$cacheConfigDir = WEBEDIT_HOME . DIRECTORY_SEPARATOR . 'build' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR;
 		
 		$currentProfile = (defined("PROFILE") ? PROFILE : trim(file_get_contents(WEBEDIT_HOME . "/profile")));
-		$cacheFile = $cacheConfigDir .  $currentProfile . ".php";
+		$cacheFile = $cacheConfigDir . $currentProfile . ".php";
 		$cacheDefineFile = $cacheConfigDir . $currentProfile . ".define.php";
 		
 		$this->compiling = true;
@@ -254,7 +254,6 @@ class change_ConfigurationService
 			include $cacheDefineFile;
 			$oldDefines = $this->defines;
 		}
-		
 		
 		// Config Dir for over write.
 		$fileList = scandir($configDir);
@@ -372,7 +371,7 @@ class change_ConfigurationService
 		
 		$content = "<?php // change_ConfigurationService::setDefineArray PART // \n";
 		$configDefineArray = $this->prepareToExportDefineArray($configDefineArray);
-		$content .= "change_ConfigurationService::getInstance()->setDefineArray(" . var_export($configDefineArray, true) . ');';		
+		$content .= "change_ConfigurationService::getInstance()->setDefineArray(" . var_export($configDefineArray, true) . ');';
 		$this->writeFile($cacheConfigDir . $currentProfile . ".define.php", $content);
 		$this->defines = $configDefineArray;
 		$this->applyDefine();
@@ -385,12 +384,10 @@ class change_ConfigurationService
 		$content .= "change_ConfigurationService::getInstance()->setConfigArray(" . var_export($configArray['config'], true) . ');';
 		$this->writeFile($cacheConfigDir . $currentProfile . ".php", $content);
 		$this->config = $configArray['config'];
-
+		
 		return ($oldConfig !== null) ? array("old" => array("defines" => $oldDefines, "config" => $oldConfig), 
-				"current" => array("config" => $configArray['config'], "defines" => $configDefineArray)) : null;
+			"current" => array("config" => $configArray['config'], "defines" => $configDefineArray)) : null;
 	}
-	
-	
 	
 	private function writeFile($path, $content)
 	{
@@ -640,7 +637,7 @@ class change_ConfigurationService
 	 * @param string $value        	
 	 * @return string old value
 	 */
-	public function addProjectConfigurationEntry($path, $value)
+	public function addProjectConfigurationEntry($path, $value, $profile = null)
 	{
 		$sections = array();
 		foreach (explode('/', $path) as $name)
@@ -655,7 +652,7 @@ class change_ConfigurationService
 			return false;
 		}
 		$entryName = array_pop($sections);
-		return self::addProjectConfigurationNamedEntry(implode('/', $sections), $entryName, $value);
+		return self::addProjectConfigurationNamedEntry(implode('/', $sections), $entryName, $value, $profile);
 	}
 	
 	/**
@@ -664,7 +661,7 @@ class change_ConfigurationService
 	 * @param string $value        	
 	 * @return string old value
 	 */
-	public function addProjectConfigurationNamedEntry($path, $entryName, $value)
+	public function addProjectConfigurationNamedEntry($path, $entryName, $value, $profile = null)
 	{
 		if (empty($entryName) || ($value !== null && !is_string($value)))
 		{
@@ -684,7 +681,16 @@ class change_ConfigurationService
 		}
 		
 		$oldValue = null;
-		$configProjectPath = implode(DIRECTORY_SEPARATOR, array(WEBEDIT_HOME, 'config', 'project.xml'));
+		
+		$pathArray = array(WEBEDIT_HOME, 'config');
+		$file = 'project.xml';
+		if ($profile != null)
+		{
+			$file = 'project.' . $profile . '.xml';
+		}
+		$pathArray[] = $file;
+		
+		$configProjectPath = implode(DIRECTORY_SEPARATOR, $pathArray);
 		if (!is_readable($configProjectPath))
 		{
 			return false;
@@ -769,17 +775,17 @@ class change_ConfigurationService
 	 */
 	private function array_merge_configuration($configArray1, $configArray2)
 	{
-		foreach($configArray2 as $key => $value)
+		foreach ($configArray2 as $key => $value)
 		{
-			if(array_key_exists($key, $configArray1) && is_array($value))
+			if (array_key_exists($key, $configArray1) && is_array($value))
 			{
 				$configArray1[$key] = $this->array_merge_configuration($configArray1[$key], $configArray2[$key]);
-			}	
+			}
 			else
 			{
 				$configArray1[$key] = $value;
-			}	
-		}	
+			}
+		}
 		return $configArray1;
 	}
 	
@@ -787,7 +793,7 @@ class change_ConfigurationService
 	{
 		$content = "<?php // For development only //" . PHP_EOL;
 		$content .= "throw new Exception('Do not include this file');" . PHP_EOL;
-		foreach($defineArray as $key => $value)
+		foreach ($defineArray as $key => $value)
 		{
 			$defval = var_export($value, true);
 			if (is_string($value))
@@ -797,10 +803,10 @@ class change_ConfigurationService
 					$defval = substr($value, 7, strlen($value) - 8);
 				}
 			}
-			$content .= "define('".$key. "', " .  $defval . ");" . PHP_EOL;
+			$content .= "define('" . $key . "', " . $defval . ");" . PHP_EOL;
 		}
 		$filename = implode(DIRECTORY_SEPARATOR, array(WEBEDIT_HOME, 'build', PROFILE, 'dev_defines.php'));
 		file_put_contents($filename, $content);
 	}
-	
+
 }
