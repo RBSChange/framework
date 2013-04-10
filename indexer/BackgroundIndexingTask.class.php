@@ -34,7 +34,8 @@ class f_tasks_BackgroundIndexingTask extends task_SimpleSystemTask
 		$output = f_util_System::execScript($scriptPath, array($indexingMode, $maxId, $chunkSize));
 		if (!is_numeric($output))
 		{
-			$chunkInfo = " Error on processsing $modeLabel at index $maxId.";
+			$chunkInfo = " Error on processsing $modeLabel at index $maxId : ".var_export($output, true).".";
+			Framework::error(__METHOD__.": ".$chunkInfo);
 			$errors[] = $chunkInfo;
 			$logs->namedLog($chunkInfo, 'indexer');
 			$output = -1;
