@@ -120,6 +120,20 @@ class BeanUtils
 	}
 
 	/**
+	 * For security reasons, these properties are excluded for documents extending modules_users/user.
+	 * If you need to update them, do it manually.
+	 * @var string[]
+	 */
+	protected static $excludeForUsers = array('passwordmd5', 'changepasswordkey');
+
+	/**
+	 * For security reasons, these properties are excluded for documents extending modules_users/user.
+	 * If you need to update them, do it manually.
+	 * @var string[]
+	 */
+	protected static $excludeForOtherUsers = array('password', 'email', 'login');
+
+	/**
 	 * Populate a bean with an array of
 	 * @param stdClass $bean
 	 * @param array<String,mixed> $properties
@@ -169,6 +183,30 @@ class BeanUtils
 			}
 			else
 			{
+				// For security reasons, backend users can't be updated by automatic population.
+				// If you need to update them, do it manually.
+				if ($bean instanceof users_persistentdocument_backenduser)
+				{
+					continue;
+				}
+				// For security reasons, some properties are excluded for documents extending modules_users/user.
+				// If you need to update them, do it manually.
+				if ($bean instanceof users_persistentdocument_frontenduser)
+				{
+					if (in_array($name, self::$excludeForUsers))
+					{
+						continue;
+					}
+					elseif (in_array($name, self::$excludeForOtherUsers))
+					{
+						$user = users_UserService::getInstance()->getCurrentFrontEndUser();
+						if (!$bean->isNew() && !DocumentHelper::equals($bean, $user))
+						{
+							continue;
+						}
+					}
+				}
+
 				if (!self::setDirectProperty($bean, $name, $value, $class))
 				{
 					$invalidProperties[$name] = $value;
