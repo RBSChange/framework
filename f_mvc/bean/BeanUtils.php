@@ -37,17 +37,18 @@ class BeanUtils
 			$wrappedObject = $bean->getWrappedObject();
 			if (!$wrappedObject instanceof $expectedClassName)
 			{
-				throw new Exception("Object '$beanName' is not an instance of $expectedClassName but ".get_class($wrappedObject));
+				throw new Exception("Object is not an instance of $expectedClassName but " . get_class($wrappedObject));
 			}
 		}
 		elseif (!$bean instanceof $expectedClassName)
 		{
-			throw new Exception("Object '$beanName' is not an instance of $expectedClassName but ".get_class($bean));
+			throw new Exception("Object is not an instance of $expectedClassName but " . get_class($bean));
 		}
 	}
 
 	/**
 	 * @param f_mvc_Bean $bean
+	 * @return array
 	 */
 	static function getSerializableProperties($bean)
 	{
@@ -55,7 +56,7 @@ class BeanUtils
 		$class = new ReflectionClass($bean);
 		foreach ($bean->getBeanModel()->getBeanPropertiesInfos() as $propName => $propInfo)
 		{
-			$value  = self::getProperty($bean, $propName, $class);
+			$value = self::getProperty($bean, $propName, $class);
 			$converter = $propInfo->getConverter();
 			if ($converter !== null)
 			{
@@ -68,7 +69,8 @@ class BeanUtils
 
 	/**
 	 * @param ReflectionClass $reflectionClass
-	 * @return Object
+	 * @throws Exception
+	 * @return f_mvc_Bean
 	 */
 	static function getNewBeanInstance($reflectionClass)
 	{
@@ -80,12 +82,16 @@ class BeanUtils
 			}
 			else
 			{
-				throw new Exception("Can not instantiate ".$reflectionClass->getName());
+				throw new Exception("Can not instantiate " . $reflectionClass->getName());
 			}
 		}
 		return $reflectionClass->getMethod('getNewInstance')->invoke(null);
 	}
 
+	/**
+	 * @param f_mvc_Bean $bean
+	 * @return string
+	 */
 	static function getClassName($bean)
 	{
 		if ($bean instanceof f_mvc_DynBean)
@@ -97,7 +103,8 @@ class BeanUtils
 
 	/**
 	 * @param ReflectionClass $reflectionClass
-	 * @param Integer $documentId
+	 * @param integer $beanId
+	 * @throws Exception
 	 * @return Object
 	 */
 	static function getBeanInstance($reflectionClass, $beanId)
@@ -116,16 +123,32 @@ class BeanUtils
 			}
 			return $bean;
 		}
-		throw new Exception('beanInstance class is not the same as bean class: expected '.$reflectionClass->getName().', got '.get_class($bean));
+		throw new Exception('beanInstance class is not the same as bean class: expected ' . $reflectionClass->getName() . ', got '
+			. get_class($bean));
 	}
 
 	/**
+	 * For security reasons, these properties are excluded for documents extending modules_users/user.
+	 * If you need to update them, do it manually.
+	 * @var string[]
+	 */
+	protected static $excludeForUsers = array('passwordmd5', 'changepasswordkey');
+
+	/**
+	 * For security reasons, these properties are excluded for documents extending modules_users/user.
+	 * If you need to update them, do it manually.
+	 * @var string[]
+	 */
+	protected static $excludeForOtherUsers = array('password', 'email', 'login');
+
+	/**
 	 * Populate a bean with an array of
-	 * @param stdClass $bean
+	 * @param Object $bean
 	 * @param array<String,mixed> $properties
-	 * @param array<String> $include
-	 * @param array<String> $exclude
-	 * @return array<String,mixed> of invalide property value;
+	 * @param string[] $include
+	 * @param string[] $exclude
+	 * @return array<String,mixed> of invalid property value
+	 * @throws Exception
 	 */
 	static function populate($bean, $properties, $include = null, $exclude = null)
 	{
@@ -154,7 +177,7 @@ class BeanUtils
 				continue;
 			}
 
-			if (($index = strpos($name, ".")) !== false)
+			if (($index = strpos($name, '.')) !== false)
 			{
 				$subBeanName = substr($name, 0, $index);
 				if (!$beanModel->hasBeanProperty($subBeanName))
@@ -165,10 +188,34 @@ class BeanUtils
 				{
 					$nestedProperties[$subBeanName] = array();
 				}
-				$nestedProperties[$subBeanName][substr($name, $index+1)] = $value;
+				$nestedProperties[$subBeanName][substr($name, $index + 1)] = $value;
 			}
 			else
 			{
+				// For security reasons, backend users can't be updated by automatic population.
+				// If you need to update them, do it manually.
+				if ($bean instanceof users_persistentdocument_backenduser)
+				{
+					continue;
+				}
+				// For security reasons, some properties are excluded for documents extending modules_users/user.
+				// If you need to update them, do it manually.
+				if ($bean instanceof users_persistentdocument_frontenduser)
+				{
+					if (in_array($name, self::$excludeForUsers))
+					{
+						continue;
+					}
+					elseif (in_array($name, self::$excludeForOtherUsers))
+					{
+						$user = users_UserService::getInstance()->getCurrentFrontEndUser();
+						if (!$bean->isNew() && !DocumentHelper::equals($bean, $user))
+						{
+							continue;
+						}
+					}
+				}
+
 				if (!self::setDirectProperty($bean, $name, $value, $class))
 				{
 					$invalidProperties[$name] = $value;
@@ -184,10 +231,10 @@ class BeanUtils
 				{
 					$subBeanProperty = $beanModel->getBeanPropertyInfo($subBeanName);
 					$subBeanClass = new ReflectionClass($subBeanProperty->getClassName());
-					if (isset($subBeanProperties["id"]))
+					if (isset($subBeanProperties['id']))
 					{
-						$subBean = self::getBeanInstance($subBeanClass, $subBeanProperties["id"]);
-						unset($subBeanProperties["id"]);
+						$subBean = self::getBeanInstance($subBeanClass, $subBeanProperties['id']);
+						unset($subBeanProperties['id']);
 					}
 					else
 					{
@@ -206,13 +253,13 @@ class BeanUtils
 				$subInvalidProperties = self::populate($subBean, $subBeanProperties);
 				foreach ($subInvalidProperties as $key => $value)
 				{
-					$invalidProperties[$subBeanName.'.'.$key] = $value;
+					$invalidProperties[$subBeanName . '.' . $key] = $value;
 				}
 			}
 		}
 		return $invalidProperties;
 	}
-	
+
 	/**
 	 * @param String|Object $beanClassNameOrObject
 	 * @param String $propertyName
@@ -229,6 +276,7 @@ class BeanUtils
 			$reflectionClass = new ReflectionClass($beanClassNameOrObject);
 			$beanInstance = self::getNewBeanInstance($reflectionClass);
 		}
+		/* @var $finalBean f_mvc_Bean */
 		list($finalBean, $propName) = self::resolveModel($beanInstance, $propertyName);
 		return $finalBean->getBeanModel()->getBeanPropertyInfo($propName);
 	}
@@ -236,9 +284,11 @@ class BeanUtils
 	/**
 	 * @param f_mvc_Bean $beanInstance
 	 * @param String $propertyName
+	 * @return boolean
 	 */
 	static function hasProperty($beanInstance, $propertyName)
 	{
+		/* @var $finalBean f_mvc_Bean */
 		list($finalBean, $propName) = self::resolveModel($beanInstance, $propertyName);
 		if ($finalBean === null)
 		{
@@ -260,7 +310,7 @@ class BeanUtils
 		{
 			$model = $beanInstance->getBeanModel();
 			$subBean = $beanInstance;
-			for ($i = 0; $i < $propInfoCount-1; $i++)
+			for ($i = 0; $i < $propInfoCount - 1; $i++)
 			{
 				$propName = $propInfo[$i];
 				if (!$model->hasBeanProperty($propName))
@@ -292,10 +342,12 @@ class BeanUtils
 	/**
 	 * @param f_mvc_Bean $beanInstance
 	 * @param String $propertyName
+	 * @throws Exception
 	 * @return BeanPropertyInfo
 	 */
 	static function getPropertyInfo($beanInstance, $propertyName)
 	{
+		/* @var $finalBean f_mvc_Bean */
 		list($finalBean, $propName) = self::resolveModel($beanInstance, $propertyName);
 		if ($finalBean === null)
 		{
@@ -344,6 +396,8 @@ class BeanUtils
 	 * @param String|Object $beanClassNameOrObject
 	 * @param String[] $include
 	 * @param String[] $exclude
+	 * @param string $suffix
+	 * @throws InvalidArgumentException
 	 * @return String[]
 	 */
 	private static function _getBeanValidationRules($beanClassNameOrObject, $include = null, $exclude = null, $suffix = null)
@@ -387,7 +441,7 @@ class BeanUtils
 			$rule = self::getBeanPropertyInfo($beanInstance, $propertyName)->getValidationRules();
 			if (!f_util_StringUtils::isEmpty($rule))
 			{
-				$rules[] = $suffix.$rule;
+				$rules[] = $suffix . $rule;
 			}
 		}
 		return $rules;
@@ -395,8 +449,10 @@ class BeanUtils
 
 	/**
 	 * @param String $beanClassName Example: "mymodule_persistentdocument_mybean"
+	 * @param String $subBeanName
 	 * @param String[] $include Example: "aDocumentPropertyName"
 	 * @param String[] $exclude Example: array("label", "aSubBeanPropertyName")
+	 * @throws Exception
 	 * @return String[]
 	 */
 	static function getSubBeanValidationRules($beanClassName, $subBeanName, $include = null, $exclude = null)
@@ -414,12 +470,12 @@ class BeanUtils
 			$subBeanPropertyInfo = $beanModel->getBeanPropertyInfo($property);
 			$tempBeanClassName = $subBeanPropertyInfo->getClassName();
 		}
-		$rules = self::_getBeanValidationRules($subBeanPropertyInfo->getClassName(), $include, $exclude, $subBeanName.".");
+		$rules = self::_getBeanValidationRules($subBeanPropertyInfo->getClassName(), $include, $exclude, $subBeanName . ".");
 		return $rules;
 	}
 
 	/**
-	 * @param stdClass $bean
+	 * @param f_mvc_Bean $bean
 	 * @param String $name
 	 * @param ReflectionClass $class deprecated parameter
 	 * @return Mixed
@@ -431,9 +487,10 @@ class BeanUtils
 	}
 
 	/**
-	 * @param stdClass $bean
+	 * @param Object $bean
 	 * @param String $name
 	 * @param ReflectionClass $class
+	 * @throws Exception
 	 * @return Mixed
 	 */
 	private static function getDirectProperty($bean, $name, ReflectionClass $class = null)
@@ -488,7 +545,7 @@ class BeanUtils
 	}
 
 	/**
-	 * @param stdClass $bean
+	 * @param f_mvc_Bean $bean
 	 * @param String $name
 	 * @param mixed $value empty strings are considered as null
 	 * @param ReflectionClass $class
@@ -501,7 +558,7 @@ class BeanUtils
 	}
 
 	/**
-	 * @param stdClass $bean
+	 * @param Object $bean
 	 * @param String $name
 	 * @param mixed $value empty strings are considered as null or empty array, depending on the type of the property
 	 * @param ReflectionClass $class
@@ -571,7 +628,7 @@ class BeanUtils
 	 * @param ReflectionMethod $method
 	 * @param Integer $parameterIndex the parameter index, starting with 0
 	 * @param String $beanName
-	 * @return ReflectionClas|null
+	 * @return ReflectionClass|null
 	 */
 	static function getBeanClass(ReflectionMethod $method, $parameterIndex, &$beanName)
 	{
@@ -590,7 +647,7 @@ class BeanUtils
 	}
 
 	// Deprecated
-	
+
 	/**
 	 * @deprecated (will be removed in 4.0) use getBeanPropertyInfo
 	 */
