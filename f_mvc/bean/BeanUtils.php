@@ -147,11 +147,22 @@ class BeanUtils
 	 * @param array<String,mixed> $properties
 	 * @param string[] $include
 	 * @param string[] $exclude
+	 * @param boolean|null $strictMode
 	 * @return array<String,mixed> of invalid property value
 	 * @throws Exception
 	 */
-	static function populate($bean, $properties, $include = null, $exclude = null)
+	static function populate($bean, $properties, $include = null, $exclude = null, $strictMode = null)
 	{
+		// In strict mode, a document can't be populated if the $include parameter is not defined.
+		if ($strictMode === null)
+		{
+			$strictMode = Framework::getConfigurationValue('modules/website/useBeanPopulateStrictMode') != 'false';
+		}
+		if ($strictMode && $include === null && $bean instanceof f_persistentdocument_PersistentDocument)
+		{
+			throw new Exception('Try to populate document bean without specifying $include');
+		}
+
 		$invalidProperties = array();
 
 		if ($bean instanceof f_mvc_DynBean)
@@ -250,7 +261,26 @@ class BeanUtils
 						$target->{$subBeanName} = $subBean;
 					}
 				}
-				$subInvalidProperties = self::populate($subBean, $subBeanProperties);
+
+				if ($strictMode)
+				{
+					$subInclude = array();
+					$prefix = $subBeanName . '.';
+					foreach ($include as $name)
+					{
+						if (f_util_StringUtils::beginsWith($name, $prefix) !== false)
+						{
+							$subInclude[] = substr($name, strpos($name, '.') + 1);
+						}
+					}
+					$subInclude = count($subInclude) ? $subInclude : null;
+				}
+				else
+				{
+					$subInclude = null;
+				}
+
+				$subInvalidProperties = self::populate($subBean, $subBeanProperties, $subInclude, null, $strictMode);
 				foreach ($subInvalidProperties as $key => $value)
 				{
 					$invalidProperties[$subBeanName . '.' . $key] = $value;
