@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://www.rbs.fr/schema/change-component/1.0 http://www.rbschange.fr/static/schema/change-component/1.0.xsd">
 	<name>framework</name>
 	<type>change-lib</type>
-	<version>3.6.5</version>
+	<version>3.6.6</version>
 	<description>Framework Change</description>
 	<license>os</license>
 	<repository>public</repository>
@@ -54,7 +54,7 @@
 		<dependency>
 			<name>lib/icons</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 
@@ -75,182 +75,182 @@
 		<dependency>
 			<name>change-module/webservices</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 
 		<dependency>
 			<name>change-module/contactcard</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 
 		<dependency>
 			<name>change-module/filter</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 
 		<dependency>
 			<name>change-module/form</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 
 		<dependency>
 			<name>change-module/markergas</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 
 		<dependency>
 			<name>change-module/skin</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 
 		<dependency>
 			<name>change-module/useractionlogger</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 
 		<dependency>
 			<name>change-module/uixul</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 
 		<dependency>
 			<name>change-module/list</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 
 		<dependency>
 			<name>change-module/media</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 
 		<dependency>
 			<name>change-module/notification</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 
 		<dependency>
 			<name>change-module/generic</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 
 		<dependency>
 			<name>change-module/preferences</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 
 		<dependency>
 			<name>change-module/mysqlindexer</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 
 		<dependency>
 			<name>change-module/solrsearch</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 
 		<dependency>
 			<name>change-module/rss</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 
 		<dependency>
 			<name>change-module/seo</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 
 		<dependency>
 			<name>change-module/dashboard</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 
 		<dependency>
 			<name>change-module/task</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 		
 		<dependency>
 			<name>change-module/theme</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 
 		<dependency>
 			<name>change-module/i18n</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 
 		<dependency>
 			<name>change-module/users</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 
 		<dependency>
 			<name>change-module/website</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 
 		<dependency>
 			<name>change-module/workflow</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 		
 		<dependency>
 			<name>change-module/zone</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 		
 		<dependency>
 			<name>change-module/updater</name>
 			<versions>
-				<version>3.6.5</version>
+				<version>3.6.6</version>
 			</versions>
 		</dependency>
 	</dependencies>
