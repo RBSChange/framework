@@ -55,7 +55,7 @@ class BaseException extends Exception
 		}
 		return $this->getMessage();
 	}
-	
+
 	/**
 	 * @param string[html | xml] $format
 	 */
