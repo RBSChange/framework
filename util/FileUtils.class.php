@@ -374,7 +374,8 @@ abstract class f_util_FileUtils
 	/**
 	 * TODO: this method does NOT returns what it promise to do ...
 	 * remove a directory (and sub-directories) on filesystem
-	 * @param $directoryPath the directory to remove
+	 * @param string $directoryPath the directory to remove
+	 * @param boolean $onlyContent
 	 * @return boolean FALSE if directory cannot be removed
 	 */
 	static public function rmdir($directoryPath, $onlyContent = false)
@@ -556,16 +557,16 @@ abstract class f_util_FileUtils
 			throw new FrameworkException('deleteTmpFile_invalid_parmater');
 		}
 		if (empty($filePath)) {
-			return TRUE;
+			return true;
 		}
 
 		if (is_string($filePath)) {
 			$filePath = array($filePath);
 		}
 
-		$result = TRUE;
+		$result = true;
 		foreach($filePath as $path) {
-			if ($result == FALSE) {
+			if ($result == false) {
 				continue;
 			}
 			if (file_exists($path)) {

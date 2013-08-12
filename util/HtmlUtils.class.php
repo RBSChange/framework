@@ -65,7 +65,7 @@ abstract class f_util_HtmlUtils
 	{
 		if (f_util_StringUtils::isNotEmpty($string))
 		{
-			return htmlspecialchars(str_replace(array("\t", "\n"), array("&#09;", "&#10;"), $string), ENT_COMPAT, 'UTF-8');
+			return str_replace(array("\t", "\n"), array("&#09;", "&#10;"), htmlspecialchars($string, ENT_COMPAT, 'UTF-8'));
 		}
 		return '';
 	}
