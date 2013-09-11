@@ -46,27 +46,33 @@ class f_DataCacheFileService extends f_DataCacheService
 		$dirPath = $this->getCachePath($item);
 		if (is_dir($dirPath))
 		{
-			$subCaches = f_util_FileUtils::getDirFiles($dirPath);
-			foreach ($subCaches as $subCache)
+			try
 			{
-				$subCacheName = basename($subCache);
-				if ($subCacheName != self::INVALID_CACHE_ENTRY)
+				$subCaches = f_util_FileUtils::getDirFiles($dirPath);
+				foreach ($subCaches as $subCache)
 				{
-					$item->setCreationTime(@filemtime($subCache));
-					$item->setValue($subCacheName, f_util_FileUtils::read($subCache));
+					$subCacheName = basename($subCache);
+					if ($subCacheName != self::INVALID_CACHE_ENTRY)
+					{
+						$item->setCreationTime(@filemtime($subCache));
+						$item->setValue($subCacheName, f_util_FileUtils::read($subCache));
+					}
+				}
+				$expireTime = @filemtime($this->getCachePath($item, self::INVALID_CACHE_ENTRY));
+				if ($expireTime > time())
+				{
+					$item->setTTL($expireTime-$item->getCreationTime());
+					$item->setValidity(true);
+				}
+				else
+				{
+					$item->setInvalid();
 				}
 			}
-			$expireTime = @filemtime($this->getCachePath($item, self::INVALID_CACHE_ENTRY));
-			if ($expireTime > time())
-			{
-				$item->setTTL($expireTime-$item->getCreationTime());
-				$item->setValidity(true);
-			}
-			else
+			catch (Exception $e)
 			{
 				$item->setInvalid();
 			}
-			
 			return $item;
 		}
 		return ($returnItem) ? $item : null;
@@ -376,7 +382,18 @@ class f_DataCacheFileService extends f_DataCacheService
 				if (!file_exists($byIdRegister))
 				{
 					f_util_FileUtils::mkdir(dirname($byIdRegister));
-					f_util_FileUtils::symlink($this->getCachePath($item), $byIdRegister);
+					try
+					{
+						f_util_FileUtils::symlink($this->getCachePath($item), $byIdRegister);
+					}
+					catch (Exception $e)
+					{
+						clearstatcache(true); // someone could create it
+						if (!is_link($byIdRegister))
+						{
+							throw $e;
+						}
+					}
 				}
 			}
 		}
