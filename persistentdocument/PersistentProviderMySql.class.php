@@ -2271,6 +2271,7 @@ class f_persistentdocument_DocumentQueryBuilder
 	private $aliasCount = 0;
 	private $relationAliasCount = 0;
 	private $aliasByPath = array();
+	private $modelByPath = array();
 	private $currentPropertyPath = array();
 	private $groupBy = array();
 	private $having = array();
@@ -2365,7 +2366,9 @@ class f_persistentdocument_DocumentQueryBuilder
 			if (!is_null($propertyName))
 			{
 				$this->currentPropertyPath[] = $propertyName;
-				$this->aliasByPath[join('.', $this->currentPropertyPath)] = $this->getTableAlias();
+				$fullPath = join('.', $this->currentPropertyPath);
+				$this->aliasByPath[$fullPath] = $this->getTableAlias();
+				$this->modelByPath[$fullPath] = $model;
 			}
 		}
 	}
@@ -2507,6 +2510,7 @@ class f_persistentdocument_DocumentQueryBuilder
 			{
 				throw new Exception("Could not resolve $propertyName. Did you made any criteria ?");
 			}
+
 			$model = $this->getModel();
 			foreach ($propInfo as $propName)
 			{
@@ -2517,7 +2521,16 @@ class f_persistentdocument_DocumentQueryBuilder
 				}
 				if ($prop === null || !$prop->isDocument())
 				{
-					throw new Exception("$propName is not a document property");
+					$propModelName = join(".", $propInfo);
+					if (isset($this->modelByPath[$propModelName]))
+					{
+						$model = $this->modelByPath[$propModelName];
+						break;
+					}
+					else
+					{
+						throw new Exception("$propName is not a document property ");
+					}
 				}
 				$model = f_persistentdocument_PersistentDocumentModel::getInstanceFromDocumentModelName($prop->getType());
 			}
