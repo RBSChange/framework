@@ -109,7 +109,13 @@ class paginator_Paginator extends ArrayObject
 	 * @var integer
 	 */
 	private $pageCount = 1;
-	
+
+	/**
+	 * Count of items for the paginator
+	 * @var integer
+	 */
+	private $itemCount = 1;
+
 	/**
 	 * Name of the module that use the paginator
 	 * @var string
@@ -159,6 +165,7 @@ class paginator_Paginator extends ArrayObject
 		if ($itemCount != null)
 		{
 			$this->setItemCount($itemCount);
+			$this->setPageCount((int) ceil($this->itemCount / $this->nbItemPerPage));
 		}
 		
 		$this->excludeParams = $excludeParams;
@@ -186,6 +193,7 @@ class paginator_Paginator extends ArrayObject
 				}
 				
 				$this->setItemCount($count);
+				$this->setPageCount((int) ceil($this->itemCount / $this->nbItemPerPage));
 				$itemsArray = array_slice($itemsArray, ($pageIndex - 1) * $nbItemPerPage, $nbItemPerPage);
 			}
 			
@@ -208,13 +216,15 @@ class paginator_Paginator extends ArrayObject
 	{
 		return $this->pageIndexParamName;
 	}
-	
+
 	/**
-	 * @param Integer $itemCount
+	 * @param Integer $value
+	 * @return paginator_Paginator
 	 */
-	public function setItemCount($itemCount)
+	public function setItemCount($value)
 	{
-		$this->setPageCount((int) ceil($itemCount / $this->nbItemPerPage));
+		$this->itemCount = $value;
+		return $this;
 	}
 	
 	/**
@@ -246,7 +256,15 @@ class paginator_Paginator extends ArrayObject
 		$this->moduleName = $value;
 		return $this;
 	}
-	
+
+	/**
+	 * @return mixed integer or null
+	 */
+	public function getItemCount()
+	{
+		return $this->itemCount;
+	}
+
 	/**
 	 * @return mixed integer or null
 	 */
