@@ -90,13 +90,14 @@ class commands_ApplyPatch extends commands_AbstractChangeCommand
 		{
 			// Get a instance of class
 			$className = $moduleName . '_patch_' . $patchNumber;
+			$patchPathBase = WEBEDIT_HOME."/";
 			if ($moduleName == "framework")
 			{
-				$patchPathBase = "framework"; 	
+				$patchPathBase .= "framework"; 	
 			}
 			else
 			{
-				$patchPathBase = "modules/".$moduleName;
+				$patchPathBase .= "modules/".$moduleName;
 			}
 			
 			$patchPath = realpath($patchPathBase."/patch/".$patchNumber."/install.php");
