@@ -6,10 +6,14 @@ class f_MemcachedProvider
 	public function __construct($config)
 	{
 		$this->memcachedInstance = new Memcached('memcachedConnection');
-		
-		if ($this->memcachedInstance->addServer($config["server"]["host"], $config["server"]["port"]) === false)
+
+		// Check if memcached instance has no servers in it's pool yet (see http://www.php.net/manual/en/memcached.construct.php#93536)
+		if (!count($this->memcachedInstance->getServerList()))
 		{
-			Framework::error("MemcachedProvider: could not obtain memcache instance");
+			if ($this->memcachedInstance->addServer($config["server"]["host"], $config["server"]["port"]) === false)
+			{
+				Framework::error("MemcachedProvider: could not obtain memcache instance");
+			}
 		}
 	}
 	
