@@ -2,10 +2,15 @@
 class f_MemcachedProvider
 {
 	private $memcachedInstance = null;
-	
+
 	public function __construct($config)
 	{
-		$this->memcachedInstance = new Memcached('memcachedConnection');
+		if (defined('PROJECT_ID')) {
+			$instanceName = PROJECT_ID;
+		} else {
+			$instanceName = 'memcachedConnection';
+		}
+		$this->memcachedInstance = new Memcached($instanceName);
 
 		// Check if memcached instance has no servers in it's pool yet (see http://www.php.net/manual/en/memcached.construct.php#93536)
 		if (!count($this->memcachedInstance->getServerList()))
@@ -16,7 +21,7 @@ class f_MemcachedProvider
 			}
 		}
 	}
-	
+
 	/**
 	 * @return Boolean
 	 */
@@ -24,7 +29,7 @@ class f_MemcachedProvider
 	{
 		return ($this->memcachedInstance !== null);
 	}
-	
+
 	public function close()
 	{
 		if ($this->isAvailable())
@@ -32,12 +37,12 @@ class f_MemcachedProvider
 			$this->memcachedInstance = null;
 		}
 	}
-	
+
 	/**
 	 * @return Memcache
 	 */
 	public function getConnection()
 	{
-		return $this->memcachedInstance;	
+		return $this->memcachedInstance;
 	}
 }
