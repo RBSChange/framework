@@ -78,7 +78,7 @@ class Framework
 	{
 		if (self::getLogLevel() <= $priority)
 		{
-			LoggingService::getInstance()->log($message, $loggerGroup);
+			LoggingService::getInstance()->log($message, $loggerGroup, $priority);
 		}
 	}
 
