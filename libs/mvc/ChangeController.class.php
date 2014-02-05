@@ -32,6 +32,11 @@ class controller_ChangeController extends HttpController
 
 	public function dispatch()
 	{
+		$clusterScale = ModuleService::getInstance()->moduleExists("modules_clusterscale");
+		if ($clusterScale)
+		{
+			$this->setRequestContextMode();
+		}
 		// Handle auto-login.
 		$us = users_UserService::getInstance();
 		if (is_null($us->getCurrentFrontEndUser()) && isset($_COOKIE[self::AUTO_LOGIN_COOKIE]))
@@ -57,7 +62,10 @@ class controller_ChangeController extends HttpController
 		}
 		
 		$this->setLangFromRequest();
-		$this->setRequestContextMode();
+		if (!$clusterScale)
+		{
+			$this->setRequestContextMode();
+		}
 		parent::dispatch();
 	}
 
