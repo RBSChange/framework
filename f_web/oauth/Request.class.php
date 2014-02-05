@@ -281,6 +281,7 @@ class f_web_oauth_Request
 		}
 		
 		ksort($mergedRequest);
+		parse_str(http_build_query($mergedRequest, "", "&"), $mergedRequest);
 		foreach ($mergedRequest as $name => $value)
 		{
 			sort($value);
