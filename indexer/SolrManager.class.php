@@ -326,13 +326,13 @@ class indexer_SolrManager
 					// Add the client field
 					$this->xmlWriterAdd->startElement('field');
 					$this->xmlWriterAdd->writeAttribute('name', 'client');
-					$this->xmlWriterAdd->text($this->xmlentities($this->getClientId()));
+					$this->xmlWriterAdd->text($this->getClientId());
 					$this->xmlWriterAdd->endElement();
 					
 					// Build the finalId
 					$this->xmlWriterAdd->startElement('field');
 					$this->xmlWriterAdd->writeAttribute('name', 'finalId');
-					$this->xmlWriterAdd->text($this->xmlentities(strval($this->getClientId() . $values[0])));
+					$this->xmlWriterAdd->text(strval($this->getClientId() . $values[0]));
 					$this->xmlWriterAdd->endElement();
 					break;
 				case 'lang':
@@ -348,7 +348,7 @@ class indexer_SolrManager
 			{
 				$this->xmlWriterAdd->startElement('field');
 				$this->xmlWriterAdd->writeAttribute('name', $name);
-				$this->xmlWriterAdd->text($this->xmlentities(strval($value)));
+				$this->xmlWriterAdd->text(strval($value));
 				$this->xmlWriterAdd->endElement();
 			}
 		}
@@ -622,17 +622,6 @@ class indexer_SolrManager
 			throw new IndexException(__METHOD__ . "Unexpected Server reply (URL = " . $this->getBaseURL() . $this->getTask() . ") data = " . $data);
 		}
 		return $data;
-	}
-	
-	/**
-	 * Converts to xml entities (borrowed from SolrUpdate.php)
-	 *
-	 * @param String $string
-	 * @return String
-	 */
-	private function xmlentities($string)
-	{
-		return str_replace(array('&', '<', '>', '"'), array('&amp;', '&lt;', '&gt;', '&quot;'), $string);
 	}
 	
 	/**
