@@ -1315,6 +1315,11 @@ class generator_PersistentModel
 	 */
 	public function isBackofficeIndexable()
 	{
+		if ($this->injected() && !is_null($this->getReplacer()->backofficeIndexable))
+		{
+			return $this->getReplacer()->backofficeIndexable;
+		}
+
 		if (is_null($this->backofficeIndexable))
 		{
 			if ($this->hasParentModel())
