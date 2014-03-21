@@ -77,12 +77,12 @@ class f_DataCacheFileService extends f_DataCacheService
 	 */
 	public function writeToCache($item)
 	{
-		f_util_FileUtils::mkdir($this->getCachePath($item));
-		$this->register($item);
-		$data = $item->getValues();
-		f_util_FileUtils::touch($this->getCachePath($item, self::INVALID_CACHE_ENTRY), time()+$item->getTTL());
 		try
 		{
+			f_util_FileUtils::mkdir($this->getCachePath($item));
+			$this->register($item);
+			$data = $item->getValues();
+			f_util_FileUtils::touch($this->getCachePath($item, self::INVALID_CACHE_ENTRY), time()+$item->getTTL());
 			foreach ($data as $k => $v)
 			{
 				if ($v !== null)
@@ -91,12 +91,14 @@ class f_DataCacheFileService extends f_DataCacheService
 					f_util_FileUtils::write($this->getCachePath($item, $k), $v, f_util_FileUtils::OVERRIDE);
 				}
 			}
+			return true;
 		}
 		catch (Exception $e)
 		{
 			// Do not let potential partial or broken content rest on disk
 			f_util_FileUtils::rmdir($this->getCachePath($item));
-			throw $e;
+			Framework::exception($e);
+			return false;
 		}
 	}
 	
