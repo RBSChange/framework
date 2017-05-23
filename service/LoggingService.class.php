@@ -74,7 +74,9 @@ class LoggingService extends BaseService
 	 */
 	public function registerErrorHandler()
 	{
-		ini_set('display_errors', 1);
+		if (Framework::inDevelopmentMode()) {
+			ini_set('display_errors', 1);
+		}
 		
 		$this->errortype = array (
 			E_ERROR              => 'E_ERROR',
