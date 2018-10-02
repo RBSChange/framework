@@ -496,7 +496,7 @@ if (spl_autoload_register(array(ClassLoader::getInstance(), "autoload")) === fal
 
 define('AG_WEBAPP_DIR', PROJECT_OVERRIDE);
 
-ini_set('include_path', FRAMEWORK_HOME . '/libs/pear' . PATH_SEPARATOR . PEAR_DIR);
+ini_set('include_path', FRAMEWORK_HOME . '/libs/pear' . PATH_SEPARATOR . PEAR_DIR . PATH_SEPARATOR . get_include_path());
 
 ini_set('arg_separator.output',      '&amp;');
 ini_set('magic_quotes_runtime',      0);
