@@ -29,7 +29,7 @@ class validation_DomainValidator extends validation_ValidatorImpl implements val
 			}
 			
 			
-			if (!preg_match('/(^([a-zA-Z0-9]([a-zA-Z0-9\-]*\.))*[a-zA-Z](:[0-9]+)?+$)|(^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(:[0-9]+)?$)/', $value))
+			if (!preg_match('/^[a-z0-9-_\.]+(:[0-9]+)?$/', $value))
 			{
 				$this->reject($field->getName(), $errors);
 			}
