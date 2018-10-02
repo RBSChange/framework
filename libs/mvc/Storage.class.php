@@ -116,7 +116,9 @@ class SessionStorage extends Storage
 	{
 		parent::initialize($context, $parameters);
 		$sessionName = $this->getParameter('session_name', '__CHANGESESSIONID');
-		session_name($sessionName);
+		if (!session_name()) {
+			session_name($sessionName);
+		}
 		if ($this->getParameter('auto_start', true))
 		{
 			if (session_id() == "")
