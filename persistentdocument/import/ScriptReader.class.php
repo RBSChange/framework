@@ -156,6 +156,11 @@ class import_ScriptReader extends BaseService
 
 	public function errorReport($errno, $errstr, $errfile, $errline)
 	{
+		// PHP7 compatibility fix to avoid failing on compatibility errors
+		if (strpos($errstr, 'Declaration of') === 0) {
+			return true;
+		}
+
 		switch ($errno)
 		{
 			case E_USER_ERROR:
