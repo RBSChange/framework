@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://www.rbs.fr/schema/change-component/1.0 http://www.rbschange.fr/static/schema/change-component/1.0.xsd">
 	<name>framework</name>
 	<type>change-lib</type>
-	<version>3.6.9</version>
+	<version>3.7.0</version>
 	<description>Framework Change</description>
 	<license>os</license>
 	<repository>public</repository>
