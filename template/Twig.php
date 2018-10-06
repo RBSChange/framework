@@ -181,11 +181,13 @@ class Twig
 		}
 
 		$loader = new Twig_Loader_Filesystem(dirname($this->_path));
-		$twig = new Twig_Environment($loader, array(
+		$twig = new Twig_Environment($loader, [
 			'debug' => Framework::inDevelopmentMode(),
-		));
-		$twig->addExtension(new Twig_Extension_Debug());
+		]);
 		$twig->addExtension(new f_template_TwigExtension());
+		if (Framework::inDevelopmentMode()) {
+			$twig->addExtension(new f_template_TwigDumpExtension());
+		}
 
 		return $twig->render(basename($this->_path), $this->_context->getContext());
 	}
