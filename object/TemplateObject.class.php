@@ -21,7 +21,11 @@ class TemplateObject
 	{
 		$this->mimeContentType = $mimeContentType;
 		$this->fileName = $fileName;
-		$this->template = new PHPTAL($fileName);
+		if ($mimeContentType == K::TWIG) {
+			$this->template = new Twig($fileName);
+		} else {
+			$this->template = new PHPTAL($fileName);
+		}
 		$this->lang = RequestContext::getInstance()->getLang();
 		$registry = PHPTAL_TalesRegistry::getInstance();
 		if (!self::$prefixregistered)
@@ -124,6 +128,7 @@ class TemplateObject
 				break;
 
 			case K::HTML :
+			case K::TWIG :
 				$header = 'text/html';
 				break;
 

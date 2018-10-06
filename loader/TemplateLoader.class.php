@@ -58,7 +58,19 @@ class TemplateLoader extends FileLoader implements ResourceLoader
 			$overrideThemeDir = f_util_FileUtils::buildOverridePath('themes', $theme);
 			$this->resolver->addPotentialDirectory($overrideThemeDir);
 		}
-		$path = $this->resolver->getPath($filename);
+
+		if ($this->resolver->getMimeContentType() == K::AUTO) {
+			foreach ([K::TWIG, K::HTML] as $contentType) {
+				$this->resolver->setMimeContentType($contentType);
+				$path = $this->resolver->getPath($filename);
+				if ($path !== null) {
+					break;
+				}
+			}
+		} else {
+			$path = $this->resolver->getPath($filename);
+		}
+
 		if ($path === null)
 		{
 			throw new TemplateNotFoundException($this->getDirectory()."/".$filename, $this->getPackageName());
@@ -66,7 +78,7 @@ class TemplateLoader extends FileLoader implements ResourceLoader
 		$localizedPath = $this->templateLocalize($path);
 		$template = new TemplateObject($localizedPath, $this->resolver->getMimeContentType());
 
-		if (Framework::inDevelopmentMode() && $this->resolver->getMimeContentType() === K::HTML)
+		if (Framework::inDevelopmentMode() && in_array($this->resolver->getMimeContentType(), [K::HTML, K::TWIG]))
 		{
 			$template->setOriginalPath($path); 
 		}

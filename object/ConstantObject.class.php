@@ -64,7 +64,9 @@ class K
 	const XUL = 'xul';
 	const XML = 'xml';
 	const HTML = 'html';
+	const TWIG = 'twig';
 	const MAIL = 'mail';
+	const AUTO = 'auto';
 
     const ROLE_NAME                        = 'roleName';
     const ROLE_SYSTEM_DO                   = 'do';
