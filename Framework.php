@@ -524,3 +524,8 @@ $localResult = setlocale(LC_ALL, 'en_US.UTF-8');
 
 // Set GMT TimeZone
 date_default_timezone_set('GMT');
+
+// Composer autoloader
+if (file_exists(WEBEDIT_HOME . '/vendor/autoload.php')) {
+    require_once(WEBEDIT_HOME . '/vendor/autoload.php');
+}
