@@ -60,7 +60,7 @@ class TemplateLoader extends FileLoader implements ResourceLoader
 		}
 
 		if ($this->resolver->getMimeContentType() == K::AUTO) {
-			foreach ([K::TWIG, K::HTML] as $contentType) {
+			foreach ([K::HTML, K::TWIG] as $contentType) {
 				$this->resolver->setMimeContentType($contentType);
 				$path = $this->resolver->getPath($filename);
 				if ($path !== null) {
